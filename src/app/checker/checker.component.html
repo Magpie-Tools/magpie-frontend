@@ -1,0 +1,136 @@
+<h2 class="titleHeader">
+  <mat-icon svgIcon="computing"></mat-icon>
+  <div>Checker</div>
+</h2>
+
+<form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+  <div class="row" formGroupName="autoSelect">
+    <label class="text-center">Check For</label>
+    <label class="col text-center">
+      HTTP
+    </label>
+    <input type="checkbox" formControlName="http" />
+    <label class="col text-center">
+      HTTPS
+    </label>
+    <input type="checkbox" formControlName="https" />
+    <label class="col text-center">
+      SOCKS4
+    </label>
+    <input type="checkbox" formControlName="socks4" />
+    <label class="col text-center">
+      SOCKS5
+    </label>
+    <input type="checkbox" formControlName="socks5" />
+  </div>
+
+  <!-- First row -->
+  <div class="form-row">
+    <div class="form-group">
+      <label for="threads">Threads</label>
+      <input id="threads" formControlName="threads" type="number" />
+    </div>
+    <div class="form-group">
+      <label for="retries">Retries</label>
+      <input id="retries" formControlName="retries" type="number" />
+    </div>
+    <div class="form-group">
+      <label for="timeout">Timeout (ms)</label>
+      <input id="timeout" formControlName="timeout" type="number" />
+    </div>
+  </div>
+
+  <!-- Second row -->
+  <div class="form-row">
+    <div class="form-group">
+      <label for="iplookup">IP Lookup</label>
+      <input id="iplookup" formControlName="iplookup" type="text" />
+    </div>
+    <div class="form-group">
+      <label for="judges_threads">Judge Threads</label>
+      <input id="judges_threads" formControlName="judges_threads" type="number" />
+    </div>
+    <div class="form-group">
+      <label for="judges_timeout">Judge Timeout</label>
+      <input id="judges_timeout" formControlName="judges_timeout" type="number" />
+    </div>
+  </div>
+
+  <!-- Third row -->
+  <div class="form-row">
+    <div class="form-group">
+      <label for="bancheck">Ban Check</label>
+      <input id="bancheck" formControlName="bancheck" type="text" />
+    </div>
+  </div>
+
+  <!-- Judges -->
+  <div formArrayName="judges">
+    <label>Judges</label>
+    <div *ngFor="let judge of judges.controls; let i = index" [formGroupName]="i">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="judge-url-{{i}}">URL</label>
+          <input id="judge-url-{{i}}" formControlName="url" type="text" />
+        </div>
+        <div class="form-group">
+          <label for="judge-regex-{{i}}">Regex</label>
+          <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
+        </div>
+      </div>
+    </div>
+    <button type="button" (click)="addJudge()">Add Judge</button>
+  </div>
+
+  <!-- Blacklist -->
+  <div formArrayName="blacklisted">
+    <label>Blacklisted</label>
+    <div *ngFor="let url of blacklisted.controls; let i = index">
+      <input [formControlName]="i" type="text" />
+    </div>
+    <button type="button" (click)="addBlacklist()">Add Blacklist</button>
+  </div>
+
+  <!-- Keywords -->
+  <div formArrayName="keywords">
+    <label>Keywords</label>
+    <div *ngFor="let keyword of keywords.controls; let i = index">
+      <input [formControlName]="i" type="text" />
+    </div>
+    <button type="button" (click)="addKeyword()">Add Keyword</button>
+  </div>
+
+  <!-- Transport Settings -->
+  <div formGroupName="transport">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="KeepAlive">Keep Alive</label>
+        <input id="KeepAlive" formControlName="KeepAlive" type="checkbox" />
+      </div>
+      <div class="form-group">
+        <label for="KeepAliveSeconds">Keep Alive Seconds</label>
+        <input id="KeepAliveSeconds" formControlName="KeepAliveSeconds" type="number" />
+      </div>
+      <div class="form-group">
+        <label for="MaxIdleConns">Max Idle Connections</label>
+        <input id="MaxIdleConns" formControlName="MaxIdleConns" type="number" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="MaxIdleConnsPerHost">Max Idle Conns Per Host</label>
+        <input id="MaxIdleConnsPerHost" formControlName="MaxIdleConnsPerHost" type="number" />
+      </div>
+      <div class="form-group">
+        <label for="IdleConnTimeout">Idle Conn Timeout</label>
+        <input id="IdleConnTimeout" formControlName="IdleConnTimeout" type="number" />
+      </div>
+      <div class="form-group">
+        <label for="TLSHandshakeTimeout">TLS Handshake Timeout</label>
+        <input id="TLSHandshakeTimeout" formControlName="TLSHandshakeTimeout" type="number" />
+      </div>
+    </div>
+  </div>
+
+  <button type="submit">Save Settings</button>
+</form>

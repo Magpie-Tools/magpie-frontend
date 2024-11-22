@@ -1,11 +1,12 @@
 <nav class="navbar">
-  <a class="navbar-logo" href="#">
+  <a class="navbar-logo" routerLink="">
     <img src="../../assets/logo/magpie-light.png" alt="Logo" />
     <h5>M A G P I E</h5>
   </a>
-  <a class="navbar-item" href="#"><h4>Dashboard</h4></a>
-  <a class="navbar-item" href="#"><h4>Checker</h4></a>
-  <a class="navbar-item" href="#"><h4>Scraper</h4></a>
+  <a class="navbar-item" routerLink="" routerLinkActive="active"><h4>Dashboard</h4></a>
+  <a class="navbar-item" routerLink="checker" routerLinkActive="active"><h4>Checker</h4></a>
+  <a class="navbar-item" routerLink="scraper" routerLinkActive="active"><h4>Scraper</h4></a>
 
-  <a class="person" (click)="showAuthPopup()"><mat-icon svgIcon="person"></mat-icon></a>
+<!--  <a class="person" routerLink="license" routerLinkActive="active"><mat-icon svgIcon="discord"></mat-icon></a>-->
+  <a class="person" routerLink="license" routerLinkActive="active"><mat-icon svgIcon="person"></mat-icon></a>
 </nav>

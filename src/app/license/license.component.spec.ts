@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AuthDialogComponent } from './auth-dialog.component';
+import { LicenseComponent } from './license.component';
 
-describe('AuthDialogComponent', () => {
-  let component: AuthDialogComponent;
-  let fixture: ComponentFixture<AuthDialogComponent>;
+describe('LicenseComponent', () => {
+  let component: LicenseComponent;
+  let fixture: ComponentFixture<LicenseComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AuthDialogComponent]
+      imports: [LicenseComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AuthDialogComponent);
+    fixture = TestBed.createComponent(LicenseComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
