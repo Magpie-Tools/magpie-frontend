@@ -1,7 +1,12 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf} from '@angular/common';
+import {MatDivider} from '@angular/material/divider';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {TooltipComponent} from '../tooltip/tooltip.component';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatTab, MatTabGroup} from '@angular/material/tabs';
 
 @Component({
   selector: 'app-checker',
@@ -9,7 +14,12 @@ import {NgForOf} from '@angular/common';
   imports: [
     MatIcon,
     ReactiveFormsModule,
-    NgForOf
+    NgForOf,
+    MatDivider,
+    TooltipComponent,
+    MatTooltip,
+    MatTab,
+    MatTabGroup
   ],
   templateUrl: './checker.component.html',
   styleUrl: './checker.component.scss'
@@ -22,20 +32,11 @@ export class CheckerComponent {
       threads: [250],
       retries: [2],
       timeout: [7500],
-      privacy_mode: [false],
-      copyToClipboard: [false],
-      autoSelect: this.fb.group({
+      selectedPorts: this.fb.group({
         http: [false],
         https: [false],
         socks4: [false],
         socks5: [false],
-      }),
-      autoSave: this.fb.group({
-        timeBetweenSafes: [15],
-        'ip:port': [false],
-        'protocol://ip:port': [false],
-        'ip:port;time': [false],
-        custom: ['']
       }),
       timeBetweenRefresh: [100],
       iplookup: ['http://api.ipify.org/'],
@@ -91,7 +92,11 @@ export class CheckerComponent {
     this.keywords.push(this.fb.control(''));
   }
 
+  private _snackBar = inject(MatSnackBar);
   onSubmit() {
+    this._snackBar.open("Saved settings of checker!");
+
     console.log(this.settingsForm.value);
   }
 }
+

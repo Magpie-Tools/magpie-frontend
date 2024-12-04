@@ -53,3 +53,19 @@ mat-icon + span {
 .titleHeader mat-icon {
   margin-bottom: 0.4rem;
 }
+
+.mainText {
+  color: #ffffff
+}
+
+.subText {
+  color: #cfcfcf;
+}
+
+mat-tab-body .mat-mdc-tab-body-content {
+  overflow-x: hidden;
+}
+
+.cdk-overlay-container {
+  z-index: 1000 !important;
+}

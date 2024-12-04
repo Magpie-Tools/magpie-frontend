@@ -71,3 +71,64 @@ form {
     }
   }
 }
+
+/* Styled Checkboxes */
+.checkbox-container {
+  font-size: 16px;
+  color: $text-color;
+
+  input[type="checkbox"] {
+    cursor: pointer;
+    margin-left: 1rem;
+    appearance: none;
+    -webkit-appearance: none; // For Safari
+    width: 15px;
+    height: 15px;
+    border: 2px solid $border-color;
+    border-radius: 4px;
+    background-color: $navbar-background;
+    transition: all 0.3s ease;
+    display: inline-block;
+    position: relative;
+
+    &:hover {
+      border-color: lighten($border-color, 10%);
+    }
+
+    &:checked {
+      background-color: $logo-color;
+      border-color: $logo-color;
+
+      &::after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(320deg);
+        width: 10px;
+        height: 5px;
+        border: solid $navbar-background;
+        border-width: 0 0 2px 2px;
+      }
+    }
+  }
+
+  label {
+    cursor: pointer;
+    user-select: none;
+    padding: 0.5rem;
+    border: #158566 solid 1px;
+    border-radius: 10px;
+  }
+}
+
+mat-divider {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-color: rgb(255,255,255,0.2);
+}
+
+button {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+}
