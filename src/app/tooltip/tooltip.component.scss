@@ -1,0 +1,20 @@
+$iconwidth: 16px;
+
+.mat-icon {
+  color: rgb(171, 171, 171);
+  font-size: 16px;
+  width: $iconwidth;
+  display: inline-block;
+  vertical-align: bottom;
+  height: 5px;
+}
+
+:host {
+  display: inline-block;
+  width: $iconwidth;
+}
+
+.mat-icon {
+  margin-left: 0.5rem;
+  padding: 0;
+}
