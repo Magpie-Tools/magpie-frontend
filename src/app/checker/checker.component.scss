@@ -127,8 +127,16 @@ mat-divider {
   border-color: rgb(255,255,255,0.2);
 }
 
-button {
+#saveButton {
   position: fixed;
   bottom: 1rem;
   right: 1rem;
+}
+
+mat-tab {
+  color: white;
+}
+
+.mat-tab-label {
+  color: white;
 }

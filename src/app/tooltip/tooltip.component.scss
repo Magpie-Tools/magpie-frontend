@@ -1,20 +1,13 @@
-$iconwidth: 16px;
+$iconWidth: 15px;
 
 .mat-icon {
   color: rgb(171, 171, 171);
-  font-size: 16px;
-  width: $iconwidth;
-  display: inline-block;
-  vertical-align: bottom;
-  height: 5px;
+  font-size: $iconWidth;
+  width: $iconWidth;
+  margin-left: 0.5rem;
+  height: 20px !important;
 }
 
 :host {
-  display: inline-block;
-  width: $iconwidth;
-}
-
-.mat-icon {
-  margin-left: 0.5rem;
-  padding: 0;
+  width: $iconWidth;
 }

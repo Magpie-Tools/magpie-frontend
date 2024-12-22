@@ -1,3 +1,5 @@
+$logo-color: #348566;
+
 @use '@angular/material' as mat;
 
 $frontend-theme: mat.define-theme((
@@ -68,4 +70,18 @@ mat-tab-body .mat-mdc-tab-body-content {
 
 .cdk-overlay-container {
   z-index: 1000 !important;
+}
+
+:root {
+  @include mat.tabs-overrides((
+    divider-color: rgb(171, 171, 171),
+  ));
+}
+
+.mat-mdc-tab .mdc-tab__text-label {
+  color: rgb(171, 171, 171) !important;
+}
+
+.mat-mdc-tab-group, .mat-mdc-tab-nav-bar {
+  --mdc-tab-indicator-active-indicator-color: $logo-color !important;
 }
