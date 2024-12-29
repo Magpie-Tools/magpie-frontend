@@ -1,0 +1,39 @@
+<h2 class="titleHeader">
+  <mat-icon svgIcon="cloudup"></mat-icon>
+  <div>Proxies</div>
+</h2>
+
+<div class="content-container">
+  <div class="row">
+    <div class="col">
+      <div class="row h-25">
+        <h4 class="text-center subText">Add Proxies</h4>
+      </div>
+      <div class="row h-15">
+        <button type="button" class="h-25 d-flex align-items-center justify-content-center full-color-button">Paste from Clipboard</button>
+      </div>
+      <div class="row h-25">
+        <button type="button" (click)="triggerFileInput(fileInput)" class="h-75 d-flex align-items-center justify-content-center full-color-button">Import from File</button>
+        <input type="file" #fileInput (change)="onFileSelected($event)">
+      </div>
+      <div class="row">
+        <textarea maxlength="109999" [placeholder]="'Bulk add Proxies\n127.0.0.1:66535'"></textarea>
+      </div>
+
+    </div>
+    <div class="col">
+      fsdfjj
+    </div>
+  </div>
+</div>
+
+<div class="d-flex align-items-center justify-content-center mt-4">
+  <div class="row w-25">
+    <button type="submit" class="col">Add Proxies to Queue</button>
+    <app-checkbox label="High Priority Queue" class="col" matTooltip="When High Priority Queue is activated, proxies will get checked instantly and will NOT be at the end of the queue."></app-checkbox>
+  </div>
+</div>
+
+
+
+
