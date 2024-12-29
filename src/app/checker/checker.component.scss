@@ -10,42 +10,6 @@ body {
 }
 
 form {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-  border: 1px solid $border-color;
-  border-radius: 8px;
-  background-color: $navbar-background;
-
-  .form-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-
-    .form-group {
-      flex: 1;
-      min-width: 200px;
-
-      label {
-        display: block;
-        font-size: 0.9rem;
-        margin-bottom: 5px;
-        color: $logo-color;
-      }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid $border-color;
-        border-radius: 4px;
-        background-color: $navbar-background;
-        color: $personColor;
-      }
-    }
-  }
-
   .checkbox-row {
     display: flex;
     gap: 15px;
@@ -55,19 +19,6 @@ form {
       align-items: center;
       gap: 5px;
       color: $text-color;
-    }
-  }
-
-  button {
-    padding: 10px 20px;
-    background-color: $logo-color;
-    color: $personColor;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-
-    &:hover {
-      background-color: lighten($logo-color, 10%);
     }
   }
 }
@@ -139,4 +90,14 @@ mat-tab {
 
 .mat-tab-label {
   color: white;
+}
+
+input[type=number] {
+  background-color: #171717;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+input[type=number]::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }

@@ -3,43 +3,46 @@
   <div>Scraper</div>
 </h2>
 
-<form [formGroup]="scraperForm" (ngSubmit)="onSubmit()">
-  <mat-tab-group>
-    <!-- Sources Tab -->
-    <mat-tab label="Sources">
-      <div formArrayName="sources">
-        <label>Sources</label>
-        <div *ngFor="let source of sources.controls; let i = index" [formGroupName]="i">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="source-url-{{ i }}">URL</label>
-              <input id="source-url-{{ i }}" formControlName="url" type="text" />
-            </div>
-            <div class="form-group">
-              <label for="source-delimiter-{{ i }}">Proxy Delimiter</label>
-              <input id="source-delimiter-{{ i }}" formControlName="delimiter" type="text" />
+<div class="content-container">
+
+  <form [formGroup]="scraperForm" (ngSubmit)="onSubmit()">
+    <mat-tab-group>
+      <!-- Sources Tab -->
+      <mat-tab label="Sources">
+        <div formArrayName="sources">
+          <label>Sources</label>
+          <div *ngFor="let source of sources.controls; let i = index" [formGroupName]="i">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="source-url-{{ i }}">URL</label>
+                <input id="source-url-{{ i }}" formControlName="url" type="text" />
+              </div>
+              <div class="form-group">
+                <label for="source-delimiter-{{ i }}">Proxy Delimiter</label>
+                <input id="source-delimiter-{{ i }}" formControlName="delimiter" type="text" />
+              </div>
             </div>
           </div>
+          <button type="button" (click)="addSource()">Add Source</button>
         </div>
-        <button type="button" (click)="addSource()">Add Source</button>
-      </div>
-    </mat-tab>
+      </mat-tab>
 
-    <!-- Settings Tab -->
-    <mat-tab label="Settings">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="scrapeInterval">Scrape Interval (minutes)</label>
-          <input id="scrapeInterval" formControlName="scrapeInterval" type="number" />
+      <!-- Settings Tab -->
+      <mat-tab label="Settings">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="scrapeInterval">Scrape Interval (minutes)</label>
+            <input id="scrapeInterval" formControlName="scrapeInterval" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="scrapeThreads">Threads</label>
+            <input id="scrapeThreads" formControlName="scrapeThreads" type="number" />
+          </div>
         </div>
-        <div class="form-group">
-          <label for="scrapeThreads">Threads</label>
-          <input id="scrapeThreads" formControlName="scrapeThreads" type="number" />
-        </div>
-      </div>
-    </mat-tab>
+      </mat-tab>
 
-  </mat-tab-group>
+    </mat-tab-group>
 
-  <button type="submit">Save Settings</button>
-</form>
+    <button type="submit">Save Settings</button>
+  </form>
+</div>

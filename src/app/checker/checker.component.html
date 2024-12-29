@@ -3,103 +3,110 @@
   <div>Checker</div>
 </h2>
 
-<form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
-  <mat-tab-group>
-    <!-- Common Tab -->
-    <mat-tab label="Common">
-      <h4 class="text-center subText">Protocols</h4>
-      <div class="row mb-3" formGroupName="selectedPorts">
-        <div class="col text-center checkbox-container">
-          <label>HTTP
-            <input type="checkbox" formControlName="http" />
-          </label>
-        </div>
-        <div class="col text-center checkbox-container">
-          <label>HTTPS
-            <input type="checkbox" formControlName="https" />
-          </label>
-        </div>
-        <div class="col text-center checkbox-container">
-          <label>SOCKS4
-            <input type="checkbox" formControlName="socks4" />
-          </label>
-        </div>
-        <div class="col text-center checkbox-container">
-          <label>SOCKS5
-            <input type="checkbox" formControlName="socks5" />
-          </label>
-        </div>
-      </div>
+<div class="content-container">
 
-      <mat-divider></mat-divider>
-<!--      <br>-->
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="threads">Threads<app-tooltip [text]="'Threads are used to check Proxies at the same time'"></app-tooltip>
-          </label>
-          <input id="threads" formControlName="threads" type="number" />
-        </div>
-        <div class="form-group">
-          <label for="retries">Retries</label>
-          <input id="retries" formControlName="retries" type="number" />
-        </div>
-        <div class="form-group">
-          <label for="timeout">Timeout (ms)</label>
-          <input id="timeout" formControlName="timeout" type="number" />
-        </div>
-      </div>
-    </mat-tab>
-
-    <!-- Judges Tab -->
-    <mat-tab label="Judges">
-      <div formArrayName="judges">
-        <label>Judges</label>
-        <div *ngFor="let judge of judges.controls; let i = index" [formGroupName]="i">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="judge-url-{{i}}">URL</label>
-              <input id="judge-url-{{i}}" formControlName="url" type="text" />
-            </div>
-            <div class="form-group">
-              <label for="judge-regex-{{i}}">Regex</label>
-              <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
-            </div>
+  <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+    <mat-tab-group>
+      <!-- Common Tab -->
+      <mat-tab label="Common">
+        <h4 class="text-center subText">Protocols</h4>
+        <div class="row mb-3" formGroupName="selectedPorts">
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="HTTP" formControlName="http"></app-checkbox>
+          </div>
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="HTTPS" formControlName="https"></app-checkbox>
+          </div>
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="SOCKS4" formControlName="socks4"></app-checkbox>
+          </div>
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="SOCKS5" formControlName="socks5"></app-checkbox>
           </div>
         </div>
-<!--        <button type="button" (click)="addJudge()">Add Judge</button>-->
-      </div>
-    </mat-tab>
 
-    <!-- IP Tab -->
-    <mat-tab label="IP">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="iplookup">IP Lookup</label>
-          <input id="iplookup" formControlName="iplookup" type="text" />
-        </div>
-        <div class="form-group">
-          <label for="judges_threads">Judge Threads</label>
-          <input id="judges_threads" formControlName="judges_threads" type="number" />
-        </div>
-        <div class="form-group">
-          <label for="judges_timeout">Judge Timeout</label>
-          <input id="judges_timeout" formControlName="judges_timeout" type="number" />
-        </div>
-      </div>
-    </mat-tab>
+        <mat-divider></mat-divider>
 
-    <!-- Blacklist Tab -->
-    <mat-tab label="Blacklist">
-      <div formArrayName="blacklisted">
-        <label>Blacklisted</label>
-        <div *ngFor="let url of blacklisted.controls; let i = index">
-          <input [formControlName]="i" type="text" />
+        <h4 class="text-center subText">Check ALL proxies every</h4>
+        <div class="form-row mb-3">
+          <input type="number" class="form-control w-25" placeholder="Days">
+          <input type="number" class="form-control w-25" placeholder="Hours">
+          <input type="number" class="form-control w-25" placeholder="Minutes">
+          <input type="number" class="form-control w-25" placeholder="Seconds">
         </div>
-<!--        <button type="button" (click)="addBlacklist()">Add Blacklist</button>-->
-      </div>
-    </mat-tab>
-  </mat-tab-group>
 
-  <button type="submit">Save Settings</button>
-</form>
+        <mat-divider></mat-divider>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="threads">Threads<app-tooltip [text]="'Threads are used to check Proxies at the same time'"></app-tooltip>
+            </label>
+            <input id="threads" formControlName="threads" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="retries">Retries</label>
+            <input id="retries" formControlName="retries" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="timeout">Timeout (ms)</label>
+            <input id="timeout" formControlName="timeout" type="number" />
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Judges Tab -->
+      <mat-tab label="Judges">
+        <div formArrayName="judges">
+          <label>Judges</label>
+          <div *ngFor="let judge of judges.controls; let i = index" [formGroupName]="i">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="judge-url-{{i}}">URL</label>
+                <input id="judge-url-{{i}}" formControlName="url" type="text" />
+              </div>
+              <div class="form-group">
+                <label for="judge-regex-{{i}}">Regex</label>
+                <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
+              </div>
+            </div>
+          </div>
+  <!--        <button type="button" (click)="addJudge()">Add Judge</button>-->
+        </div>
+      </mat-tab>
+
+      <!-- IP Tab -->
+      <mat-tab label="IP">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="iplookup">IP Lookup</label>
+            <input id="iplookup" formControlName="iplookup" type="text" />
+          </div>
+          <div class="form-group">
+            <label for="judges_threads">Judge Threads</label>
+            <input id="judges_threads" formControlName="judges_threads" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="judges_timeout">Judge Timeout</label>
+            <input id="judges_timeout" formControlName="judges_timeout" type="number" />
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Blacklist Tab -->
+      <mat-tab label="Blacklist">
+        <div formArrayName="blacklisted">
+          <label>Blacklisted</label>
+          <div *ngFor="let url of blacklisted.controls; let i = index">
+            <input [formControlName]="i" type="text" />
+          </div>
+  <!--        <button type="button" (click)="addBlacklist()">Add Blacklist</button>-->
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+  </form>
+</div>
+
+<div class="d-flex align-items-center justify-content-center mt-4">
+    <button type="submit">Save Settings</button>
+</div>

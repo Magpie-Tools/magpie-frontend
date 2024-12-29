@@ -1,12 +1,13 @@
 import {Component, inject} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
-import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf} from '@angular/common';
 import {MatDivider} from '@angular/material/divider';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {TooltipComponent} from '../tooltip/tooltip.component';
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
+import {CheckboxComponent} from '../checkbox/checkbox.component';
 
 @Component({
   selector: 'app-checker',
@@ -19,7 +20,9 @@ import {MatTab, MatTabGroup} from '@angular/material/tabs';
     TooltipComponent,
     MatTooltip,
     MatTab,
-    MatTabGroup
+    MatTabGroup,
+    FormsModule,
+    CheckboxComponent
   ],
   templateUrl: './checker.component.html',
   styleUrl: './checker.component.scss'
