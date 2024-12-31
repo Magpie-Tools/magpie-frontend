@@ -43,8 +43,15 @@ mat-icon {
   height: 30px !important;
 }
 
-mat-icon + span {
-  margin-bottom: 100px;
+.custom-tooltip {
+  white-space: pre-line !important;
+  background-color: #2d2d2d;
+  color: #ffffff;
+  border: 1px solid #3b3b3b;
+}
+
+.mat-icon > svg {
+  margin-bottom: 0.75rem;
 }
 
 .titleHeader {

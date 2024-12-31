@@ -7,7 +7,7 @@
   <div class="row">
     <div class="col">
       <div class="row h-25">
-        <h4 class="text-center subText">Add Proxies</h4>
+        <h4 class="text-center subText">Add Proxies <app-tooltip [text]="'You can add proxies in the following formats:\n\nip:port\nip:port@username:password\nip:port:username:password'"></app-tooltip></h4>
       </div>
       <div class="row h-15">
         <button type="button" class="h-25 d-flex align-items-center justify-content-center full-color-button">Paste from Clipboard</button>
@@ -29,8 +29,15 @@
 
 <div class="d-flex align-items-center justify-content-center mt-4">
   <div class="row w-25">
-    <button type="submit" class="col">Add Proxies to Queue</button>
-    <app-checkbox label="High Priority Queue" class="col" matTooltip="When High Priority Queue is activated, proxies will get checked instantly and will NOT be at the end of the queue."></app-checkbox>
+    <div class="col d-flex justify-content-center">
+      <button type="submit" class="w-100">Add Proxies to Queue</button>
+    </div>
+    <div class="col d-flex justify-content-center align-items-center">
+      <app-checkbox
+        label="High Priority Queue"
+        matTooltip="When High Priority Queue is activated, proxies will get checked instantly and will NOT be at the end of the queue."
+      ></app-checkbox>
+    </div>
   </div>
 </div>
 

@@ -3,6 +3,8 @@ import {MatIcon} from "@angular/material/icon";
 import {ReactiveFormsModule} from '@angular/forms';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
 import {MatTooltip} from '@angular/material/tooltip';
+import {TooltipComponent} from '../tooltip/tooltip.component';
+import {HttpService} from '../services/http.service';
 
 @Component({
   selector: 'app-proxies',
@@ -11,12 +13,16 @@ import {MatTooltip} from '@angular/material/tooltip';
     MatIcon,
     ReactiveFormsModule,
     CheckboxComponent,
-    MatTooltip
+    MatTooltip,
+    TooltipComponent
   ],
   templateUrl: './proxies.component.html',
   styleUrl: './proxies.component.scss'
 })
 export class ProxiesComponent {
+
+  constructor(private service: HttpService) { }
+
   triggerFileInput(fileInput: HTMLInputElement): void {
     fileInput.click();
   }
@@ -24,8 +30,14 @@ export class ProxiesComponent {
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      console.log(file); // Do something with the selected file
+      this.service.uploadProxyFile(input.files[0]).subscribe({
+        next: (response) => {
+          console.log('Upload successful', response);
+        },
+        error: (error) => {
+          console.error('Upload failed', error);
+        }
+      });
     }
   }
 
