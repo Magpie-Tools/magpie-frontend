@@ -13,16 +13,29 @@
         <button type="button" class="h-25 d-flex align-items-center justify-content-center full-color-button">Paste from Clipboard</button>
       </div>
       <div class="row h-25">
-        <button type="button" (click)="triggerFileInput(fileInput)" class="h-75 d-flex align-items-center justify-content-center full-color-button">Import from File</button>
-        <input type="file" #fileInput (change)="onFileSelected($event)">
+        <div [class]="file != undefined ? 'col-10' : ''" class="p-0">
+          <button type="button" (click)="triggerFileInput(fileInput)" class="h-75 d-flex align-items-center justify-content-center w-100"
+                  [class]="file != undefined ? '' : 'full-color-button'"
+                  [disabled]="file != undefined">Import from File</button>
+          <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;">
+        </div>
+        @if (file != undefined) {
+          <div class="col-1">
+            <button class="btn btn-danger" (click)="onFileClear()">X</button>
+          </div>
+        }
       </div>
+
+
       <div class="row">
-        <textarea maxlength="109999" [placeholder]="'Bulk add Proxies\n127.0.0.1:66535'"></textarea>
+        <textarea maxlength="109999" [placeholder]="'Bulk add Proxies\n127.0.0.1:66535'" [(ngModel)]="ProxyTextarea" (ngModelChange)="addTextAreaProxies()"></textarea>
       </div>
 
     </div>
     <div class="col">
-      fsdfjj
+      Loaded {{ getProxiesWithoutAuthCount()}} Proxies without Auth
+      <br>
+      Loaded {{ getProxiesWithAuthCount() }} Proxies with Auth
     </div>
   </div>
 </div>
@@ -30,7 +43,7 @@
 <div class="d-flex align-items-center justify-content-center mt-4">
   <div class="row w-25">
     <div class="col d-flex justify-content-center">
-      <button type="submit" class="w-100">Add Proxies to Queue</button>
+      <button type="submit" class="w-100" (click)="submitProxies()">Add Proxies to Queue</button>
     </div>
     <div class="col d-flex justify-content-center align-items-center">
       <app-checkbox

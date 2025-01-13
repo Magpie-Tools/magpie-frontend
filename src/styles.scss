@@ -150,6 +150,15 @@ button {
   &:hover {
     background-color: darken(#2d2d2d, 5%);
   }
+
+  &:disabled {
+    background-color: #2a2a2a; /* Slightly lighter for a "disabled" look */
+    color: #888888; /* Muted color for text */
+    border-color: #444444; /* Duller border */
+    cursor: not-allowed; /* Shows as non-clickable */
+    box-shadow: none; /* Removes shadow for a flatter look */
+    opacity: 0.7; /* Adds a slight transparency */
+  }
 }
 
 button:active {

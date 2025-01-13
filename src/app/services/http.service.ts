@@ -10,12 +10,7 @@ export class HttpService {
 
   constructor(private http: HttpClient) { }
 
-  uploadProxyFile(file: File){
-    const formData = new FormData();
-    formData.append('file', file);
-
-    console.log(this.apiUrl)
-
-    return this.http.post(this.apiUrl + '/addProxies', formData)
+  uploadProxies(formData: FormData) {
+    return this.http.post(this.apiUrl + '/addProxies', formData);
   }
 }
