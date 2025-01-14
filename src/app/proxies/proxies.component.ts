@@ -28,9 +28,11 @@ export class ProxiesComponent {
   ProxyTextarea: string = ""
   fileProxiesNoAuthCount: number = 0;
   fileProxiesWithAuthCount: number = 0;
+  uniqueFileProxiesCount: number = 0;
 
   textAreaProxiesNoAuthCount: number = 0;
   textAreaProxiesWithAuthCount: number = 0;
+  uniqueTextAreaProxiesCount: number = 0;
 
   triggerFileInput(fileInput: HTMLInputElement): void {
     fileInput.click();
@@ -45,9 +47,12 @@ export class ProxiesComponent {
       reader.onload = (_: ProgressEvent<FileReader>) => {
         const content = reader.result as string;
         const lines = content.split(/\r?\n/);
-        this.fileProxiesNoAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 1).length;
+        let proxies = lines.filter(line => (line.match(/:/g) || []).length === 1)
+
+        this.fileProxiesNoAuthCount = proxies.length;
 
         this.fileProxiesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
+        this.uniqueFileProxiesCount = Array.from(new Set(proxies)).length;
       };
 
       reader.readAsText(this.file);
@@ -62,9 +67,12 @@ export class ProxiesComponent {
 
   addTextAreaProxies() {
     const lines = this.ProxyTextarea.split(/\r?\n/);
-    this.textAreaProxiesNoAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 1).length;
+    let proxies = lines.filter(line => (line.match(/:/g) || []).length === 1)
 
+    this.textAreaProxiesNoAuthCount = proxies.length;
     this.textAreaProxiesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
+    this.uniqueTextAreaProxiesCount = Array.from(new Set(proxies)).length;
+
   }
 
   getProxiesWithoutAuthCount() {
@@ -73,6 +81,10 @@ export class ProxiesComponent {
 
   getProxiesWithAuthCount() {
     return this.textAreaProxiesWithAuthCount+this.fileProxiesWithAuthCount;
+  }
+
+  getUniqueProxiesCount() {
+    return this.uniqueFileProxiesCount + this.uniqueTextAreaProxiesCount;
   }
 
   submitProxies() {

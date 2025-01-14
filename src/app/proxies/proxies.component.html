@@ -32,10 +32,19 @@
       </div>
 
     </div>
-    <div class="col">
-      Loaded {{ getProxiesWithoutAuthCount()}} Proxies without Auth
-      <br>
-      Loaded {{ getProxiesWithAuthCount() }} Proxies with Auth
+    <div class="col d-flex justify-content-center align-items-center">
+      @if (getProxiesWithoutAuthCount() + getProxiesWithAuthCount() > 0) {
+        <p>
+          Total Proxies {{ getProxiesWithoutAuthCount() }}
+          <br>
+          Unique {{getUniqueProxiesCount()}}
+          <br>
+          With Auth {{ getProxiesWithAuthCount() }}
+
+        </p>
+      } @else {
+        <mat-icon svgIcon="graph"></mat-icon>
+      }
     </div>
   </div>
 </div>
