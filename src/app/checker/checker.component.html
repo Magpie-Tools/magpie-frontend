@@ -31,22 +31,22 @@
         <div class="form-row mb-3 d-flex justify-content-center" formGroupName="timer">
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Days" formControlName="days">
-              <mat-option *ngFor="let day of daysList" [value]="day">{{ day }}</mat-option>
+              <mat-option *ngFor="let day of daysList" [value]="day">{{ day + " Days" }}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Hours" formControlName="hours">
-              <mat-option *ngFor="let hour of hoursList" [value]="hour">{{ hour }}</mat-option>
+              <mat-option *ngFor="let hour of hoursList" [value]="hour">{{ hour + " Hours" }}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Minutes" formControlName="minutes">
-              <mat-option *ngFor="let min of minutesList" [value]="min">{{ min }}</mat-option>
+              <mat-option *ngFor="let min of minutesList" [value]="min">{{ min + " Minutes" }}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Seconds" formControlName="seconds">
-              <mat-option *ngFor="let sec of secondsList" [value]="sec">{{ sec }}</mat-option>
+              <mat-option *ngFor="let sec of secondsList" [value]="sec">{{ sec + " Seconds" }}</mat-option>
             </mat-select>
           </mat-form-field>
         </div>

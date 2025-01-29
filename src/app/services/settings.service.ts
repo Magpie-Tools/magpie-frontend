@@ -17,10 +17,10 @@ export class SettingsService {
     return {
       protocols: formData.selectedPorts,
       timer: {
-        days: formData.days || 0,
-        hours: formData.hours || 12,
-        minutes: formData.minutes || 0,
-        seconds: formData.seconds || 0
+        days: formData.timer.days,
+        hours: formData.timer.hours,
+        minutes: formData.timer.minutes,
+        seconds: formData.timer.seconds
       },
       checker: {
         threads: formData.threads,
@@ -30,7 +30,6 @@ export class SettingsService {
         judges_timeout: formData.judges_timeout,
         judges: formData.judges,
         ip_lookup: formData.iplookup,
-        current_ip: "", // You may need to fetch this separately
         standard_header: ["USER-AGENT", "HOST", "ACCEPT", "ACCEPT-ENCODING"],
         proxy_header: ["HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"]
       },

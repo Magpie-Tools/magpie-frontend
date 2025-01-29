@@ -84,11 +84,11 @@ export class CheckerComponent {
   onSubmit() {
     this.settingsService.saveSettings(this.settingsForm.value).subscribe({
       next: (resp) => {
-        this._snackBar.open(resp, "Close", { duration: 3000 });
+        this._snackBar.open(resp, "", { duration: 3000 });
       },
       error: (err) => {
         console.error("Error saving settings:", err);
-        this._snackBar.open("Failed to save settings!", "Close", { duration: 3000 });
+        this._snackBar.open("Failed to save settings!");
       }
     });
   }
