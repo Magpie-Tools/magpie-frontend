@@ -5,7 +5,7 @@
 
 <div class="content-container">
 
-  <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="settingsForm">
     <mat-tab-group>
       <!-- Common Tab -->
       <mat-tab label="Common">
@@ -28,12 +28,29 @@
         <mat-divider></mat-divider>
 
         <h4 class="text-center subText">Check ALL proxies every</h4>
-        <div class="form-row mb-3">
-          <input type="number" class="form-control w-25" placeholder="Days">
-          <input type="number" class="form-control w-25" placeholder="Hours">
-          <input type="number" class="form-control w-25" placeholder="Minutes">
-          <input type="number" class="form-control w-25" placeholder="Seconds">
+        <div class="form-row mb-3 d-flex justify-content-center" formGroupName="timer">
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Days" formControlName="days">
+              <mat-option *ngFor="let day of daysList" [value]="day">{{ day }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Hours" formControlName="hours">
+              <mat-option *ngFor="let hour of hoursList" [value]="hour">{{ hour }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Minutes" formControlName="minutes">
+              <mat-option *ngFor="let min of minutesList" [value]="min">{{ min }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Seconds" formControlName="seconds">
+              <mat-option *ngFor="let sec of secondsList" [value]="sec">{{ sec }}</mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
+
 
         <mat-divider></mat-divider>
 
@@ -70,7 +87,6 @@
               </div>
             </div>
           </div>
-  <!--        <button type="button" (click)="addJudge()">Add Judge</button>-->
         </div>
       </mat-tab>
 
@@ -99,7 +115,6 @@
           <div *ngFor="let url of blacklisted.controls; let i = index">
             <input [formControlName]="i" type="text" />
           </div>
-  <!--        <button type="button" (click)="addBlacklist()">Add Blacklist</button>-->
         </div>
       </mat-tab>
     </mat-tab-group>
@@ -108,5 +123,5 @@
 </div>
 
 <div class="d-flex align-items-center justify-content-center mt-4">
-    <button type="submit">Save Settings</button>
+    <button type="submit" (click)="onSubmit()">Save Settings</button>
 </div>

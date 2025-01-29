@@ -1,28 +1,32 @@
 import {Component, inject} from '@angular/core';
-import {MatIcon} from "@angular/material/icon";
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {NgForOf} from '@angular/common';
-import {MatDivider} from '@angular/material/divider';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {TooltipComponent} from '../tooltip/tooltip.component';
-import {MatTooltip} from '@angular/material/tooltip';
+import {SettingsService} from '../services/settings.service';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
+import {TooltipComponent} from '../tooltip/tooltip.component';
+import {MatDivider} from '@angular/material/divider';
+import {MatFormField} from '@angular/material/form-field';
+import {MatOption, MatSelect} from '@angular/material/select';
+import {NgForOf} from '@angular/common';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'app-checker',
   standalone: true,
   imports: [
-    MatIcon,
     ReactiveFormsModule,
-    NgForOf,
-    MatDivider,
-    TooltipComponent,
-    MatTooltip,
-    MatTab,
-    MatTabGroup,
     FormsModule,
-    CheckboxComponent
+    MatTab,
+    TooltipComponent,
+    MatDivider,
+    MatFormField,
+    MatSelect,
+    MatOption,
+    NgForOf,
+    CheckboxComponent,
+    MatTabGroup,
+    MatIcon
   ],
   templateUrl: './checker.component.html',
   styleUrl: './checker.component.scss'
@@ -30,46 +34,42 @@ import {CheckboxComponent} from '../checkbox/checkbox.component';
 export class CheckerComponent {
   settingsForm: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private settingsService: SettingsService) {
     this.settingsForm = this.fb.group({
       threads: [250],
       retries: [2],
       timeout: [7500],
       selectedPorts: this.fb.group({
         http: [false],
-        https: [false],
+        https: [true],
         socks4: [false],
         socks5: [false],
       }),
-      timeBetweenRefresh: [100],
-      iplookup: ['http://api.ipify.org/'],
+      timer: this.fb.group({
+        days: [0],
+        hours: [1],
+        minutes: [0],
+        seconds: [0]
+      }),
+      iplookup: ['https://ident.me'],
       judges_threads: [3],
       judges_timeout: [5000],
       judges: this.fb.array([
-        this.fb.group({ url: ['http://azenv.net'], regex: ['default'] }),
-        this.fb.group({ url: ['http://httpbin.org/headers'], regex: ['default'] }),
         this.fb.group({ url: ['https://pool.proxyspace.pro/judge.php'], regex: ['default'] }),
-        this.fb.group({ url: ['https://httpbingo.org/headers'], regex: ['default'] }),
-        this.fb.group({ url: ['https://postman-echo.com/headers'], regex: ['default'] }),
+        this.fb.group({ url: ['http://azenv.net'], regex: ['default'] })
       ]),
       blacklisted: this.fb.array([
         ['https://www.spamhaus.org/drop/drop.txt'],
         ['https://www.spamhaus.org/drop/edrop.txt'],
         ['http://myip.ms/files/blacklist/general/latest_blacklist.txt']
-      ]),
-      bancheck: [''],
-      keywords: this.fb.array(['']),
-      transport: this.fb.group({
-        KeepAlive: [false],
-        KeepAliveSeconds: [15],
-        MaxIdleConns: [500],
-        MaxIdleConnsPerHost: [100],
-        IdleConnTimeout: [20],
-        TLSHandshakeTimeout: [5],
-        ExpectContinueTimeout: [1]
-      }),
+      ])
     });
   }
+
+  daysList = Array.from({ length: 31 }, (_, i) => i);
+  hoursList = Array.from({ length: 24 }, (_, i) => i);
+  minutesList = Array.from({ length: 60 }, (_, i) => i);
+  secondsList = Array.from({ length: 60 }, (_, i) => i);
 
   get judges() {
     return this.settingsForm.get('judges') as FormArray;
@@ -79,27 +79,17 @@ export class CheckerComponent {
     return this.settingsForm.get('blacklisted') as FormArray;
   }
 
-  get keywords() {
-    return this.settingsForm.get('keywords') as FormArray;
-  }
-
-  addJudge() {
-    this.judges.push(this.fb.group({ url: [''], regex: [''] }));
-  }
-
-  addBlacklist() {
-    this.blacklisted.push(this.fb.control(''));
-  }
-
-  addKeyword() {
-    this.keywords.push(this.fb.control(''));
-  }
-
   private _snackBar = inject(MatSnackBar);
-  onSubmit() {
-    this._snackBar.open("Saved settings of checker!");
 
-    console.log(this.settingsForm.value);
+  onSubmit() {
+    this.settingsService.saveSettings(this.settingsForm.value).subscribe({
+      next: (resp) => {
+        this._snackBar.open(resp, "Close", { duration: 3000 });
+      },
+      error: (err) => {
+        console.error("Error saving settings:", err);
+        this._snackBar.open("Failed to save settings!", "Close", { duration: 3000 });
+      }
+    });
   }
 }
-
