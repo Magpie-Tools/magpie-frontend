@@ -106,6 +106,8 @@ export class ProxiesComponent {
         next: (response) => {
           this.file = undefined;
           this.ProxyTextarea = ""
+          this.onFileClear()
+          this.addTextAreaProxies()
           console.log('Upload successful', response);
         },
         error: (error) => {
