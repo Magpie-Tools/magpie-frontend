@@ -63,6 +63,7 @@ export class ProxiesComponent {
     this.file = undefined;
     this.fileProxiesWithAuthCount = 0;
     this.fileProxiesNoAuthCount = 0;
+    this.uniqueFileProxiesCount = 0;
   }
 
   addTextAreaProxies() {
