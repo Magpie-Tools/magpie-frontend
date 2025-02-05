@@ -14,7 +14,6 @@ export class HttpService {
 
   httpOptions = {
     headers: new HttpHeaders({
-      'Content-Type':  'application/json',
     })
   };
 
@@ -34,7 +33,7 @@ export class HttpService {
   }
 
   uploadProxies(formData: FormData) {
-    return this.http.post(this.apiUrl + '/addProxies', formData);
+    return this.http.post(this.apiUrl + '/addProxies', formData, this.httpOptions);
   }
 
 }
