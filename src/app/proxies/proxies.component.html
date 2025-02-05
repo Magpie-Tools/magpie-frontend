@@ -35,7 +35,7 @@
     <div class="col d-flex justify-content-center align-items-center">
       @if (getProxiesWithoutAuthCount() + getProxiesWithAuthCount() > 0) {
         <p>
-          Total Proxies {{ getProxiesWithoutAuthCount() }}
+          Total Proxies {{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}
           <br>
           Unique {{getUniqueProxiesCount()}}
           <br>
@@ -52,7 +52,7 @@
 <div class="d-flex align-items-center justify-content-center mt-4">
   <div class="row w-50">
     <div class="col d-flex justify-content-center">
-      <button type="submit" class="w-100" (click)="submitProxies()">Add Proxies to Queue</button>
+      <button type="submit" class="w-100 maxWidth-200" (click)="submitProxies()">Add Proxies to Queue</button>
     </div>
     <div class="col d-flex justify-content-center align-items-center">
       <app-checkbox
