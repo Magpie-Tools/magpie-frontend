@@ -1,0 +1,37 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 75vh; //Making that dynamic would be great
+}
+
+.auth-card {
+  width: 400px;
+  padding: 30px;
+  text-align: center;
+  background: #1a1a1a;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 255, 128, 0.2);
+  color: #fff;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+button {
+  width: 100%;
+  margin-top: 20px;
+  background: #00ff80;
+  color: #000;
+}
+
+.switch-link {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+a {
+  color: #00ff80;
+  text-decoration: none;
+}
