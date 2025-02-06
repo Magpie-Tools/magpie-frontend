@@ -1,18 +1,19 @@
 import { Routes } from '@angular/router';
-import {LicenseComponent} from './license/license.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {CheckerComponent} from './checker/checker.component';
 import {ScraperComponent} from './scraper/scraper.component';
 import {ProxiesComponent} from './proxies/proxies.component';
 import {RegisterComponent} from './auth/register/register.component';
 import {LoginComponent} from './auth/login/login.component';
+import {AuthGuardService} from './services/authorization/auth-guard.service';
+import {AccountComponent} from './account/account.component';
 
 export const routes: Routes = [
-  {path: "license", component: LicenseComponent},
-  {path: "proxies", component: ProxiesComponent},
-  {path: "checker", component: CheckerComponent},
-  {path: "scraper", component: ScraperComponent},
+  {path: "account", component: AccountComponent, canActivate: [AuthGuardService]},
+  {path: "proxies", component: ProxiesComponent, canActivate: [AuthGuardService]},
+  {path: "checker", component: CheckerComponent, canActivate: [AuthGuardService]},
+  {path: "scraper", component: ScraperComponent, canActivate: [AuthGuardService]},
   {path: "register", component: RegisterComponent},
   {path: "login", component: LoginComponent},
-  {path: "**", component: DashboardComponent}
+  {path: "**", component: DashboardComponent, canActivate: [AuthGuardService]}
 ];

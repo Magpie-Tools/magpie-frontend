@@ -1,21 +1,28 @@
-<div class="auth-container">
-  <mat-card class="auth-card">
-    <h2>Login</h2>
-    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email" type="email" />
-      </mat-form-field>
+<div class="background-color">
+  <div class="auth-container">
+    <a class="auth-logo" routerLink="">
+      <img src="../../../assets/logo/magpie-light.png" alt="Logo"/>
+      <h5>M A G P I E</h5>
+    </a>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Password</mat-label>
-        <input matInput formControlName="password" type="password" />
-      </mat-form-field>
+    <mat-card class="auth-card">
+      <h2>Login</h2>
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" />
+        </mat-form-field>
 
-      <button mat-raised-button color="primary" type="submit">Login</button>
-      <p class="switch-link">
-        Don't have an account? <a routerLink="/register">Register</a>
-      </p>
-    </form>
-  </mat-card>
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password" />
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit">Login</button>
+        <p class="switch-link">
+          Don't have an account? <a routerLink="/register">Register</a>
+        </p>
+      </form>
+    </mat-card>
+  </div>
 </div>

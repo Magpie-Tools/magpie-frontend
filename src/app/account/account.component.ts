@@ -2,14 +2,14 @@ import { Component } from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
 
 @Component({
-  selector: 'app-license',
+  selector: 'app-account',
   standalone: true,
     imports: [
         MatIcon
     ],
-  templateUrl: './license.component.html',
-  styleUrl: './license.component.scss'
+  templateUrl: './account.component.html',
+  styleUrl: './account.component.scss'
 })
-export class LicenseComponent {
+export class AccountComponent {
 
 }

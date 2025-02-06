@@ -1,26 +1,33 @@
-<div class="auth-container">
-  <mat-card class="auth-card">
-    <h2>Register</h2>
-    <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email" type="email" />
-      </mat-form-field>
+<div class="background-color">
+  <div class="auth-container">
+    <a class="auth-logo" routerLink="">
+      <img src="../../../assets/logo/magpie-light.png" alt="Logo"/>
+      <h5>M A G P I E</h5>
+    </a>
+    <mat-card class="auth-card">
+      <h2>Register</h2>
+      <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" />
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Password</mat-label>
-        <input matInput formControlName="password" type="password" />
-      </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password" />
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Confirm Password</mat-label>
-        <input matInput formControlName="confirmPassword" type="password" />
-      </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Confirm Password</mat-label>
+          <input matInput formControlName="confirmPassword" type="password" />
+        </mat-form-field>
 
-      <button mat-raised-button color="primary" type="submit" [disabled]="!registerForm.valid || !passwordIsTheSame()">Register</button>
-      <p class="switch-link">
-        Already have an account? <a routerLink="/login">Login</a>
-      </p>
-    </form>
-  </mat-card>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!registerForm.valid || !passwordIsTheSame()">Register</button>
+        <p class="switch-link">
+          Already have an account? <a routerLink="/login">Login</a>
+        </p>
+      </form>
+    </mat-card>
+  </div>
 </div>
+

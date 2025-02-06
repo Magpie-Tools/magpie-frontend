@@ -1,8 +1,43 @@
+.background-color {
+  height: 100vh;
+  background-color: #171717;
+}
+
 .auth-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 75vh; //Making that dynamic would be great
+  height: 85vh;
+  position: relative;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  text-decoration: none;
+  animation: float 3s ease-in-out infinite;
+  position: relative;
+
+  img {
+    height: 80px;
+    margin-right: 1.5rem;
+    filter: drop-shadow(0 0 10px rgba(78, 208, 158, 0.5));
+  }
+
+  h5 {
+    color: #fff;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(78, 208, 158, 0.5);
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
 }
 
 .auth-card {

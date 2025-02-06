@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import {MatFormField, MatLabel} from "@angular/material/form-field";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MatButton} from "@angular/material/button";
-import {RouterLink} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 import {MatCard} from "@angular/material/card";
 import {MatInput} from "@angular/material/input";
 import {User} from '../../models/userModel';
 import {HttpService} from '../../services/http.service';
+import {UserService} from '../../services/authorization/user.service';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +27,7 @@ import {HttpService} from '../../services/http.service';
 export class LoginComponent {
   loginForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private http: HttpService) {
+  constructor(private fb: FormBuilder, private http: HttpService, private router: Router) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -37,7 +38,14 @@ export class LoginComponent {
     const { email, password } = this.loginForm.value;
     const user: User = { email, password };
     this.http.loginUser(user).subscribe({
-      next: (response) =>  this.http.setJWTToken(response.token),
+      next: (response) => {
+        this.http.setJWTToken(response.token)
+        UserService.setLoggedIn(true)
+        this.router.navigate(["/"])
+      },
+      error: () => {
+        UserService.setLoggedIn(false)
+      }
     })
   }
 }
