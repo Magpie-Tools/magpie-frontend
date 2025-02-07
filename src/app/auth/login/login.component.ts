@@ -8,6 +8,7 @@ import {MatInput} from "@angular/material/input";
 import {User} from '../../models/userModel';
 import {HttpService} from '../../services/http.service';
 import {UserService} from '../../services/authorization/user.service';
+import {SnackbarService} from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-login',
@@ -43,8 +44,11 @@ export class LoginComponent {
         UserService.setLoggedIn(true)
         this.router.navigate(["/"])
       },
-      error: () => {
+      error: (err) => {
         UserService.setLoggedIn(false)
+        if (err.status === 401) {
+          SnackbarService.openSnackbar("Username or Password is incorrect", 3000)
+        }
       }
     })
   }
