@@ -1,0 +1,50 @@
+<div class="proxy-container">
+  <mat-table [dataSource]="dataSource" matSort class="proxy-table">
+    <ng-container matColumnDef="alive">
+      <mat-header-cell *matHeaderCellDef mat-sort-header start>Status</mat-header-cell>
+      <mat-cell *matCellDef="let proxy">
+        <div class="status-dot" [class.alive]="proxy.alive" [class.dead]="!proxy.alive"></div>
+      </mat-cell>
+    </ng-container>
+
+    <!-- IP Column -->
+    <ng-container matColumnDef="ip">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>IP Address</mat-header-cell>
+      <mat-cell *matCellDef="let proxy">{{ proxy.ip }}</mat-cell>
+    </ng-container>
+
+    <!-- Country Column -->
+    <ng-container matColumnDef="country">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>Country</mat-header-cell>
+      <mat-cell *matCellDef="let proxy">{{ proxy.country }}</mat-cell>
+    </ng-container>
+
+    <!-- Response Time Column -->
+    <ng-container matColumnDef="response_time">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>Response Time</mat-header-cell>
+      <mat-cell *matCellDef="let proxy">{{ proxy.response_time }} ms</mat-cell>
+    </ng-container>
+
+    <!-- Protocol Column -->
+    <ng-container matColumnDef="protocol">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>Protocol</mat-header-cell>
+      <mat-cell *matCellDef="let proxy">{{ proxy.protocol }}</mat-cell>
+    </ng-container>
+
+    <!-- Last Check Column -->
+    <ng-container matColumnDef="latest_check">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>Last Check</mat-header-cell>
+      <mat-cell *matCellDef="let proxy">{{ proxy.latest_check | date:'short' }}</mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+
+  <mat-paginator [length]="totalItems"
+                 [pageSize]="40"
+                 [pageIndex]="page - 1"
+                 (page)="onPageChange($event)"
+                 class="custom-paginator">
+  </mat-paginator>
+</div>

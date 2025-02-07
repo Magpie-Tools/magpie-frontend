@@ -3,6 +3,7 @@ import {environment} from '../../environments/environment';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {User} from '../models/userModel';
 import {jwtToken} from '../models/jwtToken';
+import {ProxyInfo} from '../models/ProxyInfo';
 
 @Injectable({
   providedIn: 'root'
@@ -36,4 +37,11 @@ export class HttpService {
     return this.http.post(this.apiUrl + '/addProxies', formData, this.httpOptions);
   }
 
+  getProxyPage(pageNumber: number) {
+    return this.http.get<ProxyInfo[]>(this.apiUrl + '/getProxyPage/' + pageNumber, this.httpOptions);
+  }
+
+  getProxyCount() {
+    return this.http.get<number>(this.apiUrl + '/getProxyCount', this.httpOptions);
+  }
 }
