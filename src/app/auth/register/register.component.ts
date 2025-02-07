@@ -3,10 +3,12 @@ import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatInput} from '@angular/material/input';
 import {MatButton} from '@angular/material/button';
-import {RouterLink} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {MatCard} from '@angular/material/card';
 import {HttpService} from '../../services/http.service';
 import {User} from '../../models/userModel';
+import {UserService} from '../../services/authorization/user.service';
+import {SnackbarService} from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-register',
@@ -26,7 +28,7 @@ import {User} from '../../models/userModel';
 export class RegisterComponent {
   registerForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private http: HttpService) {
+  constructor(private fb: FormBuilder, private http: HttpService, private router: Router) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
@@ -47,7 +49,12 @@ export class RegisterComponent {
 
       // Send the data to the backend
       this.http.registerUser(user).subscribe({
-        next: (response) =>  this.http.setJWTToken(response.token),
+        next: (response) => {
+          this.http.setJWTToken(response.token)
+          UserService.setLoggedIn(true)
+          SnackbarService.openSnackbar("Registration successful", 3000)
+          this.router.navigate(['/']);
+        },
         error: (error) => console.error('Registration failed', error),
       });
     }
