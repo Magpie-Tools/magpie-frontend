@@ -13,16 +13,22 @@
       <mat-cell *matCellDef="let proxy">{{ proxy.ip }}</mat-cell>
     </ng-container>
 
-    <!-- Country Column -->
-    <ng-container matColumnDef="country">
-      <mat-header-cell *matHeaderCellDef mat-sort-header>Country</mat-header-cell>
-      <mat-cell *matCellDef="let proxy">{{ proxy.country }}</mat-cell>
-    </ng-container>
-
     <!-- Response Time Column -->
     <ng-container matColumnDef="response_time">
       <mat-header-cell *matHeaderCellDef mat-sort-header>Response Time</mat-header-cell>
       <mat-cell *matCellDef="let proxy">{{ proxy.response_time }} ms</mat-cell>
+    </ng-container>
+
+    <!-- Estimated Type -->
+    <ng-container matColumnDef="estimated_type">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>Estimated Type</mat-header-cell>
+      <mat-cell *matCellDef="let proxy">{{ proxy.estimated_type }}</mat-cell>
+    </ng-container>
+
+    <!-- Country Column -->
+    <ng-container matColumnDef="country">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>Country</mat-header-cell>
+      <mat-cell *matCellDef="let proxy">{{ proxy.country }}</mat-cell>
     </ng-container>
 
     <!-- Protocol Column -->
