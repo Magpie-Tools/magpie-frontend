@@ -5,6 +5,7 @@ import {ProxyInfo} from '../../models/ProxyInfo';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {DatePipe} from '@angular/common';
+import {LoadingComponent} from '../../loading/loading.component';
 
 import {
   MatCell,
@@ -34,7 +35,8 @@ import {
     MatRow,
     DatePipe,
     MatRowDef,
-    MatHeaderRowDef
+    MatHeaderRowDef,
+    LoadingComponent
   ],
   templateUrl: './proxy-list.component.html',
   styleUrl: './proxy-list.component.scss'
@@ -44,6 +46,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
   page = 1;
   displayedColumns: string[] = ['alive', 'ip', 'response_time', 'estimated_type', 'country', 'protocol', 'latest_check'];
   totalItems = 0;
+  hasLoaded = false;
 
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -74,6 +77,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
   getAndSetProxyCount() {
     this.http.getProxyCount().subscribe(res => {
       this.totalItems = res
+      this.hasLoaded = true
     })
   }
 
