@@ -21,5 +21,6 @@ import {AddProxiesComponent} from './add-proxies/add-proxies.component';
 })
 export class ProxiesComponent {
   showProxyList: boolean = true;
+  showNoProxiesMessage: boolean = false;
 }
 

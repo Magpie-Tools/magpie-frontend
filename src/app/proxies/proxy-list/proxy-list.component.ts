@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnInit, Output, ViewChild, EventEmitter} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpService} from '../../services/http.service';
 import {ProxyInfo} from '../../models/ProxyInfo';
@@ -42,6 +42,8 @@ import {
   styleUrl: './proxy-list.component.scss'
 })
 export class ProxyListComponent implements OnInit, AfterViewInit {
+  @Output() showAddProxiesMessage = new EventEmitter<boolean>();
+
   dataSource = new MatTableDataSource<ProxyInfo>([]);
   page = 1;
   displayedColumns: string[] = ['alive', 'ip', 'response_time', 'estimated_type', 'country', 'protocol', 'latest_check'];
@@ -78,6 +80,9 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
     this.http.getProxyCount().subscribe(res => {
       this.totalItems = res
       this.hasLoaded = true
+      let tdf = this.totalItems === 0 && this.hasLoaded
+
+      this.showAddProxiesMessage.emit(tdf);
     })
   }
 

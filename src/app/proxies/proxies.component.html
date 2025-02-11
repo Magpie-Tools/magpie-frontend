@@ -17,7 +17,18 @@
 </div>
 
 @if (showProxyList) {
-  <app-proxy-list></app-proxy-list>
+  @if (showNoProxiesMessage) {
+    <div class="empty-state d-flex flex-column align-items-center justify-content-center mt-5 p-4">
+      <span class="text-center">
+        No proxies found. Start by
+        <a class="link" href="" (click)="showProxyList = false">adding proxies</a>
+      </span>
+    </div>
+  } @else {
+    <app-proxy-list
+      (showAddProxiesMessage)="showNoProxiesMessage = $event">
+    </app-proxy-list>
+  }
 } @else {
   <app-add-proxies></app-add-proxies>
 }
