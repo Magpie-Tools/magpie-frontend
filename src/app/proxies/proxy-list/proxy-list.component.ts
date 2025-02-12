@@ -78,12 +78,23 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
 
   getAndSetProxyCount() {
     this.http.getProxyCount().subscribe(res => {
-      this.totalItems = res
-      this.hasLoaded = true
-      let tdf = this.totalItems === 0 && this.hasLoaded
+      this.totalItems = res;
+      this.hasLoaded = true;
+      this.showAddProxiesMessage.emit(this.totalItems === 0 && this.hasLoaded);
 
-      this.showAddProxiesMessage.emit(tdf);
-    })
+      setTimeout(() => {
+        if (this.sort) {
+          this.dataSource.sort = this.sort;
+
+          this.dataSource.sortingDataAccessor = (item, property) => {
+            if (property === 'alive') {
+              return item.alive ? 0 : 1;
+            }
+            return item[property as keyof ProxyInfo] as any;
+          };
+        }
+      });
+    });
   }
 
   onPageChange(event: PageEvent) {
