@@ -28,7 +28,12 @@ export class ProcesingPopupComponent {
 
   messages = [
     'Please wait while we add your proxies.',
-    'This can take a few seconds.'
+    'This can take a few seconds.',
+    'Just a little longer, we’re on it.',
+    'Hang tight, we’re working on it.',
+    'Almost there... just a moment more.',
+    'Seems like you added a lot of proxies, but don’t worry, we’ll handle it.',
+    'Loading... good things take time!',
   ];
   currentMessageIndex = 0;
   textState = 0;
@@ -52,7 +57,7 @@ export class ProcesingPopupComponent {
       }
       this.currentMessageIndex = (this.currentMessageIndex + 1) % this.messages.length;
       this.textState++;
-    }, 5000);
+    }, 10000);
   }
 
   onClose() {
