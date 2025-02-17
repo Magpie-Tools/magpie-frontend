@@ -49,28 +49,16 @@ $green-dark: #1B5E20;     // Dark Green - Bold and dramatic
   radial-gradient(1.5px 1.5px at 150px 149.5px, $green-emerald 100%, #0000 150%), // Star
   radial-gradient(4px 100px at 0px 215px, rgb(255, 145, 0), #0000),
   radial-gradient(4px 100px at 300px 215px, rgb(255, 132, 0), #0000),
-  radial-gradient(
-      1.5px 1.5px at 150px 107.5px,
-      rgb(255, 136, 0) 100%,
-      #0000 150%
-  ),
-  radial-gradient(4px 100px at 0px 281px, rgb(255, 170, 0), #0000),
-  radial-gradient(4px 100px at 300px 281px, rgb(255, 115, 0), #0000),
-  radial-gradient(
-      1.5px 1.5px at 150px 140.5px,
-      rgb(255, 119, 0) 100%,
-      #0000 150%
-  ),
+  radial-gradient(1.5px 1.5px at 150px 107.5px, rgb(255, 136, 0) 100%, #0000 150%), // Star
+  radial-gradient(4px 100px at 0px 281px, $green-spring, #0000),
+  radial-gradient(4px 100px at 300px 281px, $green-dark, #0000),
+  radial-gradient(1.5px 1.5px at 150px 140.5px, $green-dark 100%, #0000 150%),
   radial-gradient(4px 100px at 0px 158px, $green-dark, #0000),
   radial-gradient(4px 100px at 300px 158px, $green-forest, #0000),
   radial-gradient(1.5px 1.5px at 150px 79px, $green-spring 100%, #0000 150%), // Star
-  radial-gradient(4px 100px at 0px 210px, rgb(255, 123, 0), #0000),
-  radial-gradient(4px 100px at 300px 210px, rgb(255, 162, 0), #0000),
-  radial-gradient(
-      1.5px 1.5px at 150px 105px,
-      rgb(255, 136, 0) 100%,
-      #0000 150%
-  );
+  radial-gradient(4px 100px at 0px 210px, $green-forest, #0000),
+  radial-gradient(4px 100px at 300px 210px, $green-emerald, #0000),
+  radial-gradient(1.5px 1.5px at 150px 105px, $green-forest 100%, #0000 150%); //Star
   background-size:
     300px 235px,
     300px 235px,

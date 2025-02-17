@@ -34,7 +34,7 @@ export class HttpService {
   }
 
   uploadProxies(formData: FormData) {
-    return this.http.post(this.apiUrl + '/addProxies', formData, this.httpOptions);
+    return this.http.post<{proxyCount: number}>(this.apiUrl + '/addProxies', formData, this.httpOptions);
   }
 
   getProxyPage(pageNumber: number) {

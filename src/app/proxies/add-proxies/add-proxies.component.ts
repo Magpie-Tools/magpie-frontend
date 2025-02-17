@@ -5,17 +5,19 @@ import {MatIcon} from "@angular/material/icon";
 import {MatTooltip} from "@angular/material/tooltip";
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {HttpService} from '../../services/http.service';
+import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.component';
 
 @Component({
   selector: 'app-add-proxies',
   standalone: true,
-    imports: [
-        CheckboxComponent,
-        FormsModule,
-        MatIcon,
-        MatTooltip,
-        TooltipComponent
-    ],
+  imports: [
+    CheckboxComponent,
+    FormsModule,
+    MatIcon,
+    MatTooltip,
+    TooltipComponent,
+    ProcesingPopupComponent
+  ],
   templateUrl: './add-proxies.component.html',
   styleUrl: './add-proxies.component.scss'
 })
@@ -31,6 +33,10 @@ export class AddProxiesComponent {
   textAreaProxiesNoAuthCount: number = 0;
   textAreaProxiesWithAuthCount: number = 0;
   uniqueTextAreaProxiesCount: number = 0;
+
+  showPopup = false;
+  popupStatus: 'processing' | 'success' | 'error' = 'processing';
+  addedProxyCount = 0;
 
   triggerFileInput(fileInput: HTMLInputElement): void {
     fileInput.click();
@@ -88,6 +94,9 @@ export class AddProxiesComponent {
 
   submitProxies() {
     if (this.file || this.ProxyTextarea) {
+      this.showPopup = true;
+      this.popupStatus = 'processing';
+
       const formData = new FormData();
 
       if (this.file) {
@@ -102,18 +111,24 @@ export class AddProxiesComponent {
 
       this.service.uploadProxies(formData).subscribe({
         next: (response) => {
+          this.addedProxyCount = response.proxyCount;
+          this.popupStatus = 'success';
+
           this.file = undefined;
           this.ProxyTextarea = ""
           this.onFileClear()
           this.addTextAreaProxies()
-          console.log('Upload successful', response);
         },
-        error: (error) => {
-          console.error('Upload failed', error);
+        error: () => {
+          this.popupStatus = 'error';
         },
       });
     } else {
       console.warn('No data to submit');
     }
+  }
+
+  onPopupClose() {
+    this.showPopup = false;
   }
 }

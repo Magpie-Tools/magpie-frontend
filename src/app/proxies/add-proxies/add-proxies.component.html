@@ -57,3 +57,12 @@
     </div>
   </div>
 </div>
+
+@if (showPopup) {
+  <app-procesing-popup
+    [status]="popupStatus"
+    [proxyCount]="addedProxyCount"
+    (closed)="onPopupClose()"
+  >
+  </app-procesing-popup>
+}
