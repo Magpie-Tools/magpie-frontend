@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
-import {LoadingComponent} from '../loading/loading.component';
+import {LoadingComponent} from '../ui-elements/loading/loading.component';
 import {TooltipComponent} from '../tooltip/tooltip.component';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {NgForOf} from '@angular/common';

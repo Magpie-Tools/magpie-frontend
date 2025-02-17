@@ -5,7 +5,7 @@ import {ProxyInfo} from '../../models/ProxyInfo';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {DatePipe} from '@angular/common';
-import {LoadingComponent} from '../../loading/loading.component';
+import {LoadingComponent} from '../../ui-elements/loading/loading.component';
 
 import {
   MatCell,
