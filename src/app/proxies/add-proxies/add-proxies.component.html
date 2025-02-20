@@ -5,7 +5,17 @@
         <h4 class="text-center subText">Add Proxies <app-tooltip [text]="'You can add proxies in the following formats:\n\nip:port\nip:port@username:password\nip:port:username:password'"></app-tooltip></h4>
       </div>
       <div class="row h-15">
-        <button type="button" class="h-25 d-flex align-items-center justify-content-center full-color-button">Paste from Clipboard</button>
+        <div [class]="clipboardProxies ? 'col-10' : ''" class="p-0">
+          <button type="button" (click)="pasteFromClipboard()" class="h-25 d-flex align-items-center justify-content-center w-100"
+                  [class]="clipboardProxies ? '' : 'full-color-button'"
+                  [disabled]="clipboardProxies">Paste from Clipboard</button>
+        </div>
+        @if (clipboardProxies) {
+          <div class="col-1">
+            <button class="btn btn-danger h-50 d-flex align-items-center justify-content-center"
+                    (click)="clearClipboardProxies()">X</button>
+          </div>
+        }
       </div>
       <div class="row h-25">
         <div [class]="file != undefined ? 'col-10' : ''" class="p-0">
@@ -21,7 +31,6 @@
         }
       </div>
 
-
       <div class="row">
         <textarea maxlength="109999" [placeholder]="'Bulk add Proxies\n127.0.0.1:66535'" [(ngModel)]="ProxyTextarea" (ngModelChange)="addTextAreaProxies()"></textarea>
       </div>
@@ -35,7 +44,6 @@
           Unique {{getUniqueProxiesCount()}}
           <br>
           With Auth {{ getProxiesWithAuthCount() }}
-
         </p>
       } @else {
         <mat-icon svgIcon="graph"></mat-icon>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {CheckboxComponent} from "../../checkbox/checkbox.component";
 import {FormsModule} from "@angular/forms";
 import {MatIcon} from "@angular/material/icon";
@@ -24,8 +24,10 @@ import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.compone
 export class AddProxiesComponent {
   constructor(private service: HttpService) { }
 
-  file: File | undefined
-  ProxyTextarea: string = ""
+  file: File | undefined;
+  ProxyTextarea: string = "";
+  clipboardProxies: string = "";
+
   fileProxiesNoAuthCount: number = 0;
   fileProxiesWithAuthCount: number = 0;
   uniqueFileProxiesCount: number = 0;
@@ -34,9 +36,43 @@ export class AddProxiesComponent {
   textAreaProxiesWithAuthCount: number = 0;
   uniqueTextAreaProxiesCount: number = 0;
 
+  clipboardProxiesNoAuthCount: number = 0;
+  clipboardProxiesWithAuthCount: number = 0;
+  uniqueClipboardProxiesCount: number = 0;
+
   showPopup = false;
   popupStatus: 'processing' | 'success' | 'error' = 'processing';
   addedProxyCount = 0;
+
+  async pasteFromClipboard(): Promise<void> {
+    try {
+      this.clipboardProxies = await navigator.clipboard.readText();
+      this.processClipboardProxies();
+    } catch (err) {
+      console.error('Failed to read clipboard:', err);
+    }
+  }
+
+  clearClipboardProxies(): void {
+    this.clipboardProxies = "";
+    this.clipboardProxiesNoAuthCount = 0;
+    this.clipboardProxiesWithAuthCount = 0;
+    this.uniqueClipboardProxiesCount = 0;
+  }
+
+  processClipboardProxies() {
+    if (!this.clipboardProxies) {
+      this.clearClipboardProxies();
+      return;
+    }
+
+    const lines = this.clipboardProxies.split(/\r?\n/);
+    const proxies = lines.filter(line => (line.match(/:/g) || []).length === 1);
+
+    this.clipboardProxiesNoAuthCount = proxies.length;
+    this.clipboardProxiesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
+    this.uniqueClipboardProxiesCount = Array.from(new Set(proxies)).length;
+  }
 
   triggerFileInput(fileInput: HTMLInputElement): void {
     fileInput.click();
@@ -54,7 +90,6 @@ export class AddProxiesComponent {
         let proxies = lines.filter(line => (line.match(/:/g) || []).length === 1)
 
         this.fileProxiesNoAuthCount = proxies.length;
-
         this.fileProxiesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
         this.uniqueFileProxiesCount = Array.from(new Set(proxies)).length;
       };
@@ -77,23 +112,22 @@ export class AddProxiesComponent {
     this.textAreaProxiesNoAuthCount = proxies.length;
     this.textAreaProxiesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
     this.uniqueTextAreaProxiesCount = Array.from(new Set(proxies)).length;
-
   }
 
   getProxiesWithoutAuthCount() {
-    return this.textAreaProxiesNoAuthCount+this.fileProxiesNoAuthCount;
+    return this.textAreaProxiesNoAuthCount + this.fileProxiesNoAuthCount + this.clipboardProxiesNoAuthCount;
   }
 
   getProxiesWithAuthCount() {
-    return this.textAreaProxiesWithAuthCount+this.fileProxiesWithAuthCount;
+    return this.textAreaProxiesWithAuthCount + this.fileProxiesWithAuthCount + this.clipboardProxiesWithAuthCount;
   }
 
   getUniqueProxiesCount() {
-    return this.uniqueFileProxiesCount + this.uniqueTextAreaProxiesCount;
+    return this.uniqueFileProxiesCount + this.uniqueTextAreaProxiesCount + this.uniqueClipboardProxiesCount;
   }
 
   submitProxies() {
-    if (this.file || this.ProxyTextarea) {
+    if (this.file || this.ProxyTextarea || this.clipboardProxies) {
       this.showPopup = true;
       this.popupStatus = 'processing';
 
@@ -109,15 +143,21 @@ export class AddProxiesComponent {
         formData.append('proxyTextarea', this.ProxyTextarea);
       }
 
+      if (this.clipboardProxies) {
+        formData.append('clipboardProxies', this.clipboardProxies);
+      }
+
       this.service.uploadProxies(formData).subscribe({
         next: (response) => {
           this.addedProxyCount = response.proxyCount;
           this.popupStatus = 'success';
 
           this.file = undefined;
-          this.ProxyTextarea = ""
-          this.onFileClear()
-          this.addTextAreaProxies()
+          this.ProxyTextarea = "";
+          this.clipboardProxies = "";
+          this.onFileClear();
+          this.clearClipboardProxies();
+          this.addTextAreaProxies();
         },
         error: () => {
           this.popupStatus = 'error';
