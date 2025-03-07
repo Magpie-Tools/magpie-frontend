@@ -87,6 +87,7 @@ export class AdminCheckerComponent implements OnInit{
         this.fb.group({ url: ['https://pool.proxyspace.pro/judge.php'], regex: ['default'] }),
         this.fb.group({ url: ['http://azenv.net'], regex: ['default'] })
       ]),
+      use_https_for_socks: true,
       iplookup: ['https://ident.me'],
       standard_header: this.fb.array([
         "USER-AGENT", "HOST", "ACCEPT", "ACCEPT-ENCODING"
