@@ -1,37 +1,117 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import {environment} from '../../environments/environment';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { GlobalSettings } from '../models/GlobalSettings';
+import { HttpService } from './http.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SettingsService {
-  constructor(private http: HttpClient) {}
+  private settings: GlobalSettings | undefined;
+  private settingsSubject = new BehaviorSubject<GlobalSettings | undefined>(undefined);
+  public settings$ = this.settingsSubject.asObservable();
+
+  constructor(private http: HttpService) {
+    this.loadSettings();
+  }
+
+  loadSettings(): void {
+    this.http.getGlobalSettings().subscribe(res => {
+      this.settings = res;
+
+      console.log(res);
+      this.settingsSubject.next(this.settings);
+    });
+  }
+
+  getSettings(): GlobalSettings | undefined {
+    return this.settings;
+  }
+
+  getCheckerSettings(): Observable<GlobalSettings['checker']> {
+    return this.settings$.pipe(
+      map(settings => {
+        if (!settings) {
+          throw new Error('Settings not loaded');
+        }
+        return settings.checker;
+      })
+    );
+  }
+
+  getScraperSettings(): Observable<GlobalSettings['scraper']> {
+    return this.settings$.pipe(
+      map(settings => {
+        if (!settings) {
+          throw new Error('Settings not loaded');
+        }
+        return settings.scraper;
+      })
+    );
+  }
+
+  getProtocols(): GlobalSettings["protocols"] | undefined {
+    return this.settings?.protocols;
+  }
+
+  getBlacklistSources(): string[] | undefined {
+    return this.settings?.blacklist_sources;
+  }
 
   saveSettings(formData: any): Observable<any> {
     const payload = this.transformSettings(formData);
-    return this.http.post(environment.apiUrl + "/saveSettings", payload, { responseType: 'text' });  }
+    return this.http.saveGlobalSettings(payload);
+  }
 
-  private transformSettings(formData: any) {
+  private transformSettings(formData: any): GlobalSettings {
+    const protocols: GlobalSettings["protocols"] = {
+      http: formData.protocols.http,
+      https: formData.protocols.https,
+      socks4: formData.protocols.socks4,
+      socks5: formData.protocols.socks5
+    };
+    // if (formData.protocols.https) protocols.push('https');
+    // if (formData.protocols.socks4) protocols.push('socks4');
+    // if (formData.protocols.socks5) protocols.push('socks5');
+
     return {
-      protocols: formData.selectedPorts,
-      timer: {
-        days: formData.timer.days,
-        hours: formData.timer.hours,
-        minutes: formData.timer.minutes,
-        seconds: formData.timer.seconds
-      },
+      protocols: protocols,
       checker: {
         threads: formData.threads,
         retries: formData.retries,
         timeout: formData.timeout,
+        checker_timer: {
+          days: formData.timer.days,
+          hours: formData.timer.hours,
+          minutes: formData.timer.minutes,
+          seconds: formData.timer.seconds
+        },
         judges_threads: formData.judges_threads,
         judges_timeout: formData.judges_timeout,
+        judge_timer: {
+          days: formData.judge_timer?.days || 0,
+          hours: formData.judge_timer?.hours || 0,
+          minutes: formData.judge_timer?.minutes || 30,
+          seconds: formData.judge_timer?.seconds || 0
+        },
         judges: formData.judges,
+        use_https_for_socks: formData.use_https_for_socks,
         ip_lookup: formData.iplookup,
-        standard_header: ["USER-AGENT", "HOST", "ACCEPT", "ACCEPT-ENCODING"],
-        proxy_header: ["HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"]
+        standard_header: formData.standard_header || ["USER-AGENT", "HOST", "ACCEPT", "ACCEPT-ENCODING"],
+        proxy_header: formData.proxy_header || ["HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"]
+      },
+      scraper: {
+        dynamic_threads: formData.dynamic_threads || false,
+        threads: formData.scraper_threads || 250,
+        retries: formData.scraper_retries || 2,
+        timeout: formData.scraper_timeout || 7500,
+        scraper_timer: {
+          days: formData.scraper_timer?.days || 0,
+          hours: formData.scraper_timer?.hours || 0,
+          minutes: formData.scraper_timer?.minutes || 5,
+          seconds: formData.scraper_timer?.seconds || 0
+        }
       },
       blacklist_sources: formData.blacklisted
     };

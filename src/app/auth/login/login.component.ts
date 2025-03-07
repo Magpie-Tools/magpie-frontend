@@ -43,6 +43,7 @@ export class LoginComponent {
         this.http.setJWTToken(response.token)
         UserService.setLoggedIn(true)
         this.router.navigate(["/"])
+        this.http.getUserRole().subscribe(res => {UserService.setRole(res)})
       },
       error: (err) => {
         UserService.setLoggedIn(false)

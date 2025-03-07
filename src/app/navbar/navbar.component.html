@@ -6,6 +6,9 @@
   <a class="navbar-item" routerLink="" routerLinkActive="active"><h4>Dashboard</h4></a>
   <a class="navbar-item" routerLink="proxies" routerLinkActive="active"><h4>Proxies</h4></a>
   <a class="navbar-item" routerLink="checker" routerLinkActive="active"><h4>Checker</h4></a>
+  @if (UserService.isAdmin()) {
+    <a class="navbar-item" routerLink="global/checker" routerLinkActive="active"><h4>Global Checker</h4></a>
+  }
   <a class="navbar-item" routerLink="scraper" routerLinkActive="active"><h4>Scraper</h4></a>
 
   <a class="person" routerLink="account" routerLinkActive="active"><mat-icon svgIcon="person"></mat-icon></a>

@@ -4,6 +4,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {User} from '../models/userModel';
 import {jwtToken} from '../models/jwtToken';
 import {ProxyInfo} from '../models/ProxyInfo';
+import {GlobalSettings} from '../models/GlobalSettings';
 
 @Injectable({
   providedIn: 'root'
@@ -43,5 +44,21 @@ export class HttpService {
 
   getProxyCount() {
     return this.http.get<number>(this.apiUrl + '/getProxyCount', this.httpOptions);
+  }
+
+  saveGlobalSettings(payload: GlobalSettings) {
+    return this.http.post(environment.apiUrl + "/saveSettings", payload, this.httpOptions)
+  }
+
+  getGlobalSettings() {
+    return this.http.get<GlobalSettings>(this.apiUrl + '/global/settings', this.httpOptions);
+  }
+
+  getUserSettings() {
+    return this.http.get<GlobalSettings>(this.apiUrl + '/user/settings', this.httpOptions);
+  }
+
+  getUserRole() {
+    return this.http.get<string>(this.apiUrl + '/user/role', this.httpOptions);
   }
 }

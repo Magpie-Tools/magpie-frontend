@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 import {RouterLink, RouterLinkActive} from '@angular/router';
+import {UserService} from "../services/authorization/user.service";
 
 @Component({
   selector: 'app-navbar',
@@ -14,4 +15,5 @@ import {RouterLink, RouterLinkActive} from '@angular/router';
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
+    protected readonly UserService = UserService;
 }

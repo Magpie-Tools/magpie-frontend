@@ -1,0 +1,219 @@
+<h2 class="titleHeader">
+  <mat-icon svgIcon="computing"></mat-icon>
+  <div>Global Checker</div>
+</h2>
+
+<div class="content-container">
+  <form [formGroup]="settingsForm">
+    <mat-tab-group>
+      <!-- Common Tab -->
+      <mat-tab label="Common">
+        <h4 class="text-center subText">Protocols</h4>
+        <div class="row mb-3" formGroupName="protocols">
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="HTTP" formControlName="http"></app-checkbox>
+          </div>
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="HTTPS" formControlName="https"></app-checkbox>
+          </div>
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="SOCKS4" formControlName="socks4"></app-checkbox>
+          </div>
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="SOCKS5" formControlName="socks5"></app-checkbox>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <h4 class="text-center subText">Check ALL proxies every</h4>
+        <div class="form-row mb-3 d-flex justify-content-center" formGroupName="timer">
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Days" formControlName="days">
+              <mat-option *ngFor="let day of daysList" [value]="day">{{ day + " Days" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Hours" formControlName="hours">
+              <mat-option *ngFor="let hour of hoursList" [value]="hour">{{ hour + " Hours" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Minutes" formControlName="minutes">
+              <mat-option *ngFor="let min of minutesList" [value]="min">{{ min + " Minutes" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Seconds" formControlName="seconds">
+              <mat-option *ngFor="let sec of secondsList" [value]="sec">{{ sec + " Seconds" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="threads">Threads<app-tooltip [text]="'Threads are used to check Proxies at the same time'"></app-tooltip>
+            </label>
+            <input id="threads" formControlName="threads" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="retries">Retries</label>
+            <input id="retries" formControlName="retries" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="timeout">Timeout (ms)</label>
+            <input id="timeout" formControlName="timeout" type="number" />
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Judges Tab -->
+      <mat-tab label="Judges">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="judges_threads">Judge Threads</label>
+            <input id="judges_threads" formControlName="judges_threads" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="judges_timeout">Judge Timeout (ms)</label>
+            <input id="judges_timeout" formControlName="judges_timeout" type="number" />
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <h4 class="text-center subText">Check Judges every</h4>
+        <div class="form-row mb-3 d-flex justify-content-center" formGroupName="judge_timer">
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Days" formControlName="days">
+              <mat-option *ngFor="let day of daysList" [value]="day">{{ day + " Days" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Hours" formControlName="hours">
+              <mat-option *ngFor="let hour of hoursList" [value]="hour">{{ hour + " Hours" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Minutes" formControlName="minutes">
+              <mat-option *ngFor="let min of minutesList" [value]="min">{{ min + " Minutes" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Seconds" formControlName="seconds">
+              <mat-option *ngFor="let sec of secondsList" [value]="sec">{{ sec + " Seconds" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div formArrayName="judges">
+          <label>Judge URLs and Regex</label>
+          <div *ngFor="let judge of judges.controls; let i = index" [formGroupName]="i" class="judge-row">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="judge-url-{{i}}">URL</label>
+                <input id="judge-url-{{i}}" formControlName="url" type="text" />
+              </div>
+              <div class="form-group">
+                <label for="judge-regex-{{i}}">Regex</label>
+                <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
+              </div>
+              @if (judges.length > 1) {
+                <button type="button" class="btn-remove" (click)="removeJudge(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+          <button type="button" class="btn-add" (click)="addJudge()">
+            <mat-icon>add</mat-icon> Add Judge
+          </button>
+        </div>
+      </mat-tab>
+
+      <!-- IP Tab -->
+      <mat-tab label="IP">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="iplookup">IP Lookup URL</label>
+            <input id="iplookup" formControlName="iplookup" type="text" />
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="section-container">
+          <h4 class="section-title">Standard Headers</h4>
+          <div formArrayName="standard_header">
+            <div *ngFor="let header of standardHeaders.controls; let i = index" class="header-row">
+              <div class="form-row">
+                <div class="form-group flex-grow-1">
+                  <input [formControlName]="i" type="text" class="w-100" />
+                </div>
+                @if (standardHeaders.length > 1) {
+                  <button type="button" class="btn-remove" (click)="removeStandardHeader(i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            </div>
+            <button type="button" class="btn-add" (click)="addStandardHeader()">
+              <mat-icon>add</mat-icon> Add Standard Header
+            </button>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="section-container">
+          <h4 class="section-title">Proxy Headers</h4>
+          <div formArrayName="proxy_header">
+            <div *ngFor="let header of proxyHeaders.controls; let i = index" class="header-row">
+              <div class="form-row">
+                <div class="form-group flex-grow-1">
+                  <input [formControlName]="i" type="text" class="w-100" />
+                </div>
+                @if (proxyHeaders.length > 1) {
+                  <button type="button" class="btn-remove" (click)="removeProxyHeader(i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            </div>
+            <button type="button" class="btn-add" (click)="addProxyHeader()">
+              <mat-icon>add</mat-icon> Add Proxy Header
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Blacklist Tab -->
+      <mat-tab label="Blacklist">
+        <div formArrayName="blacklisted">
+          <label>Blacklisted URLs</label>
+          <div *ngFor="let url of blacklisted.controls; let i = index" class="blacklist-row">
+            <div class="form-row">
+              <div class="form-group flex-grow-1">
+                <input [formControlName]="i" type="text" class="w-100" />
+              </div>
+              <button type="button" class="btn-remove" (click)="removeBlacklistedUrl(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <button type="button" class="btn-add" (click)="addBlacklistedUrl()">
+            <mat-icon>add</mat-icon> Add Blacklist URL
+          </button>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </form>
+</div>
+
+<div class="d-flex align-items-center justify-content-center mt-4">
+  <button type="submit" (click)="onSubmit()">Save Settings</button>
+</div>

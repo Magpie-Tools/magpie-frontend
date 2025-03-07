@@ -1,10 +1,16 @@
 import {Injectable} from '@angular/core';
+import {HttpService} from '../http.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private static isAuthenticated = false
+  private static role = 'user';
+
+  constructor(private http: HttpService) {
+    http.getUserRole().subscribe(res => {UserService.role = res;})
+  }
 
   public static isLoggedIn() {
     return UserService.isAuthenticated;
@@ -12,5 +18,13 @@ export class UserService {
 
   public static setLoggedIn(loggedIn: boolean) {
     this.isAuthenticated = loggedIn;
+  }
+
+  public static setRole(role: string) {
+    UserService.role = role;
+  }
+
+  public static isAdmin() {
+    return UserService.role === 'admin';
   }
 }
