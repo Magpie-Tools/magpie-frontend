@@ -1,0 +1,88 @@
+$logo-color: #348566;
+$navbar-background: #171717;
+$text-color: rgb(171, 171, 171);
+$border-color: rgba(255, 255, 255, 0.2);
+$personColor: #ffffff;
+
+.checkbox-container {
+  font-size: 16px;
+  color: $text-color;
+
+  input[type="checkbox"] {
+    cursor: pointer;
+    margin-left: 1rem;
+    appearance: none;
+    -webkit-appearance: none; // For Safari
+    width: 15px;
+    height: 15px;
+    border: 2px solid $border-color;
+    border-radius: 4px;
+    background-color: $navbar-background;
+    transition: all 0.3s ease;
+    display: inline-block;
+    position: relative;
+
+    &:hover {
+      border-color: lighten($border-color, 10%);
+    }
+
+    &:checked {
+      background-color: $logo-color;
+      border-color: $logo-color;
+
+      &::after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(320deg);
+        width: 10px;
+        height: 5px;
+        border: solid $navbar-background;
+        border-width: 0 0 2px 2px;
+      }
+    }
+  }
+
+  label {
+    cursor: pointer;
+    user-select: none;
+    padding: 0.5rem;
+    border: #158566 solid 1px;
+    border-radius: 10px;
+  }
+}
+
+
+mat-divider {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-color: rgb(255,255,255,0.2);
+}
+
+/* Override mat-tab styles */
+::ng-deep {
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid $border-color;
+    margin-bottom: 1.5rem;
+  }
+
+  .mat-mdc-tab-labels {
+    background-color: $navbar-background;
+  }
+
+  .mat-mdc-tab {
+    color: $text-color !important;
+
+    &.mat-mdc-tab-active {
+      color: $logo-color !important;
+    }
+  }
+
+  .mat-mdc-form-field-appearance-outline .mat-mdc-form-field-outline {
+    color: $border-color;
+  }
+
+  .mat-mdc-select-value {
+    color: $personColor;
+  }
+}

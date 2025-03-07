@@ -1,4 +1,5 @@
 $logo-color: #348566;
+$text-color: rgb(171, 171, 171);
 
 @use '@angular/material' as mat;
 
@@ -68,7 +69,7 @@ mat-icon {
 }
 
 .subText {
-  color: #cfcfcf;
+  color: $text-color;
 }
 
 mat-tab-body .mat-mdc-tab-body-content {
@@ -81,12 +82,12 @@ mat-tab-body .mat-mdc-tab-body-content {
 
 :root {
   @include mat.tabs-overrides((
-    divider-color: rgb(171, 171, 171),
+    divider-color: $text-color,
   ));
 }
 
 .mat-mdc-tab .mdc-tab__text-label {
-  color: rgb(171, 171, 171) !important;
+  color: $text-color !important;
 }
 
 .mat-mdc-tab-group, .mat-mdc-tab-nav-bar {
@@ -114,8 +115,8 @@ mat-tab-body .mat-mdc-tab-body-content {
       label {
         display: block;
         font-size: 0.9rem;
-        margin-bottom: 5px;
-        color: #348566;
+        margin-bottom: 0.5rem;
+        color: $text-color;
       }
 
       input,

@@ -52,7 +52,7 @@ export class AdminCheckerComponent implements OnInit{
     });
 
     // Load protocols and blacklist separately
-    const settings = this.settingsService.getSettings();
+    const settings = this.settingsService.getGlobalSettings();
     if (settings) {
       this.updateProtocolsAndBlacklist(settings.protocols, settings.blacklist_sources);
     }
@@ -209,7 +209,7 @@ export class AdminCheckerComponent implements OnInit{
   }
 
   onSubmit() {
-    this.settingsService.saveSettings(this.settingsForm.value).subscribe({
+    this.settingsService.saveGlobalSettings(this.settingsForm.value).subscribe({
       next: (resp) => {
         SnackbarService.openSnackbar(resp.message, 3000)
       },

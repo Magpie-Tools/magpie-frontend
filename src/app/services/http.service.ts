@@ -47,6 +47,7 @@ export class HttpService {
     return this.http.get<number>(this.apiUrl + '/getProxyCount', this.httpOptions);
   }
 
+
   saveGlobalSettings(payload: GlobalSettings) {
     return this.http.post(environment.apiUrl + "/saveSettings", payload, this.httpOptions)
   }
@@ -57,6 +58,10 @@ export class HttpService {
 
   getUserSettings() {
     return this.http.get<UserSettings>(this.apiUrl + '/user/settings', this.httpOptions);
+  }
+
+  saveUserSettings(payload: UserSettings) {
+    return this.http.post(environment.apiUrl + "/user/settings", payload, this.httpOptions)
   }
 
   getUserRole() {

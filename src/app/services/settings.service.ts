@@ -3,12 +3,14 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GlobalSettings } from '../models/GlobalSettings';
 import { HttpService } from './http.service';
+import {UserSettings} from '../models/UserSettings';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SettingsService {
   private settings: GlobalSettings | undefined;
+  private userSettings: UserSettings | undefined;
   private settingsSubject = new BehaviorSubject<GlobalSettings | undefined>(undefined);
   public settings$ = this.settingsSubject.asObservable();
 
@@ -17,16 +19,21 @@ export class SettingsService {
   }
 
   loadSettings(): void {
+    this.http.getUserSettings().subscribe(res => {
+      this.userSettings = res
+    })
     this.http.getGlobalSettings().subscribe(res => {
       this.settings = res;
-
-      console.log(res);
       this.settingsSubject.next(this.settings);
     });
   }
 
-  getSettings(): GlobalSettings | undefined {
+  getGlobalSettings(): GlobalSettings | undefined {
     return this.settings;
+  }
+
+  getUserSettings(): UserSettings | undefined {
+    return this.userSettings;
   }
 
   getCheckerSettings(): Observable<GlobalSettings['checker']> {
@@ -59,12 +66,29 @@ export class SettingsService {
     return this.settings?.blacklist_sources;
   }
 
-  saveSettings(formData: any): Observable<any> {
-    const payload = this.transformSettings(formData);
+  saveUserSettings(formData: any): Observable<any> {
+    const payload = this.transformUserSettings(formData);
+    return this.http.saveUserSettings(payload);
+  }
+
+  private transformUserSettings(formData: any): UserSettings {
+    return {
+      http_protocol: formData.HTTPProtocol,
+      https_protocol: formData.HTTPSProtocol,
+      socks4_protocol: formData.SOCKS4Protocol,
+      socks5_protocol: formData.SOCKS5Protocol,
+      timeout: formData.Timeout,
+      retries: formData.Retries,
+      UseHttpsForSocks: formData.UseHttpsForSocks
+    };
+  }
+
+  saveGlobalSettings(formData: any): Observable<any> {
+    const payload = this.transformGlobalSettings(formData);
     return this.http.saveGlobalSettings(payload);
   }
 
-  private transformSettings(formData: any): GlobalSettings {
+  private transformGlobalSettings(formData: any): GlobalSettings {
     const protocols: GlobalSettings["protocols"] = {
       http: formData.protocols.http,
       https: formData.protocols.https,
