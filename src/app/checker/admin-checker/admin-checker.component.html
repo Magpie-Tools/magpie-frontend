@@ -1,6 +1,6 @@
 <h2 class="titleHeader">
   <mat-icon svgIcon="computing"></mat-icon>
-  <div>Global Checker</div>
+  <div>Global Checker Settings</div>
 </h2>
 
 <div class="content-container">
@@ -111,8 +111,8 @@
         <mat-divider></mat-divider>
 
         <div formArrayName="judges">
-          <label>Judge URLs and Regex</label>
-          <div *ngFor="let judge of judges.controls; let i = index" [formGroupName]="i" class="judge-row">
+          <h4 class="text-center subText">Default Judge URLs and Regex</h4>
+          <div *ngFor="let judge of judges.controls; let i = index" [formGroupName]="i">
             <div class="form-row">
               <div class="form-group">
                 <label for="judge-url-{{i}}">URL</label>
@@ -149,7 +149,7 @@
         <div class="section-container">
           <h4 class="section-title">Standard Headers</h4>
           <div formArrayName="standard_header">
-            <div *ngFor="let header of standardHeaders.controls; let i = index" class="header-row">
+            <div *ngFor="let header of standardHeaders.controls; let i = index">
               <div class="form-row">
                 <div class="form-group flex-grow-1">
                   <input [formControlName]="i" type="text" class="w-100" />
@@ -172,7 +172,7 @@
         <div class="section-container">
           <h4 class="section-title">Proxy Headers</h4>
           <div formArrayName="proxy_header">
-            <div *ngFor="let header of proxyHeaders.controls; let i = index" class="header-row">
+            <div *ngFor="let header of proxyHeaders.controls; let i = index">
               <div class="form-row">
                 <div class="form-group flex-grow-1">
                   <input [formControlName]="i" type="text" class="w-100" />
@@ -194,8 +194,8 @@
       <!-- Blacklist Tab -->
       <mat-tab label="Blacklist">
         <div formArrayName="blacklisted">
-          <label>Blacklisted URLs</label>
-          <div *ngFor="let url of blacklisted.controls; let i = index" class="blacklist-row">
+          <h4 class="text-center subText">Blacklisted URLs</h4>
+          <div *ngFor="let url of blacklisted.controls; let i = index">
             <div class="form-row">
               <div class="form-group flex-grow-1">
                 <input [formControlName]="i" type="text" class="w-100" />

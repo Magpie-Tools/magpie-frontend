@@ -150,16 +150,6 @@ mat-divider {
   color: #ff5252;
 }
 
-.judge-row, .blacklist-row, .header-row {
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid $border-color;
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
 /* Override mat-tab styles */
 ::ng-deep {
   .mat-mdc-tab-header {
