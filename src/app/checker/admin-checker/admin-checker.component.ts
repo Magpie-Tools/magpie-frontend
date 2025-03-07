@@ -16,20 +16,20 @@ import {SnackbarService} from '../../services/snackbar.service';
 @Component({
   selector: 'app-admin-checker',
   standalone: true,
-    imports: [
-        CheckboxComponent,
-        FormsModule,
-        MatDivider,
-        MatFormField,
-        MatIcon,
-        MatOption,
-        MatSelect,
-        MatTab,
-        MatTabGroup,
-        NgForOf,
-        ReactiveFormsModule,
-        TooltipComponent
-    ],
+  imports: [
+    CheckboxComponent,
+    FormsModule,
+    MatDivider,
+    MatFormField,
+    MatIcon,
+    MatOption,
+    MatSelect,
+    MatTab,
+    MatTabGroup,
+    NgForOf,
+    ReactiveFormsModule,
+    TooltipComponent
+  ],
   templateUrl: './admin-checker.component.html',
   styleUrl: './admin-checker.component.scss'
 })
@@ -114,6 +114,7 @@ export class AdminCheckerComponent implements OnInit{
       iplookup: checkerSettings.ip_lookup,
       judges_threads: checkerSettings.judges_threads,
       judges_timeout: checkerSettings.judges_timeout,
+      use_https_for_socks: checkerSettings.use_https_for_socks
     });
 
     // Update judge timer if exists
@@ -140,18 +141,17 @@ export class AdminCheckerComponent implements OnInit{
 
   private updateProtocolsAndBlacklist(protocols: any, blacklist: string[]): void {
     if (protocols) {
-      // Check if protocols is an array, if not, handle appropriately
-      const protocolsArray = Array.isArray(protocols) ? protocols :
-        (typeof protocols === 'string' ? [protocols] :
-          (protocols && typeof protocols === 'object' ? Object.keys(protocols) : []));
+      // Check if protocols is an object with boolean values
+      if (protocols && typeof protocols === 'object') {
+        const protocolsGroup = this.settingsForm.get('protocols') as FormGroup;
 
-      const portsGroup = this.settingsForm.get('protocols') as FormGroup;
-      portsGroup.patchValue({
-        http: protocolsArray.includes('http'),
-        https: protocolsArray.includes('https'),
-        socks4: protocolsArray.includes('socks4'),
-        socks5: protocolsArray.includes('socks5')
-      });
+        // Set checkboxes based on protocol values
+        Object.keys(protocols).forEach(protocol => {
+          if (protocolsGroup.contains(protocol)) {
+            protocolsGroup.get(protocol)?.setValue(!!protocols[protocol]);
+          }
+        });
+      }
     }
 
     // Update blacklist

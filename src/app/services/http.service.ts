@@ -5,6 +5,7 @@ import {User} from '../models/userModel';
 import {jwtToken} from '../models/jwtToken';
 import {ProxyInfo} from '../models/ProxyInfo';
 import {GlobalSettings} from '../models/GlobalSettings';
+import {UserSettings} from '../models/UserSettings';
 
 @Injectable({
   providedIn: 'root'
@@ -55,7 +56,7 @@ export class HttpService {
   }
 
   getUserSettings() {
-    return this.http.get<GlobalSettings>(this.apiUrl + '/user/settings', this.httpOptions);
+    return this.http.get<UserSettings>(this.apiUrl + '/user/settings', this.httpOptions);
   }
 
   getUserRole() {

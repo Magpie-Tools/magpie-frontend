@@ -71,9 +71,6 @@ export class SettingsService {
       socks4: formData.protocols.socks4,
       socks5: formData.protocols.socks5
     };
-    // if (formData.protocols.https) protocols.push('https');
-    // if (formData.protocols.socks4) protocols.push('socks4');
-    // if (formData.protocols.socks5) protocols.push('socks5');
 
     return {
       protocols: protocols,
