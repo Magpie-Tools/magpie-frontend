@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {CheckboxComponent} from "../../checkbox/checkbox.component";
 import {FormsModule} from "@angular/forms";
 import {MatIcon} from "@angular/material/icon";
@@ -22,7 +22,7 @@ import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.compone
   styleUrl: './add-proxies.component.scss'
 })
 export class AddProxiesComponent {
-  constructor(private service: HttpService) { }
+  @Output() showAddProxiesMessage = new EventEmitter<boolean>();
 
   file: File | undefined;
   ProxyTextarea: string = "";
@@ -43,6 +43,8 @@ export class AddProxiesComponent {
   showPopup = false;
   popupStatus: 'processing' | 'success' | 'error' = 'processing';
   addedProxyCount = 0;
+
+  constructor(private service: HttpService) { }
 
   async pasteFromClipboard(): Promise<void> {
     try {
@@ -158,6 +160,7 @@ export class AddProxiesComponent {
           this.onFileClear();
           this.clearClipboardProxies();
           this.addTextAreaProxies();
+          this.showAddProxiesMessage.emit(false);
         },
         error: () => {
           this.popupStatus = 'error';
