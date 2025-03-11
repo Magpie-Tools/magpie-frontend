@@ -4,6 +4,7 @@ import { map } from 'rxjs/operators';
 import { GlobalSettings } from '../models/GlobalSettings';
 import { HttpService } from './http.service';
 import {UserSettings} from '../models/UserSettings';
+import {UserService} from './authorization/user.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,10 +23,14 @@ export class SettingsService {
     this.http.getUserSettings().subscribe(res => {
       this.userSettings = res
     })
-    this.http.getGlobalSettings().subscribe(res => {
-      this.settings = res;
-      this.settingsSubject.next(this.settings);
-    });
+
+    if (UserService.isAdmin()) {
+      this.http.getGlobalSettings().subscribe(res => {
+        this.settings = res;
+        this.settingsSubject.next(this.settings);
+      });
+    }
+
   }
 
   getGlobalSettings(): GlobalSettings | undefined {

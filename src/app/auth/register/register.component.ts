@@ -28,7 +28,7 @@ import {SnackbarService} from '../../services/snackbar.service';
 export class RegisterComponent {
   registerForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private http: HttpService, private router: Router) {
+  constructor(private fb: FormBuilder, private http: HttpService, private router: Router, private user: UserService) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
@@ -52,6 +52,7 @@ export class RegisterComponent {
         next: (response) => {
           this.http.setJWTToken(response.token)
           UserService.setLoggedIn(true)
+          this.user.getAndSetRole()
           SnackbarService.openSnackbar("Registration successful", 3000)
           this.router.navigate(['/']);
         },

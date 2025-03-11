@@ -9,7 +9,13 @@ export class UserService {
   private static role = 'user';
 
   constructor(private http: HttpService) {
-    http.getUserRole().subscribe(res => {UserService.role = res;})
+    if (UserService.isAuthenticated) {
+      this.getAndSetRole()
+    }
+  }
+
+  public getAndSetRole() {
+    this.http.getUserRole().subscribe(res => {UserService.role = res;})
   }
 
   public static isLoggedIn() {
