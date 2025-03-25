@@ -45,6 +45,31 @@
           </div>
         </div>
       </mat-tab>
+
+      <!-- Judges Tab -->
+      <mat-tab label="Judges">
+        <div formArrayName="judges">
+          <h4 class="text-center subText">Default Judge URLs and Regex</h4>
+          <div *ngFor="let judge of judgesFormArray.controls; let i = index" [formGroupName]="i">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="judge-url-{{i}}">URL</label>
+                <input id="judge-url-{{i}}" formControlName="url" type="text" />
+              </div>
+              <div class="form-group">
+                <label for="judge-regex-{{i}}">Regex</label>
+                <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
+              </div>
+              <button type="button" class="btn-remove" (click)="removeJudge(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <button type="button" class="btn-add" (click)="addJudge()">
+            <mat-icon>add</mat-icon> Add Judge
+          </button>
+        </div>
+      </mat-tab>
     </mat-tab-group>
   </form>
 </div>

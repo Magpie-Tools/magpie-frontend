@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, FormArray, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatIcon} from '@angular/material/icon';
 import { UserSettings } from '../models/UserSettings';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
@@ -7,6 +7,7 @@ import {MatDivider} from '@angular/material/divider';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {SettingsService} from '../services/settings.service';
 import {SnackbarService} from '../services/snackbar.service';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'app-checker',
@@ -18,7 +19,8 @@ import {SnackbarService} from '../services/snackbar.service';
     CheckboxComponent,
     MatDivider,
     MatTab,
-    MatTabGroup
+    MatTabGroup,
+    CommonModule
   ],
   templateUrl: './checker.component.html',
   styleUrl: './checker.component.scss'
@@ -34,6 +36,10 @@ export class CheckerComponent implements OnInit {
     this.updateFormWithUserSettings(this.settingsService.getUserSettings())
   }
 
+  get judgesFormArray(): FormArray {
+    return this.settingsForm.get('judges') as FormArray;
+  }
+
   private createDefaultForm(): FormGroup {
     return this.fb.group({
       HTTPProtocol: [false],
@@ -42,8 +48,24 @@ export class CheckerComponent implements OnInit {
       SOCKS5Protocol: [false],
       Timeout: [7500],
       Retries: [2],
-      UseHttpsForSocks: [true]
+      UseHttpsForSocks: [true],
+      judges: this.fb.array([])
     });
+  }
+
+  private createJudgeFormGroup(url: string = '', regex: string = ''): FormGroup {
+    return this.fb.group({
+      url: [url],
+      regex: [regex]
+    });
+  }
+
+  addJudge(): void {
+    this.judgesFormArray.push(this.createJudgeFormGroup());
+  }
+
+  removeJudge(index: number): void {
+    this.judgesFormArray.removeAt(index);
   }
 
   private updateFormWithUserSettings(settings: UserSettings | undefined): void {
@@ -57,11 +79,36 @@ export class CheckerComponent implements OnInit {
         Retries: settings.retries,
         UseHttpsForSocks: settings.UseHttpsForSocks
       });
+
+      // Clear existing judges form array
+      while (this.judgesFormArray.length !== 0) {
+        this.judgesFormArray.removeAt(0);
+      }
+
+      // Add judges from settings
+      if (settings.judges && settings.judges.length > 0) {
+        settings.judges.forEach(judge => {
+          this.judgesFormArray.push(this.createJudgeFormGroup(judge.url, judge.regex));
+        });
+      }
     }
   }
 
   onSubmit() {
-    this.settingsService.saveUserSettings(this.settingsForm.value).subscribe({
+    // Prepare the settings object from form values
+    const formValues = this.settingsForm.value;
+    const settings: UserSettings = {
+      http_protocol: formValues.HTTPProtocol,
+      https_protocol: formValues.HTTPSProtocol,
+      socks4_protocol: formValues.SOCKS4Protocol,
+      socks5_protocol: formValues.SOCKS5Protocol,
+      timeout: formValues.Timeout,
+      retries: formValues.Retries,
+      UseHttpsForSocks: formValues.UseHttpsForSocks,
+      judges: formValues.judges
+    };
+
+    this.settingsService.saveUserSettings(settings).subscribe({
       next: (resp) => {
         SnackbarService.openSnackbar(resp.message, 3000)
       },

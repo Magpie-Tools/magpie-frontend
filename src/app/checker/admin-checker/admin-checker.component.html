@@ -130,11 +130,9 @@
                 <label for="judge-regex-{{i}}">Regex</label>
                 <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
               </div>
-              @if (judges.length > 1) {
-                <button type="button" class="btn-remove" (click)="removeJudge(i)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              }
+              <button type="button" class="btn-remove" (click)="removeJudge(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
             </div>
           </div>
           <button type="button" class="btn-add" (click)="addJudge()">

@@ -6,4 +6,9 @@ export interface UserSettings {
   timeout:          number
   retries:          number
   UseHttpsForSocks: boolean
+
+  judges: [{
+    url: string
+    regex: string
+  }]
 }

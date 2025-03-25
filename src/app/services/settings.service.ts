@@ -84,7 +84,8 @@ export class SettingsService {
       socks5_protocol: formData.SOCKS5Protocol,
       timeout: formData.Timeout,
       retries: formData.Retries,
-      UseHttpsForSocks: formData.UseHttpsForSocks
+      UseHttpsForSocks: formData.UseHttpsForSocks,
+      judges: formData.Judges
     };
   }
 
