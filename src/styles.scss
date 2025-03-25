@@ -44,6 +44,12 @@ mat-icon {
   height: 30px !important;
 }
 
+mat-icon.reset {
+  margin-left: initial !important;
+  margin-right: initial !important;
+  height: initial !important;
+}
+
 .custom-tooltip {
   white-space: pre-line !important;
   background-color: #2d2d2d;

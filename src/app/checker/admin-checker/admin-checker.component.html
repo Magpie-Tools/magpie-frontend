@@ -131,14 +131,14 @@
                 <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
               </div>
               @if (judges.length > 1) {
-                <button type="button" class="btn-remove" (click)="removeJudge(i)">
-                  <mat-icon>delete</mat-icon>
+                <button type="button" class="btn-remove mt-4" (click)="removeJudge(i)">
+                  <mat-icon class="reset">delete</mat-icon>
                 </button>
               }
             </div>
           </div>
           <button type="button" class="btn-add" (click)="addJudge()">
-            <mat-icon>add</mat-icon> Add Judge
+            <mat-icon class="reset">add</mat-icon> Add Judge
           </button>
         </div>
       </mat-tab>
