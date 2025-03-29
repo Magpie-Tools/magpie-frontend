@@ -2,21 +2,7 @@ $logo-color: #348566;
 $text-color: rgb(171, 171, 171);
 
 @use '@angular/material' as mat;
-
-$frontend-theme: mat.define-theme((
-  color: (
-    theme-type: dark,
-    primary: mat.$azure-palette,
-    tertiary: mat.$blue-palette,
-  ),
-  density: (
-    scale: 0,
-  )
-));
-
-:root {
-  @include mat.all-component-themes($frontend-theme);
-}
+@include mat.core();
 
 @import 'bootstrap/scss/bootstrap';
 
@@ -92,14 +78,39 @@ mat-tab-body .mat-mdc-tab-body-content {
   ));
 }
 
-.mat-mdc-tab .mdc-tab__text-label {
-  color: $text-color !important;
+.mat-tab-group {
+  background: transparent;
+  border: 1px solid rgba(171, 171, 171, 0.2);
+  border-radius: 6px;
 }
 
-.mat-mdc-tab-group, .mat-mdc-tab-nav-bar {
-  --mdc-tab-indicator-active-indicator-color: $logo-color !important;
-}
+.mat-tab-header {
+  border-bottom: 1px solid rgba(171, 171, 171, 0.2);
 
+  .mat-tab-labels {
+    justify-content: flex-start;
+  }
+
+  .mat-tab-label {
+    color: $text-color;
+    text-transform: none;
+    font-weight: 500;
+    padding: 12px 20px;
+
+    &:hover {
+      color: $logo-color;
+    }
+
+    &.mat-tab-label-active {
+      color: $logo-color;
+    }
+  }
+
+  .mat-ink-bar {
+    background-color: $logo-color;
+    height: 3px;
+  }
+}
 
 .content-container {
   max-width: 800px;
@@ -146,7 +157,6 @@ mat-tab-body .mat-mdc-tab-body-content {
 }
 
 button {
-  padding: 10px 20px;
   background-color: #171717;
   color: #F8F8F2;
   border: 1px solid #348566;
@@ -166,6 +176,10 @@ button {
     box-shadow: none; /* Removes shadow for a flatter look */
     opacity: 0.7; /* Adds a slight transparency */
   }
+}
+
+.button-padding {
+  padding: 10px 20px;
 }
 
 button:active {
