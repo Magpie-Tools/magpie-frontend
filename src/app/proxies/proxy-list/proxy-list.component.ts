@@ -46,7 +46,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
 
   dataSource = new MatTableDataSource<ProxyInfo>([]);
   page = 1;
-  displayedColumns: string[] = ['alive', 'ip', 'response_time', 'estimated_type', 'country', 'protocol', 'latest_check'];
+  displayedColumns: string[] = ['alive', 'ip', 'port', 'response_time', 'estimated_type', 'country', 'protocol', 'latest_check'];
   totalItems = 0;
   hasLoaded = false;
 

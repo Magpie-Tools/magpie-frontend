@@ -1,5 +1,6 @@
 export interface ProxyInfo {
   "ip": string;
+  "port": number;
   "estimated_type": string;
   "response_time": number;
   "country": string;

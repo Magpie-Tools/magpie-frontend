@@ -16,6 +16,12 @@
         <mat-cell *matCellDef="let proxy">{{ proxy.ip }}</mat-cell>
       </ng-container>
 
+      <!-- Port Column -->
+      <ng-container matColumnDef="port">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>Port</mat-header-cell>
+        <mat-cell *matCellDef="let proxy">{{ proxy.port }}</mat-cell>
+      </ng-container>
+
       <!-- Response Time Column -->
       <ng-container matColumnDef="response_time">
         <mat-header-cell *matHeaderCellDef mat-sort-header>Response Time</mat-header-cell>
