@@ -6,27 +6,7 @@ $personColor: #ffffff;
 
 .form-row {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
   align-items: center;
-
-  .form-group {
-    flex: 1;
-
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 4px;
-      background-color: $navbar-background;
-      color: $personColor;
-      border: 1px solid $border-color;
-
-      &:focus {
-        outline: none;
-        border-color: $logo-color;
-      }
-    }
-  }
 }
 
 mat-divider {
@@ -54,9 +34,6 @@ mat-divider {
   display: flex;
   align-items: center;
   gap: 5px;
-  background-color: $navbar-background;
-  border: 1px solid $border-color;
-  color: $text-color;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
