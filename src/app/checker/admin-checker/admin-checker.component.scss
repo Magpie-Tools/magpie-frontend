@@ -83,38 +83,6 @@ mat-divider {
   color: #ff5252;
 }
 
-/* Override mat-tab styles */
-::ng-deep {
-  .mat-mdc-tab-header {
-    border-bottom: 1px solid $border-color;
-    margin-bottom: 1.5rem;
-  }
-
-  .mat-mdc-tab-header h3 {
-    margin-bottom: 0;
-  }
-
-  .mat-mdc-tab-labels {
-    background-color: $navbar-background;
-  }
-
-  .mat-mdc-tab {
-    color: $text-color !important;
-
-    &.mat-mdc-tab-active {
-      color: $logo-color !important;
-    }
-  }
-
-  .mat-mdc-form-field-appearance-outline .mat-mdc-form-field-outline {
-    color: $border-color;
-  }
-
-  .mat-mdc-select-value {
-    color: $personColor;
-  }
-}
-
 .flex-grow-1 {
   flex-grow: 1;
 }

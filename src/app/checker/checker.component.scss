@@ -1,40 +1,5 @@
-$logo-color: #348566;
-$navbar-background: #171717;
-$text-color: rgb(171, 171, 171);
-$border-color: rgba(255, 255, 255, 0.2);
-$personColor: #ffffff;
-
-
 mat-divider {
   margin-top: 2rem;
   margin-bottom: 2rem;
   border-color: rgb(255,255,255,0.2);
-}
-
-/* Override mat-tab styles */
-::ng-deep {
-  .mat-mdc-tab-header {
-    border-bottom: 1px solid $border-color;
-    margin-bottom: 1.5rem;
-  }
-
-  .mat-mdc-tab-labels {
-    background-color: $navbar-background;
-  }
-
-  .mat-mdc-tab {
-    color: $text-color !important;
-
-    &.mat-mdc-tab-active {
-      color: $logo-color !important;
-    }
-  }
-
-  .mat-mdc-form-field-appearance-outline .mat-mdc-form-field-outline {
-    color: $border-color;
-  }
-
-  .mat-mdc-select-value {
-    color: $personColor;
-  }
 }

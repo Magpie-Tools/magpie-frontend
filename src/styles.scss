@@ -14,8 +14,16 @@ $border-color: rgba(255, 255, 255, 0.2);
     inactive-ripple-color: #b3b3b3,
     active-ripple-color: #b3b3b3,
     label-text-weight: 550,
-    container-height: 45px
+    container-height: 45px,
+    active-label-text-color: rgb(171, 171, 171),
+    inactive-label-text-color: rgb(171, 171, 171),
   ));
+  @include mat.table-overrides((
+    row-item-outline-color: #d8d8d8,
+    header-headline-color: #d8d8d8,
+    row-item-label-text-color: #d8d8d8,
+  ));
+
   --mdc-outlined-text-field-outline-color: #b8b8b8; // Input border
   --mdc-outlined-text-field-label-text-color: #ededed; //Input label color
 }
@@ -266,4 +274,12 @@ button:active {
     border: #158566 solid 1px;
     border-radius: 10px;
   }
+}
+
+.mat-mdc-tab-header {
+  margin-bottom: 1.5rem;
+}
+
+.mat-mdc-tab-header h3 {
+  margin-bottom: 0;
 }
