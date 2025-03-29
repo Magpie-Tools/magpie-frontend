@@ -54,11 +54,11 @@ mat-form-field {
   width: 100%;
 }
 
-button {
+button[mat-raised-button]  {
   width: 100%;
   margin-top: 20px;
-  background: #00ff80;
-  color: #000;
+  height: 3rem;
+  border-radius: 50px;
 }
 
 .switch-link {
@@ -69,4 +69,12 @@ button {
 a {
   color: #00ff80;
   text-decoration: none;
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-floating-label {
+  color: #ffffff !important;
+}
+
+.mdc-text-field--outlined .mat-mdc-notch-piece {
+  border-color: #ffffff !important;
 }
