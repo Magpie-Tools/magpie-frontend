@@ -19,9 +19,12 @@ $border-color: rgba(255, 255, 255, 0.2);
     inactive-label-text-color: rgb(171, 171, 171),
   ));
   @include mat.table-overrides((
-    row-item-outline-color: #d8d8d8,
-    header-headline-color: #d8d8d8,
-    row-item-label-text-color: #d8d8d8,
+    row-item-outline-color: #e8e8e8,
+    header-headline-color: #e8e8e8,
+    row-item-label-text-color: #e8e8e8,
+  ));
+  @include mat.select-overrides((
+    panel-background-color: #202020,
   ));
 
   --mdc-outlined-text-field-outline-color: #b8b8b8; // Input border
