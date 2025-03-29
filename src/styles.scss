@@ -26,6 +26,11 @@ $border-color: rgba(255, 255, 255, 0.2);
   @include mat.select-overrides((
     panel-background-color: #202020,
   ));
+  @include mat.snack-bar-overrides((
+    container-shape: 10px,
+    container-color: #5e5e5e,
+    supporting-text-color: #e8e8e8,
+  ));
 
   --mdc-outlined-text-field-outline-color: #b8b8b8; // Input border
   --mdc-outlined-text-field-label-text-color: #ededed; //Input label color

@@ -2,7 +2,32 @@
   <app-loading class="toggle-container d-flex align-items-center justify-content-center mt-5"></app-loading>
 } @else {
   <div class="proxy-container">
-    <mat-table [dataSource]="this.dataSource" matSort class="proxy-table">
+    <!-- Delete Button -->
+    <div class="actions" style="margin-bottom: 1rem;">
+      <button mat-raised-button color="warn" (click)="deleteSelectedProxies()"
+              [disabled]="!selection.hasValue()">
+        Delete Selected
+      </button>
+    </div>
+
+    <mat-table [dataSource]="dataSource" matSort class="proxy-table">
+      <!-- Selection Column -->
+      <ng-container matColumnDef="select">
+        <mat-header-cell *matHeaderCellDef>
+          <mat-checkbox (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let proxy">
+          <mat-checkbox (click)="$event.stopPropagation()"
+                        (change)="$event ? toggleSelection(proxy) : null"
+                        [checked]="selection.isSelected(proxy)">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Status Column -->
       <ng-container matColumnDef="alive">
         <mat-header-cell *matHeaderCellDef mat-sort-header start>Status</mat-header-cell>
         <mat-cell *matCellDef="let proxy">
@@ -28,7 +53,7 @@
         <mat-cell *matCellDef="let proxy">{{ proxy.response_time }} ms</mat-cell>
       </ng-container>
 
-      <!-- Estimated Type -->
+      <!-- Estimated Type Column -->
       <ng-container matColumnDef="estimated_type">
         <mat-header-cell *matHeaderCellDef mat-sort-header>Estimated Type</mat-header-cell>
         <mat-cell *matCellDef="let proxy">{{ proxy.estimated_type }}</mat-cell>
@@ -53,15 +78,14 @@
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="toggleSelection(row)"></mat-row>
     </mat-table>
 
-    <mat-paginator [length]="this.totalItems"
+    <mat-paginator [length]="totalItems"
                    [pageSize]="40"
-                   [pageIndex]="this.page - 1"
-                   (page)="this.onPageChange($event)"
+                   [pageIndex]="page - 1"
+                   (page)="onPageChange($event)"
                    class="custom-paginator">
     </mat-paginator>
   </div>
 }
-

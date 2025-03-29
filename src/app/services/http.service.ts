@@ -39,6 +39,14 @@ export class HttpService {
     return this.http.post<{proxyCount: number}>(this.apiUrl + '/addProxies', formData, this.httpOptions);
   }
 
+  deleteProxies(proxies: number[]) {
+    return this.http.request<string>('delete', this.apiUrl + '/proxies', {
+      body: proxies,
+      ...this.httpOptions
+    });
+  }
+
+
   getProxyPage(pageNumber: number) {
     return this.http.get<ProxyInfo[]>(this.apiUrl + '/getProxyPage/' + pageNumber, this.httpOptions);
   }
