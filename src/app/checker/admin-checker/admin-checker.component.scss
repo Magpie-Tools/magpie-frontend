@@ -37,6 +37,7 @@ mat-divider {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
+  margin: 0 auto;
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.05);
@@ -58,6 +59,7 @@ mat-divider {
 .btn-remove {
   padding: 0.3rem;
   color: #ff5252;
+  border-color: #ff5252;
 }
 
 .flex-grow-1 {
