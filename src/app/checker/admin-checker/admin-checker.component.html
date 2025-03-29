@@ -164,13 +164,13 @@
                 </div>
                 @if (standardHeaders.length > 1) {
                   <button type="button" class="btn-remove" (click)="removeStandardHeader(i)">
-                    <mat-icon>delete</mat-icon>
+                    <mat-icon class="reset">delete</mat-icon>
                   </button>
                 }
               </div>
             </div>
             <button type="button" class="btn-add" (click)="addStandardHeader()">
-              <mat-icon>add</mat-icon> Add Standard Header
+              <mat-icon class="reset">add</mat-icon> Add Standard Header
             </button>
           </div>
         </div>
@@ -209,12 +209,12 @@
                 <input [formControlName]="i" type="text" class="w-100" />
               </div>
               <button type="button" class="btn-remove" (click)="removeBlacklistedUrl(i)">
-                <mat-icon>delete</mat-icon>
+                <mat-icon class="reset">delete</mat-icon>
               </button>
             </div>
           </div>
           <button type="button" class="btn-add" (click)="addBlacklistedUrl()">
-            <mat-icon>add</mat-icon> Add Blacklist URL
+            <mat-icon class="reset">add</mat-icon> Add Blacklist URL
           </button>
         </div>
       </mat-tab>

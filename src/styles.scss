@@ -4,6 +4,17 @@ $text-color: rgb(171, 171, 171);
 @use '@angular/material' as mat;
 @include mat.core();
 
+
+:root {
+  @include mat.tabs-overrides((
+    active-indicator-color: #ffffff,
+    inactive-ripple-color: #b3b3b3,
+    active-ripple-color: #b3b3b3,
+    label-text-weight: 550,
+    container-height: 45px
+  ));
+}
+
 @import 'bootstrap/scss/bootstrap';
 
 // Override Bootstrap's heading sizes
@@ -82,34 +93,6 @@ mat-tab-body .mat-mdc-tab-body-content {
   background: transparent;
   border: 1px solid rgba(171, 171, 171, 0.2);
   border-radius: 6px;
-}
-
-.mat-tab-header {
-  border-bottom: 1px solid rgba(171, 171, 171, 0.2);
-
-  .mat-tab-labels {
-    justify-content: flex-start;
-  }
-
-  .mat-tab-label {
-    color: $text-color;
-    text-transform: none;
-    font-weight: 500;
-    padding: 12px 20px;
-
-    &:hover {
-      color: $logo-color;
-    }
-
-    &.mat-tab-label-active {
-      color: $logo-color;
-    }
-  }
-
-  .mat-ink-bar {
-    background-color: $logo-color;
-    height: 3px;
-  }
 }
 
 .content-container {
@@ -193,4 +176,12 @@ button:active {
 
 .maxWidth-200 {
   max-width: 200px;
+}
+
+.mat-mdc-tab-group {
+  .mat-mdc-tab-header {
+    .mat-mdc-tab-label-container {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  }
 }
