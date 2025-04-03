@@ -7,6 +7,7 @@ import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import {MatInput} from '@angular/material/input';
 import {NgForOf, NgIf} from '@angular/common';
 import {CheckboxComponent} from '../../../checkbox/checkbox.component';
+import {MatDivider} from '@angular/material/divider';
 
 @Component({
   selector: 'app-export-proxies-dialog',
@@ -26,7 +27,8 @@ import {CheckboxComponent} from '../../../checkbox/checkbox.component';
     NgForOf,
     MatLabel,
     ReactiveFormsModule,
-    CheckboxComponent
+    CheckboxComponent,
+    MatDivider
   ],
   standalone: true
 })
@@ -39,7 +41,7 @@ export class ExportProxiesDialogComponent {
 
   constructor(private fb: FormBuilder, public dialogRef: MatDialogRef<ExportProxiesDialogComponent>) {
     this.exportForm = this.fb.group({
-      output: ['protocol://ip:port', [Validators.required]],
+      output: ['protocol://ip:port;username;password', [Validators.required]],
       filter: [false, []]
     });
   }
