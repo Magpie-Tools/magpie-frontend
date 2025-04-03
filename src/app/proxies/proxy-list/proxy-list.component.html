@@ -8,6 +8,11 @@
               [disabled]="!selection.hasValue()">
         Delete Selected
       </button>
+
+      <button mat-raised-button color="primary" (click)="openExportDialog()"
+              [disabled]="!dataSource.data.length" style="margin-left: 1rem;">
+        Export Proxies
+      </button>
     </div>
 
     <mat-table [dataSource]="dataSource" matSort class="proxy-table">

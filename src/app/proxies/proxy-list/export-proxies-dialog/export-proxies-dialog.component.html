@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>Export Proxies</h2>
+<mat-dialog-content>
+  <mat-radio-group [(ngModel)]="exportOption">
+    <div class="row">
+      <div class="col text-center">
+        <mat-radio-button value="all">All Proxies</mat-radio-button>
+      </div>
+      <div class="col text-center">
+        <mat-radio-button value="selected">Selected Proxies</mat-radio-button>
+      </div>
+    </div>
+  </mat-radio-group>
+
+
+
+  <form [formGroup]="exportForm">
+    <div class="d-flex align-items-center justify-content-center mt-4">
+      <app-checkbox label="Filter Proxies" formControlName="filter"></app-checkbox>
+    </div>
+
+    @if (this.exportForm.value.filter) {
+
+    }
+
+
+    <div style="margin-top: 1rem;">
+      <div style="margin-bottom: 2rem; display: flex; justify-content: center; flex-wrap: wrap;">
+        <button *ngFor="let text of predefinedFilters" mat-raised-button class="m-1"
+                (click)="addToFilter(text)">
+          {{ text }}
+        </button>
+      </div>
+
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Output Format</mat-label>
+          <input matInput formControlName="output" type="text" />
+        </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button color="primary" (click)="onExport()">Export</button>
+</mat-dialog-actions>

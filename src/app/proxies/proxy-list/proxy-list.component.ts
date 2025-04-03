@@ -1,25 +1,30 @@
-import {AfterViewInit, Component, OnInit, Output, ViewChild, EventEmitter} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {HttpService} from '../../services/http.service';
-import {ProxyInfo} from '../../models/ProxyInfo';
-import {MatSort, MatSortModule} from '@angular/material/sort';
-import {MatPaginator, PageEvent} from '@angular/material/paginator';
-import {DatePipe} from '@angular/common';
-import {LoadingComponent} from '../../ui-elements/loading/loading.component';
+import { AfterViewInit, Component, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpService } from '../../services/http.service';
+import { ProxyInfo } from '../../models/ProxyInfo';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { DatePipe } from '@angular/common';
+import { LoadingComponent } from '../../ui-elements/loading/loading.component';
 import { SelectionModel } from '@angular/cdk/collections';
-
 import {
   MatCell,
   MatCellDef,
   MatColumnDef,
   MatHeaderCell,
   MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef,
-  MatTable, MatTableDataSource
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
+  MatTableDataSource
 } from '@angular/material/table';
-import {MatButton} from '@angular/material/button';
-import {MatCheckbox} from '@angular/material/checkbox';
-import {SnackbarService} from '../../services/snackbar.service';
+import { MatButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SnackbarService } from '../../services/snackbar.service';
+import { MatDialog } from '@angular/material/dialog';
+import {ExportProxiesDialogComponent} from './export-proxies-dialog/export-proxies-dialog.component';
 
 @Component({
   selector: 'app-proxy-list',
@@ -45,7 +50,7 @@ import {SnackbarService} from '../../services/snackbar.service';
     MatCheckbox
   ],
   templateUrl: './proxy-list.component.html',
-  styleUrl: './proxy-list.component.scss'
+  styleUrls: ['./proxy-list.component.scss']
 })
 export class ProxyListComponent implements OnInit, AfterViewInit {
   @Output() showAddProxiesMessage = new EventEmitter<boolean>();
@@ -59,7 +64,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
 
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpService) { }
+  constructor(private http: HttpService, private dialog: MatDialog) { }
 
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
@@ -130,11 +135,46 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
     const selectedProxies = this.selection.selected;
     if (selectedProxies.length > 0) {
       this.http.deleteProxies(selectedProxies.map(proxy => proxy.id)).subscribe(res => {
-        SnackbarService.openSnackbar(res, 3000)
-        this.totalItems -= selectedProxies.length
+        SnackbarService.openSnackbar(res, 3000);
+        this.totalItems -= selectedProxies.length;
       });
       this.selection.clear();
       this.getAndSetProxyList();
     }
+  }
+
+  openExportDialog(): void {
+    const dialogRef = this.dialog.open(ExportProxiesDialogComponent, {
+      width: '600px',
+      height: "600px"
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Determine which proxies to export based on the user's choice
+        if (result.option === 'selected') {
+          this.exportProxies(this.selection.selected);
+        } else if (result.option === 'all') {
+          this.exportProxies(this.dataSource.data);
+        } else if (result.option === 'filter') {
+          const filtered = this.dataSource.data.filter(proxy => {
+            // Example filter: check if the proxy's IP address includes the filter criteria
+            return proxy.ip.includes(result.criteria);
+          });
+          this.exportProxies(filtered);
+        }
+      }
+    });
+  }
+
+  exportProxies(proxies: ProxyInfo[]): void {
+    // Call the export function; you can handle the request yourself here.
+    this.handleExportRequest(proxies);
+  }
+
+  handleExportRequest(proxies: ProxyInfo[]): void {
+    // Placeholder function that you can replace with your actual export handling logic.
+    console.log('Exporting proxies:', proxies);
+    // For example, call an export service or trigger a download.
   }
 }

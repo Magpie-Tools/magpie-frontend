@@ -31,7 +31,13 @@ $border-color: rgba(255, 255, 255, 0.2);
     container-color: #5e5e5e,
     supporting-text-color: #e8e8e8,
   ));
-
+  @include mat.dialog-overrides((
+    container-color: #171717,
+    subhead-size: 1.25rem,
+    subhead-weight: bold,
+    subhead-color: rgb(246, 246, 246),
+    supporting-text-color: rgb(229, 229, 229)
+  ));
   --mdc-outlined-text-field-outline-color: #b8b8b8; // Input border
   --mdc-outlined-text-field-label-text-color: #ededed; //Input label color
 }
@@ -47,6 +53,11 @@ $custom-theme: mat.m2-define-dark-theme((
     accent: $custom-accent,
   )
 ));
+
+h2[mat-dialog-title] {
+  margin-bottom: 1rem;        /* Adjust the margin as needed */
+  border-bottom: 1px solid #fff; /* White border */
+}
 
 // Include only the form-field theme styles
 @include mat.form-field-theme($custom-theme);
