@@ -11,18 +11,42 @@
     </div>
   </mat-radio-group>
 
-
-
   <form [formGroup]="exportForm">
     <mat-divider></mat-divider>
 
-    <div class="d-flex align-items-center justify-content-center mt-4">
+    <div class="d-flex align-items-center justify-content-center mt-4 mb-4">
       <app-checkbox label="Filter Proxies" formControlName="filter"></app-checkbox>
     </div>
 
-    @if (this.exportForm.value.filter) {
+    <div *ngIf="exportForm.get('filter')?.value">
+      <div class="row mb-3">
+        <div class="col text-center checkbox-container">
+          <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
+        </div>
+        <div class="col text-center checkbox-container">
+          <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
+        </div>
+        <div class="col text-center checkbox-container">
+          <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
+        </div>
+        <div class="col text-center checkbox-container">
+          <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
+        </div>
+      </div>
 
-    }
+      <div class="row"></div>
+
+      <div class="row mt-4">
+        <mat-form-field appearance="outline" class="col">
+          <mat-label>Max Retries</mat-label>
+          <input id="retries" matInput formControlName="Retries" type="number" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="col">
+          <mat-label>Max Timeout (ms)</mat-label>
+          <input id="timeout" matInput formControlName="Timeout" type="number" />
+        </mat-form-field>
+      </div>
+    </div>
 
     <mat-divider></mat-divider>
 
@@ -34,15 +58,15 @@
         </button>
       </div>
 
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Output Format</mat-label>
-          <input matInput formControlName="output" type="text" />
-        </mat-form-field>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Output Format</mat-label>
+        <input matInput formControlName="output" type="text" />
+      </mat-form-field>
     </div>
   </form>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-button color="primary" (click)="onExport()">Export</button>
+<mat-dialog-actions align="center">
+  <button (click)="onCancel()" class="dialog-cancel">Cancel</button>
+  <button (click)="onExport()" class="dialog-ok">Export</button>
 </mat-dialog-actions>

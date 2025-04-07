@@ -42,8 +42,15 @@ export class ExportProxiesDialogComponent {
   constructor(private fb: FormBuilder, public dialogRef: MatDialogRef<ExportProxiesDialogComponent>) {
     this.exportForm = this.fb.group({
       output: ['protocol://ip:port;username;password', [Validators.required]],
-      filter: [false, []]
+      filter: [false],
+      HTTPProtocol: [false],
+      HTTPSProtocol: [false],
+      SOCKS4Protocol: [false],
+      SOCKS5Protocol: [false],
+      Retries: [3, [Validators.required]],
+      Timeout: [1000, [Validators.required]],
     });
+
   }
 
   onCancel(): void {
