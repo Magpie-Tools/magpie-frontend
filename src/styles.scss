@@ -42,9 +42,47 @@ $border-color: rgba(255, 255, 255, 0.2);
   --mdc-outlined-text-field-label-text-color: #ededed; //Input label color
 }
 
+$dark-primary-text: rgba(black, 0.87);
+$light-primary-text: white;
+$green-palette: (
+  50:  #e3f2ec,
+  100: #b8ddd1,
+  200: #8cc8b5,
+  300: #61b399,
+  400: #4a9d83,
+  500: #348566, // base logo color
+  600: #2e755a,
+  700: #27634d,
+  800: #205241,
+  900: #183e31,
+  A100: #a8f5d5,
+  A200: #5aeab2,
+  A400: #20d998,
+  A700: #0bbf80,
+  contrast: (
+    50:  $dark-primary-text,
+    100: $dark-primary-text,
+    200: $dark-primary-text,
+    300: $light-primary-text,
+    400: $light-primary-text,
+    500: $light-primary-text,
+    600: $light-primary-text,
+    700: $light-primary-text,
+    800: $light-primary-text,
+    900: $light-primary-text,
+    A100: $dark-primary-text,
+    A200: $dark-primary-text,
+    A400: $light-primary-text,
+    A700: $light-primary-text,
+  )
+);
+
+
+
+
 // Define a minimal palette (adjust as needed)
 //$custom-primary: mat.m2-define-palette(mat.$m2-deep-purple-palette);
-$custom-primary: mat.m2-define-palette(mat.$m2-blue-gray-palette);
+$custom-primary: mat.m2-define-palette($green-palette);
 $custom-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200);
 
 $custom-theme: mat.m2-define-dark-theme((
@@ -319,4 +357,8 @@ button:active {
 .mat-mdc-dialog-actions.mat-mdc-dialog-actions-align-center, .mat-mdc-dialog-actions[align="center"] {
   border-top: 2px solid $border-color;
   padding-top: 2rem;
+}
+
+.mat-mdc-option:hover {
+  background-color: #2d2d2d !important;
 }

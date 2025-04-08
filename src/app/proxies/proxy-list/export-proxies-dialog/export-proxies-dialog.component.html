@@ -50,6 +50,16 @@
 
     <mat-divider></mat-divider>
 
+    <!-- New select field for proxy status -->
+    <mat-form-field appearance="outline" class="w-100" style="margin-top: 1rem;">
+      <mat-label>Proxy Status</mat-label>
+      <mat-select formControlName="proxyStatus">
+        <mat-option value="all">All Proxies</mat-option>
+        <mat-option value="alive">Only Alive Proxies</mat-option>
+        <mat-option value="dead">Only Dead Proxies</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <div style="margin-top: 1rem;">
       <div style="margin-bottom: 2rem; display: flex; justify-content: center; flex-wrap: wrap;">
         <button *ngFor="let text of predefinedFilters" mat-raised-button class="m-1"

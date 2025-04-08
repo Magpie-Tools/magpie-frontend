@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
-import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
-import {MatButton} from '@angular/material/button';
-import {MatFormField, MatLabel} from '@angular/material/form-field';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
-import {MatInput} from '@angular/material/input';
-import {NgForOf, NgIf} from '@angular/common';
-import {CheckboxComponent} from '../../../checkbox/checkbox.component';
-import {MatDivider} from '@angular/material/divider';
+import { MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
+import { MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
+import { MatInput } from '@angular/material/input';
+import { NgForOf, NgIf } from '@angular/common';
+import { CheckboxComponent } from '../../../checkbox/checkbox.component';
+import { MatDivider } from '@angular/material/divider';
+import {MatOption} from '@angular/material/core';
+import {MatSelect} from '@angular/material/select';
 
 @Component({
   selector: 'app-export-proxies-dialog',
@@ -28,7 +30,9 @@ import {MatDivider} from '@angular/material/divider';
     MatLabel,
     ReactiveFormsModule,
     CheckboxComponent,
-    MatDivider
+    MatDivider,
+    MatOption,
+    MatSelect
   ],
   standalone: true
 })
@@ -43,14 +47,14 @@ export class ExportProxiesDialogComponent {
     this.exportForm = this.fb.group({
       output: ['protocol://ip:port;username;password', [Validators.required]],
       filter: [false],
-      HTTPProtocol: [false],
-      HTTPSProtocol: [false],
-      SOCKS4Protocol: [false],
-      SOCKS5Protocol: [false],
+      HTTPProtocol: [true],
+      HTTPSProtocol: [true],
+      SOCKS4Protocol: [true],
+      SOCKS5Protocol: [true],
       Retries: [3, [Validators.required]],
       Timeout: [1000, [Validators.required]],
+      proxyStatus: ['all']
     });
-
   }
 
   onCancel(): void {
@@ -58,7 +62,12 @@ export class ExportProxiesDialogComponent {
   }
 
   onExport(): void {
-    this.dialogRef.close({ option: this.exportOption, criteria: this.exportForm.value.output });
+    // Pass the export option and the additional proxyStatus criteria along with the other form values.
+    this.dialogRef.close({
+      option: this.exportOption,
+      criteria: this.exportForm.value.output,
+      proxyStatus: this.exportForm.value.proxyStatus
+    });
   }
 
   addToFilter(text: string): void {
