@@ -10,6 +10,7 @@ import { CheckboxComponent } from '../../../checkbox/checkbox.component';
 import { MatDivider } from '@angular/material/divider';
 import {MatOption} from '@angular/material/core';
 import {MatSelect} from '@angular/material/select';
+import {SettingsService} from '../../../services/settings.service';
 
 @Component({
   selector: 'app-export-proxies-dialog',
@@ -43,16 +44,17 @@ export class ExportProxiesDialogComponent {
 
   exportForm: FormGroup;
 
-  constructor(private fb: FormBuilder, public dialogRef: MatDialogRef<ExportProxiesDialogComponent>) {
+  constructor(private fb: FormBuilder, public dialogRef: MatDialogRef<ExportProxiesDialogComponent>, private settingsService: SettingsService) {
+    let settings = settingsService.getUserSettings()
     this.exportForm = this.fb.group({
       output: ['protocol://ip:port;username;password', [Validators.required]],
       filter: [false],
-      HTTPProtocol: [true],
-      HTTPSProtocol: [true],
-      SOCKS4Protocol: [true],
-      SOCKS5Protocol: [true],
-      Retries: [3, [Validators.required]],
-      Timeout: [1000, [Validators.required]],
+      HTTPProtocol: [settings?.http_protocol],
+      HTTPSProtocol: [settings?.https_protocol],
+      SOCKS4Protocol: [settings?.socks4_protocol],
+      SOCKS5Protocol: [settings?.socks5_protocol],
+      Retries: [settings?.retries, [Validators.required]],
+      Timeout: [settings?.timeout, [Validators.required]],
       proxyStatus: ['all']
     });
   }

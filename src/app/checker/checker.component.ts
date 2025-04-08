@@ -95,20 +95,9 @@ export class CheckerComponent implements OnInit {
   }
 
   onSubmit() {
-    // Prepare the settings object from form values
     const formValues = this.settingsForm.value;
-    const settings: UserSettings = {
-      http_protocol: formValues.HTTPProtocol,
-      https_protocol: formValues.HTTPSProtocol,
-      socks4_protocol: formValues.SOCKS4Protocol,
-      socks5_protocol: formValues.SOCKS5Protocol,
-      timeout: formValues.Timeout,
-      retries: formValues.Retries,
-      UseHttpsForSocks: formValues.UseHttpsForSocks,
-      judges: formValues.judges
-    };
 
-    this.settingsService.saveUserSettings(settings).subscribe({
+    this.settingsService.saveUserSettings(formValues).subscribe({
       next: (resp) => {
         SnackbarService.openSnackbar(resp.message, 3000)
       },

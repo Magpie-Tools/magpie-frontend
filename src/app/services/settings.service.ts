@@ -73,6 +73,7 @@ export class SettingsService {
 
   saveUserSettings(formData: any): Observable<any> {
     const payload = this.transformUserSettings(formData);
+    this.userSettings = payload
     return this.http.saveUserSettings(payload);
   }
 
