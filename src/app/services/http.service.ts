@@ -6,6 +6,7 @@ import {jwtToken} from '../models/jwtToken';
 import {ProxyInfo} from '../models/ProxyInfo';
 import {GlobalSettings} from '../models/GlobalSettings';
 import {UserSettings} from '../models/UserSettings';
+import {ExportSettings} from '../models/ExportSettings';
 
 @Injectable({
   providedIn: 'root'
@@ -74,5 +75,9 @@ export class HttpService {
 
   getUserRole() {
     return this.http.get<string>(this.apiUrl + '/user/role', this.httpOptions);
+  }
+
+  exportProxies(settings: ExportSettings) {
+    return this.http.post<string>(this.apiUrl + '/user/export', settings, this.httpOptions)
   }
 }

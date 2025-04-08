@@ -146,7 +146,8 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
   openExportDialog(): void {
     const dialogRef = this.dialog.open(ExportProxiesDialogComponent, {
       width: '700px',
-      height: "700px"
+      height: "700px",
+      data: { selectedProxies: this.selection.selected }
     });
 
     dialogRef.afterClosed().subscribe(result => {
