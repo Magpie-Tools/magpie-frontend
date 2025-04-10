@@ -175,7 +175,6 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
 
   handleExportRequest(proxies: ProxyInfo[]): void {
     // Placeholder function that you can replace with your actual export handling logic.
-    console.log('Exporting proxies:', proxies);
     // For example, call an export service or trigger a download.
   }
 }
