@@ -19,7 +19,6 @@ import {MatSelect} from '@angular/material/select';
 import {SettingsService} from '../../../services/settings.service';
 import {HttpService} from '../../../services/http.service';
 import {ProxyInfo} from '../../../models/ProxyInfo';
-import {ProxyListComponent} from '../proxy-list.component';
 import {ExportSettings} from '../../../models/ExportSettings';
 
 @Component({
@@ -66,7 +65,7 @@ export class ExportProxiesDialogComponent {
 
     let settings = settingsService.getUserSettings()
     this.exportForm = this.fb.group({
-      output: ['protocol://ip:port;username;password', [Validators.required]],
+      output: ['protocol://ip:port', [Validators.required]],
       filter: [false],
       HTTPProtocol: [settings?.http_protocol],
       HTTPSProtocol: [settings?.https_protocol],
@@ -92,15 +91,33 @@ export class ExportProxiesDialogComponent {
 
     let exportSettings = this.transformFormToExport(this.exportForm, proxies)
 
-    this.http.exportProxies(exportSettings).subscribe(res => {
-      console.log(res)
-    })
+    const today = new Date();
+    const formattedDate = this.formatDate(today);
+    const randomCode = this.generateRandomCode(4);
+    const fileName = `${formattedDate}-${randomCode}-magpie.txt`;
 
-    // this.dialogRef.close({
-    //   option: this.exportOption,
-    //   criteria: this.exportForm.value.output,
-    //   proxyStatus: this.exportForm.value.proxyStatus
-    // });
+    this.http.exportProxies(exportSettings).subscribe(res => {
+      const blob = new Blob([res], { type: 'text/plain' });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName; // Name of the downloaded file
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      window.URL.revokeObjectURL(url);
+
+      this.dialogRef.close({
+        option: this.exportOption,
+        criteria: this.exportForm.value.output,
+        proxyStatus: this.exportForm.value.proxyStatus
+      });
+    });
+
   }
 
   addToFilter(text: string): void {
@@ -124,5 +141,23 @@ export class ExportProxiesDialogComponent {
       proxyStatus: formValue.proxyStatus,
       outputFormat: formValue.output
     };
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    // Months and days below 10 will be padded with a leading zero
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+// Helper function to generate a random 4-character alphanumeric code
+  generateRandomCode(length: number = 4): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
   }
 }
