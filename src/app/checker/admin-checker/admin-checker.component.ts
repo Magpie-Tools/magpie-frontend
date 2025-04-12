@@ -48,19 +48,38 @@ export class AdminCheckerComponent implements OnInit{
     this.settingsService.getCheckerSettings().pipe(take(1)).subscribe(checkerSettings => {
       if (checkerSettings) {
         this.updateFormWithCheckerSettings(checkerSettings);
-        console.log(checkerSettings)
       }
     });
 
-    // Load protocols and blacklist separately
     const settings = this.settingsService.getGlobalSettings();
     if (settings) {
       this.updateProtocolsAndBlacklist(settings.protocols, settings.blacklist_sources);
     }
+
+    const dynamicControl = this.settingsForm.get('dynamic_threads');
+    const threadsControl = this.settingsForm.get('threads');
+
+    // Check initial state and set the threads control accordingly.
+    if (dynamicControl?.value) {
+      threadsControl?.disable();
+    } else {
+      threadsControl?.enable();
+    }
+
+    // Subscribe to future changes on dynamic_threads.
+    dynamicControl?.valueChanges.subscribe(dynamic => {
+      if (dynamic) {
+        threadsControl?.disable();
+      } else {
+        threadsControl?.enable();
+      }
+    });
   }
+
 
   private createDefaultForm(): FormGroup {
     return this.fb.group({
+      dynamic_threads: false,
       threads: [250],
       retries: [2],
       timeout: [7500],
@@ -103,6 +122,7 @@ export class AdminCheckerComponent implements OnInit{
   private updateFormWithCheckerSettings(checkerSettings: any): void {
     // Update checker-specific fields
     this.settingsForm.patchValue({
+      dynamic_threads: checkerSettings.dynamic_threads,
       threads: checkerSettings.threads,
       retries: checkerSettings.retries,
       timeout: checkerSettings.timeout,

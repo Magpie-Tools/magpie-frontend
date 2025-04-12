@@ -56,7 +56,7 @@
           <div class="form-group">
             <label for="threads">Threads<app-tooltip [text]="'Threads are used to check Proxies at the same time'"></app-tooltip>
             </label>
-            <input id="threads" formControlName="threads" type="number" />
+            <input id="threads" formControlName="threads" type="number"/>
           </div>
           <div class="form-group">
             <label for="retries">Retries</label>
@@ -71,6 +71,10 @@
         <mat-divider></mat-divider>
 
         <div class="row mb-3 mt-3">
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="Dynamic Threads" formControlName="dynamic_threads"></app-checkbox>
+          </div>
+
           <div class="col text-center checkbox-container">
             <app-checkbox label="Use HTTPS for SOCKS" formControlName="use_https_for_socks"></app-checkbox>
           </div>

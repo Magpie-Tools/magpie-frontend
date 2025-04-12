@@ -109,6 +109,7 @@ export class SettingsService {
     return {
       protocols: protocols,
       checker: {
+        dynamic_threads: formData.dynamic_threads,
         threads: formData.threads,
         retries: formData.retries,
         timeout: formData.timeout,

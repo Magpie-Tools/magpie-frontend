@@ -7,6 +7,7 @@ export interface GlobalSettings {
   },
 
   checker: {
+    dynamic_threads: boolean,
     threads: number,
     retries: number,
     timeout: number,

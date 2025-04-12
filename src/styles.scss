@@ -213,6 +213,10 @@ mat-tab-body .mat-mdc-tab-body-content {
         border-radius: 4px;
         background-color: #171717;
         color: #ffffff;
+
+        &:disabled {
+          background-color: #2e2e2e;
+        }
       }
     }
   }
