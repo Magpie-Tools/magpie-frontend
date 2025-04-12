@@ -24,8 +24,11 @@ export class SettingsService {
       this.userSettings = res
     })
 
+    console.log(UserService.isAdmin())
+
     if (UserService.isAdmin()) {
       this.http.getGlobalSettings().subscribe(res => {
+        console.log(res)
         this.settings = res;
         this.settingsSubject.next(this.settings);
       });

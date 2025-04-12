@@ -48,6 +48,7 @@ export class AdminCheckerComponent implements OnInit{
     this.settingsService.getCheckerSettings().pipe(take(1)).subscribe(checkerSettings => {
       if (checkerSettings) {
         this.updateFormWithCheckerSettings(checkerSettings);
+        console.log(checkerSettings)
       }
     });
 

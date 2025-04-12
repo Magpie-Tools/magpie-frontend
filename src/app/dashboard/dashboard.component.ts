@@ -16,5 +16,6 @@ import {SettingsService} from '../services/settings.service';
 export class DashboardComponent {
 
   constructor(private settings: SettingsService) {
+    settings.loadSettings()
   }
 }
