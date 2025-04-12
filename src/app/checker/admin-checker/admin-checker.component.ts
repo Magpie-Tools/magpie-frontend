@@ -12,6 +12,7 @@ import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {SettingsService} from '../../services/settings.service';
 import {take} from 'rxjs/operators';
 import {SnackbarService} from '../../services/snackbar.service';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-admin-checker',
@@ -28,7 +29,8 @@ import {SnackbarService} from '../../services/snackbar.service';
     MatTabGroup,
     NgForOf,
     ReactiveFormsModule,
-    TooltipComponent
+    TooltipComponent,
+    MatTooltip
   ],
   templateUrl: './admin-checker.component.html',
   styleUrl: './admin-checker.component.scss'

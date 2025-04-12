@@ -38,6 +38,11 @@ $border-color: rgba(255, 255, 255, 0.2);
     subhead-color: rgb(246, 246, 246),
     supporting-text-color: rgb(229, 229, 229)
   ));
+  @include mat.tooltip-overrides((
+    container-color: #2d2d2d,
+    supporting-text-color: #ffffff,
+    container-shape: 6px,
+  ));
   --mdc-outlined-text-field-outline-color: #b8b8b8; // Input border
   --mdc-outlined-text-field-label-text-color: #ededed; //Input label color
 }
@@ -133,10 +138,7 @@ mat-icon.reset {
 }
 
 .custom-tooltip {
-  white-space: pre-line !important;
-  background-color: #2d2d2d;
-  color: #ffffff;
-  border: 1px solid #3b3b3b;
+  //white-space: pre-line !important;
 }
 
 .mat-icon > svg {
