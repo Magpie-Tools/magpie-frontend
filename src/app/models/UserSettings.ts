@@ -11,4 +11,6 @@ export interface UserSettings {
     url: string
     regex: string
   }]
+
+  scraping_sources: string[]
 }

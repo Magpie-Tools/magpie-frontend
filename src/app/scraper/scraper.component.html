@@ -5,7 +5,7 @@
 
 <div class="content-container">
 
-  <form [formGroup]="scraperForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="scraperForm">
     <div formArrayName="sources">
       <h4 class="text-center subText mb-4 mt-0">Scraping Sources</h4>
       <div *ngFor="let source of sources.controls; let i = index" [formGroupName]="i">
@@ -14,6 +14,9 @@
             <label for="source-url-{{ i }}">URL</label>
             <input id="source-url-{{ i }}" formControlName="url" type="text" />
           </div>
+          <button type="button" class="btn-remove mt-4" (click)="removeSource(i)">
+            <mat-icon class="reset">delete</mat-icon>
+          </button>
         </div>
       </div>
       <button type="button" class="btn-add" (click)="addSource()">
@@ -24,5 +27,5 @@
 </div>
 
 <div class="d-flex align-items-center justify-content-center">
-  <button type="submit" class="button-padding">Save Settings</button>
+  <button type="submit" class="button-padding" (click)="onSubmit()">Save Settings</button>
 </div>

@@ -73,6 +73,10 @@ export class HttpService {
     return this.http.post(environment.apiUrl + "/user/settings", payload, this.httpOptions)
   }
 
+  saveUserScrapingSites(payload: string[]) {
+    return this.http.post(environment.apiUrl + "/user/scrapingSites", payload, this.httpOptions)
+  }
+
   getUserRole() {
     return this.http.get<string>(this.apiUrl + '/user/role', this.httpOptions);
   }

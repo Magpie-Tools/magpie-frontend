@@ -77,6 +77,13 @@ export class SettingsService {
     return this.http.saveUserSettings(payload);
   }
 
+  saveUserScrapingSources(sources: string[]): Observable<any> {
+    if (this.userSettings) {
+      this.userSettings.scraping_sources = sources
+    }
+    return this.http.saveUserScrapingSites(sources)
+  }
+
   private transformUserSettings(formData: any): UserSettings {
     return {
       http_protocol: formData.HTTPProtocol,
@@ -86,7 +93,8 @@ export class SettingsService {
       timeout: formData.Timeout,
       retries: formData.Retries,
       UseHttpsForSocks: formData.UseHttpsForSocks,
-      judges: formData.judges
+      judges: formData.judges,
+      scraping_sources: [] // Not needed here
     };
   }
 
