@@ -49,7 +49,7 @@
       <!-- Judges Tab -->
       <mat-tab label="Judges">
         <div formArrayName="judges">
-          <h4 class="text-center subText">Default Judge URLs and Regex</h4>
+          <h4 class="text-center subText mb-4 mt-0">Judge URLs and Regex</h4>
           <div *ngFor="let judge of judgesFormArray.controls; let i = index" [formGroupName]="i">
             <div class="form-row">
               <div class="form-group">

@@ -1,0 +1,81 @@
+<h2 class="titleHeader">
+  <mat-icon svgIcon="reality"></mat-icon>
+  <div>Global Scraper Settings</div>
+</h2>
+
+<div class="content-container">
+  <form [formGroup]="settingsForm">
+    <mat-tab-group>
+      <mat-tab label="Common">
+        <h4 class="text-center subText">Check ALL proxies every</h4>
+        <div class="form-row mb-3 d-flex justify-content-center" formGroupName="scraper_timer">
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Days" formControlName="days">
+              <mat-option *ngFor="let day of daysList" [value]="day">{{ day + " Days" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Hours" formControlName="hours">
+              <mat-option *ngFor="let hour of hoursList" [value]="hour">{{ hour + " Hours" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Minutes" formControlName="minutes">
+              <mat-option *ngFor="let min of minutesList" [value]="min">{{ min + " Minutes" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mx-2">
+            <mat-select placeholder="Seconds" formControlName="seconds">
+              <mat-option *ngFor="let sec of secondsList" [value]="sec">{{ sec + " Seconds" }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="threads">
+              Threads
+              <app-tooltip [text]="'Determines how many proxies are checked concurrently.'"></app-tooltip>
+            </label>
+            <input id="threads" formControlName="threads" type="number"/>
+          </div>
+          <div class="form-group">
+            <label for="retries">Retries</label>
+            <input id="retries" formControlName="retries" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="timeout">Timeout (ms)</label>
+            <input id="timeout" formControlName="timeout" type="number" />
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="row mb-3 mt-3">
+          <div class="col text-center checkbox-container">
+            <app-checkbox
+              label="Dynamic Threads"
+              formControlName="dynamic_threads"
+              matTooltip="Enable this option to automatically adjust the number of threads based on the available proxies and your checker settings.">
+            </app-checkbox>
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Sources">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="scrape_sites">Default Scrape Sites</label>
+            <input id="scrape_sites" formControlName="scrape_sites" type="number" />
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </form>
+</div>
+
+<div class="d-flex align-items-center justify-content-center mt-4">
+  <button type="submit" (click)="onSubmit()" class="button-padding">Save Settings</button>
+</div>

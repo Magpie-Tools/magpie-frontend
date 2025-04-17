@@ -91,7 +91,7 @@ export class AdminCheckerComponent implements OnInit{
         socks4: [false],
         socks5: [false],
       }),
-      timer: this.fb.group({
+      checker_timer: this.fb.group({
         days: [0],
         hours: [1],
         minutes: [0],
@@ -128,7 +128,7 @@ export class AdminCheckerComponent implements OnInit{
       threads: checkerSettings.threads,
       retries: checkerSettings.retries,
       timeout: checkerSettings.timeout,
-      timer: {
+      checker_timer: {
         days: checkerSettings.checker_timer.days,
         hours: checkerSettings.checker_timer.hours,
         minutes: checkerSettings.checker_timer.minutes,

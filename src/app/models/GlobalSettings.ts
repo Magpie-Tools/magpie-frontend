@@ -46,7 +46,9 @@ export interface GlobalSettings {
       hours: 0,
       minutes: 5,
       seconds: 0
-    }
+    },
+
+    scrape_sites: string[]
   },
 
   blacklist_sources: string[]

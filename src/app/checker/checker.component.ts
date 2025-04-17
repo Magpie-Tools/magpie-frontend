@@ -98,8 +98,6 @@ export class CheckerComponent implements OnInit {
   onSubmit() {
     const formValues = this.settingsForm.value;
 
-    console.log(formValues.judges)
-
     this.settingsService.saveUserSettings(formValues).subscribe({
       next: (resp) => {
         SnackbarService.openSnackbar(resp.message, 3000)

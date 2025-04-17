@@ -24,11 +24,8 @@ export class SettingsService {
       this.userSettings = res
     })
 
-    console.log(UserService.isAdmin())
-
     if (UserService.isAdmin()) {
       this.http.getGlobalSettings().subscribe(res => {
-        console.log(res)
         this.settings = res;
         this.settingsSubject.next(this.settings);
       });
@@ -114,10 +111,10 @@ export class SettingsService {
         retries: formData.retries,
         timeout: formData.timeout,
         checker_timer: {
-          days: formData.timer.days,
-          hours: formData.timer.hours,
-          minutes: formData.timer.minutes,
-          seconds: formData.timer.seconds
+          days: formData.checker_timer.days,
+          hours: formData.checker_timer.hours,
+          minutes: formData.checker_timer.minutes,
+          seconds: formData.checker_timer.seconds
         },
         judges_threads: formData.judges_threads,
         judges_timeout: formData.judges_timeout,
@@ -143,7 +140,8 @@ export class SettingsService {
           hours: formData.scraper_timer?.hours || 0,
           minutes: formData.scraper_timer?.minutes || 5,
           seconds: formData.scraper_timer?.seconds || 0
-        }
+        },
+        scrape_sites: formData.scrape_sites || []
       },
       blacklist_sources: formData.blacklisted
     };

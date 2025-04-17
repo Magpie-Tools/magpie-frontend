@@ -27,7 +27,7 @@
         <mat-divider></mat-divider>
 
         <h4 class="text-center subText">Check ALL proxies every</h4>
-        <div class="form-row mb-3 d-flex justify-content-center" formGroupName="timer">
+        <div class="form-row mb-3 d-flex justify-content-center" formGroupName="checker_timer">
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Days" formControlName="days">
               <mat-option *ngFor="let day of daysList" [value]="day">{{ day + " Days" }}</mat-option>

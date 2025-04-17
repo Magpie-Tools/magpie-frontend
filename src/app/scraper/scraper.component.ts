@@ -1,21 +1,14 @@
 import { Component } from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
-import {LoadingComponent} from '../ui-elements/loading/loading.component';
-import {TooltipComponent} from '../tooltip/tooltip.component';
-import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {NgForOf} from '@angular/common';
-import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-scraper',
   standalone: true,
   imports: [
     MatIcon,
-    LoadingComponent,
-    TooltipComponent,
-    MatTab,
     NgForOf,
-    MatTabGroup,
     ReactiveFormsModule
   ],
   templateUrl: './scraper.component.html',
@@ -27,10 +20,6 @@ export class ScraperComponent {
   constructor(private fb: FormBuilder) {
     this.scraperForm = this.fb.group({
       sources: this.fb.array([]),
-      scrapeInterval: new FormControl(10),
-      maxProxies: new FormControl(100),
-      scrapeThreads: new FormControl(5),
-      log: new FormControl('')
     });
   }
 
