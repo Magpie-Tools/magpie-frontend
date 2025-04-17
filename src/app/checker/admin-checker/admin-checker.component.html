@@ -54,7 +54,9 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="threads">Threads<app-tooltip [text]="'Threads are used to check Proxies at the same time'"></app-tooltip>
+            <label for="threads">
+              Threads
+              <app-tooltip [text]="'Determines how many proxies are checked concurrently.'"></app-tooltip>
             </label>
             <input id="threads" formControlName="threads" type="number"/>
           </div>

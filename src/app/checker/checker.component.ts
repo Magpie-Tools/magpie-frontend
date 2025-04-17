@@ -77,7 +77,8 @@ export class CheckerComponent implements OnInit {
         SOCKS5Protocol: settings.socks5_protocol,
         Timeout: settings.timeout,
         Retries: settings.retries,
-        UseHttpsForSocks: settings.UseHttpsForSocks
+        UseHttpsForSocks: settings.UseHttpsForSocks,
+        judges: settings.judges,
       });
 
       // Clear existing judges form array
@@ -96,6 +97,8 @@ export class CheckerComponent implements OnInit {
 
   onSubmit() {
     const formValues = this.settingsForm.value;
+
+    console.log(formValues.judges)
 
     this.settingsService.saveUserSettings(formValues).subscribe({
       next: (resp) => {

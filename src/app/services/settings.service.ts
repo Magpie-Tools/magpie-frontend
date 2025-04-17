@@ -89,7 +89,7 @@ export class SettingsService {
       timeout: formData.Timeout,
       retries: formData.Retries,
       UseHttpsForSocks: formData.UseHttpsForSocks,
-      judges: formData.Judges
+      judges: formData.judges
     };
   }
 
