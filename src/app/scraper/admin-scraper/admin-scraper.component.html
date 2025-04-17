@@ -39,15 +39,15 @@
               Threads
               <app-tooltip [text]="'Determines how many proxies are checked concurrently.'"></app-tooltip>
             </label>
-            <input id="threads" formControlName="threads" type="number"/>
+            <input id="threads" formControlName="scraper_threads" type="number"/>
           </div>
           <div class="form-group">
             <label for="retries">Retries</label>
-            <input id="retries" formControlName="retries" type="number" />
+            <input id="retries" formControlName="scraper_retries" type="number" />
           </div>
           <div class="form-group">
             <label for="timeout">Timeout (ms)</label>
-            <input id="timeout" formControlName="timeout" type="number" />
+            <input id="timeout" formControlName="scraper_timeout" type="number" />
           </div>
         </div>
 
@@ -57,7 +57,7 @@
           <div class="col text-center checkbox-container">
             <app-checkbox
               label="Dynamic Threads"
-              formControlName="dynamic_threads"
+              formControlName="scraper_dynamic_threads"
               matTooltip="Enable this option to automatically adjust the number of threads based on the available proxies and your checker settings.">
             </app-checkbox>
           </div>

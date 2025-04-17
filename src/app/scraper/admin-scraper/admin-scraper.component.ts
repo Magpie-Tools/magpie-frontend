@@ -53,8 +53,8 @@ export class AdminScraperComponent implements OnInit {
     });
 
 
-    const threadsCtrl  = this.settingsForm.get('threads');
-    const dynamicCtrl  = this.settingsForm.get('dynamic_threads');
+    const threadsCtrl  = this.settingsForm.get('scraper_threads');
+    const dynamicCtrl  = this.settingsForm.get('scraper_dynamic_threads');
 
     /* whenever the checkbox toggles, enable/disable “threads” */
     dynamicCtrl!.valueChanges.subscribe((isDynamic: boolean) => {
@@ -65,10 +65,10 @@ export class AdminScraperComponent implements OnInit {
 
   private createDefaultForm(): FormGroup {
     return this.fb.group({
-      dynamic_threads: true,
-      threads: [{ value: 250, disabled: true }],
-      retries: [2],
-      timeout: [7500],
+      scraper_dynamic_threads: true,
+      scraper_threads: [{ value: 250, disabled: true }],
+      scraper_retries: [2],
+      scraper_timeout: [7500],
       scraper_timer: this.fb.group({
         days: [0],
         hours: [1],
@@ -84,16 +84,17 @@ export class AdminScraperComponent implements OnInit {
   private updateFormWithScraperSettings(scraperSettings: any): void {
     // Update checker-specific fields
     this.settingsForm.patchValue({
-      dynamic_threads: scraperSettings.dynamic_threads,
-      threads: scraperSettings.threads,
-      retries: scraperSettings.retries,
-      timeout: scraperSettings.timeout,
+      scraper_dynamic_threads: scraperSettings.dynamic_threads,
+      scraper_threads: scraperSettings.threads,
+      scraper_retries: scraperSettings.retries,
+      scraper_timeout: scraperSettings.timeout,
       scraper_timer: {
         days: scraperSettings.scraper_timer.days,
         hours: scraperSettings.scraper_timer.hours,
         minutes: scraperSettings.scraper_timer.minutes,
         seconds: scraperSettings.scraper_timer.seconds
       },
+      scrape_sites: scraperSettings.scrape_sites,
     });
   }
 

@@ -96,54 +96,72 @@ export class SettingsService {
   }
 
   private transformGlobalSettings(formData: any): GlobalSettings {
-    const protocols: GlobalSettings["protocols"] = {
-      http: formData.protocols.http,
-      https: formData.protocols.https,
-      socks4: formData.protocols.socks4,
-      socks5: formData.protocols.socks5
+    const current = this.settings;
+
+    /* ---------- 1. protocols ---------- */
+    const protocols: GlobalSettings['protocols'] = {
+      http:   formData?.protocols?.http   ?? current?.protocols.http,
+      https:  formData?.protocols?.https  ?? current?.protocols.https,
+      socks4: formData?.protocols?.socks4 ?? current?.protocols.socks4,
+      socks5: formData?.protocols?.socks5 ?? current?.protocols.socks5
     };
 
-    return {
-      protocols: protocols,
-      checker: {
-        dynamic_threads: formData.dynamic_threads,
-        threads: formData.threads,
-        retries: formData.retries,
-        timeout: formData.timeout,
-        checker_timer: {
-          days: formData.checker_timer.days,
-          hours: formData.checker_timer.hours,
-          minutes: formData.checker_timer.minutes,
-          seconds: formData.checker_timer.seconds
-        },
-        judges_threads: formData.judges_threads,
-        judges_timeout: formData.judges_timeout,
-        judge_timer: {
-          days: formData.judge_timer?.days || 0,
-          hours: formData.judge_timer?.hours || 0,
-          minutes: formData.judge_timer?.minutes || 30,
-          seconds: formData.judge_timer?.seconds || 0
-        },
-        judges: formData.judges,
-        use_https_for_socks: formData.use_https_for_socks,
-        ip_lookup: formData.iplookup,
-        standard_header: formData.standard_header || ["USER-AGENT", "HOST", "ACCEPT", "ACCEPT-ENCODING"],
-        proxy_header: formData.proxy_header || ["HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"]
+    /* ---------- 2. checker ---------- */
+    const checker: GlobalSettings['checker'] = {
+      dynamic_threads: formData.dynamic_threads      ?? current?.checker.dynamic_threads,
+      threads:         formData.threads              ?? current?.checker.threads,
+      retries:         formData.retries              ?? current?.checker.retries,
+      timeout:         formData.timeout              ?? current?.checker.timeout,
+
+      checker_timer: {
+        days:    formData?.checker_timer?.days    ?? current?.checker.checker_timer.days,
+        hours:   formData?.checker_timer?.hours   ?? current?.checker.checker_timer.hours,
+        minutes: formData?.checker_timer?.minutes ?? current?.checker.checker_timer.minutes,
+        seconds: formData?.checker_timer?.seconds ?? current?.checker.checker_timer.seconds
       },
-      scraper: {
-        dynamic_threads: formData.dynamic_threads || false,
-        threads: formData.scraper_threads || 250,
-        retries: formData.scraper_retries || 2,
-        timeout: formData.scraper_timeout || 7500,
-        scraper_timer: {
-          days: formData.scraper_timer?.days || 0,
-          hours: formData.scraper_timer?.hours || 0,
-          minutes: formData.scraper_timer?.minutes || 5,
-          seconds: formData.scraper_timer?.seconds || 0
-        },
-        scrape_sites: formData.scrape_sites || []
+
+      judges_threads: formData.judges_threads      ?? current?.checker.judges_threads,
+      judges_timeout: formData.judges_timeout      ?? current?.checker.judges_timeout,
+
+      judge_timer: {
+        days:    formData?.judge_timer?.days    ?? current?.checker.judge_timer.days,
+        hours:   formData?.judge_timer?.hours   ?? current?.checker.judge_timer.hours,
+        minutes: formData?.judge_timer?.minutes ?? current?.checker.judge_timer.minutes,
+        seconds: formData?.judge_timer?.seconds ?? current?.checker.judge_timer.seconds
       },
-      blacklist_sources: formData.blacklisted
+
+      judges:             formData.judges             ?? current?.checker.judges,
+      use_https_for_socks:formData.use_https_for_socks?? current?.checker.use_https_for_socks,
+      ip_lookup:          formData.iplookup           ?? current?.checker.ip_lookup,
+
+      standard_header: formData.standard_header ?? current?.checker.standard_header,
+
+      proxy_header: formData.proxy_header ?? current?.checker.proxy_header
     };
+
+    /* ---------- 3. scraper ---------- */
+    const scraper: GlobalSettings['scraper'] = {
+      dynamic_threads: formData.scraper_dynamic_threads ?? current?.scraper.dynamic_threads,
+      threads:         formData.scraper_threads         ?? current?.scraper.threads,
+      retries:         formData.scraper_retries         ?? current?.scraper.retries,
+      timeout:         formData.scraper_timeout         ?? current?.scraper.timeout,
+
+      scraper_timer: {
+        days:    formData?.scraper_timer?.days    ?? current?.scraper.scraper_timer.days,
+        hours:   formData?.scraper_timer?.hours   ?? current?.scraper.scraper_timer.hours,
+        minutes: formData?.scraper_timer?.minutes ?? current?.scraper.scraper_timer.minutes,
+        seconds: formData?.scraper_timer?.seconds ?? current?.scraper.scraper_timer.seconds
+      },
+
+      scrape_sites: formData.scrape_sites ?? current?.scraper.scrape_sites
+    };
+
+    /* ---------- 4. blacklist ---------- */
+    const blacklist_sources =
+      formData.blacklisted ?? current?.blacklist_sources;
+
+    /* ---------- final shape ---------- */
+    return { protocols, checker, scraper, blacklist_sources };
   }
+
 }
