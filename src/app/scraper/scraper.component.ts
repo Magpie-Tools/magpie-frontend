@@ -7,6 +7,7 @@ import {SettingsService} from '../services/settings.service';
 import {Component, OnInit} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 import {NgForOf} from '@angular/common';
+import {SnackbarService} from '../services/snackbar.service';
 
 @Component({
   selector: 'app-scraper',
@@ -74,8 +75,10 @@ export class ScraperComponent implements OnInit {
       g => g.get('url')!.value as string
     );
 
-    console.log(urls);
-
-    this.settings.saveUserScrapingSources(urls).subscribe();
+    this.settings.saveUserScrapingSources(urls).subscribe(
+      res => {
+        SnackbarService.openSnackbar("Sites saved successfully", 3000)
+      }
+    );
   }
 }
