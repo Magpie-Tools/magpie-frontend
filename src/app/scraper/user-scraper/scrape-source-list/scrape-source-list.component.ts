@@ -116,7 +116,7 @@ export class ScrapeSourceListComponent implements OnInit, AfterViewInit {
   deleteSelectedSources(): void {
     const selectedProxies = this.selection.selected;
     if (selectedProxies.length > 0) {
-      this.http.deleteProxies(selectedProxies.map(proxy => proxy.id)).subscribe(res => {
+      this.http.deleteScrapingSource(selectedProxies.map(proxy => proxy.id)).subscribe(res => {
         SnackbarService.openSnackbar(res, 3000);
         this.totalItems -= selectedProxies.length;
       });

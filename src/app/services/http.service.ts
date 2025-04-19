@@ -97,4 +97,11 @@ export class HttpService {
   getScrapingSourcePage(pageNumber: number) {
     return this.http.get<ScrapeSourceInfo[]>(this.apiUrl + '/getScrapingSourcesPage/' + pageNumber, this.httpOptions);
   }
+
+  deleteScrapingSource(proxies: number[]) {
+    return this.http.request<string>('delete', this.apiUrl + '/scrapingSources', {
+      body: proxies,
+      ...this.httpOptions
+    });
+  }
 }
