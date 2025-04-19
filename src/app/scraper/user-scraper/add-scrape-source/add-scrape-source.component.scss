@@ -1,0 +1,22 @@
+input[type="file"] {
+  display: none;
+}
+
+textarea {
+  background-color: #2d2d2d; /* Match the dark background */
+  color: #ffffff; /* White text for readability */
+  border: 1px solid #3b3b3b; /* Subtle border to define the area */
+  border-radius: 4px; /* Rounded corners like the buttons */
+  padding: 10px; /* Add some padding for comfortable input */
+  font-family: 'Arial', sans-serif; /* Matching the font style */
+  font-size: 14px; /* Consistent font size */
+  width: 100%; /* Full width to align with other elements */
+  box-sizing: border-box; /* Include padding in width calculation */
+  outline: none; /* Remove default blue outline on focus */
+  resize: none;
+}
+
+textarea:focus {
+  border-color: #348566; /* Match the green highlight of buttons */
+  box-shadow: 0 0 5px rgba(92, 184, 92, 0.5); /* Subtle glow on focus */
+}

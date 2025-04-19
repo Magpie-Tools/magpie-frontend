@@ -1,0 +1,77 @@
+<div class="content-container">
+  <div class="row">
+    <div class="col">
+      <div class="row h-25">
+        <h4 class="text-center subText">Add Scrape Sources <app-tooltip [text]="'You can add scrape sources in the following formats:\n\nip:port\nip:port@username:password\nip:port:username:password'"></app-tooltip></h4>
+      </div>
+      <div class="row h-15">
+        <div [class]="clipboardScrapeSources ? 'col-10' : ''" class="p-0">
+          <button type="button" (click)="pasteFromClipboard()" class="button-padding h-25 d-flex align-items-center justify-content-center w-100"
+                  [class]="clipboardScrapeSources ? '' : 'full-color-button'"
+                  [disabled]="clipboardScrapeSources">Paste from Clipboard</button>
+        </div>
+        @if (clipboardScrapeSources) {
+          <div class="col-1">
+            <button class="btn btn-danger h-50 d-flex align-items-center justify-content-center"
+                    (click)="clearClipboardSources()">X</button>
+          </div>
+        }
+      </div>
+      <div class="row h-25">
+        <div [class]="file != undefined ? 'col-10' : ''" class="p-0">
+          <button type="button" (click)="triggerFileInput(fileInput)" class="h-75 d-flex align-items-center justify-content-center w-100"
+                  [class]="file != undefined ? '' : 'full-color-button'"
+                  [disabled]="file != undefined">Import from File</button>
+          <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;">
+        </div>
+        @if (file != undefined) {
+          <div class="col-1">
+            <button class="btn btn-danger" (click)="onFileClear()">X</button>
+          </div>
+        }
+      </div>
+
+      <div class="row">
+        <textarea maxlength="109999" [placeholder]="'Bulk add Scrape Sources\n127.0.0.1:66535'" [(ngModel)]="scrapeSourceTextarea" (ngModelChange)="addTextAreaSources()"></textarea>
+      </div>
+
+    </div>
+    <div class="col d-flex justify-content-center align-items-center">
+      @if (getSourcesWithoutAuthCount() + getSourcesWithAuthCount() > 0) {
+        <p>
+          Total Scrape Sources {{ getSourcesWithoutAuthCount() + getSourcesWithAuthCount() }}
+          <br>
+          Unique {{getUniqueSourcesCount()}}
+          <br>
+          With Auth {{ getSourcesWithAuthCount() }}
+        </p>
+      } @else {
+        <mat-icon svgIcon="graph"></mat-icon>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="d-flex align-items-center justify-content-center mt-4">
+  <div class="row w-50">
+    <div class="col d-flex justify-content-center">
+      <button type="submit" class="w-100 maxWidth-200" (click)="submitScrapeSources()">Add Scrape Sources to Queue</button>
+    </div>
+    <div class="col d-flex justify-content-center align-items-center">
+      <app-checkbox
+        label="High Priority Queue"
+        matTooltip="When High Priority Queue is activated, scrape sources will get checked instantly and will NOT be at the end of the queue."
+      ></app-checkbox>
+    </div>
+  </div>
+</div>
+
+@if (showPopup) {
+  <app-procesing-popup
+    [status]="popupStatus"
+    [count]="addedSourceCount"
+    [item]="'Scrape Sources'"
+    (closed)="onPopupClose()"
+  >
+  </app-procesing-popup>
+}
