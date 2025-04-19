@@ -29,16 +29,13 @@ export class AddScrapeSourceComponent {
   scrapeSourceTextarea: string = "";
   clipboardScrapeSources: string = "";
 
-  fileSourcesNoAuthCount: number = 0;
-  fileSourcesWithAuthCount: number = 0;
+  fileSourcesCount: number = 0;
   uniqueFileSourcesCount: number = 0;
 
-  textAreaSourcesNoAuthCount: number = 0;
-  textAreaSourcesWithAuthCount: number = 0;
+  textAreaSourcesCount: number = 0;
   uniqueTextAreaSourcesCount: number = 0;
 
-  clipboardSourcesNoAuthCount: number = 0;
-  clipboardSourcesWithAuthCount: number = 0;
+  clipboardSourcesCount: number = 0;
   uniqueClipboardSourcesCount: number = 0;
 
   showPopup = false;
@@ -58,8 +55,7 @@ export class AddScrapeSourceComponent {
 
   clearClipboardSources(): void {
     this.clipboardScrapeSources = "";
-    this.clipboardSourcesNoAuthCount = 0;
-    this.clipboardSourcesWithAuthCount = 0;
+    this.clipboardSourcesCount = 0;
     this.uniqueClipboardSourcesCount = 0;
   }
 
@@ -72,8 +68,7 @@ export class AddScrapeSourceComponent {
     const lines = this.clipboardScrapeSources.split(/\r?\n/);
     const sources = lines.filter(line => (line.match(/:/g) || []).length === 1);
 
-    this.clipboardSourcesNoAuthCount = sources.length;
-    this.clipboardSourcesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
+    this.clipboardSourcesCount = sources.length;
     this.uniqueClipboardSourcesCount = Array.from(new Set(sources)).length;
   }
 
@@ -92,8 +87,7 @@ export class AddScrapeSourceComponent {
         const lines = content.split(/\r?\n/);
         let sources = lines.filter(line => (line.match(/:/g) || []).length === 1)
 
-        this.fileSourcesNoAuthCount = sources.length;
-        this.fileSourcesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
+        this.fileSourcesCount = sources.length;
         this.uniqueFileSourcesCount = Array.from(new Set(sources)).length;
       };
 
@@ -103,8 +97,7 @@ export class AddScrapeSourceComponent {
 
   onFileClear(): void {
     this.file = undefined;
-    this.fileSourcesWithAuthCount = 0;
-    this.fileSourcesNoAuthCount = 0;
+    this.fileSourcesCount = 0;
     this.uniqueFileSourcesCount = 0;
   }
 
@@ -112,17 +105,12 @@ export class AddScrapeSourceComponent {
     const lines = this.scrapeSourceTextarea.split(/\r?\n/);
     let sources = lines.filter(line => (line.match(/:/g) || []).length === 1)
 
-    this.textAreaSourcesNoAuthCount = sources.length;
-    this.textAreaSourcesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
+    this.textAreaSourcesCount = sources.length;
     this.uniqueTextAreaSourcesCount = Array.from(new Set(sources)).length;
   }
 
-  getSourcesWithoutAuthCount() {
-    return this.textAreaSourcesNoAuthCount + this.fileSourcesNoAuthCount + this.clipboardSourcesNoAuthCount;
-  }
-
-  getSourcesWithAuthCount() {
-    return this.textAreaSourcesWithAuthCount + this.fileSourcesWithAuthCount + this.clipboardSourcesWithAuthCount;
+  getSourcesCount() {
+    return this.textAreaSourcesCount + this.fileSourcesCount + this.clipboardSourcesCount;
   }
 
   getUniqueSourcesCount() {

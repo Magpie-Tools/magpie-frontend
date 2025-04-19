@@ -8,11 +8,11 @@
     </div>
 
     <div *ngIf="status === 'success'" class="result-message success">
-      Successfully added <br>{{ proxyCount }} proxies
+      Successfully added <br>{{ count }} {{ item }}
     </div>
 
     <div *ngIf="status === 'error'" class="result-message error">
-      Something went wrong while adding the proxies <br>Please try again
+      Something went wrong while adding the {{ item }} <br>Please try again
     </div>
   </div>
   <button *ngIf="status !== 'processing'" class="close-button" (click)="onClose()">Close</button>

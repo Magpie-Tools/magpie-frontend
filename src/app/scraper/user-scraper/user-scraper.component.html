@@ -1,6 +1,6 @@
 <h2 class="titleHeader">
-  <mat-icon svgIcon="cloudup"></mat-icon>
-  <div>Proxies</div>
+  <mat-icon svgIcon="reality"></mat-icon>
+  <div>Scraper</div>
 </h2>
 
 <div class="toggle-container d-flex align-items-center justify-content-center mt-4">
@@ -26,7 +26,7 @@
     </div>
   } @else {
     <app-scrape-source-list
-      (showAddProxiesMessage)="showNoSourceMessage = $event">
+      (showAddScrapeSourceMessage)="showNoSourceMessage = $event">
     </app-scrape-source-list>
   }
 } @else {

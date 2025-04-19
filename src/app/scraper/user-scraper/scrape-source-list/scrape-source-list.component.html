@@ -1,1 +1,69 @@
-<p>scrape-source-list works!</p>
+@if (!hasLoaded) {
+  <app-loading class="toggle-container d-flex align-items-center justify-content-center mt-5"></app-loading>
+} @else {
+  <div class="proxy-container">
+    <!-- Delete Button -->
+    <div class="actions d-flex justify-content-start mb-3">
+      <button mat-raised-button class="btn btn-danger" (click)="deleteSelectedSources()"
+              [disabled]="!selection.hasValue()">
+        Delete Selected
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <mat-table [dataSource]="dataSource" matSort class="scraping-source-table">
+        <!-- Selection Column -->
+        <ng-container matColumnDef="select">
+          <mat-header-cell *matHeaderCellDef>
+            <mat-checkbox (change)="$event ? masterToggle() : null"
+                          [checked]="selection.hasValue() && isAllSelected()"
+                          [indeterminate]="selection.hasValue() && !isAllSelected()">
+            </mat-checkbox>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let source">
+            <mat-checkbox (click)="$event.stopPropagation()"
+                          (change)="$event ? toggleSelection(source) : null"
+                          [checked]="selection.isSelected(source)">
+            </mat-checkbox>
+          </mat-cell>
+        </ng-container>
+
+        <!-- URL Column -->
+        <ng-container matColumnDef="url">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>URL</mat-header-cell>
+          <mat-cell *matCellDef="let source" class="text-truncate">
+            <a
+              [href]="source.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              (click)="$event.stopPropagation()">
+              {{ source.url }}
+            </a>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Proxy Count Column -->
+        <ng-container matColumnDef="proxy_count">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Proxy Count</mat-header-cell>
+          <mat-cell *matCellDef="let source" class="text-center">{{ source.proxy_count }}</mat-cell>
+        </ng-container>
+
+        <!-- Added At Column -->
+        <ng-container matColumnDef="added_at">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Added At</mat-header-cell>
+          <mat-cell *matCellDef="let source" class="text-nowrap">{{ source.added_at | date:'short' }}</mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="toggleSelection(row)"></mat-row>
+      </mat-table>
+    </div>
+
+    <mat-paginator [length]="totalItems"
+                   [pageSize]="20"
+                   [pageIndex]="page - 1"
+                   (page)="onPageChange($event)"
+                   class="custom-paginator">
+    </mat-paginator>
+  </div>
+}

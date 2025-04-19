@@ -69,7 +69,8 @@
 @if (showPopup) {
   <app-procesing-popup
     [status]="popupStatus"
-    [proxyCount]="addedProxyCount"
+    [count]="addedProxyCount"
+    [item]="'proxies'"
     (closed)="onPopupClose()"
   >
   </app-procesing-popup>

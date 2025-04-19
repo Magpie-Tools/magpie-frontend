@@ -23,16 +23,17 @@ import {NgIf} from '@angular/common';
 })
 export class ProcesingPopupComponent {
   @Input() status: 'processing' | 'success' | 'error' = 'processing';
-  @Input() proxyCount: number = 0;
+  @Input() count: number = 0;
+  @Input() item: string = "";
   @Output() closed = new EventEmitter<void>();
 
   messages = [
-    'Please wait while we add your proxies.',
+    `Please wait while we add your ${this.item}.`,
     'This can take a few seconds.',
     'Just a little longer, we’re on it.',
     'Hang tight, we’re working on it.',
     'Almost there... just a moment more.',
-    'Seems like you added a lot of proxies, but don’t worry, we’ll handle it.',
+    `Seems like you added a lot of ${ this.item }, but don’t worry, we’ll handle it.`,
     'Loading... good things take time!',
   ];
   currentMessageIndex = 0;

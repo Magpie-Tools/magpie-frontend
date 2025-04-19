@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col">
       <div class="row h-25">
-        <h4 class="text-center subText">Add Scrape Sources <app-tooltip [text]="'You can add scrape sources in the following formats:\n\nip:port\nip:port@username:password\nip:port:username:password'"></app-tooltip></h4>
+        <h4 class="text-center subText">Add Scrape Sources <app-tooltip [text]="'A scrape source is a websites that shows proxies on it.'"></app-tooltip></h4>
       </div>
       <div class="row h-15">
         <div [class]="clipboardScrapeSources ? 'col-10' : ''" class="p-0">
@@ -32,18 +32,16 @@
       </div>
 
       <div class="row">
-        <textarea maxlength="109999" [placeholder]="'Bulk add Scrape Sources\n127.0.0.1:66535'" [(ngModel)]="scrapeSourceTextarea" (ngModelChange)="addTextAreaSources()"></textarea>
+        <textarea maxlength="109999" [placeholder]="'Bulk add Scrape Sources\nhttps://scrape-source.com'" [(ngModel)]="scrapeSourceTextarea" (ngModelChange)="addTextAreaSources()"></textarea>
       </div>
 
     </div>
     <div class="col d-flex justify-content-center align-items-center">
-      @if (getSourcesWithoutAuthCount() + getSourcesWithAuthCount() > 0) {
+      @if (getSourcesCount() > 0) {
         <p>
-          Total Scrape Sources {{ getSourcesWithoutAuthCount() + getSourcesWithAuthCount() }}
+          Total Scrape Sources {{ getSourcesCount() }}
           <br>
           Unique {{getUniqueSourcesCount()}}
-          <br>
-          With Auth {{ getSourcesWithAuthCount() }}
         </p>
       } @else {
         <mat-icon svgIcon="graph"></mat-icon>

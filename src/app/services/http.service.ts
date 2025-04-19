@@ -7,6 +7,7 @@ import {ProxyInfo} from '../models/ProxyInfo';
 import {GlobalSettings} from '../models/GlobalSettings';
 import {UserSettings} from '../models/UserSettings';
 import {ExportSettings} from '../models/ExportSettings';
+import {ScrapeSourceInfo} from '../models/ScrapeSourceInfo';
 
 @Injectable({
   providedIn: 'root'
@@ -83,5 +84,17 @@ export class HttpService {
 
   exportProxies(settings: ExportSettings) {
     return this.http.post<string>(this.apiUrl + '/user/export', settings, this.httpOptions)
+  }
+
+  uploadScrapeSources(formData: FormData) {
+    return this.http.post<{sourceCount: number}>(this.apiUrl + '/scrapingSources', formData, this.httpOptions);
+  }
+
+  getScrapingSourcesCount() {
+    return this.http.get<number>(this.apiUrl + '/getScrapingSourcesCount', this.httpOptions);
+  }
+
+  getScrapingSourcePage(pageNumber: number) {
+    return this.http.get<ScrapeSourceInfo[]>(this.apiUrl + '/getScrapingSourcesPage/' + pageNumber, this.httpOptions);
   }
 }
