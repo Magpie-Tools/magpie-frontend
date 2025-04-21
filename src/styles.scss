@@ -126,7 +126,7 @@ body {
 }
 
 mat-icon {
-  margin-left: 3rem;
+  margin-left: 1rem;
   margin-right: 1rem;
   height: 30px !important;
 }
@@ -148,6 +148,7 @@ mat-icon.reset {
 .titleHeader {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .titleHeader mat-icon {

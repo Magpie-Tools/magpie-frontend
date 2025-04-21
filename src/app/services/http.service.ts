@@ -8,6 +8,7 @@ import {GlobalSettings} from '../models/GlobalSettings';
 import {UserSettings} from '../models/UserSettings';
 import {ExportSettings} from '../models/ExportSettings';
 import {ScrapeSourceInfo} from '../models/ScrapeSourceInfo';
+import {DashboardInfo} from '../models/DashboardInfo';
 
 @Injectable({
   providedIn: 'root'
@@ -103,5 +104,9 @@ export class HttpService {
       body: proxies,
       ...this.httpOptions
     });
+  }
+
+  getDashboardInfo() {
+    return this.http.get<DashboardInfo>(this.apiUrl + '/getDashboardInfo', this.httpOptions);
   }
 }
