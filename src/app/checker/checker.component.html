@@ -58,7 +58,10 @@
                 <input id="judge-url-{{i}}" formControlName="url" type="text" />
               </div>
               <div class="form-group">
-                <label for="judge-regex-{{i}}">Regex</label>
+                <label for="judge-regex-{{i}}">Regex
+                  <app-tooltip
+                  [text]="'If the regex is set to &quot;default&quot;, the program will validate the request based on the headers, which are used to determine whether a proxy is anonymous. If a custom regex is provided instead, the program will search for that pattern in the response and use it to decide whether the request was valid.'">
+                </app-tooltip></label>
                 <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
               </div>
               <button type="button" class="btn-remove mt-4" (click)="removeJudge(i)">

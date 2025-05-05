@@ -8,6 +8,7 @@ import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {SettingsService} from '../services/settings.service';
 import {SnackbarService} from '../services/snackbar.service';
 import {CommonModule} from '@angular/common';
+import {TooltipComponent} from '../tooltip/tooltip.component';
 
 @Component({
   selector: 'app-checker',
@@ -20,7 +21,8 @@ import {CommonModule} from '@angular/common';
     MatDivider,
     MatTab,
     MatTabGroup,
-    CommonModule
+    CommonModule,
+    TooltipComponent
   ],
   templateUrl: './checker.component.html',
   styleUrl: './checker.component.scss'
