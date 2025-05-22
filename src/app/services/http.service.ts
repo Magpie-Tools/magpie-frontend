@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {environment} from '../../environments/environment';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {User} from '../models/userModel';
 import {jwtToken} from '../models/jwtToken';
 import {ProxyInfo} from '../models/ProxyInfo';
@@ -16,18 +16,10 @@ import {DashboardInfo} from '../models/DashboardInfo';
 export class HttpService {
   private apiUrl = environment.apiUrl;
 
-  private jwtToken = ""
-
-  httpOptions = {
-    headers: new HttpHeaders({
-    })
-  };
-
   constructor(private http: HttpClient) { }
 
-  public setJWTToken(token: string) {
-    this.jwtToken = "Bearer " + token;
-    this.httpOptions.headers = this.httpOptions.headers.set('Authorization', this.jwtToken);
+  checkLogin() {
+    return this.http.get(this.apiUrl + '/checkLogin')
   }
 
   registerUser(user: User) {
@@ -39,74 +31,72 @@ export class HttpService {
   }
 
   uploadProxies(formData: FormData) {
-    return this.http.post<{proxyCount: number}>(this.apiUrl + '/addProxies', formData, this.httpOptions);
+    return this.http.post<{proxyCount: number}>(this.apiUrl + '/addProxies', formData);
   }
 
   deleteProxies(proxies: number[]) {
     return this.http.request<string>('delete', this.apiUrl + '/proxies', {
       body: proxies,
-      ...this.httpOptions
     });
   }
 
 
   getProxyPage(pageNumber: number) {
-    return this.http.get<ProxyInfo[]>(this.apiUrl + '/getProxyPage/' + pageNumber, this.httpOptions);
+    return this.http.get<ProxyInfo[]>(this.apiUrl + '/getProxyPage/' + pageNumber);
   }
 
   getProxyCount() {
-    return this.http.get<number>(this.apiUrl + '/getProxyCount', this.httpOptions);
+    return this.http.get<number>(this.apiUrl + '/getProxyCount');
   }
 
 
   saveGlobalSettings(payload: GlobalSettings) {
-    return this.http.post(environment.apiUrl + "/saveSettings", payload, this.httpOptions)
+    return this.http.post(environment.apiUrl + "/saveSettings", payload)
   }
 
   getGlobalSettings() {
-    return this.http.get<GlobalSettings>(this.apiUrl + '/global/settings', this.httpOptions);
+    return this.http.get<GlobalSettings>(this.apiUrl + '/global/settings');
   }
 
   getUserSettings() {
-    return this.http.get<UserSettings>(this.apiUrl + '/user/settings', this.httpOptions);
+    return this.http.get<UserSettings>(this.apiUrl + '/user/settings');
   }
 
   saveUserSettings(payload: UserSettings) {
-    return this.http.post(environment.apiUrl + "/user/settings", payload, this.httpOptions)
+    return this.http.post(environment.apiUrl + "/user/settings", payload)
   }
 
   saveUserScrapingSites(payload: string[]) {
-    return this.http.post(environment.apiUrl + "/user/scrapingSites", payload, this.httpOptions)
+    return this.http.post(environment.apiUrl + "/user/scrapingSites", payload)
   }
 
   getUserRole() {
-    return this.http.get<string>(this.apiUrl + '/user/role', this.httpOptions);
+    return this.http.get<string>(this.apiUrl + '/user/role');
   }
 
   exportProxies(settings: ExportSettings) {
-    return this.http.post<string>(this.apiUrl + '/user/export', settings, this.httpOptions)
+    return this.http.post<string>(this.apiUrl + '/user/export', settings)
   }
 
   uploadScrapeSources(formData: FormData) {
-    return this.http.post<{sourceCount: number}>(this.apiUrl + '/scrapingSources', formData, this.httpOptions);
+    return this.http.post<{sourceCount: number}>(this.apiUrl + '/scrapingSources', formData);
   }
 
   getScrapingSourcesCount() {
-    return this.http.get<number>(this.apiUrl + '/getScrapingSourcesCount', this.httpOptions);
+    return this.http.get<number>(this.apiUrl + '/getScrapingSourcesCount');
   }
 
   getScrapingSourcePage(pageNumber: number) {
-    return this.http.get<ScrapeSourceInfo[]>(this.apiUrl + '/getScrapingSourcesPage/' + pageNumber, this.httpOptions);
+    return this.http.get<ScrapeSourceInfo[]>(this.apiUrl + '/getScrapingSourcesPage/' + pageNumber);
   }
 
   deleteScrapingSource(proxies: number[]) {
     return this.http.request<string>('delete', this.apiUrl + '/scrapingSources', {
       body: proxies,
-      ...this.httpOptions
     });
   }
 
   getDashboardInfo() {
-    return this.http.get<DashboardInfo>(this.apiUrl + '/getDashboardInfo', this.httpOptions);
+    return this.http.get<DashboardInfo>(this.apiUrl + '/getDashboardInfo');
   }
 }

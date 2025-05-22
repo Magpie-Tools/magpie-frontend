@@ -43,6 +43,9 @@ $border-color: rgba(255, 255, 255, 0.2);
     supporting-text-color: #ffffff,
     container-shape: 6px,
   ));
+  @include mat.menu-overrides((
+    item-hover-state-layer-color: #545454
+  ));
   --mdc-outlined-text-field-outline-color: #b8b8b8; // Input border
   --mdc-outlined-text-field-label-text-color: #ededed; //Input label color
 }

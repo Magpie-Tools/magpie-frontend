@@ -13,5 +13,16 @@
   @if (UserService.isAdmin()) {
     <a class="navbar-item" routerLink="global/scraper" routerLinkActive="active"><h4>Global Scraper</h4></a>
   }
-  <a class="person" routerLink="account" routerLinkActive="active"><mat-icon svgIcon="person"></mat-icon></a>
+  <button id="account" class="person" [matMenuTriggerFor]="menu"><mat-icon svgIcon="person"></mat-icon></button>
 </nav>
+
+<mat-menu #menu="matMenu">
+  <button id="menu-settings" mat-menu-item routerLink="account" routerLinkActive="active">
+    <mat-icon svgIcon="settings"></mat-icon>
+    <span>Settings</span>
+  </button>
+  <button id="menu-logout" mat-menu-item (click)="user.logoutAndRedirect()">
+    <mat-icon svgIcon="signout"></mat-icon>
+    <span>Logout</span>
+  </button>
+</mat-menu>

@@ -40,7 +40,7 @@ export class LoginComponent {
     const user: User = { email, password };
     this.http.loginUser(user).subscribe({
       next: (response) => {
-        this.http.setJWTToken(response.token)
+        localStorage.setItem('magpie-jwt', response.token);
         UserService.setLoggedIn(true)
         UserService.setRole(response.role)
         this.router.navigate(["/"])

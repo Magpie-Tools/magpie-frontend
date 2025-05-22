@@ -50,7 +50,7 @@ export class RegisterComponent {
       // Send the data to the backend
       this.http.registerUser(user).subscribe({
         next: (response) => {
-          this.http.setJWTToken(response.token)
+          localStorage.setItem('magpie-jwt', response.token);
           UserService.setLoggedIn(true)
           this.user.getAndSetRole()
           SnackbarService.openSnackbar("Registration successful", 3000)

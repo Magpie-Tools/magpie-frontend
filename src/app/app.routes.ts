@@ -11,6 +11,7 @@ import {AuthGuardAdminService} from './services/authorization/auth-guard-admin.s
 import {AdminCheckerComponent} from './checker/admin-checker/admin-checker.component';
 import {AdminScraperComponent} from './scraper/admin-scraper/admin-scraper.component';
 import {UserScraperComponent} from './scraper/user-scraper/user-scraper.component';
+import {AuthLoginGuardService} from './services/authorization/auth-login-guard.service';
 
 export const routes: Routes = [
   {path: "account", component: AccountComponent, canActivate: [AuthGuardService]},
@@ -20,7 +21,7 @@ export const routes: Routes = [
   {path: "global/checker", component: AdminCheckerComponent, canActivate: [AuthGuardAdminService]},
   {path: "scraper", component: UserScraperComponent, canActivate: [AuthGuardService]},
   {path: "global/scraper", component: AdminScraperComponent, canActivate: [AuthGuardAdminService]},
-  {path: "register", component: RegisterComponent},
-  {path: "login", component: LoginComponent},
+  {path: "register", component: RegisterComponent, canActivate: [AuthLoginGuardService]},
+  {path: "login", component: LoginComponent, canActivate: [AuthLoginGuardService]},
   {path: "**", component: DashboardComponent, canActivate: [AuthGuardService]}
 ];

@@ -91,3 +91,40 @@ $personColor: #ffffff;
     transform: translateX(500%);
   }
 }
+
+.mat-mdc-menu-item > mat-icon {
+  margin-left: 1rem;
+  margin-right: 0.5rem;
+  height: 20px !important;
+}
+
+.mat-mdc-menu-item {
+  border: none;
+  box-shadow: none;
+  background-color: #2f2f2f;
+  border-radius: 0;
+}
+
+.mat-mdc-menu-item:hover {
+  background-color: #2f2f2f;
+}
+
+#account {
+  border: none;
+  box-shadow: none;
+}
+
+#menu-settings,
+#menu-logout {
+  border-radius: 0 !important;
+}
+
+#menu-settings {
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
+}
+
+#menu-logout {
+  border-bottom-left-radius: 5px !important;
+  border-bottom-right-radius: 5px !important;
+}
