@@ -3,6 +3,7 @@ $text-color: rgb(171, 171, 171);
 $navbar-background: #171717;
 $personColor: #ffffff;
 $border-color: rgba(255, 255, 255, 0.2);
+$darker-background: #cococo;
 
 @use '@angular/material' as mat;
 @include mat.core();
@@ -45,6 +46,12 @@ $border-color: rgba(255, 255, 255, 0.2);
   ));
   @include mat.menu-overrides((
     item-hover-state-layer-color: #545454
+  ));
+  @include mat.checkbox-overrides((
+    label-text-color: #b8b8b8,
+    selected-icon-color: $darker-background,
+    unselected-icon-color: $darker-background,
+    selected-checkmark-color: $logo-color,
   ));
   --mdc-outlined-text-field-outline-color: #b8b8b8; // Input border
   --mdc-outlined-text-field-label-text-color: #ededed; //Input label color
@@ -238,9 +245,10 @@ button, button[mat-raised-button] {
   background-color: #171717;
   color: #F8F8F2;
   border: 1px solid #348566;
-  border-radius: 12px;
+  border-radius: 10px;
+  //height: 2rem;
   cursor: pointer;
-  box-shadow: 0 0 5px rgba(92, 184, 92, 0.5);
+  //box-shadow: 0 0 5px rgba(92, 184, 92, 0.5);
 
   &:hover {
     background-color: darken(#2d2d2d, 5%);

@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import {environment} from '../../environments/environment';
 import {HttpClient} from '@angular/common/http';
-import {User} from '../models/userModel';
-import {jwtToken} from '../models/jwtToken';
+import {User} from '../models/UserModel';
+import {jwtToken} from '../models/JwtToken';
 import {ProxyInfo} from '../models/ProxyInfo';
 import {GlobalSettings} from '../models/GlobalSettings';
 import {UserSettings} from '../models/UserSettings';
 import {ExportSettings} from '../models/ExportSettings';
 import {ScrapeSourceInfo} from '../models/ScrapeSourceInfo';
 import {DashboardInfo} from '../models/DashboardInfo';
+import {ChangePassword} from '../models/ChangePassword';
 
 @Injectable({
   providedIn: 'root'
@@ -23,11 +24,15 @@ export class HttpService {
   }
 
   registerUser(user: User) {
-    return this.http.post<jwtToken>(this.apiUrl + '/register', user);
+    return this.http.post<jwtToken>(this.apiUrl + '/register', user)
   }
 
   loginUser(user: User) {
-    return this.http.post<jwtToken>(this.apiUrl + '/login', user);
+    return this.http.post<jwtToken>(this.apiUrl + '/login', user)
+  }
+
+  changePassword(changePassword: ChangePassword) {
+    return this.http.post<string>(this.apiUrl + '/changePassword', changePassword)
   }
 
   uploadProxies(formData: FormData) {

@@ -12,11 +12,20 @@ import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+
+  private static token: string = ""
+
+  static setToken(tok: string) {
+    this.token = tok
+  }
+
   intercept(
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const token = localStorage.getItem('magpie-jwt');
+    const token: string | null =
+      AuthInterceptor.token || localStorage.getItem('magpie-jwt');
+
     const authReq = token
       ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
       : req;

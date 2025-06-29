@@ -18,6 +18,8 @@
           <input matInput formControlName="password" type="password" />
         </mat-form-field>
 
+        <mat-checkbox [(ngModel)]="rememberPass" [ngModelOptions]="{standalone: true}">Remember login</mat-checkbox>
+
         <button mat-raised-button color="primary" type="submit">Login</button>
         <p class="switch-link">
           Don't have an account? <a routerLink="/register">Register</a>

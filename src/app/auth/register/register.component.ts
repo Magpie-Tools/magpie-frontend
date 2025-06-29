@@ -6,9 +6,10 @@ import {MatButton} from '@angular/material/button';
 import {Router, RouterLink} from '@angular/router';
 import {MatCard} from '@angular/material/card';
 import {HttpService} from '../../services/http.service';
-import {User} from '../../models/userModel';
+import {User} from '../../models/UserModel';
 import {UserService} from '../../services/authorization/user.service';
 import {SnackbarService} from '../../services/snackbar.service';
+import {AuthInterceptor} from '../../services/auth-interceptor.interceptor';
 
 @Component({
   selector: 'app-register',
@@ -44,19 +45,17 @@ export class RegisterComponent {
         return;
       }
 
-      // Create a User object
       const user: User = { email, password };
 
-      // Send the data to the backend
       this.http.registerUser(user).subscribe({
         next: (response) => {
-          localStorage.setItem('magpie-jwt', response.token);
+          AuthInterceptor.setToken(response.token)
           UserService.setLoggedIn(true)
           this.user.getAndSetRole()
           SnackbarService.openSnackbar("Registration successful", 3000)
           this.router.navigate(['/']);
         },
-        error: (error) => console.error('Registration failed', error),
+        error: (error) => SnackbarService.openSnackbar('Registration failed: ' + error.error.error, 3000),
       });
     }
   }
