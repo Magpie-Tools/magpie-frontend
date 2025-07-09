@@ -71,22 +71,26 @@ export class ScrapeSourceListComponent implements OnInit, AfterViewInit {
   }
 
   getAndSetScrapeSourcesList() {
-    this.http.getScrapingSourcePage(this.page).subscribe(res => {
-      this.dataSource.data = res;
+    this.http.getScrapingSourcePage(this.page).subscribe({
+      next: res => {
+        this.dataSource.data = res;
+      }, error: err => SnackbarService.openSnackbarDefault("Could not get scraping sources" + err.error.message)
     });
   }
 
   getAndSetScrapeSourceCount() {
-    this.http.getScrapingSourcesCount().subscribe(res => {
-      this.totalItems = res;
-      this.hasLoaded = true;
-      this.showAddScrapeSourceMessage.emit(this.totalItems === 0 && this.hasLoaded);
+    this.http.getScrapingSourcesCount().subscribe({
+      next: res => {
+        this.totalItems = res;
+        this.hasLoaded = true;
+        this.showAddScrapeSourceMessage.emit(this.totalItems === 0 && this.hasLoaded);
 
-      setTimeout(() => {
-        if (this.sort) {
-          this.dataSource.sort = this.sort;
-        }
-      });
+        setTimeout(() => {
+          if (this.sort) {
+            this.dataSource.sort = this.sort;
+          }
+        });
+      }, error: err => SnackbarService.openSnackbarDefault("Could not get scrape sources count " + err.error.message)
     });
   }
 
@@ -116,9 +120,11 @@ export class ScrapeSourceListComponent implements OnInit, AfterViewInit {
   deleteSelectedSources(): void {
     const selectedProxies = this.selection.selected;
     if (selectedProxies.length > 0) {
-      this.http.deleteScrapingSource(selectedProxies.map(proxy => proxy.id)).subscribe(res => {
-        SnackbarService.openSnackbar(res, 3000);
-        this.totalItems -= selectedProxies.length;
+      this.http.deleteScrapingSource(selectedProxies.map(proxy => proxy.id)).subscribe({
+        next: res => {
+          SnackbarService.openSnackbar(res, 3000);
+          this.totalItems -= selectedProxies.length;
+        }, error: err => SnackbarService.openSnackbarDefault("Could not delete scraping source "+ err.error.message)
       });
       this.selection.clear();
       this.getAndSetScrapeSourcesList();

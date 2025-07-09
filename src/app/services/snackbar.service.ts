@@ -18,6 +18,9 @@ export class SnackbarService {
   public static openSnackbar(text: string, duration: number): void {
     this.snackBar.open(text, '', { duration });
   }
+  public static openSnackbarDefault(text: string): void {
+    this.openSnackbar(text, 5000);
+  }
 
   public static openSnackbarAction(text: string, action: string, duration: number): void {
     this.snackBar.open(text, action, { duration });

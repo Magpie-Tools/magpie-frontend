@@ -20,6 +20,7 @@ import {SettingsService} from '../../../services/settings.service';
 import {HttpService} from '../../../services/http.service';
 import {ProxyInfo} from '../../../models/ProxyInfo';
 import {ExportSettings} from '../../../models/ExportSettings';
+import {SnackbarService} from '../../../services/snackbar.service';
 
 @Component({
   selector: 'app-export-proxies-dialog',
@@ -96,26 +97,28 @@ export class ExportProxiesDialogComponent {
     const randomCode = this.generateRandomCode(4);
     const fileName = `${formattedDate}-${randomCode}-magpie.txt`;
 
-    this.http.exportProxies(exportSettings).subscribe(res => {
-      const blob = new Blob([res], { type: 'text/plain' });
+    this.http.exportProxies(exportSettings).subscribe({
+      next: res => {
+        const blob = new Blob([res], { type: 'text/plain' });
 
-      const url = window.URL.createObjectURL(blob);
+        const url = window.URL.createObjectURL(blob);
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName; // Name of the downloaded file
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName; // Name of the downloaded file
 
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
 
-      window.URL.revokeObjectURL(url);
+        window.URL.revokeObjectURL(url);
 
-      this.dialogRef.close({
-        option: this.exportOption,
-        criteria: this.exportForm.value.output,
-        proxyStatus: this.exportForm.value.proxyStatus
-      });
+        this.dialogRef.close({
+          option: this.exportOption,
+          criteria: this.exportForm.value.output,
+          proxyStatus: this.exportForm.value.proxyStatus
+        });
+      }, error: err => SnackbarService.openSnackbarDefault("Error while exporting proxies: " + err.error.message)
     });
 
   }

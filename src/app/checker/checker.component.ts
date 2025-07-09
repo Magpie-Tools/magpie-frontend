@@ -103,6 +103,7 @@ export class CheckerComponent implements OnInit {
     this.settingsService.saveUserSettings(formValues).subscribe({
       next: (resp) => {
         SnackbarService.openSnackbar(resp.message, 3000)
+        this.settingsForm.markAsPristine()
       },
       error: (err) => {
         console.error("Error saving settings:", err);

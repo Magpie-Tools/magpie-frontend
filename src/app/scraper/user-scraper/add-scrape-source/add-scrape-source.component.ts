@@ -6,6 +6,7 @@ import {ProcesingPopupComponent} from "../../../proxies/add-proxies/procesing-po
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {TooltipComponent} from "../../../tooltip/tooltip.component";
 import {HttpService} from '../../../services/http.service';
+import {SnackbarService} from '../../../services/snackbar.service';
 
 @Component({
   selector: 'app-add-scrape-source',
@@ -151,8 +152,9 @@ export class AddScrapeSourceComponent {
           this.addTextAreaSources();
           this.showAddScrapeSourcesMessage.emit(false);
         },
-        error: () => {
+        error: (err) => {
           this.popupStatus = 'error';
+          SnackbarService.openSnackbarDefault("There has been an error while uploading the scrape sources! " + err.error.message)
         },
       });
     } else {

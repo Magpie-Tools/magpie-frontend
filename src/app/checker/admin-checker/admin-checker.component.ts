@@ -47,10 +47,13 @@ export class AdminCheckerComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    this.settingsService.getCheckerSettings().pipe(take(1)).subscribe(checkerSettings => {
-      if (checkerSettings) {
-        this.updateFormWithCheckerSettings(checkerSettings);
-      }
+    this.settingsService.getCheckerSettings().pipe(take(1)).subscribe({
+      next: checkerSettings => {
+        if (checkerSettings) {
+          this.updateFormWithCheckerSettings(checkerSettings);
+        }
+      },
+      error: err => {SnackbarService.openSnackbarDefault("Could not get checker settings: " + err.error.message)}
     });
 
     const settings = this.settingsService.getGlobalSettings();
@@ -58,7 +61,7 @@ export class AdminCheckerComponent implements OnInit{
       this.updateProtocolsAndBlacklist(settings.protocols, settings.blacklist_sources);
     }
 
-    const dynamicControl = this.settingsForm.get('dynamic_threads');
+    const dynamicControl = this.settingsForm.get('dynamic_threads')!;
     const threadsControl = this.settingsForm.get('threads');
 
     // Check initial state and set the threads control accordingly.
@@ -68,13 +71,9 @@ export class AdminCheckerComponent implements OnInit{
       threadsControl?.enable();
     }
 
-    // Subscribe to future changes on dynamic_threads.
-    dynamicControl?.valueChanges.subscribe(dynamic => {
-      if (dynamic) {
-        threadsControl?.disable();
-      } else {
-        threadsControl?.enable();
-      }
+    dynamicControl?.valueChanges?.subscribe({
+      next: dynamic => dynamic ? threadsControl?.disable() : threadsControl?.enable(),
+      error: err => SnackbarService.openSnackbarDefault("Could not get dynamic thread info " + err.error.message)
     });
   }
 
@@ -235,6 +234,7 @@ export class AdminCheckerComponent implements OnInit{
     this.settingsService.saveGlobalSettings(this.settingsForm.value).subscribe({
       next: (resp) => {
         SnackbarService.openSnackbar(resp.message, 3000)
+        this.settingsForm.markAsPristine()
       },
       error: (err) => {
         console.error("Error saving settings:", err);
@@ -248,33 +248,41 @@ export class AdminCheckerComponent implements OnInit{
       url: [''],
       regex: ['default']
     }));
+    this.settingsForm.markAsDirty();
   }
 
   removeJudge(index: number): void {
     this.judges.removeAt(index);
+    this.settingsForm.markAsDirty();
   }
 
   addBlacklistedUrl(): void {
     this.blacklisted.push(this.fb.control(''));
+    this.settingsForm.markAsDirty();
   }
 
   removeBlacklistedUrl(index: number): void {
     this.blacklisted.removeAt(index);
+    this.settingsForm.markAsDirty();
   }
 
   addStandardHeader(): void {
     this.standardHeaders.push(this.fb.control(''));
+    this.settingsForm.markAsDirty();
   }
 
   removeStandardHeader(index: number): void {
     this.standardHeaders.removeAt(index);
+    this.settingsForm.markAsDirty();
   }
 
   addProxyHeader(): void {
     this.proxyHeaders.push(this.fb.control(''));
+    this.settingsForm.markAsDirty();
   }
 
   removeProxyHeader(index: number): void {
     this.proxyHeaders.removeAt(index);
+    this.settingsForm.markAsDirty();
   }
 }

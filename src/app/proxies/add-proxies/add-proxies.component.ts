@@ -6,6 +6,7 @@ import {MatTooltip} from "@angular/material/tooltip";
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {HttpService} from '../../services/http.service';
 import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.component';
+import {SnackbarService} from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-add-proxies',
@@ -162,8 +163,9 @@ export class AddProxiesComponent {
           this.addTextAreaProxies();
           this.showAddProxiesMessage.emit(false);
         },
-        error: () => {
+        error: (err) => {
           this.popupStatus = 'error';
+          SnackbarService.openSnackbarDefault("Could not upload proxies: " + err.error.message)
         },
       });
     } else {

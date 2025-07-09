@@ -9,6 +9,7 @@ import {MatInput} from '@angular/material/input';
 import {NgForOf} from '@angular/common';
 import {interval, startWith, switchMap} from 'rxjs';
 import {FlashOnChangeDirective} from '../ui-elements/flash-on-change/flash-on-change.directive';
+import {SnackbarService} from '../services/snackbar.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,6 +37,9 @@ export class DashboardComponent implements OnInit{
     interval(10_000).pipe(
       startWith(0),
       switchMap(() => this.http.getDashboardInfo())
-    ).subscribe(info => this.dashboardInfo = info);
+    ).subscribe({
+      next: info => this.dashboardInfo = info,
+      error: err => SnackbarService.openSnackbarDefault("Could not get dashboard info: " + err.error.message)
+    });
   }
 }

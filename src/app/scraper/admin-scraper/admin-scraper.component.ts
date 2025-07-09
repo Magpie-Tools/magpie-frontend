@@ -46,10 +46,12 @@ export class AdminScraperComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.settingsService.getScraperSettings().pipe(take(1)).subscribe(scraperSettings => {
-      if (scraperSettings) {
-        this.updateFormWithScraperSettings(scraperSettings);
-      }
+    this.settingsService.getScraperSettings().pipe(take(1)).subscribe({
+      next: scraperSettings => {
+        if (scraperSettings) {
+          this.updateFormWithScraperSettings(scraperSettings);
+        }
+      }, error: err => SnackbarService.openSnackbarDefault("Could not get scraper settings" + err.error.message)
     });
 
 
@@ -57,9 +59,11 @@ export class AdminScraperComponent implements OnInit {
     const dynamicCtrl  = this.settingsForm.get('scraper_dynamic_threads');
 
     /* whenever the checkbox toggles, enable/disable “threads” */
-    dynamicCtrl!.valueChanges.subscribe((isDynamic: boolean) => {
-      isDynamic ? threadsCtrl!.disable({ emitEvent: false })
-        : threadsCtrl!.enable({ emitEvent: false });
+    dynamicCtrl!.valueChanges.subscribe({
+      next: (isDynamic: boolean) => {
+        isDynamic ? threadsCtrl!.disable({ emitEvent: false })
+          : threadsCtrl!.enable({ emitEvent: false });
+      }, error: err => SnackbarService.openSnackbarDefault("Error while toggling threadCtrl: " + err.error.message)
     });
   }
 
@@ -103,10 +107,11 @@ export class AdminScraperComponent implements OnInit {
     this.settingsService.saveGlobalSettings(this.settingsForm.value).subscribe({
       next: (resp) => {
         SnackbarService.openSnackbar(resp.message, 3000)
+        this.settingsForm.markAsPristine()
       },
       error: (err) => {
         console.error("Error saving settings:", err);
-        SnackbarService.openSnackbar("Failed to save settings!", 3000);
+        SnackbarService.openSnackbarDefault("Failed to save settings: " + err.error.message);
       }
     });
   }

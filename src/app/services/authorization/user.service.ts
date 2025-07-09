@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpService} from '../http.service';
 import {Router} from '@angular/router';
+import {SnackbarService} from '../snackbar.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,10 @@ export class UserService {
   }
 
   public getAndSetRole() {
-    this.http.getUserRole().subscribe(res => {UserService.role = res;})
+    this.http.getUserRole().subscribe({
+      next: res => {UserService.role = res;},
+      error: err => SnackbarService.openSnackbarDefault("Error while getting user role! " + err.error.message)
+    })
   }
 
   public static isLoggedIn() {
