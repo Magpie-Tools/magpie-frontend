@@ -61,9 +61,9 @@ export class LoginComponent {
       error: (err) => {
         UserService.setLoggedIn(false)
         if (err.status === 401) {
-          SnackbarService.openSnackbar("Username or Password is incorrect", 3000)
+          SnackbarService.openSnackbarDefault("Username or Password is incorrect")
         } else {
-          SnackbarService.openSnackbar("Something went wrong while login! Error code: " + err.status, 3000)
+          SnackbarService.openSnackbarDefault("Something went wrong while login! Error code: " + err.status)
         }
       }
     })

@@ -82,13 +82,15 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
   }
 
   getAndSetProxyList() {
-    this.http.getProxyPage(this.page).subscribe(res => {
-      this.dataSource.data = res;
-    });
+    this.http.getProxyPage(this.page).subscribe({
+      next: res => this.dataSource.data = res,
+      error: err => SnackbarService.openSnackbarDefault("Could not get proxy page: " + err.error.message)
+    }
+  );
   }
 
   getAndSetProxyCount() {
-    this.http.getProxyCount().subscribe(res => {
+    this.http.getProxyCount().subscribe({next: res => {
       this.totalItems = res;
       this.hasLoaded = true;
       this.showAddProxiesMessage.emit(this.totalItems === 0 && this.hasLoaded);
@@ -104,6 +106,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
           };
         }
       });
+    }, error: err => SnackbarService.openSnackbarDefault("Error while getting proxy count: " + err.error.message)
     });
   }
 
@@ -134,9 +137,11 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
   deleteSelectedProxies(): void {
     const selectedProxies = this.selection.selected;
     if (selectedProxies.length > 0) {
-      this.http.deleteProxies(selectedProxies.map(proxy => proxy.id)).subscribe(res => {
-        SnackbarService.openSnackbar(res, 3000);
-        this.totalItems -= selectedProxies.length;
+      this.http.deleteProxies(selectedProxies.map(proxy => proxy.id)).subscribe({
+        next: res => {
+          SnackbarService.openSnackbar(res, 3000);
+          this.totalItems -= selectedProxies.length;
+        }, error: err => SnackbarService.openSnackbarDefault("Could not delete proxies" + err.error.message)
       });
       this.selection.clear();
       this.getAndSetProxyList();
@@ -150,21 +155,23 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
       data: { selectedProxies: this.selection.selected }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Determine which proxies to export based on the user's choice
-        if (result.option === 'selected') {
-          this.exportProxies(this.selection.selected);
-        } else if (result.option === 'all') {
-          this.exportProxies(this.dataSource.data);
-        } else if (result.option === 'filter') {
-          const filtered = this.dataSource.data.filter(proxy => {
-            // Example filter: check if the proxy's IP address includes the filter criteria
-            return proxy.ip.includes(result.criteria);
-          });
-          this.exportProxies(filtered);
+    dialogRef.afterClosed().subscribe({
+      next: result => {
+        if (result) {
+          // Determine which proxies to export based on the user's choice
+          if (result.option === 'selected') {
+            this.exportProxies(this.selection.selected);
+          } else if (result.option === 'all') {
+            this.exportProxies(this.dataSource.data);
+          } else if (result.option === 'filter') {
+            const filtered = this.dataSource.data.filter(proxy => {
+              // Example filter: check if the proxy's IP address includes the filter criteria
+              return proxy.ip.includes(result.criteria);
+            });
+            this.exportProxies(filtered);
+          }
         }
-      }
+      }, error: err => SnackbarService.openSnackbarDefault("Error while closing dialog " + err.error.message)
     });
   }
 

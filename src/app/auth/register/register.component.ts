@@ -55,7 +55,7 @@ export class RegisterComponent {
           SnackbarService.openSnackbar("Registration successful", 3000)
           this.router.navigate(['/']);
         },
-        error: (error) => SnackbarService.openSnackbar('Registration failed: ' + error.error.error, 3000),
+        error: (error) => SnackbarService.openSnackbarDefault('Registration failed: ' + error.error.error),
       });
     }
   }

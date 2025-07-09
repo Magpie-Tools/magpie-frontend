@@ -53,7 +53,7 @@ export class AccountComponent {
 
       this.http.changePassword(changePass).subscribe({
         next:  res  => SnackbarService.openSnackbar(res, 5000),
-        error: err => SnackbarService.openSnackbar(err.error.message ?? 'Something went wrong', 5000)
+        error: err => SnackbarService.openSnackbar("There has been an error while changing the password! " + err.error.message, 5000)
       });
 
       // this.passwordForm.reset();
