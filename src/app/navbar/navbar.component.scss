@@ -1,96 +1,121 @@
 /* Variables */
 $navbar-background: #171717;
 $text-color: rgb(171 171 171);
-$border-color: rgba(255, 255, 255, 0.2);
+$border-color: rgba(255, 255, 255, 0.1);
 $personColor: #ffffff;
+$navbar-width: 240px; // Define a variable for the width
+
+/* New style for the main content area */
+.main-content {
+  margin-left: $navbar-width; // Push content to the right of the navbar
+  padding: 2rem;
+}
 
 .navbar {
-  position: relative;
+  position: fixed; // Keep it visible on scroll
+  top: 0;
+  left: 0;
+  height: 100vh; // Full viewport height
+  width: $navbar-width; // Set a fixed width
   background-color: $navbar-background;
   display: flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  border-bottom: 2px solid $navbar-background;
+  flex-direction: column; // Stack items vertically
+  align-items: center; // Center items horizontally in the container
+  padding: 0; // Remove previous padding
+  border-right: 1px solid $border-color; // Change border from bottom to right
 
   h5 {
     color: white;
-    margin-right: 2em;
+    margin: 0;
   }
 
   a {
     text-decoration: none;
+    width: 100%; // Make links take full width
   }
 
   .navbar-logo {
     display: flex;
     align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    width: 100%;
+    border-bottom: 1px solid $border-color;
+    margin-bottom: 1rem;
 
     img {
       height: 40px;
       margin-right: 1em;
     }
 
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -2px; /* Adjust to align with the border */
-      left: 0;
-      width: 20%; /* Adjust this percentage to make the line shorter */
-      height: 2px;
-      background-color: #4ed09e;
-      animation: moveLine 3s infinite;
-    }
+    // The animated line is removed as it fits better in a horizontal layout
   }
 
-    .navbar-item {
-      //font-size: 1.2rem;
-      font-weight: bold;
-      text-decoration: none;
-      color: $text-color;
-      position: relative; /* Position relative for the pseudo-element */
-
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: -5px; /* Position the border below the text */
-        left: 50%; /* Start from the center */
-        width: 0; /* Start with no width */
-        height: 2px; /* Border height */
-        background-color: $navbar-background; /* Border color */
-        transition: width 0.3s ease, left 0.3s ease; /* Smooth transition */
-      }
-
-      &:hover::after {
-        width: 100%; /* Expand to full width on hover */
-        left: 0; /* Move to the left */
-      }
-    }
-
-    .navbar-item + .navbar-item {
-      margin-left: 1.5rem;
-      border-left: 0.01rem solid $navbar-background;
-      padding-left: 1.5rem;
-    }
-
-    .person {
-      margin-left: auto;
-      margin-right: 0;
-      font-weight: bold;
-      text-decoration: none;
-      color: $personColor;
-    }
-}
-
-
-/* Keyframes for the animation */
-@keyframes moveLine {
-  0% {
-    transform: translateX(-100%);
+  .nav-items {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
-  100% {
-    transform: translateX(500%);
+
+  .navbar-item {
+    font-weight: bold;
+    text-decoration: none;
+    color: $text-color;
+    position: relative;
+    padding: 1rem 1.5rem; // Add vertical and horizontal padding
+    transition: background-color 0.3s ease, color 0.3s ease;
+
+    h4 {
+      margin: 0;
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    &.active {
+      color: #35987c;
+      //background-color: ;
+    }
+
+    // The underline hover effect is removed in favor of a background color change
+    // You can keep it if you prefer, but this is cleaner for a sidebar.
+  }
+
+  // This rule is no longer needed
+  // .navbar-item + .navbar-item { ... }
+
+  .account-section {
+    margin-top: auto; // This is the key to pushing it to the bottom
+    width: 100%;
+    border-top: 1px solid $border-color;
+    position: relative;
+  }
+
+  .person {
+    color: $personColor;
+    width: 100%;
+    padding: 1.25rem 0;
+    border-radius: 0;
+    background: none;
+    border: none;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
   }
 }
+
+
+///* Keyframes for the animation */
+//@keyframes moveLine {
+//  0% {
+//    transform: translateX(-100%);
+//  }
+//  100% {
+//    transform: translateX(500%);
+//  }
+//}
 
 .mat-mdc-menu-item > mat-icon {
   margin-left: 1rem;
@@ -120,11 +145,11 @@ $personColor: #ffffff;
 }
 
 #menu-settings {
-  border-top-left-radius: 5px !important;
-  border-top-right-radius: 5px !important;
+  border-bottom-left-radius: 5px !important;
+  border-bottom-right-radius: 5px !important;
 }
 
 #menu-logout {
-  border-bottom-left-radius: 5px !important;
-  border-bottom-right-radius: 5px !important;
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
 }

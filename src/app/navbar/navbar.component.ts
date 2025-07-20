@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
-import {RouterLink, RouterLinkActive} from '@angular/router';
+import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {UserService} from "../services/authorization/user.service";
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {MatButton} from '@angular/material/button';
@@ -16,6 +16,7 @@ import {MatButton} from '@angular/material/button';
     MatMenu,
     MatMenuItem,
     MatButton,
+    RouterOutlet,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',

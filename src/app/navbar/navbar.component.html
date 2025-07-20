@@ -3,26 +3,32 @@
     <img src="../../assets/logo/magpie-light.png" alt="Logo" />
     <h5>M A G P I E</h5>
   </a>
-  <a class="navbar-item" routerLink="" routerLinkActive="active"><h4>Dashboard</h4></a>
-  <a class="navbar-item" routerLink="proxies" routerLinkActive="active"><h4>Proxies</h4></a>
-  <a class="navbar-item" routerLink="checker" routerLinkActive="active"><h4>Checker</h4></a>
-  @if (UserService.isAdmin()) {
-    <a class="navbar-item" routerLink="global/checker" routerLinkActive="active"><h4>Global Checker</h4></a>
-  }
-  <a class="navbar-item" routerLink="scraper" routerLinkActive="active"><h4>Scraper</h4></a>
-  @if (UserService.isAdmin()) {
-    <a class="navbar-item" routerLink="global/scraper" routerLinkActive="active"><h4>Global Scraper</h4></a>
-  }
-  <button id="account" class="person" [matMenuTriggerFor]="menu"><mat-icon svgIcon="person"></mat-icon></button>
+
+  <div class="nav-items">
+    <a class="navbar-item" routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><h4>Dashboard</h4></a>
+    <a class="navbar-item" routerLink="proxies" routerLinkActive="active"><h4>Proxies</h4></a>
+    <a class="navbar-item" routerLink="checker" routerLinkActive="active"><h4>Checker</h4></a>
+    @if (UserService.isAdmin()) {
+      <a class="navbar-item" routerLink="global/checker" routerLinkActive="active"><h4>Global Checker</h4></a>
+    }
+    <a class="navbar-item" routerLink="scraper" routerLinkActive="active"><h4>Scraper</h4></a>
+    @if (UserService.isAdmin()) {
+      <a class="navbar-item" routerLink="global/scraper" routerLinkActive="active"><h4>Global Scraper</h4></a>
+    }
+  </div>
+
+  <div class="account-section">
+    <button id="account" class="person" [matMenuTriggerFor]="menu"><mat-icon svgIcon="person"></mat-icon></button>
+  </div>
 </nav>
 
-<mat-menu #menu="matMenu">
-  <button id="menu-settings" mat-menu-item routerLink="account" routerLinkActive="active">
-    <mat-icon svgIcon="settings"></mat-icon>
-    <span>Settings</span>
-  </button>
+<mat-menu #menu="matMenu" xPosition="after">
   <button id="menu-logout" mat-menu-item (click)="user.logoutAndRedirect()">
     <mat-icon svgIcon="signout"></mat-icon>
     <span>Logout</span>
+  </button>
+  <button id="menu-settings" mat-menu-item routerLink="account" routerLinkActive="active">
+    <mat-icon svgIcon="settings"></mat-icon>
+    <span>Settings</span>
   </button>
 </mat-menu>
