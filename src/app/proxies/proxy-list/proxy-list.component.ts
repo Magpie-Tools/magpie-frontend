@@ -27,30 +27,29 @@ import { MatDialog } from '@angular/material/dialog';
 import {ExportProxiesDialogComponent} from './export-proxies-dialog/export-proxies-dialog.component';
 
 @Component({
-  selector: 'app-proxy-list',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    FormsModule,
-    MatCellDef,
-    MatCell,
-    MatHeaderCellDef,
-    MatHeaderCell,
-    MatColumnDef,
-    MatTable,
-    MatSortModule,
-    MatPaginator,
-    MatHeaderRow,
-    MatRow,
-    DatePipe,
-    MatRowDef,
-    MatHeaderRowDef,
-    LoadingComponent,
-    MatButton,
-    MatCheckbox
-  ],
-  templateUrl: './proxy-list.component.html',
-  styleUrls: ['./proxy-list.component.scss']
+    selector: 'app-proxy-list',
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        MatCellDef,
+        MatCell,
+        MatHeaderCellDef,
+        MatHeaderCell,
+        MatColumnDef,
+        MatTable,
+        MatSortModule,
+        MatPaginator,
+        MatHeaderRow,
+        MatRow,
+        DatePipe,
+        MatRowDef,
+        MatHeaderRowDef,
+        LoadingComponent,
+        MatButton,
+        MatCheckbox
+    ],
+    templateUrl: './proxy-list.component.html',
+    styleUrls: ['./proxy-list.component.scss']
 })
 export class ProxyListComponent implements OnInit, AfterViewInit {
   @Output() showAddProxiesMessage = new EventEmitter<boolean>();

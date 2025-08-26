@@ -9,18 +9,17 @@ import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.compone
 import {SnackbarService} from '../../services/snackbar.service';
 
 @Component({
-  selector: 'app-add-proxies',
-  standalone: true,
-  imports: [
-    CheckboxComponent,
-    FormsModule,
-    MatIcon,
-    MatTooltip,
-    TooltipComponent,
-    ProcesingPopupComponent
-  ],
-  templateUrl: './add-proxies.component.html',
-  styleUrl: './add-proxies.component.scss'
+    selector: 'app-add-proxies',
+    imports: [
+        CheckboxComponent,
+        FormsModule,
+        MatIcon,
+        MatTooltip,
+        TooltipComponent,
+        ProcesingPopupComponent
+    ],
+    templateUrl: './add-proxies.component.html',
+    styleUrl: './add-proxies.component.scss'
 })
 export class AddProxiesComponent {
   @Output() showAddProxiesMessage = new EventEmitter<boolean>();

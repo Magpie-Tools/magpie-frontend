@@ -11,21 +11,20 @@ import {CommonModule} from '@angular/common';
 import {TooltipComponent} from '../tooltip/tooltip.component';
 
 @Component({
-  selector: 'app-checker',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    FormsModule,
-    MatIcon,
-    CheckboxComponent,
-    MatDivider,
-    MatTab,
-    MatTabGroup,
-    CommonModule,
-    TooltipComponent
-  ],
-  templateUrl: './checker.component.html',
-  styleUrl: './checker.component.scss'
+    selector: 'app-checker',
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        MatIcon,
+        CheckboxComponent,
+        MatDivider,
+        MatTab,
+        MatTabGroup,
+        CommonModule,
+        TooltipComponent
+    ],
+    templateUrl: './checker.component.html',
+    styleUrl: './checker.component.scss'
 })
 export class CheckerComponent implements OnInit {
   settingsForm: FormGroup;

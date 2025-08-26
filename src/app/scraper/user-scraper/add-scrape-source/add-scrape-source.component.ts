@@ -9,19 +9,18 @@ import {HttpService} from '../../../services/http.service';
 import {SnackbarService} from '../../../services/snackbar.service';
 
 @Component({
-  selector: 'app-add-scrape-source',
-  standalone: true,
-  imports: [
-    CheckboxComponent,
-    MatIcon,
-    MatTooltip,
-    ProcesingPopupComponent,
-    ReactiveFormsModule,
-    TooltipComponent,
-    FormsModule
-  ],
-  templateUrl: './add-scrape-source.component.html',
-  styleUrl: './add-scrape-source.component.scss'
+    selector: 'app-add-scrape-source',
+    imports: [
+        CheckboxComponent,
+        MatIcon,
+        MatTooltip,
+        ProcesingPopupComponent,
+        ReactiveFormsModule,
+        TooltipComponent,
+        FormsModule
+    ],
+    templateUrl: './add-scrape-source.component.html',
+    styleUrl: './add-scrape-source.component.scss'
 })
 export class AddScrapeSourceComponent {
   @Output() showAddScrapeSourcesMessage = new EventEmitter<boolean>();

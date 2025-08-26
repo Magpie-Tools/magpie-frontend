@@ -12,19 +12,18 @@ import {SnackbarService} from '../../services/snackbar.service';
 import {AuthInterceptor} from '../../services/auth-interceptor.interceptor';
 
 @Component({
-  selector: 'app-register',
-  standalone: true,
-  imports: [
-    MatLabel,
-    MatFormField,
-    ReactiveFormsModule,
-    MatInput,
-    MatButton,
-    RouterLink,
-    MatCard
-  ],
-  templateUrl: './register.component.html',
-  styleUrl: '../auth.component.scss'
+    selector: 'app-register',
+    imports: [
+        MatLabel,
+        MatFormField,
+        ReactiveFormsModule,
+        MatInput,
+        MatButton,
+        RouterLink,
+        MatCard
+    ],
+    templateUrl: './register.component.html',
+    styleUrl: '../auth.component.scss'
 })
 export class RegisterComponent {
   registerForm: FormGroup;

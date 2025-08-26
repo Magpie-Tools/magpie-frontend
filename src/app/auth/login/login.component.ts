@@ -13,21 +13,20 @@ import {MatCheckbox} from '@angular/material/checkbox';
 import {AuthInterceptor} from '../../services/auth-interceptor.interceptor';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [
-    MatLabel,
-    MatFormField,
-    ReactiveFormsModule,
-    MatButton,
-    RouterLink,
-    MatCard,
-    MatInput,
-    MatCheckbox,
-    FormsModule
-  ],
-  templateUrl: './login.component.html',
-  styleUrl: '../auth.component.scss'
+    selector: 'app-login',
+    imports: [
+        MatLabel,
+        MatFormField,
+        ReactiveFormsModule,
+        MatButton,
+        RouterLink,
+        MatCard,
+        MatInput,
+        MatCheckbox,
+        FormsModule
+    ],
+    templateUrl: './login.component.html',
+    styleUrl: '../auth.component.scss'
 })
 export class LoginComponent {
   loginForm: FormGroup;

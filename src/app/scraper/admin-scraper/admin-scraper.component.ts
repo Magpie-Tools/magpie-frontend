@@ -15,24 +15,23 @@ import {SnackbarService} from '../../services/snackbar.service';
 import {take} from 'rxjs/operators';
 
 @Component({
-  selector: 'app-admin-scraper',
-  standalone: true,
-  imports: [
-    MatIcon,
-    NgForOf,
-    ReactiveFormsModule,
-    CheckboxComponent,
-    MatDivider,
-    MatTab,
-    MatTabGroup,
-    MatFormField,
-    MatOption,
-    MatSelect,
-    MatTooltip,
-    TooltipComponent
-  ],
-  templateUrl: './admin-scraper.component.html',
-  styleUrl: './admin-scraper.component.scss'
+    selector: 'app-admin-scraper',
+    imports: [
+        MatIcon,
+        NgForOf,
+        ReactiveFormsModule,
+        CheckboxComponent,
+        MatDivider,
+        MatTab,
+        MatTabGroup,
+        MatFormField,
+        MatOption,
+        MatSelect,
+        MatTooltip,
+        TooltipComponent
+    ],
+    templateUrl: './admin-scraper.component.html',
+    styleUrl: './admin-scraper.component.scss'
 })
 export class AdminScraperComponent implements OnInit {
   daysList = Array.from({ length: 31 }, (_, i) => i);

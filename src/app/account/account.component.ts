@@ -11,18 +11,17 @@ import {ChangePassword} from '../models/ChangePassword';
 import {SnackbarService} from '../services/snackbar.service';
 
 @Component({
-  selector: 'app-account',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-  ],
-  templateUrl: './account.component.html',
-  styleUrls: ['./account.component.scss'],
+    selector: 'app-account',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+    ],
+    templateUrl: './account.component.html',
+    styleUrls: ['./account.component.scss']
 })
 export class AccountComponent {
   passwordForm: FormGroup;

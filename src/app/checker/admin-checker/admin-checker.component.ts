@@ -15,25 +15,24 @@ import {SnackbarService} from '../../services/snackbar.service';
 import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
-  selector: 'app-admin-checker',
-  standalone: true,
-  imports: [
-    CheckboxComponent,
-    FormsModule,
-    MatDivider,
-    MatFormField,
-    MatIcon,
-    MatOption,
-    MatSelect,
-    MatTab,
-    MatTabGroup,
-    NgForOf,
-    ReactiveFormsModule,
-    TooltipComponent,
-    MatTooltip
-  ],
-  templateUrl: './admin-checker.component.html',
-  styleUrl: './admin-checker.component.scss'
+    selector: 'app-admin-checker',
+    imports: [
+        CheckboxComponent,
+        FormsModule,
+        MatDivider,
+        MatFormField,
+        MatIcon,
+        MatOption,
+        MatSelect,
+        MatTab,
+        MatTabGroup,
+        NgForOf,
+        ReactiveFormsModule,
+        TooltipComponent,
+        MatTooltip
+    ],
+    templateUrl: './admin-checker.component.html',
+    styleUrl: './admin-checker.component.scss'
 })
 export class AdminCheckerComponent implements OnInit{
   settingsForm: FormGroup;

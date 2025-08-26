@@ -6,18 +6,17 @@ import {ProxyListComponent} from './proxy-list/proxy-list.component';
 import {AddProxiesComponent} from './add-proxies/add-proxies.component';
 
 @Component({
-  selector: 'app-proxies',
-  standalone: true,
-  imports: [
-    MatIcon,
-    ReactiveFormsModule,
-    FormsModule,
-    MatSortModule,
-    ProxyListComponent,
-    AddProxiesComponent,
-  ],
-  templateUrl: './proxies.component.html',
-  styleUrl: './proxies.component.scss'
+    selector: 'app-proxies',
+    imports: [
+        MatIcon,
+        ReactiveFormsModule,
+        FormsModule,
+        MatSortModule,
+        ProxyListComponent,
+        AddProxiesComponent,
+    ],
+    templateUrl: './proxies.component.html',
+    styleUrl: './proxies.component.scss'
 })
 export class ProxiesComponent {
   showProxyList: boolean = true;

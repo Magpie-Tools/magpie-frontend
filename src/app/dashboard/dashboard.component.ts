@@ -12,19 +12,18 @@ import {FlashOnChangeDirective} from '../ui-elements/flash-on-change/flash-on-ch
 import {SnackbarService} from '../services/snackbar.service';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [
-    MatIcon,
-    LoadingComponent,
-    MatLabel,
-    MatFormField,
-    MatInput,
-    NgForOf,
-    FlashOnChangeDirective,
-  ],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+    selector: 'app-dashboard',
+    imports: [
+        MatIcon,
+        LoadingComponent,
+        MatLabel,
+        MatFormField,
+        MatInput,
+        NgForOf,
+        FlashOnChangeDirective,
+    ],
+    templateUrl: './dashboard.component.html',
+    styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit{
   dashboardInfo: DashboardInfo | undefined;

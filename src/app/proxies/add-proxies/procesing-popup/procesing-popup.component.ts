@@ -4,22 +4,21 @@ import {animate, style, transition, trigger} from '@angular/animations';
 import {NgIf} from '@angular/common';
 
 @Component({
-  selector: 'app-procesing-popup',
-  standalone: true,
-  imports: [
-    StarBackgroundComponent,
-    NgIf
-  ],
-  templateUrl: './procesing-popup.component.html',
-  styleUrl: './procesing-popup.component.scss',
-  animations: [
-    trigger('textAnimation', [
-      transition(':increment, :decrement', [
-        style({ opacity: 0, transform: 'translateY(-10px)' }),
-        animate('500ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
-      ]),
-    ]),
-  ]
+    selector: 'app-procesing-popup',
+    imports: [
+        StarBackgroundComponent,
+        NgIf
+    ],
+    templateUrl: './procesing-popup.component.html',
+    styleUrl: './procesing-popup.component.scss',
+    animations: [
+        trigger('textAnimation', [
+            transition(':increment, :decrement', [
+                style({ opacity: 0, transform: 'translateY(-10px)' }),
+                animate('500ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
+            ]),
+        ]),
+    ]
 })
 export class ProcesingPopupComponent {
   @Input() status: 'processing' | 'success' | 'error' = 'processing';

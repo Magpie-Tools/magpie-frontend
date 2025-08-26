@@ -6,20 +6,19 @@ import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {MatButton} from '@angular/material/button';
 
 @Component({
-  selector: 'app-navbar',
-  standalone: true,
-  imports: [
-    MatIcon,
-    RouterLink,
-    RouterLinkActive,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuItem,
-    MatButton,
-    RouterOutlet,
-  ],
-  templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.scss',
+    selector: 'app-navbar',
+    imports: [
+        MatIcon,
+        RouterLink,
+        RouterLinkActive,
+        MatMenuTrigger,
+        MatMenu,
+        MatMenuItem,
+        MatButton,
+        RouterOutlet,
+    ],
+    templateUrl: './navbar.component.html',
+    styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
     protected readonly UserService = UserService;

@@ -20,29 +20,28 @@ import {SnackbarService} from '../../../services/snackbar.service';
 import {ScrapeSourceInfo} from '../../../models/ScrapeSourceInfo';
 
 @Component({
-  selector: 'app-scrape-source-list',
-  standalone: true,
-  imports: [
-    DatePipe,
-    LoadingComponent,
-    MatButton,
-    MatCell,
-    MatCellDef,
-    MatCheckbox,
-    MatColumnDef,
-    MatHeaderCell,
-    MatHeaderRow,
-    MatHeaderRowDef,
-    MatPaginator,
-    MatRow,
-    MatRowDef,
-    MatSort,
-    MatSortHeader,
-    MatTable,
-    MatHeaderCellDef
-  ],
-  templateUrl: './scrape-source-list.component.html',
-  styleUrl: './scrape-source-list.component.scss'
+    selector: 'app-scrape-source-list',
+    imports: [
+        DatePipe,
+        LoadingComponent,
+        MatButton,
+        MatCell,
+        MatCellDef,
+        MatCheckbox,
+        MatColumnDef,
+        MatHeaderCell,
+        MatHeaderRow,
+        MatHeaderRowDef,
+        MatPaginator,
+        MatRow,
+        MatRowDef,
+        MatSort,
+        MatSortHeader,
+        MatTable,
+        MatHeaderCellDef
+    ],
+    templateUrl: './scrape-source-list.component.html',
+    styleUrl: './scrape-source-list.component.scss'
 })
 export class ScrapeSourceListComponent implements OnInit, AfterViewInit {
   @Output() showAddScrapeSourceMessage = new EventEmitter<boolean>();

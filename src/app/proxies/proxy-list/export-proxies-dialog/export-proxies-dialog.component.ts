@@ -23,29 +23,28 @@ import {ExportSettings} from '../../../models/ExportSettings';
 import {SnackbarService} from '../../../services/snackbar.service';
 
 @Component({
-  selector: 'app-export-proxies-dialog',
-  templateUrl: './export-proxies-dialog.component.html',
-  styleUrls: ['./export-proxies-dialog.component.scss'],
-  imports: [
-    MatDialogActions,
-    MatButton,
-    MatFormField,
-    FormsModule,
-    MatRadioButton,
-    MatRadioGroup,
-    MatDialogContent,
-    MatDialogTitle,
-    MatInput,
-    NgIf,
-    NgForOf,
-    MatLabel,
-    ReactiveFormsModule,
-    CheckboxComponent,
-    MatDivider,
-    MatOption,
-    MatSelect
-  ],
-  standalone: true
+    selector: 'app-export-proxies-dialog',
+    templateUrl: './export-proxies-dialog.component.html',
+    styleUrls: ['./export-proxies-dialog.component.scss'],
+    imports: [
+        MatDialogActions,
+        MatButton,
+        MatFormField,
+        FormsModule,
+        MatRadioButton,
+        MatRadioGroup,
+        MatDialogContent,
+        MatDialogTitle,
+        MatInput,
+        NgIf,
+        NgForOf,
+        MatLabel,
+        ReactiveFormsModule,
+        CheckboxComponent,
+        MatDivider,
+        MatOption,
+        MatSelect
+    ]
 })
 export class ExportProxiesDialogComponent {
   exportOption: string = 'all';
