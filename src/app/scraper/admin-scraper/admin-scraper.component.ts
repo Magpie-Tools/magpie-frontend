@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
-import {NgForOf} from "@angular/common";
+
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {CheckboxComponent} from '../../checkbox/checkbox.component';
 import {MatDivider} from '@angular/material/divider';
@@ -17,19 +17,18 @@ import {take} from 'rxjs/operators';
 @Component({
     selector: 'app-admin-scraper',
     imports: [
-        MatIcon,
-        NgForOf,
-        ReactiveFormsModule,
-        CheckboxComponent,
-        MatDivider,
-        MatTab,
-        MatTabGroup,
-        MatFormField,
-        MatOption,
-        MatSelect,
-        MatTooltip,
-        TooltipComponent
-    ],
+    MatIcon,
+    ReactiveFormsModule,
+    CheckboxComponent,
+    MatDivider,
+    MatTab,
+    MatTabGroup,
+    MatFormField,
+    MatOption,
+    MatSelect,
+    MatTooltip,
+    TooltipComponent
+],
     templateUrl: './admin-scraper.component.html',
     styleUrl: './admin-scraper.component.scss'
 })

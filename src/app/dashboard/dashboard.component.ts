@@ -6,7 +6,7 @@ import {HttpService} from '../services/http.service';
 import {DashboardInfo} from '../models/DashboardInfo';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
-import {NgForOf} from '@angular/common';
+
 import {interval, startWith, switchMap} from 'rxjs';
 import {FlashOnChangeDirective} from '../ui-elements/flash-on-change/flash-on-change.directive';
 import {SnackbarService} from '../services/snackbar.service';
@@ -14,14 +14,13 @@ import {SnackbarService} from '../services/snackbar.service';
 @Component({
     selector: 'app-dashboard',
     imports: [
-        MatIcon,
-        LoadingComponent,
-        MatLabel,
-        MatFormField,
-        MatInput,
-        NgForOf,
-        FlashOnChangeDirective,
-    ],
+    MatIcon,
+    LoadingComponent,
+    MatLabel,
+    MatFormField,
+    MatInput,
+    FlashOnChangeDirective
+],
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.scss'
 })

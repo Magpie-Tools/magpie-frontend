@@ -7,7 +7,7 @@ import {MatIcon} from "@angular/material/icon";
 import {MatOption} from "@angular/material/core";
 import {MatSelect} from "@angular/material/select";
 import {MatTab, MatTabGroup} from "@angular/material/tabs";
-import {NgForOf} from "@angular/common";
+
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {SettingsService} from '../../services/settings.service';
 import {take} from 'rxjs/operators';
@@ -17,20 +17,19 @@ import {MatTooltip} from '@angular/material/tooltip';
 @Component({
     selector: 'app-admin-checker',
     imports: [
-        CheckboxComponent,
-        FormsModule,
-        MatDivider,
-        MatFormField,
-        MatIcon,
-        MatOption,
-        MatSelect,
-        MatTab,
-        MatTabGroup,
-        NgForOf,
-        ReactiveFormsModule,
-        TooltipComponent,
-        MatTooltip
-    ],
+    CheckboxComponent,
+    FormsModule,
+    MatDivider,
+    MatFormField,
+    MatIcon,
+    MatOption,
+    MatSelect,
+    MatTab,
+    MatTabGroup,
+    ReactiveFormsModule,
+    TooltipComponent,
+    MatTooltip
+],
     templateUrl: './admin-checker.component.html',
     styleUrl: './admin-checker.component.scss'
 })

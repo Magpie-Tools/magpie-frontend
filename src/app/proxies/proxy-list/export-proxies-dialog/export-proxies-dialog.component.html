@@ -18,35 +18,35 @@
       <app-checkbox label="Filter Proxies" formControlName="filter"></app-checkbox>
     </div>
 
-    <div *ngIf="exportForm.get('filter')?.value">
-      <div class="row mb-3">
-        <div class="col text-center checkbox-container">
-          <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
+    @if (exportForm.get('filter')?.value) {
+      <div>
+        <div class="row mb-3">
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
+          </div>
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
+          </div>
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
+          </div>
+          <div class="col text-center checkbox-container">
+            <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
+          </div>
         </div>
-        <div class="col text-center checkbox-container">
-          <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
-        </div>
-        <div class="col text-center checkbox-container">
-          <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
-        </div>
-        <div class="col text-center checkbox-container">
-          <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
+        <div class="row"></div>
+        <div class="row mt-4">
+          <mat-form-field appearance="outline" class="col">
+            <mat-label>Max Retries</mat-label>
+            <input id="retries" matInput formControlName="Retries" type="number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="col">
+            <mat-label>Max Timeout (ms)</mat-label>
+            <input id="timeout" matInput formControlName="Timeout" type="number" />
+          </mat-form-field>
         </div>
       </div>
-
-      <div class="row"></div>
-
-      <div class="row mt-4">
-        <mat-form-field appearance="outline" class="col">
-          <mat-label>Max Retries</mat-label>
-          <input id="retries" matInput formControlName="Retries" type="number" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="col">
-          <mat-label>Max Timeout (ms)</mat-label>
-          <input id="timeout" matInput formControlName="Timeout" type="number" />
-        </mat-form-field>
-      </div>
-    </div>
+    }
 
     <mat-divider></mat-divider>
 
@@ -62,10 +62,12 @@
 
     <div style="margin-top: 1rem;">
       <div style="margin-bottom: 2rem; display: flex; justify-content: center; flex-wrap: wrap;">
-        <button *ngFor="let text of predefinedFilters" mat-raised-button class="m-1"
-                (click)="addToFilter(text)">
-          {{ text }}
-        </button>
+        @for (text of predefinedFilters; track text) {
+          <button mat-raised-button class="m-1"
+            (click)="addToFilter(text)">
+            {{ text }}
+          </button>
+        }
       </div>
 
       <mat-form-field appearance="outline" class="w-100">

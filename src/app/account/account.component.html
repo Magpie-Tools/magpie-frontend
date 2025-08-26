@@ -10,28 +10,36 @@
     <mat-form-field appearance="outline">
       <mat-label>Current password</mat-label>
       <input matInput formControlName="oldPassword" type="password" />
-      <mat-error *ngIf="passwordForm.get('oldPassword')?.hasError('required')">
-        Current password is required
-      </mat-error>
+      @if (passwordForm.get('oldPassword')?.hasError('required')) {
+        <mat-error>
+          Current password is required
+        </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>New password</mat-label>
       <input matInput formControlName="newPassword" type="password" />
-      <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
-        New password is required
-      </mat-error>
-      <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">
-        Minimum length is 8 characters
-      </mat-error>
+      @if (passwordForm.get('newPassword')?.hasError('required')) {
+        <mat-error>
+          New password is required
+        </mat-error>
+      }
+      @if (passwordForm.get('newPassword')?.hasError('minlength')) {
+        <mat-error>
+          Minimum length is 8 characters
+        </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>Repeat new password</mat-label>
       <input matInput formControlName="newPasswordCheck" type="password" />
-      <mat-error *ngIf="passwordForm.hasError('passwordsMismatch') && passwordForm.get('newPasswordCheck')?.touched">
-        Passwords do not match
-      </mat-error>
+      @if (passwordForm.hasError('passwordsMismatch') && passwordForm.get('newPasswordCheck')?.touched) {
+        <mat-error>
+          Passwords do not match
+        </mat-error>
+      }
     </mat-form-field>
 
     <button type="submit" class="align-self-center" [disabled]="passwordForm.invalid">

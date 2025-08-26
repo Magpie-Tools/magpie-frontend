@@ -12,22 +12,30 @@
         <div class="form-row mb-3 d-flex justify-content-center" formGroupName="scraper_timer">
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Days" formControlName="days">
-              <mat-option *ngFor="let day of daysList" [value]="day">{{ day + " Days" }}</mat-option>
+              @for (day of daysList; track day) {
+                <mat-option [value]="day">{{ day + " Days" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Hours" formControlName="hours">
-              <mat-option *ngFor="let hour of hoursList" [value]="hour">{{ hour + " Hours" }}</mat-option>
+              @for (hour of hoursList; track hour) {
+                <mat-option [value]="hour">{{ hour + " Hours" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Minutes" formControlName="minutes">
-              <mat-option *ngFor="let min of minutesList" [value]="min">{{ min + " Minutes" }}</mat-option>
+              @for (min of minutesList; track min) {
+                <mat-option [value]="min">{{ min + " Minutes" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Seconds" formControlName="seconds">
-              <mat-option *ngFor="let sec of secondsList" [value]="sec">{{ sec + " Seconds" }}</mat-option>
+              @for (sec of secondsList; track sec) {
+                <mat-option [value]="sec">{{ sec + " Seconds" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -83,5 +91,5 @@
     (click)="onSubmit()"
     class="button-padding"
     [disabled]="!settingsForm.dirty">
-    Save Settings</button>
+  Save Settings</button>
 </div>

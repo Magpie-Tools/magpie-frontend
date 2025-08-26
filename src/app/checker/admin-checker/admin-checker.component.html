@@ -31,22 +31,30 @@
         <div class="form-row mb-3 d-flex justify-content-center" formGroupName="checker_timer">
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Days" formControlName="days">
-              <mat-option *ngFor="let day of daysList" [value]="day">{{ day + " Days" }}</mat-option>
+              @for (day of daysList; track day) {
+                <mat-option [value]="day">{{ day + " Days" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Hours" formControlName="hours">
-              <mat-option *ngFor="let hour of hoursList" [value]="hour">{{ hour + " Hours" }}</mat-option>
+              @for (hour of hoursList; track hour) {
+                <mat-option [value]="hour">{{ hour + " Hours" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Minutes" formControlName="minutes">
-              <mat-option *ngFor="let min of minutesList" [value]="min">{{ min + " Minutes" }}</mat-option>
+              @for (min of minutesList; track min) {
+                <mat-option [value]="min">{{ min + " Minutes" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Seconds" formControlName="seconds">
-              <mat-option *ngFor="let sec of secondsList" [value]="sec">{{ sec + " Seconds" }}</mat-option>
+              @for (sec of secondsList; track sec) {
+                <mat-option [value]="sec">{{ sec + " Seconds" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -107,22 +115,30 @@
         <div class="form-row mb-3 d-flex justify-content-center" formGroupName="judge_timer">
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Days" formControlName="days">
-              <mat-option *ngFor="let day of daysList" [value]="day">{{ day + " Days" }}</mat-option>
+              @for (day of daysList; track day) {
+                <mat-option [value]="day">{{ day + " Days" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Hours" formControlName="hours">
-              <mat-option *ngFor="let hour of hoursList" [value]="hour">{{ hour + " Hours" }}</mat-option>
+              @for (hour of hoursList; track hour) {
+                <mat-option [value]="hour">{{ hour + " Hours" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Minutes" formControlName="minutes">
-              <mat-option *ngFor="let min of minutesList" [value]="min">{{ min + " Minutes" }}</mat-option>
+              @for (min of minutesList; track min) {
+                <mat-option [value]="min">{{ min + " Minutes" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="mx-2">
             <mat-select placeholder="Seconds" formControlName="seconds">
-              <mat-option *ngFor="let sec of secondsList" [value]="sec">{{ sec + " Seconds" }}</mat-option>
+              @for (sec of secondsList; track sec) {
+                <mat-option [value]="sec">{{ sec + " Seconds" }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -131,27 +147,29 @@
 
         <div formArrayName="judges">
           <h4 class="text-center subText">Default Judge URLs and Regex</h4>
-          <div *ngFor="let judge of judges.controls; let i = index" [formGroupName]="i">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="judge-url-{{i}}">URL</label>
-                <input id="judge-url-{{i}}" formControlName="url" type="text" />
+          @for (judge of judges.controls; track judge; let i = $index) {
+            <div [formGroupName]="i">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="judge-url-{{i}}">URL</label>
+                  <input id="judge-url-{{i}}" formControlName="url" type="text" />
+                </div>
+                <div class="form-group">
+                  <label for="judge-regex-{{i}}">Regex
+                    <app-tooltip
+                      [text]="'If the regex is set to &quot;default&quot;, it will check judges based on the headers from the &quot;IP&quot; tab. This is necessary to detect whether a proxy is anonymous. If a custom regex is used, the program will search for that pattern in the response and use it to decide whether the request was valid.'">
+                    </app-tooltip>
+                  </label>
+                  <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
+                </div>
+                @if (judges.length > 1) {
+                  <button type="button" class="btn-remove mt-4" (click)="removeJudge(i)">
+                    <mat-icon class="reset">delete</mat-icon>
+                  </button>
+                }
               </div>
-              <div class="form-group">
-                <label for="judge-regex-{{i}}">Regex
-                  <app-tooltip
-                    [text]="'If the regex is set to &quot;default&quot;, it will check judges based on the headers from the &quot;IP&quot; tab. This is necessary to detect whether a proxy is anonymous. If a custom regex is used, the program will search for that pattern in the response and use it to decide whether the request was valid.'">
-                  </app-tooltip>
-                </label>
-                <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
-              </div>
-              @if (judges.length > 1) {
-                <button type="button" class="btn-remove mt-4" (click)="removeJudge(i)">
-                  <mat-icon class="reset">delete</mat-icon>
-                </button>
-              }
             </div>
-          </div>
+          }
           <button type="button" class="btn-add" (click)="addJudge()">
             <mat-icon class="reset">add</mat-icon> Add Judge
           </button>
@@ -172,18 +190,20 @@
         <div class="section-container">
           <h4 class="section-title">Standard Headers<app-tooltip text="This is needed to identify if the request to the judge was valid"></app-tooltip></h4>
           <div formArrayName="standard_header">
-            <div *ngFor="let header of standardHeaders.controls; let i = index">
-              <div class="form-row">
-                <div class="form-group flex-grow-1">
-                  <input [formControlName]="i" type="text" class="w-100" />
+            @for (header of standardHeaders.controls; track header; let i = $index) {
+              <div>
+                <div class="form-row">
+                  <div class="form-group flex-grow-1">
+                    <input [formControlName]="i" type="text" class="w-100" />
+                  </div>
+                  @if (standardHeaders.length > 1) {
+                    <button type="button" class="btn-remove" (click)="removeStandardHeader(i)">
+                      <mat-icon class="reset">delete</mat-icon>
+                    </button>
+                  }
                 </div>
-                @if (standardHeaders.length > 1) {
-                  <button type="button" class="btn-remove" (click)="removeStandardHeader(i)">
-                    <mat-icon class="reset">delete</mat-icon>
-                  </button>
-                }
               </div>
-            </div>
+            }
             <button type="button" class="btn-add" (click)="addStandardHeader()">
               <mat-icon class="reset">add</mat-icon> Add Standard Header
             </button>
@@ -195,18 +215,20 @@
         <div class="section-container">
           <h4 class="section-title">Proxy Headers<app-tooltip text="This is needed to identify if the proxy is anonymous"></app-tooltip></h4>
           <div formArrayName="proxy_header">
-            <div *ngFor="let header of proxyHeaders.controls; let i = index">
-              <div class="form-row">
-                <div class="form-group flex-grow-1">
-                  <input [formControlName]="i" type="text" class="w-100" />
+            @for (header of proxyHeaders.controls; track header; let i = $index) {
+              <div>
+                <div class="form-row">
+                  <div class="form-group flex-grow-1">
+                    <input [formControlName]="i" type="text" class="w-100" />
+                  </div>
+                  @if (proxyHeaders.length > 1) {
+                    <button type="button" class="btn-remove" (click)="removeProxyHeader(i)">
+                      <mat-icon class="reset">delete</mat-icon>
+                    </button>
+                  }
                 </div>
-                @if (proxyHeaders.length > 1) {
-                  <button type="button" class="btn-remove" (click)="removeProxyHeader(i)">
-                    <mat-icon class="reset">delete</mat-icon>
-                  </button>
-                }
               </div>
-            </div>
+            }
             <button type="button" class="btn-add" (click)="addProxyHeader()">
               <mat-icon class="reset">add</mat-icon> Add Proxy Header
             </button>
@@ -218,16 +240,18 @@
       <mat-tab label="Blacklist">
         <div formArrayName="blacklisted">
           <h4 class="text-center subText">Blacklisted URLs</h4>
-          <div *ngFor="let url of blacklisted.controls; let i = index">
-            <div class="form-row">
-              <div class="form-group flex-grow-1">
-                <input [formControlName]="i" type="text" class="w-100" />
+          @for (url of blacklisted.controls; track url; let i = $index) {
+            <div>
+              <div class="form-row">
+                <div class="form-group flex-grow-1">
+                  <input [formControlName]="i" type="text" class="w-100" />
+                </div>
+                <button type="button" class="btn-remove" (click)="removeBlacklistedUrl(i)">
+                  <mat-icon class="reset">delete</mat-icon>
+                </button>
               </div>
-              <button type="button" class="btn-remove" (click)="removeBlacklistedUrl(i)">
-                <mat-icon class="reset">delete</mat-icon>
-              </button>
             </div>
-          </div>
+          }
           <button type="button" class="btn-add" (click)="addBlacklistedUrl()">
             <mat-icon class="reset">add</mat-icon> Add Blacklist URL
           </button>
@@ -243,5 +267,5 @@
     (click)="onSubmit()"
     class="button-padding"
     [disabled]="!settingsForm.dirty">
-    Save Settings</button>
+  Save Settings</button>
 </div>

@@ -1,14 +1,13 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {StarBackgroundComponent} from '../../../ui-elements/star-background/star-background.component';
 import {animate, style, transition, trigger} from '@angular/animations';
-import {NgIf} from '@angular/common';
+
 
 @Component({
     selector: 'app-procesing-popup',
     imports: [
-        StarBackgroundComponent,
-        NgIf
-    ],
+    StarBackgroundComponent
+],
     templateUrl: './procesing-popup.component.html',
     styleUrl: './procesing-popup.component.scss',
     animations: [

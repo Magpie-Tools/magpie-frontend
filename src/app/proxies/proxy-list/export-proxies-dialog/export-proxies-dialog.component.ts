@@ -11,7 +11,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatInput } from '@angular/material/input';
-import { NgForOf, NgIf } from '@angular/common';
+
 import { CheckboxComponent } from '../../../checkbox/checkbox.component';
 import { MatDivider } from '@angular/material/divider';
 import {MatOption} from '@angular/material/core';
@@ -27,24 +27,22 @@ import {SnackbarService} from '../../../services/snackbar.service';
     templateUrl: './export-proxies-dialog.component.html',
     styleUrls: ['./export-proxies-dialog.component.scss'],
     imports: [
-        MatDialogActions,
-        MatButton,
-        MatFormField,
-        FormsModule,
-        MatRadioButton,
-        MatRadioGroup,
-        MatDialogContent,
-        MatDialogTitle,
-        MatInput,
-        NgIf,
-        NgForOf,
-        MatLabel,
-        ReactiveFormsModule,
-        CheckboxComponent,
-        MatDivider,
-        MatOption,
-        MatSelect
-    ]
+    MatDialogActions,
+    MatButton,
+    MatFormField,
+    FormsModule,
+    MatRadioButton,
+    MatRadioGroup,
+    MatDialogContent,
+    MatDialogTitle,
+    MatInput,
+    MatLabel,
+    ReactiveFormsModule,
+    CheckboxComponent,
+    MatDivider,
+    MatOption,
+    MatSelect
+]
 })
 export class ExportProxiesDialogComponent {
   exportOption: string = 'all';

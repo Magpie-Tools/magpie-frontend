@@ -7,22 +7,21 @@ import {MatDivider} from '@angular/material/divider';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {SettingsService} from '../services/settings.service';
 import {SnackbarService} from '../services/snackbar.service';
-import {CommonModule} from '@angular/common';
+
 import {TooltipComponent} from '../tooltip/tooltip.component';
 
 @Component({
     selector: 'app-checker',
     imports: [
-        ReactiveFormsModule,
-        FormsModule,
-        MatIcon,
-        CheckboxComponent,
-        MatDivider,
-        MatTab,
-        MatTabGroup,
-        CommonModule,
-        TooltipComponent
-    ],
+    ReactiveFormsModule,
+    FormsModule,
+    MatIcon,
+    CheckboxComponent,
+    MatDivider,
+    MatTab,
+    MatTabGroup,
+    TooltipComponent
+],
     templateUrl: './checker.component.html',
     styleUrl: './checker.component.scss'
 })

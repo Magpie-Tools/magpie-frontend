@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,13 +13,12 @@ import {SnackbarService} from '../services/snackbar.service';
 @Component({
     selector: 'app-account',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatIconModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-    ],
+    ReactiveFormsModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule
+],
     templateUrl: './account.component.html',
     styleUrls: ['./account.component.scss']
 })
