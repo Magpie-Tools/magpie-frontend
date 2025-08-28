@@ -1,21 +1,17 @@
 import {Component} from '@angular/core';
-import {MatIcon} from "@angular/material/icon";
 import {ReactiveFormsModule} from "@angular/forms";
-import {AddProxiesComponent} from '../../proxies/add-proxies/add-proxies.component';
-import {ProxyListComponent} from '../../proxies/proxy-list/proxy-list.component';
 import {AddScrapeSourceComponent} from './add-scrape-source/add-scrape-source.component';
 import {ScrapeSourceListComponent} from './scrape-source-list/scrape-source-list.component';
+import {Button} from 'primeng/button';
 
 @Component({
     selector: 'app-user-scraper',
-    imports: [
-        MatIcon,
-        ReactiveFormsModule,
-        AddProxiesComponent,
-        ProxyListComponent,
-        AddScrapeSourceComponent,
-        ScrapeSourceListComponent
-    ],
+  imports: [
+    ReactiveFormsModule,
+    AddScrapeSourceComponent,
+    ScrapeSourceListComponent,
+    Button
+  ],
     templateUrl: './user-scraper.component.html',
     styleUrl: './user-scraper.component.scss'
 })

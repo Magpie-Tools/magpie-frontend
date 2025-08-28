@@ -1,49 +1,45 @@
-<h2 class="titleHeader">
-  <mat-icon svgIcon="person"></mat-icon>
+<h2 class="titleHeader flex items-center gap-2">
+  <i class="pi pi-user text-gray-400"></i>
   <div>Account</div>
 </h2>
 
-
 <div class="content-container">
   <h3 class="text-center mt-0">Change Password</h3>
-  <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()" class="d-flex flex-column gap-3">
-    <mat-form-field appearance="outline">
-      <mat-label>Current password</mat-label>
-      <input matInput formControlName="oldPassword" type="password" />
-      @if (passwordForm.get('oldPassword')?.hasError('required')) {
-        <mat-error>
-          Current password is required
-        </mat-error>
-      }
-    </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>New password</mat-label>
-      <input matInput formControlName="newPassword" type="password" />
-      @if (passwordForm.get('newPassword')?.hasError('required')) {
-        <mat-error>
-          New password is required
-        </mat-error>
-      }
-      @if (passwordForm.get('newPassword')?.hasError('minlength')) {
-        <mat-error>
-          Minimum length is 8 characters
-        </mat-error>
-      }
-    </mat-form-field>
+  <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-3">
 
-    <mat-form-field appearance="outline">
-      <mat-label>Repeat new password</mat-label>
-      <input matInput formControlName="newPasswordCheck" type="password" />
+    <!-- Current password -->
+    <div class="flex flex-col gap-1">
+      <label for="oldPassword">Current password</label>
+      <input id="oldPassword" type="password" pInputText formControlName="oldPassword" />
+      @if (passwordForm.get('oldPassword')?.hasError('required') && passwordForm.get('oldPassword')?.touched) {
+        <small class="p-error">Current password is required</small>
+      }
+    </div>
+
+    <!-- New password -->
+    <div class="flex flex-col gap-1">
+      <label for="newPassword">New password</label>
+      <input id="newPassword" type="password" pInputText formControlName="newPassword" />
+      @if (passwordForm.get('newPassword')?.hasError('required') && passwordForm.get('newPassword')?.touched) {
+        <small class="p-error">New password is required</small>
+      }
+      @if (passwordForm.get('newPassword')?.hasError('minlength') && passwordForm.get('newPassword')?.touched) {
+        <small class="p-error">Minimum length is 8 characters</small>
+      }
+    </div>
+
+    <!-- Repeat new password -->
+    <div class="flex flex-col gap-1">
+      <label for="newPasswordCheck">Repeat new password</label>
+      <input id="newPasswordCheck" type="password" pInputText formControlName="newPasswordCheck" />
       @if (passwordForm.hasError('passwordsMismatch') && passwordForm.get('newPasswordCheck')?.touched) {
-        <mat-error>
-          Passwords do not match
-        </mat-error>
+        <small class="p-error">Passwords do not match</small>
       }
-    </mat-form-field>
+    </div>
 
-    <button type="submit" class="align-self-center" [disabled]="passwordForm.invalid">
-      Save password
-    </button>
+    <!-- Submit button -->
+    <p-button type="submit" label="Save password" class="self-center"
+              [disabled]="passwordForm.invalid"></p-button>
   </form>
 </div>

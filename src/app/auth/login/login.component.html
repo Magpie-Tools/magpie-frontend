@@ -1,30 +1,41 @@
-<div class="background-color">
-  <div class="auth-container">
-    <a class="auth-logo" routerLink="">
-      <img src="../../../assets/logo/magpie-light.png" alt="Logo"/>
-      <h5>M A G P I E</h5>
+<div class="background-color flex items-center justify-center min-h-screen">
+  <div class="auth-container flex flex-col items-center">
+    <a class="auth-logo flex flex-col items-center mb-6" routerLink="">
+      <img src="../../../assets/logo/magpie-light.png" alt="Logo" class="w-20 mb-2"/>
+      <h5 class="text-lg font-semibold">M A G P I E</h5>
     </a>
 
-    <mat-card class="auth-card">
-      <h2>Login</h2>
-      <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-        <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" />
-        </mat-form-field>
+    <p-card class="auth-card w-96">
+      <h2 class="text-center mb-4 text-xl font-bold">Login</h2>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Password</mat-label>
-          <input matInput formControlName="password" type="password" />
-        </mat-form-field>
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="flex flex-col gap-4">
 
-        <mat-checkbox [(ngModel)]="rememberPass" [ngModelOptions]="{standalone: true}">Remember login</mat-checkbox>
+        <!-- Email -->
+        <div class="flex flex-col gap-1">
+          <label for="email">Email</label>
+          <input id="email" type="email" pInputText formControlName="email" />
+        </div>
 
-        <button mat-raised-button color="primary" type="submit">Login</button>
-        <p class="switch-link">
-          Don't have an account? <a routerLink="/register">Register</a>
+        <!-- Password -->
+        <div class="flex flex-col gap-1">
+          <label for="password">Password</label>
+          <input id="password" type="password" pInputText formControlName="password" />
+        </div>
+
+        <!-- Remember login -->
+        <div class="flex items-center gap-2">
+          <p-checkbox inputId="remember" [(ngModel)]="rememberPass" [ngModelOptions]="{standalone: true}"></p-checkbox>
+          <label for="remember">Remember login</label>
+        </div>
+
+        <!-- Submit -->
+        <p-button type="submit" label="Login" styleClass="w-full"></p-button>
+
+        <p class="switch-link text-center mt-2">
+          Don't have an account?
+          <a routerLink="/register" class="text-blue-500 hover:underline">Register</a>
         </p>
       </form>
-    </mat-card>
+    </p-card>
   </div>
 </div>

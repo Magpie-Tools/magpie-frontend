@@ -1,84 +1,133 @@
-<h2 mat-dialog-title>Export Proxies</h2>
-<mat-dialog-content>
-  <mat-radio-group [(ngModel)]="exportOption">
-    <div class="row">
-      <div class="col text-center">
-        <mat-radio-button value="all">All Proxies</mat-radio-button>
-      </div>
-      <div class="col text-center">
-        <mat-radio-button value="selected">Selected Proxies</mat-radio-button>
-      </div>
-    </div>
-  </mat-radio-group>
+<div class="p-fluid p-4 bg-gray-800 text-gray-200 rounded-lg shadow-xl">
+  <h2 class="text-2xl font-semibold mb-6 text-center text-white">Export Proxies</h2>
 
-  <form [formGroup]="exportForm">
-    <mat-divider></mat-divider>
+  <div class="mb-6">
+    <p-fieldset legend="Export Option" styleClass="!border-none">
+      <div class="flex justify-center gap-8">
+        <div class="flex items-center">
+          <p-radioButton
+            name="exportOption"
+            value="all"
+            [(ngModel)]="exportOption"
+            inputId="exportAll"
+          ></p-radioButton>
+          <label for="exportAll" class="ml-2 text-lg">All Proxies</label>
+        </div>
+        <div class="flex items-center">
+          <p-radioButton
+            name="exportOption"
+            value="selected"
+            [(ngModel)]="exportOption"
+            inputId="exportSelected"
+            [disabled]="!selectedProxies.length"
+          ></p-radioButton>
+          <label for="exportSelected" class="ml-2 text-lg" [class.text-gray-500]="!selectedProxies.length" [class.cursor-not-allowed]="!selectedProxies.length">Selected Proxies</label>
+        </div>
+      </div>
+    </p-fieldset>
+  </div>
 
-    <div class="d-flex align-items-center justify-content-center mt-4 mb-4">
+  <form [formGroup]="exportForm" class="space-y-6">
+    <p-divider></p-divider>
+
+    <div class="flex items-center justify-center mt-4 mb-4">
       <app-checkbox label="Filter Proxies" formControlName="filter"></app-checkbox>
     </div>
 
     @if (exportForm.get('filter')?.value) {
-      <div>
-        <div class="row mb-3">
-          <div class="col text-center checkbox-container">
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+          <div class="flex items-center justify-center">
             <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
           </div>
-          <div class="col text-center checkbox-container">
+          <div class="flex items-center justify-center">
             <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
           </div>
-          <div class="col text-center checkbox-container">
+          <div class="flex items-center justify-center">
             <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
           </div>
-          <div class="col text-center checkbox-container">
+          <div class="flex items-center justify-center">
             <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
           </div>
         </div>
-        <div class="row"></div>
-        <div class="row mt-4">
-          <mat-form-field appearance="outline" class="col">
-            <mat-label>Max Retries</mat-label>
-            <input id="retries" matInput formControlName="Retries" type="number" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="col">
-            <mat-label>Max Timeout (ms)</mat-label>
-            <input id="timeout" matInput formControlName="Timeout" type="number" />
-          </mat-form-field>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div class="p-field">
+            <label for="retries" class="block mb-2 text-sm font-medium text-gray-300">Max Retries</label>
+            <p-inputNumber
+              id="retries"
+              formControlName="Retries"
+              mode="decimal"
+              [showButtons]="true"
+              [min]="0"
+              inputStyleClass="w-full bg-gray-700 text-white border-gray-600 focus:border-blue-500"
+            ></p-inputNumber>
+          </div>
+          <div class="p-field">
+            <label for="timeout" class="block mb-2 text-sm font-medium text-gray-300">Max Timeout (ms)</label>
+            <p-inputNumber
+              id="timeout"
+              formControlName="Timeout"
+              mode="decimal"
+              [showButtons]="true"
+              [min]="0"
+              inputStyleClass="w-full bg-gray-700 text-white border-gray-600 focus:border-blue-500"
+            ></p-inputNumber>
+          </div>
         </div>
       </div>
     }
 
-    <mat-divider></mat-divider>
+    <p-divider></p-divider>
 
     <!-- New select field for proxy status -->
-    <mat-form-field appearance="outline" class="w-100" style="margin-top: 1rem;">
-      <mat-label>Proxy Status</mat-label>
-      <mat-select formControlName="proxyStatus">
-        <mat-option value="all">All Proxies</mat-option>
-        <mat-option value="alive">Only Alive Proxies</mat-option>
-        <mat-option value="dead">Only Dead Proxies</mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div class="p-field mt-4">
+      <label for="proxyStatus" class="block mb-2 text-sm font-medium text-gray-300">Proxy Status</label>
+      <p-select
+        id="proxyStatus"
+        formControlName="proxyStatus"
+        [options]="proxyStatusOptions"
+        optionLabel="label"
+        optionValue="value"
+        class="w-full"
+        panelStyleClass="bg-gray-700 text-white"
+      ></p-select>
+    </div>
 
-    <div style="margin-top: 1rem;">
-      <div style="margin-bottom: 2rem; display: flex; justify-content: center; flex-wrap: wrap;">
+    <div class="mt-4">
+      <div class="flex justify-center flex-wrap gap-2 mb-6">
         @for (text of predefinedFilters; track text) {
-          <button mat-raised-button class="m-1"
-            (click)="addToFilter(text)">
-            {{ text }}
-          </button>
+          <p-button
+            [label]="text"
+            styleClass="p-button-outlined p-button-secondary p-button-sm"
+            (onClick)="addToFilter(text)"
+          ></p-button>
         }
       </div>
 
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Output Format</mat-label>
-        <input matInput formControlName="output" type="text" />
-      </mat-form-field>
+      <div class="p-field">
+        <label for="outputFormat" class="block mb-2 text-sm font-medium text-gray-300">Output Format</label>
+        <input
+          id="outputFormat"
+          pInputText
+          formControlName="output"
+          type="text"
+          class="w-full p-2.5 bg-gray-700 text-white border border-gray-600 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+        />
+      </div>
     </div>
   </form>
-</mat-dialog-content>
 
-<mat-dialog-actions align="center">
-  <button (click)="onCancel()" class="dialog-cancel">Cancel</button>
-  <button (click)="onExport()" class="dialog-ok">Export</button>
-</mat-dialog-actions>
+  <div class="flex justify-center gap-4 mt-8">
+    <p-button
+      label="Cancel"
+      styleClass="p-button-secondary p-button-text"
+      (onClick)="onCancel()"
+    ></p-button>
+    <p-button
+      label="Export"
+      styleClass="p-button-success"
+      (onClick)="onExport()"
+    ></p-button>
+  </div>
+</div>

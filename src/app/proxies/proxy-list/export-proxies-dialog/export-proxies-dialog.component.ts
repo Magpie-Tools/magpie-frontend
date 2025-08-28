@@ -1,67 +1,65 @@
-import {Component, Inject} from '@angular/core';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogActions,
-  MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle
-} from '@angular/material/dialog';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
-import { MatInput } from '@angular/material/input';
+import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog'; // Corrected import
+import { ButtonModule } from 'primeng/button';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+import { DividerModule } from 'primeng/divider';
+import { FieldsetModule } from 'primeng/fieldset'; // For the fieldset around radio buttons
 
-import { CheckboxComponent } from '../../../checkbox/checkbox.component';
-import { MatDivider } from '@angular/material/divider';
-import {MatOption} from '@angular/material/core';
-import {MatSelect} from '@angular/material/select';
-import {SettingsService} from '../../../services/settings.service';
-import {HttpService} from '../../../services/http.service';
-import {ProxyInfo} from '../../../models/ProxyInfo';
-import {ExportSettings} from '../../../models/ExportSettings';
-import {SnackbarService} from '../../../services/snackbar.service';
+import { CheckboxComponent } from '../../../checkbox/checkbox.component'; // Assuming this is your custom checkbox
+import { SettingsService } from '../../../services/settings.service';
+import { HttpService } from '../../../services/http.service';
+import { ProxyInfo } from '../../../models/ProxyInfo';
+import { ExportSettings } from '../../../models/ExportSettings';
+import { SnackbarService } from '../../../services/snackbar.service';
+import { CommonModule, DatePipe } from '@angular/common';
+import {Select} from 'primeng/select'; // Import CommonModule for ngIf, ngFor, etc.
 
 @Component({
-    selector: 'app-export-proxies-dialog',
-    templateUrl: './export-proxies-dialog.component.html',
-    styleUrls: ['./export-proxies-dialog.component.scss'],
-    imports: [
-    MatDialogActions,
-    MatButton,
-    MatFormField,
-    FormsModule,
-    MatRadioButton,
-    MatRadioGroup,
-    MatDialogContent,
-    MatDialogTitle,
-    MatInput,
-    MatLabel,
+  selector: 'app-export-proxies-dialog',
+  standalone: true, // Mark as standalone
+  templateUrl: './export-proxies-dialog.component.html',
+  styleUrls: ['./export-proxies-dialog.component.scss'], // Tailwind classes are mostly in HTML
+  imports: [
+    CommonModule, // Required for @if, @for, etc.
     ReactiveFormsModule,
-    CheckboxComponent,
-    MatDivider,
-    MatOption,
-    MatSelect
-]
+    FormsModule,
+    ButtonModule,
+    RadioButtonModule,
+    InputNumberModule,
+    InputTextModule,
+    DividerModule,
+    FieldsetModule, // Add FieldsetModule
+    CheckboxComponent, // Your custom checkbox component
+    DatePipe,
+    Select,
+    // If you use DatePipe in the template for any reason, keep it.
+  ]
 })
-export class ExportProxiesDialogComponent {
+export class ExportProxiesDialogComponent implements OnInit {
   exportOption: string = 'all';
-
   predefinedFilters: string[] = ['protocol', 'ip', 'port', 'username', 'password', 'country', 'alive', 'type', 'time'];
-
   exportForm: FormGroup;
-  selectedProxies: ProxyInfo[]
+  selectedProxies: ProxyInfo[];
 
+  proxyStatusOptions = [
+    { label: 'All Proxies', value: 'all' },
+    { label: 'Only Alive Proxies', value: 'alive' },
+    { label: 'Only Dead Proxies', value: 'dead' }
+  ];
 
-  constructor(private fb: FormBuilder,
-              public dialogRef: MatDialogRef<ExportProxiesDialogComponent>,
-              private settingsService: SettingsService,
-              private http: HttpService,
-              @Inject(MAT_DIALOG_DATA) public data: { selectedProxies: ProxyInfo[] },
+  constructor(
+    private fb: FormBuilder,
+    public ref: DynamicDialogRef, // Use DynamicDialogRef for PrimeNG
+    public config: DynamicDialogConfig, // Use DynamicDialogConfig for PrimeNG to get data
+    private settingsService: SettingsService,
+    private http: HttpService
   ) {
-    this.selectedProxies = data.selectedProxies
+    this.selectedProxies = this.config.data.selectedProxies || [];
 
-    let settings = settingsService.getUserSettings()
+    const settings = settingsService.getUserSettings();
     this.exportForm = this.fb.group({
       output: ['protocol://ip:port', [Validators.required]],
       filter: [false],
@@ -75,19 +73,44 @@ export class ExportProxiesDialogComponent {
     });
   }
 
+  ngOnInit(): void {
+    // You can add any initialization logic here if needed
+  }
+
   onCancel(): void {
-    this.dialogRef.close();
+    this.ref.close();
   }
 
   onExport(): void {
-    let proxies: ProxyInfo[] = []
+    let proxiesToExport: ProxyInfo[] = [];
 
-    if (this.exportOption == 'selected') {
-      proxies = this.selectedProxies
+    if (this.exportOption === 'selected') {
+      proxiesToExport = this.selectedProxies;
+    } else {
+      // If 'all' is selected, you might need to fetch all proxies from your service
+      // or if `dataSource.data` from the parent component is passed, use that.
+      // For now, assuming you'll handle fetching all proxies if needed.
+      // If `this.config.data.allProxies` was passed, you could use that.
+      // For this example, I'll assume the parent component will handle passing `all` proxies if `exportOption` is 'all'
+      // or you'll fetch them here.
+      // For simplicity, let's assume `this.config.data.allProxies` is available if 'all' is chosen
+      // Or, you might need to emit an event to the parent to get all proxies if not passed.
+      // For now, I'll make a placeholder for 'all' based on the parent's `dataSource.data` if it was passed.
+      if (this.config.data.allProxies) { // Assuming parent passes allProxies if available
+        proxiesToExport = this.config.data.allProxies;
+      } else {
+        // Fallback or explicit fetch if 'all' proxies are not passed
+        // This might involve calling http.getAllProxies()
+        // For now, if 'all' is selected and no `allProxies` is passed, it will export based on the current `selectedProxies` (which might be empty)
+        // You'll need to adjust this logic based on how you intend to get 'all' proxies.
+        console.warn("Exporting 'all' proxies, but no `allProxies` data was provided to the dialog. Ensure `allProxies` is passed via DynamicDialogConfig if needed, or implement fetching logic here.");
+        // As a temporary measure, if 'all' is selected and no `allProxies` is provided, we might just use the currently loaded ones
+        // or prompt the user. For now, we'll proceed with whatever `proxiesToExport` holds.
+      }
     }
 
 
-    let exportSettings = this.transformFormToExport(this.exportForm, proxies)
+    const exportSettings = this.transformFormToExport(this.exportForm, proxiesToExport);
 
     const today = new Date();
     const formattedDate = this.formatDate(today);
@@ -97,12 +120,10 @@ export class ExportProxiesDialogComponent {
     this.http.exportProxies(exportSettings).subscribe({
       next: res => {
         const blob = new Blob([res], { type: 'text/plain' });
-
         const url = window.URL.createObjectURL(blob);
-
         const a = document.createElement('a');
         a.href = url;
-        a.download = fileName; // Name of the downloaded file
+        a.download = fileName;
 
         document.body.appendChild(a);
         a.click();
@@ -110,27 +131,28 @@ export class ExportProxiesDialogComponent {
 
         window.URL.revokeObjectURL(url);
 
-        this.dialogRef.close({
+        this.ref.close({
           option: this.exportOption,
-          criteria: this.exportForm.value.output,
-          proxyStatus: this.exportForm.value.proxyStatus
+          criteria: this.exportForm.value.output, // This might need to be adjusted based on actual filter criteria
+          proxyStatus: this.exportForm.value.proxyStatus,
+          filterSettings: this.exportForm.value.filter ? this.exportForm.value : null // Pass full filter settings if filter is active
         });
-      }, error: err => SnackbarService.openSnackbarDefault("Error while exporting proxies: " + err.error.message)
+      },
+      error: err => SnackbarService.openSnackbarDefault('Error while exporting proxies: ' + err.error.message)
     });
-
   }
 
   addToFilter(text: string): void {
     const currentValue = this.exportForm.get('output')?.value;
-    const newValue = currentValue ? `${currentValue};${text}` : text;
+    const newValue = currentValue && currentValue !== '' ? `${currentValue};${text}` : text;
     this.exportForm.get('output')?.setValue(newValue);
   }
 
-  transformFormToExport(exportForm: FormGroup, selectedProxies: ProxyInfo[]): ExportSettings {
+  transformFormToExport(exportForm: FormGroup, proxies: ProxyInfo[]): ExportSettings {
     const formValue = exportForm.value;
 
     return {
-      proxies: selectedProxies.map(proxy => proxy.id),
+      proxies: proxies.map(proxy => proxy.id),
       filter: formValue.filter,
       http: formValue.HTTPProtocol,
       https: formValue.HTTPSProtocol,
@@ -145,13 +167,11 @@ export class ExportProxiesDialogComponent {
 
   formatDate(date: Date): string {
     const year = date.getFullYear();
-    // Months and days below 10 will be padded with a leading zero
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
-// Helper function to generate a random 4-character alphanumeric code
   generateRandomCode(length: number = 4): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';

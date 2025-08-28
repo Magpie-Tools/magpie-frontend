@@ -1,11 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {MatIcon} from '@angular/material/icon';
 import {LoadingComponent} from '../ui-elements/loading/loading.component';
 import {SettingsService} from '../services/settings.service';
 import {HttpService} from '../services/http.service';
 import {DashboardInfo} from '../models/DashboardInfo';
-import {MatFormField, MatLabel} from '@angular/material/form-field';
-import {MatInput} from '@angular/material/input';
 
 import {interval, startWith, switchMap} from 'rxjs';
 import {FlashOnChangeDirective} from '../ui-elements/flash-on-change/flash-on-change.directive';
@@ -14,11 +11,7 @@ import {SnackbarService} from '../services/snackbar.service';
 @Component({
     selector: 'app-dashboard',
     imports: [
-    MatIcon,
     LoadingComponent,
-    MatLabel,
-    MatFormField,
-    MatInput,
     FlashOnChangeDirective
 ],
     templateUrl: './dashboard.component.html',

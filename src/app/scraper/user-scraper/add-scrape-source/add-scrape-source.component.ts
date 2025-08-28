@@ -1,26 +1,29 @@
 import {Component, EventEmitter, Output} from '@angular/core';
-import {CheckboxComponent} from "../../../checkbox/checkbox.component";
-import {MatIcon} from "@angular/material/icon";
-import {MatTooltip} from "@angular/material/tooltip";
 import {ProcesingPopupComponent} from "../../../proxies/add-proxies/procesing-popup/procesing-popup.component";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {TooltipComponent} from "../../../tooltip/tooltip.component";
 import {HttpService} from '../../../services/http.service';
 import {SnackbarService} from '../../../services/snackbar.service';
 
+import {ButtonModule} from 'primeng/button';
+import {TextareaModule} from 'primeng/textarea';
+import {TooltipModule} from 'primeng/tooltip';
+import {CheckboxModule} from 'primeng/checkbox';
+import {FileUploadModule} from 'primeng/fileupload';
+
 @Component({
-    selector: 'app-add-scrape-source',
-    imports: [
-        CheckboxComponent,
-        MatIcon,
-        MatTooltip,
-        ProcesingPopupComponent,
-        ReactiveFormsModule,
-        TooltipComponent,
-        FormsModule
-    ],
-    templateUrl: './add-scrape-source.component.html',
-    styleUrl: './add-scrape-source.component.scss'
+  selector: 'app-add-scrape-source',
+  imports: [
+    ProcesingPopupComponent,
+    ReactiveFormsModule,
+    FormsModule,
+    ButtonModule,
+    TextareaModule,
+    TooltipModule,
+    CheckboxModule,
+    FileUploadModule
+  ],
+  templateUrl: './add-scrape-source.component.html',
+  styleUrl: './add-scrape-source.component.scss'
 })
 export class AddScrapeSourceComponent {
   @Output() showAddScrapeSourcesMessage = new EventEmitter<boolean>();

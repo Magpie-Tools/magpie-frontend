@@ -1,78 +1,55 @@
-import { AfterViewInit, Component, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
+import { AfterViewInit, Component, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpService } from '../../services/http.service';
 import { ProxyInfo } from '../../models/ProxyInfo';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { DatePipe } from '@angular/common';
 import { LoadingComponent } from '../../ui-elements/loading/loading.component';
 import { SelectionModel } from '@angular/cdk/collections';
-import {
-  MatCell,
-  MatCellDef,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderCellDef,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatRow,
-  MatRowDef,
-  MatTable,
-  MatTableDataSource
-} from '@angular/material/table';
-import { MatButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { SnackbarService } from '../../services/snackbar.service';
-import { MatDialog } from '@angular/material/dialog';
-import {ExportProxiesDialogComponent} from './export-proxies-dialog/export-proxies-dialog.component';
+import { ExportProxiesDialogComponent } from './export-proxies-dialog/export-proxies-dialog.component';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { TableLazyLoadEvent } from 'primeng/table'; // Keep this for onLazyLoad
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { CheckboxModule } from 'primeng/checkbox';
 
 @Component({
-    selector: 'app-proxy-list',
-    imports: [
-        ReactiveFormsModule,
-        FormsModule,
-        MatCellDef,
-        MatCell,
-        MatHeaderCellDef,
-        MatHeaderCell,
-        MatColumnDef,
-        MatTable,
-        MatSortModule,
-        MatPaginator,
-        MatHeaderRow,
-        MatRow,
-        DatePipe,
-        MatRowDef,
-        MatHeaderRowDef,
-        LoadingComponent,
-        MatButton,
-        MatCheckbox
-    ],
-    templateUrl: './proxy-list.component.html',
-    styleUrls: ['./proxy-list.component.scss']
+  selector: 'app-proxy-list',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    DatePipe,
+    LoadingComponent,
+    ButtonModule,
+    TableModule,
+    CheckboxModule,
+  ],
+  templateUrl: './proxy-list.component.html',
+  styleUrls: ['./proxy-list.component.scss'],
+  providers: [DialogService]
 })
 export class ProxyListComponent implements OnInit, AfterViewInit {
   @Output() showAddProxiesMessage = new EventEmitter<boolean>();
 
-  dataSource = new MatTableDataSource<ProxyInfo>([]);
+  dataSource: { data: ProxyInfo[] } = { data: [] };
   selection = new SelectionModel<ProxyInfo>(true, []);
+  selectedProxies: ProxyInfo[] = [];
   page = 1;
+  pageSize = 40;
   displayedColumns: string[] = ['select', 'alive', 'ip', 'port', 'response_time', 'estimated_type', 'country', 'protocol', 'latest_check'];
   totalItems = 0;
   hasLoaded = false;
 
-  @ViewChild(MatSort) sort!: MatSort;
+  sortField: string | null | undefined;
+  sortOrder: number | undefined | null; // 1 for ascending, -1 for descending
 
-  constructor(private http: HttpService, private dialog: MatDialog) { }
+  ref: DynamicDialogRef | undefined;
+
+  constructor(private http: HttpService, public dialogService: DialogService) { }
 
   ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
-    this.dataSource.sortingDataAccessor = (item, property) => {
-      if (property === 'alive') {
-        return item.alive ? 0 : 1;
-      }
-      return item[property as keyof ProxyInfo] as any;
-    };
+    // PrimeNG table handles sorting internally with pSortableColumn and (onSort)
   }
 
   ngOnInit(): void {
@@ -80,53 +57,76 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
     this.getAndSetProxyList();
   }
 
-  getAndSetProxyList() {
-    this.http.getProxyPage(this.page).subscribe({
-      next: res => this.dataSource.data = res,
-      error: err => SnackbarService.openSnackbarDefault("Could not get proxy page: " + err.error.message)
-    }
-  );
-  }
+  getAndSetProxyList(event?: TableLazyLoadEvent) {
+    this.hasLoaded = false;
+    const page = event ? Math.floor(event.first! / event.rows!) + 1 : this.page;
+    const rows = event ? event.rows : this.pageSize;
+    const sortField = event?.sortField || this.sortField;
+    const sortOrder = event?.sortOrder || this.sortOrder;
 
-  getAndSetProxyCount() {
-    this.http.getProxyCount().subscribe({next: res => {
-      this.totalItems = res;
-      this.hasLoaded = true;
-      this.showAddProxiesMessage.emit(this.totalItems === 0 && this.hasLoaded);
-
-      setTimeout(() => {
-        if (this.sort) {
-          this.dataSource.sort = this.sort;
-          this.dataSource.sortingDataAccessor = (item, property) => {
-            if (property === 'alive') {
-              return item.alive ? 0 : 1;
-            }
-            return item[property as keyof ProxyInfo] as any;
-          };
-        }
-      });
-    }, error: err => SnackbarService.openSnackbarDefault("Error while getting proxy count: " + err.error.message)
+    this.http.getProxyPage(page).subscribe({
+      next: res => {
+        this.dataSource.data = res;
+        this.totalItems = res.length > 0 ? this.totalItems : 0; // Adjust totalItems if data is empty after filter/sort
+        this.hasLoaded = true;
+        this.showAddProxiesMessage.emit(this.totalItems === 0 && this.hasLoaded);
+      },
+      error: err => {
+        SnackbarService.openSnackbarDefault('Could not get proxy page: ' + err.error.message);
+        this.hasLoaded = true;
+      }
     });
   }
 
-  onPageChange(event: PageEvent) {
-    this.page = event.pageIndex + 1;
-    this.getAndSetProxyList();
+  getAndSetProxyCount() {
+    this.http.getProxyCount().subscribe({
+      next: res => {
+        this.totalItems = res;
+        if (this.dataSource.data.length === 0) {
+          this.hasLoaded = true;
+        }
+        this.showAddProxiesMessage.emit(this.totalItems === 0 && this.hasLoaded);
+      },
+      error: err => SnackbarService.openSnackbarDefault('Error while getting proxy count: ' + err.error.message)
+    });
   }
 
-  // Toggle the selection for a given proxy
+  onLazyLoad(event: TableLazyLoadEvent) {
+    this.page = Math.floor(event.first! / event.rows!) + 1;
+    this.pageSize = event.rows!;
+    this.sortField = this.sortField = Array.isArray(event.sortField)
+      ? event.sortField[0]
+      : event.sortField ?? null;
+    this.sortOrder = event.sortOrder;
+    this.getAndSetProxyList(event);
+  }
+
+  // Corrected onSort method
+  onSort(event: { field: string; order: number }) {
+    this.sortField = event.field;
+    this.sortOrder = event.order;
+    // Trigger a lazy load to re-fetch data with new sort parameters
+    this.getAndSetProxyList({
+      first: (this.page - 1) * this.pageSize,
+      rows: this.pageSize,
+      sortField: this.sortField,
+      sortOrder: this.sortOrder,
+      globalFilter: null,
+      filters: {},
+      multiSortMeta: undefined
+    });
+  }
+
   toggleSelection(proxy: ProxyInfo): void {
     this.selection.toggle(proxy);
   }
 
-  // Whether the number of selected elements matches the total number of rows.
   isAllSelected(): boolean {
     const numSelected = this.selection.selected.length;
     const numRows = this.dataSource.data.length;
-    return numSelected === numRows;
+    return numSelected === numRows && numRows > 0; // Added numRows > 0 to handle empty table case
   }
 
-  // Selects all rows if they are not all selected; otherwise clear selection.
   masterToggle(): void {
     this.isAllSelected() ?
       this.selection.clear() :
@@ -140,37 +140,38 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
         next: res => {
           SnackbarService.openSnackbar(res, 3000);
           this.totalItems -= selectedProxies.length;
-        }, error: err => SnackbarService.openSnackbarDefault("Could not delete proxies" + err.error.message)
+          this.selection.clear();
+          this.getAndSetProxyList();
+        },
+        error: err => SnackbarService.openSnackbarDefault('Could not delete proxies' + err.error.message)
       });
-      this.selection.clear();
-      this.getAndSetProxyList();
     }
   }
 
   openExportDialog(): void {
-    const dialogRef = this.dialog.open(ExportProxiesDialogComponent, {
+    this.ref = this.dialogService.open(ExportProxiesDialogComponent, {
+      header: 'Export Proxies',
       width: '700px',
-      height: "700px",
+      height: '700px',
       data: { selectedProxies: this.selection.selected }
     });
 
-    dialogRef.afterClosed().subscribe({
+    this.ref.onClose.subscribe({
       next: result => {
         if (result) {
-          // Determine which proxies to export based on the user's choice
           if (result.option === 'selected') {
             this.exportProxies(this.selection.selected);
           } else if (result.option === 'all') {
             this.exportProxies(this.dataSource.data);
           } else if (result.option === 'filter') {
             const filtered = this.dataSource.data.filter(proxy => {
-              // Example filter: check if the proxy's IP address includes the filter criteria
               return proxy.ip.includes(result.criteria);
             });
             this.exportProxies(filtered);
           }
         }
-      }, error: err => SnackbarService.openSnackbarDefault("Error while closing dialog " + err.error.message)
+      },
+      error: err => SnackbarService.openSnackbarDefault('Error while closing dialog ' + err.error.message)
     });
   }
 
@@ -179,6 +180,6 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
   }
 
   handleExportRequest(proxies: ProxyInfo[]): void {
-
+    // Your export logic here
   }
 }

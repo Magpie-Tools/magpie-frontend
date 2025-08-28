@@ -1,28 +1,21 @@
-/* Variables */
 $navbar-background: #171717;
 $text-color: rgb(171 171 171);
 $border-color: rgba(255, 255, 255, 0.1);
 $personColor: #ffffff;
-$navbar-width: 240px; // Define a variable for the width
-
-/* New style for the main content area */
-.main-content {
-  margin-left: $navbar-width; // Push content to the right of the navbar
-  padding: 2rem;
-}
+$navbar-width: 240px;
 
 .navbar {
-  position: fixed; // Keep it visible on scroll
+  position: fixed;
   top: 0;
   left: 0;
-  height: 100vh; // Full viewport height
-  width: $navbar-width; // Set a fixed width
+  height: 100vh;
+  width: $navbar-width;
   background-color: $navbar-background;
   display: flex;
-  flex-direction: column; // Stack items vertically
-  align-items: center; // Center items horizontally in the container
-  padding: 0; // Remove previous padding
-  border-right: 1px solid $border-color; // Change border from bottom to right
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border-right: 1px solid $border-color;
 
   h5 {
     color: white;
@@ -31,7 +24,7 @@ $navbar-width: 240px; // Define a variable for the width
 
   a {
     text-decoration: none;
-    width: 100%; // Make links take full width
+    width: 100%;
   }
 
   .navbar-logo {
@@ -47,8 +40,6 @@ $navbar-width: 240px; // Define a variable for the width
       height: 40px;
       margin-right: 1em;
     }
-
-    // The animated line is removed as it fits better in a horizontal layout
   }
 
   .nav-items {
@@ -59,10 +50,8 @@ $navbar-width: 240px; // Define a variable for the width
 
   .navbar-item {
     font-weight: bold;
-    text-decoration: none;
     color: $text-color;
-    position: relative;
-    padding: 1rem 1.5rem; // Add vertical and horizontal padding
+    padding: 1rem 1.5rem;
     transition: background-color 0.3s ease, color 0.3s ease;
 
     h4 {
@@ -75,81 +64,43 @@ $navbar-width: 240px; // Define a variable for the width
 
     &.active {
       color: #35987c;
-      //background-color: ;
     }
-
-    // The underline hover effect is removed in favor of a background color change
-    // You can keep it if you prefer, but this is cleaner for a sidebar.
   }
 
-  // This rule is no longer needed
-  // .navbar-item + .navbar-item { ... }
-
   .account-section {
-    margin-top: auto; // This is the key to pushing it to the bottom
+    margin-top: auto;
     width: 100%;
     border-top: 1px solid $border-color;
     position: relative;
-  }
 
-  .person {
-    color: $personColor;
-    width: 100%;
-    padding: 1.25rem 0;
-    border-radius: 0;
-    background: none;
-    border: none;
+    .person {
+      color: $personColor;
+      width: 100%;
+      padding: 1.25rem 0;
+      border-radius: 0;
+      background: none;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.05);
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    .account-menu {
+      background-color: #2f2f2f;
+      border-radius: 0;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .account-menu button {
+      border-radius: 0;
+      justify-content: flex-start;
+      padding: 0.5rem 1rem;
     }
   }
-}
-
-
-///* Keyframes for the animation */
-//@keyframes moveLine {
-//  0% {
-//    transform: translateX(-100%);
-//  }
-//  100% {
-//    transform: translateX(500%);
-//  }
-//}
-
-.mat-mdc-menu-item > mat-icon {
-  margin-left: 1rem;
-  margin-right: 0.5rem;
-  height: 20px !important;
-}
-
-.mat-mdc-menu-item {
-  border: none;
-  box-shadow: none;
-  background-color: #2f2f2f;
-  border-radius: 0;
-}
-
-.mat-mdc-menu-item:hover {
-  background-color: #2f2f2f;
-}
-
-#account {
-  border: none;
-  box-shadow: none;
-}
-
-#menu-settings,
-#menu-logout {
-  border-radius: 0 !important;
-}
-
-#menu-settings {
-  border-bottom-left-radius: 5px !important;
-  border-bottom-right-radius: 5px !important;
-}
-
-#menu-logout {
-  border-top-left-radius: 5px !important;
-  border-top-right-radius: 5px !important;
 }

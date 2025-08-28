@@ -1,9 +1,10 @@
 $iconWidth: 15px;
 
-.mat-icon {
+.info-icon {
   color: rgb(171, 171, 171);
   font-size: $iconWidth;
   width: $iconWidth;
+  height: $iconWidth;
   margin-left: 0.5rem;
-  height: 15px !important;
+  cursor: pointer; // optional, makes it look more interactive
 }

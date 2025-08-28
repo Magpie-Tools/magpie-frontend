@@ -1,95 +1,172 @@
-<h2 class="titleHeader">
-  <mat-icon svgIcon="reality"></mat-icon>
-  <div>Global Scraper Settings</div>
-  <mat-icon svgIcon="reality"></mat-icon>
-</h2>
+<div class="flex items-center justify-center mb-6">
+  <i class="pi pi-cog text-2xl text-blue-500 mr-3"></i>
+  <h2 class="text-2xl font-semibold text-gray-800 dark:text-white">
+    Global Scraper Settings
+  </h2>
+  <i class="pi pi-cog text-2xl text-blue-500 ml-3"></i>
+</div>
 
-<div class="content-container">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
   <form [formGroup]="settingsForm">
-    <mat-tab-group>
-      <mat-tab label="Common">
-        <h4 class="text-center subText">Check ALL scrape sites every</h4>
-        <div class="form-row mb-3 d-flex justify-content-center" formGroupName="scraper_timer">
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Days" formControlName="days">
-              @for (day of daysList; track day) {
-                <mat-option [value]="day">{{ day + " Days" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Hours" formControlName="hours">
-              @for (hour of hoursList; track hour) {
-                <mat-option [value]="hour">{{ hour + " Hours" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Minutes" formControlName="minutes">
-              @for (min of minutesList; track min) {
-                <mat-option [value]="min">{{ min + " Minutes" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Seconds" formControlName="seconds">
-              @for (sec of secondsList; track sec) {
-                <mat-option [value]="sec">{{ sec + " Seconds" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Common</p-tab>
+        <p-tab value="1">Sources</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div class="space-y-6 pt-4">
+            <!-- Timer Section -->
+            <div class="text-center">
+              <h4 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4">
+                Check ALL scrape sites every
+              </h4>
+              <div class="flex justify-center gap-4 flex-wrap" formGroupName="scraper_timer">
+                <div class="flex flex-col">
+                  <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Days</label>
+                  <p-select
+                    [options]="daysList"
+                    formControlName="days"
+                    placeholder="Select Days"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-32">
+                  </p-select>
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Hours</label>
+                  <p-select
+                    [options]="hoursList"
+                    formControlName="hours"
+                    placeholder="Select Hours"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-32">
+                  </p-select>
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Minutes</label>
+                  <p-select
+                    [options]="minutesList"
+                    formControlName="minutes"
+                    placeholder="Select Minutes"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-32">
+                  </p-select>
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Seconds</label>
+                  <p-select
+                    [options]="secondsList"
+                    formControlName="seconds"
+                    placeholder="Select Seconds"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-32">
+                  </p-select>
+                </div>
+              </div>
+            </div>
 
-        <mat-divider></mat-divider>
+            <p-divider></p-divider>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="threads">
-              Threads
-              <app-tooltip [text]="'Determines how many proxies are checked concurrently.'"></app-tooltip>
-            </label>
-            <input id="threads" formControlName="scraper_threads" type="number"/>
-          </div>
-          <div class="form-group">
-            <label for="retries">Retries</label>
-            <input id="retries" formControlName="scraper_retries" type="number" />
-          </div>
-          <div class="form-group">
-            <label for="timeout">Timeout (ms)</label>
-            <input id="timeout" formControlName="scraper_timeout" type="number" />
-          </div>
-        </div>
+            <!-- Settings Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="flex flex-col">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  Threads
+                  <i class="pi pi-info-circle text-gray-400 cursor-help"
+                     pTooltip="Determines how many proxies are checked concurrently."
+                     tooltipPosition="top">
+                  </i>
+                </label>
+                <p-inputNumber
+                  formControlName="scraper_threads"
+                  [min]="1"
+                  [max]="10000"
+                  class="w-full">
+                </p-inputNumber>
+              </div>
 
-        <mat-divider></mat-divider>
+              <div class="flex flex-col">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Retries
+                </label>
+                <p-inputNumber
+                  formControlName="scraper_retries"
+                  [min]="0"
+                  [max]="100"
+                  class="w-full">
+                </p-inputNumber>
+              </div>
 
-        <div class="row mb-3 mt-3">
-          <div class="col text-center checkbox-container">
-            <app-checkbox
-              label="Dynamic Threads"
-              formControlName="scraper_dynamic_threads"
-              matTooltip="Enable this option to automatically adjust the number of threads based on the available proxies and your checker settings.">
-            </app-checkbox>
-          </div>
-        </div>
-      </mat-tab>
+              <div class="flex flex-col">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Timeout (ms)
+                </label>
+                <p-inputNumber
+                  formControlName="scraper_timeout"
+                  [min]="1000"
+                  [max]="60000"
+                  [step]="500"
+                  class="w-full">
+                </p-inputNumber>
+              </div>
+            </div>
 
-      <mat-tab label="Sources">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="scrape_sites">Default Scrape Sites</label>
-            <input id="scrape_sites" formControlName="scrape_sites" type="number" />
+            <p-divider></p-divider>
+
+            <!-- Dynamic Threads Checkbox -->
+            <div class="flex justify-center">
+              <div class="flex items-center gap-3">
+                <p-checkbox
+                  formControlName="scraper_dynamic_threads"
+                  [binary]="true"
+                  inputId="dynamic-threads">
+                </p-checkbox>
+                <label for="dynamic-threads"
+                       class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer flex items-center gap-2">
+                  Dynamic Threads
+                  <i class="pi pi-info-circle text-gray-400 cursor-help"
+                     pTooltip="Enable this option to automatically adjust the number of threads based on the available proxies and your checker settings."
+                     tooltipPosition="top">
+                  </i>
+                </label>
+              </div>
+            </div>
           </div>
-        </div>
-      </mat-tab>
-    </mat-tab-group>
+        </p-tabpanel>
+
+        <p-tabpanel value="1">
+          <div class="space-y-4 pt-4">
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Default Scrape Sites
+              </label>
+              <input
+                type="text"
+                formControlName="scrape_sites"
+                pInputText
+                class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md
+                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                       dark:bg-gray-700 dark:text-white"
+                placeholder="Enter scrape site URL">
+            </div>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
   </form>
 </div>
 
-<div class="d-flex align-items-center justify-content-center mt-4">
-  <button
-    type="submit"
-    (click)="onSubmit()"
-    class="button-padding"
-    [disabled]="!settingsForm.dirty">
-  Save Settings</button>
+<!-- Save Button -->
+<div class="flex justify-center mt-6">
+  <p-button
+    label="Save Settings"
+    icon="pi pi-save"
+    (onClick)="onSubmit()"
+    [disabled]="!settingsForm.dirty"
+    class="px-6 py-2">
+  </p-button>
 </div>

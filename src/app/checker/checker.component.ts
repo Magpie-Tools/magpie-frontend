@@ -1,27 +1,30 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, FormArray, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatIcon} from '@angular/material/icon';
 import { UserSettings } from '../models/UserSettings';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
-import {MatDivider} from '@angular/material/divider';
-import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {SettingsService} from '../services/settings.service';
 import {SnackbarService} from '../services/snackbar.service';
 
 import {TooltipComponent} from '../tooltip/tooltip.component';
+import {Button} from 'primeng/button';
+import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
+import {Divider} from 'primeng/divider';
 
 @Component({
     selector: 'app-checker',
-    imports: [
+  imports: [
     ReactiveFormsModule,
     FormsModule,
-    MatIcon,
     CheckboxComponent,
-    MatDivider,
-    MatTab,
-    MatTabGroup,
-    TooltipComponent
-],
+    TooltipComponent,
+    Button,
+    Tabs,
+    TabList,
+    Tab,
+    TabPanels,
+    TabPanel,
+    Divider
+  ],
     templateUrl: './checker.component.html',
     styleUrl: './checker.component.scss'
 })

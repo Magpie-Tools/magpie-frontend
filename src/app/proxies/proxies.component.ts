@@ -1,20 +1,18 @@
 import {Component} from '@angular/core';
-import {MatIcon} from "@angular/material/icon";
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatSortModule} from '@angular/material/sort';
 import {ProxyListComponent} from './proxy-list/proxy-list.component';
 import {AddProxiesComponent} from './add-proxies/add-proxies.component';
+import {Button} from 'primeng/button';
 
 @Component({
     selector: 'app-proxies',
-    imports: [
-        MatIcon,
-        ReactiveFormsModule,
-        FormsModule,
-        MatSortModule,
-        ProxyListComponent,
-        AddProxiesComponent,
-    ],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    ProxyListComponent,
+    AddProxiesComponent,
+    Button,
+  ],
     templateUrl: './proxies.component.html',
     styleUrl: './proxies.component.scss'
 })

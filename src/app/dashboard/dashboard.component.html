@@ -1,73 +1,10 @@
 <h2 class="titleHeader">
-  <mat-icon svgIcon="home"></mat-icon>
   <div>Dashboard</div>
-  <mat-icon svgIcon="home"></mat-icon>
 </h2>
 
 @if (dashboardInfo == undefined) {
   <app-loading class="toggle-container d-flex align-items-center justify-content-center mt-4"></app-loading>
 } @else {
-  <div class="stats-grid">
-    <!-- non‑weekly -->
-    <mat-form-field appearance="outline" floatLabel="auto">
-      <mat-label>Total checks</mat-label>
-      <input
-        matInput
-        type="text"
-        [value]="dashboardInfo.total_checks"
-        [flashOnChange]="dashboardInfo.total_checks"
-        readonly
-        />
-      </mat-form-field>
-      <mat-form-field appearance="outline" floatLabel="auto">
-        <mat-label>Total scraped</mat-label>
-        <input
-          matInput
-          type="text"
-          [value]="dashboardInfo.total_scraped"
-          [flashOnChange]="dashboardInfo.total_scraped"
-          readonly
-          />
-        </mat-form-field>
-
-        <!-- weekly -->
-        <mat-form-field appearance="outline" floatLabel="auto">
-          <mat-label>Checks this week</mat-label>
-          <input
-            matInput
-            type="text"
-            [value]="dashboardInfo.total_checks_week"
-            [flashOnChange]="dashboardInfo.total_checks_week"
-            readonly
-            />
-          </mat-form-field>
-          <mat-form-field appearance="outline" floatLabel="auto">
-            <mat-label>Scraped this week</mat-label>
-            <input
-              matInput
-              type="text"
-              [value]="dashboardInfo.total_scraped_week"
-              [flashOnChange]="dashboardInfo.total_scraped_week"
-              readonly
-              />
-            </mat-form-field>
-          </div>
-
-          <!-- per‑judge proxy counts -->
-          <div class="judges-list">
-            @for (judge of dashboardInfo.judge_valid_proxies; track judge) {
-              <div class="judge-block">
-                <mat-form-field appearance="outline" floatLabel="auto">
-                  <mat-label>{{ judge.judge_url }}</mat-label>
-                  <textarea matInput readonly rows="3" style="white-space: pre-wrap;">
-                    Elite: {{ judge.elite_proxies }}
-                    Anonymous: {{ judge.anonymous_proxies }}
-                    Transparent: {{ judge.transparent_proxies }}
-                  </textarea>
-                </mat-form-field>
-              </div>
-            }
-          </div>
 
         }
 

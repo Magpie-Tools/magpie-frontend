@@ -1,28 +1,30 @@
-<h2 class="titleHeader">
-  <mat-icon svgIcon="cloudup"></mat-icon>
+<div class="flex items-center justify-center gap-2 text-2xl font-bold mb-4">
+  <i class="pi pi-cloud-upload"></i>
   <div>Proxies</div>
-  <mat-icon svgIcon="cloudup"></mat-icon>
-</h2>
+  <i class="pi pi-cloud-upload"></i>
+</div>
 
-<div class="toggle-container d-flex align-items-center justify-content-center mt-4">
-  <button
-          [class.active]="showProxyList"
-          (click)="showProxyList = true">
-    Proxy List
-  </button>
-  <button
-          [class.active]="!showProxyList"
-          (click)="showProxyList = false">
-    Add Proxies
-  </button>
+<div class="flex justify-center mt-4">
+  <p-button
+    label="Proxy List"
+    (onClick)="showProxyList = true"
+    [outlined]="!showProxyList"
+    [severity]="showProxyList ? 'primary' : 'secondary'"
+  ></p-button>
+  <p-button
+    label="Add Proxies"
+    (onClick)="showProxyList = false"
+    [outlined]="showProxyList"
+    [severity]="!showProxyList ? 'primary' : 'secondary'"
+  ></p-button>
 </div>
 
 @if (showProxyList) {
   @if (showNoProxiesMessage) {
-    <div class="empty-state d-flex flex-column align-items-center justify-content-center mt-5 p-4">
-      <span class="text-center">
+    <div class="flex flex-col items-center justify-center mt-5 p-4 bg-gray-100 rounded-md">
+      <span class="text-center text-gray-700">
         No proxies found. Start by
-        <a class="link" href="" (click)="showProxyList = false">adding proxies</a>
+        <a class="text-blue-600 hover:underline cursor-pointer" (click)="showProxyList = false">adding proxies</a>
       </span>
     </div>
   } @else {

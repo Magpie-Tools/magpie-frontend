@@ -1,75 +1,150 @@
-<div class="content-container">
-  <div class="row">
-    <div class="col">
-      <div class="row h-25">
-        <h4 class="text-center subText">Add Scrape Sources <app-tooltip [text]="'A scrape source is a websites that shows proxies on it.'"></app-tooltip></h4>
-      </div>
-      <div class="row h-15">
-        <div [class]="clipboardScrapeSources ? 'col-10' : ''" class="p-0">
-          <button type="button" (click)="pasteFromClipboard()" class="button-padding h-25 d-flex align-items-center justify-content-center w-100"
-                  [class]="clipboardScrapeSources ? '' : 'full-color-button'"
-                  [disabled]="clipboardScrapeSources">Paste from Clipboard</button>
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+  <!-- Header -->
+  <div class="text-center mb-6">
+    <h4 class="text-lg font-medium text-gray-700 dark:text-gray-300 flex items-center justify-center gap-2">
+      Add Scrape Sources
+      <i class="pi pi-info-circle text-gray-400 cursor-help"
+         pTooltip="A scrape source is a website that shows proxies on it."
+         tooltipPosition="top">
+      </i>
+    </h4>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Left Column - Input Methods -->
+    <div class="space-y-4">
+      <!-- Clipboard Section -->
+      <div class="flex gap-2">
+        <div class="flex-1">
+          <p-button
+            label="Paste from Clipboard"
+            icon="pi pi-clipboard"
+            (onClick)="pasteFromClipboard()"
+            [disabled]="clipboardScrapeSources"
+            [outlined]="clipboardScrapeSources"
+            severity="primary"
+            class="w-full">
+          </p-button>
         </div>
         @if (clipboardScrapeSources) {
-          <div class="col-1">
-            <button class="btn btn-danger h-50 d-flex align-items-center justify-content-center"
-                    (click)="clearClipboardSources()">X</button>
-          </div>
+          <p-button
+            icon="pi pi-times"
+            (onClick)="clearClipboardSources()"
+            severity="danger"
+            [text]="true"
+            class="flex-shrink-0">
+          </p-button>
         }
       </div>
-      <div class="row h-25">
-        <div [class]="file != undefined ? 'col-10' : ''" class="p-0">
-          <button type="button" (click)="triggerFileInput(fileInput)" class="h-75 d-flex align-items-center justify-content-center w-100"
-                  [class]="file != undefined ? '' : 'full-color-button'"
-                  [disabled]="file != undefined">Import from File</button>
-          <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;">
+
+      <!-- File Upload Section -->
+      <div class="flex gap-2">
+        <div class="flex-1">
+          <p-button
+            label="Import from File"
+            icon="pi pi-upload"
+            (onClick)="triggerFileInput(fileInput)"
+            [disabled]="file != undefined"
+            [outlined]="file != undefined"
+            severity="primary"
+            class="w-full">
+          </p-button>
+          <input
+            type="file"
+            #fileInput
+            (change)="onFileSelected($event)"
+            class="hidden"
+            accept=".txt,.csv">
         </div>
         @if (file != undefined) {
-          <div class="col-1">
-            <button class="btn btn-danger" (click)="onFileClear()">X</button>
-          </div>
+          <p-button
+            icon="pi pi-times"
+            (onClick)="onFileClear()"
+            severity="danger"
+            [text]="true"
+            class="flex-shrink-0">
+          </p-button>
         }
       </div>
 
-      <div class="row">
-        <textarea maxlength="109999" [placeholder]="'Bulk add Scrape Sources\nhttps://scrape-source.com'" [(ngModel)]="scrapeSourceTextarea" (ngModelChange)="addTextAreaSources()"></textarea>
+      <!-- Textarea Section -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Bulk Add Scrape Sources
+        </label>
+        <textarea
+          pTextarea
+          [(ngModel)]="scrapeSourceTextarea"
+          (ngModelChange)="addTextAreaSources()"
+          maxlength="109999"
+          placeholder="Bulk add Scrape Sources&#10;https://scrape-source.com"
+          rows="8"
+          class="w-full resize-none">
+        </textarea>
       </div>
-
     </div>
-    <div class="col d-flex justify-content-center align-items-center">
+
+    <!-- Right Column - Stats/Icon -->
+    <div class="flex items-center justify-center">
       @if (getSourcesCount() > 0) {
-        <p>
-          Total Scrape Sources {{ getSourcesCount() }}
-          <br>
-          Unique {{getUniqueSourcesCount()}}
-        </p>
+        <div class="text-center bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+            {{ getSourcesCount() }}
+          </div>
+          <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+            Total Scrape Sources
+          </div>
+          <div class="text-lg font-semibold text-green-600 dark:text-green-400">
+            {{ getUniqueSourcesCount() }}
+          </div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">
+            Unique Sources
+          </div>
+        </div>
       } @else {
-        <mat-icon svgIcon="graph"></mat-icon>
+        <div class="text-gray-400 dark:text-gray-500">
+          <i class="pi pi-chart-line text-6xl"></i>
+        </div>
       }
     </div>
   </div>
 </div>
 
-<div class="d-flex align-items-center justify-content-center mt-4">
-  <div class="row w-50">
-    <div class="col d-flex justify-content-center">
-      <button type="submit" class="w-100 maxWidth-200" (click)="submitScrapeSources()">Add Scrape Sources to Queue</button>
-    </div>
-    <div class="col d-flex justify-content-center align-items-center">
-      <app-checkbox
-        label="High Priority Queue"
-        matTooltip="When High Priority Queue is activated, scrape sources will get checked instantly and will NOT be at the end of the queue."
-      ></app-checkbox>
-    </div>
+<!-- Action Buttons -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
+  <div class="w-full sm:w-auto">
+    <p-button
+      label="Add Scrape Sources to Queue"
+      icon="pi pi-plus"
+      (onClick)="submitScrapeSources()"
+      severity="success"
+      size="large"
+      class="w-full sm:w-auto min-w-64">
+    </p-button>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <p-checkbox
+      inputId="high-priority"
+      [binary]="true">
+    </p-checkbox>
+    <label for="high-priority"
+           class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer flex items-center gap-2">
+      High Priority Queue
+      <i class="pi pi-info-circle text-gray-400 cursor-help"
+         pTooltip="When High Priority Queue is activated, scrape sources will get checked instantly and will NOT be at the end of the queue."
+         tooltipPosition="top">
+      </i>
+    </label>
   </div>
 </div>
 
+<!-- Processing Popup -->
 @if (showPopup) {
   <app-procesing-popup
     [status]="popupStatus"
     [count]="addedSourceCount"
     [item]="'Scrape Sources'"
-    (closed)="onPopupClose()"
-  >
+    (closed)="onPopupClose()">
   </app-procesing-popup>
 }

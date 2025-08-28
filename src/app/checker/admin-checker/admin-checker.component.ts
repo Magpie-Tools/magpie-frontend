@@ -1,35 +1,34 @@
 import {Component, OnInit} from '@angular/core';
 import {CheckboxComponent} from "../../checkbox/checkbox.component";
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {MatDivider} from "@angular/material/divider";
-import {MatFormField} from "@angular/material/form-field";
-import {MatIcon} from "@angular/material/icon";
-import {MatOption} from "@angular/material/core";
-import {MatSelect} from "@angular/material/select";
-import {MatTab, MatTabGroup} from "@angular/material/tabs";
 
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {SettingsService} from '../../services/settings.service';
 import {take} from 'rxjs/operators';
 import {SnackbarService} from '../../services/snackbar.service';
-import {MatTooltip} from '@angular/material/tooltip';
+import {Button} from 'primeng/button';
+import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
+import {Divider} from 'primeng/divider';
+import {Select} from 'primeng/select';
+import {InputText} from 'primeng/inputtext';
 
 @Component({
     selector: 'app-admin-checker',
-    imports: [
+  imports: [
     CheckboxComponent,
     FormsModule,
-    MatDivider,
-    MatFormField,
-    MatIcon,
-    MatOption,
-    MatSelect,
-    MatTab,
-    MatTabGroup,
     ReactiveFormsModule,
     TooltipComponent,
-    MatTooltip
-],
+    Button,
+    TabPanel,
+    Divider,
+    Select,
+    Tabs,
+    InputText,
+    TabList,
+    Tab,
+    TabPanels
+  ],
     templateUrl: './admin-checker.component.html',
     styleUrl: './admin-checker.component.scss'
 })

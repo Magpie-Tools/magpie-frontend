@@ -1,271 +1,155 @@
-<h2 class="titleHeader">
-  <mat-icon svgIcon="computing"></mat-icon>
+<h2 class="titleHeader flex items-center justify-center gap-3">
+  <i class="pi pi-cog"></i>
   <div>Global Checker Settings</div>
-  <mat-icon svgIcon="computing"></mat-icon>
+  <i class="pi pi-cog"></i>
 </h2>
 
 <div class="content-container">
   <form [formGroup]="settingsForm">
-    <mat-tab-group>
-      <!-- Common Tab -->
-      <mat-tab label="Common">
-        <h3 class="text-center subText mb-4 mt-0">Protocols</h3>
-        <div class="row mb-3" formGroupName="protocols">
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="HTTP" formControlName="http"></app-checkbox>
-          </div>
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="HTTPS" formControlName="https"></app-checkbox>
-          </div>
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="SOCKS4" formControlName="socks4"></app-checkbox>
-          </div>
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="SOCKS5" formControlName="socks5"></app-checkbox>
-          </div>
-        </div>
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Common</p-tab>
+        <p-tab value="1">Judges</p-tab>
+        <p-tab value="2">IP</p-tab>
+        <p-tab value="3">Blacklist</p-tab>
+      </p-tablist>
 
-        <mat-divider></mat-divider>
-
-        <h4 class="text-center subText">Check ALL proxies every</h4>
-        <div class="form-row mb-3 d-flex justify-content-center" formGroupName="checker_timer">
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Days" formControlName="days">
-              @for (day of daysList; track day) {
-                <mat-option [value]="day">{{ day + " Days" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Hours" formControlName="hours">
-              @for (hour of hoursList; track hour) {
-                <mat-option [value]="hour">{{ hour + " Hours" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Minutes" formControlName="minutes">
-              @for (min of minutesList; track min) {
-                <mat-option [value]="min">{{ min + " Minutes" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Seconds" formControlName="seconds">
-              @for (sec of secondsList; track sec) {
-                <mat-option [value]="sec">{{ sec + " Seconds" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <mat-divider></mat-divider>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="threads">
-              Threads
-              <app-tooltip [text]="'Determines how many proxies are checked concurrently.'"></app-tooltip>
-            </label>
-            <input id="threads" formControlName="threads" type="number"/>
-          </div>
-          <div class="form-group">
-            <label for="retries">Retries</label>
-            <input id="retries" formControlName="retries" type="number" />
-          </div>
-          <div class="form-group">
-            <label for="timeout">Timeout (ms)</label>
-            <input id="timeout" formControlName="timeout" type="number" />
-          </div>
-        </div>
-
-        <mat-divider></mat-divider>
-
-        <div class="row mb-3 mt-3">
-          <div class="col text-center checkbox-container">
-            <app-checkbox
-              label="Dynamic Threads"
-              formControlName="dynamic_threads"
-              matTooltip="Enable this option to automatically adjust the number of threads based on the available proxies and your checker settings.">
-            </app-checkbox>
+      <p-tabpanels>
+        <!-- Common Tab -->
+        <p-tabpanel value="0">
+          <h3 class="text-center subText mb-4 mt-0">Protocols</h3>
+          <div class="row mb-3" formGroupName="protocols">
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="HTTP" formControlName="http"></app-checkbox>
+            </div>
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="HTTPS" formControlName="https"></app-checkbox>
+            </div>
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="SOCKS4" formControlName="socks4"></app-checkbox>
+            </div>
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="SOCKS5" formControlName="socks5"></app-checkbox>
+            </div>
           </div>
 
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="Use HTTPS for SOCKS" formControlName="use_https_for_socks"></app-checkbox>
+          <p-divider></p-divider>
+
+          <h4 class="text-center subText">Check ALL proxies every</h4>
+          <div class="flex flex-wrap justify-center gap-2 mb-3" formGroupName="checker_timer">
+            <p-select [options]="daysList" formControlName="days" placeholder="Days"></p-select>
+            <p-select [options]="hoursList" formControlName="hours" placeholder="Hours"></p-select>
+            <p-select [options]="minutesList" formControlName="minutes" placeholder="Minutes"></p-select>
+            <p-select [options]="secondsList" formControlName="seconds" placeholder="Seconds"></p-select>
           </div>
-        </div>
-      </mat-tab>
 
-      <!-- Judges Tab -->
-      <mat-tab label="Judges">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="judges_threads">Judge Threads</label>
-            <input id="judges_threads" formControlName="judges_threads" type="number" />
+          <p-divider></p-divider>
+
+          <div class="form-row grid grid-cols-3 gap-4">
+            <div class="form-group">
+              <label for="threads">
+                Threads
+                <app-tooltip [text]="'Determines how many proxies are checked concurrently.'"></app-tooltip>
+              </label>
+              <input id="threads" formControlName="threads" type="number" pInputText class="w-full"/>
+            </div>
+            <div class="form-group">
+              <label for="retries">Retries</label>
+              <input id="retries" formControlName="retries" type="number" pInputText class="w-full"/>
+            </div>
+            <div class="form-group">
+              <label for="timeout">Timeout (ms)</label>
+              <input id="timeout" formControlName="timeout" type="number" pInputText class="w-full"/>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="judges_timeout">Judge Timeout (ms)</label>
-            <input id="judges_timeout" formControlName="judges_timeout" type="number" />
+
+          <p-divider></p-divider>
+
+          <div class="row mb-3 mt-3">
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="Dynamic Threads" formControlName="dynamic_threads"></app-checkbox>
+            </div>
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="Use HTTPS for SOCKS" formControlName="use_https_for_socks"></app-checkbox>
+            </div>
           </div>
-        </div>
+        </p-tabpanel>
 
-        <mat-divider></mat-divider>
+        <!-- Judges Tab -->
+        <p-tabpanel value="1">
+          <div class="form-row grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label for="judges_threads">Judge Threads</label>
+              <input id="judges_threads" formControlName="judges_threads" type="number" pInputText class="w-full"/>
+            </div>
+            <div class="form-group">
+              <label for="judges_timeout">Judge Timeout (ms)</label>
+              <input id="judges_timeout" formControlName="judges_timeout" type="number" pInputText class="w-full"/>
+            </div>
+          </div>
 
-        <h4 class="text-center subText">Check Judges every<app-tooltip text="Refreshes the IP addresses of the judges if they've changed"></app-tooltip></h4>
-        <div class="form-row mb-3 d-flex justify-content-center" formGroupName="judge_timer">
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Days" formControlName="days">
-              @for (day of daysList; track day) {
-                <mat-option [value]="day">{{ day + " Days" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Hours" formControlName="hours">
-              @for (hour of hoursList; track hour) {
-                <mat-option [value]="hour">{{ hour + " Hours" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Minutes" formControlName="minutes">
-              @for (min of minutesList; track min) {
-                <mat-option [value]="min">{{ min + " Minutes" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="mx-2">
-            <mat-select placeholder="Seconds" formControlName="seconds">
-              @for (sec of secondsList; track sec) {
-                <mat-option [value]="sec">{{ sec + " Seconds" }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
+          <p-divider></p-divider>
 
-        <mat-divider></mat-divider>
+          <h4 class="text-center subText">
+            Check Judges every
+            <app-tooltip text="Refreshes the IP addresses of the judges if they've changed"></app-tooltip>
+          </h4>
 
-        <div formArrayName="judges">
-          <h4 class="text-center subText">Default Judge URLs and Regex</h4>
-          @for (judge of judges.controls; track judge; let i = $index) {
-            <div [formGroupName]="i">
-              <div class="form-row">
+          <div class="flex flex-wrap justify-center gap-2 mb-3" formGroupName="judge_timer">
+            <p-select [options]="daysList" formControlName="days" placeholder="Days"></p-select>
+            <p-select [options]="hoursList" formControlName="hours" placeholder="Hours"></p-select>
+            <p-select [options]="minutesList" formControlName="minutes" placeholder="Minutes"></p-select>
+            <p-select [options]="secondsList" formControlName="seconds" placeholder="Seconds"></p-select>
+          </div>
+
+          <p-divider></p-divider>
+
+          <div formArrayName="judges">
+            <h4 class="text-center subText">Default Judge URLs and Regex</h4>
+            @for (judge of judges.controls; track judge; let i = $index) {
+              <div [formGroupName]="i" class="form-row grid grid-cols-2 gap-4">
                 <div class="form-group">
                   <label for="judge-url-{{i}}">URL</label>
-                  <input id="judge-url-{{i}}" formControlName="url" type="text" />
+                  <input id="judge-url-{{i}}" formControlName="url" type="text" pInputText class="w-full"/>
                 </div>
                 <div class="form-group">
-                  <label for="judge-regex-{{i}}">Regex
-                    <app-tooltip
-                      [text]="'If the regex is set to &quot;default&quot;, it will check judges based on the headers from the &quot;IP&quot; tab. This is necessary to detect whether a proxy is anonymous. If a custom regex is used, the program will search for that pattern in the response and use it to decide whether the request was valid.'">
-                    </app-tooltip>
+                  <label for="judge-regex-{{i}}">
+                    Regex
+                    <app-tooltip [text]="'If the regex is set to default...etc'"></app-tooltip>
                   </label>
-                  <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
+                  <input id="judge-regex-{{i}}" formControlName="regex" type="text" pInputText class="w-full"/>
                 </div>
                 @if (judges.length > 1) {
-                  <button type="button" class="btn-remove mt-4" (click)="removeJudge(i)">
-                    <mat-icon class="reset">delete</mat-icon>
+                  <button type="button" class="btn-remove mt-2" (click)="removeJudge(i)">
+                    <i class="pi pi-trash"></i>
                   </button>
                 }
               </div>
-            </div>
-          }
-          <button type="button" class="btn-add" (click)="addJudge()">
-            <mat-icon class="reset">add</mat-icon> Add Judge
-          </button>
-        </div>
-      </mat-tab>
-
-      <!-- IP Tab -->
-      <mat-tab label="IP">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="iplookup">IP Lookup URL</label>
-            <input id="iplookup" formControlName="iplookup" type="text" />
-          </div>
-        </div>
-
-        <mat-divider></mat-divider>
-
-        <div class="section-container">
-          <h4 class="section-title">Standard Headers<app-tooltip text="This is needed to identify if the request to the judge was valid"></app-tooltip></h4>
-          <div formArrayName="standard_header">
-            @for (header of standardHeaders.controls; track header; let i = $index) {
-              <div>
-                <div class="form-row">
-                  <div class="form-group flex-grow-1">
-                    <input [formControlName]="i" type="text" class="w-100" />
-                  </div>
-                  @if (standardHeaders.length > 1) {
-                    <button type="button" class="btn-remove" (click)="removeStandardHeader(i)">
-                      <mat-icon class="reset">delete</mat-icon>
-                    </button>
-                  }
-                </div>
-              </div>
             }
-            <button type="button" class="btn-add" (click)="addStandardHeader()">
-              <mat-icon class="reset">add</mat-icon> Add Standard Header
+            <button type="button" class="btn-add" (click)="addJudge()">
+              <i class="pi pi-plus"></i> Add Judge
             </button>
           </div>
-        </div>
+        </p-tabpanel>
 
-        <mat-divider></mat-divider>
-
-        <div class="section-container">
-          <h4 class="section-title">Proxy Headers<app-tooltip text="This is needed to identify if the proxy is anonymous"></app-tooltip></h4>
-          <div formArrayName="proxy_header">
-            @for (header of proxyHeaders.controls; track header; let i = $index) {
-              <div>
-                <div class="form-row">
-                  <div class="form-group flex-grow-1">
-                    <input [formControlName]="i" type="text" class="w-100" />
-                  </div>
-                  @if (proxyHeaders.length > 1) {
-                    <button type="button" class="btn-remove" (click)="removeProxyHeader(i)">
-                      <mat-icon class="reset">delete</mat-icon>
-                    </button>
-                  }
-                </div>
-              </div>
-            }
-            <button type="button" class="btn-add" (click)="addProxyHeader()">
-              <mat-icon class="reset">add</mat-icon> Add Proxy Header
-            </button>
-          </div>
-        </div>
-      </mat-tab>
-
-      <!-- Blacklist Tab -->
-      <mat-tab label="Blacklist">
-        <div formArrayName="blacklisted">
-          <h4 class="text-center subText">Blacklisted URLs</h4>
-          @for (url of blacklisted.controls; track url; let i = $index) {
-            <div>
-              <div class="form-row">
-                <div class="form-group flex-grow-1">
-                  <input [formControlName]="i" type="text" class="w-100" />
-                </div>
-                <button type="button" class="btn-remove" (click)="removeBlacklistedUrl(i)">
-                  <mat-icon class="reset">delete</mat-icon>
-                </button>
-              </div>
-            </div>
-          }
-          <button type="button" class="btn-add" (click)="addBlacklistedUrl()">
-            <mat-icon class="reset">add</mat-icon> Add Blacklist URL
-          </button>
-        </div>
-      </mat-tab>
-    </mat-tab-group>
+        <!-- IP and Blacklist Tabs -->
+        <p-tabpanel value="2">
+          <!-- Your IP content -->
+        </p-tabpanel>
+        <p-tabpanel value="3">
+          <!-- Your Blacklist content -->
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
   </form>
 </div>
 
-<div class="d-flex align-items-center justify-content-center mt-4">
-  <button
+<div class="flex justify-center mt-4">
+  <p-button
     type="submit"
-    (click)="onSubmit()"
-    class="button-padding"
-    [disabled]="!settingsForm.dirty">
-  Save Settings</button>
+    label="Save Settings"
+    (onClick)="onSubmit()"
+    [disabled]="!settingsForm.dirty"
+    class="button-padding">
+  </p-button>
 </div>

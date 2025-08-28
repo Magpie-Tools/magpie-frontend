@@ -1,22 +1,18 @@
 import {Component} from '@angular/core';
-import {MatIcon} from '@angular/material/icon';
-import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {RouterLink, RouterLinkActive} from '@angular/router';
 import {UserService} from "../services/authorization/user.service";
-import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
-import {MatButton} from '@angular/material/button';
+import {Button, ButtonDirective} from 'primeng/button';
+import {Popover} from 'primeng/popover';
 
 @Component({
     selector: 'app-navbar',
-    imports: [
-        MatIcon,
-        RouterLink,
-        RouterLinkActive,
-        MatMenuTrigger,
-        MatMenu,
-        MatMenuItem,
-        MatButton,
-        RouterOutlet,
-    ],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    ButtonDirective,
+    Popover,
+    Button,
+  ],
     templateUrl: './navbar.component.html',
     styleUrl: './navbar.component.scss'
 })

@@ -1,42 +1,41 @@
 import {Component, OnInit} from '@angular/core';
-import {MatIcon} from "@angular/material/icon";
-
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {CheckboxComponent} from '../../checkbox/checkbox.component';
-import {MatDivider} from '@angular/material/divider';
-import {MatTab, MatTabGroup} from '@angular/material/tabs';
-import {MatFormField} from '@angular/material/form-field';
-import {MatOption} from '@angular/material/core';
-import {MatSelect} from '@angular/material/select';
-import {MatTooltip} from '@angular/material/tooltip';
 import {TooltipComponent} from '../../tooltip/tooltip.component';
 import {SettingsService} from '../../services/settings.service';
 import {SnackbarService} from '../../services/snackbar.service';
 import {take} from 'rxjs/operators';
 
+import {TabsModule} from 'primeng/tabs';
+import {SelectModule} from 'primeng/select';
+import {InputNumberModule} from 'primeng/inputnumber';
+import {ButtonModule} from 'primeng/button';
+import {DividerModule} from 'primeng/divider';
+import {TooltipModule} from 'primeng/tooltip';
+import {CheckboxModule} from 'primeng/checkbox';
+import {InputTextModule} from 'primeng/inputtext';
+
 @Component({
-    selector: 'app-admin-scraper',
-    imports: [
-    MatIcon,
+  selector: 'app-admin-scraper',
+  imports: [
     ReactiveFormsModule,
-    CheckboxComponent,
-    MatDivider,
-    MatTab,
-    MatTabGroup,
-    MatFormField,
-    MatOption,
-    MatSelect,
-    MatTooltip,
-    TooltipComponent
-],
-    templateUrl: './admin-scraper.component.html',
-    styleUrl: './admin-scraper.component.scss'
+    TabsModule,
+    SelectModule,
+    InputNumberModule,
+    ButtonModule,
+    DividerModule,
+    TooltipModule,
+    CheckboxModule,
+    InputTextModule
+  ],
+  templateUrl: './admin-scraper.component.html',
+  styleUrl: './admin-scraper.component.scss'
 })
 export class AdminScraperComponent implements OnInit {
-  daysList = Array.from({ length: 31 }, (_, i) => i);
-  hoursList = Array.from({ length: 24 }, (_, i) => i);
-  minutesList = Array.from({ length: 60 }, (_, i) => i);
-  secondsList = Array.from({ length: 60 }, (_, i) => i);
+  daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
+  hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
+  minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
+  secondsList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Seconds`, value: i }));
   settingsForm: FormGroup;
 
   constructor(private fb: FormBuilder, private settingsService: SettingsService) {
@@ -52,11 +51,10 @@ export class AdminScraperComponent implements OnInit {
       }, error: err => SnackbarService.openSnackbarDefault("Could not get scraper settings" + err.error.message)
     });
 
-
     const threadsCtrl  = this.settingsForm.get('scraper_threads');
     const dynamicCtrl  = this.settingsForm.get('scraper_dynamic_threads');
 
-    /* whenever the checkbox toggles, enable/disable “threads” */
+    /* whenever the checkbox toggles, enable/disable "threads" */
     dynamicCtrl!.valueChanges.subscribe({
       next: (isDynamic: boolean) => {
         isDynamic ? threadsCtrl!.disable({ emitEvent: false })
@@ -99,7 +97,6 @@ export class AdminScraperComponent implements OnInit {
       scrape_sites: scraperSettings.scrape_sites,
     });
   }
-
 
   onSubmit() {
     this.settingsService.saveGlobalSettings(this.settingsForm.value).subscribe({

@@ -1,90 +1,98 @@
-<h2 class="titleHeader">
-  <mat-icon svgIcon="computing"></mat-icon>
+<h2 class="titleHeader flex items-center justify-center gap-3">
+  <i class="pi pi-desktop"></i>
   <div>Checker</div>
-  <mat-icon svgIcon="computing"></mat-icon>
+  <i class="pi pi-desktop"></i>
 </h2>
 
 <div class="content-container">
   <form [formGroup]="settingsForm">
-    <mat-tab-group>
-      <!-- Common Tab -->
-      <mat-tab label="Common">
-        <h3 class="text-center subText mb-4 mt-0">Protocols</h3>
-        <div class="row mb-3">
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
-          </div>
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
-          </div>
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
-          </div>
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
-          </div>
-        </div>
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Common</p-tab>
+        <p-tab value="1">Judges</p-tab>
+      </p-tablist>
 
-        <mat-divider></mat-divider>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="retries">Retries</label>
-            <input id="retries" formControlName="Retries" type="number" />
+      <p-tabpanels>
+        <!-- Common Tab -->
+        <p-tabpanel value="0">
+          <h3 class="text-center subText mb-4 mt-0">Protocols</h3>
+          <div class="row mb-3">
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
+            </div>
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
+            </div>
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
+            </div>
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="timeout">Timeout (ms)</label>
-            <input id="timeout" formControlName="Timeout" type="number" />
+
+          <p-divider></p-divider>
+
+          <div class="form-row grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label for="retries">Retries</label>
+              <input id="retries" formControlName="Retries" type="number" pInputText class="w-full"/>
+            </div>
+            <div class="form-group">
+              <label for="timeout">Timeout (ms)</label>
+              <input id="timeout" formControlName="Timeout" type="number" pInputText class="w-full"/>
+            </div>
           </div>
-        </div>
 
-        <mat-divider></mat-divider>
+          <p-divider></p-divider>
 
-        <div class="row mb-3 mt-3">
-          <div class="col text-center checkbox-container">
-            <app-checkbox label="Use HTTPS for SOCKS" formControlName="UseHttpsForSocks"></app-checkbox>
+          <div class="row mb-3 mt-3">
+            <div class="col text-center checkbox-container">
+              <app-checkbox label="Use HTTPS for SOCKS" formControlName="UseHttpsForSocks"></app-checkbox>
+            </div>
           </div>
-        </div>
-      </mat-tab>
+        </p-tabpanel>
 
-      <!-- Judges Tab -->
-      <mat-tab label="Judges">
-        <div formArrayName="judges">
-          <h4 class="text-center subText mb-4 mt-0">Judge URLs and Regex</h4>
-          @for (judge of judgesFormArray.controls; track judge; let i = $index) {
-            <div [formGroupName]="i">
-              <div class="form-row">
+        <!-- Judges Tab -->
+        <p-tabpanel value="1">
+          <div formArrayName="judges">
+            <h4 class="text-center subText mb-4 mt-0">Judge URLs and Regex</h4>
+            @for (judge of judgesFormArray.controls; track judge; let i = $index) {
+              <div [formGroupName]="i" class="form-row grid grid-cols-3 gap-4">
                 <div class="form-group">
                   <label for="judge-url-{{i}}">URL</label>
-                  <input id="judge-url-{{i}}" formControlName="url" type="text" />
+                  <input id="judge-url-{{i}}" formControlName="url" type="text" pInputText class="w-full"/>
                 </div>
                 <div class="form-group">
-                  <label for="judge-regex-{{i}}">Regex
+                  <label for="judge-regex-{{i}}">
+                    Regex
                     <app-tooltip
                       [text]="'If the regex is set to &quot;default&quot;, the program will validate the request based on the headers, which are used to determine whether a proxy is anonymous. If a custom regex is provided instead, the program will search for that pattern in the response and use it to decide whether the request was valid.'">
-                    </app-tooltip></label>
-                    <input id="judge-regex-{{i}}" formControlName="regex" type="text" />
-                  </div>
-                  <button type="button" class="btn-remove mt-4" (click)="removeJudge(i)">
-                    <mat-icon class="reset">delete</mat-icon>
-                  </button>
+                    </app-tooltip>
+                  </label>
+                  <input id="judge-regex-{{i}}" formControlName="regex" type="text" pInputText class="w-full"/>
                 </div>
+                <button type="button" class="btn-remove mt-4" (click)="removeJudge(i)">
+                  <i class="pi pi-trash"></i>
+                </button>
               </div>
             }
-            <button type="button" class="btn-add" (click)="addJudge()">
-              <mat-icon class="reset">add</mat-icon> Add Judge
+            <button type="button" class="btn-add mt-2" (click)="addJudge()">
+              <i class="pi pi-plus"></i> Add Judge
             </button>
           </div>
-        </mat-tab>
-      </mat-tab-group>
-    </form>
-  </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </form>
+</div>
 
-  <div class="d-flex align-items-center justify-content-center mt-4">
-    <button
-      type="submit"
-      (click)="onSubmit()"
-      class="button-padding"
-      [disabled]="!settingsForm.dirty">
-    Save Settings</button>
-  </div>
+<div class="flex justify-center mt-4">
+  <p-button
+    type="submit"
+    label="Save Settings"
+    (onClick)="onSubmit()"
+    [disabled]="!settingsForm.dirty"
+    class="button-padding">
+  </p-button>
+</div>

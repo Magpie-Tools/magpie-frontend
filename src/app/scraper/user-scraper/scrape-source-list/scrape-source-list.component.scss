@@ -1,151 +1,164 @@
-$background-color: #171717;
-$text-color: rgb(171 171 171);
-$accent-color: #4ed09e;
-$border-color: rgba(255, 255, 255, 0.1);
-
-.proxy-container {
-  padding: 2rem;
-  min-height: 100vh;
-  width: 60%;
-  margin: 0 auto;
-}
-
-.scraping-source-table {
-  display: table;
-  width: 100%;
-  table-layout: fixed;    // enforce our column widths
-  background-color: $background-color;
-  color: $text-color;
-  border: 1px solid $border-color;
-  border-radius: 4px;
-  overflow: hidden;
-
-  // make all cells handle overflow gracefully
-  .mat-header-cell,
-  .mat-cell {
-    padding: 0.75rem;
-    font-size: 0.85rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  // allow URL cells to wrap on really long links
-  .mat-column-url {
-    white-space: normal;
-    word-wrap: break-word;
-  }
-
-  // Column width rules - adjusted as requested
-  .mat-column-select {
-    width: 100px;
-    flex: 0 0 100px;
-  }
-  .mat-column-added_at {
-    width: 200px;
-    flex: 0 0 200px;
-  }
-  .mat-column-proxy_count {
-    width:  calc((100% - 300px) * 0.2);
-    flex:   0 0 calc((100% - 300px) * 0.2);
-  }
-
-  .mat-column-url {
-    width:  calc((100% - 300px) * 0.8);
-    flex:   0 0 calc((100% - 300px) * 0.8);
-  }
-
-  .mat-header-cell {
-    background-color: darken($background-color, 3%);
-    color: white;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  .mat-row {
-    transition: background-color 0.2s ease;
-    &:hover {
-      background-color: lighten($background-color, 5%);
+// Custom PrimeNG Table Overrides
+:host ::ng-deep {
+  // Table styling
+  .p-datatable {
+    .p-datatable-thead > tr > th {
+      @apply bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold;
+      @apply border-b-2 border-gray-200 dark:border-gray-600;
+      padding: 1rem 0.75rem;
     }
-    &:not(:last-child) {
-      border-bottom: 1px solid $border-color;
+
+    .p-datatable-tbody > tr > td {
+      @apply text-gray-700 dark:text-gray-300;
+      padding: 0.75rem;
+      border-bottom: 1px solid theme('colors.gray.200');
+
+      .dark & {
+        border-bottom-color: theme('colors.gray.600');
+      }
+    }
+
+    .p-datatable-tbody > tr:hover {
+      @apply bg-gray-50 dark:bg-gray-700/50;
+    }
+
+    .p-datatable-tbody > tr.p-highlight {
+      @apply bg-blue-50 dark:bg-blue-900/20;
     }
   }
-}
 
-// Bootstrap integration classes
-.btn-danger {
-  background-color: #dc3545;
-}
+  // Checkbox styling
+  .p-checkbox {
+    .p-checkbox-box {
+      @apply border-gray-300 dark:border-gray-600;
 
-.table-responsive {
-  overflow-x: auto;
-}
+      &.p-highlight {
+        @apply bg-blue-600 border-blue-600;
+      }
 
-.custom-paginator {
-  background-color: $background-color;
-  color: $text-color;
-  padding: 1rem 0;
-  border: 1px solid $border-color;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-
-  .mat-paginator-page-size,
-  .mat-paginator-range-actions {
-    color: $text-color;
+      &:hover {
+        @apply border-blue-500;
+      }
+    }
   }
 
-  .mat-paginator-navigation-previous,
-  .mat-paginator-navigation-next {
-    color: $text-color;
+  // Sort icon styling
+  .p-sortable-column-icon {
+    @apply text-gray-400 hover:text-blue-500;
+
+    &.pi-sort-up,
+    &.pi-sort-down {
+      @apply text-blue-500;
+    }
   }
 
-  .mat-paginator-page {
-    color: $text-color;
+  // Loading overlay
+  .p-datatable-loading-overlay {
+    @apply bg-white/80 dark:bg-gray-800/80;
+  }
 
-    &.mat-paginator-page-active {
-      color: white;
-      background-color: rgba($accent-color, 0.2);
+  // Paginator styling
+  .p-paginator {
+    @apply bg-transparent border-0;
+
+    .p-paginator-pages {
+      .p-paginator-page {
+        @apply text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600;
+
+        &.p-highlight {
+          @apply bg-blue-600 text-white;
+        }
+      }
+    }
+
+    .p-paginator-prev,
+    .p-paginator-next {
+      @apply text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600;
+
+      &.p-disabled {
+        @apply text-gray-400 dark:text-gray-500;
+      }
+    }
+
+    .p-dropdown {
+      @apply bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600;
+
+      .p-dropdown-label {
+        @apply text-gray-700 dark:text-gray-300;
+      }
+    }
+  }
+
+  // Confirm dialog styling
+  .p-confirm-dialog {
+    .p-dialog-header {
+      @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600;
+
+      .p-dialog-title {
+        @apply text-gray-900 dark:text-gray-100;
+      }
+    }
+
+    .p-dialog-content {
+      @apply bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300;
+    }
+
+    .p-dialog-footer {
+      @apply bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600;
     }
   }
 }
 
-.mat-sort-header-container {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: color 0.2s ease;
+// Badge styling for delete button
+.p-badge {
+  &.bg-red-500 {
+    @apply bg-red-500 text-white;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    line-height: 1.25rem;
+    font-size: 0.75rem;
+  }
+}
+
+// Link styling
+a {
+  @apply text-blue-600 dark:text-blue-400 no-underline;
 
   &:hover {
-    color: $accent-color;
+    @apply text-blue-800 dark:text-blue-300 underline;
+  }
+}
 
-    .mat-sort-header-arrow {
-      opacity: 0.8;
+// Responsive table
+@media (max-width: 768px) {
+  :host ::ng-deep {
+    .p-datatable {
+      .p-datatable-thead > tr > th,
+      .p-datatable-tbody > tr > td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.875rem;
+      }
     }
   }
 }
 
-.mat-sort-header-arrow {
-  color: $accent-color;
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-}
+// Custom scrollbar for table
+:host ::ng-deep {
+  .p-datatable-wrapper {
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
 
-.mat-sort-header-sorted {
-  color: $accent-color;
+    &::-webkit-scrollbar-track {
+      @apply bg-gray-100 dark:bg-gray-700 rounded;
+    }
 
-  .mat-sort-header-arrow {
-    opacity: 1;
+    &::-webkit-scrollbar-thumb {
+      @apply bg-gray-300 dark:bg-gray-600 rounded;
+
+      &:hover {
+        @apply bg-gray-400 dark:bg-gray-500;
+      }
+    }
   }
-}
-
-::ng-deep .mat-dialog-container {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-a {
-  color: #bc724a;
-  text-decoration: none;
 }

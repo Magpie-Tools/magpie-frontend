@@ -2,23 +2,17 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
 import {HttpService} from '../services/http.service';
 import {ChangePassword} from '../models/ChangePassword';
 import {SnackbarService} from '../services/snackbar.service';
+import {Button} from 'primeng/button';
 
 @Component({
     selector: 'app-account',
-    imports: [
+  imports: [
     ReactiveFormsModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule
-],
+    Button,
+  ],
     templateUrl: './account.component.html',
     styleUrls: ['./account.component.scss']
 })

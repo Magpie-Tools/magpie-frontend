@@ -10,10 +10,8 @@ export class FlashOnChangeDirective implements OnChanges {
   constructor(private el: ElementRef, private renderer: Renderer2) {}
 
   ngOnChanges(changes: SimpleChanges) {
-    // ignore the very first binding
     if (changes['flashOnChange'] && !changes['flashOnChange'].isFirstChange()) {
       this.renderer.addClass(this.el.nativeElement, 'flash');
-      // remove the class after animation finishes
       setTimeout(() => {
         this.renderer.removeClass(this.el.nativeElement, 'flash');
       }, 600);

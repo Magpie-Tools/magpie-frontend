@@ -1,34 +1,51 @@
 <nav class="navbar">
+  <!-- Logo -->
   <a class="navbar-logo" routerLink="">
     <img src="../../assets/logo/magpie-light.png" alt="Logo" />
     <h5>M A G P I E</h5>
   </a>
 
+  <!-- Nav Items -->
   <div class="nav-items">
-    <a class="navbar-item" routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><h4>Dashboard</h4></a>
-    <a class="navbar-item" routerLink="proxies" routerLinkActive="active"><h4>Proxies</h4></a>
-    <a class="navbar-item" routerLink="checker" routerLinkActive="active"><h4>Checker</h4></a>
+    <a class="navbar-item" routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <h4>Dashboard</h4>
+    </a>
+    <a class="navbar-item" routerLink="proxies" routerLinkActive="active">
+      <h4>Proxies</h4>
+    </a>
+    <a class="navbar-item" routerLink="checker" routerLinkActive="active">
+      <h4>Checker</h4>
+    </a>
     @if (UserService.isAdmin()) {
-      <a class="navbar-item" routerLink="global/checker" routerLinkActive="active"><h4>Global Checker</h4></a>
+      <a class="navbar-item" routerLink="global/checker" routerLinkActive="active">
+        <h4>Global Checker</h4>
+      </a>
     }
-    <a class="navbar-item" routerLink="scraper" routerLinkActive="active"><h4>Scraper</h4></a>
+    <a class="navbar-item" routerLink="scraper" routerLinkActive="active">
+      <h4>Scraper</h4>
+    </a>
     @if (UserService.isAdmin()) {
-      <a class="navbar-item" routerLink="global/scraper" routerLinkActive="active"><h4>Global Scraper</h4></a>
+      <a class="navbar-item" routerLink="global/scraper" routerLinkActive="active">
+        <h4>Global Scraper</h4>
+      </a>
     }
   </div>
 
+  <!-- Account Section -->
   <div class="account-section">
-    <button id="account" class="person" [matMenuTriggerFor]="menu"><mat-icon svgIcon="person"></mat-icon></button>
+    <p-button type="button" class="person w-full flex items-center justify-center" icon="pi pi-user" (click)="accountPopover.toggle($event)"></p-button>
+
+    <p-popover #accountPopover>
+      <div class="flex flex-col w-[15rem] gap-2 p-2">
+        <button pButton type="button" class="w-full flex items-center gap-2 justify-start" (click)="user.logoutAndRedirect()">
+          <i class="pi pi-sign-out"></i>
+          <span>Logout</span>
+        </button>
+        <button pButton type="button" class="w-full flex items-center gap-2 justify-start" routerLink="account">
+          <i class="pi pi-cog"></i>
+          <span>Settings</span>
+        </button>
+      </div>
+    </p-popover>
   </div>
 </nav>
-
-<mat-menu #menu="matMenu" xPosition="after">
-  <button id="menu-logout" mat-menu-item (click)="user.logoutAndRedirect()">
-    <mat-icon svgIcon="signout"></mat-icon>
-    <span>Logout</span>
-  </button>
-  <button id="menu-settings" mat-menu-item routerLink="account" routerLinkActive="active">
-    <mat-icon svgIcon="settings"></mat-icon>
-    <span>Settings</span>
-  </button>
-</mat-menu>

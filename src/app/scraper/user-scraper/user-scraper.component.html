@@ -1,28 +1,33 @@
-<h2 class="titleHeader">
-  <mat-icon svgIcon="reality"></mat-icon>
+<h2 class="flex items-center justify-center gap-3 text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+  <i class="pi pi-globe text-blue-500"></i>
   <div>Scraper</div>
-  <mat-icon svgIcon="reality"></mat-icon>
+  <i class="pi pi-globe text-blue-500"></i>
 </h2>
 
-<div class="toggle-container d-flex align-items-center justify-content-center mt-4">
-  <button
-    [class.active]="showSourceList"
-    (click)="showSourceList = true">
-    Scrape Source List
-  </button>
-  <button
-    [class.active]="!showSourceList"
-    (click)="showSourceList = false">
-    Add Sources
-  </button>
+<div class="flex items-center justify-center mt-4 gap-2">
+  <p-button
+    label="Scrape Source List"
+    [outlined]="!showSourceList"
+    [severity]="showSourceList ? 'primary' : 'secondary'"
+    (onClick)="showSourceList = true">
+  </p-button>
+
+  <p-button
+    label="Add Sources"
+    [outlined]="showSourceList"
+    [severity]="!showSourceList ? 'primary' : 'secondary'"
+    (onClick)="showSourceList = false">
+  </p-button>
 </div>
 
 @if (showSourceList) {
   @if (showNoSourceMessage) {
-    <div class="empty-state d-flex flex-column align-items-center justify-content-center mt-5 p-4">
+    <div class="flex flex-col items-center justify-center mt-5 p-6 text-gray-600 dark:text-gray-400">
       <span class="text-center">
         No sources found. Start by
-        <a class="link" href="" (click)="showSourceList = false">adding sources</a>
+        <a href="" class="text-blue-600 dark:text-blue-400 hover:underline" (click)="showSourceList = false">
+          adding sources
+        </a>
       </span>
     </div>
   } @else {
@@ -31,5 +36,7 @@
     </app-scrape-source-list>
   }
 } @else {
-  <app-add-scrape-source (showAddScrapeSourcesMessage)="showNoSourceMessage = $event"></app-add-scrape-source>
+  <app-add-scrape-source
+    (showAddScrapeSourcesMessage)="showNoSourceMessage = $event">
+  </app-add-scrape-source>
 }
