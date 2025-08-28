@@ -5,7 +5,7 @@ import { GlobalSettings } from '../models/GlobalSettings';
 import { HttpService } from './http.service';
 import {UserSettings} from '../models/UserSettings';
 import {UserService} from './authorization/user.service';
-import {SnackbarService} from './snackbar.service';
+import {NotificationService} from './notification-service.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +23,7 @@ export class SettingsService {
   loadSettings(): void {
     this.http.getUserSettings().subscribe({
       next: res => this.userSettings = res,
-      error: err => SnackbarService.openSnackbarDefault("Error while getting user settings" + err.error.message)
+      error: err => NotificationService.showError("Error while getting user settings" + err.error.message)
       })
 
     if (UserService.isAdmin()) {
@@ -33,7 +33,7 @@ export class SettingsService {
           this.settingsSubject.next(this.settings);
         },
         error: err => {
-          SnackbarService.openSnackbarDefault("Error while getting global settings " + err.error.message)
+          NotificationService.showError("Error while getting global settings " + err.error.message)
         }
       });
     }

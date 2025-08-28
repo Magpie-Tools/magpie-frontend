@@ -1,17 +1,17 @@
-import { AfterViewInit, Component, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, Output, EventEmitter} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpService } from '../../services/http.service';
 import { ProxyInfo } from '../../models/ProxyInfo';
 import { DatePipe } from '@angular/common';
 import { LoadingComponent } from '../../ui-elements/loading/loading.component';
 import { SelectionModel } from '@angular/cdk/collections';
-import { SnackbarService } from '../../services/snackbar.service';
 import { ExportProxiesDialogComponent } from './export-proxies-dialog/export-proxies-dialog.component';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { TableLazyLoadEvent } from 'primeng/table'; // Keep this for onLazyLoad
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { CheckboxModule } from 'primeng/checkbox';
+import {NotificationService} from '../../services/notification-service.service';
 
 @Component({
   selector: 'app-proxy-list',
@@ -72,7 +72,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
         this.showAddProxiesMessage.emit(this.totalItems === 0 && this.hasLoaded);
       },
       error: err => {
-        SnackbarService.openSnackbarDefault('Could not get proxy page: ' + err.error.message);
+        NotificationService.showError('Could not get proxy page: ' + err.error.message);
         this.hasLoaded = true;
       }
     });
@@ -87,7 +87,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
         }
         this.showAddProxiesMessage.emit(this.totalItems === 0 && this.hasLoaded);
       },
-      error: err => SnackbarService.openSnackbarDefault('Error while getting proxy count: ' + err.error.message)
+      error: err => NotificationService.showError('Error while getting proxy count: ' + err.error.message)
     });
   }
 
@@ -138,12 +138,12 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
     if (selectedProxies.length > 0) {
       this.http.deleteProxies(selectedProxies.map(proxy => proxy.id)).subscribe({
         next: res => {
-          SnackbarService.openSnackbar(res, 3000);
+          NotificationService.showSuccess(res);
           this.totalItems -= selectedProxies.length;
           this.selection.clear();
           this.getAndSetProxyList();
         },
-        error: err => SnackbarService.openSnackbarDefault('Could not delete proxies' + err.error.message)
+        error: err => NotificationService.showError('Could not delete proxies' + err.error.message)
       });
     }
   }
@@ -171,7 +171,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit {
           }
         }
       },
-      error: err => SnackbarService.openSnackbarDefault('Error while closing dialog ' + err.error.message)
+      error: err => NotificationService.showError('Error while closing dialog ' + err.error.message)
     });
   }
 

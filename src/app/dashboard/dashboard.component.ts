@@ -5,14 +5,12 @@ import {HttpService} from '../services/http.service';
 import {DashboardInfo} from '../models/DashboardInfo';
 
 import {interval, startWith, switchMap} from 'rxjs';
-import {FlashOnChangeDirective} from '../ui-elements/flash-on-change/flash-on-change.directive';
-import {SnackbarService} from '../services/snackbar.service';
+import {NotificationService} from '../services/notification-service.service';
 
 @Component({
     selector: 'app-dashboard',
     imports: [
     LoadingComponent,
-    FlashOnChangeDirective
 ],
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.scss'
@@ -30,7 +28,7 @@ export class DashboardComponent implements OnInit{
       switchMap(() => this.http.getDashboardInfo())
     ).subscribe({
       next: info => this.dashboardInfo = info,
-      error: err => SnackbarService.openSnackbarDefault("Could not get dashboard info: " + err.error.message)
+      error: err => NotificationService.showError("Could not get dashboard info: " + err.error.message)
     });
   }
 }

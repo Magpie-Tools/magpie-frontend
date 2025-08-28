@@ -4,8 +4,8 @@ import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors }
 import { ReactiveFormsModule } from '@angular/forms';
 import {HttpService} from '../services/http.service';
 import {ChangePassword} from '../models/ChangePassword';
-import {SnackbarService} from '../services/snackbar.service';
 import {Button} from 'primeng/button';
+import {NotificationService} from '../services/notification-service.service';
 
 @Component({
     selector: 'app-account',
@@ -44,8 +44,8 @@ export class AccountComponent {
       const changePass: ChangePassword = this.passwordForm.value
 
       this.http.changePassword(changePass).subscribe({
-        next:  res  => SnackbarService.openSnackbar(res, 5000),
-        error: err => SnackbarService.openSnackbar("There has been an error while changing the password! " + err.error.message, 5000)
+        next:  res  => NotificationService.showInfo(res),
+        error: err => NotificationService.showError("There has been an error while changing the password! " + err.error.message)
       });
 
       // this.passwordForm.reset();

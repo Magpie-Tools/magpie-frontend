@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog'; // Corrected import
 import { ButtonModule } from 'primeng/button';
@@ -13,9 +13,9 @@ import { SettingsService } from '../../../services/settings.service';
 import { HttpService } from '../../../services/http.service';
 import { ProxyInfo } from '../../../models/ProxyInfo';
 import { ExportSettings } from '../../../models/ExportSettings';
-import { SnackbarService } from '../../../services/snackbar.service';
-import { CommonModule, DatePipe } from '@angular/common';
-import {Select} from 'primeng/select'; // Import CommonModule for ngIf, ngFor, etc.
+import { CommonModule } from '@angular/common';
+import {Select} from 'primeng/select';
+import {NotificationService} from '../../../services/notification-service.service'; // Import CommonModule for ngIf, ngFor, etc.
 
 @Component({
   selector: 'app-export-proxies-dialog',
@@ -33,9 +33,7 @@ import {Select} from 'primeng/select'; // Import CommonModule for ngIf, ngFor, e
     DividerModule,
     FieldsetModule, // Add FieldsetModule
     CheckboxComponent, // Your custom checkbox component
-    DatePipe,
     Select,
-    // If you use DatePipe in the template for any reason, keep it.
   ]
 })
 export class ExportProxiesDialogComponent implements OnInit {
@@ -138,7 +136,7 @@ export class ExportProxiesDialogComponent implements OnInit {
           filterSettings: this.exportForm.value.filter ? this.exportForm.value : null // Pass full filter settings if filter is active
         });
       },
-      error: err => SnackbarService.openSnackbarDefault('Error while exporting proxies: ' + err.error.message)
+      error: err => NotificationService.showError('Error while exporting proxies: ' + err.error.message)
     });
   }
 

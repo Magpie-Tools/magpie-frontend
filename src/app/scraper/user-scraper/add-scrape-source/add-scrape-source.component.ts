@@ -2,13 +2,13 @@ import {Component, EventEmitter, Output} from '@angular/core';
 import {ProcesingPopupComponent} from "../../../proxies/add-proxies/procesing-popup/procesing-popup.component";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpService} from '../../../services/http.service';
-import {SnackbarService} from '../../../services/snackbar.service';
 
 import {ButtonModule} from 'primeng/button';
 import {TextareaModule} from 'primeng/textarea';
 import {TooltipModule} from 'primeng/tooltip';
 import {CheckboxModule} from 'primeng/checkbox';
 import {FileUploadModule} from 'primeng/fileupload';
+import {NotificationService} from '../../../services/notification-service.service';
 
 @Component({
   selector: 'app-add-scrape-source',
@@ -156,7 +156,7 @@ export class AddScrapeSourceComponent {
         },
         error: (err) => {
           this.popupStatus = 'error';
-          SnackbarService.openSnackbarDefault("There has been an error while uploading the scrape sources! " + err.error.message)
+          NotificationService.showError("There has been an error while uploading the scrape sources! " + err.error.message)
         },
       });
     } else {

@@ -14,6 +14,7 @@ import {definePreset} from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 import {MessageService} from 'primeng/api';
 import {providePrimeNG} from 'primeng/config';
+import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 
 const CustomTheme = definePreset(Aura, {
   semantic: {
@@ -89,6 +90,7 @@ const CustomTheme = definePreset(Aura, {
 export const appConfig: ApplicationConfig = {
   providers: [
     MessageService,
+    provideAnimationsAsync(),
     providePrimeNG({
       theme: {
         preset: CustomTheme,

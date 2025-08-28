@@ -1,9 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {CheckboxComponent} from '../../checkbox/checkbox.component';
-import {TooltipComponent} from '../../tooltip/tooltip.component';
 import {SettingsService} from '../../services/settings.service';
-import {SnackbarService} from '../../services/snackbar.service';
 import {take} from 'rxjs/operators';
 
 import {TabsModule} from 'primeng/tabs';
@@ -14,6 +11,7 @@ import {DividerModule} from 'primeng/divider';
 import {TooltipModule} from 'primeng/tooltip';
 import {CheckboxModule} from 'primeng/checkbox';
 import {InputTextModule} from 'primeng/inputtext';
+import {NotificationService} from '../../services/notification-service.service';
 
 @Component({
   selector: 'app-admin-scraper',
@@ -48,7 +46,7 @@ export class AdminScraperComponent implements OnInit {
         if (scraperSettings) {
           this.updateFormWithScraperSettings(scraperSettings);
         }
-      }, error: err => SnackbarService.openSnackbarDefault("Could not get scraper settings" + err.error.message)
+      }, error: err => NotificationService.showError("Could not get scraper settings" + err.error.message)
     });
 
     const threadsCtrl  = this.settingsForm.get('scraper_threads');
@@ -59,7 +57,7 @@ export class AdminScraperComponent implements OnInit {
       next: (isDynamic: boolean) => {
         isDynamic ? threadsCtrl!.disable({ emitEvent: false })
           : threadsCtrl!.enable({ emitEvent: false });
-      }, error: err => SnackbarService.openSnackbarDefault("Error while toggling threadCtrl: " + err.error.message)
+      }, error: err => NotificationService.showError("Error while toggling threadCtrl: " + err.error.message)
     });
   }
 
@@ -101,12 +99,12 @@ export class AdminScraperComponent implements OnInit {
   onSubmit() {
     this.settingsService.saveGlobalSettings(this.settingsForm.value).subscribe({
       next: (resp) => {
-        SnackbarService.openSnackbar(resp.message, 3000)
+        NotificationService.showSuccess(resp.message)
         this.settingsForm.markAsPristine()
       },
       error: (err) => {
         console.error("Error saving settings:", err);
-        SnackbarService.openSnackbarDefault("Failed to save settings: " + err.error.message);
+        NotificationService.showError("Failed to save settings: " + err.error.message);
       }
     });
   }

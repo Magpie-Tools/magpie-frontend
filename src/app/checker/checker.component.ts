@@ -3,12 +3,12 @@ import {FormBuilder, FormGroup, FormArray, FormsModule, ReactiveFormsModule} fro
 import { UserSettings } from '../models/UserSettings';
 import {CheckboxComponent} from '../checkbox/checkbox.component';
 import {SettingsService} from '../services/settings.service';
-import {SnackbarService} from '../services/snackbar.service';
 
 import {TooltipComponent} from '../tooltip/tooltip.component';
 import {Button} from 'primeng/button';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
 import {Divider} from 'primeng/divider';
+import {NotificationService} from '../services/notification-service.service';
 
 @Component({
     selector: 'app-checker',
@@ -103,12 +103,12 @@ export class CheckerComponent implements OnInit {
 
     this.settingsService.saveUserSettings(formValues).subscribe({
       next: (resp) => {
-        SnackbarService.openSnackbar(resp.message, 3000)
+        NotificationService.showSuccess(resp.message)
         this.settingsForm.markAsPristine()
       },
       error: (err) => {
         console.error("Error saving settings:", err);
-        SnackbarService.openSnackbar("Failed to save settings!", 3000);
+        NotificationService.showError("Failed to save settings!");
       }
     });
   }

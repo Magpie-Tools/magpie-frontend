@@ -9,8 +9,8 @@ import { ButtonModule } from 'primeng/button';
 import { HttpService } from '../../services/http.service';
 import { User } from '../../models/UserModel';
 import { UserService } from '../../services/authorization/user.service';
-import { SnackbarService } from '../../services/snackbar.service';
 import { AuthInterceptor } from '../../services/auth-interceptor.interceptor';
+import {NotificationService} from '../../services/notification-service.service';
 
 @Component({
   selector: 'app-register',
@@ -56,11 +56,11 @@ export class RegisterComponent {
           AuthInterceptor.setToken(response.token);
           UserService.setLoggedIn(true);
           this.user.getAndSetRole();
-          SnackbarService.openSnackbar('Registration successful', 3000);
+          NotificationService.showSuccess('Registration successful');
           this.router.navigate(['/']);
         },
         error: (error) =>
-          SnackbarService.openSnackbarDefault('Registration failed: ' + error.error.error)
+          NotificationService.showError('Registration failed: ' + error.error.error)
       });
     }
   }

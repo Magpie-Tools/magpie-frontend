@@ -10,8 +10,8 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { User } from '../../models/UserModel';
 import { HttpService } from '../../services/http.service';
 import { UserService } from '../../services/authorization/user.service';
-import { SnackbarService } from '../../services/snackbar.service';
 import { AuthInterceptor } from '../../services/auth-interceptor.interceptor';
+import {NotificationService} from '../../services/notification-service.service';
 
 @Component({
   selector: 'app-login',
@@ -60,11 +60,9 @@ export class LoginComponent {
       error: (err) => {
         UserService.setLoggedIn(false);
         if (err.status === 401) {
-          SnackbarService.openSnackbarDefault('Username or Password is incorrect');
+          NotificationService.showError('Username or Password is incorrect');
         } else {
-          SnackbarService.openSnackbarDefault(
-            'Something went wrong while login! Error code: ' + err.status
-          );
+          NotificationService.showError('Something went wrong while login! Error code: ' + err.status)
         }
       },
     });

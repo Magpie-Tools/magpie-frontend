@@ -2,7 +2,6 @@ import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {DatePipe, NgClass} from '@angular/common';
 import {LoadingComponent} from '../../../ui-elements/loading/loading.component';
 import {HttpService} from '../../../services/http.service';
-import {SnackbarService} from '../../../services/snackbar.service';
 import {ScrapeSourceInfo} from '../../../models/ScrapeSourceInfo';
 
 // PrimeNG imports
@@ -13,6 +12,7 @@ import {PaginatorModule, PaginatorState} from 'primeng/paginator';
 import {TooltipModule} from 'primeng/tooltip';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {ConfirmationService} from 'primeng/api';
+import {NotificationService} from '../../../services/notification-service.service';
 
 @Component({
   selector: 'app-scrape-source-list',
@@ -60,7 +60,7 @@ export class ScrapeSourceListComponent implements OnInit {
         this.loading = false;
       },
       error: err => {
-        SnackbarService.openSnackbarDefault("Could not get scraping sources" + err.error.message);
+        NotificationService.showError("Could not get scraping sources" + err.error.message);
         this.loading = false;
       }
     });
@@ -73,7 +73,7 @@ export class ScrapeSourceListComponent implements OnInit {
         this.hasLoaded = true;
         this.showAddScrapeSourceMessage.emit(this.totalItems === 0 && this.hasLoaded);
       },
-      error: err => SnackbarService.openSnackbarDefault("Could not get scrape sources count " + err.error.message)
+      error: err => NotificationService.showError("Could not get scrape sources count " + err.error.message)
     });
   }
 
@@ -115,12 +115,12 @@ export class ScrapeSourceListComponent implements OnInit {
 
         this.http.deleteScrapingSource(selectedIds).subscribe({
           next: res => {
-            SnackbarService.openSnackbar(res, 3000);
+            NotificationService.showSuccess(res);
             this.totalItems -= this.selectedSources.length;
             this.selectedSources = [];
             this.getAndSetScrapeSourcesList();
           },
-          error: err => SnackbarService.openSnackbarDefault("Could not delete scraping source " + err.error.message)
+          error: err => NotificationService.showError("Could not delete scraping source " + err.error.message)
         });
       }
     });

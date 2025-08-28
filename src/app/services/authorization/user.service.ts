@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpService} from '../http.service';
 import {Router} from '@angular/router';
-import {SnackbarService} from '../snackbar.service';
+import {NotificationService} from '../notification-service.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +19,7 @@ export class UserService {
   public getAndSetRole() {
     this.http.getUserRole().subscribe({
       next: res => {UserService.role = res;},
-      error: err => SnackbarService.openSnackbarDefault("Error while getting user role! " + err.error.message)
+      error: err => NotificationService.showError("Error while getting user role! " + err.error.message)
     })
   }
 

@@ -4,9 +4,9 @@ import {FormsModule} from "@angular/forms";
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {HttpService} from '../../services/http.service';
 import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.component';
-import {SnackbarService} from '../../services/snackbar.service';
 import {Button} from 'primeng/button';
 import {Tooltip} from 'primeng/tooltip';
+import {NotificationService} from '../../services/notification-service.service';
 
 @Component({
     selector: 'app-add-proxies',
@@ -164,7 +164,7 @@ export class AddProxiesComponent {
         },
         error: (err) => {
           this.popupStatus = 'error';
-          SnackbarService.openSnackbarDefault("Could not upload proxies: " + err.error.message)
+          NotificationService.showError("Could not upload proxies: " + err.error.message)
         },
       });
     } else {
