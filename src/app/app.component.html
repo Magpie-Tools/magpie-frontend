@@ -1,6 +1,9 @@
-@if (UserService.isLoggedIn()) {
-  <app-navbar></app-navbar>
-}
-<router-outlet></router-outlet>
-
+<div class="flex h-screen">
+  @if (UserService.isLoggedIn()) {
+    <app-navbar class="h-full"></app-navbar>
+  }
+  <main class="p-5" [ngClass]="UserService.isLoggedIn() ? 'flex-1' : ''">
+    <router-outlet></router-outlet>
+  </main>
+</div>
 <p-toast></p-toast>

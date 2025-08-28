@@ -5,9 +5,6 @@ $personColor: #ffffff;
 $navbar-width: 240px;
 
 .navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
   height: 100vh;
   width: $navbar-width;
   background-color: $navbar-background;
