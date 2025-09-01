@@ -31,7 +31,7 @@ const CustomTheme = definePreset(Aura, {
       900: '#183e31'
     },
     surface: {
-      0:   '#171717',   // navbar background / base dark
+      0:   '#111111',   // navbar background / base dark - CHANGED FROM #171717
       50:  '#202020',
       100: '#2d2d2d',
       200: '#545454',
@@ -68,7 +68,7 @@ const CustomTheme = definePreset(Aura, {
       dark: {
         primary: {
           color: '#348566',
-          inverseColor: '#171717',
+          inverseColor: '#111111',
           hoverColor: '#61b399',
           activeColor: '#8cc8b5'
         },
