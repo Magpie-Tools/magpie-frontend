@@ -68,7 +68,7 @@ const CustomTheme = definePreset(Aura, {
       dark: {
         primary: {
           color: '#348566',
-          inverseColor: '#111111',
+          inverseColor: '#171717',
           hoverColor: '#61b399',
           activeColor: '#8cc8b5'
         },
