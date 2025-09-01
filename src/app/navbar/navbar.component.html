@@ -34,8 +34,9 @@
         }
 
         @if (item.hasExpandable === true) {
-          <span class="ml-auto border border-surface rounded bg-emphasis text-xs p-1">
-            <i [class]="item.expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"></i>
+          <span class="ml-auto text-xs p-1">
+            <i class="pi pi-chevron-down chevron"
+               [class.expanded]="item.expanded"></i>
           </span>
         }
 

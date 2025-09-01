@@ -59,6 +59,7 @@ export class NavbarComponent implements OnInit {
         label: 'Admin',
         icon: 'pi pi-shield', // Add icon for the header
         styleClass: 'menu-title',
+        hasExpandable: true,
         visible: UserService.isAdmin(),
         items: [
           {
