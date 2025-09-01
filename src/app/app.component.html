@@ -1,9 +1,11 @@
-<div class="flex h-screen">
-  @if (UserService.isLoggedIn()) {
+@if (UserService.isLoggedIn()) {
+  <div class="flex h-screen">
     <app-navbar class="h-full"></app-navbar>
-  }
-  <main class="p-5" [ngClass]="UserService.isLoggedIn() ? 'flex-1' : ''">
+    <main class="p-5 flex-1">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+} @else {
     <router-outlet></router-outlet>
-  </main>
-</div>
+}
 <p-toast></p-toast>

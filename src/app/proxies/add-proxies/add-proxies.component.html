@@ -1,118 +1,109 @@
-<div class="content-container">
-  <div class="row">
-    <!-- Left Column -->
-    <div class="col">
-      <!-- Add Proxies Header -->
-      <div class="row h-25">
-        <h4 class="text-center subText">
-          Add Proxies
-          <app-tooltip [text]="'You can add proxies in the following formats:\n\nip:port\nip:port@username:password\nip:port:username:password'"></app-tooltip>
-        </h4>
-      </div>
-
-      <!-- Paste from Clipboard -->
-      <div class="row h-15">
-        <div [class]="clipboardProxies ? 'col-10' : 'col-12'" class="p-0">
-          <p-button
-            type="button"
-            label="Paste from Clipboard"
-            class="h-25 w-full"
-            [class]="clipboardProxies ? '' : 'full-color-button'"
-            (click)="pasteFromClipboard()"
-            [disabled]="clipboardProxies">
-          </p-button>
+<div class="text-white min-h-screen p-6">
+  <div class="max-w-6xl mx-auto bg-gray-800 rounded-2xl border border-gray-600 p-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Left Column -->
+      <div class="space-y-4">
+        <!-- Add Proxies Header -->
+        <div class="text-center mb-6">
+          <h4 class="text-lg font-bold text-gray-300 flex items-center justify-center gap-2">
+            Add Proxies
+            <app-tooltip [text]="'You can add proxies in the following formats:\n\nip:port\nip:port@username:password\nip:port:username:password'"></app-tooltip>
+          </h4>
         </div>
-        @if (clipboardProxies) {
-          <div class="col-1">
+
+        <!-- Paste from Clipboard -->
+        <div class="flex gap-2">
+          <div class="flex-1">
             <p-button
               type="button"
-              class="p-button-danger h-50"
-              icon="pi pi-times"
-              (click)="clearClipboardProxies()">
+              label="Paste from Clipboard"
+              styleClass="w-full"
+              (click)="pasteFromClipboard()"
+              [disabled]="clipboardProxies != ''">
             </p-button>
           </div>
-        }
-      </div>
-
-      <!-- Import from File -->
-      <div class="row h-25">
-        <div [class]="file != undefined ? 'col-10' : 'col-12'" class="p-0">
-          <p-button
-            type="button"
-            label="Import from File"
-            class="h-75 w-full"
-            [class]="file != undefined ? '' : 'full-color-button'"
-            (click)="triggerFileInput(fileInput)"
-            [disabled]="file != undefined">
-          </p-button>
-          <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;">
+          @if (clipboardProxies) {
+            <div class="flex-shrink-0">
+              <p-button
+                type="button"
+                styleClass="p-button-danger p-button-sm mt-1"
+                icon="pi pi-times"
+                (click)="clearClipboardProxies()">
+              </p-button>
+            </div>
+          }
         </div>
-        @if (file != undefined) {
-          <div class="col-1">
+
+        <!-- Import from File -->
+        <div class="flex gap-2">
+          <div class="flex-1">
             <p-button
               type="button"
-              class="p-button-danger"
-              icon="pi pi-times"
-              (click)="onFileClear()">
+              label="Import from File"
+              styleClass="w-full"
+              (click)="triggerFileInput(fileInput)"
+              [disabled]="file != undefined">
             </p-button>
+            <input type="file" #fileInput (change)="onFileSelected($event)" class="hidden">
           </div>
+          @if (file != undefined) {
+            <div class="flex-shrink-0">
+              <p-button
+                type="button"
+                styleClass="p-button-danger p-button-sm mt-1"
+                icon="pi pi-times"
+                (click)="onFileClear()">
+              </p-button>
+            </div>
+          }
+        </div>
+
+        <!-- Bulk Textarea -->
+        <div class="mt-4">
+          <textarea
+            maxlength="109999"
+            placeholder="Bulk add Proxies&#10;127.0.0.1:66535"
+            [(ngModel)]="ProxyTextarea"
+            (ngModelChange)="addTextAreaProxies()"
+            class="w-full h-40 p-3 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 resize-none focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none">
+          </textarea>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="flex items-center justify-center">
+        @if (getProxiesWithoutAuthCount() + getProxiesWithAuthCount() > 0) {
+          <div class="space-y-1">
+            <div>Total Proxies {{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}</div>
+            <div>Unique {{ getUniqueProxiesCount() }}</div>
+            <div>With Auth {{ getProxiesWithAuthCount() }}</div>
+          </div>
+        } @else {
+          <i class="pi pi-chart-line text-6xl text-gray-500"></i>
         }
       </div>
+    </div>
 
-      <!-- Bulk Textarea -->
-      <div class="row">
-        <textarea
-          maxlength="109999"
-          placeholder="Bulk add Proxies&#10;127.0.0.1:66535"
-          [(ngModel)]="ProxyTextarea"
-          (ngModelChange)="addTextAreaProxies()"
-          class="w-full p-2 border rounded resize-none">
-        </textarea>
+    <!-- Footer Actions -->
+    <div class="mt-8 flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-8">
+      <div class="w-full lg:w-auto">
+        <p-button
+          type="submit"
+          label="Add Proxies to Queue"
+          styleClass="w-full lg:w-auto min-w-[200px]"
+          (click)="submitProxies()">
+        </p-button>
       </div>
     </div>
-
-    <!-- Right Column -->
-    <div class="col d-flex justify-content-center align-items-center">
-      @if (getProxiesWithoutAuthCount() + getProxiesWithAuthCount() > 0) {
-        <p>
-          Total Proxies {{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}<br>
-          Unique {{ getUniqueProxiesCount() }}<br>
-          With Auth {{ getProxiesWithAuthCount() }}
-        </p>
-      } @else {
-        <i class="pi pi-chart-line text-4xl text-muted"></i>
-      }
-    </div>
   </div>
-</div>
 
-<!-- Footer Actions -->
-<div class="d-flex align-items-center justify-content-center mt-4">
-  <div class="row w-50">
-    <div class="col d-flex justify-content-center">
-      <p-button
-        type="submit"
-        label="Add Proxies to Queue"
-        class="w-full max-w-[200px]"
-        (click)="submitProxies()">
-      </p-button>
-    </div>
-    <div class="col d-flex justify-content-center align-items-center">
-      <app-checkbox
-        label="High Priority Queue"
-        pTooltip="When High Priority Queue is activated, proxies will get checked instantly and will NOT be at the end of the queue."
-        tooltipPosition="top">
-      </app-checkbox>
-    </div>
-  </div>
+  <!-- Processing Popup -->
+  @if (showPopup) {
+    <app-procesing-popup
+      [status]="popupStatus"
+      [count]="addedProxyCount"
+      [item]="'proxies'"
+      (closed)="onPopupClose()">
+    </app-procesing-popup>
+  }
 </div>
-
-<!-- Processing Popup -->
-@if (showPopup) {
-  <app-procesing-popup
-    [status]="popupStatus"
-    [count]="addedProxyCount"
-    [item]="'proxies'"
-    (closed)="onPopupClose()">
-  </app-procesing-popup>
-}

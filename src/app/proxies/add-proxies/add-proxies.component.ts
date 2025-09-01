@@ -1,22 +1,18 @@
 import {Component, EventEmitter, Output} from '@angular/core';
-import {CheckboxComponent} from "../../checkbox/checkbox.component";
 import {FormsModule} from "@angular/forms";
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {HttpService} from '../../services/http.service';
 import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.component';
 import {Button} from 'primeng/button';
-import {Tooltip} from 'primeng/tooltip';
 import {NotificationService} from '../../services/notification-service.service';
 
 @Component({
     selector: 'app-add-proxies',
   imports: [
-    CheckboxComponent,
     FormsModule,
     TooltipComponent,
     ProcesingPopupComponent,
     Button,
-    Tooltip
   ],
     templateUrl: './add-proxies.component.html',
     styleUrl: './add-proxies.component.scss'
