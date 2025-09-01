@@ -166,3 +166,21 @@ $hover-bg: rgba(255, 255, 255, 0.05);
 .chevron.expanded {
   transform: rotate(180deg);
 }
+
+:host ::ng-deep {
+  .p-panelmenu {
+    .p-panelmenu-content {
+      a.active {
+        background: rgba($active-color, 0.2) !important;
+        color: $active-color !important;
+        border-left: 4px solid $active-color;
+
+        i {
+          color: $active-color !important;
+        }
+      }
+    }
+  }
+}
+
+

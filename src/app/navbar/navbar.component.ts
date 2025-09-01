@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {RouterLink, RouterLinkActive} from '@angular/router';
+import {AfterViewInit, Component, ElementRef, OnInit} from '@angular/core';
+import {NavigationEnd, Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {UserService} from "../services/authorization/user.service";
 import {Button, ButtonDirective} from 'primeng/button';
 import {Popover} from 'primeng/popover';
@@ -23,10 +23,12 @@ import {Badge} from 'primeng/badge';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, AfterViewInit {
   menuItems: MenuItem[] = [];
 
-  constructor(protected user: UserService) {}
+  constructor(protected user: UserService,
+              private router: Router,
+              private elementRef: ElementRef) {}
 
   ngOnInit() {
     this.updateMenuItems();
@@ -75,5 +77,24 @@ export class NavbarComponent implements OnInit {
         ]
       }
     ];
+  }
+
+  ngAfterViewInit() {
+    //FIXES FIREFOX SELECTION BUG
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        setTimeout(() => {
+          this.removeFocusFromPanelMenu();
+        }, 100);
+      }
+    });
+  }
+
+  private removeFocusFromPanelMenu(): void {
+    const focusedElements = this.elementRef.nativeElement.querySelectorAll('.p-focus');
+    focusedElements.forEach((element: HTMLElement) => {
+      element.classList.remove('p-focus');
+      element.blur();
+    });
   }
 }
