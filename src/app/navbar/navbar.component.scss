@@ -1,8 +1,10 @@
-$navbar-background: #171717;
-$text-color: rgb(171 171 171);
+$navbar-background: #111111;
+$text-color: rgb(171, 171, 171);
 $border-color: rgba(255, 255, 255, 0.1);
 $personColor: #ffffff;
 $navbar-width: 240px;
+$active-color: #348566; // Your primary
+$hover-bg: rgba(255, 255, 255, 0.05);
 
 .navbar {
   height: 100vh;
@@ -39,28 +41,96 @@ $navbar-width: 240px;
     }
   }
 
-  .nav-items {
-    display: flex;
-    flex-direction: column;
+  // Styles for regular navbar sections
+  .navbar-section {
     width: 100%;
+    margin-bottom: 1rem;
+
+    .section-title {
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      color: rgba($text-color, 0.7);
+      padding: 0.5rem 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .navbar-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      color: $text-color;
+      transition: all 0.3s;
+      text-decoration: none;
+      border-left: 4px solid transparent;
+
+      i {
+        font-size: 1.2rem;
+        width: 1.2rem;
+        display: flex;
+        justify-content: center;
+      }
+
+      &:hover {
+        background: $hover-bg;
+        color: $active-color;
+      }
+
+      &.active {
+        background: rgba($active-color, 0.2);
+        color: $active-color;
+        border-left: 4px solid $active-color;
+      }
+    }
   }
 
-  .navbar-item {
-    font-weight: bold;
-    color: $text-color;
-    padding: 1rem 1.5rem;
-    transition: background-color 0.3s ease, color 0.3s ease;
+  :host ::ng-deep {
+    .p-panelmenu-header {
+      .p-panelmenu-header-content {
+        display: flex;
+        justify-content: space-between; // arrow to the right
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        cursor: pointer;
 
-    h4 {
-      margin: 0;
+        .p-panelmenu-header-text {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex: 1; // text stays on the left
+        }
+
+        .p-panelmenu-header-icon {
+          transition: transform 0.3s;
+        }
+      }
+
+      &.p-panelmenu-header-active {
+        .p-panelmenu-header-icon {
+          transform: rotate(90deg);
+        }
+      }
     }
+  }
 
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
 
-    &.active {
-      color: #35987c;
+
+
+  .menu-title {
+    :host ::ng-deep .p-panelmenu-header {
+      .p-panelmenu-header-content {
+        .p-panelmenu-header-action {
+          text-transform: uppercase;
+          font-size: 0.85rem;
+          color: rgba($text-color, 0.7); // Muted for headers
+
+          &:hover {
+            color: rgba($text-color, 0.9);
+            background: $hover-bg;
+          }
+        }
+      }
     }
   }
 
@@ -82,22 +152,8 @@ $navbar-width: 240px;
       align-items: center;
 
       &:hover {
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: $hover-bg;
       }
-    }
-
-    .account-menu {
-      background-color: #2f2f2f;
-      border-radius: 0;
-      padding: 0.5rem;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .account-menu button {
-      border-radius: 0;
-      justify-content: flex-start;
-      padding: 0.5rem 1rem;
     }
   }
 }
