@@ -15,21 +15,14 @@
       <p-tabpanels>
         <!-- Common Tab -->
         <p-tabpanel value="0">
-          <h3 class="text-center subText mb-4 mt-0">Protocols</h3>
-          <div class="row mb-3">
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
-            </div>
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
-            </div>
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
-            </div>
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
-            </div>
+          <h3 class="text-center subText mb-8 mt-0">Protocols</h3>
+          <div class="flex justify-center flex-wrap gap-6 mb-8">
+            <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
+            <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
+            <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
+            <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
           </div>
+
 
           <p-divider></p-divider>
 
@@ -46,7 +39,7 @@
 
           <p-divider></p-divider>
 
-          <div class="row mb-3 mt-3">
+          <div class="row mb-3 mt-10">
             <div class="col text-center checkbox-container">
               <app-checkbox label="Use HTTPS for SOCKS" formControlName="UseHttpsForSocks"></app-checkbox>
             </div>

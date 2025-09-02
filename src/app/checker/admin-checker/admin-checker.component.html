@@ -18,19 +18,11 @@
         <!-- Common Tab -->
         <p-tabpanel value="0">
           <h3 class="text-center subText mb-4 mt-0">Protocols</h3>
-          <div class="row mb-3" formGroupName="protocols">
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="HTTP" formControlName="http"></app-checkbox>
-            </div>
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="HTTPS" formControlName="https"></app-checkbox>
-            </div>
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="SOCKS4" formControlName="socks4"></app-checkbox>
-            </div>
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="SOCKS5" formControlName="socks5"></app-checkbox>
-            </div>
+          <div class="flex justify-center flex-wrap gap-6 mb-3" formGroupName="protocols">
+            <app-checkbox label="HTTP" formControlName="http"></app-checkbox>
+            <app-checkbox label="HTTPS" formControlName="https"></app-checkbox>
+            <app-checkbox label="SOCKS4" formControlName="socks4"></app-checkbox>
+            <app-checkbox label="SOCKS5" formControlName="socks5"></app-checkbox>
           </div>
 
           <p-divider></p-divider>
@@ -65,13 +57,9 @@
 
           <p-divider></p-divider>
 
-          <div class="row mb-3 mt-3">
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="Dynamic Threads" formControlName="dynamic_threads"></app-checkbox>
-            </div>
-            <div class="col text-center checkbox-container">
-              <app-checkbox label="Use HTTPS for SOCKS" formControlName="use_https_for_socks"></app-checkbox>
-            </div>
+          <div class="flex justify-center flex-wrap gap-6 mt-8 mb-3">
+            <app-checkbox label="Dynamic Threads" formControlName="dynamic_threads"></app-checkbox>
+            <app-checkbox label="Use HTTPS for SOCKS" formControlName="use_https_for_socks"></app-checkbox>
           </div>
         </p-tabpanel>
 

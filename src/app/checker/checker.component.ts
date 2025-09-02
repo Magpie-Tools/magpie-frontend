@@ -9,6 +9,7 @@ import {Button} from 'primeng/button';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
 import {Divider} from 'primeng/divider';
 import {NotificationService} from '../services/notification-service.service';
+import {InputText} from 'primeng/inputtext';
 
 @Component({
     selector: 'app-checker',
@@ -23,7 +24,8 @@ import {NotificationService} from '../services/notification-service.service';
     Tab,
     TabPanels,
     TabPanel,
-    Divider
+    Divider,
+    InputText
   ],
     templateUrl: './checker.component.html',
     styleUrl: './checker.component.scss'

@@ -88,6 +88,19 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         }, 100);
       }
     });
+
+    // Listen to panel menu clicks to handle toggle events
+    const panelMenuElement = this.elementRef.nativeElement.querySelector('p-panelmenu');
+    if (panelMenuElement) {
+      panelMenuElement.addEventListener('click', (event: any) => {
+        // Check if a header was clicked (toggle action)
+        if (event.target.closest('.p-panelmenu-header')) {
+          setTimeout(() => {
+            this.removeFocusFromPanelMenu();
+          }, 150); // Slightly longer delay for panel animation
+        }
+      });
+    }
   }
 
   private removeFocusFromPanelMenu(): void {
