@@ -28,11 +28,51 @@
           <p-divider></p-divider>
 
           <h4 class="text-center subText">Check ALL proxies every</h4>
-          <div class="flex flex-wrap justify-center gap-2 mb-3" formGroupName="checker_timer">
-            <p-select [options]="daysList" formControlName="days" placeholder="Days"></p-select>
-            <p-select [options]="hoursList" formControlName="hours" placeholder="Hours"></p-select>
-            <p-select [options]="minutesList" formControlName="minutes" placeholder="Minutes"></p-select>
-            <p-select [options]="secondsList" formControlName="seconds" placeholder="Seconds"></p-select>
+          <div class="flex justify-center gap-4 flex-wrap text-center mt-4" formGroupName="checker_timer">
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Days</label>
+              <p-select
+                [options]="daysList"
+                formControlName="days"
+                placeholder="Select Days"
+                optionLabel="label"
+                optionValue="value"
+                class="w-32">
+              </p-select>
+            </div>
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Hours</label>
+              <p-select
+                [options]="hoursList"
+                formControlName="hours"
+                placeholder="Select Hours"
+                optionLabel="label"
+                optionValue="value"
+                class="w-32">
+              </p-select>
+            </div>
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Minutes</label>
+              <p-select
+                [options]="minutesList"
+                formControlName="minutes"
+                placeholder="Select Minutes"
+                optionLabel="label"
+                optionValue="value"
+                class="w-32">
+              </p-select>
+            </div>
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Seconds</label>
+              <p-select
+                [options]="secondsList"
+                formControlName="seconds"
+                placeholder="Select Seconds"
+                optionLabel="label"
+                optionValue="value"
+                class="w-32">
+              </p-select>
+            </div>
           </div>
 
           <p-divider></p-divider>
@@ -83,11 +123,51 @@
             <app-tooltip text="Refreshes the IP addresses of the judges if they've changed"></app-tooltip>
           </h4>
 
-          <div class="flex flex-wrap justify-center gap-2 mb-3" formGroupName="judge_timer">
-            <p-select [options]="daysList" formControlName="days" placeholder="Days"></p-select>
-            <p-select [options]="hoursList" formControlName="hours" placeholder="Hours"></p-select>
-            <p-select [options]="minutesList" formControlName="minutes" placeholder="Minutes"></p-select>
-            <p-select [options]="secondsList" formControlName="seconds" placeholder="Seconds"></p-select>
+          <div class="flex justify-center gap-4 flex-wrap text-center mt-4" formGroupName="judge_timer">
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Days</label>
+              <p-select
+                [options]="daysList"
+                formControlName="days"
+                placeholder="Select Days"
+                optionLabel="label"
+                optionValue="value"
+                class="w-32">
+              </p-select>
+            </div>
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Hours</label>
+              <p-select
+                [options]="hoursList"
+                formControlName="hours"
+                placeholder="Select Hours"
+                optionLabel="label"
+                optionValue="value"
+                class="w-32">
+              </p-select>
+            </div>
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Minutes</label>
+              <p-select
+                [options]="minutesList"
+                formControlName="minutes"
+                placeholder="Select Minutes"
+                optionLabel="label"
+                optionValue="value"
+                class="w-32">
+              </p-select>
+            </div>
+            <div class="flex flex-col">
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Seconds</label>
+              <p-select
+                [options]="secondsList"
+                formControlName="seconds"
+                placeholder="Select Seconds"
+                optionLabel="label"
+                optionValue="value"
+                class="w-32">
+              </p-select>
+            </div>
           </div>
 
           <p-divider></p-divider>
