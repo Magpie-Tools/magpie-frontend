@@ -30,6 +30,9 @@ import {ProxyCheck} from '../models/ProxyCheck';
 })
 export class DashboardComponent implements OnInit {
   dashboardInfo: any = {};
+  proxiesLineData: any;
+  proxiesLineOptions: any;
+  majorCountries: any[] = [];
 
   // KPI Data
   conversionRate = {
@@ -142,7 +145,100 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.dashboardInfo = { loaded: true };
+
+    // Total count of proxies
+    const values = this.visitorPieData.datasets[0].data;
+    const labels = this.visitorPieData.labels;
+    const colors = this.visitorPieData.datasets[0].backgroundColor;
+    const total = values.reduce((a: number, b: number) => a + b, 0);
+
+    // Sort by biggest
+    const combined = labels.map((name: string, i: number) => ({
+      name,
+      value: values[i],
+      color: colors[i]
+    })).sort((a, b) => b.value - a.value);
+
+    // Take top 5
+    const top = combined.slice(0, 4);
+    const othersValue = combined.slice(4).reduce((a, b) => a + b.value, 0);
+
+    if (othersValue > 0) {
+      top.push({ name: 'Others', value: othersValue, color: '#6b7280' });
+    }
+
+    // Calculate percentages
+    this.majorCountries = top.map(c => ({
+      ...c,
+      percentage: ((c.value / total) * 100).toFixed(1)
+    }));
+
+    // Mock hourly data for last 7 days (simplified to 24 points)
+    const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+    const proxies = [50, 52, 54, 58, 61, 65, 63, 70, 72, 74, 76, 80, 85, 83, 82, 84, 88, 92, 95, 97, 98, 99, 100, 100];
+    const gained = [0, 2, 2, 4, 3, 4, -2, 7, 2, 2, 2, 4, 5, -2, -1, 2, 4, 4, 3, 2, 1, 1, 1, 0];
+    const lost = gained.map(v => (v < 0 ? Math.abs(v) : 0));
+    const limit = 100; // max proxies allowed
+
+    this.proxiesLineData = {
+      labels: hours,
+      datasets: [
+        {
+          label: 'Proxies',
+          data: proxies,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        },
+        {
+          label: 'Proxy Limit',
+          data: Array(hours.length).fill(limit),
+          borderColor: '#f59e0b',
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false
+        }
+      ]
+    };
+
+    this.proxiesLineOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (context: any) => {
+              const index = context.dataIndex;
+              const value = context.dataset.data[index];
+              const g = gained[index] || 0;
+              const l = lost[index] || 0;
+              if (context.dataset.label === 'Proxies') {
+                return `Proxies: ${value} (Gained: ${g}, Lost: ${l})`;
+              }
+              return `Limit: ${value}`;
+            }
+          }
+        },
+        legend: {
+          labels: { color: '#e5e7eb' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#9ca3af' },
+          grid: { color: '#374151' }
+        },
+        y: {
+          ticks: { color: '#9ca3af' },
+          grid: { color: '#374151' }
+        }
+      }
+    };
   }
+
 
   getChangeColorClass(change: number): string {
     if (change > 2) {
