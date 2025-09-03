@@ -143,4 +143,25 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.dashboardInfo = { loaded: true };
   }
+
+  getChangeColorClass(change: number): string {
+    if (change > 2) {
+      return 'text-green-400'; // green
+    } else if (change < -2) {
+      return 'text-red-400'; // red
+    } else {
+      return 'text-blue-400'; // neutral
+    }
+  }
+
+  getChipClass(change: number): string {
+    if (change > 2) {
+      return '!bg-green-500/20 !text-green-400';
+    } else if (change < -2) {
+      return '!bg-red-500/20 !text-red-400';
+    } else {
+      return '!bg-blue-500/20 !text-blue-400';
+    }
+  }
+
 }

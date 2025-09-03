@@ -8,6 +8,7 @@
 
 <div *ngIf="dashboardInfo?.loaded" class="dashboard-container">
   <div class="flex flex-wrap -m-2">
+    <!-- Conversion Rate -->
     <div class="w-full md:w-1/3 p-2">
       <p-card styleClass="kpi-card bg-neutral-900 border border-neutral-800 rounded-2xl shadow-md">
         <div class="flex justify-between items-center">
@@ -16,13 +17,9 @@
             <div class="flex items-center gap-3">
               <!-- Dynamic chip -->
               <p-chip
-                [ngClass]="{
-                  '!bg-green-500/20 !text-green-400': conversionRate.change > 2,
-                  '!bg-red-500/20 !text-red-400': conversionRate.change < -2,
-                  '!bg-blue-500/20 !text-blue-400': conversionRate.change >= -2 && conversionRate.change <= 2
-                }"
+                [ngClass]="getChipClass(conversionRate.change)"
                 styleClass="font-medium px-2 py-1 rounded-md">
-                <i class="pi {{conversionRate.isPositive ? 'pi-arrow-up' : 'pi-arrow-down'}}"></i>
+                <i class="pi" [ngClass]="conversionRate.change >= 0 ? 'pi-arrow-up' : 'pi-arrow-down'"></i>
                 {{conversionRate.change + '%'}}
               </p-chip>
 
@@ -35,7 +32,7 @@
           <!-- Mini chart -->
           <div class="opacity-70">
             <svg width="100" height="40" viewBox="0 0 100 40"
-                 [ngClass]="conversionRate.isPositive ? 'text-green-400' : 'text-red-400'">
+                 [ngClass]="getChangeColorClass(conversionRate.change)">
               <path d="M0,30 Q25,10 50,20 T100,15"
                     stroke="currentColor" stroke-width="2" fill="none"/>
             </svg>
@@ -53,13 +50,9 @@
             <div class="flex items-center gap-3">
               <!-- Dynamic chip -->
               <p-chip
-                [ngClass]="{
-                  '!bg-green-500/20 !text-green-400': avgOrderValue.change > 2,
-                  '!bg-red-500/20 !text-red-400': avgOrderValue.change < -2,
-                  '!bg-blue-500/20 !text-blue-400': avgOrderValue.change >= -2 && avgOrderValue.change <= 2
-                }"
+                [ngClass]="getChipClass(avgOrderValue.change)"
                 styleClass="font-medium px-2 py-1 rounded-md">
-                <i class="pi {{avgOrderValue.isPositive ? 'pi-arrow-up' : 'pi-arrow-down'}}"></i>
+                <i class="pi" [ngClass]="avgOrderValue.change >= 0 ? 'pi-arrow-up' : 'pi-arrow-down'"></i>
                 {{avgOrderValue.change + '%'}}
               </p-chip>
 
@@ -73,7 +66,7 @@
           <!-- Mini chart -->
           <div class="opacity-70">
             <svg width="100" height="40" viewBox="0 0 100 40"
-                 [ngClass]="avgOrderValue.isPositive ? 'text-green-400' : 'text-red-400'">
+                 [ngClass]="getChangeColorClass(avgOrderValue.change)">
               <path d="M0,35 Q25,25 50,15 T100,20"
                     stroke="currentColor" stroke-width="2" fill="none"/>
             </svg>
@@ -91,13 +84,9 @@
             <div class="flex items-center gap-3">
               <!-- Dynamic chip -->
               <p-chip
-                [ngClass]="{
-                  '!bg-green-500/20 !text-green-400': orderQuantity.change > 2,
-                  '!bg-red-500/20 !text-red-400': orderQuantity.change < -2,
-                  '!bg-blue-500/20 !text-blue-400': orderQuantity.change >= -2 && orderQuantity.change <= 2
-                }"
+                [ngClass]="getChipClass(orderQuantity.change)"
                 styleClass="font-medium px-2 py-1 rounded-md">
-                <i class="pi {{orderQuantity.isPositive ? 'pi-arrow-up' : 'pi-arrow-down'}}"></i>
+                <i class="pi" [ngClass]="orderQuantity.change >= 0 ? 'pi-arrow-up' : 'pi-arrow-down'"></i>
                 {{orderQuantity.change + '%'}}
               </p-chip>
 
@@ -111,7 +100,7 @@
           <!-- Mini chart -->
           <div class="opacity-70">
             <svg width="100" height="40" viewBox="0 0 100 40"
-                 [ngClass]="orderQuantity.isPositive ? 'text-green-400' : 'text-red-400'">
+                 [ngClass]="getChangeColorClass(orderQuantity.change)">
               <path d="M0,25 Q25,30 50,10 T100,15"
                     stroke="currentColor" stroke-width="2" fill="none"/>
             </svg>
@@ -182,12 +171,6 @@
             </div>
           </div>
         </div>
-
-        <ng-template pTemplate="footer">
-          <div class="text-center p-2">
-            <a href="#" class="text-blue-400 text-sm hover:text-blue-300">View all transactions</a>
-          </div>
-        </ng-template>
       </p-card>
     </div>
   </div>

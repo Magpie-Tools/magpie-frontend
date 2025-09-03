@@ -1,12 +1,12 @@
 @if (UserService.isLoggedIn()) {
-  <div class="flex h-screen">
+  <div class="flex h-screen overflow-hidden">
     <app-navbar class="h-full"></app-navbar>
-    <main class="p-5 flex-1">
+    <main class="p-5 flex-1 overflow-y-auto">
       <router-outlet></router-outlet>
     </main>
   </div>
 } @else {
-    <router-outlet></router-outlet>
+  <router-outlet></router-outlet>
 }
 
 <p-toast></p-toast>
