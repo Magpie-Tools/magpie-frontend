@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {ProgressSpinner} from 'primeng/progressspinner';
 import {Card} from 'primeng/card';
-import {DatePipe, DecimalPipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {DatePipe, DecimalPipe, NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {UIChart} from 'primeng/chart';
 import {Button} from 'primeng/button';
@@ -24,7 +24,8 @@ import {ProxyCheck} from '../models/ProxyCheck';
     PrimeTemplate,
     NgIf,
     NgForOf,
-    Chip
+    Chip,
+    NgStyle
   ],
   styleUrls: ['./dashboard.component.scss']
 })
@@ -33,6 +34,16 @@ export class DashboardComponent implements OnInit {
   proxiesLineData: any;
   proxiesLineOptions: any;
   majorCountries: any[] = [];
+
+  anonymitySummary!: { total: number; change: number };
+  anonymitySegments!: Array<{
+    name: string;
+    count: number;
+    change: number;           // delta vs. last period (for arrows)
+    share: number;            // computed
+    barClass: string;         // Tailwind bg-*
+    dotColor: string;         // small top dot color
+  }>;
 
   // KPI Data
   conversionRate = {
@@ -121,37 +132,27 @@ export class DashboardComponent implements OnInit {
     }
   ];
 
-  getStatusIcon(status: string): string {
-    switch (status) {
-      case 'working': return 'pi pi-check-circle';
-      case 'failed': return 'pi pi-times-circle';
-      case 'timeout': return 'pi pi-clock';
-      default: return 'pi pi-question';
-    }
-  }
-
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'working': return '#10b981'; // green
-      case 'failed': return '#ef4444';  // red
-      case 'timeout': return '#f59e0b'; // orange
-      default: return '#6b7280';
-    }
-  }
-
-  formatLatency(latency?: number): string {
-    return latency ? `${latency} ms` : '-';
-  }
-
   ngOnInit() {
     this.dashboardInfo = { loaded: true };
+
+    const anonRaw = [
+      { name: 'Elite',       count: 780_000, change:  0.12, barClass: 'bg-blue-500/70',   dotColor: '#60a5fa' },
+      { name: 'Anonymous',   count: 636_000, change: -0.16, barClass: 'bg-orange-500/70', dotColor: '#f59e0b' },
+      { name: 'Transparent', count: 356_480, change:  0.05, barClass: 'bg-slate-300/70',  dotColor: '#cbd5e1' }
+    ];
+
 
     // Total count of proxies
     const values = this.visitorPieData.datasets[0].data;
     const labels = this.visitorPieData.labels;
     const colors = this.visitorPieData.datasets[0].backgroundColor;
-    const total = values.reduce((a: number, b: number) => a + b, 0);
+    const total = anonRaw.reduce((a, b) => a + b.count, 0);
+    this.anonymitySegments = anonRaw.map(s => ({ ...s, share: s.count / total }));
 
+    this.anonymitySummary = {
+      total,
+      change: 0.64 // +64% overall (just demo)
+    };
     // Sort by biggest
     const combined = labels.map((name: string, i: number) => ({
       name,
@@ -239,6 +240,29 @@ export class DashboardComponent implements OnInit {
     };
   }
 
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'working': return 'pi pi-check-circle';
+      case 'failed': return 'pi pi-times-circle';
+      case 'timeout': return 'pi pi-clock';
+      default: return 'pi pi-question';
+    }
+  }
+
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'working': return '#10b981'; // green
+      case 'failed': return '#ef4444';  // red
+      case 'timeout': return '#f59e0b'; // orange
+      default: return '#6b7280';
+    }
+  }
+
+  formatLatency(latency?: number): string {
+    return latency ? `${latency} ms` : '-';
+  }
+
+
 
   getChangeColorClass(change: number): string {
     if (change > 2) {
@@ -260,4 +284,10 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+
+  getHeight(share: number): string {
+    // keep a pleasant minimum height so tiny categories still show
+    const min = 0.08;
+    return `${Math.max(share, min) * 100}%`;
+  }
 }
