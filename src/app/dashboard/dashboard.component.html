@@ -178,7 +178,6 @@
             </ul>
           </div>
 
-          <!-- Right Side: Pie Chart -->
           <div class="w-full md:w-2/3 flex justify-center">
             <p-chart type="pie" [data]="visitorPieData" [options]="pieChartOptions"
                      class="h-96 w-96"></p-chart>
@@ -187,7 +186,6 @@
       </p-card>
     </div>
 
-    <!-- Proxies by Anonymity (card next to the pie chart) -->
     <div class="lg:col-span-1">
       <p-card styleClass="chart-card bg-neutral-900 border-neutral-800">
         <ng-template pTemplate="header">
@@ -197,7 +195,6 @@
         </ng-template>
 
         <div class="p-4">
-          <!-- Total widget header -->
           <div class="bg-neutral-800 p-2 rounded-xl">
             <div class="rounded-xl bg-neutral-700 px-3 py-2 flex items-center justify-between mb-3">
               <span class="text-neutral-300 text-sm">Live Proxies</span>
@@ -213,7 +210,6 @@
             </div>
           </div>
 
-          <!-- 3 mini panels -->
           <div class="grid grid-cols-3 gap-3 mt-7 mb-5">
             <div *ngFor="let s of anonymitySegments" class="rounded-2xl bg-neutral-800/60 p-3">
               <div class="flex items-center justify-between text-xs text-neutral-400 mb-2">
@@ -224,7 +220,6 @@
             </span>
               </div>
 
-              <!-- bar with dotted guide like Poseidon -->
               <div class="relative h-28 rounded-xl bg-neutral-900/60 overflow-hidden flex items-end">
                 <div class="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full"
                      [ngStyle]="{'background-color': s.dotColor}"></div>

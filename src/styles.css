@@ -4,10 +4,10 @@
 
 @variant dark (.dark &);
 
-/*!* PrimeNG dark polish *!*/
-/*.p-button {*/
-/*  transform: translateZ(0);*/
-/*}*/
+@layer base {
+  html, body { @apply bg-[#191919]; }
+}
+
 .p-button:active {
   transform: translateY(1px);
 }
