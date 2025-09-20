@@ -1,4 +1,4 @@
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+<div class="bg-neutral-800 rounded-lg shadow-md p-6 mt-5">
   <!-- Header -->
   <div class="text-center mb-6">
     <h4 class="text-lg font-medium text-gray-700 dark:text-gray-300 flex items-center justify-center gap-2">
@@ -117,25 +117,9 @@
       label="Add Scrape Sources to Queue"
       icon="pi pi-plus"
       (onClick)="submitScrapeSources()"
-      severity="success"
       size="large"
       class="w-full sm:w-auto min-w-64">
     </p-button>
-  </div>
-
-  <div class="flex items-center gap-3">
-    <p-checkbox
-      inputId="high-priority"
-      [binary]="true">
-    </p-checkbox>
-    <label for="high-priority"
-           class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer flex items-center gap-2">
-      High Priority Queue
-      <i class="pi pi-info-circle text-gray-400 cursor-help"
-         pTooltip="When High Priority Queue is activated, scrape sources will get checked instantly and will NOT be at the end of the queue."
-         tooltipPosition="top">
-      </i>
-    </label>
   </div>
 </div>
 
