@@ -1,9 +1,19 @@
 @if (UserService.isLoggedIn()) {
-  <div class="flex h-screen overflow-hidden">
-    <app-navbar class="h-full"></app-navbar>
-    <main class="p-5 flex-1 overflow-y-auto">
-      <router-outlet></router-outlet>
-    </main>
+  <div class="h-screen overflow-hidden flex"
+       [class.sidebar-collapsed]="!layout.sidebarOpen()">
+
+    <app-navbar
+      class="h-full overflow-hidden transition-[width,transform] duration-200 ease-in-out shrink-0"
+      [style.width.px]="layout.sidebarOpen() ? 240 : 0">
+    </app-navbar>
+
+    <div class="flex-1 min-w-0 flex flex-col">
+      <app-topbar></app-topbar>
+
+      <main class="p-5 flex-1 overflow-y-auto">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
   </div>
 } @else {
   <router-outlet></router-outlet>

@@ -184,3 +184,13 @@ $hover-bg: rgba(255, 255, 255, 0.05);
 }
 
 
+//:host {
+//  display: block; /* so width:100% in app shell works */
+//}
+//
+///* When parent grid sets width to 0, we slide it out; no changes needed here.
+//   But let's make sure text doesn't peek when animating: */
+//.navbar {
+//  will-change: transform;
+//  overflow: hidden;
+//}
