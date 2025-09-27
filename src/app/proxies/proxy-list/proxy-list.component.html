@@ -1,17 +1,9 @@
 @if (!hasLoaded) {
   <app-loading class="flex items-center justify-center mt-20"></app-loading>
 } @else {
-  <div class="proxy-container p-8 min-h-screen bg-gray-900 text-gray-300">
+  <div class="proxy-container p-8 min-h-screen text-gray-300">
     <!-- Delete and Export Buttons -->
     <div class="actions mb-4 flex gap-4">
-      <p-button
-        label="Delete Selected"
-        icon="pi pi-trash"
-        styleClass="p-button-danger"
-        (onClick)="deleteSelectedProxies()"
-        [disabled]="!selection.hasValue()"
-      ></p-button>
-
       <p-button
         label="Export Proxies"
         icon="pi pi-upload"
@@ -19,16 +11,24 @@
         (onClick)="openExportDialog()"
         [disabled]="!dataSource.data.length"
       ></p-button>
+
+      <p-button
+        label="Delete Selected"
+        icon="pi pi-trash"
+        styleClass="p-button-danger"
+        (onClick)="deleteSelectedProxies()"
+        [disabled]="!selection.hasValue()"
+      ></p-button>
     </div>
 
     <p-table
       [value]="dataSource.data"
       [paginator]="true"
-      [rows]="40"
+      [rows]="pageSize"
       [totalRecords]="totalItems"
       [lazy]="true"
       (onLazyLoad)="onLazyLoad($event)"
-      [rowsPerPageOptions]="[20, 40, 60, 100]"
+        [rowsPerPageOptions]="[20, 40, 60, 100]"
       [selection]="selection.selected"
       [(selection)]="selectedProxies"
       dataKey="id"
@@ -36,6 +36,7 @@
       [sortField]="sortField"
       [sortOrder]="sortOrder ?? 0"
       (onSort)="onSort($event)"
+      [loading]="isLoading"
     >
       <ng-template pTemplate="header">
         <tr>

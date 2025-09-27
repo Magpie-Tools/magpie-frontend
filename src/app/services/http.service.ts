@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {environment} from '../../environments/environment';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {User} from '../models/UserModel';
 import {jwtToken} from '../models/JwtToken';
 import {ProxyInfo} from '../models/ProxyInfo';
@@ -46,8 +46,23 @@ export class HttpService {
   }
 
 
-  getProxyPage(pageNumber: number) {
-    return this.http.get<ProxyInfo[]>(this.apiUrl + '/getProxyPage/' + pageNumber);
+  getProxyPage(pageNumber: number, options?: { rows?: number; sortField?: string | null | undefined; sortOrder?: number | null | undefined }) {
+    let params = new HttpParams();
+
+    if (options?.rows && options.rows > 0) {
+      params = params.set('pageSize', options.rows.toString());
+    }
+
+    if (options?.sortField) {
+      params = params.set('sortField', options.sortField);
+    }
+
+    if (options?.sortOrder && options.sortOrder !== 0) {
+      const direction = options.sortOrder === 1 ? 'asc' : 'desc';
+      params = params.set('sortOrder', direction);
+    }
+
+    return this.http.get<ProxyInfo[]>(`${this.apiUrl}/getProxyPage/${pageNumber}`, { params });
   }
 
   getProxyCount() {
