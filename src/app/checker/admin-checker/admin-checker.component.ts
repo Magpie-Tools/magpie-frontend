@@ -34,10 +34,10 @@ import {NotificationService} from '../../services/notification-service.service';
 })
 export class AdminCheckerComponent implements OnInit{
   settingsForm: FormGroup;
-  daysList = Array.from({ length: 31 }, (_, i) => i);
-  hoursList = Array.from({ length: 24 }, (_, i) => i);
-  minutesList = Array.from({ length: 60 }, (_, i) => i);
-  secondsList = Array.from({ length: 60 }, (_, i) => i);
+  daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
+  hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
+  minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
+  secondsList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Seconds`, value: i }));
 
   constructor(private fb: FormBuilder, private settingsService: SettingsService) {
     this.settingsForm = this.createDefaultForm();
