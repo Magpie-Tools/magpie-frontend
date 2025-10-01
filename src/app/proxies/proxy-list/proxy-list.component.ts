@@ -69,17 +69,17 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     const requestedSortOrder = event?.sortOrder ?? this.sortOrder ?? null;
     const normalizedSortOrder = requestedSortOrder && requestedSortOrder !== 0 ? requestedSortOrder : null;
     const normalizedSortField = normalizedSortOrder ? requestedSortField : null;
+
+    this.sortField = normalizedSortField;
+    this.sortOrder = normalizedSortOrder;
+
     this.proxyListSubscription = this.http.getProxyPage(page, {
       rows,
-      sortField: normalizedSortField,
-      sortOrder: normalizedSortOrder,
     }).subscribe({
       next: res => {
         const data = [...res];
         this.page = page;
         this.pageSize = rows;
-        this.sortField = normalizedSortField;
-        this.sortOrder = normalizedSortOrder;
         this.dataSource.data = this.applySort(data, normalizedSortField, normalizedSortOrder);
         this.totalItems = res.length > 0 ? (this.totalItems || res.length) : 0; // fall back to current batch size until count arrives
         this.isLoading = false;
@@ -112,22 +112,34 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onLazyLoad(event: TableLazyLoadEvent) {
-    this.page = Math.floor(event.first! / event.rows!) + 1;
-    this.pageSize = event.rows!;
+    const previousSortField = this.sortField;
+    const previousSortOrder = this.sortOrder;
+
+    const newPage = Math.floor(event.first! / event.rows!) + 1;
+    const newPageSize = event.rows ?? this.pageSize;
 
     const normalizedSortOrder = event.sortOrder && event.sortOrder !== 0 ? event.sortOrder : null;
     const normalizedSortField = normalizedSortOrder ? this.resolveSortField(event.sortField) : null;
 
+    const sortChanged = normalizedSortField !== previousSortField || normalizedSortOrder !== previousSortOrder;
+    const pageChanged = newPage !== this.page;
+    const pageSizeChanged = newPageSize !== this.pageSize;
+
+    this.page = newPage;
+    this.pageSize = newPageSize;
     this.sortField = normalizedSortField;
     this.sortOrder = normalizedSortOrder;
 
-    this.getAndSetProxyList(event);
+    if (!sortChanged && (pageChanged || pageSizeChanged)) {
+      this.getAndSetProxyList(event);
+    }
   }
 
   onSort(event: { field: string; order: number }) {
     const hasOrder = event.order !== 0 && event.order !== undefined && event.order !== null;
-    this.sortField = hasOrder ? event.field : null;
+    this.sortField = hasOrder ? this.resolveSortField(event.field) : null;
     this.sortOrder = hasOrder ? event.order : null;
+    this.dataSource.data = this.applySort([...this.dataSource.data], this.sortField, this.sortOrder);
   }
 
   toggleSelection(proxy: ProxyInfo): void {
