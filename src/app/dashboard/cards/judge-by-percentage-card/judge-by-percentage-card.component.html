@@ -1,35 +1,41 @@
 <!-- traffic-card.component.html -->
 <p-card styleClass="bg-[#0f1a23] border border-neutral-800 rounded-2xl shadow-md overflow-hidden">
-  <div class="p-4 sm:p-5">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <h3 class="text-base font-semibold text-neutral-100">Judges by alive proxies</h3>
+  <ng-template pTemplate="header">
+    <div class="flex justify-between items-center w-full p-3">
+      <h3 class="text-white m-0">Judges by proxies alive</h3>
     </div>
-
-    <!-- Segmented progress bar -->
-    <div class="mt-4">
-      <div class="w-full h-2 rounded-full bg-neutral-700 overflow-hidden flex">
-        <ng-container *ngFor="let seg of segments()">
+  </ng-template>
+  <div class="mt-4">
+    <div class="relative w-full h-2 rounded-full bg-neutral-800/70 shadow-inner overflow-hidden">
+      <div class="relative flex h-full">
+        <ng-container *ngFor="let seg of segments(); let first = first; let last = last">
           <div
-            class="h-full"
-            [ngStyle]="{ width: seg.widthPct + '%', background: seg.color }">
+            class="segment"
+            [ngClass]="{
+              'rounded-l-full': first,
+              'rounded-r-full': last
+            }"
+            [ngStyle]="{
+              width: seg.widthPct + '%',
+              backgroundColor: seg.color
+            }">
           </div>
         </ng-container>
       </div>
     </div>
+  </div>
 
-    <!-- List -->
-    <div class="mt-4 space-y-2">
-      <div
-        *ngFor="let e of entries()"
-        class="flex items-center justify-between text-sm">
-        <div class="flex items-center gap-2">
-          <span class="inline-block h-2.5 w-2.5 rounded-full" [ngStyle]="{ background: e.color }"></span>
-          <span class="text-neutral-300">{{ e.key }}</span>
-        </div>
-        <div class="tabular-nums font-semibold text-neutral-100">
-          {{ e.pct | number : '1.0-0' }}%
-        </div>
+  <!-- List -->
+  <div class="mt-4 space-y-2">
+    <div
+      *ngFor="let e of entries()"
+      class="flex items-center justify-between text-sm">
+      <div class="flex items-center gap-2">
+        <span class="inline-block h-2.5 w-2.5 rounded-full" [ngStyle]="{ background: e.color }"></span>
+        <span class="text-neutral-300">{{ e.key }}</span>
+      </div>
+      <div class="tabular-nums font-semibold text-neutral-100">
+        {{ e.pct | number : '1.0-0' }}%
       </div>
     </div>
   </div>

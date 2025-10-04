@@ -1,6 +1,7 @@
 import {Component, computed, Input} from '@angular/core';
 import {Card} from 'primeng/card';
-import {DecimalPipe, NgForOf, NgStyle} from '@angular/common';
+import {DecimalPipe, NgClass, NgForOf, NgStyle} from '@angular/common';
+import {PrimeTemplate} from 'primeng/api';
 
 type TrafficMap = Record<string, number>;
 
@@ -10,7 +11,9 @@ type TrafficMap = Record<string, number>;
     Card,
     NgForOf,
     NgStyle,
-    DecimalPipe
+    DecimalPipe,
+    NgClass,
+    PrimeTemplate
   ],
   templateUrl: './judge-by-percentage-card.component.html',
   styleUrl: './judge-by-percentage-card.component.scss'
@@ -22,20 +25,22 @@ export class JudgeByPercentageCardComponent {
   @Input() periodOptions = ['Yearly', 'Quarterly', 'Monthly'];
   selectedPeriod = this.periodOptions[0];
 
-  /** Color palette for bullets + segments; cycles if more keys than colors. */
-  private colors = ['#F59E0B', '#9CA3AF', '#10B981', '#34D399', '#06B6D4', '#F59E0B'];
+  /** Cache avoids recomputing colors for keys we already processed. */
+  private colorCache = new Map<string, string>();
 
   // Sorted entries with computed percentage
   entries = computed(() => {
     const items = Object.entries(this.data ?? {});
     const total = items.reduce((s, [, v]) => s + v, 0);
-    // keep original order; change to sort by value desc if needed
-    return items.map(([k, v], i) => ({
-      key: k,
-      value: v,
-      pct: total > 0 ? (v / total) * 100 : 0,
-      color: this.colors[i % this.colors.length],
-    }));
+    const sorted = items.sort(([, a], [, b]) => b - a);
+    return sorted.map(([k, v]) => {
+      return {
+        key: k,
+        value: v,
+        pct: total > 0 ? (v / total) * 100 : 0,
+        color: this.colorForKey(k),
+      };
+    });
   });
 
   // For the segmented bar
@@ -47,4 +52,34 @@ export class JudgeByPercentageCardComponent {
   );
 
   total = computed(() => Object.values(this.data ?? {}).reduce((s, v) => s + v, 0));
+
+  /**
+   * Generate a saturated but balanced color derived from the provided key.
+   * The hash ensures identical strings always map to the same hue.
+   */
+  private colorForKey(key: string): string {
+    const cached = this.colorCache.get(key);
+    if (cached) {
+      return cached;
+    }
+
+    const hash = this.hashString(key);
+    const hue = hash % 360;
+    const saturation = 65;
+    const lightness = 52;
+    const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+    this.colorCache.set(key, color);
+    return color;
+  }
+
+  private hashString(value: string): number {
+    let hash = 0;
+    for (let i = 0; i < value.length; i++) {
+      hash = (hash << 5) - hash + value.charCodeAt(i);
+      hash |= 0; // Convert to 32bit integer
+    }
+
+    return Math.abs(hash);
+  }
 }
