@@ -47,13 +47,13 @@ export class DashboardComponent implements OnInit {
 
   // KPI Data
   conversionRate = {
-    value: 0.81,
+    value: 10,
     change: -0.6,
     isPositive: false
   };
 
   avgOrderValue = {
-    value: 306.2,
+    value: 306,
     change: 4.2,
     isPositive: true
   };
