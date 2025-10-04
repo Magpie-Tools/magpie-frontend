@@ -8,8 +8,7 @@
       <app-kpi-card
         title="Alive Proxies"
         [value]="conversionRate.value"
-        [change]="conversionRate.change"
-        svgPath="M0,30 Q25,10 50,20 T100,15">
+        [chartValues]="conversionRate.history">
       </app-kpi-card>
     </div>
 
@@ -17,8 +16,7 @@
       <app-kpi-card
         title="Total Proxies"
         [value]="avgOrderValue.value"
-        [change]="avgOrderValue.change"
-        svgPath="M0,35 Q25,25 50,15 T100,20">
+        [chartValues]="avgOrderValue.history">
       </app-kpi-card>
     </div>
 
@@ -26,9 +24,8 @@
       <app-kpi-card
         title="Scraped Proxies"
         [value]="orderQuantity.value"
-        [change]="orderQuantity.change"
         [displayValue]="orderQuantity.value | number"
-        svgPath="M0,25 Q25,30 50,10 T100,15">
+        [chartValues]="orderQuantity.history">
       </app-kpi-card>
     </div>
   </div>

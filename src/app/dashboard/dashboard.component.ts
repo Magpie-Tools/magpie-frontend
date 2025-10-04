@@ -41,20 +41,17 @@ export class DashboardComponent implements OnInit {
 
   conversionRate = {
     value: 10,
-    change: -0.6,
-    isPositive: false
+    history: [8.6, 9.1, 9.8, 10.06]
   };
 
   avgOrderValue = {
     value: 306,
-    change: 4.2,
-    isPositive: true
+    history: [280, 288, 297, 294]
   };
 
   orderQuantity = {
     value: 1620,
-    change: -2.1,
-    isPositive: false
+    history: [1400, 1520, 1680, 1655]
   };
 
   proxyData = {
