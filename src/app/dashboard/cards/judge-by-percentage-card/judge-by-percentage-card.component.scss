@@ -1,0 +1,25 @@
+/* traffic-card.component.css */
+/* Tailwind handles most styling. Small tweaks below. */
+:host {
+  display: block;
+}
+.p-card .p-card-body {
+  padding: 0; /* we handle padding in template */
+}
+.p-dropdown {
+  background: transparent;
+}
+.p-dropdown .p-inputtext {
+  font-size: 0.875rem;
+  background: transparent;
+  color: #e5e7eb; /* neutral-200 */
+  border: none;
+}
+.p-dropdown .p-dropdown-trigger {
+  color: #9ca3af; /* neutral-400 */
+}
+.p-dropdown-panel {
+  background: #0b141b;
+  color: #e5e7eb;
+  border: 1px solid #374151; /* neutral-700 */
+}

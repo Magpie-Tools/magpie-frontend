@@ -50,11 +50,27 @@
       </app-proxies-per-country-card>
     </div>
 
+<!--    <div class="lg:col-span-1">-->
+<!--      <app-proxies-by-anonymity-card-->
+<!--        [summary]="anonymitySummary"-->
+<!--        [segments]="anonymitySegments">-->
+<!--      </app-proxies-by-anonymity-card>-->
+<!--    </div>-->
+
     <div class="lg:col-span-1">
-      <app-proxies-by-anonymity-card
-        [summary]="anonymitySummary"
-        [segments]="anonymitySegments">
-      </app-proxies-by-anonymity-card>
+      <app-judge-by-percentage-card
+        [data]="{
+          test1: 220,
+          proxyspace: 50,
+          'judge.pro': 150,
+          test2: 70,
+          fdsad: 80,
+          ecomm: 110
+        }"
+        [periodOptions]="['Yearly','Monthly','Weekly']">
+      </app-judge-by-percentage-card>
+
     </div>
+
   </div>
 </div>

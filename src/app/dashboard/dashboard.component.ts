@@ -7,6 +7,7 @@ import {ProxiesPerHourCardComponent} from './cards/proxies-per-hour-card/proxies
 import {ProxyHistoryCardComponent} from './cards/proxy-history-card/proxy-history-card.component';
 import {ProxiesPerCountryCardComponent} from './cards/proxies-per-country-card/proxies-per-country-card.component';
 import {ProxiesByAnonymityCardComponent} from './cards/proxies-by-anonymity-card/proxies-by-anonymity-card.component';
+import {JudgeByPercentageCardComponent} from './cards/judge-by-percentage-card/judge-by-percentage-card.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,7 +20,8 @@ import {ProxiesByAnonymityCardComponent} from './cards/proxies-by-anonymity-card
     ProxiesPerHourCardComponent,
     ProxyHistoryCardComponent,
     ProxiesPerCountryCardComponent,
-    ProxiesByAnonymityCardComponent
+    ProxiesByAnonymityCardComponent,
+    JudgeByPercentageCardComponent
   ],
   styleUrls: ['./dashboard.component.scss']
 })

@@ -1,0 +1,36 @@
+<!-- traffic-card.component.html -->
+<p-card styleClass="bg-[#0f1a23] border border-neutral-800 rounded-2xl shadow-md overflow-hidden">
+  <div class="p-4 sm:p-5">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <h3 class="text-base font-semibold text-neutral-100">Judges by alive proxies</h3>
+    </div>
+
+    <!-- Segmented progress bar -->
+    <div class="mt-4">
+      <div class="w-full h-2 rounded-full bg-neutral-700 overflow-hidden flex">
+        <ng-container *ngFor="let seg of segments()">
+          <div
+            class="h-full"
+            [ngStyle]="{ width: seg.widthPct + '%', background: seg.color }">
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- List -->
+    <div class="mt-4 space-y-2">
+      <div
+        *ngFor="let e of entries()"
+        class="flex items-center justify-between text-sm">
+        <div class="flex items-center gap-2">
+          <span class="inline-block h-2.5 w-2.5 rounded-full" [ngStyle]="{ background: e.color }"></span>
+          <span class="text-neutral-300">{{ e.key }}</span>
+        </div>
+        <div class="tabular-nums font-semibold text-neutral-100">
+          {{ e.pct | number : '1.0-0' }}%
+        </div>
+      </div>
+    </div>
+  </div>
+</p-card>
