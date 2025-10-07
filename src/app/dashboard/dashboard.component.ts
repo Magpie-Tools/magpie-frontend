@@ -12,6 +12,7 @@ import {ProxiesPerCountryCardComponent} from './cards/proxies-per-country-card/p
 import {ProxiesByAnonymityCardComponent} from './cards/proxies-by-anonymity-card/proxies-by-anonymity-card.component';
 import {JudgeByPercentageCardComponent} from './cards/judge-by-percentage-card/judge-by-percentage-card.component';
 import {
+  CountryBreakdownEntry,
   DashboardInfo,
   DashboardViewer,
   GraphqlService,
@@ -86,6 +87,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     ]
   };
 
+  private readonly numberFormatter = new Intl.NumberFormat('de-DE');
+
   pieChartOptions = {
     responsive: true,
     plugins: {
@@ -93,6 +96,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         position: 'right',
         labels: {
           color: '#e5e7eb'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const label = context?.label ?? '';
+            const value = typeof context?.parsed === 'number' ? context.parsed : 0;
+            const formatted = this.numberFormatter.format(value);
+            return label ? `${label}: ${formatted}` : formatted;
+          }
         }
       }
     }
@@ -140,7 +153,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     this.updateKpis(viewer.dashboard, viewer.proxyCount);
-    this.updateCountryBreakdown(viewer.proxies?.items ?? [], viewer.proxyCount);
+    this.updateCountryBreakdown(
+      viewer.proxies?.items ?? [],
+      viewer.proxyCount,
+      viewer.dashboard?.countryBreakdown ?? []
+    );
     this.updateProxyHistory(viewer.proxies?.items ?? []);
     this.updateAnonymitySummary(viewer.dashboard?.judgeValidProxies ?? []);
     this.updateJudgeBreakdown(viewer.dashboard?.judgeValidProxies ?? []);
@@ -181,29 +198,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
   }
 
-  private updateCountryBreakdown(proxies: ProxyNode[], proxyTotal: number): void {
-    const counts = new Map<string, number>();
-    proxies.forEach((proxy) => {
-      const key = proxy.country?.trim() || 'Unknown';
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-    });
+  private updateCountryBreakdown(
+    proxies: ProxyNode[],
+    proxyTotal: number,
+    breakdown: CountryBreakdownEntry[] = []
+  ): void {
+    const aggregated = breakdown.length
+      ? breakdown
+          .filter((entry) => entry.count > 0)
+          .map((entry) => ({
+            name: entry.country?.trim() || 'Unknown',
+            value: entry.count
+          }))
+      : this.buildCountryCountsFromProxies(proxies);
 
-    const sorted = Array.from(counts.entries()).sort(([, a], [, b]) => b - a);
-    const total = sorted.reduce((sum, [, value]) => sum + value, 0);
+    const sorted = aggregated.sort((a, b) => b.value - a.value);
+    const total = sorted.reduce((sum, entry) => sum + entry.value, 0);
 
-    const topEntries = sorted.slice(0, 4);
-    const othersValue = sorted.slice(4).reduce((sum, [, value]) => sum + value, 0);
+    const primaryEntries = sorted.slice(0, 10);
+    const othersValue = sorted.slice(4).reduce((sum, entry) => sum + entry.value, 0);
     if (othersValue > 0) {
-      topEntries.push(['Others', othersValue]);
+      primaryEntries.push({ name: 'Others', value: othersValue });
     }
 
     const palette = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1', '#34d399'];
 
-    this.majorCountries = topEntries.map(([name, value], index) => ({
-      name,
-      value,
+    this.majorCountries = primaryEntries.map((entry, index) => ({
+      name: entry.name,
+      value: entry.value,
       color: palette[index % palette.length],
-      percentage: total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'
+      percentage: total > 0 ? ((entry.value / total) * 100).toFixed(1) : '0.0'
     }));
 
     const labels = this.majorCountries.map((entry) => entry.name);
@@ -230,6 +254,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.visitorPieData.datasets[0].backgroundColor = ['#3b82f6'];
       this.visitorPieData.datasets[0].hoverBackgroundColor = ['#60a5fa'];
     }
+  }
+
+  private buildCountryCountsFromProxies(proxies: ProxyNode[]): Array<{ name: string; value: number }> {
+    const counts = new Map<string, number>();
+    proxies.forEach((proxy) => {
+      const key = proxy.country?.trim() || 'Unknown';
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+
+    return Array.from(counts.entries()).map(([name, value]) => ({ name, value }));
   }
 
   private updateProxyHistory(proxies: ProxyNode[]): void {

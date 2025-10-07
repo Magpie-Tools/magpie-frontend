@@ -54,6 +54,13 @@
       </app-proxies-per-country-card>
     </div>
 
+    <div class="lg:col-span-1">
+      <app-judge-by-percentage-card
+        [data]="judgeTrafficData"
+        [periodOptions]="judgePeriodOptions">
+      </app-judge-by-percentage-card>
+    </div>
+
     <div class="lg:col-span-1" *ngIf="anonymitySummary">
       <app-proxies-by-anonymity-card
         [summary]="anonymitySummary"
@@ -61,13 +68,6 @@
       </app-proxies-by-anonymity-card>
     </div>
 
-    <div class="lg:col-span-1">
-      <app-judge-by-percentage-card
-        [data]="judgeTrafficData"
-        [periodOptions]="judgePeriodOptions">
-      </app-judge-by-percentage-card>
-
-    </div>
 
   </div>
 </div>

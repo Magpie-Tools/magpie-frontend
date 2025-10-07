@@ -12,6 +12,10 @@ const DASHBOARD_QUERY = `#graphql
         totalScraped
         totalChecksWeek
         totalScrapedWeek
+        countryBreakdown {
+          country
+          count
+        }
         judgeValidProxies {
           judgeUrl
           eliteProxies
@@ -62,7 +66,13 @@ export interface DashboardInfo {
   totalScraped: number;
   totalChecksWeek: number;
   totalScrapedWeek: number;
+  countryBreakdown: CountryBreakdownEntry[];
   judgeValidProxies: JudgeValidProxy[];
+}
+
+export interface CountryBreakdownEntry {
+  country: string;
+  count: number;
 }
 
 export interface JudgeValidProxy {
