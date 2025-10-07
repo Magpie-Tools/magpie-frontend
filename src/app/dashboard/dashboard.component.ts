@@ -1,6 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ProgressSpinner} from 'primeng/progressspinner';
 import {NgIf, DecimalPipe} from '@angular/common';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
+
 import {ProxyCheck} from '../models/ProxyCheck';
 import {KpiCardComponent} from './cards/kpi-card/kpi-card.component';
 import {ProxiesPerHourCardComponent} from './cards/proxies-per-hour-card/proxies-per-hour-card.component';
@@ -8,6 +11,28 @@ import {ProxyHistoryCardComponent} from './cards/proxy-history-card/proxy-histor
 import {ProxiesPerCountryCardComponent} from './cards/proxies-per-country-card/proxies-per-country-card.component';
 import {ProxiesByAnonymityCardComponent} from './cards/proxies-by-anonymity-card/proxies-by-anonymity-card.component';
 import {JudgeByPercentageCardComponent} from './cards/judge-by-percentage-card/judge-by-percentage-card.component';
+import {
+  DashboardInfo,
+  DashboardViewer,
+  GraphqlService,
+  JudgeValidProxy,
+  ProxyNode
+} from '../services/graphql.service';
+
+interface SparklineMetric {
+  value: number;
+  history: number[];
+  displayValue?: string | null;
+  change?: number | null;
+}
+
+interface DashboardStatus {
+  loading: boolean;
+  loaded: boolean;
+  error?: string;
+}
+
+const HOUR_MS = 60 * 60 * 1000;
 
 @Component({
   selector: 'app-dashboard',
@@ -25,51 +50,38 @@ import {JudgeByPercentageCardComponent} from './cards/judge-by-percentage-card/j
   ],
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
-  dashboardInfo: any = {};
-  proxiesLineData: any;
-  proxiesLineOptions: any;
+export class DashboardComponent implements OnInit, OnDestroy {
+  dashboardInfo: DashboardStatus = { loading: false, loaded: false };
+
+  conversionRate: SparklineMetric = { value: 0, history: [] };
+  avgOrderValue: SparklineMetric = { value: 0, history: [] };
+  orderQuantity: SparklineMetric = { value: 0, history: [] };
+
+  proxiesLineData: any = {};
+  proxiesLineOptions: any = {};
+  private proxiesLineDiff = { gained: [] as number[], lost: [] as number[] };
+
   majorCountries: Array<{ name: string; value: number; color?: string; percentage: string }> = [];
 
-  anonymitySummary!: { total: number; change: number };
-  anonymitySegments!: Array<{
+  anonymitySummary?: { total: number; change: number };
+  anonymitySegments: Array<{
     name: string;
     count: number;
     change: number;
     share: number;
     barClass: string;
     dotColor: string;
-  }>;
+  }> = [];
 
-  conversionRate = {
-    value: 10,
-    history: [8.6, 9.1, 9.8, 10.06]
-  };
-
-  avgOrderValue = {
-    value: 306,
-    history: [280, 288, 297, 294]
-  };
-
-  orderQuantity = {
-    value: 1620,
-    history: [1400, 1520, 1680, 1655]
-  };
-
-  proxyData = {
-    current: 620076,
-    avg: 1120,
-    growth: 'PROXIES',
-    avgLabel: 'Checks Per Second'
-  };
+  proxyHistory: ProxyCheck[] = [];
 
   visitorPieData = {
-    labels: ['United States', 'Germany', 'India', 'Brazil', 'Austria'],
+    labels: [] as string[],
     datasets: [
       {
-        data: [320000, 95000, 72000, 54000, 38000],
-        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-        hoverBackgroundColor: ['#2563eb', '#059669', '#d97706', '#dc2626', '#7c3aed']
+        data: [] as number[],
+        backgroundColor: [] as string[],
+        hoverBackgroundColor: [] as string[]
       }
     ]
   };
@@ -86,90 +98,264 @@ export class DashboardComponent implements OnInit {
     }
   };
 
-  proxyHistory: ProxyCheck[] = [
-    {
-      id: '#1',
-      ip: '192.168.1.101:8080',
-      status: 'working',
-      latency: 120,
-      date: new Date('2025-09-01T12:05:00'),
-      time: '12:05 PM'
-    },
-    {
-      id: '#2',
-      ip: '192.168.1.102:8080',
-      status: 'failed',
-      date: new Date('2025-09-01T12:03:00'),
-      time: '12:03 PM'
-    },
-    {
-      id: '#3',
-      ip: '192.168.1.103:8080',
-      status: 'timeout',
-      date: new Date('2025-09-01T11:55:00'),
-      time: '11:55 AM'
-    },
-    {
-      id: '#4',
-      ip: '192.168.1.104:8080',
-      status: 'working',
-      latency: 85,
-      date: new Date('2025-09-01T11:50:00'),
-      time: '11:50 AM'
-    }
-  ];
+  judgeTrafficData: Record<string, number> = {};
+  judgePeriodOptions = ['Yearly', 'Monthly', 'Weekly'];
+
+  private readonly destroy$ = new Subject<void>();
+
+  constructor(private graphqlService: GraphqlService) {}
 
   ngOnInit(): void {
-    this.dashboardInfo = { loaded: true };
+    this.loadDashboard();
+  }
 
-    const anonRaw = [
-      { name: 'Elite', count: 780_000, change: 0.12, barClass: 'bg-blue-500/70', dotColor: '#60a5fa' },
-      { name: 'Anonymous', count: 636_000, change: -0.16, barClass: 'bg-orange-500/70', dotColor: '#f59e0b' },
-      { name: 'Transparent', count: 356_480, change: 0.05, barClass: 'bg-slate-300/70', dotColor: '#cbd5e1' }
-    ];
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    const values = this.visitorPieData.datasets[0].data;
-    const labels = this.visitorPieData.labels;
-    const colors = this.visitorPieData.datasets[0].backgroundColor;
-    const total = anonRaw.reduce((a, b) => a + b.count, 0);
+  private loadDashboard(): void {
+    this.dashboardInfo = { loading: true, loaded: false };
+    this.graphqlService
+      .fetchDashboardData()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ viewer }) => {
+          this.applyDashboardData(viewer);
+          this.dashboardInfo = { loading: false, loaded: true };
+        },
+        error: (error: Error) => {
+          this.dashboardInfo = {
+            loading: false,
+            loaded: false,
+            error: error?.message ?? 'Failed to load dashboard data'
+          };
+        }
+      });
+  }
 
-    this.anonymitySegments = anonRaw.map(s => ({ ...s, share: s.count / total }));
-
-    this.anonymitySummary = {
-      total,
-      change: 0.64
-    };
-
-    const combined = labels.map((name: string, i: number) => ({
-      name,
-      value: values[i],
-      color: colors[i]
-    })).sort((a, b) => b.value - a.value);
-
-    const top = combined.slice(0, 4);
-    const othersValue = combined.slice(4).reduce((a, b) => a + b.value, 0);
-
-    if (othersValue > 0) {
-      top.push({ name: 'Others', value: othersValue, color: '#6b7280' });
+  private applyDashboardData(viewer: DashboardViewer | undefined): void {
+    if (!viewer) {
+      return;
     }
 
-    this.majorCountries = top.map(c => ({
-      ...c,
-      percentage: ((c.value / total) * 100).toFixed(1)
+    this.updateKpis(viewer.dashboard, viewer.proxyCount);
+    this.updateCountryBreakdown(viewer.proxies?.items ?? [], viewer.proxyCount);
+    this.updateProxyHistory(viewer.proxies?.items ?? []);
+    this.updateAnonymitySummary(viewer.dashboard?.judgeValidProxies ?? []);
+    this.updateJudgeBreakdown(viewer.dashboard?.judgeValidProxies ?? []);
+    this.buildProxiesLineChart(viewer.proxies?.items ?? [], viewer.proxyCount);
+  }
+
+  private updateKpis(dashboard: DashboardInfo, proxyCount: number): void {
+    const judgeEntries = dashboard?.judgeValidProxies ?? [];
+    const aliveTotals = judgeEntries.reduce((sum, entry) => {
+      return sum + entry.eliteProxies + entry.anonymousProxies + entry.transparentProxies;
+    }, 0);
+
+    const aliveHistory = judgeEntries
+      .map((entry) => entry.eliteProxies + entry.anonymousProxies + entry.transparentProxies)
+      .filter((value) => value > 0);
+    this.conversionRate = {
+      value: aliveTotals,
+      history: aliveHistory.length ? aliveHistory : [aliveTotals],
+      displayValue: aliveTotals.toLocaleString()
+    };
+
+    const totalChecks = dashboard?.totalChecks ?? 0;
+    const totalChecksWeek = dashboard?.totalChecksWeek ?? 0;
+    const checksHistory = [totalChecksWeek, totalChecks].filter((value, index) => value > 0 && index === 0 ? true : value >= totalChecksWeek);
+    this.avgOrderValue = {
+      value: proxyCount,
+      history: checksHistory.length ? checksHistory : [proxyCount],
+      displayValue: proxyCount.toLocaleString()
+    };
+
+    const totalScraped = dashboard?.totalScraped ?? 0;
+    const totalScrapedWeek = dashboard?.totalScrapedWeek ?? 0;
+    const scrapedHistory = totalScrapedWeek > 0 ? [totalScrapedWeek] : [];
+    this.orderQuantity = {
+      value: totalScraped,
+      history: scrapedHistory.length ? scrapedHistory : [totalScraped],
+      displayValue: totalScraped.toLocaleString()
+    };
+  }
+
+  private updateCountryBreakdown(proxies: ProxyNode[], proxyTotal: number): void {
+    const counts = new Map<string, number>();
+    proxies.forEach((proxy) => {
+      const key = proxy.country?.trim() || 'Unknown';
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+
+    const sorted = Array.from(counts.entries()).sort(([, a], [, b]) => b - a);
+    const total = sorted.reduce((sum, [, value]) => sum + value, 0);
+
+    const topEntries = sorted.slice(0, 4);
+    const othersValue = sorted.slice(4).reduce((sum, [, value]) => sum + value, 0);
+    if (othersValue > 0) {
+      topEntries.push(['Others', othersValue]);
+    }
+
+    const palette = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1', '#34d399'];
+
+    this.majorCountries = topEntries.map(([name, value], index) => ({
+      name,
+      value,
+      color: palette[index % palette.length],
+      percentage: total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'
     }));
 
-    const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`);
-    const proxies = [50, 52, 54, 58, 61, 65, 63, 70, 72, 74, 76, 80, 85, 83, 82, 84, 88, 92, 95, 97, 98, 99, 100, 100];
-    const gained = [0, 2, 2, 4, 3, 4, -2, 7, 2, 2, 2, 4, 5, -2, -1, 2, 4, 4, 3, 2, 1, 1, 1, 0];
-    const lost = gained.map(v => (v < 0 ? Math.abs(v) : 0));
-    const limit = 100;
+    const labels = this.majorCountries.map((entry) => entry.name);
+    const data = this.majorCountries.map((entry) => entry.value);
+    const backgroundColors = this.majorCountries.map((entry, index) =>
+      entry.color ?? palette[index % palette.length]
+    );
+    const hoverColors = backgroundColors.map((color) => this.adjustColor(color, 25));
+
+    this.visitorPieData = {
+      labels,
+      datasets: [
+        {
+          data,
+          backgroundColor: backgroundColors,
+          hoverBackgroundColor: hoverColors
+        }
+      ]
+    };
+
+    if (!labels.length && proxyTotal > 0) {
+      this.visitorPieData.labels = ['Total'];
+      this.visitorPieData.datasets[0].data = [proxyTotal];
+      this.visitorPieData.datasets[0].backgroundColor = ['#3b82f6'];
+      this.visitorPieData.datasets[0].hoverBackgroundColor = ['#60a5fa'];
+    }
+  }
+
+  private updateProxyHistory(proxies: ProxyNode[]): void {
+    const history = proxies
+      .map((proxy): ProxyCheck | null => {
+        const latest = this.parseDate(proxy.latestCheck);
+        if (!latest) {
+          return null;
+        }
+
+        const status = proxy.alive
+          ? 'working'
+          : proxy.responseTime === 0
+            ? 'timeout'
+            : 'failed';
+
+        const entry: ProxyCheck = {
+          id: `#${proxy.id}`,
+          ip: `${proxy.ip}:${proxy.port}`,
+          status,
+          date: latest,
+          time: this.toTimeLabel(latest)
+        };
+
+        if (proxy.responseTime > 0) {
+          entry.latency = proxy.responseTime;
+        }
+
+        return entry;
+      })
+      .filter((entry): entry is ProxyCheck => entry !== null)
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 8);
+
+    this.proxyHistory = history;
+  }
+
+  private updateAnonymitySummary(entries: JudgeValidProxy[]): void {
+    const totals = entries.reduce(
+      (acc, entry) => {
+        acc.elite += entry.eliteProxies;
+        acc.anonymous += entry.anonymousProxies;
+        acc.transparent += entry.transparentProxies;
+        return acc;
+      },
+      { elite: 0, anonymous: 0, transparent: 0 }
+    );
+
+    const total = totals.elite + totals.anonymous + totals.transparent;
+    this.anonymitySummary = { total, change: 0 };
+
+    const segmentConfig: Array<{
+      key: keyof typeof totals;
+      name: string;
+      barClass: string;
+      dotColor: string;
+    }> = [
+      { key: 'elite', name: 'Elite', barClass: 'bg-blue-500/70', dotColor: '#60a5fa' },
+      { key: 'anonymous', name: 'Anonymous', barClass: 'bg-orange-500/70', dotColor: '#f59e0b' },
+      { key: 'transparent', name: 'Transparent', barClass: 'bg-slate-300/70', dotColor: '#cbd5e1' }
+    ];
+
+    this.anonymitySegments = segmentConfig.map((config) => {
+      const count = totals[config.key];
+      return {
+        name: config.name,
+        count,
+        change: 0,
+        share: total > 0 ? count / total : 0,
+        barClass: config.barClass,
+        dotColor: config.dotColor
+      };
+    });
+  }
+
+  private updateJudgeBreakdown(entries: JudgeValidProxy[]): void {
+    const data: Record<string, number> = {};
+    entries.forEach((entry) => {
+      const total = entry.eliteProxies + entry.anonymousProxies + entry.transparentProxies;
+      if (total > 0) {
+        data[entry.judgeUrl] = total;
+      }
+    });
+
+    this.judgeTrafficData = data;
+  }
+
+  private buildProxiesLineChart(proxies: ProxyNode[], limit: number): void {
+    const hoursToShow = 24;
+    const now = new Date();
+    const start = new Date(now);
+    start.setMinutes(0, 0, 0);
+    start.setHours(start.getHours() - (hoursToShow - 1));
+
+    const labels: string[] = [];
+    const values = new Array<number>(hoursToShow).fill(0);
+
+    for (let index = 0; index < hoursToShow; index++) {
+      const slot = new Date(start.getTime() + index * HOUR_MS);
+      labels.push(`${slot.getHours().toString().padStart(2, '0')}:00`);
+    }
+
+    proxies.forEach((proxy) => {
+      const checkDate = this.parseDate(proxy.latestCheck);
+      if (!checkDate) {
+        return;
+      }
+      const index = Math.floor((checkDate.getTime() - start.getTime()) / HOUR_MS);
+      if (index >= 0 && index < hoursToShow) {
+        values[index] += 1;
+      }
+    });
+
+    const gained = values.map((value, index) => (index === 0 ? value : value - values[index - 1]));
+    const lost = gained.map((value) => (value < 0 ? Math.abs(value) : 0));
+    this.proxiesLineDiff = { gained, lost };
+
+    const limitSeries = new Array<number>(hoursToShow).fill(limit ?? 0);
+    const diffRef = this.proxiesLineDiff;
 
     this.proxiesLineData = {
-      labels: hours,
+      labels,
       datasets: [
         {
           label: 'Proxies',
-          data: proxies,
+          data: values,
           borderColor: '#3b82f6',
           backgroundColor: 'rgba(59, 130, 246, 0.2)',
           fill: true,
@@ -179,7 +365,7 @@ export class DashboardComponent implements OnInit {
         },
         {
           label: 'Proxy Limit',
-          data: Array(hours.length).fill(limit),
+          data: limitSeries,
           borderColor: '#f59e0b',
           borderDash: [5, 5],
           pointRadius: 0,
@@ -197,10 +383,10 @@ export class DashboardComponent implements OnInit {
             label: (context: any) => {
               const index = context.dataIndex;
               const value = context.dataset.data[index];
-              const g = gained[index] || 0;
-              const l = lost[index] || 0;
               if (context.dataset.label === 'Proxies') {
-                return `Proxies: ${value} (Gained: ${g}, Lost: ${l})`;
+                const gainedValue = diffRef.gained[index] ?? 0;
+                const lostValue = diffRef.lost[index] ?? 0;
+                return `Proxies: ${value} (Gained: ${Math.max(gainedValue, 0)}, Lost: ${lostValue})`;
               }
               return `Limit: ${value}`;
             }
@@ -221,5 +407,40 @@ export class DashboardComponent implements OnInit {
         }
       }
     };
+  }
+
+  private parseDate(raw?: string): Date | null {
+    if (!raw) {
+      return null;
+    }
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private toTimeLabel(date: Date): string {
+    return new Intl.DateTimeFormat(undefined, {
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  }
+
+  private adjustColor(hex: string, amount: number): string {
+    const normalized = hex.replace('#', '');
+    if (normalized.length !== 6) {
+      return hex;
+    }
+
+    const r = parseInt(normalized.slice(0, 2), 16);
+    const g = parseInt(normalized.slice(2, 4), 16);
+    const b = parseInt(normalized.slice(4, 6), 16);
+
+    const clamp = (channel: number) => Math.max(0, Math.min(255, channel + amount));
+
+    const nr = clamp(r);
+    const ng = clamp(g);
+    const nb = clamp(b);
+
+    const toHex = (value: number) => value.toString(16).padStart(2, '0');
+    return `#${toHex(nr)}${toHex(ng)}${toHex(nb)}`;
   }
 }

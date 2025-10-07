@@ -1,5 +1,9 @@
-<div *ngIf="!dashboardInfo?.loaded" class="toggle-container d-flex align-items-center justify-content-center mt-4">
+<div *ngIf="dashboardInfo?.loading" class="toggle-container d-flex align-items-center justify-content-center mt-4">
   <p-progressSpinner></p-progressSpinner>
+</div>
+
+<div *ngIf="dashboardInfo?.error" class="mt-4 text-center text-red-400">
+  {{ dashboardInfo.error }}
 </div>
 
 <div *ngIf="dashboardInfo?.loaded" class="dashboard-container">
@@ -50,24 +54,17 @@
       </app-proxies-per-country-card>
     </div>
 
-<!--    <div class="lg:col-span-1">-->
-<!--      <app-proxies-by-anonymity-card-->
-<!--        [summary]="anonymitySummary"-->
-<!--        [segments]="anonymitySegments">-->
-<!--      </app-proxies-by-anonymity-card>-->
-<!--    </div>-->
+    <div class="lg:col-span-1" *ngIf="anonymitySummary">
+      <app-proxies-by-anonymity-card
+        [summary]="anonymitySummary"
+        [segments]="anonymitySegments">
+      </app-proxies-by-anonymity-card>
+    </div>
 
     <div class="lg:col-span-1">
       <app-judge-by-percentage-card
-        [data]="{
-          'postman-echo.com/headers': 220,
-          'httpbingo.org/headers': 50,
-          'judge.pro': 150,
-          'azenv.net': 70,
-          'httpbin.org/headers': 80,
-          'pool.proxyspace.pro/judge.php': 110
-        }"
-        [periodOptions]="['Yearly','Monthly','Weekly']">
+        [data]="judgeTrafficData"
+        [periodOptions]="judgePeriodOptions">
       </app-judge-by-percentage-card>
 
     </div>
