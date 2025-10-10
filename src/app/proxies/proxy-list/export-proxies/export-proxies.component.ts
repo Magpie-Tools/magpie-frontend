@@ -15,6 +15,18 @@ import {Select} from 'primeng/select';
 import {NotificationService} from '../../../services/notification-service.service';
 import {TooltipComponent} from '../../../tooltip/tooltip.component';
 
+type ExportFormDefaults = {
+  output: string;
+  filter: boolean;
+  HTTPProtocol: boolean;
+  HTTPSProtocol: boolean;
+  SOCKS4Protocol: boolean;
+  SOCKS5Protocol: boolean;
+  Retries: number;
+  Timeout: number;
+  proxyStatus: 'all' | 'alive' | 'dead';
+};
+
 @Component({
   selector: 'app-export-proxies',
   standalone: true,
@@ -49,7 +61,7 @@ export class ExportProxiesComponent implements OnChanges {
     {label: 'Only Dead Proxies', value: 'dead'},
   ];
 
-  private readonly defaultFormValues: Record<string, unknown>;
+  private defaultFormValues: ExportFormDefaults;
 
   constructor(private fb: FormBuilder, private settingsService: SettingsService, private http: HttpService) {
     const settings = this.settingsService.getUserSettings();
@@ -57,25 +69,25 @@ export class ExportProxiesComponent implements OnChanges {
     this.defaultFormValues = {
       output: 'protocol://ip:port',
       filter: false,
-      HTTPProtocol: settings?.http_protocol,
-      HTTPSProtocol: settings?.https_protocol,
-      SOCKS4Protocol: settings?.socks4_protocol,
-      SOCKS5Protocol: settings?.socks5_protocol,
-      Retries: settings?.retries,
-      Timeout: settings?.timeout,
+      HTTPProtocol: settings?.http_protocol ?? false,
+      HTTPSProtocol: settings?.https_protocol ?? false,
+      SOCKS4Protocol: settings?.socks4_protocol ?? false,
+      SOCKS5Protocol: settings?.socks5_protocol ?? false,
+      Retries: settings?.retries ?? 0,
+      Timeout: settings?.timeout ?? 0,
       proxyStatus: 'all',
     };
 
     this.exportForm = this.fb.group({
-      output: [this.defaultFormValues["output"], Validators.required],
-      filter: [this.defaultFormValues["filter"]],
-      HTTPProtocol: [this.defaultFormValues["HTTPProtocol"]],
-      HTTPSProtocol: [this.defaultFormValues["HTTPSProtocol"]],
-      SOCKS4Protocol: [this.defaultFormValues["SOCKS4Protocol"]],
-      SOCKS5Protocol: [this.defaultFormValues["SOCKS5Protocol"]],
-      Retries: [this.defaultFormValues["Retries"], Validators.required],
-      Timeout: [this.defaultFormValues["Timeout"], Validators.required],
-      proxyStatus: [this.defaultFormValues["proxyStatus"]],
+      output: [this.defaultFormValues.output, Validators.required],
+      filter: [this.defaultFormValues.filter],
+      HTTPProtocol: [this.defaultFormValues.HTTPProtocol],
+      HTTPSProtocol: [this.defaultFormValues.HTTPSProtocol],
+      SOCKS4Protocol: [this.defaultFormValues.SOCKS4Protocol],
+      SOCKS5Protocol: [this.defaultFormValues.SOCKS5Protocol],
+      Retries: [this.defaultFormValues.Retries, Validators.required],
+      Timeout: [this.defaultFormValues.Timeout, Validators.required],
+      proxyStatus: [this.defaultFormValues.proxyStatus],
     });
   }
 
@@ -90,6 +102,7 @@ export class ExportProxiesComponent implements OnChanges {
       NotificationService.showError('No proxies available to export.');
       return;
     }
+    this.syncDefaultsWithUserSettings();
     this.exportOption = this.canExportSelected() ? 'selected' : 'all';
     this.dialogVisible = true;
   }
@@ -146,6 +159,29 @@ export class ExportProxiesComponent implements OnChanges {
     this.exportForm.reset(this.defaultFormValues);
     this.exportOption = 'all';
     this.isExporting = false;
+  }
+
+  private syncDefaultsWithUserSettings(): void {
+    const settings = this.settingsService.getUserSettings();
+    if (!settings) {
+      return;
+    }
+
+    const updatedDefaults: Partial<ExportFormDefaults> = {
+      HTTPProtocol: settings.http_protocol,
+      HTTPSProtocol: settings.https_protocol,
+      SOCKS4Protocol: settings.socks4_protocol,
+      SOCKS5Protocol: settings.socks5_protocol,
+      Retries: settings.retries,
+      Timeout: settings.timeout,
+    };
+
+    this.defaultFormValues = {
+      ...this.defaultFormValues,
+      ...updatedDefaults,
+    };
+
+    this.exportForm.patchValue(updatedDefaults, {emitEvent: false});
   }
 
   private transformFormToExport(exportForm: FormGroup, proxies: ProxyInfo[]): ExportSettings {
