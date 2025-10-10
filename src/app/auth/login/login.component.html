@@ -24,7 +24,7 @@
 
         <!-- Remember login -->
         <div class="flex items-center gap-2">
-          <p-checkbox inputId="remember" [(ngModel)]="rememberPass" [ngModelOptions]="{standalone: true}"></p-checkbox>
+          <p-checkbox inputId="remember" [(ngModel)]="rememberPass" [ngModelOptions]="{standalone: true}" [binary]="true"></p-checkbox>
           <label for="remember">Remember login</label>
         </div>
 
