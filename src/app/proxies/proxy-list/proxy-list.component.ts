@@ -13,6 +13,7 @@ import { TableModule } from 'primeng/table';
 import { CheckboxModule } from 'primeng/checkbox';
 import {NotificationService} from '../../services/notification-service.service';
 import { Subscription } from 'rxjs';
+import {AddProxiesComponent} from '../add-proxies/add-proxies.component';
 
 @Component({
   selector: 'app-proxy-list',
@@ -25,6 +26,7 @@ import { Subscription } from 'rxjs';
     ButtonModule,
     TableModule,
     CheckboxModule,
+    AddProxiesComponent,
   ],
   templateUrl: './proxy-list.component.html',
   styleUrls: ['./proxy-list.component.scss'],
@@ -286,5 +288,11 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     return null;
+  }
+
+  onProxiesAdded(): void {
+    this.selection.clear();
+    this.getAndSetProxyCount();
+    this.getAndSetProxyList();
   }
 }

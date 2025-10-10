@@ -2,23 +2,30 @@
   <app-loading class="flex items-center justify-center mt-20"></app-loading>
 } @else {
   <div class="proxy-container p-8 min-h-screen text-gray-300">
-    <!-- Delete and Export Buttons -->
-    <div class="actions mb-4 flex gap-4">
-      <p-button
-        label="Export Proxies"
-        icon="pi pi-upload"
-        styleClass="p-button-primary"
-        (onClick)="openExportDialog()"
-        [disabled]="!dataSource.data.length"
-      ></p-button>
+    <!-- Top Actions -->
+    <div class="actions mb-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-4">
+        <p-button
+          label="Export Proxies"
+          icon="pi pi-upload"
+          styleClass="p-button-primary"
+          (onClick)="openExportDialog()"
+          [disabled]="!dataSource.data.length"
+        ></p-button>
 
-      <p-button
-        label="Delete Selected"
-        icon="pi pi-trash"
-        styleClass="p-button-danger"
-        (onClick)="deleteSelectedProxies()"
-        [disabled]="!selection.hasValue()"
-      ></p-button>
+        <p-button
+          label="Delete Selected"
+          icon="pi pi-trash"
+          styleClass="p-button-danger"
+          (onClick)="deleteSelectedProxies()"
+          [disabled]="!selection.hasValue()"
+        ></p-button>
+      </div>
+
+      <app-add-proxies
+        (showAddProxiesMessage)="showAddProxiesMessage.emit($event)"
+        (proxiesAdded)="onProxiesAdded()"
+      ></app-add-proxies>
     </div>
 
     <p-table

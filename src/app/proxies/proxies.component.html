@@ -1,32 +1,11 @@
-<div class="flex justify-center mt-4">
-  <p-button
-    label="Proxy List"
-    (onClick)="showProxyList = true"
-    [outlined]="!showProxyList"
-    [severity]="showProxyList ? 'primary' : 'secondary'"
-    styleClass="mr-5"
-  ></p-button>
-  <p-button
-    label="Add Proxies"
-    (onClick)="showProxyList = false"
-    [outlined]="showProxyList"
-    [severity]="!showProxyList ? 'primary' : 'secondary'"
-  ></p-button>
-</div>
-
-@if (showProxyList) {
-  @if (showNoProxiesMessage) {
-    <div class="flex flex-col items-center justify-center mt-5 p-4 rounded-md">
-      <span class="text-center text-gray-700">
-        No proxies found. Start by
-        <a class="text-blue-600 hover:underline cursor-pointer" (click)="showProxyList = false">adding proxies</a>
-      </span>
-    </div>
-  } @else {
-    <app-proxy-list
-      (showAddProxiesMessage)="showNoProxiesMessage = $event">
-    </app-proxy-list>
-  }
-} @else {
-  <app-add-proxies (showAddProxiesMessage)="showNoProxiesMessage = $event"></app-add-proxies>
+@if (showNoProxiesMessage) {
+  <div class="flex flex-col items-center justify-center mt-6 p-4 rounded-md bg-neutral-900 border border-neutral-700 text-gray-300">
+    <span class="text-center">
+      No proxies found. Use the <span class="font-semibold">Add Proxies</span> button to upload your first proxies.
+    </span>
+  </div>
 }
+
+<app-proxy-list
+  (showAddProxiesMessage)="showNoProxiesMessage = $event"
+></app-proxy-list>

@@ -1,24 +1,29 @@
 import {Component, EventEmitter, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {FormsModule} from "@angular/forms";
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {HttpService} from '../../services/http.service';
 import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.component';
 import {Button} from 'primeng/button';
+import {DialogModule} from 'primeng/dialog';
 import {NotificationService} from '../../services/notification-service.service';
 
 @Component({
     selector: 'app-add-proxies',
   imports: [
+    CommonModule,
     FormsModule,
     TooltipComponent,
     ProcesingPopupComponent,
     Button,
+    DialogModule,
   ],
     templateUrl: './add-proxies.component.html',
     styleUrl: './add-proxies.component.scss'
 })
 export class AddProxiesComponent {
   @Output() showAddProxiesMessage = new EventEmitter<boolean>();
+  @Output() proxiesAdded = new EventEmitter<void>();
 
   file: File | undefined;
   ProxyTextarea: string = "";
@@ -36,6 +41,7 @@ export class AddProxiesComponent {
   clipboardProxiesWithAuthCount: number = 0;
   uniqueClipboardProxiesCount: number = 0;
 
+  dialogVisible = false;
   showPopup = false;
   popupStatus: 'processing' | 'success' | 'error' = 'processing';
   addedProxyCount = 0;
@@ -74,6 +80,19 @@ export class AddProxiesComponent {
 
   triggerFileInput(fileInput: HTMLInputElement): void {
     fileInput.click();
+  }
+
+  openDialog(): void {
+    this.dialogVisible = true;
+  }
+
+  closeDialog(): void {
+    this.dialogVisible = false;
+    this.resetFormState();
+  }
+
+  onDialogHide(): void {
+    this.resetFormState();
   }
 
   onFileSelected(event: Event): void {
@@ -149,6 +168,7 @@ export class AddProxiesComponent {
         next: (response) => {
           this.addedProxyCount = response.proxyCount;
           this.popupStatus = 'success';
+          this.dialogVisible = false;
 
           this.file = undefined;
           this.ProxyTextarea = "";
@@ -157,6 +177,7 @@ export class AddProxiesComponent {
           this.clearClipboardProxies();
           this.addTextAreaProxies();
           this.showAddProxiesMessage.emit(false);
+          this.proxiesAdded.emit();
         },
         error: (err) => {
           this.popupStatus = 'error';
@@ -170,5 +191,14 @@ export class AddProxiesComponent {
 
   onPopupClose() {
     this.showPopup = false;
+  }
+
+  private resetFormState(): void {
+    this.ProxyTextarea = "";
+    this.clipboardProxies = "";
+    this.file = undefined;
+    this.onFileClear();
+    this.clearClipboardProxies();
+    this.addTextAreaProxies();
   }
 }
