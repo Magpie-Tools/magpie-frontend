@@ -1,0 +1,187 @@
+<div class="flex items-center">
+  <p-button
+    type="button"
+    label="Export Proxies"
+    icon="pi pi-upload"
+    styleClass="p-button-primary"
+    (onClick)="openDialog()"
+    [disabled]="!hasAnyProxies()"
+  ></p-button>
+</div>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [breakpoints]="{ '960px': '90vw', '640px': '95vw' }"
+  [style]="{ width: '60rem' }"
+  [contentStyle]="{ padding: '0' }"
+  (onHide)="onDialogHide()"
+>
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-2 text-lg font-semibold">
+      <span>Export Proxies</span>
+      <app-tooltip [text]="'Export proxies with optional filters, output formats, and status selections.'"></app-tooltip>
+    </div>
+  </ng-template>
+
+  <div class="bg-neutral-900 text-gray-200 p-6 space-y-6">
+    <section class="space-y-3">
+      <p class="text-sm text-gray-400">Choose how you want to format and filter your export file.</p>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <label
+          for="exportAll"
+          class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors hover:border-green-500"
+        >
+          <p-radioButton
+            name="exportOption"
+            value="all"
+            [(ngModel)]="exportOption"
+            inputId="exportAll"
+          ></p-radioButton>
+          <div class="space-y-1">
+            <span class="font-semibold text-white">All Proxies</span>
+            <p class="text-sm text-gray-400">Export every proxy currently available.</p>
+          </div>
+        </label>
+
+        <label
+          for="exportSelected"
+          class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors hover:border-green-500"
+          [class.opacity-60]="!canExportSelected()"
+          [class.cursor-not-allowed]="!canExportSelected()"
+        >
+          <p-radioButton
+            name="exportOption"
+            value="selected"
+            [(ngModel)]="exportOption"
+            inputId="exportSelected"
+            [disabled]="!canExportSelected()"
+          ></p-radioButton>
+          <div class="space-y-1">
+            <span class="font-semibold text-white">Selected Proxies</span>
+            <p class="text-sm text-gray-400">Export only the proxies you highlighted in the table.</p>
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <form [formGroup]="exportForm" class="space-y-6">
+      <section class="bg-neutral-800 border border-neutral-700 rounded-xl p-5 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h4 class="text-base font-semibold text-white">Filter Before Export</h4>
+            <p class="text-sm text-gray-400">Toggle to limit which proxies are included.</p>
+          </div>
+          <app-checkbox label="Enable Filters" formControlName="filter"></app-checkbox>
+        </div>
+
+        @if (exportForm.get('filter')?.value) {
+          <div class="space-y-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="flex items-center justify-center">
+                <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
+              </div>
+              <div class="flex items-center justify-center">
+                <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
+              </div>
+              <div class="flex items-center justify-center">
+                <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
+              </div>
+              <div class="flex items-center justify-center">
+                <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="retries" class="block mb-2 text-sm font-medium text-gray-300">Max Retries</label>
+                <p-inputNumber
+                  id="retries"
+                  formControlName="Retries"
+                  mode="decimal"
+                  [showButtons]="true"
+                  [min]="0"
+                  inputStyleClass="w-full bg-gray-700 text-white border-gray-600 focus:border-green-500"
+                ></p-inputNumber>
+              </div>
+              <div>
+                <label for="timeout" class="block mb-2 text-sm font-medium text-gray-300">Max Timeout (ms)</label>
+                <p-inputNumber
+                  id="timeout"
+                  formControlName="Timeout"
+                  mode="decimal"
+                  [showButtons]="true"
+                  [min]="0"
+                  inputStyleClass="w-full bg-gray-700 text-white border-gray-600 focus:border-green-500"
+                ></p-inputNumber>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <p class="text-sm text-gray-500">Turn on filters to narrow the export by protocol or performance thresholds.</p>
+        }
+      </section>
+
+      <section class="bg-neutral-800 border border-neutral-700 rounded-xl p-5 space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 md:items-center">
+          <div>
+            <label for="proxyStatus" class="block mb-2 text-sm font-medium text-gray-300">Proxy Status</label>
+            <p-select
+              id="proxyStatus"
+              formControlName="proxyStatus"
+              [options]="proxyStatusOptions"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+              panelStyleClass="bg-gray-800 text-white"
+            ></p-select>
+          </div>
+
+          <div class="flex flex-wrap gap-2 md:justify-end">
+            @for (text of predefinedFilters; track text) {
+              <p-button
+                [label]="text"
+                styleClass="p-button-outlined p-button-secondary p-button-sm"
+                (onClick)="addToFilter(text)"
+              ></p-button>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label for="outputFormat" class="block mb-2 text-sm font-medium text-gray-300">Output Format</label>
+          <input
+            id="outputFormat"
+            pInputText
+            formControlName="output"
+            type="text"
+            class="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:border-green-500 focus:ring focus:ring-green-500/40"
+          />
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="w-full flex justify-end gap-3 px-6 pb-4">
+      <p-button
+        type="button"
+        label="Cancel"
+        styleClass="p-button-text"
+        (onClick)="closeDialog()"
+        [disabled]="isExporting"
+      ></p-button>
+      <p-button
+        type="button"
+        label="Export"
+        styleClass="p-button-success"
+        (onClick)="submitExport()"
+        [disabled]="isExporting || exportForm.invalid || (exportOption === 'selected' && !canExportSelected())"
+        [loading]="isExporting"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>

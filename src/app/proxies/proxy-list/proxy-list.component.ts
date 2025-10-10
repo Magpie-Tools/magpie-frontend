@@ -1,19 +1,18 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, Output, EventEmitter} from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpService } from '../../services/http.service';
-import { ProxyInfo } from '../../models/ProxyInfo';
-import { DatePipe } from '@angular/common';
-import { LoadingComponent } from '../../ui-elements/loading/loading.component';
-import { SelectionModel } from '@angular/cdk/collections';
-import { ExportProxiesDialogComponent } from './export-proxies-dialog/export-proxies-dialog.component';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { TableLazyLoadEvent } from 'primeng/table'; // Keep this for onLazyLoad
-import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
-import { CheckboxModule } from 'primeng/checkbox';
+import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {HttpService} from '../../services/http.service';
+import {ProxyInfo} from '../../models/ProxyInfo';
+import {DatePipe} from '@angular/common';
+import {LoadingComponent} from '../../ui-elements/loading/loading.component';
+import {SelectionModel} from '@angular/cdk/collections';
+import {TableLazyLoadEvent} from 'primeng/table'; // Keep this for onLazyLoad
+import {ButtonModule} from 'primeng/button';
+import {TableModule} from 'primeng/table';
+import {CheckboxModule} from 'primeng/checkbox';
 import {NotificationService} from '../../services/notification-service.service';
-import { Subscription } from 'rxjs';
+import {Subscription} from 'rxjs';
 import {AddProxiesComponent} from '../add-proxies/add-proxies.component';
+import {ExportProxiesComponent} from './export-proxies/export-proxies.component';
 
 @Component({
   selector: 'app-proxy-list',
@@ -27,10 +26,10 @@ import {AddProxiesComponent} from '../add-proxies/add-proxies.component';
     TableModule,
     CheckboxModule,
     AddProxiesComponent,
+    ExportProxiesComponent,
   ],
   templateUrl: './proxy-list.component.html',
-  styleUrls: ['./proxy-list.component.scss'],
-  providers: [DialogService]
+  styleUrls: ['./proxy-list.component.scss']
 })
 export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() showAddProxiesMessage = new EventEmitter<boolean>();
@@ -48,10 +47,9 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   sortField: string | null | undefined;
   sortOrder: number | undefined | null; // 1 for ascending, -1 for descending
 
-  ref: DynamicDialogRef | undefined;
   private proxyListSubscription?: Subscription;
 
-  constructor(private http: HttpService, public dialogService: DialogService) { }
+  constructor(private http: HttpService) { }
 
   ngAfterViewInit() {
     // PrimeNG table handles sorting internally with pSortableColumn and (onSort)
@@ -170,44 +168,12 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
           this.selection.clear();
           this.getAndSetProxyList();
         },
-        error: err => NotificationService.showError('Could not delete proxies' + err.error.message)
+        error: err => {
+          const message = err?.error?.message ?? err?.message ?? 'Unknown error';
+          NotificationService.showError('Could not delete proxies: ' + message);
+        }
       });
     }
-  }
-
-  openExportDialog(): void {
-    this.ref = this.dialogService.open(ExportProxiesDialogComponent, {
-      header: 'Export Proxies',
-      width: '700px',
-      height: '700px',
-      data: { selectedProxies: this.selection.selected }
-    });
-
-    this.ref.onClose.subscribe({
-      next: result => {
-        if (result) {
-          if (result.option === 'selected') {
-            this.exportProxies(this.selection.selected);
-          } else if (result.option === 'all') {
-            this.exportProxies(this.dataSource.data);
-          } else if (result.option === 'filter') {
-            const filtered = this.dataSource.data.filter(proxy => {
-              return proxy.ip.includes(result.criteria);
-            });
-            this.exportProxies(filtered);
-          }
-        }
-      },
-      error: err => NotificationService.showError('Error while closing dialog ' + err.error.message)
-    });
-  }
-
-  exportProxies(proxies: ProxyInfo[]): void {
-    this.handleExportRequest(proxies);
-  }
-
-  handleExportRequest(proxies: ProxyInfo[]): void {
-    // Your export logic here
   }
 
   private resolveSortField(sortField: TableLazyLoadEvent['sortField']): string | null {

@@ -5,13 +5,10 @@
     <!-- Top Actions -->
     <div class="actions mb-4 flex flex-wrap items-center justify-between gap-4">
       <div class="flex flex-wrap items-center gap-4">
-        <p-button
-          label="Export Proxies"
-          icon="pi pi-upload"
-          styleClass="p-button-primary"
-          (onClick)="openExportDialog()"
-          [disabled]="!dataSource.data.length"
-        ></p-button>
+        <app-export-proxies
+          [allProxies]="dataSource.data"
+          [selectedProxies]="selection.selected.slice()"
+        ></app-export-proxies>
 
         <p-button
           label="Delete Selected"
