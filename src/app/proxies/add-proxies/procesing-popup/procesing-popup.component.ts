@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {StarBackgroundComponent} from '../../../ui-elements/star-background/star-background.component';
 import {animate, style, transition, trigger} from '@angular/animations';
 
@@ -19,21 +19,13 @@ import {animate, style, transition, trigger} from '@angular/animations';
         ]),
     ]
 })
-export class ProcesingPopupComponent {
+export class ProcesingPopupComponent implements OnInit{
   @Input() status: 'processing' | 'success' | 'error' = 'processing';
   @Input() count: number = 0;
   @Input() item: string = "";
   @Output() closed = new EventEmitter<void>();
 
-  messages = [
-    `Please wait while we add your ${this.item}.`,
-    'This can take a few seconds.',
-    'Just a little longer, we’re on it.',
-    'Hang tight, we’re working on it.',
-    'Almost there... just a moment more.',
-    `Seems like you added a lot of ${ this.item }, but don’t worry, we’ll handle it.`,
-    'Loading... good things take time!',
-  ];
+  messages: string[] = []
   currentMessageIndex = 0;
   textState = 0;
 
@@ -43,6 +35,15 @@ export class ProcesingPopupComponent {
   }
 
   ngOnInit() {
+    this.messages = [
+      `Please wait while we add your ${this.item}.`,
+      'This can take a few seconds.',
+      'Just a little longer, we’re on it.',
+      'Hang tight, we’re working on it.',
+      'Almost there... just a moment more.',
+      `Seems like you added a lot of ${ this.item }, but don’t worry, we’ll handle it.`,
+      'Loading... good things take time!',
+    ]
     if (this.status === 'processing') {
       this.startMessageRotation();
     }
