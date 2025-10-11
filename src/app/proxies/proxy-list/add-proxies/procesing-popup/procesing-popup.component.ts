@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
-import {StarBackgroundComponent} from '../../../ui-elements/star-background/star-background.component';
 import {animate, style, transition, trigger} from '@angular/animations';
+import {StarBackgroundComponent} from '../../../../ui-elements/star-background/star-background.component';
 
 
 @Component({

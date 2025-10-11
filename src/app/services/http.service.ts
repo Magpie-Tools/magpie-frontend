@@ -10,6 +10,9 @@ import {ExportSettings} from '../models/ExportSettings';
 import {ScrapeSourceInfo} from '../models/ScrapeSourceInfo';
 import {DashboardInfo} from '../models/DashboardInfo';
 import {ChangePassword} from '../models/ChangePassword';
+import {ProxyDetail} from '../models/ProxyDetail';
+import {ProxyStatistic} from '../models/ProxyStatistic';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -62,6 +65,20 @@ export class HttpService {
 
   getProxyCount() {
     return this.http.get<number>(this.apiUrl + '/getProxyCount');
+  }
+
+  getProxyDetail(proxyId: number) {
+    return this.http.get<ProxyDetail>(`${this.apiUrl}/proxies/${proxyId}`);
+  }
+
+  getProxyStatistics(proxyId: number, options?: { limit?: number }) {
+    let params = new HttpParams();
+    if (options?.limit && options.limit > 0) {
+      params = params.set('limit', options.limit.toString());
+    }
+
+    return this.http.get<{statistics: ProxyStatistic[]}>(`${this.apiUrl}/proxies/${proxyId}/statistics`, { params })
+      .pipe(map(res => res?.statistics ?? []));
   }
 
 

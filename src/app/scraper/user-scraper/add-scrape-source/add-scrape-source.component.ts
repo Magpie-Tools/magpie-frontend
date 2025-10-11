@@ -1,5 +1,4 @@
 import {Component, EventEmitter, Output} from '@angular/core';
-import {ProcesingPopupComponent} from "../../../proxies/add-proxies/procesing-popup/procesing-popup.component";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpService} from '../../../services/http.service';
 
@@ -9,6 +8,9 @@ import {TooltipModule} from 'primeng/tooltip';
 import {CheckboxModule} from 'primeng/checkbox';
 import {FileUploadModule} from 'primeng/fileupload';
 import {NotificationService} from '../../../services/notification-service.service';
+import {
+  ProcesingPopupComponent
+} from '../../../proxies/proxy-list/add-proxies/procesing-popup/procesing-popup.component';
 
 @Component({
   selector: 'app-add-scrape-source',

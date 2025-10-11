@@ -1,12 +1,12 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from "@angular/forms";
-import {TooltipComponent} from "../../tooltip/tooltip.component";
-import {HttpService} from '../../services/http.service';
 import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.component';
 import {Button} from 'primeng/button';
 import {DialogModule} from 'primeng/dialog';
-import {NotificationService} from '../../services/notification-service.service';
+import {TooltipComponent} from '../../../tooltip/tooltip.component';
+import {HttpService} from '../../../services/http.service';
+import {NotificationService} from '../../../services/notification-service.service';
 
 @Component({
     selector: 'app-add-proxies',

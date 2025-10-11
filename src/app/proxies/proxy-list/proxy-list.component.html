@@ -44,9 +44,6 @@
       [lazy]="true"
       (onLazyLoad)="onLazyLoad($event)"
         [rowsPerPageOptions]="[20, 40, 60, 100]"
-      [selection]="selection.selected"
-      [(selection)]="selectedProxies"
-      dataKey="id"
       class="p-datatable-gridlines p-datatable-sm"
       [sortField]="sortField"
       [sortOrder]="sortOrder ?? 0"
@@ -86,13 +83,17 @@
           <th pSortableColumn="latest_check">
             Last Check <p-sortIcon field="latest_check"></p-sortIcon>
           </th>
+          <th>
+            Actions
+          </th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-proxy>
-        <tr (click)="toggleSelection(proxy)" [pSelectableRow]="proxy">
+        <tr (click)="onRowClick($event, proxy)">
           <td>
             <p-checkbox
               [binary]="true"
+              (onClick)="$event.stopPropagation()"
               (onChange)="toggleSelection(proxy)"
               [ngModel]="selection.isSelected(proxy)"
             ></p-checkbox>
@@ -113,6 +114,14 @@
           <td>{{ proxy.country }}</td>
           <td>{{ proxy.protocol }}</td>
           <td>{{ proxy.latest_check | date : 'short' }}</td>
+          <td>
+            <p-button
+              label="Details"
+              icon="pi pi-external-link"
+              styleClass="p-button-text p-button-sm"
+              (onClick)="onViewProxy($event, proxy)"
+            ></p-button>
+          </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptyMessage">

@@ -11,8 +11,9 @@ import {TableModule} from 'primeng/table';
 import {CheckboxModule} from 'primeng/checkbox';
 import {NotificationService} from '../../services/notification-service.service';
 import {Subscription} from 'rxjs';
-import {AddProxiesComponent} from '../add-proxies/add-proxies.component';
 import {ExportProxiesComponent} from './export-proxies/export-proxies.component';
+import {AddProxiesComponent} from './add-proxies/add-proxies.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-proxy-list',
@@ -39,7 +40,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedProxies: ProxyInfo[] = [];
   page = 1;
   pageSize = 40;
-  displayedColumns: string[] = ['select', 'alive', 'ip', 'port', 'response_time', 'estimated_type', 'country', 'protocol', 'latest_check'];
+  displayedColumns: string[] = ['select', 'alive', 'ip', 'port', 'response_time', 'estimated_type', 'country', 'protocol', 'latest_check', 'actions'];
   totalItems = 0;
   hasLoaded = false;
   isLoading = false;
@@ -51,7 +52,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private proxyListSubscription?: Subscription;
 
-  constructor(private http: HttpService) { }
+  constructor(private http: HttpService, private router: Router) { }
 
   ngAfterViewInit() {
     // PrimeNG table handles sorting internally with pSortableColumn and (onSort)
@@ -282,5 +283,18 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selection.clear();
     retained.forEach(proxy => this.selection.select(proxy));
     this.selectedProxies = [...retained];
+  }
+
+  onRowClick(_event: MouseEvent, proxy: ProxyInfo): void {
+    this.router.navigate(['/proxies', proxy.id]).catch(() => {});
+  }
+
+  onViewProxy(event: Event | { originalEvent?: Event }, proxy: ProxyInfo): void {
+    if (typeof (event as { originalEvent?: Event }).originalEvent !== 'undefined') {
+      (event as { originalEvent?: Event }).originalEvent?.stopPropagation?.();
+    } else {
+      (event as Event)?.stopPropagation?.();
+    }
+    this.router.navigate(['/proxies', proxy.id]).catch(() => {});
   }
 }
