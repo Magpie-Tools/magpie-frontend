@@ -41,6 +41,10 @@ const DASHBOARD_QUERY = `#graphql
           latestCheck
         }
       }
+      proxyHistory(limit: 168) {
+        count
+        recordedAt
+      }
       scrapeSourceCount
     }
   }
@@ -58,6 +62,7 @@ export interface DashboardViewer {
   dashboard: DashboardInfo;
   proxyCount: number;
   proxies: ProxyPage;
+  proxyHistory: ProxyHistoryEntry[];
   scrapeSourceCount: number;
 }
 
@@ -100,6 +105,11 @@ export interface ProxyNode {
   protocol: string;
   alive: boolean;
   latestCheck?: string;
+}
+
+export interface ProxyHistoryEntry {
+  count: number;
+  recordedAt: string;
 }
 
 interface GraphQLResponse<T> {

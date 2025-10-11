@@ -17,6 +17,7 @@ import {
   DashboardViewer,
   GraphqlService,
   JudgeValidProxy,
+  ProxyHistoryEntry,
   ProxyNode
 } from '../services/graphql.service';
 
@@ -32,8 +33,6 @@ interface DashboardStatus {
   loaded: boolean;
   error?: string;
 }
-
-const HOUR_MS = 60 * 60 * 1000;
 
 @Component({
   selector: 'app-dashboard',
@@ -161,7 +160,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.updateProxyHistory(viewer.proxies?.items ?? []);
     this.updateAnonymitySummary(viewer.dashboard?.judgeValidProxies ?? []);
     this.updateJudgeBreakdown(viewer.dashboard?.judgeValidProxies ?? []);
-    this.buildProxiesLineChart(viewer.proxies?.items ?? [], viewer.proxyCount);
+    this.buildProxiesLineChart(viewer.proxyHistory ?? [], viewer.proxyCount);
   }
 
   private updateKpis(dashboard: DashboardInfo, proxyCount: number): void {
@@ -351,37 +350,64 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.judgeTrafficData = data;
   }
 
-  private buildProxiesLineChart(proxies: ProxyNode[], limit: number): void {
-    const hoursToShow = 24;
-    const now = new Date();
-    const start = new Date(now);
-    start.setMinutes(0, 0, 0);
-    start.setHours(start.getHours() - (hoursToShow - 1));
+  private buildProxiesLineChart(history: ProxyHistoryEntry[], limit: number): void {
+    const parsed = history
+      .map((entry) => {
+        const timestamp = this.parseDate(entry.recordedAt);
+        if (!timestamp) {
+          return null;
+        }
+        return { timestamp, count: entry.count ?? 0 };
+      })
+      .filter((entry): entry is { timestamp: Date; count: number } => entry !== null)
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
-    const labels: string[] = [];
-    const values = new Array<number>(hoursToShow).fill(0);
+    const labelFormatter = new Intl.DateTimeFormat(undefined, {
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
 
-    for (let index = 0; index < hoursToShow; index++) {
-      const slot = new Date(start.getTime() + index * HOUR_MS);
-      labels.push(`${slot.getHours().toString().padStart(2, '0')}:00`);
+    if (!parsed.length) {
+      const baseline = limit ?? 0;
+      this.proxiesLineDiff = { gained: [0], lost: [0] };
+      const diffRef = this.proxiesLineDiff;
+      this.proxiesLineData = {
+        labels: ['No Data'],
+        datasets: [
+          {
+            label: 'Proxies',
+            data: [0],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          },
+          {
+            label: 'Proxy Limit',
+            data: [baseline],
+            borderColor: '#f59e0b',
+            borderDash: [5, 5],
+            pointRadius: 0,
+            fill: false
+          }
+        ]
+      };
+      this.proxiesLineOptions = this.createProxyLineOptions(diffRef);
+      return;
     }
 
-    proxies.forEach((proxy) => {
-      const checkDate = this.parseDate(proxy.latestCheck);
-      if (!checkDate) {
-        return;
-      }
-      const index = Math.floor((checkDate.getTime() - start.getTime()) / HOUR_MS);
-      if (index >= 0 && index < hoursToShow) {
-        values[index] += 1;
-      }
-    });
+    const labels = parsed.map((entry) => labelFormatter.format(entry.timestamp));
+    const values = parsed.map((entry) => entry.count);
 
     const gained = values.map((value, index) => (index === 0 ? value : value - values[index - 1]));
     const lost = gained.map((value) => (value < 0 ? Math.abs(value) : 0));
     this.proxiesLineDiff = { gained, lost };
 
-    const limitSeries = new Array<number>(hoursToShow).fill(limit ?? 0);
+    const limitSeries = values.map(() => limit ?? 0);
     const diffRef = this.proxiesLineDiff;
 
     this.proxiesLineData = {
@@ -408,7 +434,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       ]
     };
 
-    this.proxiesLineOptions = {
+    this.proxiesLineOptions = this.createProxyLineOptions(diffRef);
+  }
+
+  private createProxyLineOptions(diffRef: { gained: number[]; lost: number[] }) {
+    return {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
