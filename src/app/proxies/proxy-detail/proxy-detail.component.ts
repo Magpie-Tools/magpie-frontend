@@ -90,7 +90,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     return `${ip}:${port}`;
   }
 
-  get externalLookupLinks(): { label: string; url: string }[] {
+  get externalLookupLinks(): { label: string; url: string; icon: string }[] {
     const ip = this.detail?.ip?.toString().trim();
     if (!ip) {
       return [];
@@ -101,15 +101,23 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       {
         label: 'Talos Intelligence',
         url: `https://talosintelligence.com/reputation_center/lookup?search=${encodedIp}`,
+        icon: 'https://talosintelligence.com/favicon.ico',
       },
       {
         label: 'AbuseIPDB',
         url: `https://www.abuseipdb.com/check/${encodedIp}`,
+        icon: 'https://www.abuseipdb.com/favicon.ico',
       },
       {
         label: 'Scamalytics',
         url: `https://scamalytics.com/ip/${encodedIp}`,
+        icon: 'https://cdn.brandfetch.io/idnv72IlO9/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1752967343407',
       },
+      {
+        label: 'IPQS',
+        url: `https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/${encodedIp}`,
+        icon: 'https://www.ipqualityscore.com/favicon.ico'
+      }
     ];
   }
 

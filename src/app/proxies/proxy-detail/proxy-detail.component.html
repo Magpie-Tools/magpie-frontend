@@ -38,7 +38,7 @@
           <ng-template #proxyIdHeading>
             <span class="ml-2">{{ proxyId || '—' }}</span>
           </ng-template>
-          <p class="text-sm text-gray-400 flex flex-wrap items-center gap-2 mt-3">
+          <p class="text-sm text-gray-400 flex flex-wrap items-center gap-2 mt-2">
             <span>Proxy ID {{ proxyId || '—' }}</span>
             <ng-container *ngIf="externalLookupLinks.length">
               <span class="hidden sm:inline text-gray-600">|</span>
@@ -49,6 +49,7 @@
                   target="_blank"
                   rel="noopener noreferrer"
                 >
+                  <img [src]="link.icon" alt="" />
                   {{ link.label }}
                   <i class="pi pi-external-link"></i>
                 </a>
