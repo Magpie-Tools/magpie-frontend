@@ -1,0 +1,81 @@
+.proxy-detail-page {
+  .proxy-address {
+    .address-chip {
+      background: rgba(30, 41, 59, 0.45);
+      border: 1px solid rgba(96, 165, 250, 0.25);
+      border-radius: 9999px;
+      padding: 0.2rem 0.75rem;
+      font-size: 0.85rem;
+      color: rgb(226, 232, 240);
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+      &:hover {
+        background: rgba(96, 165, 250, 0.2);
+        border-color: rgba(96, 165, 250, 0.5);
+        color: rgb(191, 219, 254);
+      }
+    }
+
+    .copy-address-button {
+      border-radius: 9999px;
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+      background: rgba(96, 165, 250, 0.15);
+      color: rgb(191, 219, 254);
+      border-color: rgba(96, 165, 250, 0.35);
+
+      &:hover {
+        background: rgba(96, 165, 250, 0.25);
+      }
+    }
+  }
+
+  .detail-item {
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(71, 85, 105, 0.35);
+
+    .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgb(148, 163, 184);
+      margin-bottom: 0.25rem;
+    }
+
+    .value {
+      font-size: 0.95rem;
+      color: rgb(226, 232, 240);
+      word-break: break-word;
+    }
+  }
+
+  ::ng-deep .proxy-stat-table {
+    width: 100%;
+
+    th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(31, 41, 55, 0.8);
+      color: rgb(148, 163, 184);
+      border: none;
+    }
+
+    td {
+      border: none;
+      font-size: 0.875rem;
+      color: rgb(226, 232, 240);
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(30, 41, 59, 0.45);
+    }
+
+    tbody tr:hover {
+      background: rgba(96, 165, 250, 0.08);
+    }
+  }
+}
