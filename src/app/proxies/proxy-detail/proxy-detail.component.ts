@@ -77,14 +77,14 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       return '';
     }
     const ip = `${this.detail.ip ?? ''}`.trim();
-    const port = this.detail.port ?? '';
-    if (!ip && !port) {
+    const port = this.detail.port;
+    if (!ip && (port === undefined || port === null || `${port}`.trim() === '')) {
       return '';
     }
     if (!ip) {
-      return `${port}`;
+      return `${port ?? ''}`;
     }
-    if (port === 0 || port === null) {
+    if (port === undefined || port === null || `${port}`.trim() === '') {
       return ip;
     }
     return `${ip}:${port}`;

@@ -11,30 +11,35 @@
     <section class="flex-1 min-w-[320px] bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow">
       <div class="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 class="text-2xl font-semibold text-white">Proxy {{ proxyId }}</h1>
-          <p class="proxy-address text-sm text-gray-400 mt-1 flex items-center gap-2 flex-wrap">
-            <ng-container *ngIf="detail?.ip; else noAddress">
-              <button type="button" class="address-chip" (click)="copyIp()" title="Copy IP">
-                {{ detail?.ip }}
-              </button>
-              <ng-container *ngIf="detail?.port !== undefined && detail?.port !== null">
-                <span class="text-gray-600">:</span>
-                <button type="button" class="address-chip" (click)="copyPort()" title="Copy Port">
-                  {{ detail?.port }}
+          <h1 class="text-2xl font-semibold text-white">
+            Proxy
+            <ng-container *ngIf="detail?.ip; else proxyIdHeading">
+              <span class="proxy-address inline-flex items-center gap-1.5 flex-wrap ml-2 text-base">
+                <button type="button" class="address-chip" (click)="copyIp()" title="Copy IP">
+                  {{ detail?.ip }}
                 </button>
-              </ng-container>
-              <button
-                *ngIf="detail?.port !== undefined && detail?.port !== null"
-                type="button"
-                pButton
-                label="Copy"
-                icon="pi pi-copy"
-                class="copy-address-button p-button-sm p-button-text"
-                (click)="copyFullAddress()"
-                title="Copy IP and port"
-              ></button>
+                <ng-container *ngIf="detail?.port !== undefined && detail?.port !== null">
+                  <span class="text-gray-500">:</span>
+                  <button type="button" class="address-chip" (click)="copyPort()" title="Copy Port">
+                    {{ detail?.port }}
+                  </button>
+                  <button
+                    type="button"
+                    pButton
+                    icon="pi pi-copy"
+                    class="copy-address-button"
+                    (click)="copyFullAddress()"
+                    title="Copy IP and port"
+                  ></button>
+                </ng-container>
+              </span>
             </ng-container>
-            <ng-template #noAddress>—</ng-template>
+          </h1>
+          <ng-template #proxyIdHeading>
+            <span class="ml-2">{{ proxyId || '—' }}</span>
+          </ng-template>
+          <p class="text-sm text-gray-400 mt-1">
+            Proxy ID {{ proxyId || '—' }}
           </p>
         </div>
         <span
