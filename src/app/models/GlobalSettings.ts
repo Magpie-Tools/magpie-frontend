@@ -1,55 +1,61 @@
 export interface GlobalSettings {
   protocols: {
-    http: boolean
-    https: boolean
-    socks4: boolean
-    socks5: boolean
-  },
+    http: boolean;
+    https: boolean;
+    socks4: boolean;
+    socks5: boolean;
+  };
 
   checker: {
-    dynamic_threads: boolean,
-    threads: number,
-    retries: number,
-    timeout: number,
+    dynamic_threads: boolean;
+    threads: number;
+    retries: number;
+    timeout: number;
     checker_timer: {
-      days: number,
-      hours: number,
-      minutes: number,
-      seconds: number
-    },
-    judges_threads: number,
-    judges_timeout: number,
+      days: number;
+      hours: number;
+      minutes: number;
+      seconds: number;
+    };
+    judges_threads: number;
+    judges_timeout: number;
     judges: {
-      url: string,
-      regex: string
-    }[],
+      url: string;
+      regex: string;
+    }[];
     judge_timer: {
-      days: number,
-      hours: number,
-      minutes: number,
-      seconds: number
-    },
-    use_https_for_socks: boolean,
-    ip_lookup: string,
-    standard_header: ["USER-AGENT", "HOST", "ACCEPT", "ACCEPT-ENCODING"],
-    proxy_header: ["HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"]
-  },
+      days: number;
+      hours: number;
+      minutes: number;
+      seconds: number;
+    };
+    use_https_for_socks: boolean;
+    ip_lookup: string;
+    standard_header: string[];
+    proxy_header: string[];
+  };
 
   scraper: {
-    dynamic_threads: false,
-    threads: 250,
-    retries: 2,
-    timeout: 7500,
+    dynamic_threads: boolean;
+    threads: number;
+    retries: number;
+    timeout: number;
 
     scraper_timer: {
-      days: 0,
-      hours: 0,
-      minutes: 5,
-      seconds: 0
-    },
+      days: number;
+      hours: number;
+      minutes: number;
+      seconds: number;
+    };
 
-    scrape_sites: string[]
-  },
+    scrape_sites: string[];
+  };
 
-  blacklist_sources: string[]
+  proxy_limits: {
+    enabled: boolean;
+    max_per_user: number;
+    exclude_admins: boolean;
+  };
+
+  blacklist_sources: string[];
 }

@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from '../../services/settings.service';
-import {take} from 'rxjs/operators';
+import {filter, take} from 'rxjs/operators';
 
 import {TabsModule} from 'primeng/tabs';
 import {SelectModule} from 'primeng/select';
@@ -12,6 +12,7 @@ import {TooltipModule} from 'primeng/tooltip';
 import {CheckboxModule} from 'primeng/checkbox';
 import {InputTextModule} from 'primeng/inputtext';
 import {NotificationService} from '../../services/notification-service.service';
+import {GlobalSettings} from '../../models/GlobalSettings';
 
 @Component({
   selector: 'app-admin-scraper',
@@ -41,24 +42,35 @@ export class AdminScraperComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.settingsService.getScraperSettings().pipe(take(1)).subscribe({
-      next: scraperSettings => {
-        if (scraperSettings) {
-          this.updateFormWithScraperSettings(scraperSettings);
-        }
-      }, error: err => NotificationService.showError("Could not get scraper settings" + err.error.message)
+    this.settingsService.settings$
+      .pipe(
+        filter((settings): settings is GlobalSettings => !!settings),
+        take(1)
+      )
+      .subscribe({
+        next: settings => this.updateFormWithSettings(settings),
+        error: err => NotificationService.showError("Could not get scraper settings" + err.error.message)
     });
 
     const threadsCtrl  = this.settingsForm.get('scraper_threads');
     const dynamicCtrl  = this.settingsForm.get('scraper_dynamic_threads');
+    const proxyLimitCtrl = this.settingsForm.get('proxy_limit_enabled');
 
     /* whenever the checkbox toggles, enable/disable "threads" */
     dynamicCtrl!.valueChanges.subscribe({
       next: (isDynamic: boolean) => {
-        isDynamic ? threadsCtrl!.disable({ emitEvent: false })
-          : threadsCtrl!.enable({ emitEvent: false });
+        this.updateThreadControlState(isDynamic);
       }, error: err => NotificationService.showError("Error while toggling threadCtrl: " + err.error.message)
     });
+
+    proxyLimitCtrl!.valueChanges.subscribe({
+      next: (enabled: boolean) => {
+        this.updateProxyLimitState(enabled);
+      }, error: err => NotificationService.showError("Error while toggling proxy limit: " + err.error.message)
+    });
+
+    this.updateThreadControlState(dynamicCtrl?.value ?? true);
+    this.updateProxyLimitState(proxyLimitCtrl?.value ?? false);
   }
 
   private createDefaultForm(): FormGroup {
@@ -69,35 +81,71 @@ export class AdminScraperComponent implements OnInit {
       scraper_timeout: [7500],
       scraper_timer: this.fb.group({
         days: [0],
-        hours: [1],
+        hours: [9],
         minutes: [0],
         seconds: [0]
       }),
-      scrape_sites: [
-        'https://raw.githubusercontent.com/dpangestuw/Free-Proxy/refs/heads/main/http_proxies.txt'
-      ]
+      scrape_sites: this.fb.control(''),
+      proxy_limit_enabled: [false],
+      proxy_limit_max_per_user: [0],
+      proxy_limit_exclude_admins: [true]
     });
   }
 
-  private updateFormWithScraperSettings(scraperSettings: any): void {
-    // Update checker-specific fields
+  private updateFormWithSettings(settings: GlobalSettings): void {
     this.settingsForm.patchValue({
-      scraper_dynamic_threads: scraperSettings.dynamic_threads,
-      scraper_threads: scraperSettings.threads,
-      scraper_retries: scraperSettings.retries,
-      scraper_timeout: scraperSettings.timeout,
+      scraper_dynamic_threads: settings.scraper.dynamic_threads,
+      scraper_threads: settings.scraper.threads,
+      scraper_retries: settings.scraper.retries,
+      scraper_timeout: settings.scraper.timeout,
       scraper_timer: {
-        days: scraperSettings.scraper_timer.days,
-        hours: scraperSettings.scraper_timer.hours,
-        minutes: scraperSettings.scraper_timer.minutes,
-        seconds: scraperSettings.scraper_timer.seconds
+        days: settings.scraper.scraper_timer.days,
+        hours: settings.scraper.scraper_timer.hours,
+        minutes: settings.scraper.scraper_timer.minutes,
+        seconds: settings.scraper.scraper_timer.seconds
       },
-      scrape_sites: scraperSettings.scrape_sites,
+      scrape_sites: settings.scraper.scrape_sites.join('\n'),
+      proxy_limit_enabled: settings.proxy_limits.enabled,
+      proxy_limit_max_per_user: settings.proxy_limits.max_per_user,
+      proxy_limit_exclude_admins: settings.proxy_limits.exclude_admins
     });
+
+    this.updateThreadControlState(settings.scraper.dynamic_threads);
+    this.updateProxyLimitState(settings.proxy_limits.enabled);
+  }
+
+  private updateThreadControlState(isDynamic: boolean): void {
+    const threadsCtrl  = this.settingsForm.get('scraper_threads');
+    if (!threadsCtrl) {
+      return;
+    }
+
+    if (isDynamic) {
+      threadsCtrl.disable({ emitEvent: false });
+    } else {
+      threadsCtrl.enable({ emitEvent: false });
+    }
+  }
+
+  private updateProxyLimitState(isEnabled: boolean): void {
+    const maxCtrl = this.settingsForm.get('proxy_limit_max_per_user');
+    const excludeCtrl = this.settingsForm.get('proxy_limit_exclude_admins');
+
+    if (!maxCtrl || !excludeCtrl) {
+      return;
+    }
+
+    if (isEnabled) {
+      maxCtrl.enable({ emitEvent: false });
+      excludeCtrl.enable({ emitEvent: false });
+    } else {
+      maxCtrl.disable({ emitEvent: false });
+      excludeCtrl.disable({ emitEvent: false });
+    }
   }
 
   onSubmit() {
-    this.settingsService.saveGlobalSettings(this.settingsForm.value).subscribe({
+    this.settingsService.saveGlobalSettings(this.settingsForm.getRawValue()).subscribe({
       next: (resp) => {
         NotificationService.showSuccess(resp.message)
         this.settingsForm.markAsPristine()

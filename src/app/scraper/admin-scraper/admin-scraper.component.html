@@ -127,6 +127,55 @@
                 </label>
               </div>
             </div>
+
+            <p-divider></p-divider>
+
+            <!-- Proxy Limit Controls -->
+            <div class="space-y-4">
+              <div class="flex items-center gap-3">
+                <p-checkbox
+                  formControlName="proxy_limit_enabled"
+                  [binary]="true"
+                  inputId="proxy-limit-enabled">
+                </p-checkbox>
+                <label for="proxy-limit-enabled"
+                       class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer flex items-center gap-2">
+                  Enforce Proxy Limit
+                  <i class="pi pi-info-circle text-gray-400 cursor-help"
+                     pTooltip="Restrict how many proxies each account may store."
+                     tooltipPosition="top">
+                  </i>
+                </label>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col">
+                  <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Max Proxies Per User
+                  </label>
+                  <p-inputNumber
+                    formControlName="proxy_limit_max_per_user"
+                    [min]="0"
+                    [max]="1000000"
+                    [step]="50"
+                    [useGrouping]="false"
+                    class="w-full">
+                  </p-inputNumber>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <p-checkbox
+                    formControlName="proxy_limit_exclude_admins"
+                    [binary]="true"
+                    inputId="proxy-limit-exclude-admins">
+                  </p-checkbox>
+                  <label for="proxy-limit-exclude-admins"
+                         class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                    Exclude admins from limit
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
         </p-tabpanel>
 
@@ -136,14 +185,16 @@
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Default Scrape Sites
               </label>
-              <input
-                type="text"
+              <textarea
                 formControlName="scrape_sites"
-                pInputText
+                rows="6"
                 class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md
                        focus:ring-2 focus:ring-blue-500 focus:border-transparent
                        dark:bg-gray-700 dark:text-white"
-                placeholder="Enter scrape site URL">
+                placeholder="Enter one URL per line or separate with commas"></textarea>
+              <small class="text-xs text-gray-500 dark:text-gray-400">
+                One URL per line is recommended. Empty lines are ignored when saving.
+              </small>
             </div>
           </div>
         </p-tabpanel>
