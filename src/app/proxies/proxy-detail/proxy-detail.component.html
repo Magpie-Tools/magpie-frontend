@@ -95,7 +95,39 @@
             </div>
             <div class="detail-item">
               <div class="label">Authentication</div>
-              <div class="value break-all">{{ authenticationDisplay }}</div>
+              <div class="value break-all">
+                @if (authenticationCredentials; as credentials) {
+                  <span class="auth-credentials inline-flex items-center gap-1.5 flex-wrap">
+                    <button
+                      type="button"
+                      class="credential-chip"
+                      (click)="copyUsername()"
+                      title="Copy username"
+                    >
+                      {{ credentials.username }}
+                    </button>
+                    <span class="text-gray-500">:</span>
+                    <button
+                      type="button"
+                      class="credential-chip"
+                      (click)="copyPassword()"
+                      title="Copy password"
+                    >
+                      {{ credentials.password }}
+                    </button>
+                    <button
+                      type="button"
+                      pButton
+                      icon="pi pi-copy"
+                      class="copy-credential-button"
+                      (click)="copyAuthCredentials()"
+                      title="Copy username and password"
+                    ></button>
+                  </span>
+                } @else {
+                  {{ authenticationDisplay }}
+                }
+              </div>
             </div>
             <div class="detail-item">
               <div class="label">Latest Protocol</div>

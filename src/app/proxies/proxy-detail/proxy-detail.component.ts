@@ -145,6 +145,30 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     this.copyToClipboard(value, 'Proxy address copied');
   }
 
+  copyUsername(): void {
+    const username = this.authenticationCredentials?.username;
+    if (!username) {
+      return;
+    }
+    this.copyToClipboard(username, 'Username copied');
+  }
+
+  copyPassword(): void {
+    const password = this.authenticationCredentials?.password;
+    if (!password) {
+      return;
+    }
+    this.copyToClipboard(password, 'Password copied');
+  }
+
+  copyAuthCredentials(): void {
+    const combined = this.authenticationCredentials?.combined;
+    if (!combined) {
+      return;
+    }
+    this.copyToClipboard(combined, 'Credentials copied');
+  }
+
   private copyToClipboard(value: string, successMessage: string): void {
     const copied = this.clipboard.copy(value);
     if (copied) {
@@ -183,6 +207,24 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     }
 
     return user || pass || 'Present';
+  }
+
+  get authenticationCredentials(): { username: string; password: string; combined: string } | null {
+    if (!this.detail?.has_auth) {
+      return null;
+    }
+
+    const username = this.detail.username?.trim();
+    const password = this.detail.password?.trim();
+    if (!username || !password) {
+      return null;
+    }
+
+    return {
+      username,
+      password,
+      combined: `${username}:${password}`,
+    };
   }
 
   get latestStatistic(): ProxyStatistic | null {
