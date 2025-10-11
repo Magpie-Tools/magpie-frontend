@@ -7,6 +7,11 @@ export interface ProxyInfo {
   "country": string;
   "anonymity_level": string;
   "protocol": string;
-  "alive": boolean
+  "alive": boolean;
   "latest_check": Date;
+}
+
+export interface ProxyPage {
+  "proxies": ProxyInfo[];
+  "total": number;
 }

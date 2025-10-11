@@ -19,10 +19,21 @@
         ></p-button>
       </div>
 
-      <app-add-proxies
-        (showAddProxiesMessage)="showAddProxiesMessage.emit($event)"
-        (proxiesAdded)="onProxiesAdded()"
-      ></app-add-proxies>
+      <div class="flex flex-wrap items-center gap-4">
+        <input
+          type="search"
+          class="proxy-search-input"
+          placeholder="Search proxies"
+          [ngModel]="searchTerm"
+          (ngModelChange)="onSearchTermChange($event)"
+          aria-label="Search proxies"
+        />
+
+        <app-add-proxies
+          (showAddProxiesMessage)="showAddProxiesMessage.emit($event)"
+          (proxiesAdded)="onProxiesAdded()"
+        ></app-add-proxies>
+      </div>
     </div>
 
     <p-table

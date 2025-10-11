@@ -43,6 +43,8 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   totalItems = 0;
   hasLoaded = false;
   isLoading = false;
+  searchTerm = '';
+  private searchDebounceHandle?: ReturnType<typeof setTimeout>;
 
   sortField: string | null | undefined;
   sortOrder: number | undefined | null; // 1 for ascending, -1 for descending
@@ -56,14 +58,13 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.getAndSetProxyCount();
     this.getAndSetProxyList();
   }
 
   getAndSetProxyList(event?: TableLazyLoadEvent) {
     this.proxyListSubscription?.unsubscribe();
     this.isLoading = true;
-    const page = event ? Math.floor(event.first! / event.rows!) + 1 : this.page;
+    const page = event ? Math.floor((event.first ?? 0) / (event.rows ?? this.pageSize)) + 1 : this.page;
     const rows = event?.rows ?? this.pageSize;
     const requestedSortField = this.resolveSortField(event?.sortField);
     const requestedSortOrder = event?.sortOrder ?? this.sortOrder ?? null;
@@ -73,15 +74,19 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sortField = normalizedSortField;
     this.sortOrder = normalizedSortOrder;
 
+    const trimmedSearch = this.searchTerm.trim();
+
     this.proxyListSubscription = this.http.getProxyPage(page, {
       rows,
+      search: trimmedSearch.length > 0 ? trimmedSearch : undefined,
     }).subscribe({
       next: res => {
-        const data = [...res];
+        const data = [...res.proxies];
         this.page = page;
         this.pageSize = rows;
         this.dataSource.data = this.applySort(data, normalizedSortField, normalizedSortOrder);
-        this.totalItems = res.length > 0 ? (this.totalItems || res.length) : 0; // fall back to current batch size until count arrives
+        this.totalItems = res.total ?? this.dataSource.data.length;
+        this.pruneSelection();
         this.isLoading = false;
         this.hasLoaded = true;
         this.showAddProxiesMessage.emit(this.totalItems === 0 && this.hasLoaded);
@@ -94,21 +99,11 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  getAndSetProxyCount() {
-    this.http.getProxyCount().subscribe({
-      next: res => {
-        this.totalItems = res;
-        if (this.dataSource.data.length === 0) {
-          this.hasLoaded = true;
-        }
-        this.showAddProxiesMessage.emit(this.totalItems === 0 && this.hasLoaded);
-      },
-      error: err => NotificationService.showError('Error while getting proxy count: ' + err.error.message)
-    });
-  }
-
   ngOnDestroy(): void {
     this.proxyListSubscription?.unsubscribe();
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+    }
   }
 
   onLazyLoad(event: TableLazyLoadEvent) {
@@ -174,6 +169,18 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     }
+  }
+
+  onSearchTermChange(value: string): void {
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+    }
+
+    this.searchTerm = value;
+    this.searchDebounceHandle = setTimeout(() => {
+      this.page = 1;
+      this.getAndSetProxyList();
+    }, 300);
   }
 
   private resolveSortField(sortField: TableLazyLoadEvent['sortField']): string | null {
@@ -258,7 +265,22 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onProxiesAdded(): void {
     this.selection.clear();
-    this.getAndSetProxyCount();
+    this.selectedProxies = [];
+    this.page = 1;
     this.getAndSetProxyList();
+  }
+
+  private pruneSelection(): void {
+    if (this.selection.isEmpty()) {
+      this.selectedProxies = [];
+      return;
+    }
+
+    const ids = new Set(this.dataSource.data.map(proxy => proxy.id));
+    const retained = this.selection.selected.filter(proxy => ids.has(proxy.id));
+
+    this.selection.clear();
+    retained.forEach(proxy => this.selection.select(proxy));
+    this.selectedProxies = [...retained];
   }
 }

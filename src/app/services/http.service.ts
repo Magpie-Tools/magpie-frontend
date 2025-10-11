@@ -3,7 +3,7 @@ import {environment} from '../../environments/environment';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {User} from '../models/UserModel';
 import {jwtToken} from '../models/JwtToken';
-import {ProxyInfo} from '../models/ProxyInfo';
+import {ProxyPage} from '../models/ProxyInfo';
 import {GlobalSettings} from '../models/GlobalSettings';
 import {UserSettings} from '../models/UserSettings';
 import {ExportSettings} from '../models/ExportSettings';
@@ -46,14 +46,18 @@ export class HttpService {
   }
 
 
-  getProxyPage(pageNumber: number, options?: { rows?: number }) {
+  getProxyPage(pageNumber: number, options?: { rows?: number; search?: string }) {
     let params = new HttpParams();
 
     if (options?.rows && options.rows > 0) {
       params = params.set('pageSize', options.rows.toString());
     }
 
-    return this.http.get<ProxyInfo[]>(`${this.apiUrl}/getProxyPage/${pageNumber}`, { params });
+    if (options?.search && options.search.trim().length > 0) {
+      params = params.set('search', options.search.trim());
+    }
+
+    return this.http.get<ProxyPage>(`${this.apiUrl}/getProxyPage/${pageNumber}`, { params });
   }
 
   getProxyCount() {
