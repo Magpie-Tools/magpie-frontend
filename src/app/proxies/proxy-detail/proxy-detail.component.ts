@@ -90,6 +90,29 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     return `${ip}:${port}`;
   }
 
+  get externalLookupLinks(): { label: string; url: string }[] {
+    const ip = this.detail?.ip?.toString().trim();
+    if (!ip) {
+      return [];
+    }
+
+    const encodedIp = encodeURIComponent(ip);
+    return [
+      {
+        label: 'Talos Intelligence',
+        url: `https://talosintelligence.com/reputation_center/lookup?search=${encodedIp}`,
+      },
+      {
+        label: 'AbuseIPDB',
+        url: `https://www.abuseipdb.com/check/${encodedIp}`,
+      },
+      {
+        label: 'Scamalytics',
+        url: `https://scamalytics.com/ip/${encodedIp}`,
+      },
+    ];
+  }
+
   copyIp(): void {
     const value = this.detail?.ip?.toString().trim();
     if (!value) {
