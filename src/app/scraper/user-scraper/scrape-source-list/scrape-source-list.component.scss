@@ -58,24 +58,6 @@ $border-color: rgba(255, 255, 255, 0.12);
     }
   }
 
-  .p-table-header-checkbox .p-checkbox-box,
-  .p-checkbox .p-checkbox-box {
-    background: rgba(15, 15, 15, 0.8);
-    border: 1px solid rgba(148, 163, 184, 0.35);
-    border-radius: 0.4rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-    &.p-highlight {
-      background: rgba($accent-color, 0.12);
-      border-color: $accent-color;
-      box-shadow: 0 0 0 1px rgba($accent-color, 0.35);
-    }
-
-    &:hover {
-      border-color: $accent-color;
-    }
-  }
-
   .p-sortable-column:not(.p-highlight):hover {
     color: $accent-color;
   }

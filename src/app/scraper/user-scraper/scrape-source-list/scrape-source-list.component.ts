@@ -1,5 +1,7 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {DatePipe, NgClass} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {SelectionModel} from '@angular/cdk/collections';
 import {LoadingComponent} from '../../../ui-elements/loading/loading.component';
 import {HttpService} from '../../../services/http.service';
 import {ScrapeSourceInfo} from '../../../models/ScrapeSourceInfo';
@@ -19,6 +21,7 @@ import {NotificationService} from '../../../services/notification-service.servic
   selector: 'app-scrape-source-list',
   imports: [
     DatePipe,
+    FormsModule,
     LoadingComponent,
     TableModule,
     ButtonModule,
@@ -37,7 +40,7 @@ export class ScrapeSourceListComponent implements OnInit {
   @Output() showAddScrapeSourceMessage = new EventEmitter<boolean>();
 
   scrapeSources: ScrapeSourceInfo[] = [];
-  selectedSources: ScrapeSourceInfo[] = [];
+  selection = new SelectionModel<ScrapeSourceInfo>(true, []);
   page = 0; // PrimeNG uses 0-based pagination
   pageSize = 20;
   totalItems = 0;
@@ -59,6 +62,7 @@ export class ScrapeSourceListComponent implements OnInit {
     this.http.getScrapingSourcePage(this.page + 1).subscribe({
       next: res => {
         this.scrapeSources = res;
+        this.syncSelectionWithData();
         this.loading = false;
       },
       error: err => {
@@ -85,41 +89,25 @@ export class ScrapeSourceListComponent implements OnInit {
     this.getAndSetScrapeSourcesList();
   }
 
-  // Select all functionality
-  onSelectAll(event: any) {
-    if (event.checked) {
-      this.selectedSources = [...this.scrapeSources];
-    } else {
-      this.selectedSources = [];
-    }
-  }
-
-  // Check if all rows are selected
-  isAllSelected(): boolean {
-    return this.scrapeSources.length > 0 && this.selectedSources.length === this.scrapeSources.length;
-  }
-
-  // Check if some rows are selected (for indeterminate state)
-  isSomeSelected(): boolean {
-    return this.selectedSources.length > 0 && this.selectedSources.length < this.scrapeSources.length;
-  }
-
   deleteSelectedSources(): void {
-    if (this.selectedSources.length === 0) return;
+    const selected = [...this.selection.selected];
+    if (selected.length === 0) {
+      return;
+    }
 
     this.confirmationService.confirm({
-      message: `Are you sure you want to delete ${this.selectedSources.length} selected scrape source(s)?`,
+      message: `Are you sure you want to delete ${selected.length} selected scrape source(s)?`,
       header: 'Confirm Deletion',
       icon: 'pi pi-exclamation-triangle',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        const selectedIds = this.selectedSources.map(source => source.id);
+        const selectedIds = selected.map(source => source.id);
 
         this.http.deleteScrapingSource(selectedIds).subscribe({
           next: res => {
             NotificationService.showSuccess(res);
-            this.totalItems -= this.selectedSources.length;
-            this.selectedSources = [];
+            this.totalItems -= selected.length;
+            this.selection.clear();
             this.getAndSetScrapeSourcesList();
           },
           error: err => NotificationService.showError("Could not delete scraping source " + err.error.message)
@@ -130,11 +118,32 @@ export class ScrapeSourceListComponent implements OnInit {
 
   // Helper method to get selection count
   getSelectionCount(): number {
-    return this.selectedSources.length;
+    return this.selection.selected.length;
+  }
+
+  toggleSelection(source: ScrapeSourceInfo): void {
+    this.selection.toggle(source);
+  }
+
+  isAllSelected(): boolean {
+    return this.scrapeSources.length > 0 && this.selection.selected.length === this.scrapeSources.length;
+  }
+
+  isSomeSelected(): boolean {
+    const count = this.selection.selected.length;
+    return count > 0 && count < this.scrapeSources.length;
+  }
+
+  masterToggle(): void {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+    } else {
+      this.scrapeSources.forEach(source => this.selection.select(source));
+    }
   }
 
   refreshList(): void {
-    this.selectedSources = [];
+    this.selection.clear();
     this.getAndSetScrapeSourceCount();
     this.getAndSetScrapeSourcesList();
   }
@@ -146,5 +155,16 @@ export class ScrapeSourceListComponent implements OnInit {
 
   onShowAddScrapeSourcesMessage(value: boolean): void {
     this.showAddScrapeSourceMessage.emit(value);
+  }
+
+  private syncSelectionWithData(): void {
+    const selectedIds = new Set(this.selection.selected.map(source => source.id));
+    this.selection.clear();
+
+    this.scrapeSources.forEach(source => {
+      if (selectedIds.has(source.id)) {
+        this.selection.select(source);
+      }
+    });
   }
 }

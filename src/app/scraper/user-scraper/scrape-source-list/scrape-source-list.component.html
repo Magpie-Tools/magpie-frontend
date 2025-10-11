@@ -8,10 +8,10 @@
           label="Delete Selected"
           icon="pi pi-trash"
           styleClass="p-button-danger"
-          [disabled]="selectedSources.length === 0"
+          [disabled]="getSelectionCount() === 0"
           (onClick)="deleteSelectedSources()"
           [badge]="getSelectionCount().toString()"
-          [badgeClass]="selectedSources.length > 0 ? 'bg-red-500' : ''"
+          [badgeClass]="getSelectionCount() > 0 ? 'bg-red-500' : ''"
           pTooltip="Delete selected scrape sources"
           tooltipPosition="top">
         </p-button>
@@ -44,16 +44,20 @@
         [paginator]="false"
         [sortMode]="'multiple'"
         [tableStyle]="{'min-width': '60rem'}"
-        [(selection)]="selectedSources"
-        [selectAll]="isAllSelected()"
-        (selectAllChange)="onSelectAll($event)"
+        dataKey="id"
         styleClass="p-datatable-gridlines p-datatable-sm"
         [rowHover]="true">
 
         <ng-template pTemplate="header">
           <tr class="bg-neutral-900/80 text-gray-200 uppercase text-xs tracking-wide">
             <th class="w-16 text-center">
-              <p-tableHeaderCheckbox [disabled]="scrapeSources.length === 0"></p-tableHeaderCheckbox>
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="isAllSelected()"
+                (onChange)="masterToggle()"
+                [disabled]="scrapeSources.length === 0"
+                [indeterminate]="isSomeSelected()"
+              ></p-checkbox>
             </th>
             <th class="text-left" pSortableColumn="url">
               <div class="flex items-center gap-2 font-semibold text-sm text-gray-300">
@@ -77,9 +81,17 @@
         </ng-template>
 
         <ng-template pTemplate="body" let-source>
-          <tr class="cursor-pointer transition-colors hover:bg-neutral-800/60" [ngClass]="{'selected-row': selectedSources.includes(source)}">
-            <td class="text-center">
-              <p-tableCheckbox [value]="source"></p-tableCheckbox>
+          <tr
+            class="cursor-pointer transition-colors hover:bg-neutral-800/60"
+            [ngClass]="{'selected-row': selection.isSelected(source)}"
+            (click)="toggleSelection(source)"
+          >
+            <td class="text-center" (click)="$event.stopPropagation()">
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="selection.isSelected(source)"
+                (onChange)="toggleSelection(source)"
+              ></p-checkbox>
             </td>
             <td class="max-w-0">
               <div class="flex items-center">
