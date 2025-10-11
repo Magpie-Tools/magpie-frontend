@@ -285,12 +285,8 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedProxies = [...retained];
   }
 
-  onRowClick(_event: MouseEvent, proxy: ProxyInfo): void {
-    this.router.navigate(['/proxies', proxy.id]).catch(() => {});
-  }
-
   onViewProxy(event: Event | { originalEvent?: Event }, proxy: ProxyInfo): void {
-    if (typeof (event as { originalEvent?: Event }).originalEvent !== 'undefined') {
+    if ((event as { originalEvent?: Event }).originalEvent) {
       (event as { originalEvent?: Event }).originalEvent?.stopPropagation?.();
     } else {
       (event as Event)?.stopPropagation?.();

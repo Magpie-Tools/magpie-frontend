@@ -44,6 +44,9 @@
       [lazy]="true"
       (onLazyLoad)="onLazyLoad($event)"
         [rowsPerPageOptions]="[20, 40, 60, 100]"
+      [selection]="selection.selected"
+      [(selection)]="selectedProxies"
+      dataKey="id"
       class="p-datatable-gridlines p-datatable-sm"
       [sortField]="sortField"
       [sortOrder]="sortOrder ?? 0"
@@ -89,11 +92,10 @@
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-proxy>
-        <tr (click)="onRowClick($event, proxy)">
+        <tr (click)="toggleSelection(proxy)" [pSelectableRow]="proxy">
           <td>
             <p-checkbox
               [binary]="true"
-              (onClick)="$event.stopPropagation()"
               (onChange)="toggleSelection(proxy)"
               [ngModel]="selection.isSelected(proxy)"
             ></p-checkbox>
