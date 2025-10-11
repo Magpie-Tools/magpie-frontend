@@ -271,6 +271,15 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getAndSetProxyList();
   }
 
+  refreshList(): void {
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+      this.searchDebounceHandle = undefined;
+    }
+
+    this.getAndSetProxyList();
+  }
+
   private pruneSelection(): void {
     if (this.selection.isEmpty()) {
       this.selectedProxies = [];

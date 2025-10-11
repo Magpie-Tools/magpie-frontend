@@ -20,6 +20,14 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-4">
+        <p-button
+          label="Refresh"
+          icon="pi pi-refresh"
+          styleClass="p-button-outlined"
+          [disabled]="isLoading"
+          (onClick)="refreshList()"
+        ></p-button>
+
         <input
           type="search"
           class="proxy-search-input"
@@ -113,7 +121,9 @@
           <td>{{ proxy.port }}</td>
           <td>{{ proxy.response_time }} ms</td>
           <td>{{ proxy.estimated_type }}</td>
-          <td>{{ proxy.country }}</td>
+          <td class="w-[140px]">
+            {{ proxy.country }}
+          </td>
           <td>{{ proxy.protocol }}</td>
           <td>{{ proxy.latest_check | date : 'short' }}</td>
           <td>
