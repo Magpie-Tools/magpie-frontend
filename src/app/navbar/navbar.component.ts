@@ -39,21 +39,21 @@ export class NavbarComponent implements OnInit, AfterViewInit {
   updateMenuItems(): void {
     this.menuItems = [
       {
-        label: 'Tools',
-        icon: 'pi pi-wrench', // Add icon for the header
+        label: 'Checker',
+        icon: 'pi pi-wrench',
         styleClass: 'menu-title',
         hasExpandable: true,
         expanded: true,
         items: [
           {
-            label: 'Checker',
-            icon: 'pi pi-check-circle',
-            routerLink: 'checker',
+            label: 'Settings',
+            icon: 'pi pi-cog',
+            routerLink: 'checker/settings',
           },
           {
-            label: 'Scraper',
-            icon: 'pi pi-download',
-            routerLink: 'scraper'
+            label: 'Judges',
+            icon: 'pi pi-address-book',
+            routerLink: 'checker/judges'
           }
         ]
       },

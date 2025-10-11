@@ -1,0 +1,92 @@
+import {Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {TooltipComponent} from '../../tooltip/tooltip.component';
+import {InputText} from 'primeng/inputtext';
+import {Button} from 'primeng/button';
+import {SettingsService} from '../../services/settings.service';
+import {NotificationService} from '../../services/notification-service.service';
+import {UserSettings} from '../../models/UserSettings';
+
+@Component({
+  selector: 'app-checker-judges',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, TooltipComponent, InputText, Button],
+  templateUrl: './checker-judges.component.html',
+  styleUrls: ['./checker-judges.component.scss']
+})
+export class CheckerJudgesComponent implements OnInit {
+  judgesForm: FormArray<FormGroup>;
+
+  constructor(private fb: FormBuilder, private settingsService: SettingsService) {
+    this.judgesForm = this.fb.array<FormGroup>([]);
+  }
+
+  ngOnInit(): void {
+    this.populateJudges(this.settingsService.getUserSettings());
+  }
+
+  get judgeControls(): FormGroup[] {
+    return this.judgesForm.controls as FormGroup[];
+  }
+
+  addJudge(): void {
+    this.judgesForm.push(this.createJudgeGroup());
+    this.judgesForm.markAsDirty();
+  }
+
+  removeJudge(index: number): void {
+    if (index < 0 || index >= this.judgesForm.length) {
+      return;
+    }
+
+    this.judgesForm.removeAt(index);
+    this.judgesForm.markAsDirty();
+  }
+
+  onSubmit(): void {
+    const current = this.settingsService.getUserSettings();
+    const payload = {
+      HTTPProtocol: current?.http_protocol ?? false,
+      HTTPSProtocol: current?.https_protocol ?? true,
+      SOCKS4Protocol: current?.socks4_protocol ?? false,
+      SOCKS5Protocol: current?.socks5_protocol ?? false,
+      Timeout: current?.timeout ?? 7500,
+      Retries: current?.retries ?? 2,
+      UseHttpsForSocks: current?.UseHttpsForSocks ?? true,
+      judges: this.judgesForm.value
+    };
+
+    this.settingsService.saveUserSettings(payload).subscribe({
+      next: (resp) => {
+        NotificationService.showSuccess(resp.message);
+        this.populateJudges(this.settingsService.getUserSettings());
+      },
+      error: (err) => {
+        console.error('Error saving judges:', err);
+        NotificationService.showError('Failed to save settings!');
+      }
+    });
+  }
+
+  private populateJudges(settings: UserSettings | undefined): void {
+    this.judgesForm.clear();
+
+    if (settings?.judges?.length) {
+      settings.judges.forEach(judge => this.judgesForm.push(this.createJudgeGroup(judge.url, judge.regex)));
+    }
+
+    if (this.judgesForm.length === 0) {
+      this.judgesForm.push(this.createJudgeGroup());
+    }
+
+    this.judgesForm.markAsPristine();
+  }
+
+  private createJudgeGroup(url: string = '', regex: string = ''): FormGroup {
+    return this.fb.group({
+      url: [url],
+      regex: [regex]
+    });
+  }
+}
