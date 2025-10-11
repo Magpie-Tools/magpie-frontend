@@ -1,36 +1,13 @@
-<div class="flex items-center justify-center mt-4 gap-2">
-  <p-button
-    label="Scrape Source List"
-    [outlined]="!showSourceList"
-    [severity]="showSourceList ? 'primary' : 'secondary'"
-    (onClick)="showSourceList = true">
-  </p-button>
-
-  <p-button
-    label="Add Sources"
-    [outlined]="showSourceList"
-    [severity]="!showSourceList ? 'primary' : 'secondary'"
-    (onClick)="showSourceList = false">
-  </p-button>
-</div>
-
-@if (showSourceList) {
+<div class="space-y-6">
   @if (showNoSourceMessage) {
-    <div class="flex flex-col items-center justify-center mt-5 p-6 text-gray-600 dark:text-gray-400">
+    <div class="no-sources-card">
       <span class="text-center">
-        No sources found. Start by
-        <a href="" class="text-blue-600 dark:text-blue-400 hover:underline" (click)="showSourceList = false">
-          adding sources
-        </a>
+        No scrape sources found. Use the <span class="font-semibold">Add Sources</span> button to upload your first sources.
       </span>
     </div>
-  } @else {
-    <app-scrape-source-list
-      (showAddScrapeSourceMessage)="showNoSourceMessage = $event">
-    </app-scrape-source-list>
   }
-} @else {
-  <app-add-scrape-source
-    (showAddScrapeSourcesMessage)="showNoSourceMessage = $event">
-  </app-add-scrape-source>
-}
+
+  <app-scrape-source-list
+    (showAddScrapeSourceMessage)="showNoSourceMessage = $event">
+  </app-scrape-source-list>
+</div>

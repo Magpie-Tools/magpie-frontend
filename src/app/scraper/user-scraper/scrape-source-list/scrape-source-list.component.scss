@@ -1,164 +1,161 @@
-//// Custom PrimeNG Table Overrides
-//:host ::ng-deep {
-//  // Table styling
-//  .p-datatable {
-//    .p-datatable-thead > tr > th {
-//      @apply bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold;
-//      @apply border-b-2 border-gray-200 dark:border-gray-600;
-//      padding: 1rem 0.75rem;
-//    }
-//
-//    .p-datatable-tbody > tr > td {
-//      @apply text-gray-700 dark:text-gray-300;
-//      padding: 0.75rem;
-//      border-bottom: 1px solid theme('colors.gray.200');
-//
-//      .dark & {
-//        border-bottom-color: theme('colors.gray.600');
-//      }
-//    }
-//
-//    .p-datatable-tbody > tr:hover {
-//      @apply bg-gray-50 dark:bg-gray-700/50;
-//    }
-//
-//    .p-datatable-tbody > tr.p-highlight {
-//      @apply bg-blue-50 dark:bg-blue-900/20;
-//    }
-//  }
-//
-//  // Checkbox styling
-//  .p-checkbox {
-//    .p-checkbox-box {
-//      @apply border-gray-300 dark:border-gray-600;
-//
-//      &.p-highlight {
-//        @apply bg-blue-600 border-blue-600;
-//      }
-//
-//      &:hover {
-//        @apply border-blue-500;
-//      }
-//    }
-//  }
-//
-//  // Sort icon styling
-//  .p-sortable-column-icon {
-//    @apply text-gray-400 hover:text-blue-500;
-//
-//    &.pi-sort-up,
-//    &.pi-sort-down {
-//      @apply text-blue-500;
-//    }
-//  }
-//
-//  // Loading overlay
-//  .p-datatable-loading-overlay {
-//    @apply bg-white/80 dark:bg-gray-800/80;
-//  }
-//
-//  // Paginator styling
-//  .p-paginator {
-//    @apply bg-transparent border-0;
-//
-//    .p-paginator-pages {
-//      .p-paginator-page {
-//        @apply text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600;
-//
-//        &.p-highlight {
-//          @apply bg-blue-600 text-white;
-//        }
-//      }
-//    }
-//
-//    .p-paginator-prev,
-//    .p-paginator-next {
-//      @apply text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600;
-//
-//      &.p-disabled {
-//        @apply text-gray-400 dark:text-gray-500;
-//      }
-//    }
-//
-//    .p-dropdown {
-//      @apply bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600;
-//
-//      .p-dropdown-label {
-//        @apply text-gray-700 dark:text-gray-300;
-//      }
-//    }
-//  }
-//
-//  // Confirm dialog styling
-//  .p-confirm-dialog {
-//    .p-dialog-header {
-//      @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600;
-//
-//      .p-dialog-title {
-//        @apply text-gray-900 dark:text-gray-100;
-//      }
-//    }
-//
-//    .p-dialog-content {
-//      @apply bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300;
-//    }
-//
-//    .p-dialog-footer {
-//      @apply bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600;
-//    }
-//  }
-//}
-//
-//// Badge styling for delete button
-//.p-badge {
-//  &.bg-red-500 {
-//    @apply bg-red-500 text-white;
-//    min-width: 1.25rem;
-//    height: 1.25rem;
-//    line-height: 1.25rem;
-//    font-size: 0.75rem;
-//  }
-//}
-//
-//// Link styling
-//a {
-//  @apply text-blue-600 dark:text-blue-400 no-underline;
-//
-//  &:hover {
-//    @apply text-blue-800 dark:text-blue-300 underline;
-//  }
-//}
-//
-//// Responsive table
-//@media (max-width: 768px) {
-//  :host ::ng-deep {
-//    .p-datatable {
-//      .p-datatable-thead > tr > th,
-//      .p-datatable-tbody > tr > td {
-//        padding: 0.5rem 0.25rem;
-//        font-size: 0.875rem;
-//      }
-//    }
-//  }
-//}
-//
-//// Custom scrollbar for table
-//:host ::ng-deep {
-//  .p-datatable-wrapper {
-//    &::-webkit-scrollbar {
-//      height: 8px;
-//    }
-//
-//    &::-webkit-scrollbar-track {
-//      @apply bg-gray-100 dark:bg-gray-700 rounded;
-//    }
-//
-//    &::-webkit-scrollbar-thumb {
-//      @apply bg-gray-300 dark:bg-gray-600 rounded;
-//
-//      &:hover {
-//        @apply bg-gray-400 dark:bg-gray-500;
-//      }
-//    }
-//  }
-//}
+@use 'sass:color';
+
+$background-color: #171717;
+$surface-color: rgba(23, 23, 23, 0.92);
+$text-color: #d1d5db;
+$muted-text: rgba(148, 163, 184, 0.75);
+$accent-color: #4ed09e;
+$border-color: rgba(255, 255, 255, 0.12);
+
+.scraper-container {
+  backdrop-filter: blur(12px);
+}
+
+.table-card {
+  background: $surface-color;
+  backdrop-filter: blur(18px);
+  border-radius: 1rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+}
+
+.selected-row {
+  background-color: rgba($accent-color, 0.08);
+
+  td {
+    color: $text-color;
+  }
+}
+
+.custom-paginator {
+  background: rgba(9, 9, 9, 0.85);
+  color: $text-color;
+}
+
+:host ::ng-deep {
+  .p-datatable {
+    background: transparent;
+    color: $text-color;
+
+    .p-datatable-thead > tr > th {
+      background: rgba(15, 15, 15, 0.85);
+      border: none;
+      color: $text-color;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      padding: 1rem;
+      text-transform: uppercase;
+    }
+
+    .p-datatable-tbody > tr > td {
+      border-top: 1px solid rgba(148, 163, 184, 0.08);
+      padding: 0.95rem 1rem;
+      color: $muted-text;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .p-datatable-tbody > tr:hover > td {
+      color: color.adjust($text-color, $lightness: 8%);
+    }
+  }
+
+  .p-table-header-checkbox .p-checkbox-box,
+  .p-checkbox .p-checkbox-box {
+    background: rgba(15, 15, 15, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 0.4rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &.p-highlight {
+      background: rgba($accent-color, 0.12);
+      border-color: $accent-color;
+      box-shadow: 0 0 0 1px rgba($accent-color, 0.35);
+    }
+
+    &:hover {
+      border-color: $accent-color;
+    }
+  }
+
+  .p-sortable-column:not(.p-highlight):hover {
+    color: $accent-color;
+  }
+
+  .p-sortable-column .p-sortable-column-icon {
+    color: rgba($accent-color, 0.55);
+  }
+
+  .p-sortable-column.p-highlight {
+    color: $accent-color;
+
+    .p-sortable-column-icon {
+      color: $accent-color;
+    }
+  }
+
+  .p-datatable-loading-overlay {
+    background: rgba(15, 15, 15, 0.85);
+  }
+
+  .p-paginator {
+    background: transparent;
+    border: none;
+    color: $muted-text;
+
+    .p-paginator-pages .p-paginator-page {
+      background: transparent;
+      border-radius: 0.5rem;
+      color: $muted-text;
+      transition: background-color 0.2s ease, color 0.2s ease;
+
+      &:hover {
+        background: rgba(148, 163, 184, 0.12);
+        color: $text-color;
+      }
+
+      &.p-highlight {
+        background: rgba($accent-color, 0.16);
+        color: $accent-color;
+      }
+    }
+
+    .p-paginator-prev,
+    .p-paginator-next {
+      border-radius: 0.5rem;
+      color: $muted-text;
+
+      &:not(.p-disabled):hover {
+        background: rgba(148, 163, 184, 0.12);
+        color: $text-color;
+      }
+
+      &.p-disabled {
+        color: rgba($muted-text, 0.6);
+      }
+    }
+
+    .p-dropdown {
+      background: rgba(15, 15, 15, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 0.75rem;
+      color: $text-color;
+
+      .p-dropdown-label {
+        color: $text-color;
+      }
+    }
+  }
+
+  .p-confirm-dialog {
+    .p-dialog-header,
+    .p-dialog-content,
+    .p-dialog-footer {
+      background: $surface-color;
+      border-color: rgba(255, 255, 255, 0.05);
+      color: $text-color;
+    }
+
+    .p-dialog-header .p-dialog-title {
+      color: $text-color;
+    }
+  }
+}

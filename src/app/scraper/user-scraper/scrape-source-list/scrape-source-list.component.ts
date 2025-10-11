@@ -3,6 +3,7 @@ import {DatePipe, NgClass} from '@angular/common';
 import {LoadingComponent} from '../../../ui-elements/loading/loading.component';
 import {HttpService} from '../../../services/http.service';
 import {ScrapeSourceInfo} from '../../../models/ScrapeSourceInfo';
+import {AddScrapeSourceComponent} from '../add-scrape-source/add-scrape-source.component';
 
 // PrimeNG imports
 import {TableModule} from 'primeng/table';
@@ -25,7 +26,8 @@ import {NotificationService} from '../../../services/notification-service.servic
     PaginatorModule,
     TooltipModule,
     ConfirmDialogModule,
-    NgClass
+    NgClass,
+    AddScrapeSourceComponent
   ],
   providers: [ConfirmationService],
   templateUrl: './scrape-source-list.component.html',
@@ -129,5 +131,20 @@ export class ScrapeSourceListComponent implements OnInit {
   // Helper method to get selection count
   getSelectionCount(): number {
     return this.selectedSources.length;
+  }
+
+  refreshList(): void {
+    this.selectedSources = [];
+    this.getAndSetScrapeSourceCount();
+    this.getAndSetScrapeSourcesList();
+  }
+
+  onScrapeSourcesAdded(): void {
+    this.page = 0;
+    this.refreshList();
+  }
+
+  onShowAddScrapeSourcesMessage(value: boolean): void {
+    this.showAddScrapeSourceMessage.emit(value);
   }
 }

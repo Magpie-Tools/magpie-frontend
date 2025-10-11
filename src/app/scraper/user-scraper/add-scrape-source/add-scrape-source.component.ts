@@ -1,12 +1,12 @@
 import {Component, EventEmitter, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpService} from '../../../services/http.service';
 
 import {ButtonModule} from 'primeng/button';
 import {TextareaModule} from 'primeng/textarea';
 import {TooltipModule} from 'primeng/tooltip';
-import {CheckboxModule} from 'primeng/checkbox';
-import {FileUploadModule} from 'primeng/fileupload';
+import {DialogModule} from 'primeng/dialog';
 import {NotificationService} from '../../../services/notification-service.service';
 import {
   ProcesingPopupComponent
@@ -15,20 +15,21 @@ import {
 @Component({
   selector: 'app-add-scrape-source',
   imports: [
+    CommonModule,
     ProcesingPopupComponent,
     ReactiveFormsModule,
     FormsModule,
     ButtonModule,
     TextareaModule,
     TooltipModule,
-    CheckboxModule,
-    FileUploadModule
+    DialogModule
   ],
   templateUrl: './add-scrape-source.component.html',
   styleUrl: './add-scrape-source.component.scss'
 })
 export class AddScrapeSourceComponent {
   @Output() showAddScrapeSourcesMessage = new EventEmitter<boolean>();
+  @Output() scrapeSourcesAdded = new EventEmitter<void>();
 
   file: File | undefined;
   scrapeSourceTextarea: string = "";
@@ -43,6 +44,7 @@ export class AddScrapeSourceComponent {
   clipboardSourcesCount: number = 0;
   uniqueClipboardSourcesCount: number = 0;
 
+  dialogVisible = false;
   showPopup = false;
   popupStatus: 'processing' | 'success' | 'error' = 'processing';
   addedSourceCount = 0;
@@ -79,6 +81,19 @@ export class AddScrapeSourceComponent {
 
   triggerFileInput(fileInput: HTMLInputElement): void {
     fileInput.click();
+  }
+
+  openDialog(): void {
+    this.dialogVisible = true;
+  }
+
+  closeDialog(): void {
+    this.dialogVisible = false;
+    this.resetFormState();
+  }
+
+  onDialogHide(): void {
+    this.resetFormState();
   }
 
   onFileSelected(event: Event): void {
@@ -147,14 +162,11 @@ export class AddScrapeSourceComponent {
         next: (response) => {
           this.addedSourceCount = response.sourceCount;
           this.popupStatus = 'success';
+          this.dialogVisible = false;
 
-          this.file = undefined;
-          this.scrapeSourceTextarea = "";
-          this.clipboardScrapeSources = "";
-          this.onFileClear();
-          this.clearClipboardSources();
-          this.addTextAreaSources();
           this.showAddScrapeSourcesMessage.emit(false);
+          this.scrapeSourcesAdded.emit();
+          this.resetFormState();
         },
         error: (err) => {
           this.popupStatus = 'error';
@@ -168,5 +180,14 @@ export class AddScrapeSourceComponent {
 
   onPopupClose() {
     this.showPopup = false;
+  }
+
+  private resetFormState(): void {
+    this.scrapeSourceTextarea = "";
+    this.addTextAreaSources();
+    this.clipboardScrapeSources = "";
+    this.clearClipboardSources();
+    this.file = undefined;
+    this.onFileClear();
   }
 }
