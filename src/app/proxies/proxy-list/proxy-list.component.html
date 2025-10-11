@@ -121,11 +121,11 @@
           <td>{{ proxy.port }}</td>
           <td>{{ proxy.response_time }} ms</td>
           <td>{{ proxy.estimated_type }}</td>
-          <td class="w-[140px]">
-            {{ proxy.country }}
-          </td>
+          <td>{{ proxy.country }}</td>
           <td>{{ proxy.protocol }}</td>
-          <td>{{ proxy.latest_check | date : 'short' }}</td>
+          <td class="w-[170px]">
+            {{ proxy.latest_check | date : 'short' }}
+          </td>
           <td>
             <p-button
               label="Details"
