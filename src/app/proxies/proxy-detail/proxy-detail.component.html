@@ -31,6 +31,16 @@
                     (click)="copyFullAddress()"
                     title="Copy IP and port"
                   ></button>
+                  @if (fullCredentialAddress) {
+                    <button
+                      type="button"
+                      pButton
+                      icon="pi pi-link"
+                      class="copy-address-button"
+                      (click)="copyFullCredentialAddress()"
+                      title="Copy IP, port, username and password"
+                    ></button>
+                  }
                 </ng-container>
               </span>
             </ng-container>

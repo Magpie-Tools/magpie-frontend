@@ -169,6 +169,14 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     this.copyToClipboard(combined, 'Credentials copied');
   }
 
+  copyFullCredentialAddress(): void {
+    const value = this.fullCredentialAddress;
+    if (!value) {
+      return;
+    }
+    this.copyToClipboard(value, 'Proxy endpoint copied');
+  }
+
   private copyToClipboard(value: string, successMessage: string): void {
     const copied = this.clipboard.copy(value);
     if (copied) {
@@ -225,6 +233,22 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       password,
       combined: `${username}:${password}`,
     };
+  }
+
+  get fullCredentialAddress(): string {
+    const credentials = this.authenticationCredentials;
+    if (!credentials) {
+      return '';
+    }
+
+    const ip = this.detail?.ip?.toString().trim();
+    const portValue = this.detail?.port;
+    const port = portValue === undefined || portValue === null ? '' : `${portValue}`.trim();
+    if (!ip || !port) {
+      return '';
+    }
+
+    return `${ip}:${port}:${credentials.username}:${credentials.password}`;
   }
 
   get latestStatistic(): ProxyStatistic | null {
