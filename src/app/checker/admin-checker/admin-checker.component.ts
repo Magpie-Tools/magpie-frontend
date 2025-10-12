@@ -7,7 +7,6 @@ import {SettingsService} from '../../services/settings.service';
 import {take} from 'rxjs/operators';
 import {Button} from 'primeng/button';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
-import {Divider} from 'primeng/divider';
 import {Select} from 'primeng/select';
 import {InputText} from 'primeng/inputtext';
 import {NotificationService} from '../../services/notification-service.service';
@@ -21,7 +20,6 @@ import {NotificationService} from '../../services/notification-service.service';
     TooltipComponent,
     Button,
     TabPanel,
-    Divider,
     Select,
     Tabs,
     InputText,
