@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CheckboxComponent} from '../../checkbox/checkbox.component';
-import {Divider} from 'primeng/divider';
 import {InputText} from 'primeng/inputtext';
 import {Button} from 'primeng/button';
 import {SettingsService} from '../../services/settings.service';
@@ -11,7 +10,7 @@ import {UserSettings} from '../../models/UserSettings';
 @Component({
   selector: 'app-checker-settings',
   standalone: true,
-  imports: [ReactiveFormsModule, CheckboxComponent, Divider, InputText, Button],
+  imports: [ReactiveFormsModule, CheckboxComponent, InputText, Button],
   templateUrl: './checker-settings.component.html',
   styleUrls: ['./checker-settings.component.scss']
 })

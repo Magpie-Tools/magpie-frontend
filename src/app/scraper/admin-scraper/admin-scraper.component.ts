@@ -1,7 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from '../../services/settings.service';
-import {filter, take} from 'rxjs/operators';
+import {Subject} from 'rxjs';
+import {filter, take, takeUntil} from 'rxjs/operators';
 
 import {TabsModule} from 'primeng/tabs';
 import {SelectModule} from 'primeng/select';
@@ -30,12 +31,13 @@ import {GlobalSettings} from '../../models/GlobalSettings';
   templateUrl: './admin-scraper.component.html',
   styleUrl: './admin-scraper.component.scss'
 })
-export class AdminScraperComponent implements OnInit {
+export class AdminScraperComponent implements OnInit, OnDestroy {
   daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
   hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
   minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
   secondsList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Seconds`, value: i }));
   settingsForm: FormGroup;
+  private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder, private settingsService: SettingsService) {
     this.settingsForm = this.createDefaultForm();
@@ -57,13 +59,17 @@ export class AdminScraperComponent implements OnInit {
     const proxyLimitCtrl = this.settingsForm.get('proxy_limit_enabled');
 
     /* whenever the checkbox toggles, enable/disable "threads" */
-    dynamicCtrl!.valueChanges.subscribe({
+    dynamicCtrl!.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
       next: (isDynamic: boolean) => {
         this.updateThreadControlState(isDynamic);
       }, error: err => NotificationService.showError("Error while toggling threadCtrl: " + err.error.message)
     });
 
-    proxyLimitCtrl!.valueChanges.subscribe({
+    proxyLimitCtrl!.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
       next: (enabled: boolean) => {
         this.updateProxyLimitState(enabled);
       }, error: err => NotificationService.showError("Error while toggling proxy limit: " + err.error.message)
@@ -71,6 +77,11 @@ export class AdminScraperComponent implements OnInit {
 
     this.updateThreadControlState(dynamicCtrl?.value ?? true);
     this.updateProxyLimitState(proxyLimitCtrl?.value ?? false);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private createDefaultForm(): FormGroup {
