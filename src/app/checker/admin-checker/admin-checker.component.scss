@@ -29,7 +29,6 @@ $accent-color-strong: #6be7ba;
 
   .section-card {
     position: relative;
-    overflow: hidden;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
 
     &:before {
