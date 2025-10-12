@@ -1,41 +1,186 @@
-$logo-color: #348566;
+$accent-color: #3b82f6;
+$accent-color-strong: #60a5fa;
 
-.checker-judges {
-  .form-row {
-    display: flex;
-    align-items: center;
+.checker-judges-page {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 1rem 0 2rem;
+
+  .judges-panel {
+    width: 100%;
+    max-width: 960px;
+    background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 55%),
+      rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(6px);
   }
 
-  .btn-add,
-  .btn-remove {
-    display: flex;
+  .panel-header {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    padding-bottom: 1rem;
+  }
+
+  .judge-list {
+    margin-top: 1.5rem;
+  }
+
+  .add-judge-button {
+    display: inline-flex;
     align-items: center;
-    gap: 5px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin: 0 auto;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(96, 165, 250, 0.5);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(59, 130, 246, 0.02));
+    color: #e5edff;
+    font-weight: 600;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.05);
+      border-color: $accent-color-strong;
+      box-shadow: 0 12px 24px rgba(59, 130, 246, 0.2);
+      transform: translateY(-1px);
     }
 
-    mat-icon {
-      font-size: 18px;
-      height: 18px;
-      width: 18px;
+    &:active {
+      transform: translateY(0);
     }
   }
 
-  .btn-add {
-    margin-top: 1rem;
-    color: $logo-color;
-    border-color: $logo-color;
+  .judge-card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.9));
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+
+    &:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    &:hover {
+      border-color: rgba(96, 165, 250, 0.5);
+      box-shadow: 0 24px 45px rgba(15, 23, 42, 0.35);
+
+      &:before {
+        opacity: 1;
+      }
+    }
   }
 
-  .btn-remove {
-    padding: 0.3rem;
-    color: #ff5252;
-    border-color: #ff5252;
+  .judge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 9999px;
+    background: rgba(96, 165, 250, 0.18);
+    border: 1px solid rgba(96, 165, 250, 0.35);
+    color: #dbeafe;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    color: rgba(248, 113, 113, 0.95);
+    background: rgba(30, 64, 175, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      border-color: rgba(248, 113, 113, 0.6);
+      box-shadow: 0 10px 20px rgba(248, 113, 113, 0.2);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .field-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #f1f5f9;
+
+    app-tooltip {
+      display: inline-flex;
+    }
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: rgba(148, 163, 184, 0.8);
+  }
+
+  .panel-footer {
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+    padding-top: 1.25rem;
+  }
+
+  :host ::ng-deep {
+    .p-inputtext.p-inputtext-sm {
+      background-color: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      color: #e2e8f0;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+      &::placeholder {
+        color: rgba(148, 163, 184, 0.6);
+      }
+
+      &:hover,
+      &:focus {
+      border-color: rgba(96, 165, 250, 0.6);
+      box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35);
+      }
+    }
+
+    .save-judges-button {
+      padding: 0.85rem 1.6rem;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(16, 185, 129, 0.5));
+      border: 1px solid rgba(16, 185, 129, 0.6);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      color: #ecfdf5;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        border-color: rgba(16, 185, 129, 0.75);
+        box-shadow: 0 16px 32px rgba(16, 185, 129, 0.2);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+    }
   }
 }
