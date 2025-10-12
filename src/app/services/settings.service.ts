@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { GlobalSettings } from '../models/GlobalSettings';
 import { HttpService } from './http.service';
 import {UserSettings} from '../models/UserSettings';
@@ -50,34 +50,22 @@ export class SettingsService {
 
   getCheckerSettings(): Observable<GlobalSettings['checker']> {
     return this.settings$.pipe(
-      map(settings => {
-        if (!settings) {
-          throw new Error('Settings not loaded');
-        }
-        return settings.checker;
-      })
+      filter((settings): settings is GlobalSettings => settings !== undefined),
+      map(settings => settings.checker)
     );
   }
 
   getScraperSettings(): Observable<GlobalSettings['scraper']> {
     return this.settings$.pipe(
-      map(settings => {
-        if (!settings) {
-          throw new Error('Settings not loaded');
-        }
-        return settings.scraper;
-      })
+      filter((settings): settings is GlobalSettings => settings !== undefined),
+      map(settings => settings.scraper)
     );
   }
 
   getProxyLimitSettings(): Observable<GlobalSettings['proxy_limits']> {
     return this.settings$.pipe(
-      map(settings => {
-        if (!settings) {
-          throw new Error('Settings not loaded');
-        }
-        return settings.proxy_limits;
-      })
+      filter((settings): settings is GlobalSettings => settings !== undefined),
+      map(settings => settings.proxy_limits)
     );
   }
 
