@@ -156,15 +156,30 @@ export class SettingsService {
     };
 
     /* ---------- 3. scraper ---------- */
-    const scraperSitesFromForm = Array.isArray(formData.scrape_sites)
-      ? formData.scrape_sites
-      : typeof formData.scrape_sites === 'string'
-        ? formData.scrape_sites.split(/\r?\n|,/)
-        : undefined;
+    const scraperSitesFromForm: string[] | undefined = (() => {
+      if (Array.isArray(formData.scrape_sites)) {
+        return formData.scrape_sites as string[];
+      }
 
-    const scrapeSites = (scraperSitesFromForm ?? current?.scraper?.scrape_sites ?? [])
+      if (typeof formData.scrape_sites === 'string') {
+        return formData.scrape_sites
+          .split(/\r?\n/)
+          .flatMap((segment: string) =>
+            segment
+              .split(/,(?=\s*https?:\/\/)/)
+              .map((site: string) => site.trim())
+              .filter((site: string) => site.length > 0)
+          );
+      }
+
+      return undefined;
+    })();
+
+    const normalizedSites: string[] = (scraperSitesFromForm ?? current?.scraper?.scrape_sites ?? [])
       .map((site: string) => site.trim())
       .filter((site: string) => site.length > 0);
+
+    const scrapeSites: string[] = Array.from(new Set<string>(normalizedSites));
 
     const scraper: GlobalSettings['scraper'] = {
       dynamic_threads: formData.scraper_dynamic_threads ?? current?.scraper?.dynamic_threads ?? true,

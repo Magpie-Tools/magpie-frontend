@@ -195,15 +195,38 @@
                   </div>
                 </div>
 
-                <div class="field-group mt-4">
-                  <label class="field-label" for="scrape-sites-textarea">Scrape Sites</label>
-                  <textarea
-                    formControlName="scrape_sites"
-                    rows="8"
-                    id="scrape-sites-textarea"
-                    class="scrape-sites-input"
-                    placeholder="Enter one URL per line or separate with commas"></textarea>
-                  <small class="hint-text">Empty lines are ignored when saving.</small>
+                <div class="mt-4" formArrayName="scrape_sites">
+                  <div class="scrape-site-list flex flex-col gap-4">
+                    @for (site of scrapeSites.controls; track site; let i = $index) {
+                      <div class="scrape-site-row flex items-start gap-3" [attr.data-index]="i">
+                        <div class="field-group flex-1">
+                          <label class="field-label" for="scrape-site-{{i}}">Source URL</label>
+                          <input
+                            id="scrape-site-{{i}}"
+                            type="text"
+                            [formControlName]="i"
+                            pInputText
+                            class="p-inputtext-sm w-full"
+                            placeholder="https://example.com/proxies"/>
+                        </div>
+                        @if (scrapeSites.length > 1) {
+                          <button
+                            type="button"
+                            class="icon-button remove mt-6"
+                            (click)="removeScrapeSite(i)">
+                            <i class="pi pi-trash"></i>
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <div class="mt-3">
+                    <button type="button" class="chip-button" (click)="addScrapeSite()">
+                      <i class="pi pi-plus"></i>
+                      <span>Add Source</span>
+                    </button>
+                  </div>
+                  <small class="hint-text block mt-2">URLs are saved exactly as entered, including query parameters such as <code>?protocols=http,https</code>.</small>
                 </div>
               </section>
             </div>

@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from '../../services/settings.service';
 import {filter, take} from 'rxjs/operators';
 
@@ -85,7 +85,7 @@ export class AdminScraperComponent implements OnInit {
         minutes: [0],
         seconds: [0]
       }),
-      scrape_sites: this.fb.control(''),
+      scrape_sites: this.fb.array([this.createScrapeSiteControl()]),
       proxy_limit_enabled: [false],
       proxy_limit_max_per_user: [0],
       proxy_limit_exclude_admins: [true]
@@ -104,12 +104,12 @@ export class AdminScraperComponent implements OnInit {
         minutes: settings.scraper.scraper_timer.minutes,
         seconds: settings.scraper.scraper_timer.seconds
       },
-      scrape_sites: settings.scraper.scrape_sites.join('\n'),
       proxy_limit_enabled: settings.proxy_limits.enabled,
       proxy_limit_max_per_user: settings.proxy_limits.max_per_user,
       proxy_limit_exclude_admins: settings.proxy_limits.exclude_admins
     });
 
+    this.resetScrapeSites(settings.scraper.scrape_sites);
     this.updateThreadControlState(settings.scraper.dynamic_threads);
     this.updateProxyLimitState(settings.proxy_limits.enabled);
   }
@@ -142,6 +142,44 @@ export class AdminScraperComponent implements OnInit {
       maxCtrl.disable({ emitEvent: false });
       excludeCtrl.disable({ emitEvent: false });
     }
+  }
+
+  get scrapeSites(): FormArray<FormControl<string>> {
+    return this.settingsForm.get('scrape_sites') as FormArray<FormControl<string>>;
+  }
+
+  addScrapeSite(): void {
+    this.scrapeSites.push(this.createScrapeSiteControl());
+    this.settingsForm.markAsDirty();
+  }
+
+  removeScrapeSite(index: number): void {
+    if (index < 0 || index >= this.scrapeSites.length) {
+      return;
+    }
+
+    if (this.scrapeSites.length === 1) {
+      this.scrapeSites.at(0).setValue('');
+    } else {
+      this.scrapeSites.removeAt(index);
+    }
+    this.settingsForm.markAsDirty();
+  }
+
+  private resetScrapeSites(sites: string[]): void {
+    this.scrapeSites.clear();
+
+    if (!sites || sites.length === 0) {
+      this.scrapeSites.push(this.createScrapeSiteControl());
+    } else {
+      sites.forEach(site => this.scrapeSites.push(this.createScrapeSiteControl(site)));
+    }
+
+    this.scrapeSites.markAsPristine();
+  }
+
+  private createScrapeSiteControl(value: string = ''): FormControl<string> {
+    return this.fb.nonNullable.control(value);
   }
 
   onSubmit() {
