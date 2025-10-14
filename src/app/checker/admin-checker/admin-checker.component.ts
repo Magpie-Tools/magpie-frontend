@@ -11,6 +11,7 @@ import {Select} from 'primeng/select';
 import {InputText} from 'primeng/inputtext';
 import {NotificationService} from '../../services/notification-service.service';
 import {Subject} from 'rxjs';
+import {Message} from 'primeng/message';
 
 @Component({
     selector: 'app-admin-checker',
@@ -26,7 +27,8 @@ import {Subject} from 'rxjs';
     InputText,
     TabList,
     Tab,
-    TabPanels
+    TabPanels,
+    Message
   ],
     templateUrl: './admin-checker.component.html',
     styleUrl: './admin-checker.component.scss'
