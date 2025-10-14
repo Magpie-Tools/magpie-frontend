@@ -55,7 +55,16 @@ export class LoginComponent {
         }
         UserService.setLoggedIn(true);
         UserService.setRole(response.role);
-        this.router.navigate(['/']);
+        const returnUrl = typeof window !== 'undefined'
+          ? window.sessionStorage.getItem('magpie-return-url')
+          : null;
+
+        if (typeof window !== 'undefined') {
+          window.sessionStorage.removeItem('magpie-return-url');
+        }
+
+        const target = returnUrl && returnUrl.trim().length > 0 ? returnUrl : '/';
+        this.router.navigateByUrl(target);
       },
       error: (err) => {
         UserService.setLoggedIn(false);

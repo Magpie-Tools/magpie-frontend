@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {UserService} from './user.service';
-import {CanActivate, Router} from '@angular/router';
+import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -9,10 +9,13 @@ export class AuthGuardService implements CanActivate{
 
   constructor(private router: Router) { }
 
-  canActivate(): boolean {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
     if (!UserService.isLoggedIn()) {
-      this.router.navigate(["login"])
-      return false;
+      if (typeof window !== 'undefined' && state.url) {
+        window.sessionStorage.setItem('magpie-return-url', state.url);
+      }
+
+      return this.router.createUrlTree(["login"]);
     }
 
     return true;
