@@ -40,7 +40,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedProxies: ProxyInfo[] = [];
   page = 1;
   pageSize = 40;
-  displayedColumns: string[] = ['select', 'alive', 'ip', 'port', 'response_time', 'estimated_type', 'country', 'protocol', 'latest_check', 'actions'];
+  displayedColumns: string[] = ['select', 'alive', 'ip', 'port', 'response_time', 'estimated_type', 'country', 'latest_check', 'actions'];
   totalItems = 0;
   hasLoaded = false;
   isLoading = false;

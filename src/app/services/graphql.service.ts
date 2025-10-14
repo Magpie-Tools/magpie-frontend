@@ -36,7 +36,6 @@ const DASHBOARD_QUERY = `#graphql
           responseTime
           country
           anonymityLevel
-          protocol
           alive
           latestCheck
         }

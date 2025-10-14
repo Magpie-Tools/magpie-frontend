@@ -88,9 +88,6 @@
           <th pSortableColumn="country">
             Country <p-sortIcon field="country"></p-sortIcon>
           </th>
-          <th pSortableColumn="protocol">
-            Protocol <p-sortIcon field="protocol"></p-sortIcon>
-          </th>
           <th pSortableColumn="latest_check">
             Last Check <p-sortIcon field="latest_check"></p-sortIcon>
           </th>
@@ -122,7 +119,6 @@
           <td>{{ proxy.response_time }} ms</td>
           <td>{{ proxy.estimated_type }}</td>
           <td>{{ proxy.country }}</td>
-          <td>{{ proxy.protocol }}</td>
           <td class="w-[170px]">
             {{ proxy.latest_check | date : 'short' }}
           </td>
