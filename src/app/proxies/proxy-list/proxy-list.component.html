@@ -107,13 +107,11 @@
           </td>
           <td>
             <div
-              class="status-dot w-3 h-3 rounded-full inline-block"
-              [class.bg-green-500]="proxy.alive"
-              [class.shadow-green-500]="proxy.alive"
-              [class.animate-pulse]="proxy.alive"
-              [class.bg-red-500]="!proxy.alive"
-            ></div>
+              class="status-dot"
+              [ngClass]="proxy.alive ? 'alive' : 'dead'">
+            </div>
           </td>
+
           <td>{{ proxy.ip }}</td>
           <td>{{ proxy.port }}</td>
           <td>{{ proxy.response_time }} ms</td>

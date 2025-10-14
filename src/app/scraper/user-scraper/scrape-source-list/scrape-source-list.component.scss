@@ -7,10 +7,6 @@ $muted-text: rgba(148, 163, 184, 0.75);
 $accent-color: #4ed09e;
 $border-color: rgba(255, 255, 255, 0.12);
 
-.scraper-container {
-  backdrop-filter: blur(12px);
-}
-
 .table-card {
   background: $surface-color;
   backdrop-filter: blur(18px);

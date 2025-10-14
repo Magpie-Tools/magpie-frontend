@@ -2,7 +2,7 @@ import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output} from 
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpService} from '../../services/http.service';
 import {ProxyInfo} from '../../models/ProxyInfo';
-import {DatePipe} from '@angular/common';
+import {DatePipe, NgClass} from '@angular/common';
 import {LoadingComponent} from '../../ui-elements/loading/loading.component';
 import {SelectionModel} from '@angular/cdk/collections';
 import {TableLazyLoadEvent} from 'primeng/table'; // Keep this for onLazyLoad
@@ -28,6 +28,7 @@ import {Router} from '@angular/router';
     CheckboxModule,
     AddProxiesComponent,
     ExportProxiesComponent,
+    NgClass,
   ],
   templateUrl: './proxy-list.component.html',
   styleUrls: ['./proxy-list.component.scss']
