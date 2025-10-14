@@ -1,15 +1,16 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CheckboxComponent} from "../../checkbox/checkbox.component";
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {SettingsService} from '../../services/settings.service';
-import {take} from 'rxjs/operators';
+import {take, takeUntil} from 'rxjs/operators';
 import {Button} from 'primeng/button';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
 import {Select} from 'primeng/select';
 import {InputText} from 'primeng/inputtext';
 import {NotificationService} from '../../services/notification-service.service';
+import {Subject} from 'rxjs';
 
 @Component({
     selector: 'app-admin-checker',
@@ -30,12 +31,13 @@ import {NotificationService} from '../../services/notification-service.service';
     templateUrl: './admin-checker.component.html',
     styleUrl: './admin-checker.component.scss'
 })
-export class AdminCheckerComponent implements OnInit{
+export class AdminCheckerComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
   daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
   hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
   minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
   secondsList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Seconds`, value: i }));
+  private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder, private settingsService: SettingsService) {
     this.settingsForm = this.createDefaultForm();
@@ -56,6 +58,15 @@ export class AdminCheckerComponent implements OnInit{
       this.updateProtocolsAndBlacklist(settings.protocols, settings.blacklist_sources);
     }
 
+    this.settingsService.settings$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(settingsState => {
+        if (!settingsState) {
+          return;
+        }
+        this.updateProtocolsAndBlacklist(settingsState.protocols, settingsState.blacklist_sources);
+      });
+
     const dynamicControl = this.settingsForm.get('dynamic_threads')!;
     const threadsControl = this.settingsForm.get('threads');
 
@@ -70,6 +81,11 @@ export class AdminCheckerComponent implements OnInit{
       next: dynamic => dynamic ? threadsControl?.disable() : threadsControl?.enable(),
       error: err => NotificationService.showError("Could not get dynamic thread info " + err.error.message)
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
 
@@ -172,13 +188,14 @@ export class AdminCheckerComponent implements OnInit{
     }
 
     // Update blacklist
-    if (blacklist && blacklist.length > 0) {
-      const blacklistArray = this.settingsForm.get('blacklisted') as FormArray;
-      blacklistArray.clear();
-      blacklist.forEach(url => {
-        blacklistArray.push(this.fb.control(url));
-      });
-    }
+    const blacklistArray = this.settingsForm.get('blacklisted') as FormArray;
+    blacklistArray.clear();
+
+    (blacklist ?? []).forEach(url => {
+      blacklistArray.push(this.fb.control(url));
+    });
+
+    blacklistArray.markAsPristine();
   }
 
   private updateJudgesArray(judges: any[]): void {

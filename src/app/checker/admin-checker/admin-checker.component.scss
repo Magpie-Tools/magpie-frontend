@@ -193,6 +193,22 @@ $accent-color-strong: #6be7ba;
     justify-content: flex-start;
   }
 
+  .blacklist-list {
+    margin-top: 1.25rem;
+  }
+
+  .blacklist-row {
+    background: rgba(24, 24, 28, 0.42);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 1rem;
+    padding: 1rem;
+  }
+
+  .blacklist-actions {
+    display: flex;
+    justify-content: flex-start;
+  }
+
   .panel-footer {
     border-top: 1px solid rgba(148, 163, 184, 0.14);
     padding-top: 1.25rem;

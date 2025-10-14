@@ -265,9 +265,22 @@
           <!-- IP Tab Placeholder -->
           <p-tabpanel value="2">
             <div class="tab-stack">
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5 text-gray-400">
-                <h3 class="section-title mb-2 text-white">IP Management</h3>
-                <p class="section-hint">Configure IP rotation and verification rules here once the feature is available.</p>
+              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
+                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h3 class="section-title text-white">IP Lookup</h3>
+                    <p class="section-hint text-gray-400">Configure the lookup endpoint used to determine the checker host's public IP.
+                      <app-tooltip [text]="'This website is requested on startup so the checker can compare proxy responses against the server\'s actual IP.'"></app-tooltip>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="field-group mt-4">
+                  <label class="field-label" for="iplookup">
+                    Lookup URL
+                  </label>
+                  <input id="iplookup" formControlName="iplookup" type="url" pInputText class="p-inputtext-sm w-full" placeholder="https://ident.me"/>
+                </div>
               </section>
             </div>
           </p-tabpanel>
@@ -275,9 +288,45 @@
           <!-- Blacklist Tab Placeholder -->
           <p-tabpanel value="3">
             <div class="tab-stack">
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5 text-gray-400">
-                <h3 class="section-title mb-2 text-white">Blacklist Controls</h3>
-                <p class="section-hint">Manage automatic proxy removal and blacklist imports in this section soon.</p>
+              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
+                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h3 class="section-title text-white">Blacklist Controls</h3>
+                    <p class="section-hint text-gray-400">Manage the remote blacklist sources that are fetched to prune bad proxies automatically.</p>
+                  </div>
+                </div>
+
+                <div formArrayName="blacklisted" class="blacklist-list flex flex-col gap-4 mt-4">
+                  @if (!blacklisted.length) {
+                    <p class="text-sm text-gray-500">No blacklist sources configured yet.</p>
+                  }
+
+                  @for (control of blacklisted.controls; track control; let i = $index) {
+                    <div class="blacklist-row flex items-start gap-3">
+                      <div class="field-group flex-1">
+                        <label class="field-label" for="blacklist-url-{{i}}">Source URL</label>
+                        <input
+                          id="blacklist-url-{{i}}"
+                          type="url"
+                          class="p-inputtext-sm w-full"
+                          pInputText
+                          [formControlName]="i"
+                          placeholder="https://example.com/blacklist.txt"/>
+                      </div>
+
+                      <button type="button" class="icon-button remove mt-6" (click)="removeBlacklistedUrl(i)">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+
+                <div class="blacklist-actions mt-3">
+                  <button type="button" class="chip-button" (click)="addBlacklistedUrl()">
+                    <i class="pi pi-plus"></i>
+                    <span>Add Source</span>
+                  </button>
+                </div>
               </section>
             </div>
           </p-tabpanel>

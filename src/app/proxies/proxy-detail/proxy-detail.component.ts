@@ -101,21 +101,25 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       {
         label: 'Talos Intelligence',
         url: `https://talosintelligence.com/reputation_center/lookup?search=${encodedIp}`,
+        // icon: '',
         icon: 'https://talosintelligence.com/favicon.ico',
       },
       {
         label: 'AbuseIPDB',
         url: `https://www.abuseipdb.com/check/${encodedIp}`,
+        // icon: '',
         icon: 'https://www.abuseipdb.com/favicon.ico',
       },
       {
         label: 'Scamalytics',
         url: `https://scamalytics.com/ip/${encodedIp}`,
-        icon: 'https://cdn.brandfetch.io/idnv72IlO9/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1752967343407',
+        // icon: '',
+        icon: 'https://loudseas.com/wp-content/uploads/2023/12/53480-scamalytics.com.png',
       },
       {
         label: 'IPQS',
         url: `https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/${encodedIp}`,
+        // icon: ''
         icon: 'https://www.ipqualityscore.com/favicon.ico'
       }
     ];
