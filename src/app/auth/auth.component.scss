@@ -75,12 +75,12 @@
   margin-top: 20px;
   height: 3rem;
   border-radius: 50px;
-  background: #348566;
+  background: var(--theme-primary-500);
   border: none;
 }
 
 .p-button:hover {
-  background: #2a6b50;
+  background: var(--theme-primary-600);
 }
 
 .switch-link {
@@ -89,6 +89,6 @@
 }
 
 a {
-  color: #00ff80;
+  color: var(--theme-link-color);
   text-decoration: none;
 }

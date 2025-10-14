@@ -1,18 +1,18 @@
-/* Custom PrimeNG button overrides for the green theme */
+/* Align PrimeNG success styling with the active accent */
 ::ng-deep .p-button.p-button-success {
-  background: #10b981;
-  border-color: #10b981;
-  color: white;
+  background: var(--theme-primary-500);
+  border-color: var(--theme-primary-500);
+  color: var(--theme-primary-contrast);
 }
 
 ::ng-deep .p-button.p-button-success:hover {
-  background: #059669;
-  border-color: #059669;
+  background: var(--theme-primary-600);
+  border-color: var(--theme-primary-600);
 }
 
 ::ng-deep .p-button.p-button-success:active {
-  background: #047857;
-  border-color: #047857;
+  background: var(--theme-primary-700);
+  border-color: var(--theme-primary-700);
 }
 
 ::ng-deep .p-button.p-button-secondary {
@@ -59,8 +59,8 @@ textarea::placeholder {
 }
 
 textarea:focus {
-  border-color: #10b981;
-  box-shadow: 0 0 0 1px #10b981;
+  border-color: var(--theme-primary-500);
+  box-shadow: 0 0 0 1px var(--theme-primary-500);
 }
 
 /* Ensure proper spacing and alignment */

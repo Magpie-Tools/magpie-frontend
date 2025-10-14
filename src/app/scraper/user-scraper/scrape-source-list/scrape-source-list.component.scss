@@ -4,7 +4,6 @@ $background-color: #171717;
 $surface-color: rgba(23, 23, 23, 0.92);
 $text-color: #d1d5db;
 $muted-text: rgba(148, 163, 184, 0.75);
-$accent-color: #4ed09e;
 $border-color: rgba(255, 255, 255, 0.12);
 
 .table-card {
@@ -15,7 +14,7 @@ $border-color: rgba(255, 255, 255, 0.12);
 }
 
 .selected-row {
-  background-color: rgba($accent-color, 0.08);
+  background-color: rgba(var(--theme-primary-500-rgb), 0.08);
 
   td {
     color: $text-color;
@@ -55,18 +54,18 @@ $border-color: rgba(255, 255, 255, 0.12);
   }
 
   .p-sortable-column:not(.p-highlight):hover {
-    color: $accent-color;
+    color: var(--theme-primary-500);
   }
 
   .p-sortable-column .p-sortable-column-icon {
-    color: rgba($accent-color, 0.55);
+    color: rgba(var(--theme-primary-500-rgb), 0.55);
   }
 
   .p-sortable-column.p-highlight {
-    color: $accent-color;
+    color: var(--theme-primary-500);
 
     .p-sortable-column-icon {
-      color: $accent-color;
+      color: var(--theme-primary-500);
     }
   }
 
@@ -91,8 +90,8 @@ $border-color: rgba(255, 255, 255, 0.12);
       }
 
       &.p-highlight {
-        background: rgba($accent-color, 0.16);
-        color: $accent-color;
+        background: rgba(var(--theme-primary-500-rgb), 0.16);
+        color: var(--theme-primary-500);
       }
     }
 

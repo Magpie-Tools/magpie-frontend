@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, effect, inject} from '@angular/core';
 import {ProgressSpinner} from 'primeng/progressspinner';
 import {NgIf, DecimalPipe} from '@angular/common';
 import {Subject} from 'rxjs';
@@ -20,6 +20,7 @@ import {
   ProxyHistoryEntry,
   ProxyNode
 } from '../services/graphql.service';
+import {ThemeService} from '../services/theme.service';
 
 interface SparklineMetric {
   value: number;
@@ -114,8 +115,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   judgePeriodOptions = ['Yearly', 'Monthly', 'Weekly'];
 
   private readonly destroy$ = new Subject<void>();
+  private readonly themeService = inject(ThemeService);
 
-  constructor(private graphqlService: GraphqlService) {}
+  private countryChartEntries: Array<{ name: string; value: number }> = [];
+  private countryChartTotal = 0;
+
+  constructor(private graphqlService: GraphqlService) {
+    effect(() => {
+      this.themeService.theme();
+      this.applyCountryPalette();
+    });
+  }
 
   ngOnInit(): void {
     this.loadDashboard();
@@ -220,20 +230,61 @@ export class DashboardComponent implements OnInit, OnDestroy {
       primaryEntries.push({ name: 'Others', value: othersValue });
     }
 
-    const palette = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1', '#34d399'];
+    this.countryChartEntries = [...primaryEntries];
+    this.countryChartTotal = total || proxyTotal;
+    this.applyCountryPalette();
+  }
 
-    this.majorCountries = primaryEntries.map((entry, index) => ({
+  private applyCountryPalette(): void {
+    const entries = this.countryChartEntries;
+    const total = this.countryChartTotal;
+
+    if (!entries.length) {
+      if (total > 0) {
+        const palette = this.resolvePrimaryPalette();
+        const primary = palette[0];
+        this.majorCountries = [
+          { name: 'Total', value: total, color: primary, percentage: '100.0' }
+        ];
+        this.visitorPieData = {
+          labels: ['Total'],
+          datasets: [
+            {
+              data: [total],
+              backgroundColor: [primary],
+              hoverBackgroundColor: [this.adjustColor(primary, 25)]
+            }
+          ]
+        };
+      } else {
+        this.majorCountries = [];
+        this.visitorPieData = {
+          labels: [],
+          datasets: [
+            {
+              data: [],
+              backgroundColor: [],
+              hoverBackgroundColor: []
+            }
+          ]
+        };
+      }
+      return;
+    }
+
+    const palette = this.resolvePrimaryPalette();
+    const computedTotal = total > 0 ? total : entries.reduce((sum, entry) => sum + entry.value, 0);
+
+    this.majorCountries = entries.map((entry, index) => ({
       name: entry.name,
       value: entry.value,
       color: palette[index % palette.length],
-      percentage: total > 0 ? ((entry.value / total) * 100).toFixed(1) : '0.0'
+      percentage: computedTotal > 0 ? ((entry.value / computedTotal) * 100).toFixed(1) : '0.0'
     }));
 
-    const labels = this.majorCountries.map((entry) => entry.name);
-    const data = this.majorCountries.map((entry) => entry.value);
-    const backgroundColors = this.majorCountries.map((entry, index) =>
-      entry.color ?? palette[index % palette.length]
-    );
+    const labels = entries.map((entry) => entry.name);
+    const data = entries.map((entry) => entry.value);
+    const backgroundColors = data.map((_, index) => palette[index % palette.length]);
     const hoverColors = backgroundColors.map((color) => this.adjustColor(color, 25));
 
     this.visitorPieData = {
@@ -246,13 +297,46 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       ]
     };
+  }
 
-    if (!labels.length && proxyTotal > 0) {
-      this.visitorPieData.labels = ['Total'];
-      this.visitorPieData.datasets[0].data = [proxyTotal];
-      this.visitorPieData.datasets[0].backgroundColor = ['#3b82f6'];
-      this.visitorPieData.datasets[0].hoverBackgroundColor = ['#60a5fa'];
+  private resolvePrimaryPalette(): string[] {
+    const fallback = ['#348566', '#4a9d83', '#61b399', '#2e755a', '#8cc8b5', '#27634d', '#205241'];
+
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return fallback;
     }
+
+    const styles = getComputedStyle(document.documentElement);
+    const variables = [
+      '--theme-primary-500',
+      '--theme-primary-400',
+      '--theme-primary-300',
+      '--theme-primary-600',
+      '--theme-primary-200',
+      '--theme-primary-700',
+      '--theme-primary-800'
+    ];
+
+    return variables.map((variable, index) => this.getThemeVariable(styles, variable, fallback[index]));
+  }
+
+  private getThemeVariable(styles: CSSStyleDeclaration, variable: string, fallback: string): string {
+    const value = styles.getPropertyValue(variable);
+    return value && value.trim().length > 0 ? value.trim() : fallback;
+  }
+
+  private getPrimaryColor(): string {
+    return this.resolvePrimaryPalette()[0];
+  }
+
+  private getPrimaryRgba(alpha: number, fallback: string): string {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return fallback;
+    }
+
+    const value = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-500-rgb');
+    const trimmed = value && value.trim();
+    return trimmed ? `rgba(${trimmed}, ${alpha})` : fallback;
   }
 
   private buildCountryCountsFromProxies(proxies: ProxyNode[]): Array<{ name: string; value: number }> {
@@ -369,6 +453,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       minute: '2-digit'
     });
 
+    const primaryColor = this.getPrimaryColor();
+    const primaryFill = this.getPrimaryRgba(0.2, 'rgba(52, 133, 102, 0.2)');
+
     if (!parsed.length) {
       const baseline = limit ?? 0;
       this.proxiesLineDiff = { gained: [0], lost: [0] };
@@ -379,8 +466,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           {
             label: 'Proxies',
             data: [0],
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: primaryColor,
+            backgroundColor: primaryFill,
             fill: true,
             tension: 0.3,
             pointRadius: 4,
@@ -416,8 +503,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         {
           label: 'Proxies',
           data: values,
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          borderColor: primaryColor,
+          backgroundColor: primaryFill,
           fill: true,
           tension: 0.3,
           pointRadius: 4,

@@ -33,7 +33,8 @@
       <div class="flex flex-col sm:flex-row gap-4">
         <label
           for="exportAll"
-          class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors hover:border-green-500"
+          class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors theme-card"
+          [class.theme-card--active]="exportOption === 'all'"
         >
           <p-radioButton
             name="exportOption"
@@ -49,9 +50,11 @@
 
         <label
           for="exportSelected"
-          class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors hover:border-green-500"
+          class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors theme-card"
           [class.opacity-60]="!canExportSelected()"
           [class.cursor-not-allowed]="!canExportSelected()"
+          [class.theme-card--active]="exportOption === 'selected'"
+          [class.theme-card--disabled]="!canExportSelected()"
         >
           <p-radioButton
             name="exportOption"
@@ -69,7 +72,7 @@
     </section>
 
     <form [formGroup]="exportForm" class="space-y-6">
-      <section class="bg-neutral-800 border border-neutral-700 rounded-xl p-5 space-y-5">
+      <section class="bg-neutral-800 border border-neutral-700 rounded-xl p-5 space-y-5 theme-card">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h4 class="text-base font-semibold text-white">Filter Before Export</h4>
@@ -104,7 +107,7 @@
                   mode="decimal"
                   [showButtons]="true"
                   [min]="0"
-                  inputStyleClass="w-full bg-gray-700 text-white border-gray-600 focus:border-green-500"
+                  inputStyleClass="w-full bg-gray-700 text-white border-gray-600 theme-focus"
                 ></p-inputNumber>
               </div>
               <div>
@@ -115,7 +118,7 @@
                   mode="decimal"
                   [showButtons]="true"
                   [min]="0"
-                  inputStyleClass="w-full bg-gray-700 text-white border-gray-600 focus:border-green-500"
+                  inputStyleClass="w-full bg-gray-700 text-white border-gray-600 theme-focus"
                 ></p-inputNumber>
               </div>
             </div>
@@ -125,7 +128,7 @@
         }
       </section>
 
-      <section class="bg-neutral-800 border border-neutral-700 rounded-xl p-5 space-y-5">
+      <section class="bg-neutral-800 border border-neutral-700 rounded-xl p-5 space-y-5 theme-card">
         <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 md:items-center">
           <div>
             <label for="proxyStatus" class="block mb-2 text-sm font-medium text-gray-300">Proxy Status</label>
@@ -158,7 +161,7 @@
             pInputText
             formControlName="output"
             type="text"
-            class="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:border-green-500 focus:ring focus:ring-green-500/40"
+            class="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg theme-focus"
           />
         </div>
       </section>

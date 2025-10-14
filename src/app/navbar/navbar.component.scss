@@ -3,7 +3,6 @@ $text-color: rgb(171, 171, 171);
 $border-color: rgba(255, 255, 255, 0.1);
 $personColor: #ffffff;
 $navbar-width: 240px;
-$active-color: #348566; // Your primary
 $hover-bg: rgba(255, 255, 255, 0.05);
 
 .navbar {
@@ -74,13 +73,13 @@ $hover-bg: rgba(255, 255, 255, 0.05);
 
       &:hover {
         background: $hover-bg;
-        color: $active-color;
+        color: var(--theme-primary-500);
       }
 
       &.active {
-        background: rgba($active-color, 0.2);
-        color: $active-color;
-        border-left: 4px solid $active-color;
+        background: var(--theme-primary-soft-bg);
+        color: var(--theme-primary-500);
+        border-left: 4px solid var(--theme-primary-500);
       }
     }
   }
@@ -171,12 +170,12 @@ $hover-bg: rgba(255, 255, 255, 0.05);
   .p-panelmenu {
     .p-panelmenu-content {
       a.active {
-        background: rgba($active-color, 0.2) !important;
-        color: $active-color !important;
-        border-left: 4px solid $active-color;
+        background: var(--theme-primary-soft-bg) !important;
+        color: var(--theme-primary-500) !important;
+        border-left: 4px solid var(--theme-primary-500);
 
         i {
-          color: $active-color !important;
+          color: var(--theme-primary-500) !important;
         }
       }
     }

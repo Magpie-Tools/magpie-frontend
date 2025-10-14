@@ -19,8 +19,16 @@ import {provideAnimationsAsync} from '@angular/platform-browser/animations/async
 const CustomTheme = definePreset(Aura, {
   semantic: {
     primary: {
-      50:'#e3f2ec',100:'#b8ddd1',200:'#8cc8b5',300:'#61b399',
-      400:'#4a9d83',500:'#348566',600:'#2e755a',700:'#27634d',800:'#205241',900:'#183e31'
+      50: 'var(--theme-primary-50)',
+      100: 'var(--theme-primary-100)',
+      200: 'var(--theme-primary-200)',
+      300: 'var(--theme-primary-300)',
+      400: 'var(--theme-primary-400)',
+      500: 'var(--theme-primary-500)',
+      600: 'var(--theme-primary-600)',
+      700: 'var(--theme-primary-700)',
+      800: 'var(--theme-primary-800)',
+      900: 'var(--theme-primary-900)'
     },
     surface: {
       0:'#0f1113',50:'#15181b',100:'#1a1f23',200:'#21272d',300:'#2a3238',
@@ -31,20 +39,20 @@ const CustomTheme = definePreset(Aura, {
       // we always run in dark mode → define only dark
       dark: {
         primary: {
-          color: '#348566',
-          inverseColor: '#0f1113',
-          hoverColor: '#2e755a',
-          activeColor: '#27634d'
+          color: 'var(--theme-primary-500)',
+          inverseColor: 'var(--theme-primary-inverse)',
+          hoverColor: 'var(--theme-primary-600)',
+          activeColor: 'var(--theme-primary-700)'
         },
         highlight: {
-          background: 'rgba(255,255,255,.10)',
-          focusBackground: 'rgba(255,255,255,.16)',
-          color: 'rgba(255,255,255,.92)',
-          focusColor: 'rgba(255,255,255,.92)'
+          background: 'var(--theme-highlight-background)',
+          focusBackground: 'var(--theme-highlight-focus-background)',
+          color: 'var(--theme-highlight-color)',
+          focusColor: 'var(--theme-highlight-color)'
         },
         text: {
-          color: 'rgba(236,240,243,.92)',
-          hoverColor: '#8cc8b5'
+          color: 'var(--theme-text-color)',
+          hoverColor: 'var(--theme-text-hover-color)'
         }
       }
     }
@@ -66,10 +74,10 @@ const CustomTheme = definePreset(Aura, {
           // FILLED (severity="primary")
           root: {
             primary: {
-              background: '#348566',
-              hoverBackground: '#2e755a',
-              activeBackground: '#27634d',
-              color: '#ffffff',
+              background: 'var(--theme-primary-500)',
+              hoverBackground: 'var(--theme-primary-600)',
+              activeBackground: 'var(--theme-primary-700)',
+              color: 'var(--theme-primary-contrast)',
             },
             // neutral/secondary filled (great for “Add Sources” if not outlined)
             secondary: {
@@ -84,10 +92,10 @@ const CustomTheme = definePreset(Aura, {
           // OUTLINED
           outlined: {
             primary: {
-              color: '#8cc8b5',
-              borderColor: 'rgba(140,200,181,.65)',
-              hoverBackground: 'rgba(140,200,181,.12)',
-              activeBackground: 'rgba(140,200,181,.18)'
+              color: 'var(--theme-primary-outline-color)',
+              borderColor: 'var(--theme-primary-outline-border)',
+              hoverBackground: 'var(--theme-primary-outline-hover-bg)',
+              activeBackground: 'var(--theme-primary-outline-active-bg)'
             },
             plain: {
               color: 'rgba(236,240,243,.92)',
@@ -98,10 +106,16 @@ const CustomTheme = definePreset(Aura, {
 
           // TEXT / LINK
           text: {
-            primary: { color: '#8cc8b5', hoverBackground: 'rgba(140,200,181,.08)' },
+            primary: {
+              color: 'var(--theme-primary-outline-color)',
+              hoverBackground: 'var(--theme-primary-text-hover-bg)'
+            },
             plain:   { color: 'rgba(236,240,243,.80)', hoverBackground: 'rgba(255,255,255,.06)' }
           },
-          link: { color: '#8cc8b5', hoverColor: '#b8ddd1' }
+          link: {
+            color: 'var(--theme-link-color)',
+            hoverColor: 'var(--theme-link-hover)'
+          }
         }
       }
     }

@@ -120,7 +120,7 @@
 }
 
 ::ng-deep .p-progressspinner-circle {
-  stroke: #3b82f6 !important;
+  stroke: var(--theme-primary-500) !important;
 }
 
 /* Responsive adjustments */

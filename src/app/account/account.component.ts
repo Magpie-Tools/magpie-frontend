@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 
 import { ReactiveFormsModule } from '@angular/forms';
@@ -6,6 +6,8 @@ import {HttpService} from '../services/http.service';
 import {ChangePassword} from '../models/ChangePassword';
 import {Button} from 'primeng/button';
 import {NotificationService} from '../services/notification-service.service';
+
+import {ThemeService, ThemeName} from '../services/theme.service';
 
 @Component({
     selector: 'app-account',
@@ -18,8 +20,23 @@ import {NotificationService} from '../services/notification-service.service';
 })
 export class AccountComponent {
   passwordForm: FormGroup;
+  readonly themes: ThemeName[];
+  readonly currentTheme: Signal<ThemeName>;
+  private readonly themeLabels: Record<ThemeName, string> = {
+    green: 'Green',
+    blue: 'Blue',
+    red: 'Red'
+  };
 
-  constructor(private fb: FormBuilder, private http: HttpService) {
+  private readonly themePreviewColors: Record<ThemeName, string> = {
+    green: '#348566',
+    blue: '#3b82f6',
+    red: '#dc2626'
+  };
+
+  constructor(private fb: FormBuilder,
+              private http: HttpService,
+              private themeService: ThemeService) {
     this.passwordForm = this.fb.group(
       {
         oldPassword: ['', [Validators.required]],
@@ -28,6 +45,21 @@ export class AccountComponent {
       },
       { validators: this.passwordsMatchValidator }
     );
+
+    this.themes = this.themeService.themes;
+    this.currentTheme = this.themeService.theme;
+  }
+
+  setTheme(theme: ThemeName): void {
+    this.themeService.setTheme(theme);
+  }
+
+  labelFor(theme: ThemeName): string {
+    return this.themeLabels[theme];
+  }
+
+  colorFor(theme: ThemeName): string {
+    return this.themePreviewColors[theme];
   }
 
   passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {

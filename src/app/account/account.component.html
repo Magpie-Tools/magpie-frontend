@@ -1,4 +1,21 @@
 <div class="content-container">
+  <section class="theme-section">
+    <h3 class="mt-0">Interface Color</h3>
+    <p class="theme-description">Choose the accent color you prefer.</p>
+    <div class="theme-options">
+      @for (theme of themes; track theme) {
+        <button type="button"
+                class="theme-option"
+                [class.theme-option--active]="currentTheme() === theme"
+                (click)="setTheme(theme)"
+                [attr.aria-pressed]="currentTheme() === theme">
+          <span class="theme-swatch" [style.background]="colorFor(theme)"></span>
+          <span class="theme-label">{{ labelFor(theme) }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
   <h3 class="text-center mt-0">Change Password</h3>
 
   <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-3">
