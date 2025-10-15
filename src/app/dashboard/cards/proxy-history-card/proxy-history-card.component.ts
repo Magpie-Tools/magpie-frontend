@@ -33,7 +33,7 @@ export class ProxyHistoryCardComponent {
   getStatusColor(status: string): string {
     switch (status) {
       case 'working':
-        return this.getAccentColor();
+        return '#10b981';
       case 'failed':
         return '#ef4444';
       case 'timeout':
@@ -41,15 +41,6 @@ export class ProxyHistoryCardComponent {
       default:
         return '#6b7280';
     }
-  }
-
-  private getAccentColor(): string {
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
-      return '#348566';
-    }
-
-    const value = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-500');
-    return value && value.trim().length > 0 ? value.trim() : '#348566';
   }
 
   formatLatency(latency?: number): string {

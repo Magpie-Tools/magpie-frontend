@@ -29,13 +29,11 @@
     padding: 0.6rem 1.2rem;
     border-radius: 9999px;
     border: 1px solid rgba(var(--theme-primary-500-rgb), 0.35);
-    background: linear-gradient(135deg, rgba(63, 79, 76, 0.45), rgba(32, 41, 39, 0.35));
     color: #f5faf7;
     font-weight: 600;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 
     &:hover {
-      background: linear-gradient(135deg, rgba(73, 94, 90, 0.55), rgba(36, 48, 44, 0.45));
       border-color: rgba(var(--theme-primary-300-rgb), 0.8);
       box-shadow: 0 12px 24px rgba(14, 18, 16, 0.45);
       transform: translateY(-1px);
@@ -161,7 +159,6 @@
     .save-judges-button.p-button {
       padding: 0.85rem 1.6rem;
       border-radius: 9999px;
-      background: linear-gradient(135deg, rgba(62, 78, 75, 0.55), rgba(34, 43, 41, 0.7));
       border: 1px solid rgba(var(--theme-primary-500-rgb), 0.45);
       font-weight: 600;
       letter-spacing: 0.01em;
@@ -170,7 +167,6 @@
 
       &:hover,
       &.p-focus {
-        background: linear-gradient(135deg, rgba(72, 94, 90, 0.6), rgba(38, 50, 47, 0.78));
         transform: translateY(-1px);
         border-color: rgba(var(--theme-primary-500-rgb), 0.6);
         box-shadow: 0 16px 32px rgba(10, 15, 14, 0.45);

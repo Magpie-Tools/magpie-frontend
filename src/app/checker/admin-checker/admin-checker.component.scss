@@ -172,7 +172,7 @@
     gap: 0.45rem;
     padding: 0.6rem 1.2rem;
     border-radius: 9999px;
-    background: linear-gradient(135deg, rgba(62, 78, 75, 0.55), rgba(34, 43, 41, 0.7));
+    //background: linear-gradient(135deg, rgba(62, 78, 75, 0.55), rgba(34, 43, 41, 0.7));
     border: 1px solid rgba(var(--theme-primary-500-rgb), 0.45);
     color: #f3faf6;
     font-size: 0.85rem;
@@ -279,7 +279,6 @@
     .save-settings-button.p-button {
       padding: 0.95rem 1.8rem;
       border-radius: 9999px;
-      background: linear-gradient(135deg, rgba(62, 78, 75, 0.55), rgba(34, 43, 41, 0.7));
       border: 1px solid rgba(var(--theme-primary-500-rgb), 0.45);
       font-weight: 600;
       letter-spacing: 0.01em;
@@ -288,7 +287,6 @@
 
       &:hover,
       &.p-focus {
-        background: linear-gradient(135deg, rgba(72, 94, 90, 0.6), rgba(38, 50, 47, 0.78));
         transform: translateY(-1px);
         border-color: rgba(var(--theme-primary-500-rgb), 0.6);
         box-shadow: 0 16px 32px rgba(10, 15, 14, 0.45);
