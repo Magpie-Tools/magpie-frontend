@@ -328,5 +328,98 @@
     tbody tr:hover {
       background: var(--pd-table-row-hover);
     }
+
+    tbody tr.proxy-stat-row {
+      cursor: pointer;
+      transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    tbody tr.proxy-stat-row:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 1px var(--pd-primary-outline);
+    }
+  }
+
+  ::ng-deep .stat-response-dialog {
+    .p-dialog-header,
+    .p-dialog-content {
+      background: var(--pd-card-bg);
+      color: var(--theme-text-color, #e2e8f0);
+    }
+
+    .p-dialog-header {
+      border-bottom: 1px solid rgba(82, 94, 112, 0.35);
+    }
+
+    .p-dialog-content {
+      border-radius: 0 0 1rem 1rem;
+    }
+  }
+
+  .stat-response-dialog__meta {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .meta-label {
+      color: var(--pd-muted-text);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.7rem;
+    }
+
+    .meta-value {
+      color: var(--theme-text-color, #e2e8f0);
+      font-weight: 500;
+    }
+  }
+
+  .stat-response-dialog__content {
+    min-height: 200px;
+  }
+
+  .stat-response-dialog__loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 180px;
+  }
+
+  .stat-response-dialog__error {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(248, 113, 113, 0.38);
+    background: rgba(248, 113, 113, 0.18);
+    color: #fecaca;
+    font-size: 0.9rem;
+  }
+
+  .stat-response-dialog__empty {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--pd-muted-text);
+    font-size: 0.9rem;
+  }
+
+  .stat-response-dialog__body {
+    max-height: 360px;
+    overflow: auto;
+    background: rgba(17, 24, 39, 0.65);
+    border: 1px solid rgba(82, 94, 112, 0.4);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    font-family: 'Source Code Pro', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 }
