@@ -16,7 +16,8 @@
 
     <div class="judge-list flex flex-col gap-4">
       @for (judge of judgeControls; track judge; let i = $index) {
-        <article [formGroup]="judge" class="judge-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
+        <article [formGroup]="judge"
+                 class="judge-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
           <div class="card-header flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <div class="judge-chip">Judge {{ i + 1 }}</div>
