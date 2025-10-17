@@ -13,6 +13,7 @@ import {ChangePassword} from '../models/ChangePassword';
 import {ProxyDetail} from '../models/ProxyDetail';
 import {ProxyStatistic} from '../models/ProxyStatistic';
 import {ProxyStatisticResponseDetail} from '../models/ProxyStatisticResponseDetail';
+import {RotatingProxy, CreateRotatingProxy, RotatingProxyNext} from '../models/RotatingProxy';
 import {map} from 'rxjs/operators';
 
 @Injectable({
@@ -94,6 +95,24 @@ export class HttpService {
           } as ProxyStatisticResponseDetail;
         })
       );
+  }
+
+  getRotatingProxies() {
+    return this.http
+      .get<{rotating_proxies: RotatingProxy[]}>(`${this.apiUrl}/rotatingProxies`)
+      .pipe(map(res => res?.rotating_proxies ?? []));
+  }
+
+  createRotatingProxy(payload: CreateRotatingProxy) {
+    return this.http.post<RotatingProxy>(`${this.apiUrl}/rotatingProxies`, payload);
+  }
+
+  deleteRotatingProxy(id: number) {
+    return this.http.delete<void>(`${this.apiUrl}/rotatingProxies/${id}`);
+  }
+
+  getNextRotatingProxy(id: number) {
+    return this.http.post<RotatingProxyNext>(`${this.apiUrl}/rotatingProxies/${id}/next`, {});
   }
 
 

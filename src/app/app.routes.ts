@@ -14,10 +14,12 @@ import {AuthLoginGuardService} from './services/authorization/auth-login-guard.s
 import {AddProxiesComponent} from './proxies/proxy-list/add-proxies/add-proxies.component';
 import {CheckerJudgesComponent} from './checker/judges/checker-judges.component';
 import {CheckerSettingsComponent} from './checker/settings/checker-settings.component';
+import {RotatingProxiesComponent} from './rotating-proxies/rotating-proxies.component';
 
 export const routes: Routes = [
   {path: "account", component: AccountComponent, canActivate: [AuthGuardService]},
   {path: "addProxies", component: AddProxiesComponent, canActivate: [AuthGuardService]},
+  {path: "rotating", component: RotatingProxiesComponent, canActivate: [AuthGuardService]},
   {path: "proxies", component: ProxiesComponent, canActivate: [AuthGuardService]},
   {path: "proxies/:id", component: ProxyDetailComponent, canActivate: [AuthGuardService]},
   {path: "checker", redirectTo: "checker/settings", pathMatch: "full"},

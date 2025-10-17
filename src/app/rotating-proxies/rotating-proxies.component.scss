@@ -1,0 +1,254 @@
+$surface: rgba(255, 255, 255, 0.04);
+$border: rgba(255, 255, 255, 0.08);
+$text: #e5e7eb;
+$muted: #9ca3af;
+$accent: #38bdf8;
+
+:host {
+  display: block;
+}
+
+.rotating-loading {
+  padding: 3rem;
+  text-align: center;
+  color: $muted;
+  font-size: 1.1rem;
+}
+
+.rotating-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+section {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.18);
+}
+
+.create-card {
+  .create-form {
+    display: grid;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: $text;
+      text-transform: uppercase;
+    }
+
+    input {
+      background: rgba(255, 255, 255, 0.04);
+      color: $text;
+      border-color: $border;
+    }
+  }
+}
+
+:host ::ng-deep .p-select {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: $border;
+  color: $text;
+
+  .p-select-label {
+    color: $text;
+  }
+}
+
+.auth-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px dashed $border;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+
+  .auth-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: $text;
+    font-weight: 500;
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: $accent;
+    }
+  }
+
+  .auth-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+.card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: $muted;
+    font-size: 0.9rem;
+  }
+
+  &.spaced {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.hint {
+  color: $muted;
+  font-size: 0.8rem;
+}
+
+.error {
+  color: #f87171;
+  font-size: 0.8rem;
+}
+
+.list-card {
+  .p-table {
+    width: 100%;
+  }
+}
+
+:host ::ng-deep .p-table {
+  .p-datatable-thead > tr > th {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: $border;
+    color: $muted;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .p-datatable-tbody > tr > td {
+    border-color: rgba(255, 255, 255, 0.02);
+    color: $text;
+    vertical-align: middle;
+  }
+}
+
+.name-cell {
+  .name {
+    font-weight: 600;
+    color: $text;
+  }
+
+  .created {
+    font-size: 0.8rem;
+    color: $muted;
+    margin-top: 0.15rem;
+  }
+}
+
+.protocol-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba($accent, 0.18);
+  color: lighten($accent, 10%);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.alive-count {
+  font-weight: 600;
+  color: lighten($accent, 12%);
+}
+
+.muted {
+  color: $muted;
+}
+
+.actions {
+  width: 220px;
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+}
+
+.auth-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba($accent, 0.18);
+  color: lighten($accent, 15%);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  color: $muted;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.preview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .preview-content {
+    display: grid;
+    gap: 0.75rem;
+
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+
+      .label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: $muted;
+      }
+
+      .value {
+        font-weight: 600;
+        color: $text;
+        font-size: 1rem;
+
+        &.muted {
+          color: $muted;
+        }
+      }
+    }
+  }
+}
