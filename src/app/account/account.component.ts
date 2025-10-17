@@ -8,12 +8,14 @@ import {Button} from 'primeng/button';
 import {NotificationService} from '../services/notification-service.service';
 
 import {ThemeService, ThemeName} from '../services/theme.service';
+import {Password} from 'primeng/password';
 
 @Component({
     selector: 'app-account',
   imports: [
     ReactiveFormsModule,
     Button,
+    Password,
   ],
     templateUrl: './account.component.html',
     styleUrls: ['./account.component.scss']

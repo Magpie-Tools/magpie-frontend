@@ -114,7 +114,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
         label: 'Scamalytics',
         url: `https://scamalytics.com/ip/${encodedIp}`,
         // icon: '',
-        icon: 'https://loudseas.com/wp-content/uploads/2023/12/53480-scamalytics.com.png',
+        icon: 'https://scamalytics.com/wp-content/uploads/2016/06/icon_128.png',
       },
       {
         label: 'IPQS',

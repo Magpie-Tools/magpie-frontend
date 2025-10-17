@@ -7,6 +7,7 @@ import {PanelMenu} from 'primeng/panelmenu';
 import {MenuItem} from 'primeng/api';
 import {Ripple} from 'primeng/ripple';
 import {Badge} from 'primeng/badge';
+import {ThemeService} from '../services/theme.service';
 
 @Component({
   selector: 'app-navbar',
@@ -28,7 +29,8 @@ export class NavbarComponent implements OnInit, AfterViewInit {
 
   constructor(protected user: UserService,
               private router: Router,
-              private elementRef: ElementRef) {}
+              private elementRef: ElementRef,
+              protected themeService: ThemeService,) {}
 
   ngOnInit() {
     this.updateMenuItems();
@@ -109,5 +111,15 @@ export class NavbarComponent implements OnInit, AfterViewInit {
       element.classList.remove('p-focus');
       element.blur();
     });
+  }
+
+  protected getSrcPath() {
+    let start = "../../assets/logo/magpie-light-"
+    if (this.themeService.theme() === 'red') {
+      return start + "red.svg"
+    } else if (this.themeService.theme() === 'blue') {
+      return start + "blue.svg"
+    }
+    return start + 'green.svg'
   }
 }
