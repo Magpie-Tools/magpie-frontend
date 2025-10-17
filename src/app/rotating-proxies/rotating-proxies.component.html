@@ -124,15 +124,17 @@
             <td>
               <span class="protocol-tag">{{ protocolLabel(proxy.protocol) }}</span>
             </td>
-            <td class="rotator-cell">
-              <button type="button"
-                      pButton
-                      class="p-button-text p-button-sm rotator-link"
-                      [label]="rotatorEndpoint(proxy) || 'View details'"
-                      (click)="showRotatorDetails(proxy)"
-                      [disabled]="!rotatorEndpoint(proxy)">
-              </button>
-              <span class="muted hint-text">Click to view credentials</span>
+            <td>
+              <div class="rotator-cell">
+                <button type="button"
+                        pButton
+                        class="p-button-text p-button-sm rotator-link"
+                        [label]="rotatorEndpoint(proxy) || 'View details'"
+                        (click)="showRotatorDetails(proxy)"
+                        [disabled]="!rotatorEndpoint(proxy)">
+                </button>
+                <span class="muted hint-text">Click to view credentials</span>
+              </div>
             </td>
             <td>
               <span class="alive-count">{{ proxy.alive_proxy_count }}</span>
