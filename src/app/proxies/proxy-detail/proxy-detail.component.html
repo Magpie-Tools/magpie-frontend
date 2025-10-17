@@ -155,6 +155,7 @@
               <div class="label">Response Time</div>
               <div class="value">{{ latestStatistic?.response_time ?? '—' }}<span *ngIf="latestStatistic"> ms</span></div>
             </div>
+            <div></div>
             <div class="detail-item">
               <div class="label">Last Check</div>
               <div class="value">{{ detail?.latest_check ? (detail?.latest_check | date : 'medium') : 'Never' }}</div>
