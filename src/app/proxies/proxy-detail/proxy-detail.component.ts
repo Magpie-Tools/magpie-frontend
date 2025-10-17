@@ -12,6 +12,15 @@ import {Subscription} from 'rxjs';
 import {NotificationService} from '../../services/notification-service.service';
 import {LoadingComponent} from '../../ui-elements/loading/loading.component';
 
+interface ThemePalette {
+  primary: string;
+  primarySoft: string;
+  text: string;
+  muted: string;
+  gridStrong: string;
+  gridLight: string;
+}
+
 @Component({
   selector: 'app-proxy-detail',
   standalone: true,
@@ -308,14 +317,16 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     this.chronologicalStats = this.computeChronologicalStatistics();
     const points: ProxyStatistic[] = this.chronologicalStats;
 
+    const palette = this.getThemePalette();
+
     if (!points.length) {
       this.chartData = {
         labels: [],
         datasets: [
           {
             data: [],
-            borderColor: '#60a5fa',
-            backgroundColor: 'rgba(96, 165, 250, 0.15)',
+            borderColor: palette.primary,
+            backgroundColor: palette.primarySoft,
             tension: 0.35,
             fill: true,
             pointRadius: 0,
@@ -323,6 +334,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
           }
         ]
       };
+      this.chartOptions = this.buildDefaultChartOptions(palette);
       return;
     }
 
@@ -344,8 +356,8 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
         {
           label: 'Response Time (ms)',
           data: values,
-          borderColor: '#60a5fa',
-          backgroundColor: 'rgba(96, 165, 250, 0.15)',
+          borderColor: palette.primary,
+          backgroundColor: palette.primarySoft,
           tension: 0.35,
           fill: true,
           pointRadius: 0,
@@ -354,6 +366,8 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
         }
       ]
     };
+
+    this.chartOptions = this.buildDefaultChartOptions(palette);
   }
 
   private computeChronologicalStatistics(): ProxyStatistic[] {
@@ -370,7 +384,41 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     return [];
   }
 
-  private buildDefaultChartOptions(): any {
+  private getThemePalette(): ThemePalette {
+    const fallback: ThemePalette = {
+      primary: '#3b82f6',
+      primarySoft: 'rgba(59, 130, 246, 0.2)',
+      text: '#e2e8f0',
+      muted: 'rgba(148, 163, 184, 0.82)',
+      gridStrong: 'rgba(148, 163, 184, 0.18)',
+      gridLight: 'rgba(148, 163, 184, 0.12)',
+    };
+
+    if (typeof window === 'undefined') {
+      return fallback;
+    }
+
+    const styles = getComputedStyle(document.documentElement);
+    const primary = styles.getPropertyValue('--theme-primary-500').trim() || fallback.primary;
+    const primarySoft = styles.getPropertyValue('--theme-primary-soft-bg').trim() || fallback.primarySoft;
+    const text = styles.getPropertyValue('--theme-text-color').trim() || fallback.text;
+    const muted = styles.getPropertyValue('--theme-primary-200').trim() || fallback.muted;
+    const primaryRgb = styles.getPropertyValue('--theme-primary-500-rgb').trim();
+
+    const gridStrong = primaryRgb ? `rgba(${primaryRgb}, 0.18)` : fallback.gridStrong;
+    const gridLight = primaryRgb ? `rgba(${primaryRgb}, 0.12)` : fallback.gridLight;
+
+    return {
+      primary,
+      primarySoft,
+      text,
+      muted,
+      gridStrong,
+      gridLight,
+    };
+  }
+
+  private buildDefaultChartOptions(palette: ThemePalette = this.getThemePalette()): any {
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -393,19 +441,19 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       scales: {
         x: {
           ticks: {
-            color: '#cbd5f5'
+            color: palette.muted
           },
           grid: {
-            color: 'rgba(148, 163, 184, 0.15)'
+            color: palette.gridLight
           }
         },
         y: {
           ticks: {
-            color: '#cbd5f5',
+            color: palette.muted,
             callback: (value: number | string) => `${value} ms`
           },
           grid: {
-            color: 'rgba(148, 163, 184, 0.1)'
+            color: palette.gridStrong
           }
         }
       }

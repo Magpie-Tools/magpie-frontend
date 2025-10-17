@@ -1,17 +1,17 @@
-<div class="proxy-detail-page lg:px-10 text-gray-200">
+<div class="proxy-detail-page lg:px-10">
   <a
     routerLink="/proxies"
-    class="inline-flex items-center gap-2 rounded-full bg-neutral-900 border border-neutral-700 px-4 py-2 text-sm font-medium text-gray-300 hover:border-blue-500 hover:text-blue-300 transition-colors"
+    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors back-button"
   >
     <i class="pi pi-arrow-left text-xs"></i>
     Back to proxies
   </a>
 
   <div class="mt-6 flex flex-col lg:flex-row gap-6 items-stretch">
-    <section class="flex-1 min-w-[320px] bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow">
+    <section class="flex-1 min-w-[320px] detail-card p-6 shadow">
       <div class="flex flex-wrap items-start gap-4">
         <div class="flex-1 min-w-0 w-full">
-          <h1 class="text-2xl font-semibold text-white">
+          <h1 class="text-2xl font-semibold">
             Proxy
             <ng-container *ngIf="detail?.ip; else proxyIdHeading">
               <span class="proxy-address inline-flex items-center gap-1.5 flex-wrap ml-2 text-base">
@@ -19,7 +19,7 @@
                   {{ detail?.ip }}
                 </button>
                 <ng-container *ngIf="detail?.port !== undefined && detail?.port !== null">
-                  <span class="text-gray-500">:</span>
+                  <span class="value-separator">:</span>
                   <button type="button" class="address-chip" (click)="copyPort()" title="Copy Port">
                     {{ detail?.port }}
                   </button>
@@ -50,26 +50,26 @@
           </ng-template>
         </div>
         <span
-          class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide flex-shrink-0 ml-auto"
+          class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold uppercase tracking-wide flex-shrink-0 ml-auto status-pill"
           [ngClass]="{
-            'bg-green-500/15 text-green-400': latestStatistic?.alive,
-            'bg-red-500/15 text-red-400': latestStatistic && !latestStatistic.alive,
-            'bg-neutral-700/40 text-gray-300': !latestStatistic
+            'status-pill--dead': latestStatistic && !latestStatistic.alive,
+            'status-pill--unknown': !latestStatistic
           }"
         >
-          <span class="w-2 h-2 rounded-full"
-                [ngClass]="{
-                  'bg-green-400 animate-pulse': latestStatistic?.alive,
-                  'bg-red-400': latestStatistic && !latestStatistic.alive,
-                  'bg-gray-500': !latestStatistic
-                }"
+          <span
+            class="status-dot"
+            [ngClass]="{
+              alive: latestStatistic?.alive,
+              dead: latestStatistic && !latestStatistic.alive,
+              unknown: !latestStatistic
+            }"
           ></span>
           {{ latestStatistic ? (latestStatistic.alive ? 'Alive' : 'Dead') : 'Unknown' }}
         </span>
-        <div class="text-sm text-gray-400 flex flex-col sm:flex-row sm:items-center sm:gap-2 basis-full">
+        <div class="text-sm muted-text flex flex-col sm:flex-row sm:items-center sm:gap-2 basis-full">
           <span class="shrink-0">Proxy ID {{ proxyId || '—' }}</span>
           <ng-container *ngIf="externalLookupLinks.length">
-            <span class="hidden sm:inline text-gray-600" aria-hidden="true">|</span>
+            <span class="hidden sm:inline muted-divider" aria-hidden="true">|</span>
             <div class="flex flex-wrap items-center gap-2 mt-2 sm:mt-0 w-full sm:flex-1 sm:min-w-0">
               <ng-container *ngFor="let link of externalLookupLinks">
                 <a
@@ -116,7 +116,7 @@
                     >
                       {{ credentials.username }}
                     </button>
-                    <span class="text-gray-500">:</span>
+                    <span class="value-separator">:</span>
                     <button
                       type="button"
                       class="credential-chip"
@@ -168,11 +168,11 @@
       </div>
     </section>
 
-    <section class="lg:w-[420px] bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow flex flex-col">
+    <section class="lg:w-[420px] detail-card p-6 shadow flex flex-col">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="text-lg font-semibold text-white">Response Time</h2>
-          <p class="text-xs text-gray-400">Most recent {{ chronologicalStats.length }} checks</p>
+          <h2 class="text-lg font-semibold">Response Time</h2>
+          <p class="text-xs muted-text">Most recent {{ chronologicalStats.length }} checks</p>
         </div>
       </div>
 
@@ -187,7 +187,7 @@
             class="h-56 w-full"
           ></p-chart>
         } @else {
-          <div class="flex items-center justify-center h-full text-sm text-gray-400">
+          <div class="flex items-center justify-center h-full text-sm muted-text">
             No statistics recorded yet.
           </div>
         }
@@ -195,13 +195,13 @@
     </section>
   </div>
 
-  <section class="mt-8 bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow">
+  <section class="mt-8 detail-card p-6 shadow">
     <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
-        <h2 class="text-lg font-semibold text-white">Proxy Statistic History</h2>
-        <p class="text-xs text-gray-400">Chronological list of judge results</p>
+        <h2 class="text-lg font-semibold">Proxy Statistic History</h2>
+        <p class="text-xs muted-text">Chronological list of judge results</p>
       </div>
-      <span class="text-xs text-gray-400">{{ statistics.length }} entries</span>
+      <span class="text-xs muted-text">{{ statistics.length }} entries</span>
     </div>
 
     <div class="mt-4">
@@ -229,7 +229,10 @@
               <td>{{ row.created_at | date : 'medium' }}</td>
               <td>
                 <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full" [ngClass]="row.alive ? 'bg-green-400 animate-pulse' : 'bg-red-400'"></span>
+                  <span
+                    class="status-dot status-dot--small"
+                    [ngClass]="row.alive ? 'alive' : 'dead'"
+                  ></span>
                   <span class="text-sm">{{ row.alive ? 'Alive' : 'Dead' }}</span>
                 </div>
               </td>
@@ -242,7 +245,7 @@
           </ng-template>
           <ng-template pTemplate="emptymessage">
             <tr>
-              <td colspan="7" class="text-center py-6 text-gray-400">No statistics recorded yet.</td>
+              <td colspan="7" class="text-center py-6 muted-text">No statistics recorded yet.</td>
             </tr>
           </ng-template>
         </p-table>
