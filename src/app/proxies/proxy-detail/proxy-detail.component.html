@@ -284,6 +284,12 @@
           <span class="meta-label">Judge</span>
           <span class="meta-value">{{ stat.judge || 'Unknown' }}</span>
         </div>
+        @if (selectedRegex) {
+          <div class="meta-row">
+            <span class="meta-label">Regex</span>
+            <span class="meta-value font-mono break-all">{{ selectedRegex }}</span>
+          </div>
+        }
         <div class="meta-row">
           <span class="meta-label">Protocol</span>
           <span class="meta-value capitalize">{{ stat.protocol || 'Unknown' }}</span>
@@ -305,7 +311,7 @@
           {{ responseBodyError }}
         </div>
       } @else if (selectedResponseBody) {
-        <pre class="stat-response-dialog__body">{{ selectedResponseBody }}</pre>
+        <pre class="stat-response-dialog__body" [innerHTML]="highlightedResponseBody"></pre>
       } @else {
         <div class="stat-response-dialog__empty">
           No response body recorded for this check.

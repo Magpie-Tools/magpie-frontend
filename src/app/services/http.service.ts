@@ -12,6 +12,7 @@ import {DashboardInfo} from '../models/DashboardInfo';
 import {ChangePassword} from '../models/ChangePassword';
 import {ProxyDetail} from '../models/ProxyDetail';
 import {ProxyStatistic} from '../models/ProxyStatistic';
+import {ProxyStatisticResponseDetail} from '../models/ProxyStatisticResponseDetail';
 import {map} from 'rxjs/operators';
 
 @Injectable({
@@ -83,8 +84,16 @@ export class HttpService {
 
   getProxyStatisticResponseBody(proxyId: number, statisticId: number) {
     return this.http
-      .get<{response_body: string}>(`${this.apiUrl}/proxies/${proxyId}/statistics/${statisticId}`)
-      .pipe(map(res => res?.response_body ?? ''));
+      .get<ProxyStatisticResponseDetail>(`${this.apiUrl}/proxies/${proxyId}/statistics/${statisticId}`)
+      .pipe(
+        map(res => {
+          const regex = res?.regex?.trim();
+          return {
+            response_body: res?.response_body ?? '',
+            regex: regex ? regex : null,
+          } as ProxyStatisticResponseDetail;
+        })
+      );
   }
 
 

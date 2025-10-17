@@ -6,6 +6,7 @@ import {TableModule} from 'primeng/table';
 import {ButtonModule} from 'primeng/button';
 import {DialogModule} from 'primeng/dialog';
 import {ClipboardModule, Clipboard} from '@angular/cdk/clipboard';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ProxyDetail} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
 import {HttpService} from '../../services/http.service';
@@ -52,6 +53,8 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   isLoadingResponseBody = false;
   selectedStatistic: ProxyStatistic | null = null;
   selectedResponseBody = '';
+  selectedRegex: string | null = null;
+  highlightedResponseBody: SafeHtml | null = null;
   responseBodyError: string | null = null;
 
   chartData: any = { labels: [], datasets: [] };
@@ -65,6 +68,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private http: HttpService,
     private clipboard: Clipboard,
+    private sanitizer: DomSanitizer,
   ) {}
 
   ngOnInit(): void {
@@ -332,16 +336,22 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     this.isLoadingResponseBody = true;
     this.selectedStatistic = row;
     this.selectedResponseBody = '';
+    this.selectedRegex = null;
+    this.highlightedResponseBody = null;
     this.responseBodyError = null;
 
     this.responseBodySubscription?.unsubscribe();
     const sub = this.http.getProxyStatisticResponseBody(this.proxyId, row.id).subscribe({
-      next: body => {
-        this.selectedResponseBody = body;
+      next: detail => {
+        this.selectedResponseBody = detail.response_body;
+        this.selectedRegex = detail.regex;
+        this.highlightedResponseBody = this.buildHighlightedResponse(detail.response_body, detail.regex);
         this.isLoadingResponseBody = false;
       },
       error: err => {
         this.responseBodyError = err?.error?.error ?? err?.message ?? 'Failed to load response body';
+        this.selectedRegex = null;
+        this.highlightedResponseBody = this.buildHighlightedResponse('', null);
         this.isLoadingResponseBody = false;
       }
     });
@@ -355,7 +365,141 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     this.responseBodySubscription?.unsubscribe();
     this.responseBodySubscription = undefined;
     this.selectedResponseBody = '';
+    this.selectedRegex = null;
+    this.highlightedResponseBody = null;
     this.responseBodyError = null;
+  }
+
+  private buildHighlightedResponse(body: string, regex: string | null): SafeHtml {
+    if (!body) {
+      return this.sanitizer.bypassSecurityTrustHtml('');
+    }
+
+    const effectiveRegex = regex?.trim();
+    if (!effectiveRegex) {
+      return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(body));
+    }
+
+    const highlighted = this.applyHighlight(body, effectiveRegex);
+    return this.sanitizer.bypassSecurityTrustHtml(highlighted);
+  }
+
+  private applyHighlight(body: string, regex: string): string {
+    if (regex.toLowerCase() === 'default') {
+      return this.highlightDefaultHeaders(body);
+    }
+
+    const pattern = this.createRegExp(regex);
+    if (!pattern) {
+      return this.escapeHtml(body);
+    }
+
+    return this.wrapMatches(body, pattern);
+  }
+
+  private createRegExp(pattern: string): RegExp | null {
+    const trimmed = pattern.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const delimited = trimmed.match(/^\/([\s\S]+)\/([a-z]*)$/i);
+    if (delimited) {
+      let flags = delimited[2] ?? '';
+      if (!flags.includes('g')) {
+        flags += 'g';
+      }
+      try {
+        return new RegExp(delimited[1], flags);
+      } catch {
+        return null;
+      }
+    }
+
+    try {
+      return new RegExp(trimmed, 'g');
+    } catch {
+      try {
+        return new RegExp(trimmed);
+      } catch {
+        return null;
+      }
+    }
+  }
+
+  private highlightDefaultHeaders(body: string): string {
+    const tokens = this.defaultHeaderTokens;
+    if (!tokens.length) {
+      return this.escapeHtml(body);
+    }
+
+    const pattern = tokens
+      .map(token => this.escapeForRegExp(token).replace(/\\-/g, '[-_]'))
+      .join('|');
+
+    if (!pattern) {
+      return this.escapeHtml(body);
+    }
+
+    try {
+      const regex = new RegExp(`(${pattern})`, 'gi');
+      return this.wrapMatches(body, regex);
+    } catch {
+      return this.escapeHtml(body);
+    }
+  }
+
+  private wrapMatches(body: string, regex: RegExp): string {
+    const pieces: string[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    const flags = regex.flags.includes('g') ? regex.flags : `${regex.flags}g`;
+    let globalRegex: RegExp;
+    try {
+      globalRegex = regex.global ? regex : new RegExp(regex.source, flags);
+    } catch {
+      globalRegex = regex;
+    }
+
+    while ((match = globalRegex.exec(body)) !== null) {
+      const start = match.index;
+      const matchedText = match[0];
+      const end = start + matchedText.length;
+
+      if (start >= 0 && matchedText.length > 0) {
+        pieces.push(this.escapeHtml(body.slice(lastIndex, start)));
+        pieces.push(`<mark>${this.escapeHtml(matchedText)}</mark>`);
+        lastIndex = end;
+      }
+
+      if (matchedText.length === 0) {
+        globalRegex.lastIndex += 1;
+      }
+    }
+
+    pieces.push(this.escapeHtml(body.slice(lastIndex)));
+
+    return pieces.join('');
+  }
+
+  private escapeForRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private escapeHtml(value: string): string {
+    const replacements: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+
+    return value.replace(/[&<>"']/g, char => replacements[char]);
+  }
+
+  private get defaultHeaderTokens(): string[] {
+    return ['USER-AGENT', 'HOST', 'ACCEPT', 'ACCEPT-ENCODING'];
   }
 
   private updateChart(): void {
