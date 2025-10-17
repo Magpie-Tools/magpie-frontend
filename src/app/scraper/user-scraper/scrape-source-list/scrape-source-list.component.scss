@@ -1,138 +1,23 @@
-@use 'sass:color';
-
 $background-color: #171717;
-$surface-color: rgba(23, 23, 23, 0.92);
-$text-color: #d1d5db;
-$muted-text: rgba(148, 163, 184, 0.75);
-$border-color: rgba(255, 255, 255, 0.12);
+$text-color: rgb(171, 171, 171);
+$accent-color: #1cbb57;
+$border-color: rgba(255, 255, 255, 0.1);
 
-.table-card {
-  background: $surface-color;
-  backdrop-filter: blur(18px);
-  border-radius: 1rem;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+.proxy-container {
+  padding: 2rem;
+  min-height: 100vh;
 }
 
-.selected-row {
-  background-color: rgba(var(--theme-primary-500-rgb), 0.08);
-
-  td {
-    color: $text-color;
-  }
-}
-
-.custom-paginator {
-  background: rgba(9, 9, 9, 0.85);
+.scrape-url {
   color: $text-color;
+  text-decoration: none;
+  word-break: break-all;
+
+  &:hover {
+    color: lighten($text-color, 20%);
+  }
 }
 
-:host ::ng-deep {
-  .p-datatable {
-    background: transparent;
-    color: $text-color;
-
-    .p-datatable-thead > tr > th {
-      background: rgba(15, 15, 15, 0.85);
-      border: none;
-      color: $text-color;
-      font-size: 0.75rem;
-      letter-spacing: 0.08em;
-      padding: 1rem;
-      text-transform: uppercase;
-    }
-
-    .p-datatable-tbody > tr > td {
-      border-top: 1px solid rgba(148, 163, 184, 0.08);
-      padding: 0.95rem 1rem;
-      color: $muted-text;
-      transition: background-color 0.2s ease, color 0.2s ease;
-    }
-
-    .p-datatable-tbody > tr:hover > td {
-      color: color.adjust($text-color, $lightness: 8%);
-    }
-  }
-
-  .p-sortable-column:not(.p-highlight):hover {
-    color: var(--theme-primary-500);
-  }
-
-  .p-sortable-column .p-sortable-column-icon {
-    color: rgba(var(--theme-primary-500-rgb), 0.55);
-  }
-
-  .p-sortable-column.p-highlight {
-    color: var(--theme-primary-500);
-
-    .p-sortable-column-icon {
-      color: var(--theme-primary-500);
-    }
-  }
-
-  .p-datatable-loading-overlay {
-    background: rgba(15, 15, 15, 0.85);
-  }
-
-  .p-paginator {
-    background: transparent;
-    border: none;
-    color: $muted-text;
-
-    .p-paginator-pages .p-paginator-page {
-      background: transparent;
-      border-radius: 0.5rem;
-      color: $muted-text;
-      transition: background-color 0.2s ease, color 0.2s ease;
-
-      &:hover {
-        background: rgba(148, 163, 184, 0.12);
-        color: $text-color;
-      }
-
-      &.p-highlight {
-        background: rgba(var(--theme-primary-500-rgb), 0.16);
-        color: var(--theme-primary-500);
-      }
-    }
-
-    .p-paginator-prev,
-    .p-paginator-next {
-      border-radius: 0.5rem;
-      color: $muted-text;
-
-      &:not(.p-disabled):hover {
-        background: rgba(148, 163, 184, 0.12);
-        color: $text-color;
-      }
-
-      &.p-disabled {
-        color: rgba($muted-text, 0.6);
-      }
-    }
-
-    .p-dropdown {
-      background: rgba(15, 15, 15, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      border-radius: 0.75rem;
-      color: $text-color;
-
-      .p-dropdown-label {
-        color: $text-color;
-      }
-    }
-  }
-
-  .p-confirm-dialog {
-    .p-dialog-header,
-    .p-dialog-content,
-    .p-dialog-footer {
-      background: $surface-color;
-      border-color: rgba(255, 255, 255, 0.05);
-      color: $text-color;
-    }
-
-    .p-dialog-header .p-dialog-title {
-      color: $text-color;
-    }
-  }
+.actions {
+  padding: 0.5rem 0;
 }

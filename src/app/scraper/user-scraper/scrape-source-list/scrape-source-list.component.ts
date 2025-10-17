@@ -1,5 +1,5 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {DatePipe, NgClass} from '@angular/common';
+import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {SelectionModel} from '@angular/cdk/collections';
 import {LoadingComponent} from '../../../ui-elements/loading/loading.component';
@@ -8,11 +8,9 @@ import {ScrapeSourceInfo} from '../../../models/ScrapeSourceInfo';
 import {AddScrapeSourceComponent} from '../add-scrape-source/add-scrape-source.component';
 
 // PrimeNG imports
-import {TableModule} from 'primeng/table';
+import {TableLazyLoadEvent, TableModule} from 'primeng/table';
 import {ButtonModule} from 'primeng/button';
 import {CheckboxModule} from 'primeng/checkbox';
-import {PaginatorModule, PaginatorState} from 'primeng/paginator';
-import {TooltipModule} from 'primeng/tooltip';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {ConfirmationService} from 'primeng/api';
 import {NotificationService} from '../../../services/notification-service.service';
@@ -26,10 +24,7 @@ import {NotificationService} from '../../../services/notification-service.servic
     TableModule,
     ButtonModule,
     CheckboxModule,
-    PaginatorModule,
-    TooltipModule,
     ConfirmDialogModule,
-    NgClass,
     AddScrapeSourceComponent
   ],
   providers: [ConfirmationService],
@@ -41,6 +36,7 @@ export class ScrapeSourceListComponent implements OnInit {
 
   scrapeSources: ScrapeSourceInfo[] = [];
   selection = new SelectionModel<ScrapeSourceInfo>(true, []);
+  selectedScrapeSources: ScrapeSourceInfo[] = [];
   page = 0; // PrimeNG uses 0-based pagination
   pageSize = 20;
   totalItems = 0;
@@ -83,10 +79,18 @@ export class ScrapeSourceListComponent implements OnInit {
     });
   }
 
-  onPageChange(event: PaginatorState) {
-    this.page = event.page ?? 0;
-    this.pageSize = event.rows ?? this.pageSize
-    this.getAndSetScrapeSourcesList();
+  onLazyLoad(event: TableLazyLoadEvent) {
+    const newPage = Math.floor((event.first ?? 0) / (event.rows ?? this.pageSize));
+    const newPageSize = event.rows ?? this.pageSize;
+
+    const shouldFetch = newPage !== this.page || newPageSize !== this.pageSize;
+
+    this.page = newPage;
+    this.pageSize = newPageSize;
+
+    if (shouldFetch) {
+      this.getAndSetScrapeSourcesList();
+    }
   }
 
   deleteSelectedSources(): void {
@@ -108,6 +112,7 @@ export class ScrapeSourceListComponent implements OnInit {
             NotificationService.showSuccess(res);
             this.totalItems -= selected.length;
             this.selection.clear();
+            this.selectedScrapeSources = [];
             this.getAndSetScrapeSourcesList();
           },
           error: err => NotificationService.showError("Could not delete scraping source " + err.error.message)
@@ -123,6 +128,7 @@ export class ScrapeSourceListComponent implements OnInit {
 
   toggleSelection(source: ScrapeSourceInfo): void {
     this.selection.toggle(source);
+    this.selectedScrapeSources = [...this.selection.selected];
   }
 
   isAllSelected(): boolean {
@@ -140,10 +146,12 @@ export class ScrapeSourceListComponent implements OnInit {
     } else {
       this.scrapeSources.forEach(source => this.selection.select(source));
     }
+    this.selectedScrapeSources = [...this.selection.selected];
   }
 
   refreshList(): void {
     this.selection.clear();
+    this.selectedScrapeSources = [];
     this.getAndSetScrapeSourceCount();
     this.getAndSetScrapeSourcesList();
   }
@@ -166,5 +174,6 @@ export class ScrapeSourceListComponent implements OnInit {
         this.selection.select(source);
       }
     });
+    this.selectedScrapeSources = [...this.selection.selected];
   }
 }

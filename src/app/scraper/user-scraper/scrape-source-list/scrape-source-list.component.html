@@ -1,167 +1,115 @@
 @if (!hasLoaded) {
   <app-loading class="flex items-center justify-center mt-20"></app-loading>
 } @else {
-  <div class="p-8 min-h-screen text-gray-300">
-    <div class="actions mb-6 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex flex-wrap items-center gap-3">
+  <div class="proxy-container p-8 min-h-screen text-gray-300">
+    <div class="actions mb-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-4">
         <p-button
           label="Delete Selected"
           icon="pi pi-trash"
           styleClass="p-button-danger"
           [disabled]="getSelectionCount() === 0"
           (onClick)="deleteSelectedSources()"
-          [badge]="getSelectionCount().toString()"
-          [badgeClass]="getSelectionCount() > 0 ? 'bg-red-500' : ''"
-          pTooltip="Delete selected scrape sources"
-          tooltipPosition="top">
-        </p-button>
+        ></p-button>
 
         <span class="text-sm text-gray-400">
           Total: {{ totalItems }} sources
         </span>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-4">
         <p-button
           label="Refresh"
           icon="pi pi-refresh"
           styleClass="p-button-outlined"
           (onClick)="refreshList()"
-          [disabled]="loading">
-        </p-button>
+          [disabled]="loading"
+        ></p-button>
 
         <app-add-scrape-source
           (showAddScrapeSourcesMessage)="onShowAddScrapeSourcesMessage($event)"
-          (scrapeSourcesAdded)="onScrapeSourcesAdded()">
-        </app-add-scrape-source>
+          (scrapeSourcesAdded)="onScrapeSourcesAdded()"
+        ></app-add-scrape-source>
       </div>
     </div>
 
-    <div class="table-card bg-neutral-900 border border-neutral-700 rounded-xl overflow-hidden shadow-2xl">
-      <p-table
-        [value]="scrapeSources"
-        [loading]="loading"
-        [paginator]="false"
-        [sortMode]="'multiple'"
-        [tableStyle]="{'min-width': '60rem'}"
-        dataKey="id"
-        styleClass="p-datatable-gridlines p-datatable-sm"
-        [rowHover]="true">
-
-        <ng-template pTemplate="header">
-          <tr class="bg-neutral-900/80 text-gray-200 uppercase text-xs tracking-wide">
-            <th class="w-16 text-center">
-              <p-checkbox
-                [binary]="true"
-                [ngModel]="isAllSelected()"
-                (onChange)="masterToggle()"
-                [disabled]="scrapeSources.length === 0"
-                [indeterminate]="isSomeSelected()"
-              ></p-checkbox>
-            </th>
-            <th class="text-left" pSortableColumn="url">
-              <div class="flex items-center gap-2 font-semibold text-sm text-gray-300">
-                URL
-                <p-sortIcon field="url"></p-sortIcon>
-              </div>
-            </th>
-            <th class="w-32 text-center" pSortableColumn="proxy_count">
-              <div class="flex items-center justify-center gap-2 font-semibold text-sm text-gray-300">
-                Proxy Count
-                <p-sortIcon field="proxy_count"></p-sortIcon>
-              </div>
-            </th>
-            <th class="w-48 text-center" pSortableColumn="added_at">
-              <div class="flex items-center justify-center gap-2 font-semibold text-sm text-gray-300">
-                Added At
-                <p-sortIcon field="added_at"></p-sortIcon>
-              </div>
-            </th>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="body" let-source>
-          <tr
-            class="cursor-pointer transition-colors hover:bg-neutral-800/60"
-            [ngClass]="{'selected-row': selection.isSelected(source)}"
-            (click)="toggleSelection(source)"
-          >
-            <td class="text-center" (click)="$event.stopPropagation()">
-              <p-checkbox
-                [binary]="true"
-                [ngModel]="selection.isSelected(source)"
-                (onChange)="toggleSelection(source)"
-              ></p-checkbox>
-            </td>
-            <td class="max-w-0">
-              <div class="flex items-center">
-                <a
-                  [href]="source.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-emerald-400 hover:text-emerald-300 transition-colors truncate block max-w-full"
-                  [title]="source.url"
-                  (click)="$event.stopPropagation()">
-                  {{ source.url }}
-                </a>
-              </div>
-            </td>
-            <td class="text-center">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-                {{ source.proxy_count }}
-              </span>
-            </td>
-            <td class="text-center text-gray-400">
-              <div class="flex flex-col">
-                <span class="font-medium text-gray-200">{{ source.added_at | date: 'short' }}</span>
-                <span class="text-xs text-gray-500">{{ source.added_at | date: 'MMM d, y' }}</span>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="4" class="py-12">
-              <div class="flex flex-col items-center gap-4 text-gray-500">
-                <i class="pi pi-inbox text-4xl text-emerald-400"></i>
-                <div class="text-center">
-                  <p class="text-lg font-semibold text-gray-200">No scrape sources yet</p>
-                  <p class="text-sm">Add new sources to start populating the list.</p>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="loadingbody">
-          <tr>
-            <td colspan="4" class="py-8">
-              <div class="flex items-center justify-center gap-3 text-emerald-400">
-                <i class="pi pi-spin pi-spinner text-2xl"></i>
-                <span class="text-gray-300">Loading scrape sources...</span>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-
-      <div class="custom-paginator border-t border-neutral-800 bg-neutral-950/60 px-6 py-3">
-        <p-paginator
-          [first]="page * pageSize"
-          [rows]="pageSize"
-          [totalRecords]="totalItems"
-          [rowsPerPageOptions]="[10, 20, 50, 100]"
-          (onPageChange)="onPageChange($event)"
-          class="border-0 bg-transparent">
-        </p-paginator>
-      </div>
-    </div>
+    <p-table
+      [value]="scrapeSources"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="pageSize"
+      [totalRecords]="totalItems"
+      [lazy]="true"
+      (onLazyLoad)="onLazyLoad($event)"
+      [rowsPerPageOptions]="[20]"
+      dataKey="id"
+      [selection]="selection.selected"
+      [(selection)]="selectedScrapeSources"
+      class="p-datatable-gridlines p-datatable-sm"
+      [rowHover]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem">
+            <p-checkbox
+              [binary]="true"
+              (onChange)="masterToggle()"
+              [ngModel]="isAllSelected()"
+              [disabled]="scrapeSources.length === 0"
+              [indeterminate]="isSomeSelected()"
+            ></p-checkbox>
+          </th>
+          <th pSortableColumn="url">
+            URL <p-sortIcon field="url"></p-sortIcon>
+          </th>
+          <th style="width: 9rem" class="text-center" pSortableColumn="proxy_count">
+            Proxy Count <p-sortIcon field="proxy_count"></p-sortIcon>
+          </th>
+          <th style="width: 12rem" class="text-center" pSortableColumn="added_at">
+            Added At <p-sortIcon field="added_at"></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-source>
+        <tr (click)="toggleSelection(source)" [pSelectableRow]="source">
+          <td (click)="$event.stopPropagation()">
+            <p-checkbox
+              [binary]="true"
+              (onChange)="toggleSelection(source)"
+              [ngModel]="selection.isSelected(source)"
+            ></p-checkbox>
+          </td>
+          <td>
+            <a
+              [href]="source.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="scrape-url"
+              [title]="source.url"
+              (click)="$event.stopPropagation()"
+            >
+              {{ source.url }}
+            </a>
+          </td>
+          <td class="text-center">
+            {{ source.proxy_count }}
+          </td>
+          <td class="text-center">
+            {{ source.added_at | date : 'short' }}
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptyMessage">
+        <tr>
+          <td colspan="4">No scrape sources found.</td>
+        </tr>
+      </ng-template>
+    </p-table>
   </div>
 }
 
 <p-confirmDialog
   [style]="{width: '450px'}"
   [baseZIndex]="10000"
-  rejectButtonStyleClass="p-button-outlined">
-</p-confirmDialog>
+  rejectButtonStyleClass="p-button-outlined"
+></p-confirmDialog>
