@@ -8,6 +8,8 @@ import {ButtonModule} from 'primeng/button';
 import {InputTextModule} from 'primeng/inputtext';
 import {SelectModule} from 'primeng/select';
 
+import {environment} from '../../environments/environment';
+
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {CreateRotatingProxy, RotatingProxy, RotatingProxyNext} from '../models/RotatingProxy';
@@ -40,7 +42,11 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   preview: RotatingProxyPreview | null = null;
   noProtocolsAvailable = false;
   authEnabled = false;
+  previewRotator: RotatingProxy | null = null;
+  selectedRotator: RotatingProxy | null = null;
 
+  private readonly defaultRotatorHost = this.resolveDefaultHost();
+  rotatorHost = this.defaultRotatorHost;
   private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder, private http: HttpService) {
@@ -95,7 +101,23 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: ({proxies, settings}) => {
-          this.rotatingProxies = proxies;
+          const rawProxies = proxies ?? [];
+          const currentSelectedId = this.selectedRotator?.id ?? null;
+          const hostFromResponse = rawProxies.find(item => (item.listen_host ?? '').trim().length > 0)?.listen_host?.trim();
+          if (hostFromResponse) {
+            this.rotatorHost = hostFromResponse;
+          } else if (!this.rotatorHost) {
+            this.rotatorHost = this.defaultRotatorHost;
+          }
+
+          const enriched = rawProxies.map(proxy => this.enrichRotator(proxy));
+          this.rotatingProxies = enriched;
+          if (currentSelectedId) {
+            this.selectedRotator = enriched.find(item => item.id === currentSelectedId) ?? (enriched[0] ?? null);
+          } else if (!this.selectedRotator) {
+            this.selectedRotator = enriched[0] ?? null;
+          }
+
           this.protocolOptions = this.buildProtocolOptions(settings);
           this.noProtocolsAvailable = this.protocolOptions.length === 0;
           if (this.noProtocolsAvailable) {
@@ -156,9 +178,17 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: proxy => {
-          this.rotatingProxies = [proxy, ...this.rotatingProxies];
+          const enriched = this.enrichRotator(proxy);
+          if (enriched.listen_host) {
+            this.rotatorHost = enriched.listen_host;
+          } else if (!this.rotatorHost) {
+            this.rotatorHost = this.defaultRotatorHost;
+          }
+          this.rotatingProxies = [enriched, ...this.rotatingProxies];
+          this.selectedRotator = enriched;
           this.submitting = false;
           this.createForm.patchValue({name: ''}, {emitEvent: false});
+          this.createForm.get('authUsername')?.reset('', {emitEvent: false});
           this.createForm.get('authPassword')?.reset('', {emitEvent: false});
           NotificationService.showSuccess('Rotating proxy created.');
         },
@@ -182,6 +212,12 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
           if (this.preview && this.preview.proxy_id === proxy.id) {
             this.preview = null;
           }
+          if (this.previewRotator && this.previewRotator.id === proxy.id) {
+            this.previewRotator = null;
+          }
+          if (this.selectedRotator && this.selectedRotator.id === proxy.id) {
+            this.selectedRotator = this.rotatingProxies[0] ?? null;
+          }
           NotificationService.showSuccess('Rotating proxy deleted.');
         },
         error: err => {
@@ -202,16 +238,29 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
         next: res => {
           this.rotateLoading.delete(proxy.id);
           const address = `${res.ip}:${res.port}`;
+          let updatedRotator: RotatingProxy | null = null;
           this.rotatingProxies = this.rotatingProxies.map(item => {
             if (item.id !== proxy.id) {
               return item;
             }
-            return {
+            const enriched = this.enrichRotator({
               ...item,
               last_served_proxy: address,
               last_rotation_at: new Date().toISOString(),
-            };
+            });
+            updatedRotator = enriched;
+            return enriched;
           });
+          if (!updatedRotator) {
+            updatedRotator = this.enrichRotator(proxy);
+          }
+          if (updatedRotator.listen_host) {
+            this.rotatorHost = updatedRotator.listen_host;
+          }
+          this.previewRotator = updatedRotator;
+          if (this.selectedRotator && this.selectedRotator.id === updatedRotator.id) {
+            this.selectedRotator = updatedRotator;
+          }
           this.preview = {...res, name: proxy.name};
           NotificationService.showSuccess(`Serving ${address}`);
         },
@@ -231,13 +280,57 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       ? `${preview.username}:${preview.password}@${preview.ip}:${preview.port}`
       : `${preview.ip}:${preview.port}`;
 
-    if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(address)
-        .then(() => NotificationService.showSuccess('Copied to clipboard.'))
-        .catch(() => NotificationService.showWarn('Could not copy to clipboard.'));
-    } else {
-      NotificationService.showWarn('Clipboard access is not available.');
+    this.copyValueToClipboard(address, 'Copied to clipboard.', 'No proxy available to copy yet.');
+  }
+
+  copyRotatorConnection(proxy: RotatingProxy | null): void {
+    if (!proxy) {
+      NotificationService.showWarn('Rotator connection is not available yet.');
+      return;
     }
+
+    const connection = this.rotatorConnectionString(proxy);
+    this.copyValueToClipboard(connection, 'Rotator connection copied.', 'Rotator connection is not available yet.');
+  }
+
+  copyRotatorField(value: string | null | undefined, label: string): void {
+    this.copyValueToClipboard(value ?? '', `${label} copied.`, `${label} is not set.`);
+  }
+
+  showRotatorDetails(proxy: RotatingProxy): void {
+    this.selectedRotator = proxy;
+  }
+
+  rotatorEndpoint(proxy: RotatingProxy | null | undefined): string {
+    if (!proxy) {
+      return '';
+    }
+    const address = (proxy.listen_address ?? '').toString().trim();
+    if (address) {
+      return address;
+    }
+
+    const host = (proxy.listen_host ?? '').toString().trim();
+    if (host) {
+      return `${host}:${proxy.listen_port}`;
+    }
+
+    return `${proxy.listen_port}`;
+  }
+
+  rotatorConnectionString(proxy: RotatingProxy | null | undefined): string {
+    if (!proxy) {
+      return '';
+    }
+    const endpoint = this.rotatorEndpoint(proxy);
+    if (!endpoint) {
+      return '';
+    }
+
+    const protocol = (proxy.protocol ?? '').toLowerCase() || 'http';
+    const needsAuth = proxy.auth_required && !!proxy.auth_username && !!proxy.auth_password;
+    const credentials = needsAuth ? `${proxy.auth_username}:${proxy.auth_password}@` : '';
+    return `${protocol}://${credentials}${endpoint}`;
   }
 
   protocolLabel(value: string): string {
@@ -278,5 +371,67 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
 
   private getErrorMessage(err: any): string {
     return err?.error?.error ?? err?.error?.message ?? err?.message ?? 'Unknown error';
+  }
+
+  private enrichRotator(proxy: RotatingProxy): RotatingProxy {
+    const listenHost = this.resolveHostValue(proxy.listen_host);
+    const listenAddress = (proxy.listen_address ?? '').toString().trim()
+      || (listenHost ? `${listenHost}:${proxy.listen_port}` : `${proxy.listen_port}`);
+
+    return {
+      ...proxy,
+      auth_username: proxy.auth_username ?? null,
+      auth_password: proxy.auth_password ?? null,
+      listen_host: listenHost || null,
+      listen_address: listenAddress,
+    };
+  }
+
+  private resolveHostValue(host: string | null | undefined): string {
+    const candidate = (host ?? '').toString().trim();
+    if (candidate) {
+      return candidate;
+    }
+    if (this.rotatorHost) {
+      return this.rotatorHost;
+    }
+    if (this.defaultRotatorHost) {
+      return this.defaultRotatorHost;
+    }
+    if (typeof window !== 'undefined' && window.location?.hostname) {
+      return window.location.hostname;
+    }
+    return '';
+  }
+
+  private copyValueToClipboard(value: string, successMessage: string, emptyMessage: string): void {
+    if (!value) {
+      NotificationService.showWarn(emptyMessage);
+      return;
+    }
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(value)
+        .then(() => NotificationService.showSuccess(successMessage))
+        .catch(() => NotificationService.showWarn('Could not copy to clipboard.'));
+    } else {
+      NotificationService.showWarn('Clipboard access is not available.');
+    }
+  }
+
+  private resolveDefaultHost(): string {
+    try {
+      const url = new URL(environment.apiUrl);
+      if (url.hostname) {
+        return url.hostname;
+      }
+    } catch (err) {
+      // Ignore parse errors and fall back below
+    }
+
+    if (typeof window !== 'undefined' && window.location?.hostname) {
+      return window.location.hostname;
+    }
+    return '';
   }
 }

@@ -108,8 +108,7 @@
           <tr>
             <th>Name</th>
             <th>Protocol</th>
-            <th>Listen Port</th>
-            <th>Auth</th>
+            <th>Rotator Access</th>
             <th>Alive Proxies</th>
             <th>Last Rotation</th>
             <th>Last Served Proxy</th>
@@ -125,15 +124,15 @@
             <td>
               <span class="protocol-tag">{{ protocolLabel(proxy.protocol) }}</span>
             </td>
-            <td>
-              <code>{{ proxy.listen_port }}</code>
-            </td>
-            <td>
-              @if (proxy.auth_required) {
-                <span class="auth-chip">{{ proxy.auth_username || 'Set' }}</span>
-              } @else {
-                <span class="muted">None</span>
-              }
+            <td class="rotator-cell">
+              <button type="button"
+                      pButton
+                      class="p-button-text p-button-sm rotator-link"
+                      [label]="rotatorEndpoint(proxy) || 'View details'"
+                      (click)="showRotatorDetails(proxy)"
+                      [disabled]="!rotatorEndpoint(proxy)">
+              </button>
+              <span class="muted hint-text">Click to view credentials</span>
             </td>
             <td>
               <span class="alive-count">{{ proxy.alive_proxy_count }}</span>
@@ -174,7 +173,7 @@
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="6">
+            <td colspan="7">
               <div class="empty-state">
                 <p>No rotating proxies yet.</p>
                 <p class="hint">Create one above to start rotating through healthy proxies.</p>
@@ -185,6 +184,61 @@
       </p-table>
     </section>
 
+    @if (selectedRotator) {
+      <section class="details-card">
+        <div class="card-header">
+          <h2>Rotator Details</h2>
+          <p class="subtitle">{{ selectedRotator.name }} · {{ protocolLabel(selectedRotator.protocol) }}</p>
+        </div>
+
+        <div class="details-grid">
+          <div class="detail-row">
+            <span class="label">Endpoint</span>
+            <span class="value">{{ rotatorEndpoint(selectedRotator) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Connection</span>
+            @if (rotatorConnectionString(selectedRotator)) {
+              <span class="value">{{ rotatorConnectionString(selectedRotator) }}</span>
+            } @else {
+              <span class="value muted">Unavailable</span>
+            }
+          </div>
+          <div class="detail-row">
+            <span class="label">Authentication</span>
+            @if (selectedRotator.auth_required && selectedRotator.auth_username && selectedRotator.auth_password) {
+              <span class="value">{{ selectedRotator.auth_username }} / {{ selectedRotator.auth_password }}</span>
+            } @else if (selectedRotator.auth_required) {
+              <span class="value muted">Credentials required</span>
+            } @else {
+              <span class="value muted">Not required</span>
+            }
+          </div>
+        </div>
+
+        <div class="details-actions">
+          <button pButton type="button"
+                  label="Copy Connection"
+                  icon="pi pi-copy"
+                  (click)="copyRotatorConnection(selectedRotator)"
+                  [disabled]="!rotatorConnectionString(selectedRotator)">
+          </button>
+          <button pButton type="button"
+                  label="Copy Username"
+                  icon="pi pi-user"
+                  (click)="copyRotatorField(selectedRotator.auth_username, 'Username')"
+                  [disabled]="!selectedRotator.auth_username">
+          </button>
+          <button pButton type="button"
+                  label="Copy Password"
+                  icon="pi pi-lock"
+                  (click)="copyRotatorField(selectedRotator.auth_password, 'Password')"
+                  [disabled]="!selectedRotator.auth_password">
+          </button>
+        </div>
+      </section>
+    }
+
     @if (preview) {
       <section class="preview-card">
         <div class="card-header">
@@ -193,6 +247,14 @@
         </div>
 
         <div class="preview-content">
+          <div class="preview-row">
+            <span class="label">Rotator</span>
+            @if (rotatorConnectionString(previewRotator)) {
+              <span class="value">{{ rotatorConnectionString(previewRotator) }}</span>
+            } @else {
+              <span class="value muted">Unavailable</span>
+            }
+          </div>
           <div class="preview-row">
             <span class="label">Address</span>
             <span class="value">{{ preview.ip }}:{{ preview.port }}</span>
@@ -207,7 +269,19 @@
           </div>
         </div>
 
-        <button pButton type="button" label="Copy Proxy" icon="pi pi-copy" (click)="copyPreview(preview)"></button>
+        <div class="preview-actions">
+          <button pButton type="button"
+                  label="Copy Proxy"
+                  icon="pi pi-copy"
+                  (click)="copyPreview(preview)">
+          </button>
+          <button pButton type="button"
+                  label="Copy Rotator"
+                  icon="pi pi-copy"
+                  (click)="copyRotatorConnection(previewRotator)"
+                  [disabled]="!rotatorConnectionString(previewRotator)">
+          </button>
+        </div>
       </section>
     }
   </div>

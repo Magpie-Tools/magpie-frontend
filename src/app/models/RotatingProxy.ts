@@ -6,6 +6,9 @@ export interface RotatingProxy {
   listen_port: number;
   auth_required: boolean;
   auth_username?: string | null;
+  auth_password?: string | null;
+  listen_host?: string | null;
+  listen_address?: string | null;
   last_rotation_at?: string | null;
   last_served_proxy?: string | null;
   created_at: string;
