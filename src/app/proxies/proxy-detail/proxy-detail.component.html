@@ -228,7 +228,15 @@
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-row>
-            <tr>
+            <tr
+              class="proxy-stat-row"
+              role="button"
+              tabindex="0"
+              title="View judge response body"
+              (click)="openStatisticResponse(row)"
+              (keydown.enter)="openStatisticResponse(row)"
+              (keydown.space)="openStatisticResponse(row); $event.preventDefault()"
+            >
               <td>{{ row.created_at | date : 'medium' }}</td>
               <td>
                 <div class="flex items-center gap-2">
@@ -255,4 +263,54 @@
       }
     </div>
   </section>
+
+  <p-dialog
+    header="Judge Response"
+    [(visible)]="isResponseBodyModalVisible"
+    [modal]="true"
+    [blockScroll]="true"
+    [closable]="true"
+    [style]="{ width: 'min(680px, 95vw)' }"
+    styleClass="stat-response-dialog"
+    (onHide)="onResponseDialogHide()"
+  >
+    <ng-container *ngIf="selectedStatistic as stat">
+      <div class="stat-response-dialog__meta mt-4">
+        <div class="meta-row">
+          <span class="meta-label">Checked</span>
+          <span class="meta-value">{{ stat.created_at | date : 'medium' }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Judge</span>
+          <span class="meta-value">{{ stat.judge || 'Unknown' }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Protocol</span>
+          <span class="meta-value capitalize">{{ stat.protocol || 'Unknown' }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Status</span>
+          <span class="meta-value">{{ stat.alive ? 'Alive' : 'Dead' }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <div class="stat-response-dialog__content">
+      @if (isLoadingResponseBody) {
+        <div class="stat-response-dialog__loading">
+          <app-loading></app-loading>
+        </div>
+      } @else if (responseBodyError) {
+        <div class="stat-response-dialog__error">
+          {{ responseBodyError }}
+        </div>
+      } @else if (selectedResponseBody) {
+        <pre class="stat-response-dialog__body">{{ selectedResponseBody }}</pre>
+      } @else {
+        <div class="stat-response-dialog__empty">
+          No response body recorded for this check.
+        </div>
+      }
+    </div>
+  </p-dialog>
 </div>

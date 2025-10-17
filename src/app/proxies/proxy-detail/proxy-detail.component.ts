@@ -4,6 +4,7 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {UIChart} from 'primeng/chart';
 import {TableModule} from 'primeng/table';
 import {ButtonModule} from 'primeng/button';
+import {DialogModule} from 'primeng/dialog';
 import {ClipboardModule, Clipboard} from '@angular/cdk/clipboard';
 import {ProxyDetail} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
@@ -30,6 +31,7 @@ interface ThemePalette {
     UIChart,
     TableModule,
     ButtonModule,
+    DialogModule,
     ClipboardModule,
     LoadingComponent,
     DatePipe,
@@ -46,11 +48,17 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
 
   isLoadingDetail = true;
   isLoadingStatistics = true;
+  isResponseBodyModalVisible = false;
+  isLoadingResponseBody = false;
+  selectedStatistic: ProxyStatistic | null = null;
+  selectedResponseBody = '';
+  responseBodyError: string | null = null;
 
   chartData: any = { labels: [], datasets: [] };
   chartOptions: any = this.buildDefaultChartOptions();
 
   private subscriptions = new Subscription();
+  private responseBodySubscription?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -78,6 +86,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.responseBodySubscription?.unsubscribe();
     this.subscriptions.unsubscribe();
   }
 
@@ -311,6 +320,42 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     });
 
     this.subscriptions.add(sub);
+  }
+
+  openStatisticResponse(row: ProxyStatistic): void {
+    if (!this.proxyId) {
+      NotificationService.showError('Unable to determine proxy identifier');
+      return;
+    }
+
+    this.isResponseBodyModalVisible = true;
+    this.isLoadingResponseBody = true;
+    this.selectedStatistic = row;
+    this.selectedResponseBody = '';
+    this.responseBodyError = null;
+
+    this.responseBodySubscription?.unsubscribe();
+    const sub = this.http.getProxyStatisticResponseBody(this.proxyId, row.id).subscribe({
+      next: body => {
+        this.selectedResponseBody = body;
+        this.isLoadingResponseBody = false;
+      },
+      error: err => {
+        this.responseBodyError = err?.error?.error ?? err?.message ?? 'Failed to load response body';
+        this.isLoadingResponseBody = false;
+      }
+    });
+
+    this.responseBodySubscription = sub;
+    this.subscriptions.add(sub);
+  }
+
+  onResponseDialogHide(): void {
+    this.isResponseBodyModalVisible = false;
+    this.responseBodySubscription?.unsubscribe();
+    this.responseBodySubscription = undefined;
+    this.selectedResponseBody = '';
+    this.responseBodyError = null;
   }
 
   private updateChart(): void {

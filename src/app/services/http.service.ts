@@ -81,6 +81,12 @@ export class HttpService {
       .pipe(map(res => res?.statistics ?? []));
   }
 
+  getProxyStatisticResponseBody(proxyId: number, statisticId: number) {
+    return this.http
+      .get<{response_body: string}>(`${this.apiUrl}/proxies/${proxyId}/statistics/${statisticId}`)
+      .pipe(map(res => res?.response_body ?? ''));
+  }
+
 
   saveGlobalSettings(payload: GlobalSettings) {
     return this.http.post(environment.apiUrl + "/saveSettings", payload)
