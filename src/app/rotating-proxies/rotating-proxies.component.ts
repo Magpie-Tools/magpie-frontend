@@ -7,6 +7,7 @@ import {TableModule} from 'primeng/table';
 import {ButtonModule} from 'primeng/button';
 import {InputTextModule} from 'primeng/inputtext';
 import {SelectModule} from 'primeng/select';
+import {DialogModule} from 'primeng/dialog';
 
 import {environment} from '../../environments/environment';
 
@@ -28,6 +29,7 @@ type RotatingProxyPreview = RotatingProxyNext & { name: string };
     InputTextModule,
     SelectModule,
     DatePipe,
+    DialogModule,
   ],
   templateUrl: './rotating-proxies.component.html',
   styleUrl: './rotating-proxies.component.scss'
@@ -44,6 +46,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   authEnabled = false;
   previewRotator: RotatingProxy | null = null;
   selectedRotator: RotatingProxy | null = null;
+  detailsVisible = false;
 
   private readonly defaultRotatorHost = this.resolveDefaultHost();
   rotatorHost = this.defaultRotatorHost;
@@ -113,9 +116,20 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
           const enriched = rawProxies.map(proxy => this.enrichRotator(proxy));
           this.rotatingProxies = enriched;
           if (currentSelectedId) {
-            this.selectedRotator = enriched.find(item => item.id === currentSelectedId) ?? (enriched[0] ?? null);
-          } else if (!this.selectedRotator) {
-            this.selectedRotator = enriched[0] ?? null;
+            const current = enriched.find(item => item.id === currentSelectedId) ?? null;
+            this.selectedRotator = current;
+            if (!current && this.detailsVisible) {
+              this.detailsVisible = false;
+            }
+          } else if (this.selectedRotator) {
+            const updated = enriched.find(item => item.id === this.selectedRotator?.id) ?? null;
+            this.selectedRotator = updated;
+            if (!updated && this.detailsVisible) {
+              this.detailsVisible = false;
+            }
+          }
+          if (!this.selectedRotator && this.detailsVisible) {
+            this.detailsVisible = false;
           }
 
           this.protocolOptions = this.buildProtocolOptions(settings);
@@ -185,7 +199,9 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
             this.rotatorHost = this.defaultRotatorHost;
           }
           this.rotatingProxies = [enriched, ...this.rotatingProxies];
-          this.selectedRotator = enriched;
+          if (this.detailsVisible) {
+            this.selectedRotator = enriched;
+          }
           this.submitting = false;
           this.createForm.patchValue({name: ''}, {emitEvent: false});
           this.createForm.get('authUsername')?.reset('', {emitEvent: false});
@@ -216,7 +232,8 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
             this.previewRotator = null;
           }
           if (this.selectedRotator && this.selectedRotator.id === proxy.id) {
-            this.selectedRotator = this.rotatingProxies[0] ?? null;
+            this.selectedRotator = null;
+            this.detailsVisible = false;
           }
           NotificationService.showSuccess('Rotating proxy deleted.');
         },
@@ -299,6 +316,11 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
 
   showRotatorDetails(proxy: RotatingProxy): void {
     this.selectedRotator = proxy;
+    this.detailsVisible = true;
+  }
+
+  onDetailsHide(): void {
+    this.detailsVisible = false;
   }
 
   rotatorEndpoint(proxy: RotatingProxy | null | undefined): string {

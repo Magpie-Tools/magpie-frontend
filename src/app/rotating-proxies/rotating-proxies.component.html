@@ -184,61 +184,6 @@
       </p-table>
     </section>
 
-    @if (selectedRotator) {
-      <section class="details-card">
-        <div class="card-header">
-          <h2>Rotator Details</h2>
-          <p class="subtitle">{{ selectedRotator.name }} · {{ protocolLabel(selectedRotator.protocol) }}</p>
-        </div>
-
-        <div class="details-grid">
-          <div class="detail-row">
-            <span class="label">Endpoint</span>
-            <span class="value">{{ rotatorEndpoint(selectedRotator) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Connection</span>
-            @if (rotatorConnectionString(selectedRotator)) {
-              <span class="value">{{ rotatorConnectionString(selectedRotator) }}</span>
-            } @else {
-              <span class="value muted">Unavailable</span>
-            }
-          </div>
-          <div class="detail-row">
-            <span class="label">Authentication</span>
-            @if (selectedRotator.auth_required && selectedRotator.auth_username && selectedRotator.auth_password) {
-              <span class="value">{{ selectedRotator.auth_username }} / {{ selectedRotator.auth_password }}</span>
-            } @else if (selectedRotator.auth_required) {
-              <span class="value muted">Credentials required</span>
-            } @else {
-              <span class="value muted">Not required</span>
-            }
-          </div>
-        </div>
-
-        <div class="details-actions">
-          <button pButton type="button"
-                  label="Copy Connection"
-                  icon="pi pi-copy"
-                  (click)="copyRotatorConnection(selectedRotator)"
-                  [disabled]="!rotatorConnectionString(selectedRotator)">
-          </button>
-          <button pButton type="button"
-                  label="Copy Username"
-                  icon="pi pi-user"
-                  (click)="copyRotatorField(selectedRotator.auth_username, 'Username')"
-                  [disabled]="!selectedRotator.auth_username">
-          </button>
-          <button pButton type="button"
-                  label="Copy Password"
-                  icon="pi pi-lock"
-                  (click)="copyRotatorField(selectedRotator.auth_password, 'Password')"
-                  [disabled]="!selectedRotator.auth_password">
-          </button>
-        </div>
-      </section>
-    }
-
     @if (preview) {
       <section class="preview-card">
         <div class="card-header">
@@ -286,3 +231,64 @@
     }
   </div>
 }
+
+<p-dialog
+  [(visible)]="detailsVisible"
+  [modal]="true"
+  [dismissableMask]="true"
+  [style]="{width: '625px'}"
+  [breakpoints]="{'960px': '70vw', '640px': '90vw'}"
+  (onHide)="onDetailsHide()"
+  [header]="selectedRotator ? selectedRotator.name + ' · ' + protocolLabel(selectedRotator.protocol) : 'Rotator Details'">
+  @if (selectedRotator) {
+    <div class="details-dialog">
+      <div class="details-grid">
+        <div class="detail-row">
+          <span class="label">Endpoint</span>
+          <span class="value">{{ rotatorEndpoint(selectedRotator) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Connection</span>
+          @if (rotatorConnectionString(selectedRotator)) {
+            <span class="value">{{ rotatorConnectionString(selectedRotator) }}</span>
+          } @else {
+            <span class="value muted">Unavailable</span>
+          }
+        </div>
+        <div class="detail-row">
+          <span class="label">Authentication</span>
+          @if (selectedRotator.auth_required && selectedRotator.auth_username && selectedRotator.auth_password) {
+            <span class="value">{{ selectedRotator.auth_username }} / {{ selectedRotator.auth_password }}</span>
+          } @else if (selectedRotator.auth_required) {
+            <span class="value muted">Credentials required</span>
+          } @else {
+            <span class="value muted">Not required</span>
+          }
+        </div>
+      </div>
+
+      <div class="details-actions">
+        <button pButton type="button"
+                label="Copy Connection"
+                icon="pi pi-copy"
+                (click)="copyRotatorConnection(selectedRotator)"
+                [disabled]="!rotatorConnectionString(selectedRotator)">
+        </button>
+        <button pButton type="button"
+                label="Copy Username"
+                icon="pi pi-user"
+                (click)="copyRotatorField(selectedRotator.auth_username, 'Username')"
+                [disabled]="!selectedRotator.auth_username">
+        </button>
+        <button pButton type="button"
+                label="Copy Password"
+                icon="pi pi-lock"
+                (click)="copyRotatorField(selectedRotator.auth_password, 'Password')"
+                [disabled]="!selectedRotator.auth_password">
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="empty-details muted">Select a rotator to view details.</div>
+  }
+</p-dialog>
