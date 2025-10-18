@@ -35,21 +35,8 @@
           </p-select>
           @if (noProtocolsAvailable) {
             <small class="hint">Enable at least one protocol in your account settings to create a rotator.</small>
-          }
-        </div>
-
-        <div class="form-field">
-          <label for="listenPort">Listen Port</label>
-          <input id="listenPort"
-                 type="number"
-                 pInputText
-                 min="1025"
-                 max="65535"
-                 placeholder="e.g. 19000"
-                 formControlName="listenPort"
-                 [disabled]="submitting || noProtocolsAvailable">
-          @if (createForm.get('listenPort')?.invalid && (createForm.get('listenPort')?.dirty || createForm.get('listenPort')?.touched)) {
-            <small class="error">Port must be between 1025 and 65535.</small>
+          } @else {
+            <small class="hint">Ports are assigned automatically within the published range.</small>
           }
         </div>
 

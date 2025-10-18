@@ -56,7 +56,6 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     this.createForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(120)]],
       protocol: ['', Validators.required],
-      listenPort: [null, [Validators.required, Validators.min(1025), Validators.max(65535)]],
       authRequired: [false],
       authUsername: [{value: '', disabled: true}, [Validators.maxLength(120)]],
       authPassword: [{value: '', disabled: true}, [Validators.maxLength(120)]],
@@ -137,11 +136,9 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
           if (this.noProtocolsAvailable) {
             this.createForm.get('protocol')?.disable({emitEvent: false});
             this.createForm.get('name')?.disable({emitEvent: false});
-            this.createForm.get('listenPort')?.disable({emitEvent: false});
           } else {
             this.createForm.get('protocol')?.enable({emitEvent: false});
             this.createForm.get('name')?.enable({emitEvent: false});
-            this.createForm.get('listenPort')?.enable({emitEvent: false});
             const currentProtocol = this.createForm.get('protocol')?.value;
             if (!currentProtocol) {
               this.createForm.patchValue({protocol: this.protocolOptions[0].value}, {emitEvent: false});
@@ -165,7 +162,6 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     const payload: CreateRotatingProxy = {
       name: (this.createForm.get('name')?.value ?? '').trim(),
       protocol: this.createForm.get('protocol')?.value,
-      listen_port: Number(this.createForm.get('listenPort')?.value ?? 0),
       auth_required: !!this.createForm.get('authRequired')?.value,
     };
 
@@ -178,12 +174,6 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       this.createForm.get('name')?.setValue('');
       this.createForm.get('name')?.markAsTouched();
       NotificationService.showWarn('Name cannot be empty.');
-      return;
-    }
-
-    if (!payload.listen_port || payload.listen_port < 1025 || payload.listen_port > 65535) {
-      NotificationService.showWarn('Please provide a listen port between 1025 and 65535.');
-      this.createForm.get('listenPort')?.markAsTouched();
       return;
     }
 

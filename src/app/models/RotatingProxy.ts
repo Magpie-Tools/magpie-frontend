@@ -17,7 +17,6 @@ export interface RotatingProxy {
 export interface CreateRotatingProxy {
   name: string;
   protocol: string;
-  listen_port: number;
   auth_required: boolean;
   auth_username?: string | null;
   auth_password?: string | null;
