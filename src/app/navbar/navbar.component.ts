@@ -75,6 +75,11 @@ export class NavbarComponent implements OnInit, AfterViewInit {
             label: 'Global Scraper',
             icon: 'pi pi-globe',
             routerLink: 'global/scraper'
+          },
+          {
+            label: 'Other',
+            icon: 'pi pi-globe',
+            routerLink: 'global/other'
           }
         ]
       }

@@ -7,14 +7,15 @@ import {LoginComponent} from './auth/login/login.component';
 import {AuthGuardService} from './services/authorization/auth-guard.service';
 import {AccountComponent} from './account/account.component';
 import {AuthGuardAdminService} from './services/authorization/auth-guard-admin.service';
-import {AdminCheckerComponent} from './checker/admin-checker/admin-checker.component';
-import {AdminScraperComponent} from './scraper/admin-scraper/admin-scraper.component';
 import {UserScraperComponent} from './scraper/user-scraper/user-scraper.component';
 import {AuthLoginGuardService} from './services/authorization/auth-login-guard.service';
 import {AddProxiesComponent} from './proxies/proxy-list/add-proxies/add-proxies.component';
 import {CheckerJudgesComponent} from './checker/judges/checker-judges.component';
 import {CheckerSettingsComponent} from './checker/settings/checker-settings.component';
 import {RotatingProxiesComponent} from './rotating-proxies/rotating-proxies.component';
+import {AdminCheckerComponent} from './admin/admin-checker/admin-checker.component';
+import {AdminScraperComponent} from './admin/admin-scraper/admin-scraper.component';
+import {AdminOtherComponent} from './admin/admin-other/admin-other.component';
 
 export const routes: Routes = [
   {path: "account", component: AccountComponent, canActivate: [AuthGuardService]},
@@ -22,12 +23,13 @@ export const routes: Routes = [
   {path: "rotating", component: RotatingProxiesComponent, canActivate: [AuthGuardService]},
   {path: "proxies", component: ProxiesComponent, canActivate: [AuthGuardService]},
   {path: "proxies/:id", component: ProxyDetailComponent, canActivate: [AuthGuardService]},
+  {path: "scraper", component: UserScraperComponent, canActivate: [AuthGuardService]},
   {path: "checker", redirectTo: "checker/settings", pathMatch: "full"},
   {path: "checker/settings", component: CheckerSettingsComponent, canActivate: [AuthGuardService]},
   {path: "checker/judges", component: CheckerJudgesComponent, canActivate: [AuthGuardService]},
   {path: "global/checker", component: AdminCheckerComponent, canActivate: [AuthGuardAdminService]},
-  {path: "scraper", component: UserScraperComponent, canActivate: [AuthGuardService]},
   {path: "global/scraper", component: AdminScraperComponent, canActivate: [AuthGuardAdminService]},
+  {path: "global/other", component: AdminOtherComponent, canActivate: [AuthGuardAdminService]},
   {path: "register", component: RegisterComponent, canActivate: [AuthLoginGuardService]},
   {path: "login", component: LoginComponent, canActivate: [AuthLoginGuardService]},
   {path: "**", component: DashboardComponent, canActivate: [AuthGuardService]}

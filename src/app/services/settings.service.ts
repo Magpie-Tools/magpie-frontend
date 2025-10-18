@@ -208,8 +208,24 @@ export class SettingsService {
     const blacklist_sources =
       formData.blacklisted ?? current?.blacklist_sources ?? [];
 
+    /* ---------- 5. GeoLite ---------- */
+    const geoliteForm = formData.geolite ?? {};
+    const geoliteTimer = geoliteForm.update_timer ?? {};
+
+    const geolite: GlobalSettings['geolite'] = {
+      api_key: geoliteForm.api_key ?? current?.geolite?.api_key ?? '',
+      auto_update: geoliteForm.auto_update ?? current?.geolite?.auto_update ?? false,
+      update_timer: {
+        days: geoliteTimer?.days ?? current?.geolite?.update_timer?.days ?? 1,
+        hours: geoliteTimer?.hours ?? current?.geolite?.update_timer?.hours ?? 0,
+        minutes: geoliteTimer?.minutes ?? current?.geolite?.update_timer?.minutes ?? 0,
+        seconds: geoliteTimer?.seconds ?? current?.geolite?.update_timer?.seconds ?? 0
+      },
+      last_updated_at: geoliteForm.last_updated_at ?? current?.geolite?.last_updated_at ?? null
+    };
+
     /* ---------- final shape ---------- */
-    return { protocols, checker, scraper, proxy_limits, blacklist_sources };
+    return { protocols, checker, scraper, proxy_limits, geolite, blacklist_sources };
   }
 
 }

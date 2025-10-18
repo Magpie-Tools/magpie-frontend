@@ -57,5 +57,17 @@ export interface GlobalSettings {
     exclude_admins: boolean;
   };
 
+  geolite: {
+    api_key: string;
+    auto_update: boolean;
+    update_timer: {
+      days: number;
+      hours: number;
+      minutes: number;
+      seconds: number;
+    };
+    last_updated_at?: string | null;
+  };
+
   blacklist_sources: string[];
 }
