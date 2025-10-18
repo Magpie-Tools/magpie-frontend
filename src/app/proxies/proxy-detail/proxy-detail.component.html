@@ -78,7 +78,9 @@
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img [src]="link.icon" alt="" />
+                  @if (link.icon != '') {
+                    <img [src]="link.icon" alt="" />
+                  }
                   {{ link.label }}
                   <i class="pi pi-external-link"></i>
                 </a>
