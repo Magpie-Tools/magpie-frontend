@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { GlobalSettings } from '../models/GlobalSettings';
 import { HttpService } from './http.service';
 import {UserSettings} from '../models/UserSettings';
@@ -15,29 +15,62 @@ export class SettingsService {
   private userSettings: UserSettings | undefined;
   private settingsSubject = new BehaviorSubject<GlobalSettings | undefined>(undefined);
   public settings$ = this.settingsSubject.asObservable();
+  private userSettingsSubject = new BehaviorSubject<UserSettings | undefined>(undefined);
+  public userSettings$ = this.userSettingsSubject.asObservable();
 
-  constructor(private http: HttpService) {
+  private globalSettingsLoaded = false;
+
+  constructor(private http: HttpService, private userService: UserService) {
     this.loadSettings();
+
+    this.userService.role$
+      .pipe(distinctUntilChanged())
+      .subscribe(role => {
+        if (role === 'admin') {
+          this.fetchGlobalSettings();
+          return;
+        }
+
+        this.globalSettingsLoaded = false;
+        this.settings = undefined;
+        this.settingsSubject.next(this.settings);
+      });
   }
 
   loadSettings(): void {
     this.http.getUserSettings().subscribe({
-      next: res => this.userSettings = res,
+      next: res => {
+        this.userSettings = res;
+        this.userSettingsSubject.next(this.userSettings);
+      },
       error: err => NotificationService.showError("Error while getting user settings" + err.error.message)
       })
 
     if (UserService.isAdmin()) {
-      this.http.getGlobalSettings().subscribe({
-        next: res => {
-          this.settings = res;
-          this.settingsSubject.next(this.settings);
-        },
-        error: err => {
-          NotificationService.showError("Error while getting global settings " + err.error.message)
-        }
-      });
+      this.fetchGlobalSettings();
     }
 
+  }
+
+  private fetchGlobalSettings(): void {
+    if (this.globalSettingsLoaded) {
+      return;
+    }
+
+    this.http.getGlobalSettings().subscribe({
+      next: res => {
+        this.globalSettingsLoaded = true;
+        this.settings = res;
+        this.settingsSubject.next(this.settings);
+      },
+      error: err => {
+        if (err.status === 401 || err.status === 403) {
+          this.globalSettingsLoaded = false;
+          return;
+        }
+        NotificationService.showError("Error while getting global settings " + err.error.message)
+      }
+    });
   }
 
   getGlobalSettings(): GlobalSettings | undefined {
@@ -79,13 +112,15 @@ export class SettingsService {
 
   saveUserSettings(formData: any): Observable<any> {
     const payload = this.transformUserSettings(formData);
-    this.userSettings = payload
+    this.userSettings = payload;
+    this.userSettingsSubject.next(this.userSettings);
     return this.http.saveUserSettings(payload);
   }
 
   saveUserScrapingSources(sources: string[]): Observable<any> {
     if (this.userSettings) {
       this.userSettings.scraping_sources = sources
+      this.userSettingsSubject.next(this.userSettings);
     }
     return this.http.saveUserScrapingSites(sources)
   }

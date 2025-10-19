@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CheckboxComponent} from '../../checkbox/checkbox.component';
 import {InputText} from 'primeng/inputtext';
@@ -6,6 +6,8 @@ import {Button} from 'primeng/button';
 import {SettingsService} from '../../services/settings.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {UserSettings} from '../../models/UserSettings';
+import {Subject} from 'rxjs';
+import {filter, takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'app-checker-settings',
@@ -14,8 +16,9 @@ import {UserSettings} from '../../models/UserSettings';
   templateUrl: './checker-settings.component.html',
   styleUrls: ['./checker-settings.component.scss']
 })
-export class CheckerSettingsComponent implements OnInit {
+export class CheckerSettingsComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
+  private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder, private settingsService: SettingsService) {
     this.settingsForm = this.createForm();
@@ -23,6 +26,18 @@ export class CheckerSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.populateForm(this.settingsService.getUserSettings());
+
+    this.settingsService.userSettings$
+      .pipe(
+        filter((settings): settings is UserSettings => !!settings),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(settings => this.populateForm(settings));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private createForm(): FormGroup {

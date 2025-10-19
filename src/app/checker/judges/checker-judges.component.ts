@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {TooltipComponent} from '../../tooltip/tooltip.component';
@@ -7,6 +7,8 @@ import {Button} from 'primeng/button';
 import {SettingsService} from '../../services/settings.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {UserSettings} from '../../models/UserSettings';
+import {Subject} from 'rxjs';
+import {filter, takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'app-checker-judges',
@@ -15,8 +17,9 @@ import {UserSettings} from '../../models/UserSettings';
   templateUrl: './checker-judges.component.html',
   styleUrls: ['./checker-judges.component.scss']
 })
-export class CheckerJudgesComponent implements OnInit {
+export class CheckerJudgesComponent implements OnInit, OnDestroy {
   judgesForm: FormArray<FormGroup>;
+  private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder, private settingsService: SettingsService) {
     this.judgesForm = this.fb.array<FormGroup>([]);
@@ -24,6 +27,18 @@ export class CheckerJudgesComponent implements OnInit {
 
   ngOnInit(): void {
     this.populateJudges(this.settingsService.getUserSettings());
+
+    this.settingsService.userSettings$
+      .pipe(
+        filter((settings): settings is UserSettings => !!settings),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(settings => this.populateJudges(settings));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get judgeControls(): FormGroup[] {
