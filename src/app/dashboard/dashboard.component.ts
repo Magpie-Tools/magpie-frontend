@@ -2,14 +2,13 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ProgressSpinner} from 'primeng/progressspinner';
 import {DecimalPipe, NgIf} from '@angular/common';
 import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import {finalize, takeUntil} from 'rxjs/operators';
 
 import {ProxyCheck} from '../models/ProxyCheck';
 import {KpiCardComponent} from './cards/kpi-card/kpi-card.component';
 import {ProxiesPerHourCardComponent} from './cards/proxies-per-hour-card/proxies-per-hour-card.component';
 import {ProxyHistoryCardComponent} from './cards/proxy-history-card/proxy-history-card.component';
 import {ProxiesPerCountryCardComponent} from './cards/proxies-per-country-card/proxies-per-country-card.component';
-import {ProxiesByAnonymityCardComponent} from './cards/proxies-by-anonymity-card/proxies-by-anonymity-card.component';
 import {JudgeByPercentageCardComponent} from './cards/judge-by-percentage-card/judge-by-percentage-card.component';
 import {
   CountryBreakdownEntry,
@@ -45,7 +44,6 @@ interface DashboardStatus {
     ProxiesPerHourCardComponent,
     ProxyHistoryCardComponent,
     ProxiesPerCountryCardComponent,
-    ProxiesByAnonymityCardComponent,
     JudgeByPercentageCardComponent
   ],
   styleUrls: ['./dashboard.component.scss']
@@ -114,6 +112,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   judgePeriodOptions = ['Yearly', 'Monthly', 'Weekly'];
 
   private readonly destroy$ = new Subject<void>();
+  proxyHistoryRefreshing = false;
 
   constructor(private graphqlService: GraphqlService) {}
 
@@ -124,6 +123,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  onProxyHistoryRefresh(): void {
+    if (this.proxyHistoryRefreshing) {
+      return;
+    }
+
+    this.proxyHistoryRefreshing = true;
+
+    this.graphqlService
+      .fetchDashboardData()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.proxyHistoryRefreshing = false;
+        })
+      )
+      .subscribe({
+        next: ({viewer}) => {
+          const proxies = viewer?.proxies?.items ?? [];
+          this.updateProxyHistory(proxies);
+          this.dashboardInfo = {...this.dashboardInfo, error: undefined};
+        },
+        error: (error: Error) => {
+          this.dashboardInfo = {
+            ...this.dashboardInfo,
+            error: error?.message ?? 'Failed to refresh proxy history'
+          };
+        }
+      });
   }
 
   private loadDashboard(): void {

@@ -43,7 +43,11 @@
     </div>
 
     <div class="lg:col-span-1">
-      <app-proxy-history-card [history]="proxyHistory"></app-proxy-history-card>
+      <app-proxy-history-card
+        [history]="proxyHistory"
+        [refreshing]="proxyHistoryRefreshing"
+        (refresh)="onProxyHistoryRefresh()">
+      </app-proxy-history-card>
     </div>
 
     <div class="lg:col-span-2">

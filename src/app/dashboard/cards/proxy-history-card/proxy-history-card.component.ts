@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {Card} from 'primeng/card';
 import {PrimeTemplate} from 'primeng/api';
 import {Button} from 'primeng/button';
@@ -16,6 +16,16 @@ export class ProxyHistoryCardComponent {
   @Input() title = 'Proxy History';
   @Input() history: ProxyCheck[] = [];
   @Input() styleClass = 'transaction-card bg-neutral-900 border border-neutral-800 h-full';
+  @Input() refreshing = false;
+  @Output() refresh = new EventEmitter<void>();
+
+  onRefreshClick(): void {
+    if (this.refreshing) {
+      return;
+    }
+
+    this.refresh.emit();
+  }
 
   getStatusIcon(status: string): string {
     switch (status) {
