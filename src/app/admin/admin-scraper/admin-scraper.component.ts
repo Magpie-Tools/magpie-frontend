@@ -17,6 +17,7 @@ import {GlobalSettings} from '../../models/GlobalSettings';
 
 @Component({
   selector: 'app-admin-scraper',
+  standalone: true,
   imports: [
     ReactiveFormsModule,
     TabsModule,

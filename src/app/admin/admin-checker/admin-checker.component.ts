@@ -14,7 +14,8 @@ import {Subject} from 'rxjs';
 import {Message} from 'primeng/message';
 
 @Component({
-    selector: 'app-admin-checker',
+  selector: 'app-admin-checker',
+  standalone: true,
   imports: [
     CheckboxComponent,
     FormsModule,
