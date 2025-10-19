@@ -57,13 +57,19 @@ export class ScrapeSourceListComponent implements OnInit {
     this.loading = true;
     this.http.getScrapingSourcePage(this.page + 1).subscribe({
       next: res => {
-        this.scrapeSources = res;
+        const sources = Array.isArray(res) ? res : [];
+        this.scrapeSources = sources;
         this.syncSelectionWithData();
         this.loading = false;
+        this.hasLoaded = true;
+        const shouldShowEmptyState = this.totalItems === 0 && sources.length === 0;
+        this.showAddScrapeSourceMessage.emit(shouldShowEmptyState);
       },
       error: err => {
         NotificationService.showError("Could not get scraping sources" + err.error.message);
         this.loading = false;
+        this.hasLoaded = true;
+        this.showAddScrapeSourceMessage.emit(false);
       }
     });
   }
@@ -71,11 +77,13 @@ export class ScrapeSourceListComponent implements OnInit {
   getAndSetScrapeSourceCount() {
     this.http.getScrapingSourcesCount().subscribe({
       next: res => {
-        this.totalItems = res;
-        this.hasLoaded = true;
-        this.showAddScrapeSourceMessage.emit(this.totalItems === 0 && this.hasLoaded);
+        this.totalItems = res ?? 0;
+        const shouldShowEmptyState = this.totalItems === 0 && this.hasLoaded && this.scrapeSources.length === 0;
+        this.showAddScrapeSourceMessage.emit(shouldShowEmptyState);
       },
-      error: err => NotificationService.showError("Could not get scrape sources count " + err.error.message)
+      error: err => {
+        NotificationService.showError("Could not get scrape sources count " + err.error.message);
+      }
     });
   }
 
