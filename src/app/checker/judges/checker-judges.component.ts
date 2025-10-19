@@ -31,7 +31,7 @@ export class CheckerJudgesComponent implements OnInit {
   }
 
   addJudge(): void {
-    this.judgesForm.push(this.createJudgeGroup());
+    this.judgesForm.push(this.createJudgeGroup('', 'default'));
     this.judgesForm.markAsDirty();
   }
 
