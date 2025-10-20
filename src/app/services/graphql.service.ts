@@ -44,6 +44,16 @@ const DASHBOARD_QUERY = `#graphql
         count
         recordedAt
       }
+      proxySnapshots {
+        alive {
+          count
+          recordedAt
+        }
+        scraped {
+          count
+          recordedAt
+        }
+      }
       scrapeSourceCount
     }
   }
@@ -62,6 +72,7 @@ export interface DashboardViewer {
   proxyCount: number;
   proxies: ProxyPage;
   proxyHistory: ProxyHistoryEntry[];
+  proxySnapshots: ProxySnapshots;
   scrapeSourceCount: number;
 }
 
@@ -109,6 +120,16 @@ export interface ProxyNode {
 export interface ProxyHistoryEntry {
   count: number;
   recordedAt: string;
+}
+
+export interface ProxySnapshotEntry {
+  count: number;
+  recordedAt: string;
+}
+
+export interface ProxySnapshots {
+  alive: ProxySnapshotEntry[];
+  scraped: ProxySnapshotEntry[];
 }
 
 interface GraphQLResponse<T> {

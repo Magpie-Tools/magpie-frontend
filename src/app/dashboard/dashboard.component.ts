@@ -3,7 +3,6 @@ import {ProgressSpinner} from 'primeng/progressspinner';
 import {DecimalPipe, NgIf} from '@angular/common';
 import {Subject} from 'rxjs';
 import {finalize, takeUntil} from 'rxjs/operators';
-
 import {ProxyCheck} from '../models/ProxyCheck';
 import {KpiCardComponent} from './cards/kpi-card/kpi-card.component';
 import {ProxiesPerHourCardComponent} from './cards/proxies-per-hour-card/proxies-per-hour-card.component';
@@ -17,7 +16,9 @@ import {
   GraphqlService,
   JudgeValidProxy,
   ProxyHistoryEntry,
-  ProxyNode
+  ProxyNode,
+  ProxySnapshotEntry,
+  ProxySnapshots
 } from '../services/graphql.service';
 
 interface SparklineMetric {
@@ -142,8 +143,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: ({viewer}) => {
-          const proxies = viewer?.proxies?.items ?? [];
-          this.updateProxyHistory(proxies);
+          this.applyDashboardData(viewer);
           this.dashboardInfo = {...this.dashboardInfo, error: undefined};
         },
         error: (error: Error) => {
@@ -180,7 +180,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.updateKpis(viewer.dashboard, viewer.proxyCount);
+    this.updateKpis(viewer.dashboard, viewer.proxyCount, viewer.proxySnapshots, viewer.proxyHistory);
     this.updateCountryBreakdown(
       viewer.proxies?.items ?? [],
       viewer.proxyCount,
@@ -192,37 +192,81 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.buildProxiesLineChart(viewer.proxyHistory ?? [], viewer.proxyCount);
   }
 
-  private updateKpis(dashboard: DashboardInfo, proxyCount: number): void {
-    const judgeEntries = dashboard?.judgeValidProxies ?? [];
-    const aliveTotals = judgeEntries.reduce((sum, entry) => {
-      return sum + entry.eliteProxies + entry.anonymousProxies + entry.transparentProxies;
-    }, 0);
+  private updateKpis(
+    dashboard: DashboardInfo | undefined,
+    proxyCount: number,
+    snapshots: ProxySnapshots | undefined,
+    proxyHistory: ProxyHistoryEntry[] | undefined
+  ): void {
+    const aliveSeries = this.extractSnapshotCounts(snapshots?.alive);
+    const fallbackAlive = this.resolveAliveFallback(dashboard);
+    const aliveValue = aliveSeries.length ? aliveSeries[aliveSeries.length - 1] : fallbackAlive.value;
+    const aliveHistory = aliveSeries.length ? aliveSeries : fallbackAlive.history;
 
-    const aliveHistory = judgeEntries
-      .map((entry) => entry.eliteProxies + entry.anonymousProxies + entry.transparentProxies)
-      .filter((value) => value > 0);
     this.conversionRate = {
-      value: aliveTotals,
-      history: aliveHistory.length ? aliveHistory : [aliveTotals],
-      displayValue: aliveTotals.toLocaleString()
+      value: aliveValue,
+      history: aliveHistory.length ? aliveHistory : [aliveValue],
+      displayValue: aliveValue.toLocaleString()
     };
 
-    const totalChecks = dashboard?.totalChecks ?? 0;
-    const totalChecksWeek = dashboard?.totalChecksWeek ?? 0;
-    const checksHistory = [totalChecksWeek, totalChecks].filter((value, index) => value > 0 && index === 0 ? true : value >= totalChecksWeek);
+    const totalSeries = (proxyHistory ?? []).map((entry) => entry.count).filter((value) => typeof value === 'number');
     this.avgOrderValue = {
       value: proxyCount,
-      history: checksHistory.length ? checksHistory : [proxyCount],
+      history: totalSeries.length ? totalSeries : [proxyCount],
       displayValue: proxyCount.toLocaleString()
     };
 
-    const totalScraped = dashboard?.totalScraped ?? 0;
-    const totalScrapedWeek = dashboard?.totalScrapedWeek ?? 0;
-    const scrapedHistory = totalScrapedWeek > 0 ? [totalScrapedWeek] : [];
+    const scrapedSeries = this.extractSnapshotCounts(snapshots?.scraped);
+    const fallbackScraped = this.resolveScrapedFallback(dashboard);
+    const scrapedValue = scrapedSeries.length ? scrapedSeries[scrapedSeries.length - 1] : fallbackScraped.value;
+    const scrapedHistory = scrapedSeries.length ? scrapedSeries : fallbackScraped.history;
+
     this.orderQuantity = {
+      value: scrapedValue,
+      history: scrapedHistory.length ? scrapedHistory : [scrapedValue],
+      displayValue: scrapedValue.toLocaleString()
+    };
+  }
+
+  private extractSnapshotCounts(entries: ProxySnapshotEntry[] | undefined): number[] {
+    if (!Array.isArray(entries) || !entries.length) {
+      return [];
+    }
+
+    return entries
+      .map((entry) => Number(entry?.count ?? 0))
+      .filter((value) => Number.isFinite(value) && value >= 0);
+  }
+
+  private resolveAliveFallback(dashboard: DashboardInfo | undefined): { value: number; history: number[] } {
+    const judgeEntries = dashboard?.judgeValidProxies ?? [];
+    if (!judgeEntries.length) {
+      return { value: 0, history: [] };
+    }
+
+    const totals = judgeEntries.map(
+      (entry) => entry.eliteProxies + entry.anonymousProxies + entry.transparentProxies
+    );
+    const aggregate = totals.reduce((sum, value) => sum + value, 0);
+
+    return {
+      value: aggregate,
+      history: totals.filter((value) => value > 0)
+    };
+  }
+
+  private resolveScrapedFallback(dashboard: DashboardInfo | undefined): { value: number; history: number[] } {
+    if (!dashboard) {
+      return { value: 0, history: [] };
+    }
+
+    const totalScraped = dashboard.totalScraped ?? 0;
+    const totalScrapedWeek = dashboard.totalScrapedWeek ?? 0;
+    const history = totalScrapedWeek > 0 ? [totalScrapedWeek] : [];
+
+    return {
       value: totalScraped,
-      history: scrapedHistory.length ? scrapedHistory : [totalScraped],
-      displayValue: totalScraped.toLocaleString()
+      history
     };
   }
 
