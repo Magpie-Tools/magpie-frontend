@@ -1,14 +1,16 @@
-import {Injectable} from '@angular/core';
+import {Injectable, signal} from '@angular/core';
 import {HttpService} from '../http.service';
 import {Router} from '@angular/router';
 import {NotificationService} from '../notification-service.service';
 import {BehaviorSubject} from 'rxjs';
 
+type AuthState = 'checking' | 'authenticated' | 'unauthenticated';
+
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private static isAuthenticated = false
+  private static readonly _authState = signal<AuthState>('checking');
   private static role = 'user';
   private static roleSubject = new BehaviorSubject<string | undefined>(undefined);
   public readonly role$ = UserService.roleSubject.asObservable();
@@ -22,22 +24,23 @@ export class UserService {
       return;
     }
 
-    if (UserService.isAuthenticated) {
+    const token = window.localStorage.getItem('magpie-jwt');
+    if (token) {
+      UserService.setAuthState('checking');
       this.getAndSetRole();
       return;
     }
 
-    const token = window.localStorage.getItem('magpie-jwt');
-    if (token) {
-      UserService.setLoggedIn(true);
-      this.getAndSetRole();
-    }
+    UserService.setAuthState('unauthenticated');
   }
 
   public getAndSetRole() {
+    if (UserService.authState() !== 'authenticated') {
+      UserService.setAuthState('checking');
+    }
     this.http.getUserRole().subscribe({
       next: res => {
-        UserService.setLoggedIn(true);
+        UserService.setAuthState('authenticated');
         UserService.setRole(res);
       },
       error: err => {
@@ -45,18 +48,27 @@ export class UserService {
           NotificationService.showError("Error while getting user role! " + err.error.message)
         }
         if (err.status === 401 || err.status === 403) {
-          UserService.logout();
+          this.logoutAndRedirect();
+          return;
         }
+        if (!err.status || err.status === 0) {
+          // If the backend cannot be reached we keep the token but fall back to the login view.
+          UserService.setAuthState('unauthenticated');
+          UserService.setRole('user');
+          return;
+        }
+        UserService.setAuthState('unauthenticated');
+        UserService.setRole('user');
       }
     })
   }
 
   public static isLoggedIn() {
-    return UserService.isAuthenticated;
+    return UserService._authState() === 'authenticated';
   }
 
   public static setLoggedIn(loggedIn: boolean) {
-    this.isAuthenticated = loggedIn;
+    UserService.setAuthState(loggedIn ? 'authenticated' : 'unauthenticated');
   }
 
   public static setRole(role: string) {
@@ -81,5 +93,12 @@ export class UserService {
     this.router.navigate(['/login']);
   }
 
+  public static authState() {
+    return UserService._authState();
+  }
+
+  private static setAuthState(state: AuthState) {
+    UserService._authState.set(state);
+  }
 
 }
