@@ -48,8 +48,9 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   selectedRotator: RotatingProxy | null = null;
   detailsVisible = false;
 
+  private readonly loopbackHost = '127.0.0.1';
   private readonly defaultRotatorHost = this.resolveDefaultHost();
-  rotatorHost = this.defaultRotatorHost;
+  rotatorHost = this.loopbackHost;
   private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder, private http: HttpService) {
@@ -105,11 +106,8 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
         next: ({proxies, settings}) => {
           const rawProxies = proxies ?? [];
           const currentSelectedId = this.selectedRotator?.id ?? null;
-          const hostFromResponse = rawProxies.find(item => (item.listen_host ?? '').trim().length > 0)?.listen_host?.trim();
-          if (hostFromResponse) {
-            this.rotatorHost = hostFromResponse;
-          } else if (!this.rotatorHost) {
-            this.rotatorHost = this.defaultRotatorHost;
+          if (!this.rotatorHost) {
+            this.rotatorHost = this.loopbackHost || this.defaultRotatorHost;
           }
 
           const enriched = rawProxies.map(proxy => this.enrichRotator(proxy));
@@ -387,8 +385,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
 
   private enrichRotator(proxy: RotatingProxy): RotatingProxy {
     const listenHost = this.resolveHostValue(proxy.listen_host);
-    const listenAddress = (proxy.listen_address ?? '').toString().trim()
-      || (listenHost ? `${listenHost}:${proxy.listen_port}` : `${proxy.listen_port}`);
+    const listenAddress = listenHost ? `${listenHost}:${proxy.listen_port}` : `${proxy.listen_port}`;
 
     return {
       ...proxy,
@@ -400,6 +397,9 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   }
 
   private resolveHostValue(host: string | null | undefined): string {
+    if (this.loopbackHost) {
+      return this.loopbackHost;
+    }
     const candidate = (host ?? '').toString().trim();
     if (candidate) {
       return candidate;
