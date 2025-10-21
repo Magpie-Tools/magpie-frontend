@@ -17,8 +17,11 @@ interface BackendUpdateResponse {
   html_url?: string;
   message?: string;
   committed_at?: string;
+  current_sha?: string;
+  current_short_sha?: string;
 }
 
+const GIT_SHA_REGEX = /^[0-9a-f]{7}$/;
 const STORAGE_KEY = 'magpie_update_baseline_commit';
 
 function normalizeCommit(value?: string | null): string | null {
@@ -39,7 +42,7 @@ function readStoredBaseline(): string | null {
   }
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return normalizeCommit(raw);
+    return normalizeBuildCommit(raw);
   } catch {
     return null;
   }
@@ -61,13 +64,13 @@ const RAW_COMMIT =
   (import.meta as any)?.env?.NG_APP_BUILD_SHA ??
   '';
 
-const STORED_BASELINE = readStoredBaseline();
+export function normalizeBuildCommit(raw: unknown): string | null {
+  const normalized = normalizeCommit(typeof raw === 'string' ? raw : null);
+  return normalized && GIT_SHA_REGEX.test(normalized) ? normalized : null;
+}
 
-const INITIAL_COMMIT = normalizeCommit(
-  typeof RAW_COMMIT === 'string' && RAW_COMMIT && RAW_COMMIT !== 'dev'
-    ? RAW_COMMIT
-    : STORED_BASELINE
-);
+const STORED_BASELINE = readStoredBaseline();
+const BUNDLED_COMMIT = normalizeBuildCommit(RAW_COMMIT);
 
 @Injectable({ providedIn: 'root' })
 export class UpdateNotificationService {
@@ -84,10 +87,11 @@ export class UpdateNotificationService {
   private readonly enabled = !!this.config.enabled;
 
   private readonly latestRemote = signal<UpdateInfo | null>(null);
-  private readonly baselineCommit = signal<string | null>(INITIAL_COMMIT);
+  private readonly serverCommit = signal<string | null>(null);
+  private readonly baselineCommit = signal<string | null>(STORED_BASELINE);
   private pollSubscription?: Subscription;
 
-  readonly localCommit = computed(() => this.baselineCommit());
+  readonly localCommit = computed(() => BUNDLED_COMMIT ?? this.serverCommit() ?? this.baselineCommit());
 
   readonly latestRemoteCommit: Signal<UpdateInfo | null> = computed(() => this.latestRemote());
 
@@ -99,15 +103,15 @@ export class UpdateNotificationService {
     if (!remote?.sha) {
       return false;
     }
-    const baseline = this.baselineCommit();
-    if (!baseline) {
+    const local = BUNDLED_COMMIT ?? this.serverCommit() ?? this.baselineCommit();
+    if (!local) {
       return false;
     }
     const candidate = remote.shortSha || normalizeCommit(remote.sha);
     if (!candidate) {
       return false;
     }
-    return candidate !== baseline;
+    return candidate !== local;
   });
 
   start() {
@@ -127,7 +131,14 @@ export class UpdateNotificationService {
       )
       .subscribe(update => {
         if (update) {
-          if (!this.baselineCommit()) {
+          const currentBaseline = this.baselineCommit();
+          const serverCommit = this.serverCommit();
+          if (!currentBaseline) {
+            this.setBaseline(update.shortSha);
+          } else if (
+            (BUNDLED_COMMIT && update.shortSha === BUNDLED_COMMIT && currentBaseline !== update.shortSha) ||
+            (serverCommit && update.shortSha === serverCommit && currentBaseline !== serverCommit)
+          ) {
             this.setBaseline(update.shortSha);
           }
           this.latestRemote.set(update);
@@ -165,9 +176,12 @@ export class UpdateNotificationService {
     }
 
     const shortSha = normalizeCommit(res.short_sha ?? res.sha);
-    if (!shortSha) {
+    if (!shortSha || !GIT_SHA_REGEX.test(shortSha)) {
       return null;
     }
+
+    const serverShort = normalizeBuildCommit(res.current_short_sha ?? res.current_sha);
+    this.serverCommit.set(serverShort);
 
     const info: UpdateInfo = {
       sha: res.sha,
@@ -177,7 +191,13 @@ export class UpdateNotificationService {
       committedAt: res.committed_at ?? undefined,
     };
 
-    if (!this.baselineCommit()) {
+    const currentBaseline = this.baselineCommit();
+    if (!currentBaseline) {
+      this.setBaseline(info.shortSha);
+    } else if (
+      (BUNDLED_COMMIT && info.shortSha === BUNDLED_COMMIT && currentBaseline !== info.shortSha) ||
+      (serverShort && info.shortSha === serverShort && currentBaseline !== serverShort)
+    ) {
       this.setBaseline(info.shortSha);
     }
 
@@ -185,7 +205,7 @@ export class UpdateNotificationService {
   }
 
   private setBaseline(sha: string) {
-    const normalized = normalizeCommit(sha);
+    const normalized = normalizeBuildCommit(sha);
     if (!normalized) {
       return;
     }
