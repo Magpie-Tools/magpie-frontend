@@ -1,9 +1,9 @@
 <div class="flex items-center">
   <p-button
     type="button"
-    label="Export Proxies"
-    icon="pi pi-upload"
-    styleClass="p-button-primary"
+    label="Delete Proxies"
+    icon="pi pi-trash"
+    styleClass="p-button-danger"
     (onClick)="openDialog()"
     [disabled]="!hasAnyProxies()"
   ></p-button>
@@ -16,72 +16,81 @@
   [resizable]="false"
   [dismissableMask]="true"
   [breakpoints]="{ '960px': '90vw', '640px': '95vw' }"
-  [style]="{ width: '60rem' }"
+  [style]="{ width: '50rem' }"
   [contentStyle]="{ padding: '0' }"
   (onHide)="onDialogHide()"
 >
   <ng-template pTemplate="header">
-    <div class="flex items-center gap-2 text-lg font-semibold">
-      <span>Export Proxies</span>
-      <app-tooltip [text]="'Export proxies with optional filters, output formats, and status selections.'"></app-tooltip>
+    <div class="flex items-center gap-2 text-lg font-semibold text-red-200">
+      <span>Delete Proxies</span>
+      <app-tooltip [text]="'Delete proxies in bulk with optional filters and status selections. This action cannot be undone.'"></app-tooltip>
     </div>
   </ng-template>
 
   <div class="bg-neutral-900 text-gray-200 p-6 space-y-6">
+    <section class="bg-red-950/40 border border-red-800/60 rounded-xl p-4 text-sm leading-relaxed text-red-200 flex items-start gap-3">
+      <i class="pi pi-exclamation-triangle text-base mt-0.5"></i>
+      <p>
+        Deleted proxies cannot be restored. Use filters to precisely target what you want to remove.
+      </p>
+    </section>
+
     <section class="space-y-3">
-      <p class="text-sm text-gray-400">Choose how you want to format and filter your export file.</p>
+      <p class="text-sm text-gray-400">Choose which proxies should be considered for deletion.</p>
       <div class="flex flex-col sm:flex-row gap-4">
         <label
-          for="exportAll"
+          for="deleteAll"
           class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors theme-card"
-          [class.theme-card--active]="exportOption === 'all'"
+          [class.theme-card--active]="deleteOption === 'all'"
         >
           <p-radioButton
-            name="exportOption"
+            name="deleteOption"
             value="all"
-            [(ngModel)]="exportOption"
-            inputId="exportAll"
+            [(ngModel)]="deleteOption"
+            inputId="deleteAll"
           ></p-radioButton>
           <div class="space-y-1">
             <span class="font-semibold text-white">All Proxies</span>
-            <p class="text-sm text-gray-400">Export every proxy currently available.</p>
+            <p class="text-sm text-gray-400">
+              Delete every proxy you own that matches the filters below.
+            </p>
           </div>
         </label>
 
         <label
-          for="exportSelected"
+          for="deleteSelected"
           class="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors theme-card"
-          [class.opacity-60]="!canExportSelected()"
-          [class.cursor-not-allowed]="!canExportSelected()"
-          [class.theme-card--active]="exportOption === 'selected'"
-          [class.theme-card--disabled]="!canExportSelected()"
+          [class.opacity-60]="!canDeleteSelected()"
+          [class.cursor-not-allowed]="!canDeleteSelected()"
+          [class.theme-card--active]="deleteOption === 'selected'"
+          [class.theme-card--disabled]="!canDeleteSelected()"
         >
           <p-radioButton
-            name="exportOption"
+            name="deleteOption"
             value="selected"
-            [(ngModel)]="exportOption"
-            inputId="exportSelected"
-            [disabled]="!canExportSelected()"
+            [(ngModel)]="deleteOption"
+            inputId="deleteSelected"
+            [disabled]="!canDeleteSelected()"
           ></p-radioButton>
           <div class="space-y-1">
             <span class="font-semibold text-white">Selected Proxies</span>
-            <p class="text-sm text-gray-400">Export only the proxies you highlighted in the table.</p>
+            <p class="text-sm text-gray-400">Delete only the proxies highlighted in the table on this page.</p>
           </div>
         </label>
       </div>
     </section>
 
-    <form [formGroup]="exportForm" class="space-y-6">
+    <form [formGroup]="deleteForm" class="space-y-6">
       <section class="bg-neutral-800 border border-neutral-700 rounded-xl p-5 space-y-5 theme-card">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h4 class="text-base font-semibold text-white">Filter Before Export</h4>
-            <p class="text-sm text-gray-400">Toggle to limit which proxies are included.</p>
+            <h4 class="text-base font-semibold text-white">Filter Before Deleting</h4>
+            <p class="text-sm text-gray-400">Toggle to restrict which proxies get removed.</p>
           </div>
           <app-checkbox label="Enable Filters" formControlName="filter"></app-checkbox>
         </div>
 
-        @if (exportForm.get('filter')?.value) {
+        @if (deleteForm.get('filter')?.value) {
           <div class="space-y-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div class="flex items-center justify-center">
@@ -100,9 +109,9 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="retries" class="block mb-2 text-sm font-medium text-gray-300">Max Retries</label>
+                <label for="deleteRetries" class="block mb-2 text-sm font-medium text-gray-300">Max Retries</label>
                 <p-inputNumber
-                  id="retries"
+                  id="deleteRetries"
                   formControlName="Retries"
                   mode="decimal"
                   [showButtons]="true"
@@ -111,9 +120,9 @@
                 ></p-inputNumber>
               </div>
               <div>
-                <label for="timeout" class="block mb-2 text-sm font-medium text-gray-300">Max Timeout (ms)</label>
+                <label for="deleteTimeout" class="block mb-2 text-sm font-medium text-gray-300">Max Timeout (ms)</label>
                 <p-inputNumber
-                  id="timeout"
+                  id="deleteTimeout"
                   formControlName="Timeout"
                   mode="decimal"
                   [showButtons]="true"
@@ -124,16 +133,17 @@
             </div>
           </div>
         } @else {
-          <p class="text-sm text-gray-500">Turn on filters to narrow the export by protocol or performance thresholds.</p>
+          <p class="text-sm text-gray-500">
+            Enable filters to narrow deletions by protocol or performance thresholds.
+          </p>
         }
       </section>
 
       <section class="bg-neutral-800 border border-neutral-700 rounded-xl p-5 space-y-5 theme-card">
-        <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 md:items-center">
-          <div>
-            <label for="proxyStatus" class="block mb-2 text-sm font-medium text-gray-300">Proxy Status</label>
+        <div>
+          <label for="deleteProxyStatus" class="block mb-2 text-sm font-medium text-gray-300">Proxy Status</label>
           <p-select
-            id="proxyStatus"
+            id="deleteProxyStatus"
             formControlName="proxyStatus"
             [options]="proxyStatusOptions"
             optionLabel="label"
@@ -143,28 +153,6 @@
             [appendTo]="'body'"
             [scrollHeight]="'200px'"
           ></p-select>
-          </div>
-
-          <div class="flex flex-wrap gap-2 md:justify-end">
-            @for (text of predefinedFilters; track text) {
-              <p-button
-                [label]="text"
-                styleClass="p-button-outlined p-button-secondary p-button-sm"
-                (onClick)="addToFilter(text)"
-              ></p-button>
-            }
-          </div>
-        </div>
-
-        <div>
-          <label for="outputFormat" class="block mb-2 text-sm font-medium text-gray-300">Output Format</label>
-          <input
-            id="outputFormat"
-            pInputText
-            formControlName="output"
-            type="text"
-            class="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-lg theme-focus"
-          />
         </div>
       </section>
     </form>
@@ -177,15 +165,15 @@
         label="Cancel"
         styleClass="p-button-text"
         (onClick)="closeDialog()"
-        [disabled]="isExporting"
+        [disabled]="isDeleting"
       ></p-button>
       <p-button
         type="button"
-        label="Export"
-        styleClass="p-button-success"
-        (onClick)="submitExport()"
-        [disabled]="isExporting || exportForm.invalid || (exportOption === 'selected' && !canExportSelected())"
-        [loading]="isExporting"
+        label="Delete"
+        styleClass="p-button-danger"
+        (onClick)="submitDelete()"
+        [disabled]="isDeleting || (deleteOption === 'selected' && !canDeleteSelected())"
+        [loading]="isDeleting"
       ></p-button>
     </div>
   </ng-template>

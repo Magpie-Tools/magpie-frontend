@@ -14,6 +14,7 @@ import {Subscription} from 'rxjs';
 import {ExportProxiesComponent} from './export-proxies/export-proxies.component';
 import {AddProxiesComponent} from './add-proxies/add-proxies.component';
 import {Router} from '@angular/router';
+import {DeleteProxiesComponent} from './delete-proxies/delete-proxies.component';
 
 @Component({
   selector: 'app-proxy-list',
@@ -28,6 +29,7 @@ import {Router} from '@angular/router';
     CheckboxModule,
     AddProxiesComponent,
     ExportProxiesComponent,
+    DeleteProxiesComponent,
     NgClass,
   ],
   templateUrl: './proxy-list.component.html',
@@ -155,22 +157,10 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
       this.dataSource.data.forEach(row => this.selection.select(row));
   }
 
-  deleteSelectedProxies(): void {
-    const selectedProxies = this.selection.selected;
-    if (selectedProxies.length > 0) {
-      this.http.deleteProxies(selectedProxies.map(proxy => proxy.id)).subscribe({
-        next: res => {
-          NotificationService.showSuccess(res);
-          this.totalItems -= selectedProxies.length;
-          this.selection.clear();
-          this.getAndSetProxyList();
-        },
-        error: err => {
-          const message = err?.error?.message ?? err?.message ?? 'Unknown error';
-          NotificationService.showError('Could not delete proxies: ' + message);
-        }
-      });
-    }
+  onProxiesDeleted(): void {
+    this.selection.clear();
+    this.selectedProxies = [];
+    this.getAndSetProxyList();
   }
 
   onSearchTermChange(value: string): void {

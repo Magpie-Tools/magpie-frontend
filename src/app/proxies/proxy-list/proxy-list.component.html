@@ -10,13 +10,11 @@
           [selectedProxies]="selection.selected.slice()"
         ></app-export-proxies>
 
-        <p-button
-          label="Delete Selected"
-          icon="pi pi-trash"
-          styleClass="p-button-danger"
-          (onClick)="deleteSelectedProxies()"
-          [disabled]="!selection.hasValue()"
-        ></p-button>
+        <app-delete-proxies
+          [allProxies]="dataSource.data"
+          [selectedProxies]="selection.selected.slice()"
+          (proxiesDeleted)="onProxiesDeleted()"
+        ></app-delete-proxies>
       </div>
 
       <div class="flex flex-wrap items-center gap-4">
