@@ -21,13 +21,25 @@ interface BackendUpdateResponse {
 
 const STORAGE_KEY = 'magpie_update_baseline_commit';
 
+function normalizeCommit(value?: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const short = trimmed.length > 7 ? trimmed.slice(0, 7) : trimmed;
+  return short.toLowerCase();
+}
+
 function readStoredBaseline(): string | null {
   if (typeof window === 'undefined') {
     return null;
   }
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw && raw.trim().length > 0 ? raw : null;
+    return normalizeCommit(raw);
   } catch {
     return null;
   }
@@ -51,10 +63,11 @@ const RAW_COMMIT =
 
 const STORED_BASELINE = readStoredBaseline();
 
-const INITIAL_COMMIT =
+const INITIAL_COMMIT = normalizeCommit(
   typeof RAW_COMMIT === 'string' && RAW_COMMIT && RAW_COMMIT !== 'dev'
     ? RAW_COMMIT
-    : STORED_BASELINE;
+    : STORED_BASELINE
+);
 
 @Injectable({ providedIn: 'root' })
 export class UpdateNotificationService {
@@ -68,7 +81,7 @@ export class UpdateNotificationService {
   private readonly pollIntervalMs = this.config.pollIntervalMs ?? 300000;
   private readonly owner = this.config.owner ?? '';
   private readonly repo = this.config.repo ?? '';
-  private readonly enabled = this.config.enabled;
+  private readonly enabled = !!this.config.enabled;
 
   private readonly latestRemote = signal<UpdateInfo | null>(null);
   private readonly baselineCommit = signal<string | null>(INITIAL_COMMIT);
@@ -90,7 +103,11 @@ export class UpdateNotificationService {
     if (!baseline) {
       return false;
     }
-    return remote.sha !== baseline;
+    const candidate = remote.shortSha || normalizeCommit(remote.sha);
+    if (!candidate) {
+      return false;
+    }
+    return candidate !== baseline;
   });
 
   start() {
@@ -111,7 +128,7 @@ export class UpdateNotificationService {
       .subscribe(update => {
         if (update) {
           if (!this.baselineCommit()) {
-            this.setBaseline(update.sha);
+            this.setBaseline(update.shortSha);
           }
           this.latestRemote.set(update);
         }
@@ -146,27 +163,33 @@ export class UpdateNotificationService {
     if (!res?.sha) {
       return null;
     }
-    const htmlUrl = res.html_url ?? this.repoUrl;
-    const message = res.message ?? undefined;
-    const committedAt = res.committed_at ?? undefined;
+
+    const shortSha = normalizeCommit(res.short_sha ?? res.sha);
+    if (!shortSha) {
+      return null;
+    }
 
     const info: UpdateInfo = {
       sha: res.sha,
-      shortSha: (res.short_sha ?? res.sha).slice(0, 7),
-      htmlUrl,
-      message,
-      committedAt,
+      shortSha,
+      htmlUrl: res.html_url ?? this.repoUrl,
+      message: res.message ?? undefined,
+      committedAt: res.committed_at ?? undefined,
     };
 
     if (!this.baselineCommit()) {
-      this.setBaseline(info.sha);
+      this.setBaseline(info.shortSha);
     }
 
     return info;
   }
 
   private setBaseline(sha: string) {
-    this.baselineCommit.set(sha);
-    persistBaseline(sha);
+    const normalized = normalizeCommit(sha);
+    if (!normalized) {
+      return;
+    }
+    this.baselineCommit.set(normalized);
+    persistBaseline(normalized);
   }
 }
