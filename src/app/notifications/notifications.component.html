@@ -5,8 +5,8 @@
       Latest commit <strong>{{ commit.shortSha }}</strong>
       <ng-container *ngIf="commit.message">&mdash; {{ commit.message }}</ng-container>
     </span>
-    <span class="subtitle" *ngIf="localCommit && localCommit !== 'unknown'">
-      You are on <strong>{{ localCommit }}</strong>
+    <span class="subtitle" *ngIf="localCommit() as current">
+      You are on <strong>{{ current }}</strong>
     </span>
     <span class="hint">Run the update script to pull the latest changes.</span>
   </div>

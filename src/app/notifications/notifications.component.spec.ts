@@ -6,7 +6,8 @@ import {UpdateNotificationService} from '../services/update-notification.service
 class MockUpdateNotificationService {
   hasUpdate = signal(false);
   latestRemoteCommit = signal(null);
-  localCommit = 'dev';
+  localCommit = signal<string | null>('dev');
+  start() {}
   openLatestCommit() {}
 }
 
