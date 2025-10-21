@@ -7,7 +7,7 @@ import {Toast} from 'primeng/toast';
 import {LayoutService} from './services/layout.service';
 import {TopbarComponent} from './navbar/topbar/topbar.component';
 import {LoadingComponent} from './ui-elements/loading/loading.component';
-import {VersionService} from './services/version.service';
+import {UpdateNotificationService} from './services/update-notification.service';
 import {NotificationsComponent} from './notifications/notifications.component';
 
 @Component({
@@ -20,12 +20,12 @@ import {NotificationsComponent} from './notifications/notifications.component';
 export class AppComponent {
   title = 'Magpie';
   layout = inject(LayoutService);
-  private readonly versionService = inject(VersionService);
+  private readonly updateNotificationService = inject(UpdateNotificationService);
 
   constructor(
     private notificationService: NotificationService
   ) {
-    this.versionService.start();
+    this.updateNotificationService.start();
   }
 
   protected readonly UserService = UserService;

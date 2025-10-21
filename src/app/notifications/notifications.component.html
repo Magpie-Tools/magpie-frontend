@@ -1,8 +1,17 @@
 <div *ngIf="updateAvailable()" class="update-banner">
-  <span>
-    A new version of Magpie is available
-    <ng-container *ngIf="latestVersion() as version">(build {{ version }})</ng-container>
-    . Please refresh to update.
-  </span>
-  <button type="button" class="reload-button" (click)="reload()">Reload</button>
+  <div class="text-block">
+    <span class="title">New update available on GitHub</span>
+    <span class="subtitle" *ngIf="remoteCommit() as commit">
+      Latest commit <strong>{{ commit.shortSha }}</strong>
+      <ng-container *ngIf="commit.message">&mdash; {{ commit.message }}</ng-container>
+    </span>
+    <span class="subtitle" *ngIf="localCommit && localCommit !== 'unknown'">
+      You are on <strong>{{ localCommit }}</strong>
+    </span>
+    <span class="hint">Run the update script to pull the latest changes.</span>
+  </div>
+
+  <button type="button" class="action-button" (click)="viewLatestCommit()">
+    View on GitHub
+  </button>
 </div>

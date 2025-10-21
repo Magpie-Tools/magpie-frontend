@@ -1,6 +1,9 @@
 # Stage 1: build the Angular application
 FROM node:20-alpine AS build
 
+ARG BUILD_COMMIT=dev
+ENV NG_APP_BUILD_SHA=${BUILD_COMMIT}
+
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci

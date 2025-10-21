@@ -1,6 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {NgIf} from '@angular/common';
-import {VersionService} from '../services/version.service';
+import {UpdateNotificationService} from '../services/update-notification.service';
 
 @Component({
   selector: 'app-notifications',
@@ -10,12 +10,13 @@ import {VersionService} from '../services/version.service';
   styleUrl: './notifications.component.scss'
 })
 export class NotificationsComponent {
-  private readonly versionService = inject(VersionService);
-  readonly updateAvailable = this.versionService.hasUpdate;
-  readonly latestVersion = this.versionService.availableVersion;
+  private readonly updateService = inject(UpdateNotificationService);
 
-  reload() {
-    this.versionService.acknowledgeUpdate();
-    window.location.reload();
+  readonly updateAvailable = this.updateService.hasUpdate;
+  readonly remoteCommit = this.updateService.latestRemoteCommit;
+  readonly localCommit = this.updateService.localCommit;
+
+  viewLatestCommit() {
+    this.updateService.openLatestCommit();
   }
 }

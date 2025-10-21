@@ -1,12 +1,13 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {signal} from '@angular/core';
 import {NotificationsComponent} from './notifications.component';
-import {VersionService} from '../services/version.service';
+import {UpdateNotificationService} from '../services/update-notification.service';
 
-class MockVersionService {
+class MockUpdateNotificationService {
   hasUpdate = signal(false);
-  availableVersion = signal<string | null>(null);
-  acknowledgeUpdate() {}
+  latestRemoteCommit = signal(null);
+  localCommit = 'dev';
+  openLatestCommit() {}
 }
 
 describe('NotificationsComponent', () => {
@@ -16,7 +17,7 @@ describe('NotificationsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NotificationsComponent],
-      providers: [{ provide: VersionService, useClass: MockVersionService }]
+      providers: [{ provide: UpdateNotificationService, useClass: MockUpdateNotificationService }]
     })
     .compileComponents();
 
