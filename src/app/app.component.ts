@@ -7,21 +7,26 @@ import {Toast} from 'primeng/toast';
 import {LayoutService} from './services/layout.service';
 import {TopbarComponent} from './navbar/topbar/topbar.component';
 import {LoadingComponent} from './ui-elements/loading/loading.component';
+import {VersionService} from './services/version.service';
+import {NotificationsComponent} from './notifications/notifications.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, Toast, TopbarComponent, LoadingComponent],
+  imports: [RouterOutlet, NavbarComponent, Toast, TopbarComponent, LoadingComponent, NotificationsComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
   title = 'Magpie';
   layout = inject(LayoutService);
+  private readonly versionService = inject(VersionService);
 
   constructor(
     private notificationService: NotificationService
-  ) {}
+  ) {
+    this.versionService.start();
+  }
 
   protected readonly UserService = UserService;
 }

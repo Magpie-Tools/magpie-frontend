@@ -1,0 +1,8 @@
+<div *ngIf="updateAvailable()" class="update-banner">
+  <span>
+    A new version of Magpie is available
+    <ng-container *ngIf="latestVersion() as version">(build {{ version }})</ng-container>
+    . Please refresh to update.
+  </span>
+  <button type="button" class="reload-button" (click)="reload()">Reload</button>
+</div>

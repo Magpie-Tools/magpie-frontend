@@ -16,11 +16,13 @@ import {RotatingProxiesComponent} from './rotating-proxies/rotating-proxies.comp
 import {AdminCheckerComponent} from './admin/admin-checker/admin-checker.component';
 import {AdminScraperComponent} from './admin/admin-scraper/admin-scraper.component';
 import {AdminOtherComponent} from './admin/admin-other/admin-other.component';
+import {NotificationsComponent} from './notifications/notifications.component';
 
 export const routes: Routes = [
   {path: "account", component: AccountComponent, canActivate: [AuthGuardService]},
   {path: "addProxies", component: AddProxiesComponent, canActivate: [AuthGuardService]},
   {path: "rotating", component: RotatingProxiesComponent, canActivate: [AuthGuardService]},
+  {path: "notifications", component: NotificationsComponent, canActivate: [AuthGuardService]},
   {path: "proxies", component: ProxiesComponent, canActivate: [AuthGuardService]},
   {path: "proxies/:id", component: ProxyDetailComponent, canActivate: [AuthGuardService]},
   {path: "scraper", component: UserScraperComponent, canActivate: [AuthGuardService]},

@@ -1,0 +1,34 @@
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(90deg, rgba(55, 65, 81, 0.95), rgba(17, 24, 39, 0.95));
+  color: #f9fafb;
+  margin: 0 1rem 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+}
+
+.update-banner span {
+  font-size: 0.95rem;
+  line-height: 1.35rem;
+}
+
+.reload-button {
+  background: #22d3ee;
+  color: #0f172a;
+  border: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.reload-button:hover,
+.reload-button:focus-visible {
+  filter: brightness(0.9);
+}
