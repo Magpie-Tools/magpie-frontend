@@ -136,7 +136,15 @@ export class DeleteProxiesComponent implements OnChanges {
 
     this.http.deleteProxies(deleteSettings).subscribe({
       next: res => {
-        NotificationService.showSuccess(res);
+        const message = typeof res === 'string' ? res : 'Proxies deleted.';
+        const normalized = message.trim().toLowerCase();
+
+        if (normalized.includes('no proxies')) {
+          NotificationService.showInfo(message);
+        } else {
+          NotificationService.showSuccess(message);
+        }
+
         this.isDeleting = false;
         this.closeDialog();
         this.proxiesDeleted.emit();
@@ -196,4 +204,3 @@ export class DeleteProxiesComponent implements OnChanges {
     };
   }
 }
-
