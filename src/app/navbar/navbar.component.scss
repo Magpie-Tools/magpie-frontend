@@ -193,3 +193,11 @@ $hover-bg: rgba(255, 255, 255, 0.05);
 //  will-change: transform;
 //  overflow: hidden;
 //}
+
+.nav-scroll {
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
