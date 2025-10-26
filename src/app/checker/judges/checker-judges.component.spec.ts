@@ -13,6 +13,8 @@ class SettingsServiceStub {
     timeout: 7500,
     retries: 2,
     UseHttpsForSocks: true,
+    auto_remove_failing_proxies: false,
+    auto_remove_failure_threshold: 3,
     judges: [{ url: 'https://example.com', regex: 'default' }],
     scraping_sources: []
   };
@@ -21,7 +23,7 @@ class SettingsServiceStub {
     return this.settings;
   }
 
-  saveUserSettings() {
+  saveUserSettings(_: any) {
     return of({ message: 'saved' });
   }
 }

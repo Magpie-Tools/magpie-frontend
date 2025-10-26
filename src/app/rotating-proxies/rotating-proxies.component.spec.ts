@@ -16,6 +16,8 @@ const httpServiceMock = {
     timeout: 5000,
     retries: 2,
     UseHttpsForSocks: true,
+    auto_remove_failing_proxies: false,
+    auto_remove_failure_threshold: 3,
     judges: [],
     scraping_sources: [],
   })),

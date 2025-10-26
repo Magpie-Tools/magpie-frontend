@@ -6,6 +6,8 @@ export interface UserSettings {
   timeout:          number
   retries:          number
   UseHttpsForSocks: boolean
+  auto_remove_failing_proxies: boolean
+  auto_remove_failure_threshold: number
 
   judges: [{
     url: string

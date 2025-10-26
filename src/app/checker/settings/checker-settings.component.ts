@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CheckboxComponent} from '../../checkbox/checkbox.component';
 import {InputText} from 'primeng/inputtext';
 import {Button} from 'primeng/button';
@@ -49,6 +49,8 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
       Timeout: [7500],
       Retries: [2],
       UseHttpsForSocks: [true],
+      AutoRemoveFailingProxies: [false],
+      AutoRemoveFailureThreshold: [3, [Validators.min(1), Validators.max(255)]],
     });
   }
 
@@ -65,6 +67,8 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
       Timeout: settings.timeout,
       Retries: settings.retries,
       UseHttpsForSocks: settings.UseHttpsForSocks,
+      AutoRemoveFailingProxies: settings.auto_remove_failing_proxies,
+      AutoRemoveFailureThreshold: settings.auto_remove_failure_threshold,
     });
 
     this.settingsForm.markAsPristine();
@@ -76,6 +80,10 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
       ...this.settingsForm.value,
       judges: current?.judges ?? [],
     };
+
+    const threshold = Number(payload.AutoRemoveFailureThreshold ?? 1);
+    const normalizedThreshold = Math.round(Number.isFinite(threshold) ? threshold : 1);
+    payload.AutoRemoveFailureThreshold = Math.min(Math.max(normalizedThreshold, 1), 255);
 
     this.settingsService.saveUserSettings(payload).subscribe({
       next: (resp) => {

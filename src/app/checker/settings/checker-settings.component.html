@@ -86,6 +86,45 @@
           </div>
         </div>
       </section>
+
+      <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
+        <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 class="section-title">Automatic Cleanup</h3>
+            <p class="section-hint">
+              Let Magpie prune noisy proxies by removing them after they fail a set number of consecutive checks.
+            </p>
+          </div>
+        </div>
+
+        <div class="auto-remove-toggle flex justify-between items-center flex-col gap-3 sm:flex-row">
+          <div class="flex-1">
+            <p class="field-label">Auto-remove failing proxies</p>
+            <p class="field-hint">
+              When enabled, proxies that fail back-to-back checks will be removed from your list automatically.
+            </p>
+          </div>
+          <div class="protocol-option self-start">
+            <app-checkbox label="Enable" formControlName="AutoRemoveFailingProxies"></app-checkbox>
+          </div>
+        </div>
+
+        <div class="threshold-field field-group mt-5 sm:max-w-xs">
+          <label class="field-label" for="failure-threshold">Failure threshold</label>
+          <input
+            id="failure-threshold"
+            formControlName="AutoRemoveFailureThreshold"
+            type="number"
+            pInputText
+            class="p-inputtext-sm w-full"
+            placeholder="3"
+            min="1"
+            max="255"
+            [disabled]="!settingsForm.get('AutoRemoveFailingProxies')?.value"
+          />
+          <p class="field-hint">Magpie removes a proxy after it fails this many checks in a row.</p>
+        </div>
+      </section>
     </div>
 
     <footer class="panel-footer flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mt-6">

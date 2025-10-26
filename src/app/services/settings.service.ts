@@ -134,6 +134,8 @@ export class SettingsService {
       timeout: formData.Timeout,
       retries: formData.Retries,
       UseHttpsForSocks: formData.UseHttpsForSocks,
+      auto_remove_failing_proxies: formData.AutoRemoveFailingProxies,
+      auto_remove_failure_threshold: formData.AutoRemoveFailureThreshold,
       judges: formData.judges,
       scraping_sources: [] // Not needed here
     };
