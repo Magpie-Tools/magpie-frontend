@@ -22,6 +22,7 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
 
   constructor(private fb: FormBuilder, private settingsService: SettingsService) {
     this.settingsForm = this.createForm();
+    this.configureAutoRemoveThresholdToggle();
   }
 
   ngOnInit(): void {
@@ -77,7 +78,7 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     const current = this.settingsService.getUserSettings();
     const payload = {
-      ...this.settingsForm.value,
+      ...this.settingsForm.getRawValue(),
       judges: current?.judges ?? [],
     };
 
@@ -95,5 +96,28 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
         NotificationService.showError('Failed to save settings!');
       }
     });
+  }
+
+  private configureAutoRemoveThresholdToggle(): void {
+    const autoRemoveControl = this.settingsForm.get('AutoRemoveFailingProxies');
+    const thresholdControl = this.settingsForm.get('AutoRemoveFailureThreshold');
+
+    if (!autoRemoveControl || !thresholdControl) {
+      return;
+    }
+
+    const syncThresholdState = (isEnabled: boolean): void => {
+      if (isEnabled) {
+        thresholdControl.enable({emitEvent: false});
+      } else {
+        thresholdControl.disable({emitEvent: false});
+      }
+    };
+
+    syncThresholdState(!!autoRemoveControl.value);
+
+    autoRemoveControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => syncThresholdState(!!value));
   }
 }
