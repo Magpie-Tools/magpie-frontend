@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:8082/api',
+  apiUrl: 'http://localhost:5656/api',
   githubUpdates: {
     enabled: true,
     owner: 'Kuucheen',
