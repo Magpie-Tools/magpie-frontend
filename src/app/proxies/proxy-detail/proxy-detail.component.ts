@@ -138,6 +138,12 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
         // icon: 'https://scamalytics.com/wp-content/uploads/2016/06/icon_128.png',
       },
       {
+        label: 'Shodan',
+        url: `https://www.shodan.io/host/${encodedIp}`,
+        icon: '',
+        // icon: 'https://www.shodan.io/static/img/favicon-60c1b1cd.png',
+      },
+      {
         label: 'IPQS',
         url: `https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/${encodedIp}`,
         icon: ''
