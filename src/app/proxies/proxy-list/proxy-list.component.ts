@@ -15,6 +15,7 @@ import {ExportProxiesComponent} from './export-proxies/export-proxies.component'
 import {AddProxiesComponent} from './add-proxies/add-proxies.component';
 import {Router} from '@angular/router';
 import {DeleteProxiesComponent} from './delete-proxies/delete-proxies.component';
+import {ProxyReputation} from '../../models/ProxyReputation';
 
 @Component({
   selector: 'app-proxy-list',
@@ -43,7 +44,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedProxies: ProxyInfo[] = [];
   page = 1;
   pageSize = 40;
-  displayedColumns: string[] = ['select', 'alive', 'ip', 'port', 'response_time', 'estimated_type', 'country', 'latest_check', 'actions'];
+  displayedColumns: string[] = ['select', 'alive', 'ip', 'port', 'response_time', 'estimated_type', 'country', 'reputation', 'latest_check', 'actions'];
   totalItems = 0;
   hasLoaded = false;
   isLoading = false;
@@ -292,5 +293,60 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
       (event as Event)?.stopPropagation?.();
     }
     this.router.navigate(['/proxies', proxy.id]).catch(() => {});
+  }
+
+  hasReputation(proxy: ProxyInfo): boolean {
+    return this.getPrimaryReputation(proxy) !== null;
+  }
+
+  reputationBadgeClass(proxy: ProxyInfo): string {
+    const label = this.getPrimaryReputation(proxy)?.label?.toLowerCase() ?? '';
+    if (label === 'good') {
+      return 'reputation-badge reputation-badge--good';
+    }
+    if (label === 'neutral') {
+      return 'reputation-badge reputation-badge--neutral';
+    }
+    if (label === 'poor') {
+      return 'reputation-badge reputation-badge--poor';
+    }
+    return 'reputation-badge reputation-badge--unknown';
+  }
+
+  reputationLabel(proxy: ProxyInfo): string {
+    const label = this.getPrimaryReputation(proxy)?.label?.trim();
+    if (label && label.length > 0) {
+      return label;
+    }
+    return 'Unknown';
+  }
+
+  reputationScore(proxy: ProxyInfo): string {
+    const score = this.getPrimaryReputation(proxy)?.score;
+    if (score === null || score === undefined) {
+      return '—';
+    }
+    return Math.round(score).toString();
+  }
+
+  private getPrimaryReputation(proxy: ProxyInfo): ProxyReputation | null {
+    const reputation = proxy.reputation;
+    if (!reputation) {
+      return null;
+    }
+
+    if (reputation.overall) {
+      return reputation.overall;
+    }
+
+    if (reputation.protocols) {
+      for (const rep of Object.values(reputation.protocols)) {
+        if (rep) {
+          return rep;
+        }
+      }
+    }
+
+    return null;
   }
 }

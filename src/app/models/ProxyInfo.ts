@@ -1,3 +1,5 @@
+import {ProxyReputationSummary} from './ProxyReputation';
+
 export interface ProxyInfo {
   "id": number;
   "ip": string;
@@ -8,6 +10,7 @@ export interface ProxyInfo {
   "anonymity_level": string;
   "alive": boolean;
   "latest_check": Date;
+  "reputation"?: ProxyReputationSummary | null;
 }
 
 export interface ProxyPage {

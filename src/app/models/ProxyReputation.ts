@@ -10,3 +10,7 @@ export interface ProxyReputationBreakdown {
   protocols?: Record<string, ProxyReputation | null> | null;
 }
 
+export interface ProxyReputationSummary {
+  overall?: ProxyReputation | null;
+  protocols?: Record<string, ProxyReputation | null> | null;
+}
