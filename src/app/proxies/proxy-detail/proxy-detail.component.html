@@ -200,6 +200,80 @@
     </section>
   </div>
 
+  @if (hasReputation) {
+    <section class="detail-card simple-reputation mt-8">
+      <div class="simple-reputation__header">
+        <div>
+          <div class="label">Reputation</div>
+          <p class="muted-text" *ngIf="reputationOverall">
+            Composite score from the proxy's latest signals.
+          </p>
+        </div>
+        <div class="simple-reputation__summary" *ngIf="reputationOverall as overall; else noReputationFallback">
+          <div class="simple-reputation__score">
+            {{ reputationScoreDisplay(overall) }}
+            <span>/100</span>
+          </div>
+          <span [ngClass]="reputationBadgeClass(overall.label)">
+            {{ (overall.label || 'Unknown') | titlecase }}
+          </span>
+        </div>
+        <button
+          *ngIf="hasSignals(reputationOverall)"
+          type="button"
+          pButton
+          icon="pi pi-sparkles"
+          label="Signals"
+          class="signals-button p-button-outlined"
+          (click)="openSignalsDialog(reputationOverall!)"
+        ></button>
+      </div>
+      <ng-template #noReputationFallback>
+        <div class="muted-text text-sm">No overall score yet.</div>
+      </ng-template>
+
+      <div class="simple-reputation__progress" *ngIf="reputationOverall as overall">
+        <div class="progress-bar">
+          <div
+            class="progress-bar__fill"
+            [ngClass]="progressFillClass(overall.label)"
+            [style.width.%]="reputationScorePercent(overall)"
+          ></div>
+        </div>
+        <span class="progress-bar__value">{{ reputationScorePercent(overall) }}%</span>
+      </div>
+
+      <div class="simple-reputation__protocols" *ngIf="reputationProtocols.length > 0">
+        <div class="protocol-row" *ngFor="let protocol of reputationProtocols">
+          <div class="protocol-row__top">
+            <span class="protocol-row__name">{{ protocol.kind | uppercase }}</span>
+            <span class="protocol-row__score">{{ reputationScoreDisplay(protocol) }}</span>
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-bar__fill"
+              [ngClass]="progressFillClass(protocol.label)"
+              [style.width.%]="reputationScorePercent(protocol)"
+            ></div>
+          </div>
+          <div class="protocol-row__footer">
+            <span class="protocol-row__badge" [ngClass]="reputationBadgeClass(protocol.label)">
+              {{ (protocol.label || 'Unknown') | titlecase }}
+            </span>
+            <button
+              *ngIf="hasSignals(protocol)"
+              type="button"
+              pButton
+              class="p-button-text protocol-row__signals"
+              label="Signals"
+              (click)="openSignalsDialog(protocol)"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
   <section class="mt-8 detail-card p-6 shadow">
     <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
@@ -265,6 +339,73 @@
       }
     </div>
   </section>
+
+  <p-dialog
+    [header]="signalDialogTitle || 'Signals'"
+    [(visible)]="isSignalDialogVisible"
+    [modal]="true"
+    [blockScroll]="true"
+    [dismissableMask]="true"
+    [closable]="true"
+    [style]="{ width: 'min(720px, 95vw)' }"
+    [contentStyle]="{ 'max-height': '72vh', 'overflow-y': 'auto' }"
+    styleClass="signal-dialog"
+    (onHide)="onSignalDialogHide()"
+  >
+    <ng-template #structuredList let-items let-level="level">
+      @if (items?.length) {
+        <div
+          class="signal-structured-list"
+          [ngClass]="{
+            'signal-structured-list--nested': (level ?? 0) > 0,
+            'signal-structured-list--protocol': isProtocolList(items)
+          }"
+        >
+          <div class="structured-row" *ngFor="let item of items" [ngClass]="{ 'structured-row--protocol': item.layout === 'protocol' }">
+            <div class="structured-row__label">{{ item.label }}</div>
+            <div class="structured-row__value">
+              @if (item.children?.length) {
+                <ng-container
+                  *ngTemplateOutlet="structuredList; context: { $implicit: item.children, level: (level ?? 0) + 1 }"
+                ></ng-container>
+              } @else {
+                {{ item.value }}
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </ng-template>
+
+    <ng-container *ngIf="signalDialogEntries.length; else noSignalsFallback">
+      <div class="signal-dialog__list mt-10">
+        <div class="signal-dialog__item" *ngFor="let signal of signalDialogEntries">
+          <div class="signal-dialog__key">{{ signal.key }}</div>
+          <div
+            class="signal-dialog__value"
+            [ngClass]="[
+              signalToneClass(signal.tone),
+              signal.isJson ? 'signal-dialog__value--json' : '',
+              signal.structuredItems?.length ? 'signal-dialog__value--structured' : '',
+              signal.rawKey === 'components' ? 'signal-dialog__value--protocols' : ''
+            ]"
+          >
+            @if (signal.structuredItems?.length) {
+              <ng-container *ngTemplateOutlet="structuredList; context: { $implicit: signal.structuredItems, level: 0 }"></ng-container>
+            } @else if (signal.isJson) {
+              <pre class="signal-dialog__value-json">{{ signal.value }}</pre>
+            } @else {
+              <span class="signal-dialog__value-text">{{ signal.value }}</span>
+            }
+            <span class="signal-dialog__sentiment">{{ signalToneLabel(signal.tone) }}</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #noSignalsFallback>
+      <div class="signal-dialog__empty muted-text">No signals available.</div>
+    </ng-template>
+  </p-dialog>
 
   <p-dialog
     header="Judge Response"

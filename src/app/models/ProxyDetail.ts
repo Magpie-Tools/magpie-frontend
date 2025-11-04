@@ -1,4 +1,5 @@
 import {ProxyStatistic} from './ProxyStatistic';
+import {ProxyReputationBreakdown} from './ProxyReputation';
 
 export interface ProxyDetail {
   id: number;
@@ -12,5 +13,5 @@ export interface ProxyDetail {
   created_at: string;
   latest_check?: string | null;
   latest_statistic?: ProxyStatistic | null;
+  reputation?: ProxyReputationBreakdown | null;
 }
-
