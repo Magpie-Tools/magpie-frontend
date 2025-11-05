@@ -7,11 +7,11 @@
 }
 
 .spinner > div {
-  background-color: rgba(52, 133, 102, 0.2);
+  background-color: rgba(var(--theme-primary-500-rgb, 52, 133, 102), 0.2);
+  border: 2px solid var(--theme-primary-400, #4a9d83);
   height: 100%;
   position: absolute;
   width: 100%;
-  border: 2px solid #4aa581;
 }
 
 .spinner div:nth-of-type(1) {
