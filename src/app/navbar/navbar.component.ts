@@ -120,10 +120,12 @@ export class NavbarComponent implements OnInit, AfterViewInit {
 
   protected getSrcPath() {
     let start = "../../assets/logo/magpie-light-"
-    if (this.themeService.theme() === 'red') {
-      return start + "red.svg"
+    if (this.themeService.theme() === 'purple') {
+      return start + "purple.svg"
     } else if (this.themeService.theme() === 'blue') {
       return start + "blue.svg"
+    } else if (this.themeService.theme() === 'red') {
+      return start + "red.svg"
     }
     return start + 'green.svg'
   }

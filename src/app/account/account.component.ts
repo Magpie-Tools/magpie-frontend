@@ -27,13 +27,15 @@ export class AccountComponent {
   private readonly themeLabels: Record<ThemeName, string> = {
     green: 'Green',
     blue: 'Blue',
-    red: 'Red'
+    red: 'Red',
+    purple: 'Purple'
   };
 
   private readonly themePreviewColors: Record<ThemeName, string> = {
     green: '#348566',
     blue: '#3b82f6',
-    red: '#dc2626'
+    red: '#dc2626',
+    purple: '#8b5cf6'
   };
 
   constructor(private fb: FormBuilder,

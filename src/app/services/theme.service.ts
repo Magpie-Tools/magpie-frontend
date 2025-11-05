@@ -1,7 +1,7 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, effect, inject, signal } from '@angular/core';
 
-export type ThemeName = 'green' | 'blue' | 'red';
+export type ThemeName = 'green' | 'blue' | 'red' | 'purple';
 
 const THEME_STORAGE_KEY = 'magpie.theme';
 const THEME_CLASS_PREFIX = 'theme-';
@@ -12,7 +12,7 @@ export class ThemeService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  private readonly availableThemes: ThemeName[] = ['green', 'blue', 'red'];
+  private readonly availableThemes: ThemeName[] = ['green', 'blue', 'red', 'purple'];
   private readonly currentTheme = signal<ThemeName>(this.loadInitialTheme());
 
   readonly theme = this.currentTheme.asReadonly();
