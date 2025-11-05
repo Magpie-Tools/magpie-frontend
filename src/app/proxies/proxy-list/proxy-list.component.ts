@@ -249,6 +249,10 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
       return null;
     }
 
+    if (field === 'reputation') {
+      return this.getPrimaryReputation(proxy)?.score ?? null;
+    }
+
     if (Object.prototype.hasOwnProperty.call(proxy, field)) {
       return proxy[field as keyof ProxyInfo];
     }
