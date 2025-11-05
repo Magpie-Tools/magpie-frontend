@@ -1,5 +1,5 @@
-<div *ngIf="dashboardInfo?.loading" class="toggle-container d-flex align-items-center justify-content-center mt-4">
-  <p-progressSpinner></p-progressSpinner>
+<div *ngIf="dashboardInfo?.loading">
+  <app-loading class="flex items-center justify-center mt-20"></app-loading>
 </div>
 
 <div *ngIf="dashboardInfo?.error" class="mt-4 text-center text-red-400">

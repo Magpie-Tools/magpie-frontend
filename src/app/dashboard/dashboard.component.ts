@@ -1,5 +1,4 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ProgressSpinner} from 'primeng/progressspinner';
 import {DecimalPipe, NgIf} from '@angular/common';
 import {Subject} from 'rxjs';
 import {finalize, takeUntil} from 'rxjs/operators';
@@ -20,6 +19,7 @@ import {
   ProxySnapshotEntry,
   ProxySnapshots
 } from '../services/graphql.service';
+import {LoadingComponent} from '../ui-elements/loading/loading.component';
 
 interface SparklineMetric {
   value: number;
@@ -38,14 +38,14 @@ interface DashboardStatus {
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   imports: [
-    ProgressSpinner,
     NgIf,
     DecimalPipe,
     KpiCardComponent,
     ProxiesPerHourCardComponent,
     ProxyHistoryCardComponent,
     ProxiesPerCountryCardComponent,
-    JudgeByPercentageCardComponent
+    JudgeByPercentageCardComponent,
+    LoadingComponent
   ],
   styleUrls: ['./dashboard.component.scss']
 })
@@ -209,7 +209,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       displayValue: aliveValue.toLocaleString()
     };
 
-    const totalSeries = (proxyHistory ?? []).map((entry) => entry.count).filter((value) => typeof value === 'number');
+    const totalSeries = (proxyHistory ?? []).map((entry) => entry.count);
     this.avgOrderValue = {
       value: proxyCount,
       history: totalSeries.length ? totalSeries : [proxyCount],
