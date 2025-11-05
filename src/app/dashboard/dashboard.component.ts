@@ -189,7 +189,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.updateProxyHistory(viewer.proxies?.items ?? []);
     this.updateAnonymitySummary(viewer.dashboard?.judgeValidProxies ?? []);
     this.updateJudgeBreakdown(viewer.dashboard?.judgeValidProxies ?? []);
-    this.buildProxiesLineChart(viewer.proxyHistory ?? [], viewer.proxyCount);
+    this.buildProxiesLineChart(viewer.proxyHistory ?? [], viewer.proxyLimit);
   }
 
   private updateKpis(
@@ -421,7 +421,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.judgeTrafficData = data;
   }
 
-  private buildProxiesLineChart(history: ProxyHistoryEntry[], limit: number): void {
+  private buildProxiesLineChart(history: ProxyHistoryEntry[], limit: number | null | undefined): void {
     const parsed = history
       .map((entry) => {
         const timestamp = this.parseDate(entry.recordedAt);
@@ -433,6 +433,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .filter((entry): entry is { timestamp: Date; count: number } => entry !== null)
       .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
+    const effectiveLimit = typeof limit === 'number' && Number.isFinite(limit) && limit >= 0 ? limit : null;
+
     const labelFormatter = new Intl.DateTimeFormat(undefined, {
       month: 'short',
       day: '2-digit',
@@ -441,31 +443,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
 
     if (!parsed.length) {
-      const baseline = limit ?? 0;
       this.proxiesLineDiff = { gained: [0], lost: [0] };
       const diffRef = this.proxiesLineDiff;
+      const datasets: Array<Record<string, unknown>> = [
+        {
+          label: 'Proxies',
+          data: [0],
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }
+      ];
+
+      if (effectiveLimit !== null) {
+        datasets.push({
+          label: 'Proxy Limit',
+          data: [effectiveLimit],
+          borderColor: '#f59e0b',
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false
+        });
+      }
+
       this.proxiesLineData = {
         labels: ['No Data'],
-        datasets: [
-          {
-            label: 'Proxies',
-            data: [0],
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 4,
-            pointHoverRadius: 6
-          },
-          {
-            label: 'Proxy Limit',
-            data: [baseline],
-            borderColor: '#f59e0b',
-            borderDash: [5, 5],
-            pointRadius: 0,
-            fill: false
-          }
-        ]
+        datasets
       };
       this.proxiesLineOptions = this.createProxyLineOptions(diffRef);
       return;
@@ -478,31 +484,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const lost = gained.map((value) => (value < 0 ? Math.abs(value) : 0));
     this.proxiesLineDiff = { gained, lost };
 
-    const limitSeries = values.map(() => limit ?? 0);
+    const datasets: Array<Record<string, unknown>> = [
+      {
+        label: 'Proxies',
+        data: values,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }
+    ];
+
+    if (effectiveLimit !== null) {
+      datasets.push({
+        label: 'Proxy Limit',
+        data: values.map(() => effectiveLimit),
+        borderColor: '#f59e0b',
+        borderDash: [5, 5],
+        pointRadius: 0,
+        fill: false
+      });
+    }
+
     const diffRef = this.proxiesLineDiff;
 
     this.proxiesLineData = {
       labels,
-      datasets: [
-        {
-          label: 'Proxies',
-          data: values,
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.2)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 4,
-          pointHoverRadius: 6
-        },
-        {
-          label: 'Proxy Limit',
-          data: limitSeries,
-          borderColor: '#f59e0b',
-          borderDash: [5, 5],
-          pointRadius: 0,
-          fill: false
-        }
-      ]
+      datasets
     };
 
     this.proxiesLineOptions = this.createProxyLineOptions(diffRef);

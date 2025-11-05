@@ -24,6 +24,7 @@ const DASHBOARD_QUERY = `#graphql
         }
       }
       proxyCount
+      proxyLimit
       proxies(page: $proxyPage) {
         page
         pageSize
@@ -70,6 +71,7 @@ export interface DashboardQueryData {
 export interface DashboardViewer {
   dashboard: DashboardInfo;
   proxyCount: number;
+  proxyLimit: number | null;
   proxies: ProxyPage;
   proxyHistory: ProxyHistoryEntry[];
   proxySnapshots: ProxySnapshots;
