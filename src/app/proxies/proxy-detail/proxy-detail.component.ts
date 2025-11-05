@@ -403,7 +403,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
           displayKey: this.humanizeSignalLabel(key),
           value,
           formatted,
-          tone: this.determineSignalTone(key, value),
+          tone: this.determineSignalTone(key, value, rep),
           index,
         };
       })
@@ -738,8 +738,26 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     return Object.is(rounded, -0) ? 0 : rounded;
   }
 
-  private determineSignalTone(rawKey: string, value: unknown): SignalTone {
+  private determineSignalTone(rawKey: string, value: unknown, rep?: ProxyReputation | null): SignalTone {
     const key = rawKey.trim().toLowerCase();
+
+    if (key === 'combined' && rep) {
+      const labelTone = this.toneFromLabel(rep.label);
+      if (labelTone !== 'neutral') {
+        return labelTone;
+      }
+      if (Number.isFinite(rep.score)) {
+        return this.toneForScore(rep.score);
+      }
+      return labelTone;
+    }
+
+    if (key === 'components') {
+      const componentTone = this.toneFromComponents(value);
+      if (componentTone) {
+        return componentTone;
+      }
+    }
 
     if (typeof value === 'number') {
       if (this.isScoreSignal(key)) {
@@ -833,6 +851,73 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       return 'neutral';
     }
     return 'negative';
+  }
+
+  private toneFromLabel(label?: string | null): SignalTone {
+    const normalised = (label ?? '').trim().toLowerCase();
+    if (!normalised) {
+      return 'neutral';
+    }
+    if (normalised === 'good') {
+      return 'positive';
+    }
+    if (normalised === 'poor' || normalised === 'bad') {
+      return 'negative';
+    }
+    return 'neutral';
+  }
+
+  private toneFromComponents(value: unknown): SignalTone | null {
+    if (!this.isPlainObject(value)) {
+      return null;
+    }
+
+    const entries = Object.values(value as Record<string, unknown>);
+    if (!entries.length) {
+      return null;
+    }
+
+    let hasPositive = false;
+    let hasNegative = false;
+
+    for (const entry of entries) {
+      if (!this.isPlainObject(entry)) {
+        continue;
+      }
+
+      const entryRecord = entry as Record<string, unknown>;
+      const labelValue = typeof entryRecord['label'] === 'string' ? (entryRecord['label'] as string) : undefined;
+      const labelTone = this.toneFromLabel(labelValue);
+      if (labelTone === 'negative') {
+        hasNegative = true;
+        break;
+      }
+      if (labelTone === 'positive') {
+        hasPositive = true;
+        continue;
+      }
+
+      const scoreValue = entryRecord['score'];
+      if (typeof scoreValue === 'number') {
+        const scoreTone = this.toneForScore(scoreValue);
+        if (scoreTone === 'negative') {
+          hasNegative = true;
+          break;
+        }
+        if (scoreTone === 'positive') {
+          hasPositive = true;
+        }
+      }
+    }
+
+    if (hasNegative) {
+      return 'negative';
+    }
+    if (hasPositive) {
+      return 'positive';
+    }
+
+    return 'neutral';
   }
 
   private anonymityScore(value: string): number {
