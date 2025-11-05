@@ -24,6 +24,8 @@ export class AccountComponent {
   passwordForm: FormGroup;
   readonly themes: ThemeName[];
   readonly currentTheme: Signal<ThemeName>;
+  private readonly purpleActivationTarget = 10;
+  private purpleActivationCount = 0;
   private readonly themeLabels: Record<ThemeName, string> = {
     green: 'Green',
     blue: 'Blue',
@@ -56,6 +58,11 @@ export class AccountComponent {
 
   setTheme(theme: ThemeName): void {
     this.themeService.setTheme(theme);
+    if (theme === 'purple') {
+      this.handlePurpleSecret();
+      return;
+    }
+    this.resetPurpleActivation();
   }
 
   labelFor(theme: ThemeName): string {
@@ -87,6 +94,30 @@ export class AccountComponent {
       // this.passwordForm.reset();
     } else {
       this.passwordForm.markAllAsTouched();
+    }
+  }
+
+  private handlePurpleSecret(): void {
+    this.purpleActivationCount += 1;
+    const remaining = this.purpleActivationTarget - this.purpleActivationCount;
+
+    if (remaining > 0 && remaining <= 3) {
+      NotificationService.showInfo(`${remaining}...`);
+    }
+
+    if (remaining <= 0) {
+      this.resetPurpleActivation();
+      this.redirectToGithub();
+    }
+  }
+
+  private resetPurpleActivation(): void {
+    this.purpleActivationCount = 0;
+  }
+
+  private redirectToGithub(): void {
+    if (typeof globalThis !== 'undefined' && globalThis.location) {
+      globalThis.location.href = 'https://github.com/Kuucheen';
     }
   }
 }
