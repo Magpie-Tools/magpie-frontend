@@ -16,6 +16,7 @@ import {AddProxiesComponent} from './add-proxies/add-proxies.component';
 import {Router} from '@angular/router';
 import {DeleteProxiesComponent} from './delete-proxies/delete-proxies.component';
 import {ProxyReputation} from '../../models/ProxyReputation';
+import {Tooltip} from 'primeng/tooltip';
 
 @Component({
   selector: 'app-proxy-list',
@@ -32,6 +33,7 @@ import {ProxyReputation} from '../../models/ProxyReputation';
     ExportProxiesComponent,
     DeleteProxiesComponent,
     NgClass,
+    Tooltip,
   ],
   templateUrl: './proxy-list.component.html',
   styleUrls: ['./proxy-list.component.scss']
