@@ -12,6 +12,7 @@ import {ProxyInfo} from '../../../models/ProxyInfo';
 import {ExportSettings} from '../../../models/ExportSettings';
 import {DialogModule} from 'primeng/dialog';
 import {Select} from 'primeng/select';
+import {MultiSelectModule} from 'primeng/multiselect';
 import {NotificationService} from '../../../services/notification-service.service';
 import {TooltipComponent} from '../../../tooltip/tooltip.component';
 
@@ -25,6 +26,7 @@ type ExportFormDefaults = {
   Retries: number;
   Timeout: number;
   proxyStatus: 'all' | 'alive' | 'dead';
+  proxyReputations: string[];
 };
 
 @Component({
@@ -41,6 +43,7 @@ type ExportFormDefaults = {
     CheckboxComponent,
     DialogModule,
     Select,
+    MultiSelectModule,
     TooltipComponent,
   ],
   templateUrl: './export-proxies.component.html',
@@ -54,11 +57,17 @@ export class ExportProxiesComponent implements OnChanges {
   exportOption: 'all' | 'selected' = 'all';
   exportForm: FormGroup;
 
-  readonly predefinedFilters: string[] = ['protocol', 'ip', 'port', 'username', 'password', 'country', 'alive', 'type', 'time'];
+  readonly predefinedFilters: string[] = ['protocol', 'ip', 'port', 'username', 'password', 'country', 'alive', 'type', 'time', 'reputation_label', 'reputation_score'];
   readonly proxyStatusOptions = [
     {label: 'All Proxies', value: 'all'},
     {label: 'Only Alive Proxies', value: 'alive'},
     {label: 'Only Dead Proxies', value: 'dead'},
+  ];
+  readonly proxyReputationOptions = [
+    {label: 'Good', value: 'good'},
+    {label: 'Neutral', value: 'neutral'},
+    {label: 'Poor', value: 'poor'},
+    {label: 'Unknown', value: 'unknown'},
   ];
 
   private defaultFormValues: ExportFormDefaults;
@@ -76,6 +85,7 @@ export class ExportProxiesComponent implements OnChanges {
       Retries: settings?.retries ?? 0,
       Timeout: settings?.timeout ?? 0,
       proxyStatus: 'all',
+      proxyReputations: [],
     };
 
     this.exportForm = this.fb.group({
@@ -88,6 +98,7 @@ export class ExportProxiesComponent implements OnChanges {
       Retries: [this.defaultFormValues.Retries, Validators.required],
       Timeout: [this.defaultFormValues.Timeout, Validators.required],
       proxyStatus: [this.defaultFormValues.proxyStatus],
+      proxyReputations: [this.defaultFormValues.proxyReputations],
     });
   }
 
@@ -138,7 +149,7 @@ export class ExportProxiesComponent implements OnChanges {
 
     this.isExporting = true;
 
-    const exportSettings = this.transformFormToExport(this.exportForm, proxies);
+    const exportSettings = this.transformFormToExport(this.exportForm, proxies, this.exportOption);
     const fileName = this.buildFileName();
 
     this.http.exportProxies(exportSettings).subscribe({
@@ -184,11 +195,13 @@ export class ExportProxiesComponent implements OnChanges {
     this.exportForm.patchValue(updatedDefaults, {emitEvent: false});
   }
 
-  private transformFormToExport(exportForm: FormGroup, proxies: ProxyInfo[]): ExportSettings {
-    const formValue = exportForm.value;
+  private transformFormToExport(exportForm: FormGroup, proxies: ProxyInfo[], scope: 'all' | 'selected'): ExportSettings {
+    const formValue = exportForm.getRawValue();
+    const proxyIds = scope === 'selected' ? proxies.map(proxy => proxy.id) : [];
+    const reputationSelection = this.normalizeReputationSelection(formValue.proxyReputations);
 
     return {
-      proxies: proxies.map(proxy => proxy.id),
+      proxies: proxyIds,
       filter: formValue.filter,
       http: formValue.HTTPProtocol,
       https: formValue.HTTPSProtocol,
@@ -197,6 +210,7 @@ export class ExportProxiesComponent implements OnChanges {
       maxRetries: formValue.Retries,
       maxTimeout: formValue.Timeout,
       proxyStatus: formValue.proxyStatus,
+      reputationLabels: reputationSelection,
       outputFormat: formValue.output
     };
   }
@@ -229,5 +243,15 @@ export class ExportProxiesComponent implements OnChanges {
     anchor.click();
     document.body.removeChild(anchor);
     window.URL.revokeObjectURL(url);
+  }
+
+  private normalizeReputationSelection(rawValue: unknown): string[] {
+    if (Array.isArray(rawValue)) {
+      return rawValue.filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+    }
+    if (typeof rawValue === 'string' && rawValue.trim().length > 0) {
+      return [rawValue.trim()];
+    }
+    return [];
   }
 }

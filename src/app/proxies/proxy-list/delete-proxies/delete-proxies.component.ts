@@ -10,6 +10,7 @@ import {HttpService} from '../../../services/http.service';
 import {ProxyInfo} from '../../../models/ProxyInfo';
 import {DialogModule} from 'primeng/dialog';
 import {Select} from 'primeng/select';
+import {MultiSelectModule} from 'primeng/multiselect';
 import {NotificationService} from '../../../services/notification-service.service';
 import {DeleteSettings} from '../../../models/DeleteSettings';
 import {TooltipComponent} from '../../../tooltip/tooltip.component';
@@ -23,6 +24,7 @@ type DeleteFormDefaults = {
   Retries: number;
   Timeout: number;
   proxyStatus: 'all' | 'alive' | 'dead';
+  proxyReputations: string[];
 };
 
 @Component({
@@ -38,6 +40,7 @@ type DeleteFormDefaults = {
     CheckboxComponent,
     DialogModule,
     Select,
+    MultiSelectModule,
     TooltipComponent,
   ],
   templateUrl: './delete-proxies.component.html',
@@ -58,6 +61,12 @@ export class DeleteProxiesComponent implements OnChanges {
     {label: 'Only Alive Proxies', value: 'alive'},
     {label: 'Only Dead Proxies', value: 'dead'},
   ];
+  readonly proxyReputationOptions = [
+    {label: 'Good', value: 'good'},
+    {label: 'Neutral', value: 'neutral'},
+    {label: 'Poor', value: 'poor'},
+    {label: 'Unknown', value: 'unknown'},
+  ];
 
   private defaultFormValues: DeleteFormDefaults;
 
@@ -73,6 +82,7 @@ export class DeleteProxiesComponent implements OnChanges {
       Retries: settings?.retries ?? 0,
       Timeout: settings?.timeout ?? 0,
       proxyStatus: 'all',
+      proxyReputations: [],
     };
 
     this.deleteForm = this.fb.group({
@@ -84,6 +94,7 @@ export class DeleteProxiesComponent implements OnChanges {
       Retries: [this.defaultFormValues.Retries],
       Timeout: [this.defaultFormValues.Timeout],
       proxyStatus: [this.defaultFormValues.proxyStatus],
+      proxyReputations: [this.defaultFormValues.proxyReputations],
     });
   }
 
@@ -136,7 +147,7 @@ export class DeleteProxiesComponent implements OnChanges {
 
     this.http.deleteProxies(deleteSettings).subscribe({
       next: res => {
-        const message = typeof res === 'string' ? res : 'Proxies deleted.';
+        const message = res;
         const normalized = message.trim().toLowerCase();
 
         if (normalized.includes('no proxies')) {
@@ -189,6 +200,7 @@ export class DeleteProxiesComponent implements OnChanges {
   private transformFormToDelete(form: FormGroup, scope: 'all' | 'selected'): DeleteSettings {
     const formValue = form.value;
     const proxies = scope === 'selected' ? this.selectedProxies : [];
+    const reputationSelection = this.normalizeReputationSelection(formValue.proxyReputations);
 
     return {
       proxies: proxies.map(proxy => proxy.id),
@@ -200,7 +212,18 @@ export class DeleteProxiesComponent implements OnChanges {
       maxRetries: formValue.Retries,
       maxTimeout: formValue.Timeout,
       proxyStatus: formValue.proxyStatus,
+      reputationLabels: reputationSelection,
       scope,
     };
+  }
+
+  private normalizeReputationSelection(rawValue: unknown): string[] {
+    if (Array.isArray(rawValue)) {
+      return rawValue.filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+    }
+    if (typeof rawValue === 'string' && rawValue.trim().length > 0) {
+      return [rawValue.trim()];
+    }
+    return [];
   }
 }

@@ -1,6 +1,3 @@
-import {FormGroup} from '@angular/forms';
-import {ProxyInfo} from './ProxyInfo';
-
 export interface ExportSettings {
   proxies: number[]
   filter: boolean
@@ -11,6 +8,6 @@ export interface ExportSettings {
   maxRetries: number
   maxTimeout: number
   proxyStatus: 'all' | 'alive' | 'dead'
+  reputationLabels: string[]
   outputFormat: string
 }
-

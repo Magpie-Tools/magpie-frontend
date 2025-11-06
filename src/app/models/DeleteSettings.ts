@@ -8,6 +8,6 @@ export interface DeleteSettings {
   maxRetries: number;
   maxTimeout: number;
   proxyStatus: 'all' | 'alive' | 'dead';
+  reputationLabels: string[];
   scope: 'all' | 'selected';
 }
-
