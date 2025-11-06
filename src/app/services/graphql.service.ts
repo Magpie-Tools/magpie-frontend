@@ -12,6 +12,12 @@ const DASHBOARD_QUERY = `#graphql
         totalScraped
         totalChecksWeek
         totalScrapedWeek
+        reputationBreakdown {
+          good
+          neutral
+          poor
+          unknown
+        }
         countryBreakdown {
           country
           count
@@ -83,8 +89,25 @@ export interface DashboardInfo {
   totalScraped: number;
   totalChecksWeek: number;
   totalScrapedWeek: number;
+  reputationBreakdown: ReputationBreakdown;
+  topReputationProxy: TopReputationProxy | null;
   countryBreakdown: CountryBreakdownEntry[];
   judgeValidProxies: JudgeValidProxy[];
+}
+
+export interface ReputationBreakdown {
+  good: number;
+  neutral: number;
+  poor: number;
+  unknown: number;
+}
+
+export interface TopReputationProxy {
+  proxyId: number;
+  ip: string;
+  port: number;
+  score: number;
+  label: string;
 }
 
 export interface CountryBreakdownEntry {

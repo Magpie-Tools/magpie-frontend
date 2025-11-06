@@ -1,0 +1,49 @@
+<p-card [styleClass]="cardStyleClass">
+  <ng-template pTemplate="header">
+    <div class="reputation-card__header p-3">
+      <span class="reputation-card__title">Reputation Pulse
+      <span class="reputation-card__subtitle ml-2" *ngIf="total > 0; else emptyState">
+        {{ total | number }} proxies scored
+      </span>
+
+      </span>
+      <ng-template #emptyState>
+        <span class="reputation-card__subtitle">No reputation data yet</span>
+      </ng-template>
+    </div>
+  </ng-template>
+
+  <div class="reputation-card__body">
+    <div class="reputation-card__chart">
+      <p-chart
+        *ngIf="total > 0; else emptyChart"
+        type="polarArea"
+        [data]="chartData"
+        [options]="chartOptions">
+      </p-chart>
+      <ng-template #emptyChart>
+        <div class="reputation-card__empty">
+          <span class="reputation-card__empty-icon">📡</span>
+          <p class="reputation-card__empty-text">
+            We will visualise reputations as soon as your proxies collect scores.
+          </p>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="reputation-card__details ml-[20%]">
+      <div
+        class="reputation-card__legend"
+        *ngFor="let entry of entries; trackBy: trackByKey">
+        <span class="legend-swatch" [ngStyle]="{'background': entry.color}"></span>
+        <div class="legend-text">
+          <span class="legend-label">{{ entry.title }}</span>
+          <span class="legend-value">
+            {{ entry.value | number }} proxies
+            <span class="legend-value__pct" *ngIf="total > 0">({{ entry.percentage | number:'1.1-1' }}%)</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-card>

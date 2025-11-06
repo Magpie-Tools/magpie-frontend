@@ -17,9 +17,12 @@ import {
   ProxyHistoryEntry,
   ProxyNode,
   ProxySnapshotEntry,
-  ProxySnapshots
+  ProxySnapshots,
+  ReputationBreakdown,
+  TopReputationProxy
 } from '../services/graphql.service';
 import {LoadingComponent} from '../ui-elements/loading/loading.component';
+import {ProxyReputationCardComponent} from './cards/proxy-reputation-card/proxy-reputation-card.component';
 
 interface SparklineMetric {
   value: number;
@@ -45,7 +48,8 @@ interface DashboardStatus {
     ProxyHistoryCardComponent,
     ProxiesPerCountryCardComponent,
     JudgeByPercentageCardComponent,
-    LoadingComponent
+    LoadingComponent,
+    ProxyReputationCardComponent
   ],
   styleUrls: ['./dashboard.component.scss']
 })
@@ -84,6 +88,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     ]
   };
+
+  reputationBreakdown: ReputationBreakdown = { good: 0, neutral: 0, poor: 0, unknown: 0 };
+  reputationChartData: any = {};
+  reputationChartOptions: any = {};
 
   private readonly numberFormatter = new Intl.NumberFormat('de-DE');
 
@@ -186,6 +194,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       viewer.proxyCount,
       viewer.dashboard?.countryBreakdown ?? []
     );
+    this.updateReputationOverview(viewer.dashboard);
     this.updateProxyHistory(viewer.proxies?.items ?? []);
     this.updateAnonymitySummary(viewer.dashboard?.judgeValidProxies ?? []);
     this.updateJudgeBreakdown(viewer.dashboard?.judgeValidProxies ?? []);
@@ -419,6 +428,85 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
 
     this.judgeTrafficData = data;
+  }
+
+  private updateReputationOverview(dashboard: DashboardInfo | undefined): void {
+    const source = dashboard?.reputationBreakdown;
+    const breakdown: ReputationBreakdown = {
+      good: source?.good ?? 0,
+      neutral: source?.neutral ?? 0,
+      poor: source?.poor ?? 0,
+      unknown: source?.unknown ?? 0
+    };
+
+    this.reputationBreakdown = breakdown;
+
+    const values = [breakdown.good, breakdown.neutral, breakdown.poor, breakdown.unknown];
+    const labels = ['Good', 'Neutral', 'Poor', 'Unknown'];
+    const backgroundColors = [
+      'rgba(34, 197, 94, 0.72)',
+      'rgba(249, 115, 22, 0.72)',
+      'rgba(239, 68, 68, 0.72)',
+      'rgba(148, 163, 184, 0.62)'
+    ];
+    const borderColors = ['#22c55e', '#f97316', '#ef4444', '#94a3b8'];
+
+    this.reputationChartData = {
+      labels,
+      datasets: [
+        {
+          data: values,
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
+          borderWidth: 1.5,
+          hoverOffset: 8
+        }
+      ]
+    };
+
+    const total = values.reduce((sum, value) => sum + value, 0);
+
+    this.reputationChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 650 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111827',
+          titleColor: '#f9fafb',
+          bodyColor: '#e5e7eb',
+          borderColor: '#1f2937',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: (context: any) => {
+              const value = typeof context?.parsed === 'number' ? context.parsed : 0;
+              const label = context?.label ?? '';
+              const share = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+              const formatted = this.numberFormatter.format(value);
+              return `${label}: ${formatted} (${share}%)`;
+            }
+          }
+        }
+      },
+      scales: {
+        r: {
+          beginAtZero: true,
+          ticks: {
+            display: false
+          },
+          grid: {
+            color: '#1f2937'
+          },
+          angleLines: {
+            color: '#1f2937'
+          }
+        }
+      }
+    };
+
+    const topProxy = dashboard?.topReputationProxy ?? null;
   }
 
   private buildProxiesLineChart(history: ProxyHistoryEntry[], limit: number | null | undefined): void {

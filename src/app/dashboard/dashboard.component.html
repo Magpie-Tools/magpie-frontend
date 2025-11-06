@@ -65,6 +65,14 @@
       </app-judge-by-percentage-card>
     </div>
 
+    <div class="lg:col-span-2">
+      <app-proxy-reputation-card
+        [breakdown]="reputationBreakdown"
+        [chartData]="reputationChartData"
+        [chartOptions]="reputationChartOptions">
+      </app-proxy-reputation-card>
+    </div>
+
 <!--    <div class="lg:col-span-1" *ngIf="anonymitySummary">-->
 <!--      <app-proxies-by-anonymity-card-->
 <!--        [summary]="anonymitySummary"-->
