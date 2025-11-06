@@ -19,7 +19,6 @@ import {
   ProxySnapshotEntry,
   ProxySnapshots,
   ReputationBreakdown,
-  TopReputationProxy
 } from '../services/graphql.service';
 import {LoadingComponent} from '../ui-elements/loading/loading.component';
 import {ProxyReputationCardComponent} from './cards/proxy-reputation-card/proxy-reputation-card.component';
@@ -481,9 +480,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
           padding: 12,
           callbacks: {
             label: (context: any) => {
-              const value = typeof context?.parsed === 'number' ? context.parsed : 0;
               const label = context?.label ?? '';
-              const share = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+              const rawValue = context?.raw;
+              const parsedValue = context?.parsed;
+
+              let value = 0;
+              if (typeof rawValue === 'number') {
+                value = rawValue;
+              } else if (typeof parsedValue === 'number') {
+                value = parsedValue;
+              } else if (parsedValue && typeof parsedValue.r === 'number') {
+                value = parsedValue.r;
+              }
+
+              const chartData = context?.chart?.data;
+              const datasetIndex = typeof context?.datasetIndex === 'number' ? context.datasetIndex : 0;
+              const dataset = chartData?.datasets?.[datasetIndex];
+              const dataPoints = Array.isArray(dataset?.data) ? dataset.data : [];
+
+              const datasetTotal = dataPoints.reduce((sum: number, entry: unknown) => {
+                return typeof entry === 'number' ? sum + entry : sum;
+              }, 0);
+
+              const effectiveTotal = datasetTotal > 0 ? datasetTotal : total;
+              const share = effectiveTotal > 0 ? ((value / effectiveTotal) * 100).toFixed(1) : '0.0';
               const formatted = this.numberFormatter.format(value);
               return `${label}: ${formatted} (${share}%)`;
             }
@@ -505,8 +525,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       }
     };
-
-    const topProxy = dashboard?.topReputationProxy ?? null;
   }
 
   private buildProxiesLineChart(history: ProxyHistoryEntry[], limit: number | null | undefined): void {

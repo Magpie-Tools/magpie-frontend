@@ -90,7 +90,6 @@ export interface DashboardInfo {
   totalChecksWeek: number;
   totalScrapedWeek: number;
   reputationBreakdown: ReputationBreakdown;
-  topReputationProxy: TopReputationProxy | null;
   countryBreakdown: CountryBreakdownEntry[];
   judgeValidProxies: JudgeValidProxy[];
 }
@@ -100,14 +99,6 @@ export interface ReputationBreakdown {
   neutral: number;
   poor: number;
   unknown: number;
-}
-
-export interface TopReputationProxy {
-  proxyId: number;
-  ip: string;
-  port: number;
-  score: number;
-  label: string;
 }
 
 export interface CountryBreakdownEntry {
