@@ -40,6 +40,19 @@
           }
         </div>
 
+        <div class="form-field">
+          <label for="reputationFilter">Reputation Filter</label>
+          <p-multiSelect inputId="reputationFilter"
+                         display="chip"
+                         formControlName="reputationLabels"
+                         [options]="reputationOptions"
+                         optionLabel="label"
+                         optionValue="value"
+                         [disabled]="submitting">
+          </p-multiSelect>
+          <small class="hint">Pick which proxy reputations this rotator can serve. Leave empty to use every available proxy.</small>
+        </div>
+
         <div class="auth-options">
           <label class="auth-toggle">
             <input type="checkbox" formControlName="authRequired" [disabled]="submitting">
@@ -107,6 +120,12 @@
             <td class="name-cell">
               <div class="name">{{ proxy.name }}</div>
               <div class="created">Created {{ proxy.created_at | date:'short' }}</div>
+              <div class="reputation-filter">
+                <span class="filter-label">REPUTATION
+                  <br>
+                <span class="filter-value">{{ reputationFilterSummary(proxy.reputation_labels) }}</span>
+                </span>
+              </div>
             </td>
             <td>
               <span class="protocol-tag">{{ protocolLabel(proxy.protocol) }}</span>
@@ -243,6 +262,10 @@
           } @else {
             <span class="value muted">Unavailable</span>
           }
+        </div>
+        <div class="detail-row">
+          <span class="label">Reputation Filter</span>
+          <span class="value">{{ reputationFilterSummary(selectedRotator.reputation_labels) }}</span>
         </div>
         <div class="detail-row">
           <span class="label">Authentication</span>

@@ -67,6 +67,25 @@ section {
   }
 }
 
+:host ::ng-deep .p-multiselect {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: $border;
+  color: $text;
+
+  .p-multiselect-label {
+    color: $text;
+  }
+
+  .p-multiselect-trigger {
+    color: $text;
+  }
+
+  .p-multiselect-token {
+    background: rgba($accent, 0.15);
+    color: $text;
+  }
+}
+
 .auth-options {
   display: flex;
   flex-direction: column;
@@ -165,6 +184,25 @@ section {
     font-size: 0.8rem;
     color: $muted;
     margin-top: 0.15rem;
+  }
+
+  .reputation-filter {
+    margin-top: 0.35rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    font-size: 0.78rem;
+
+    .filter-label {
+      color: $muted;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+    }
+
+    .filter-value {
+      color: $text;
+      font-weight: 500;
+    }
   }
 }
 

@@ -28,6 +28,7 @@ const httpServiceMock = {
     alive_proxy_count: 0,
     listen_port: 19000,
     auth_required: false,
+    reputation_labels: ['good', 'neutral'],
     created_at: new Date().toISOString(),
   })),
   deleteRotatingProxy: jasmine.createSpy().and.returnValue(of(void 0)),

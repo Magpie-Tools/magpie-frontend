@@ -8,6 +8,7 @@ import {ButtonModule} from 'primeng/button';
 import {InputTextModule} from 'primeng/inputtext';
 import {SelectModule} from 'primeng/select';
 import {DialogModule} from 'primeng/dialog';
+import {MultiSelectModule} from 'primeng/multiselect';
 
 import {environment} from '../../environments/environment';
 
@@ -28,6 +29,7 @@ type RotatingProxyPreview = RotatingProxyNext & { name: string };
     ButtonModule,
     InputTextModule,
     SelectModule,
+    MultiSelectModule,
     DatePipe,
     DialogModule,
   ],
@@ -47,6 +49,17 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   previewRotator: RotatingProxy | null = null;
   selectedRotator: RotatingProxy | null = null;
   detailsVisible = false;
+  readonly reputationOptions = [
+    {label: 'Good', value: 'good'},
+    {label: 'Neutral', value: 'neutral'},
+    {label: 'Bad', value: 'poor'},
+  ];
+  private readonly allReputationValues = this.reputationOptions.map(option => option.value);
+  private readonly reputationDisplay: Record<string, string> = {
+    good: 'Good',
+    neutral: 'Neutral',
+    poor: 'Bad',
+  };
 
   private readonly loopbackHost = '127.0.0.1';
   private readonly defaultRotatorHost = this.resolveDefaultHost();
@@ -60,6 +73,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       authRequired: [false],
       authUsername: [{value: '', disabled: true}, [Validators.maxLength(120)]],
       authPassword: [{value: '', disabled: true}, [Validators.maxLength(120)]],
+      reputationLabels: [this.getDefaultReputationSelection()],
     });
   }
 
@@ -162,6 +176,11 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       protocol: this.createForm.get('protocol')?.value,
       auth_required: !!this.createForm.get('authRequired')?.value,
     };
+
+    const reputationSelection = this.normalizeReputationSelection(this.createForm.get('reputationLabels')?.value);
+    if (reputationSelection.length > 0) {
+      payload.reputation_labels = reputationSelection;
+    }
 
     if (payload.auth_required) {
       payload.auth_username = (this.createForm.get('authUsername')?.value ?? '').trim();
@@ -358,6 +377,16 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     }
   }
 
+  reputationFilterSummary(labels: string[] | null | undefined): string {
+    const normalized = this.normalizeReputationSelection(labels);
+    if (normalized.length === 0 || normalized.length === this.allReputationValues.length) {
+      return 'All reputations';
+    }
+    return normalized
+      .map(label => this.reputationDisplay[label] ?? label.toUpperCase())
+      .join(', ');
+  }
+
   private buildProtocolOptions(settings: UserSettings | null | undefined): { label: string; value: string }[] {
     if (!settings) {
       return [];
@@ -393,7 +422,25 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       auth_password: proxy.auth_password ?? null,
       listen_host: listenHost || null,
       listen_address: listenAddress,
+      reputation_labels: this.normalizeReputationSelection(proxy.reputation_labels),
     };
+  }
+
+  private getDefaultReputationSelection(): string[] {
+    return [...this.allReputationValues];
+  }
+
+  private normalizeReputationSelection(raw: string[] | null | undefined): string[] {
+    if (!raw || raw.length === 0) {
+      return [];
+    }
+    const normalized: string[] = [];
+    for (const allowed of this.allReputationValues) {
+      if (raw.includes(allowed)) {
+        normalized.push(allowed);
+      }
+    }
+    return normalized;
   }
 
   private resolveHostValue(host: string | null | undefined): string {

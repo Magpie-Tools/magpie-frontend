@@ -11,6 +11,7 @@ export interface RotatingProxy {
   listen_address?: string | null;
   last_rotation_at?: string | null;
   last_served_proxy?: string | null;
+  reputation_labels?: string[] | null;
   created_at: string;
 }
 
@@ -20,6 +21,7 @@ export interface CreateRotatingProxy {
   auth_required: boolean;
   auth_username?: string | null;
   auth_password?: string | null;
+  reputation_labels?: string[] | null;
 }
 
 export interface RotatingProxyNext {
