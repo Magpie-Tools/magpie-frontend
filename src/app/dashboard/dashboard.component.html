@@ -12,6 +12,7 @@
       <app-kpi-card
         title="Alive Proxies"
         [value]="conversionRate.value"
+        [displayValue]="conversionRate.value | number"
         [chartValues]="conversionRate.history">
       </app-kpi-card>
     </div>
@@ -20,6 +21,7 @@
       <app-kpi-card
         title="Total Proxies"
         [value]="avgOrderValue.value"
+        [displayValue]="avgOrderValue.value | number"
         [chartValues]="avgOrderValue.history">
       </app-kpi-card>
     </div>

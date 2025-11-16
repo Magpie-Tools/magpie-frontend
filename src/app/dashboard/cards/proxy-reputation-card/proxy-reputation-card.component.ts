@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {Card} from 'primeng/card';
 import {PrimeTemplate} from 'primeng/api';
-import {DecimalPipe, NgClass, NgForOf, NgIf, NgStyle, TitleCasePipe} from '@angular/common';
+import {DecimalPipe, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {UIChart} from 'primeng/chart';
 
 interface ReputationBreakdown {
@@ -11,18 +11,10 @@ interface ReputationBreakdown {
   unknown: number;
 }
 
-interface TopProxy {
-  proxyId: number;
-  ip: string;
-  port: number;
-  score: number;
-  label: string;
-}
-
 @Component({
   selector: 'app-proxy-reputation-card',
   standalone: true,
-  imports: [Card, PrimeTemplate, UIChart, NgIf, NgForOf, NgClass, NgStyle, TitleCasePipe, DecimalPipe],
+  imports: [Card, PrimeTemplate, UIChart, NgIf, NgForOf, NgStyle, DecimalPipe],
   templateUrl: './proxy-reputation-card.component.html',
   styleUrl: './proxy-reputation-card.component.scss'
 })
