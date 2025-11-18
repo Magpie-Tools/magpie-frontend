@@ -78,7 +78,7 @@ export class KpiCardComponent implements OnChanges {
   }
 
   getChangeIcon(change: number): string {
-    return change >= 0 ? 'pi-arrow-up' : 'pi-arrow-down';
+    return change > 0 ? 'pi-arrow-up' : change == 0 ? 'pi-arrows-v' : 'pi-arrow-down';
   }
 
   private buildSparklineData(): any {

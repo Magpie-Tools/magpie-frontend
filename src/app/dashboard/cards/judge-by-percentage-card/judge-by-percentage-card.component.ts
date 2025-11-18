@@ -1,6 +1,6 @@
 import {Component, computed, Input} from '@angular/core';
 import {Card} from 'primeng/card';
-import {DecimalPipe, NgClass, NgForOf, NgStyle} from '@angular/common';
+import {DecimalPipe, NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {PrimeTemplate} from 'primeng/api';
 
 type TrafficMap = Record<string, number>;
@@ -13,6 +13,7 @@ type TrafficMap = Record<string, number>;
     NgStyle,
     DecimalPipe,
     NgClass,
+    NgIf,
     PrimeTemplate
   ],
   templateUrl: './judge-by-percentage-card.component.html',
