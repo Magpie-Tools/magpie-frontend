@@ -51,12 +51,13 @@ export class ProxyReputationCardComponent {
     color: string;
   }> {
     const total = this.total;
-    const dataset = Array.isArray(this.chartData?.datasets) ? this.chartData.datasets[0] : null;
-    const colors = Array.isArray(dataset?.backgroundColor) ? dataset.backgroundColor : [];
+    const datasets = Array.isArray(this.chartData?.datasets) ? this.chartData.datasets : [];
+    const primaryColors = Array.isArray(datasets?.[0]?.backgroundColor) ? datasets[0].backgroundColor : [];
+    const accentColors = Array.isArray(datasets?.[1]?.backgroundColor) ? datasets[1].backgroundColor : [];
 
     return this.labels.map((entry, index) => {
       const raw = this.breakdown?.[entry.key] ?? 0;
-      const color = colors[index] ?? 'rgba(148,163,184,0.6)';
+      const color = accentColors[index] ?? primaryColors[index] ?? 'rgba(148,163,184,0.6)';
       return {
         key: entry.key,
         title: entry.title,

@@ -442,23 +442,46 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const values = [breakdown.good, breakdown.neutral, breakdown.poor, breakdown.unknown];
     const labels = ['Good', 'Neutral', 'Poor', 'Unknown'];
-    const backgroundColors = [
-      'rgba(34, 197, 94, 0.72)',
-      'rgba(249, 115, 22, 0.72)',
-      'rgba(239, 68, 68, 0.72)',
-      'rgba(148, 163, 184, 0.62)'
+    const accentColors = ['#22c55e', '#f97316', '#ef4444', '#94a3b8'];
+    const stemColors = [
+      'rgba(34, 197, 94, 0.35)',
+      'rgba(249, 115, 22, 0.35)',
+      'rgba(239, 68, 68, 0.35)',
+      'rgba(148, 163, 184, 0.35)'
     ];
-    const borderColors = ['#22c55e', '#f97316', '#ef4444', '#94a3b8'];
+
+    const lollipopPoints = labels.map((label, index) => ({
+      x: values[index],
+      y: label
+    }));
 
     this.reputationChartData = {
       labels,
       datasets: [
         {
+          type: 'bar',
           data: values,
-          backgroundColor: backgroundColors,
-          borderColor: borderColors,
-          borderWidth: 1.5,
-          hoverOffset: 8
+          backgroundColor: stemColors,
+          borderColor: accentColors,
+          borderWidth: 1.25,
+          borderRadius: 999,
+          borderSkipped: false,
+          barThickness: 8,
+          maxBarThickness: 12,
+          minBarLength: 2,
+          hoverBackgroundColor: stemColors,
+          hoverBorderColor: accentColors
+        },
+        {
+          type: 'scatter',
+          data: lollipopPoints,
+          backgroundColor: accentColors,
+          borderColor: '#0f172a',
+          borderWidth: 2,
+          pointRadius: 9,
+          pointHoverRadius: 11,
+          hitRadius: 24,
+          clip: false
         }
       ]
     };
@@ -469,6 +492,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 650 },
+      indexAxis: 'y',
+      layout: {
+        padding: { left: 8, right: 16, top: 8, bottom: 8 }
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -487,8 +514,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
               let value = 0;
               if (typeof rawValue === 'number') {
                 value = rawValue;
+              } else if (rawValue && typeof rawValue.x === 'number') {
+                value = rawValue.x;
               } else if (typeof parsedValue === 'number') {
                 value = parsedValue;
+              } else if (parsedValue && typeof parsedValue.x === 'number') {
+                value = parsedValue.x;
               } else if (parsedValue && typeof parsedValue.r === 'number') {
                 value = parsedValue.r;
               }
@@ -510,17 +541,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
           }
         }
       },
+      elements: {
+        bar: {
+          borderRadius: 999,
+          borderSkipped: false
+        }
+      },
       scales: {
-        r: {
+        x: {
           beginAtZero: true,
-          ticks: {
-            display: false
-          },
           grid: {
             color: '#1f2937'
           },
-          angleLines: {
+          ticks: {
+            color: '#d1d5db',
+            callback: (value: string | number) => {
+              if (typeof value === 'number') {
+                return this.numberFormatter.format(value);
+              }
+              const parsed = Number(value);
+              return Number.isNaN(parsed) ? value : this.numberFormatter.format(parsed);
+            }
+          },
+          border: {
             color: '#1f2937'
+          }
+        },
+        y: {
+          type: 'category',
+          grid: {
+            display: false
+          },
+          ticks: {
+            color: '#94a3b8',
+            font: {
+              weight: '600'
+            }
           }
         }
       }
