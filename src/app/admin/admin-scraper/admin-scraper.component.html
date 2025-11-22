@@ -147,6 +147,20 @@
                   <div class="toggle-card">
                     <div class="toggle-leading">
                       <p-checkbox
+                        formControlName="scraper_respect_robots_txt"
+                        [binary]="true"
+                        inputId="respect-robots">
+                      </p-checkbox>
+                    </div>
+                    <label for="respect-robots" class="toggle-content">
+                      <span class="toggle-title">Respect robots.txt</span>
+                      <span class="toggle-hint">Check each source against its robots.txt rules and skip paths that disallow the scraper.</span>
+                    </label>
+                  </div>
+
+                  <div class="toggle-card">
+                    <div class="toggle-leading">
+                      <p-checkbox
                         formControlName="proxy_limit_enabled"
                         [binary]="true"
                         inputId="proxy-limit-enabled">

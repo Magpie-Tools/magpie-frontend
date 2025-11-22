@@ -91,6 +91,7 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
       scraper_threads: [{ value: 250, disabled: true }],
       scraper_retries: [2],
       scraper_timeout: [7500],
+      scraper_respect_robots_txt: [true],
       scraper_timer: this.fb.group({
         days: [0],
         hours: [9],
@@ -110,6 +111,7 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
       scraper_threads: settings.scraper.threads,
       scraper_retries: settings.scraper.retries,
       scraper_timeout: settings.scraper.timeout,
+      scraper_respect_robots_txt: settings.scraper.respect_robots_txt ?? true,
       scraper_timer: {
         days: settings.scraper.scraper_timer.days,
         hours: settings.scraper.scraper_timer.hours,

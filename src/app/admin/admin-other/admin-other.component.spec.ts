@@ -29,6 +29,7 @@ const defaultSettings: GlobalSettings = {
     threads: 1,
     retries: 1,
     timeout: 1000,
+    respect_robots_txt: true,
     scraper_timer: timer(),
     scrape_sites: []
   },

@@ -163,6 +163,15 @@ export class HttpService {
     });
   }
 
+  checkScrapeSource(url: string) {
+    const params = new HttpParams().set('url', url);
+    return this.http.get<{allowed: boolean; robots_found: boolean; error?: string}>(this.apiUrl + '/scrapingSources/check', { params });
+  }
+
+  getRespectRobotsSetting() {
+    return this.http.get<{respect_robots_txt: boolean}>(this.apiUrl + '/scrapingSources/respectRobots');
+  }
+
   getDashboardInfo() {
     return this.http.get<DashboardInfo>(this.apiUrl + '/getDashboardInfo');
   }

@@ -47,6 +47,7 @@ export interface GlobalSettings {
       minutes: number;
       seconds: number;
     };
+    respect_robots_txt: boolean;
 
     scrape_sites: string[];
   };

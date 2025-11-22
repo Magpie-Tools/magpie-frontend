@@ -68,6 +68,11 @@
           <th style="width: 12rem" class="text-center" pSortableColumn="added_at">
             Added At <p-sortIcon field="added_at"></p-sortIcon>
           </th>
+          @if (respectRobotsEnabled) {
+            <th style="width: 11rem" class="text-center">
+              Robots Check
+            </th>
+          }
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-source>
@@ -97,11 +102,23 @@
           <td class="text-center">
             {{ source.added_at | date : 'short' }}
           </td>
+          @if (respectRobotsEnabled) {
+            <td class="text-center">
+              <p-button
+                label="Check robots.txt"
+                icon="pi pi-shield"
+                size="small"
+                [loading]="isCheckingRobots(source.id)"
+                styleClass="p-button-outlined p-button-secondary"
+                (onClick)="checkRobots(source, $event)"
+              ></p-button>
+            </td>
+          }
         </tr>
       </ng-template>
       <ng-template pTemplate="emptyMessage">
         <tr>
-          <td colspan="4">No scrape sources found.</td>
+          <td [attr.colspan]="respectRobotsEnabled ? 5 : 4">No scrape sources found.</td>
         </tr>
       </ng-template>
     </p-table>

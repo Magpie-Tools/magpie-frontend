@@ -223,6 +223,7 @@ export class SettingsService {
       threads:         formData.scraper_threads         ?? current?.scraper?.threads         ?? 250,
       retries:         formData.scraper_retries         ?? current?.scraper?.retries         ?? 2,
       timeout:         formData.scraper_timeout         ?? current?.scraper?.timeout         ?? 7500,
+      respect_robots_txt: formData.scraper_respect_robots_txt ?? current?.scraper?.respect_robots_txt ?? true,
 
       scraper_timer: {
         days:    formData?.scraper_timer?.days    ?? current?.scraper?.scraper_timer?.days    ?? 0,

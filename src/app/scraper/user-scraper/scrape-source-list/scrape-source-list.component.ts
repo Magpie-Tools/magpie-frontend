@@ -42,6 +42,8 @@ export class ScrapeSourceListComponent implements OnInit {
   totalItems = 0;
   hasLoaded = false;
   loading = false;
+  checkingRobots: Record<number, boolean> = {};
+  respectRobotsEnabled = false;
 
   constructor(
     private http: HttpService,
@@ -49,8 +51,21 @@ export class ScrapeSourceListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.loadRespectRobotsSetting();
     this.getAndSetScrapeSourceCount();
     this.getAndSetScrapeSourcesList();
+  }
+
+  private loadRespectRobotsSetting(): void {
+    this.http.getRespectRobotsSetting().subscribe({
+      next: res => {
+        this.respectRobotsEnabled = !!res?.respect_robots_txt;
+      },
+      error: err => {
+        NotificationService.showWarn('Could not load robots.txt setting: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'));
+        this.respectRobotsEnabled = false;
+      }
+    });
   }
 
   getAndSetScrapeSourcesList() {
@@ -171,6 +186,41 @@ export class ScrapeSourceListComponent implements OnInit {
 
   onShowAddScrapeSourcesMessage(value: boolean): void {
     this.showAddScrapeSourceMessage.emit(value);
+  }
+
+  checkRobots(source: ScrapeSourceInfo, event?: Event): void {
+    event?.stopPropagation();
+    if (!source?.url) {
+      return;
+    }
+
+    this.checkingRobots[source.id] = true;
+    this.http.checkScrapeSource(source.url).subscribe({
+      next: res => {
+        const { allowed, robots_found, error } = res ?? { allowed: true, robots_found: false };
+
+        if (allowed && robots_found) {
+          NotificationService.showSuccess('robots.txt allows scraping this URL');
+        } else if (!allowed && robots_found) {
+          NotificationService.showWarn('robots.txt disallows scraping this URL');
+        } else if (allowed && !robots_found) {
+          NotificationService.showInfo('No robots.txt found; scraping is allowed by default');
+        }
+
+        if (error) {
+          NotificationService.showWarn('Robots check completed with warnings: ' + error);
+        }
+      },
+      error: err => {
+        NotificationService.showError('Could not check robots.txt: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'));
+      }
+    }).add(() => {
+      delete this.checkingRobots[source.id];
+    });
+  }
+
+  isCheckingRobots(sourceId: number): boolean {
+    return !!this.checkingRobots[sourceId];
   }
 
   private syncSelectionWithData(): void {
