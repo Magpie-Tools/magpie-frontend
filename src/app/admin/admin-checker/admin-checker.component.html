@@ -4,7 +4,7 @@
       <div>
         <h2 class="text-xl font-semibold text-white mb-1">Admin Checker Configuration</h2>
         <p class="text-sm text-gray-400 max-w-3xl">
-          Fine-tune how the admin checker validates proxies, refreshes judges, and keeps your blacklist in sync. These
+          Fine-tune how the admin checker validates proxies, refreshes judges, and keeps you in sync. These
           settings shape the cadence, performance, and safeguards used during automated checks.
         </p>
       </div>
@@ -16,7 +16,6 @@
           <p-tab value="0">Common</p-tab>
           <p-tab value="1">Judges</p-tab>
           <p-tab value="2">IP</p-tab>
-          <p-tab value="3">Blacklist</p-tab>
         </p-tablist>
 
         <p-tabpanels>
@@ -280,53 +279,6 @@
                     Lookup URL
                   </label>
                   <input id="iplookup" formControlName="iplookup" type="url" pInputText class="p-inputtext-sm w-full" placeholder="https://ident.me"/>
-                </div>
-              </section>
-            </div>
-          </p-tabpanel>
-
-          <!-- Blacklist Tab Placeholder -->
-          <p-tabpanel value="3">
-            <div class="tab-stack">
-              <p-message severity="warn" closable>The blacklist functionality is not implemented right now</p-message>
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title text-white">Blacklist Controls</h3>
-                    <p class="section-hint text-gray-400">Manage the remote blacklist sources that are fetched to prune bad proxies automatically.</p>
-                  </div>
-                </div>
-
-                <div formArrayName="blacklisted" class="blacklist-list flex flex-col gap-4 mt-4">
-                  @if (!blacklisted.length) {
-                    <p class="text-sm text-gray-500">No blacklist sources configured yet.</p>
-                  }
-
-                  @for (control of blacklisted.controls; track control; let i = $index) {
-                    <div class="blacklist-row flex items-start gap-3">
-                      <div class="field-group flex-1">
-                        <label class="field-label" for="blacklist-url-{{i}}">Source URL</label>
-                        <input
-                          id="blacklist-url-{{i}}"
-                          type="url"
-                          class="p-inputtext-sm w-full"
-                          pInputText
-                          [formControlName]="i"
-                          placeholder="https://example.com/blacklist.txt"/>
-                      </div>
-
-                      <button type="button" class="icon-button remove mt-6" (click)="removeBlacklistedUrl(i)">
-                        <i class="pi pi-trash"></i>
-                      </button>
-                    </div>
-                  }
-                </div>
-
-                <div class="blacklist-actions mt-3">
-                  <button type="button" class="chip-button" (click)="addBlacklistedUrl()">
-                    <i class="pi pi-plus"></i>
-                    <span>Add Source</span>
-                  </button>
                 </div>
               </section>
             </div>

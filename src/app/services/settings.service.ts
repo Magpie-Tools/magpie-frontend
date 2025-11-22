@@ -242,11 +242,27 @@ export class SettingsService {
       exclude_admins: formData.proxy_limit_exclude_admins ?? current?.proxy_limits?.exclude_admins ?? true
     };
 
-    /* ---------- 4. blacklist ---------- */
-    const blacklist_sources =
-      formData.blacklisted ?? current?.blacklist_sources ?? [];
+    /* ---------- 5. blacklist ---------- */
+    const blacklist_timer: GlobalSettings['blacklist_timer'] = {
+      days:    formData?.blacklist_timer?.days    ?? current?.blacklist_timer?.days    ?? 0,
+      hours:   formData?.blacklist_timer?.hours   ?? current?.blacklist_timer?.hours   ?? 6,
+      minutes: formData?.blacklist_timer?.minutes ?? current?.blacklist_timer?.minutes ?? 0,
+      seconds: formData?.blacklist_timer?.seconds ?? current?.blacklist_timer?.seconds ?? 0
+    };
 
-    /* ---------- 5. GeoLite ---------- */
+    const rawBlacklistSources =
+      formData.blacklist_sources ??
+      formData.blacklisted ??
+      current?.blacklist_sources ??
+      [];
+
+    const blacklistSourceList = (rawBlacklistSources as string[]) ?? [];
+
+    const blacklist_sources: string[] = blacklistSourceList
+      .map(source => typeof source === 'string' ? source.trim() : '')
+      .filter(source => source.length > 0);
+
+    /* ---------- 6. GeoLite ---------- */
     const geoliteForm = formData.geolite ?? {};
     const geoliteTimer = geoliteForm.update_timer ?? {};
 
@@ -263,7 +279,7 @@ export class SettingsService {
     };
 
     /* ---------- final shape ---------- */
-    return { protocols, checker, scraper, proxy_limits, geolite, blacklist_sources };
+    return { protocols, checker, scraper, proxy_limits, geolite, blacklist_sources, blacklist_timer };
   }
 
 }

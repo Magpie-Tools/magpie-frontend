@@ -17,6 +17,7 @@ import {AdminCheckerComponent} from './admin/admin-checker/admin-checker.compone
 import {AdminScraperComponent} from './admin/admin-scraper/admin-scraper.component';
 import {AdminOtherComponent} from './admin/admin-other/admin-other.component';
 import {NotificationsComponent} from './notifications/notifications.component';
+import {AdminBlacklistComponent} from './admin/admin-blacklist/admin-blacklist.component';
 
 export const routes: Routes = [
   {path: "account", component: AccountComponent, canActivate: [AuthGuardService]},
@@ -31,6 +32,7 @@ export const routes: Routes = [
   {path: "checker/judges", component: CheckerJudgesComponent, canActivate: [AuthGuardService]},
   {path: "global/checker", component: AdminCheckerComponent, canActivate: [AuthGuardAdminService]},
   {path: "global/scraper", component: AdminScraperComponent, canActivate: [AuthGuardAdminService]},
+  {path: "global/blacklist", component: AdminBlacklistComponent, canActivate: [AuthGuardAdminService]},
   {path: "global/other", component: AdminOtherComponent, canActivate: [AuthGuardAdminService]},
   {path: "register", component: RegisterComponent, canActivate: [AuthLoginGuardService]},
   {path: "login", component: LoginComponent, canActivate: [AuthLoginGuardService]},

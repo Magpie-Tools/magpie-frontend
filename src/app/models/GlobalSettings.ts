@@ -70,5 +70,12 @@ export interface GlobalSettings {
     last_updated_at?: string | null;
   };
 
+  blacklist_timer: {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  };
+
   blacklist_sources: string[];
 }
