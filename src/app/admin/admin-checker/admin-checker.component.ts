@@ -11,7 +11,6 @@ import {Select} from 'primeng/select';
 import {InputText} from 'primeng/inputtext';
 import {NotificationService} from '../../services/notification-service.service';
 import {Subject} from 'rxjs';
-import {Message} from 'primeng/message';
 
 @Component({
   selector: 'app-admin-checker',
@@ -29,7 +28,6 @@ import {Message} from 'primeng/message';
     TabList,
     Tab,
     TabPanels,
-    Message
   ],
     templateUrl: './admin-checker.component.html',
     styleUrl: './admin-checker.component.scss'
@@ -253,7 +251,8 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error("Error saving settings:", err);
-        NotificationService.showError("Failed to save settings!");
+        const reason = err?.error?.message ?? err?.error?.error ?? "Failed to save settings!";
+        NotificationService.showError(reason);
       }
     });
   }

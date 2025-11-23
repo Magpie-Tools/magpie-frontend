@@ -170,7 +170,8 @@ export class AddScrapeSourceComponent {
         },
         error: (err) => {
           this.popupStatus = 'error';
-          NotificationService.showError("There has been an error while uploading the scrape sources! " + err.error.message)
+          const reason = err?.error?.message ?? err?.error?.error ?? 'Unknown error';
+          NotificationService.showError("There has been an error while uploading the scrape sources! " + reason)
         },
       });
     } else {

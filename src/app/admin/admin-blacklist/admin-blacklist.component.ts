@@ -39,7 +39,8 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
         minutes: [0],
         seconds: [0]
       }),
-      blacklist_sources: this.fb.array([this.createSourceControl()])
+      blacklist_sources: this.fb.array([this.createSourceControl()]),
+      website_blacklist: this.fb.array([this.createWebsiteControl()])
     });
   }
 
@@ -61,6 +62,10 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
     return this.form.get('blacklist_sources') as FormArray<FormControl<string>>;
   }
 
+  get blockedSites(): FormArray<FormControl<string>> {
+    return this.form.get('website_blacklist') as FormArray<FormControl<string>>;
+  }
+
   addSource(): void {
     this.sources.push(this.createSourceControl());
     this.form.markAsDirty();
@@ -79,6 +84,24 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
     this.form.markAsDirty();
   }
 
+  addBlockedSite(): void {
+    this.blockedSites.push(this.createWebsiteControl());
+    this.form.markAsDirty();
+  }
+
+  removeBlockedSite(index: number): void {
+    if (index < 0 || index >= this.blockedSites.length) {
+      return;
+    }
+
+    if (this.blockedSites.length === 1) {
+      this.blockedSites.at(0).setValue('');
+    } else {
+      this.blockedSites.removeAt(index);
+    }
+    this.form.markAsDirty();
+  }
+
   onSubmit(): void {
     this.settingsService.saveGlobalSettings(this.form.getRawValue()).subscribe({
       next: (resp) => {
@@ -87,12 +110,17 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error saving blacklist settings:', err);
-        NotificationService.showError('Failed to save blacklist settings: ' + (err?.error?.message ?? 'Unknown error'));
+        const reason = err?.error?.message ?? err?.error?.error ?? 'Unknown error';
+        NotificationService.showError('Failed to save blacklist settings: ' + reason);
       }
     });
   }
 
   private createSourceControl(value: string = ''): FormControl<string> {
+    return this.fb.nonNullable.control(value);
+  }
+
+  private createWebsiteControl(value: string = ''): FormControl<string> {
     return this.fb.nonNullable.control(value);
   }
 
@@ -108,6 +136,7 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
     }, { emitEvent: false });
 
     this.resetSources(settings.blacklist_sources);
+    this.resetWebsiteBlacklist(settings.website_blacklist);
     this.form.markAsPristine();
   }
 
@@ -121,5 +150,17 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
     }
 
     this.sources.markAsPristine();
+  }
+
+  private resetWebsiteBlacklist(entries: string[] = []): void {
+    this.blockedSites.clear();
+
+    if (!entries || entries.length === 0) {
+      this.blockedSites.push(this.createWebsiteControl());
+    } else {
+      entries.forEach(entry => this.blockedSites.push(this.createWebsiteControl(entry)));
+    }
+
+    this.blockedSites.markAsPristine();
   }
 }

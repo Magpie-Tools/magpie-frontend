@@ -108,6 +108,51 @@
             <small class="hint-text block mt-2">Accepted sources return plain text with IPv4 entries. Duplicates are ignored automatically.</small>
           </div>
         </section>
+
+        <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
+          <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 class="section-title">Website Blacklist</h3>
+              <p class="section-hint">
+                Domains listed here are never contacted&mdash;they cannot be used as judges, scrape sources, or blacklist feeds.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4" formArrayName="website_blacklist">
+            <div class="source-list flex flex-col gap-4">
+              @for (site of blockedSites.controls; track site; let i = $index) {
+                <div class="source-row flex items-start gap-3" [attr.data-index]="i">
+                  <div class="field-group flex-1">
+                    <label class="field-label" for="blocked-site-{{i}}">Website</label>
+                    <input
+                      id="blocked-site-{{i}}"
+                      type="text"
+                      [formControlName]="i"
+                      pInputText
+                      class="p-inputtext-sm w-full"
+                      placeholder="example.com or https://example.com"/>
+                  </div>
+                  @if (blockedSites.length > 1) {
+                    <button
+                      type="button"
+                      class="icon-button remove mt-6"
+                      (click)="removeBlockedSite(i)">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+            <div class="mt-3">
+              <button type="button" class="chip-button" (click)="addBlockedSite()">
+                <i class="pi pi-plus"></i>
+                <span>Add Website</span>
+              </button>
+            </div>
+            <small class="hint-text block mt-2">Entries are matched by hostname (including subdomains) and take effect immediately.</small>
+          </div>
+        </section>
       </div>
     </div>
 

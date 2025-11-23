@@ -204,7 +204,8 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error("Error saving settings:", err);
-        NotificationService.showError("Failed to save settings: " + err.error.message);
+        const reason = err?.error?.message ?? err?.error?.error ?? 'Unknown error';
+        NotificationService.showError("Failed to save settings: " + reason);
       }
     });
   }

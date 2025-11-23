@@ -44,7 +44,8 @@ const defaultSettings: GlobalSettings = {
     update_timer: timer(),
     last_updated_at: null
   },
-  blacklist_sources: []
+  blacklist_sources: [],
+  website_blacklist: []
 };
 
 class SettingsServiceStub {

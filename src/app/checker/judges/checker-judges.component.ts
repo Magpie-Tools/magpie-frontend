@@ -79,7 +79,8 @@ export class CheckerJudgesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error saving judges:', err);
-        NotificationService.showError('Failed to save settings!');
+        const reason = err?.error?.message ?? err?.error?.error ?? 'Failed to save settings!';
+        NotificationService.showError(reason);
       }
     });
   }

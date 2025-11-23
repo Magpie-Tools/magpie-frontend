@@ -259,8 +259,17 @@ export class SettingsService {
     const blacklistSourceList = (rawBlacklistSources as string[]) ?? [];
 
     const blacklist_sources: string[] = blacklistSourceList
-      .map(source => typeof source === 'string' ? source.trim() : '')
+      .map(source => source.trim())
       .filter(source => source.length > 0);
+
+    const rawWebsiteBlacklist = formData.website_blacklist ?? current?.website_blacklist ?? [];
+    const website_blacklist: string[] = Array.from(
+      new Set(
+        (rawWebsiteBlacklist as string[])
+          .map(entry => entry.trim())
+          .filter(entry => entry.length > 0)
+      )
+    );
 
     /* ---------- 6. GeoLite ---------- */
     const geoliteForm = formData.geolite ?? {};
@@ -279,7 +288,7 @@ export class SettingsService {
     };
 
     /* ---------- final shape ---------- */
-    return { protocols, checker, scraper, proxy_limits, geolite, blacklist_sources, blacklist_timer };
+    return { protocols, checker, scraper, proxy_limits, geolite, blacklist_sources, blacklist_timer, website_blacklist };
   }
 
 }

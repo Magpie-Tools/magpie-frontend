@@ -78,4 +78,5 @@ export interface GlobalSettings {
   };
 
   blacklist_sources: string[];
+  website_blacklist: string[];
 }
