@@ -1,242 +1,294 @@
 @if (loading) {
   <div class="rotating-loading">Loading rotating proxies…</div>
 } @else {
-  <div class="rotating-container">
-    <section class="create-card">
-      <div class="card-header">
-        <h2>Create Rotating Proxy</h2>
-        <p class="subtitle">Rotate through your healthy proxies for a chosen protocol.</p>
-      </div>
-
-      <form [formGroup]="createForm" (ngSubmit)="createRotator()" class="create-form">
-        <div class="form-field">
-          <label for="rotatorName">Name</label>
-          <input id="rotatorName"
-                 type="text"
-                 pInputText
-                 placeholder="My rotating proxy"
-                 maxlength="120"
-                 formControlName="name"
-                 [disabled]="submitting || noProtocolsAvailable">
-          @if (createForm.get('name')?.invalid && (createForm.get('name')?.dirty || createForm.get('name')?.touched)) {
-            <small class="error">Name is required and must be under 120 characters.</small>
-          }
+  <div class="rotating-proxies-page text-gray-200">
+    <section class="rotating-panel bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-lg">
+      <header class="panel-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-semibold text-white mb-1">Rotating Proxies</h2>
+          <p class="text-sm text-gray-400 max-w-3xl">
+            Spin up protocol-specific rotators, gate them with authentication, and pull fresh proxies on demand.
+          </p>
         </div>
+        <p-button
+          type="button"
+          label="Refresh"
+          icon="pi pi-refresh"
+          [disabled]="loading"
+          (onClick)="loadInitialData()"
+          styleClass="refresh-button"
+        >
+        </p-button>
+      </header>
 
-        <div class="form-field">
-          <label for="rotatorProtocol">Protocol</label>
-          <p-select inputId="rotatorProtocol"
-                    [options]="protocolOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    placeholder="Select a protocol"
-                    formControlName="protocol"
-                    [disabled]="submitting || noProtocolsAvailable">
-          </p-select>
-          @if (noProtocolsAvailable) {
-            <small class="hint">Enable at least one protocol in your account settings to create a rotator.</small>
-          } @else {
-            <small class="hint">Ports are assigned automatically within the published range.</small>
-          }
-        </div>
+      <div class="panel-grid">
+        <section class="section-card create-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
+          <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 class="section-title">Create Rotator</h3>
+              <p class="section-hint">Generate a rotating endpoint with optional filters and credentials.</p>
+            </div>
+            <span class="pill subtle-pill">Ports auto-assigned</span>
+          </div>
 
-        <div class="form-field">
-          <label for="reputationFilter">Reputation Filter</label>
-          <p-multiSelect inputId="reputationFilter"
-                         display="chip"
-                         formControlName="reputationLabels"
-                         [options]="reputationOptions"
-                         optionLabel="label"
-                         optionValue="value"
-                         [disabled]="submitting">
-          </p-multiSelect>
-          <small class="hint">Pick which proxy reputations this rotator can serve. Leave empty to use every available proxy.</small>
-        </div>
-
-        <div class="auth-options">
-          <label class="auth-toggle">
-            <input type="checkbox" formControlName="authRequired" [disabled]="submitting">
-            <span>Require authentication</span>
-          </label>
-
-          @if (authEnabled) {
-            <div class="auth-grid">
-              <div class="form-field">
-                <label for="authUsername">Auth Username</label>
-                <input id="authUsername"
+          <form [formGroup]="createForm" (ngSubmit)="createRotator()" class="create-form flex flex-col gap-5">
+            <div class="field-grid">
+              <div class="field-group">
+                <label class="field-label" for="rotatorName">Name</label>
+                <input id="rotatorName"
                        type="text"
                        pInputText
+                       class="p-inputtext-sm w-full"
+                       placeholder="My rotating proxy"
                        maxlength="120"
-                       formControlName="authUsername"
-                       [disabled]="submitting">
+                       formControlName="name"
+                       [disabled]="submitting || noProtocolsAvailable">
+                @if (createForm.get('name')?.invalid && (createForm.get('name')?.dirty || createForm.get('name')?.touched)) {
+                  <p class="field-error">Name is required and must be under 120 characters.</p>
+                }
               </div>
 
-              <div class="form-field">
-                <label for="authPassword">Auth Password</label>
-                <input id="authPassword"
-                       type="text"
-                       pInputText
-                       maxlength="120"
-                       formControlName="authPassword"
-                       [disabled]="submitting">
+              <div class="field-group">
+                <label class="field-label" for="rotatorProtocol">Protocol</label>
+                <p-select inputId="rotatorProtocol"
+                          class="w-full"
+                          [options]="protocolOptions"
+                          optionLabel="label"
+                          optionValue="value"
+                          placeholder="Select a protocol"
+                          formControlName="protocol"
+                          [disabled]="submitting || noProtocolsAvailable">
+                </p-select>
+                <p class="field-hint">
+                  @if (noProtocolsAvailable) {
+                    Enable at least one protocol in your account settings to create a rotator.
+                  } @else {
+                    Ports are assigned automatically within the published range.
+                  }
+                </p>
+              </div>
+
+              <div class="field-group full">
+                <label class="field-label" for="reputationFilter">Reputation Filter</label>
+                <p-multiSelect inputId="reputationFilter"
+                               class="w-full"
+                               display="chip"
+                               formControlName="reputationLabels"
+                               [options]="reputationOptions"
+                               optionLabel="label"
+                               optionValue="value"
+                               [disabled]="submitting">
+                </p-multiSelect>
+                <p class="field-hint">Pick which proxy reputations this rotator can serve. Leave empty to use every available proxy.</p>
               </div>
             </div>
+
+            <div class="auth-block">
+              <div class="auth-top flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p class="field-label">Authentication</p>
+                  <p class="field-hint">Require credentials before a client can use the rotator.</p>
+                </div>
+                <label class="auth-toggle">
+                  <input type="checkbox" formControlName="authRequired" [disabled]="submitting">
+                  <span>Require authentication</span>
+                </label>
+              </div>
+
+              @if (authEnabled) {
+                <div class="auth-grid">
+                  <div class="field-group">
+                    <label class="field-label" for="authUsername">Auth Username</label>
+                    <input id="authUsername"
+                           type="text"
+                           pInputText
+                           class="p-inputtext-sm w-full"
+                           maxlength="120"
+                           formControlName="authUsername"
+                           [disabled]="submitting">
+                  </div>
+
+                  <div class="field-group">
+                    <label class="field-label" for="authPassword">Auth Password</label>
+                    <input id="authPassword"
+                           type="text"
+                           pInputText
+                           class="p-inputtext-sm w-full"
+                           maxlength="120"
+                           formControlName="authPassword"
+                           [disabled]="submitting">
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="form-footer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p class="field-hint mb-0">Rotators will prefer healthy proxies that match your filters.</p>
+              <button pButton
+                      type="submit"
+                      label="Create Rotator"
+                      icon="pi pi-plus"
+                      [disabled]="createForm.invalid || submitting || noProtocolsAvailable"
+                      [loading]="submitting">
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section class="section-card preview-card bg-gradient-to-br from-neutral-950/60 via-neutral-950/30 to-neutral-900/60 border border-neutral-800 rounded-xl p-5">
+          <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 class="section-title">Latest Rotation</h3>
+              <p class="section-hint">Peek at the most recently served proxy from your rotators.</p>
+            </div>
+            <span class="pill" [class.pill-muted]="!preview">{{ preview ? 'Live' : 'Waiting' }}</span>
+          </div>
+
+          @if (preview) {
+            <div class="preview-content">
+              <div class="preview-row">
+                <span class="label">Rotator</span>
+                @if (rotatorConnectionString(previewRotator)) {
+                  <span class="value">{{ rotatorConnectionString(previewRotator) }}</span>
+                } @else {
+                  <span class="value muted">Unavailable</span>
+                }
+              </div>
+              <div class="preview-row">
+                <span class="label">Address</span>
+                <span class="value">{{ preview.ip }}:{{ preview.port }}</span>
+              </div>
+              <div class="preview-row">
+                <span class="label">Authentication</span>
+                @if (preview.has_auth && preview.username && preview.password) {
+                  <span class="value">{{ preview.username }} / {{ preview.password }}</span>
+                } @else {
+                  <span class="value muted">None</span>
+                }
+              </div>
+            </div>
+
+            <div class="preview-actions">
+              <button pButton type="button"
+                      label="Copy Proxy"
+                      icon="pi pi-copy"
+                      (click)="copyPreview(preview)">
+              </button>
+              <button pButton type="button"
+                      label="Copy Rotator"
+                      icon="pi pi-copy"
+                      (click)="copyRotatorConnection(previewRotator)"
+                      [disabled]="!rotatorConnectionString(previewRotator)">
+              </button>
+            </div>
+          } @else {
+            <div class="empty-preview">
+              <p>No rotations yet.</p>
+              <p class="field-hint">Rotate any entry below to see the latest served proxy here.</p>
+            </div>
           }
-        </div>
-
-        <button pButton
-                type="submit"
-                label="Create"
-                icon="pi pi-plus"
-                [disabled]="createForm.invalid || submitting || noProtocolsAvailable"
-                [loading]="submitting">
-        </button>
-      </form>
-    </section>
-
-    <section class="list-card">
-      <div class="card-header spaced">
-        <div>
-          <h2>Rotating Proxies</h2>
-          <p class="subtitle">Manage existing rotators and fetch fresh proxies on demand.</p>
-        </div>
-        <button pButton type="button" label="Refresh" icon="pi pi-refresh" (click)="loadInitialData()" [disabled]="loading"></button>
+        </section>
       </div>
 
-      <p-table [value]="rotatingProxies" [tableStyle]="{'min-width': '640px'}" responsiveLayout="scroll">
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Name</th>
-            <th>Protocol</th>
-            <th>Rotator Access</th>
-            <th>Alive Proxies</th>
-            <th>Last Rotation</th>
-            <th>Last Served Proxy</th>
-            <th class="actions">Actions</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-proxy>
-          <tr>
-            <td class="name-cell">
-              <div class="name">{{ proxy.name }}</div>
-              <div class="created">Created {{ proxy.created_at | date:'short' }}</div>
-              <div class="reputation-filter">
-                <span class="filter-label">REPUTATION
-                  <br>
-                <span class="filter-value">{{ reputationFilterSummary(proxy.reputation_labels) }}</span>
-                </span>
-              </div>
-            </td>
-            <td>
-              <span class="protocol-tag">{{ protocolLabel(proxy.protocol) }}</span>
-            </td>
-            <td>
-              <div class="rotator-cell">
-                <button type="button"
-                        pButton
-                        class="p-button-text p-button-sm rotator-link"
-                        [label]="rotatorEndpoint(proxy) || 'View details'"
-                        (click)="showRotatorDetails(proxy)"
-                        [disabled]="!rotatorEndpoint(proxy)">
-                </button>
-                <span class="muted hint-text">Click to view credentials</span>
-              </div>
-            </td>
-            <td>
-              <span class="alive-count">{{ proxy.alive_proxy_count }}</span>
-            </td>
-            <td>
-              @if (proxy.last_rotation_at) {
-                {{ proxy.last_rotation_at | date:'short' }}
-              } @else {
-                <span class="muted">Never</span>
-              }
-            </td>
-            <td>
-              @if (proxy.last_served_proxy) {
-                <code>{{ proxy.last_served_proxy }}</code>
-              } @else {
-                <span class="muted">Not rotated yet</span>
-              }
-            </td>
-            <td class="actions">
-              <div class="action-buttons">
-                <button pButton type="button"
-                        icon="pi pi-sync"
-                        label="Rotate"
-                        (click)="rotate(proxy)"
-                        [loading]="rotateLoading.has(proxy.id)"
-                        [disabled]="rotateLoading.has(proxy.id)">
-                </button>
-                <button pButton type="button"
-                        icon="pi pi-trash"
-                        label="Delete"
-                        severity="danger"
-                        (click)="deleteProxy(proxy)"
-                        [disabled]="rotateLoading.has(proxy.id)">
-                </button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="7">
-              <div class="empty-state">
-                <p>No rotating proxies yet.</p>
-                <p class="hint">Create one above to start rotating through healthy proxies.</p>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </section>
-
-    @if (preview) {
-      <section class="preview-card">
-        <div class="card-header">
-          <h2>Latest Rotation</h2>
-          <p class="subtitle">{{ preview.name }} · {{ protocolLabel(preview.protocol) }}</p>
+      <section class="section-card list-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5 mt-4">
+        <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 class="section-title">Existing Rotators</h3>
+            <p class="section-hint">Manage endpoints, rotate them manually, or remove what you no longer need.</p>
+          </div>
+          <div class="pill">{{ rotatingProxies.length }} total</div>
         </div>
 
-        <div class="preview-content">
-          <div class="preview-row">
-            <span class="label">Rotator</span>
-            @if (rotatorConnectionString(previewRotator)) {
-              <span class="value">{{ rotatorConnectionString(previewRotator) }}</span>
-            } @else {
-              <span class="value muted">Unavailable</span>
-            }
-          </div>
-          <div class="preview-row">
-            <span class="label">Address</span>
-            <span class="value">{{ preview.ip }}:{{ preview.port }}</span>
-          </div>
-          <div class="preview-row">
-            <span class="label">Authentication</span>
-            @if (preview.has_auth && preview.username && preview.password) {
-              <span class="value">{{ preview.username }} / {{ preview.password }}</span>
-            } @else {
-              <span class="value muted">None</span>
-            }
-          </div>
-        </div>
-
-        <div class="preview-actions">
-          <button pButton type="button"
-                  label="Copy Proxy"
-                  icon="pi pi-copy"
-                  (click)="copyPreview(preview)">
-          </button>
-          <button pButton type="button"
-                  label="Copy Rotator"
-                  icon="pi pi-copy"
-                  (click)="copyRotatorConnection(previewRotator)"
-                  [disabled]="!rotatorConnectionString(previewRotator)">
-          </button>
+        <div class="table-shell">
+          <p-table [value]="rotatingProxies" [tableStyle]="{'min-width': '720px'}" responsiveLayout="scroll" class="rotators-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Name</th>
+                <th>Protocol</th>
+                <th>Rotator Access</th>
+                <th>Alive Proxies</th>
+                <th>Last Rotation</th>
+                <th>Last Served Proxy</th>
+                <th class="actions">Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-proxy>
+              <tr>
+                <td class="name-cell">
+                  <div class="name">{{ proxy.name }}</div>
+                  <div class="created">Created {{ proxy.created_at | date:'short' }}</div>
+                  <div class="reputation-filter">
+                    <span class="filter-label">Reputation</span>
+                    <span class="filter-value">{{ reputationFilterSummary(proxy.reputation_labels) }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="protocol-tag">{{ protocolLabel(proxy.protocol) }}</span>
+                </td>
+                <td>
+                  <div class="rotator-cell">
+                    <button type="button"
+                            pButton
+                            class="p-button-text p-button-sm rotator-link"
+                            [label]="rotatorEndpoint(proxy) || 'View details'"
+                            (click)="showRotatorDetails(proxy)"
+                            [disabled]="!rotatorEndpoint(proxy)">
+                    </button>
+                    <span class="muted hint-text">Click to view credentials</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="alive-count">{{ proxy.alive_proxy_count }}</span>
+                </td>
+                <td>
+                  @if (proxy.last_rotation_at) {
+                    {{ proxy.last_rotation_at | date:'short' }}
+                  } @else {
+                    <span class="muted">Never</span>
+                  }
+                </td>
+                <td>
+                  @if (proxy.last_served_proxy) {
+                    <code>{{ proxy.last_served_proxy }}</code>
+                  } @else {
+                    <span class="muted">Not rotated yet</span>
+                  }
+                </td>
+                <td class="actions">
+                  <div class="action-buttons">
+                    <button pButton type="button"
+                            icon="pi pi-sync"
+                            label="Rotate"
+                            (click)="rotate(proxy)"
+                            [loading]="rotateLoading.has(proxy.id)"
+                            [disabled]="rotateLoading.has(proxy.id)">
+                    </button>
+                    <button pButton type="button"
+                            icon="pi pi-trash"
+                            label="Delete"
+                            severity="danger"
+                            (click)="deleteProxy(proxy)"
+                            [disabled]="rotateLoading.has(proxy.id)">
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <p>No rotating proxies yet.</p>
+                    <p class="field-hint">Create one above to start rotating through healthy proxies.</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
         </div>
       </section>
-    }
+
+    </section>
   </div>
 }
 
