@@ -11,6 +11,7 @@ import {DividerModule} from 'primeng/divider';
 import {InputTextModule} from 'primeng/inputtext';
 import {SelectModule} from 'primeng/select';
 import {NotificationService} from '../../services/notification-service.service';
+import {Message} from 'primeng/message';
 
 @Component({
   selector: 'app-admin-other',
@@ -21,7 +22,8 @@ import {NotificationService} from '../../services/notification-service.service';
     CheckboxModule,
     DividerModule,
     InputTextModule,
-    SelectModule
+    SelectModule,
+    Message
   ],
   templateUrl: './admin-other.component.html',
   styleUrl: './admin-other.component.scss'

@@ -43,7 +43,7 @@
             </div>
           </div>
 
-          <div class="toggle-card mt-4">
+          <div class="toggle-card mt-4 mb-4">
             <div class="toggle-leading">
               <p-checkbox
                 inputId="geolite-auto-update"
@@ -56,6 +56,10 @@
               <span class="toggle-hint">When enabled, the service refreshes GeoLite data based on the interval below.</span>
             </label>
           </div>
+
+          @if (form.getRawValue().update_timer.days == 0) {
+            <p-message severity="warn">GeoLite databases update no more than once a day</p-message>
+          }
 
           <div
             class="timer-grid mt-4"
