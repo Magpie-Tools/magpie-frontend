@@ -7,7 +7,6 @@ import {LoginComponent} from './auth/login/login.component';
 import {AuthGuardService} from './services/authorization/auth-guard.service';
 import {AccountComponent} from './account/account.component';
 import {AuthGuardAdminService} from './services/authorization/auth-guard-admin.service';
-import {UserScraperComponent} from './scraper/user-scraper/user-scraper.component';
 import {AuthLoginGuardService} from './services/authorization/auth-login-guard.service';
 import {AddProxiesComponent} from './proxies/proxy-list/add-proxies/add-proxies.component';
 import {CheckerJudgesComponent} from './checker/judges/checker-judges.component';
@@ -18,6 +17,7 @@ import {AdminScraperComponent} from './admin/admin-scraper/admin-scraper.compone
 import {AdminOtherComponent} from './admin/admin-other/admin-other.component';
 import {NotificationsComponent} from './notifications/notifications.component';
 import {AdminBlacklistComponent} from './admin/admin-blacklist/admin-blacklist.component';
+import {ScraperComponent} from './scraper/scraper.component';
 
 export const routes: Routes = [
   {path: "account", component: AccountComponent, canActivate: [AuthGuardService]},
@@ -26,7 +26,7 @@ export const routes: Routes = [
   {path: "notifications", component: NotificationsComponent, canActivate: [AuthGuardService]},
   {path: "proxies", component: ProxiesComponent, canActivate: [AuthGuardService]},
   {path: "proxies/:id", component: ProxyDetailComponent, canActivate: [AuthGuardService]},
-  {path: "scraper", component: UserScraperComponent, canActivate: [AuthGuardService]},
+  {path: "scraper", component: ScraperComponent, canActivate: [AuthGuardService]},
   {path: "checker", redirectTo: "checker/settings", pathMatch: "full"},
   {path: "checker/settings", component: CheckerSettingsComponent, canActivate: [AuthGuardService]},
   {path: "checker/judges", component: CheckerJudgesComponent, canActivate: [AuthGuardService]},

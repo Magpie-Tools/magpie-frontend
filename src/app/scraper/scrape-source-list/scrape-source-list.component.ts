@@ -2,9 +2,9 @@ import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {SelectionModel} from '@angular/cdk/collections';
-import {LoadingComponent} from '../../../ui-elements/loading/loading.component';
-import {HttpService} from '../../../services/http.service';
-import {ScrapeSourceInfo} from '../../../models/ScrapeSourceInfo';
+import {LoadingComponent} from '../../ui-elements/loading/loading.component';
+import {HttpService} from '../../services/http.service';
+import {ScrapeSourceInfo} from '../../models/ScrapeSourceInfo';
 import {AddScrapeSourceComponent} from '../add-scrape-source/add-scrape-source.component';
 
 // PrimeNG imports
@@ -13,7 +13,7 @@ import {ButtonModule} from 'primeng/button';
 import {CheckboxModule} from 'primeng/checkbox';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {ConfirmationService} from 'primeng/api';
-import {NotificationService} from '../../../services/notification-service.service';
+import {NotificationService} from '../../services/notification-service.service';
 
 @Component({
   selector: 'app-scrape-source-list',
@@ -29,7 +29,8 @@ import {NotificationService} from '../../../services/notification-service.servic
   ],
   providers: [ConfirmationService],
   templateUrl: './scrape-source-list.component.html',
-  styleUrl: './scrape-source-list.component.scss'
+  styleUrl: './scrape-source-list.component.scss',
+  standalone: true
 })
 export class ScrapeSourceListComponent implements OnInit {
   @Output() showAddScrapeSourceMessage = new EventEmitter<boolean>();
@@ -220,7 +221,7 @@ export class ScrapeSourceListComponent implements OnInit {
   }
 
   isCheckingRobots(sourceId: number): boolean {
-    return !!this.checkingRobots[sourceId];
+    return this.checkingRobots[sourceId];
   }
 
   private syncSelectionWithData(): void {

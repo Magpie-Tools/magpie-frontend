@@ -1,16 +1,16 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {HttpService} from '../../../services/http.service';
+import {HttpService} from '../../services/http.service';
 
 import {ButtonModule} from 'primeng/button';
 import {TextareaModule} from 'primeng/textarea';
 import {TooltipModule} from 'primeng/tooltip';
 import {DialogModule} from 'primeng/dialog';
-import {NotificationService} from '../../../services/notification-service.service';
+import {NotificationService} from '../../services/notification-service.service';
 import {
   ProcesingPopupComponent
-} from '../../../proxies/proxy-list/add-proxies/procesing-popup/procesing-popup.component';
+} from '../../proxies/proxy-list/add-proxies/procesing-popup/procesing-popup.component';
 
 @Component({
   selector: 'app-add-scrape-source',
