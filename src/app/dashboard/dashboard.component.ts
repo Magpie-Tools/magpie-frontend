@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {DecimalPipe} from '@angular/common';
 import {Subject} from 'rxjs';
 import {finalize, takeUntil} from 'rxjs/operators';
@@ -52,31 +52,31 @@ interface DashboardStatus {
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  dashboardInfo: DashboardStatus = { loading: false, loaded: false };
+  dashboardInfo = signal<DashboardStatus>({ loading: false, loaded: false });
 
-  conversionRate: SparklineMetric = { value: 0, history: [] };
-  avgOrderValue: SparklineMetric = { value: 0, history: [] };
-  orderQuantity: SparklineMetric = { value: 0, history: [] };
+  conversionRate = signal<SparklineMetric>({ value: 0, history: [] });
+  avgOrderValue = signal<SparklineMetric>({ value: 0, history: [] });
+  orderQuantity = signal<SparklineMetric>({ value: 0, history: [] });
 
-  proxiesLineData: any = {};
-  proxiesLineOptions: any = {};
+  proxiesLineData = signal<any>({});
+  proxiesLineOptions = signal<any>({});
   private proxiesLineDiff = { gained: [] as number[], lost: [] as number[] };
 
-  majorCountries: Array<{ name: string; value: number; color?: string; percentage: string }> = [];
+  majorCountries = signal<Array<{ name: string; value: number; color?: string; percentage: string }>>([]);
 
-  anonymitySummary?: { total: number; change: number };
-  anonymitySegments: Array<{
+  anonymitySummary = signal<{ total: number; change: number } | undefined>(undefined);
+  anonymitySegments = signal<Array<{
     name: string;
     count: number;
     change: number;
     share: number;
     barClass: string;
     dotColor: string;
-  }> = [];
+  }>>([]);
 
-  proxyHistory: ProxyCheck[] = [];
+  proxyHistory = signal<ProxyCheck[]>([]);
 
-  visitorPieData = {
+  visitorPieData = signal({
     labels: [] as string[],
     datasets: [
       {
@@ -85,15 +85,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         hoverBackgroundColor: [] as string[]
       }
     ]
-  };
+  });
 
-  reputationBreakdown: ReputationBreakdown = { good: 0, neutral: 0, poor: 0, unknown: 0 };
-  reputationChartData: any = {};
-  reputationChartOptions: any = {};
+  reputationBreakdown = signal<ReputationBreakdown>({ good: 0, neutral: 0, poor: 0, unknown: 0 });
+  reputationChartData = signal<any>({});
+  reputationChartOptions = signal<any>({});
 
   private readonly numberFormatter = new Intl.NumberFormat('de-DE');
 
-  pieChartOptions = {
+  readonly pieChartOptions = {
     responsive: true,
     plugins: {
       legend: {
@@ -115,11 +115,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   };
 
-  judgeTrafficData: Record<string, number> = {};
+  judgeTrafficData = signal<Record<string, number>>({});
   judgePeriodOptions = ['Yearly', 'Monthly', 'Weekly'];
 
   private readonly destroy$ = new Subject<void>();
-  proxyHistoryRefreshing = false;
+  proxyHistoryRefreshing = signal(false);
 
   constructor(private graphqlService: GraphqlService) {}
 
@@ -133,50 +133,50 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   onProxyHistoryRefresh(): void {
-    if (this.proxyHistoryRefreshing) {
+    if (this.proxyHistoryRefreshing()) {
       return;
     }
 
-    this.proxyHistoryRefreshing = true;
+    this.proxyHistoryRefreshing.set(true);
 
     this.graphqlService
       .fetchDashboardData()
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
-          this.proxyHistoryRefreshing = false;
+          this.proxyHistoryRefreshing.set(false);
         })
       )
       .subscribe({
         next: ({viewer}) => {
           this.applyDashboardData(viewer);
-          this.dashboardInfo = {...this.dashboardInfo, error: undefined};
+          this.dashboardInfo.update((info) => ({ ...info, error: undefined }));
         },
         error: (error: Error) => {
-          this.dashboardInfo = {
-            ...this.dashboardInfo,
+          this.dashboardInfo.update((info) => ({
+            ...info,
             error: error?.message ?? 'Failed to refresh proxy history'
-          };
+          }));
         }
       });
   }
 
   private loadDashboard(): void {
-    this.dashboardInfo = { loading: true, loaded: false };
+    this.dashboardInfo.set({ loading: true, loaded: false });
     this.graphqlService
       .fetchDashboardData()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: ({ viewer }) => {
           this.applyDashboardData(viewer);
-          this.dashboardInfo = { loading: false, loaded: true };
+          this.dashboardInfo.set({ loading: false, loaded: true });
         },
         error: (error: Error) => {
-          this.dashboardInfo = {
+          this.dashboardInfo.set({
             loading: false,
             loaded: false,
             error: error?.message ?? 'Failed to load dashboard data'
-          };
+          });
         }
       });
   }
@@ -210,29 +210,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const aliveValue = aliveSeries.length ? aliveSeries[aliveSeries.length - 1] : fallbackAlive.value;
     const aliveHistory = aliveSeries.length ? aliveSeries : fallbackAlive.history;
 
-    this.conversionRate = {
+    this.conversionRate.set({
       value: aliveValue,
       history: aliveHistory.length ? aliveHistory : [aliveValue],
       displayValue: aliveValue.toLocaleString()
-    };
+    });
 
     const totalSeries = (proxyHistory ?? []).map((entry) => entry.count);
-    this.avgOrderValue = {
+    this.avgOrderValue.set({
       value: proxyCount,
       history: totalSeries.length ? totalSeries : [proxyCount],
       displayValue: proxyCount.toLocaleString()
-    };
+    });
 
     const scrapedSeries = this.extractSnapshotCounts(snapshots?.scraped);
     const fallbackScraped = this.resolveScrapedFallback(dashboard);
     const scrapedValue = scrapedSeries.length ? scrapedSeries[scrapedSeries.length - 1] : fallbackScraped.value;
     const scrapedHistory = scrapedSeries.length ? scrapedSeries : fallbackScraped.history;
 
-    this.orderQuantity = {
+    this.orderQuantity.set({
       value: scrapedValue,
       history: scrapedHistory.length ? scrapedHistory : [scrapedValue],
       displayValue: scrapedValue.toLocaleString()
-    };
+    });
   }
 
   private extractSnapshotCounts(entries: ProxySnapshotEntry[] | undefined): number[] {
@@ -302,21 +302,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const palette = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1', '#34d399'];
 
-    this.majorCountries = primaryEntries.map((entry, index) => ({
+    this.majorCountries.set(primaryEntries.map((entry, index) => ({
       name: entry.name,
       value: entry.value,
       color: palette[index % palette.length],
       percentage: total > 0 ? ((entry.value / total) * 100).toFixed(1) : '0.0'
-    }));
+    })));
 
-    const labels = this.majorCountries.map((entry) => entry.name);
-    const data = this.majorCountries.map((entry) => entry.value);
-    const backgroundColors = this.majorCountries.map((entry, index) =>
-      entry.color ?? palette[index % palette.length]
-    );
+    const labels = this.majorCountries().map((entry) => entry.name);
+    const data = this.majorCountries().map((entry) => entry.value);
+    const backgroundColors = this.majorCountries().map((entry, index) => entry.color ?? palette[index % palette.length]);
     const hoverColors = backgroundColors.map((color) => this.adjustColor(color, 25));
 
-    this.visitorPieData = {
+    let pieData = {
       labels,
       datasets: [
         {
@@ -328,11 +326,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
 
     if (!labels.length && proxyTotal > 0) {
-      this.visitorPieData.labels = ['Total'];
-      this.visitorPieData.datasets[0].data = [proxyTotal];
-      this.visitorPieData.datasets[0].backgroundColor = ['#3b82f6'];
-      this.visitorPieData.datasets[0].hoverBackgroundColor = ['#60a5fa'];
+      pieData = {
+        labels: ['Total'],
+        datasets: [
+          {
+            data: [proxyTotal],
+            backgroundColor: ['#3b82f6'],
+            hoverBackgroundColor: ['#60a5fa']
+          }
+        ]
+      };
     }
+
+    this.visitorPieData.set(pieData);
   }
 
   private buildCountryCountsFromProxies(proxies: ProxyNode[]): Array<{ name: string; value: number }> {
@@ -346,36 +352,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateProxyHistory(proxies: ProxyNode[]): void {
-    this.proxyHistory = proxies
-      .map((proxy): ProxyCheck | null => {
-        const latest = this.parseDate(proxy.latestCheck);
-        if (!latest) {
-          return null;
-        }
+    this.proxyHistory.set(
+      proxies
+        .map((proxy): ProxyCheck | null => {
+          const latest = this.parseDate(proxy.latestCheck);
+          if (!latest) {
+            return null;
+          }
 
-        const status = proxy.alive
-          ? 'working'
-          : proxy.responseTime === 0
-            ? 'timeout'
-            : 'failed';
+          const status = proxy.alive
+            ? 'working'
+            : proxy.responseTime === 0
+              ? 'timeout'
+              : 'failed';
 
-        const entry: ProxyCheck = {
-          id: `#${proxy.id}`,
-          ip: `${proxy.ip}:${proxy.port}`,
-          status,
-          date: latest,
-          time: this.toTimeLabel(latest)
-        };
+          const entry: ProxyCheck = {
+            id: `#${proxy.id}`,
+            ip: `${proxy.ip}:${proxy.port}`,
+            status,
+            date: latest,
+            time: this.toTimeLabel(latest)
+          };
 
-        if (proxy.responseTime > 0) {
-          entry.latency = proxy.responseTime;
-        }
+          if (proxy.responseTime > 0) {
+            entry.latency = proxy.responseTime;
+          }
 
-        return entry;
-      })
-      .filter((entry): entry is ProxyCheck => entry !== null)
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .slice(0, 8);
+          return entry;
+        })
+        .filter((entry): entry is ProxyCheck => entry !== null)
+        .sort((a, b) => b.date.getTime() - a.date.getTime())
+        .slice(0, 8)
+    );
   }
 
   private updateAnonymitySummary(entries: JudgeValidProxy[]): void {
@@ -390,7 +398,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
 
     const total = totals.elite + totals.anonymous + totals.transparent;
-    this.anonymitySummary = { total, change: 0 };
 
     const segmentConfig: Array<{
       key: keyof typeof totals;
@@ -403,17 +410,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { key: 'transparent', name: 'Transparent', barClass: 'bg-slate-300/70', dotColor: '#cbd5e1' }
     ];
 
-    this.anonymitySegments = segmentConfig.map((config) => {
-      const count = totals[config.key];
-      return {
-        name: config.name,
-        count,
-        change: 0,
-        share: total > 0 ? count / total : 0,
-        barClass: config.barClass,
-        dotColor: config.dotColor
-      };
-    });
+    this.anonymitySummary.set({ total, change: 0 });
+    this.anonymitySegments.set(
+      segmentConfig.map((config) => {
+        const count = totals[config.key];
+        return {
+          name: config.name,
+          count,
+          change: 0,
+          share: total > 0 ? count / total : 0,
+          barClass: config.barClass,
+          dotColor: config.dotColor
+        };
+      })
+    );
   }
 
   private updateJudgeBreakdown(entries: JudgeValidProxy[]): void {
@@ -425,7 +435,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.judgeTrafficData = data;
+    this.judgeTrafficData.set(data);
   }
 
   private updateReputationOverview(dashboard: DashboardInfo | undefined): void {
@@ -437,7 +447,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       unknown: source?.unknown ?? 0
     };
 
-    this.reputationBreakdown = breakdown;
+    this.reputationBreakdown.set(breakdown);
 
     const values = [breakdown.good, breakdown.neutral, breakdown.poor, breakdown.unknown];
     const labels = ['Good', 'Neutral', 'Poor', 'Unknown'];
@@ -454,7 +464,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       y: label
     }));
 
-    this.reputationChartData = {
+    this.reputationChartData.set({
       labels,
       datasets: [
         {
@@ -483,11 +493,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
           clip: false
         }
       ]
-    };
+    });
 
     const total = values.reduce((sum, value) => sum + value, 0);
 
-    this.reputationChartOptions = {
+    this.reputationChartOptions.set({
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 650 },
@@ -579,7 +589,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           }
         }
       }
-    };
+    });
   }
 
   private buildProxiesLineChart(history: ProxyHistoryEntry[], limit: number | null | undefined): void {
@@ -630,11 +640,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
       }
 
-      this.proxiesLineData = {
+      this.proxiesLineData.set({
         labels: ['No Data'],
         datasets
-      };
-      this.proxiesLineOptions = this.createProxyLineOptions(diffRef);
+      });
+      this.proxiesLineOptions.set(this.createProxyLineOptions(diffRef));
       return;
     }
 
@@ -671,12 +681,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const diffRef = this.proxiesLineDiff;
 
-    this.proxiesLineData = {
+    this.proxiesLineData.set({
       labels,
       datasets
-    };
+    });
 
-    this.proxiesLineOptions = this.createProxyLineOptions(diffRef);
+    this.proxiesLineOptions.set(this.createProxyLineOptions(diffRef));
   }
 
   private createProxyLineOptions(diffRef: { gained: number[]; lost: number[] }) {

@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, computed, signal} from '@angular/core';
 import {CommonModule, DatePipe, NgClass} from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {UIChart} from 'primeng/chart';
@@ -61,26 +61,26 @@ interface ReputationSignalStructuredItem {
   styleUrl: './proxy-detail.component.scss'
 })
 export class ProxyDetailComponent implements OnInit, OnDestroy {
-  proxyId?: number;
-  detail?: ProxyDetail | null;
-  statistics: ProxyStatistic[] = [];
-  chronologicalStats: ProxyStatistic[] = [];
+  proxyId = signal<number | undefined>(undefined);
+  detail = signal<ProxyDetail | null>(null);
+  statistics = signal<ProxyStatistic[]>([]);
+  chronologicalStats = computed(() => this.computeChronologicalStatistics());
 
-  isLoadingDetail = true;
-  isLoadingStatistics = true;
-  isResponseBodyModalVisible = false;
-  isLoadingResponseBody = false;
-  selectedStatistic: ProxyStatistic | null = null;
-  selectedResponseBody = '';
-  selectedRegex: string | null = null;
-  highlightedResponseBody: SafeHtml | null = null;
-  responseBodyError: string | null = null;
-  isSignalDialogVisible = false;
-  signalDialogTitle = '';
-  signalDialogEntries: ReputationSignalEntry[] = [];
+  isLoadingDetail = signal(true);
+  isLoadingStatistics = signal(true);
+  isResponseBodyModalVisible = signal(false);
+  isLoadingResponseBody = signal(false);
+  selectedStatistic = signal<ProxyStatistic | null>(null);
+  selectedResponseBody = signal('');
+  selectedRegex = signal<string | null>(null);
+  highlightedResponseBody = signal<SafeHtml | null>(null);
+  responseBodyError = signal<string | null>(null);
+  isSignalDialogVisible = signal(false);
+  signalDialogTitle = signal('');
+  signalDialogEntries = signal<ReputationSignalEntry[]>([]);
 
-  chartData: any = { labels: [], datasets: [] };
-  chartOptions: any = this.buildDefaultChartOptions();
+  chartData = signal<any>({ labels: [], datasets: [] });
+  chartOptions = signal<any>(this.buildDefaultChartOptions());
 
   private readonly structuredMaxDepth = 3;
   private readonly signalNumberPrecision = 10;
@@ -106,7 +106,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.proxyId = id;
+      this.proxyId.set(id);
       this.loadProxyDetail(id);
       this.loadProxyStatistics(id);
     });
@@ -120,11 +120,12 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   get fullAddress(): string {
-    if (!this.detail) {
+    const detail = this.detail();
+    if (!detail) {
       return '';
     }
-    const ip = `${this.detail.ip ?? ''}`.trim();
-    const port = this.detail.port;
+    const ip = `${detail.ip ?? ''}`.trim();
+    const port = detail.port;
     if (!ip && (port === undefined || port === null || `${port}`.trim() === '')) {
       return '';
     }
@@ -138,7 +139,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   get externalLookupLinks(): { label: string; url: string; icon: string }[] {
-    const ip = this.detail?.ip?.toString().trim();
+    const ip = this.detail()?.ip?.toString().trim();
     if (!ip) {
       return [];
     }
@@ -178,7 +179,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   copyIp(): void {
-    const value = this.detail?.ip?.toString().trim();
+    const value = this.detail()?.ip?.toString().trim();
     if (!value) {
       return;
     }
@@ -186,7 +187,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   copyPort(): void {
-    const value = this.detail?.port;
+    const value = this.detail()?.port;
     if (value === undefined || value === null) {
       return;
     }
@@ -252,16 +253,17 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   get authenticationDisplay(): string {
-    if (!this.detail) {
+    const detail = this.detail();
+    if (!detail) {
       return 'Unknown';
     }
 
-    if (!this.detail.has_auth) {
+    if (!detail.has_auth) {
       return 'None';
     }
 
-    const user = this.detail.username?.trim();
-    const pass = this.detail.password?.trim();
+    const user = detail.username?.trim();
+    const pass = detail.password?.trim();
     if (!user && !pass) {
       return 'Present (masked)';
     }
@@ -274,12 +276,13 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   get authenticationCredentials(): { username: string; password: string; combined: string } | null {
-    if (!this.detail?.has_auth) {
+    const detail = this.detail();
+    if (!detail?.has_auth) {
       return null;
     }
 
-    const username = this.detail.username?.trim();
-    const password = this.detail.password?.trim();
+    const username = detail.username?.trim();
+    const password = detail.password?.trim();
     if (!username || !password) {
       return null;
     }
@@ -297,8 +300,8 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       return '';
     }
 
-    const ip = this.detail?.ip?.toString().trim();
-    const portValue = this.detail?.port;
+    const ip = this.detail()?.ip?.toString().trim();
+    const portValue = this.detail()?.port;
     const port = portValue === undefined || portValue === null ? '' : `${portValue}`.trim();
     if (!ip || !port) {
       return '';
@@ -308,19 +311,21 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   get latestStatistic(): ProxyStatistic | null {
-    if (this.detail?.latest_statistic) {
-      return this.detail.latest_statistic;
+    const detail = this.detail();
+    if (detail?.latest_statistic) {
+      return detail.latest_statistic;
     }
 
-    if (this.statistics.length > 0) {
-      return this.statistics[0];
+    const stats = this.statistics();
+    if (stats.length > 0) {
+      return stats[0];
     }
 
     return null;
   }
 
   get reputationOverall(): ProxyReputation | null {
-    const overall = this.detail?.reputation?.overall;
+    const overall = this.detail()?.reputation?.overall;
     if (!overall) {
       return null;
     }
@@ -333,7 +338,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   get reputationProtocols(): ProxyReputation[] {
-    const protocols = this.detail?.reputation?.protocols;
+    const protocols = this.detail()?.reputation?.protocols;
     if (!protocols) {
       return [];
     }
@@ -435,22 +440,22 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   openSignalsDialog(rep: ProxyReputation): void {
-    this.signalDialogEntries = this.reputationSignalEntries(rep, Infinity);
+    this.signalDialogEntries.set(this.reputationSignalEntries(rep, Infinity));
     const rawKind = rep.kind?.replace(/_/g, ' ').trim() ?? '';
     if (!rawKind) {
-      this.signalDialogTitle = 'Signals';
+      this.signalDialogTitle.set('Signals');
     } else if (rawKind.toLowerCase() === 'overall') {
-      this.signalDialogTitle = 'Overall Signals';
+      this.signalDialogTitle.set('Overall Signals');
     } else {
-      this.signalDialogTitle = `${rawKind.toUpperCase()} Signals`;
+      this.signalDialogTitle.set(`${rawKind.toUpperCase()} Signals`);
     }
-    this.isSignalDialogVisible = true;
+    this.isSignalDialogVisible.set(true);
   }
 
   onSignalDialogHide(): void {
-    this.isSignalDialogVisible = false;
-    this.signalDialogEntries = [];
-    this.signalDialogTitle = '';
+    this.isSignalDialogVisible.set(false);
+    this.signalDialogEntries.set([]);
+    this.signalDialogTitle.set('');
   }
 
   signalToneClass(tone: SignalTone): string {
@@ -499,15 +504,15 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadProxyDetail(id: number): void {
-    this.isLoadingDetail = true;
+    this.isLoadingDetail.set(true);
     const sub = this.http.getProxyDetail(id).subscribe({
       next: detail => {
-        this.detail = detail;
-        this.isLoadingDetail = false;
+        this.detail.set(detail);
+        this.isLoadingDetail.set(false);
         this.updateChart();
       },
       error: err => {
-        this.isLoadingDetail = false;
+        this.isLoadingDetail.set(false);
         const message = err?.error?.error ?? err?.message ?? 'Failed to load proxy';
         NotificationService.showError(message);
         this.router.navigate(['/proxies']).catch(() => {});
@@ -940,15 +945,15 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadProxyStatistics(id: number): void {
-    this.isLoadingStatistics = true;
+    this.isLoadingStatistics.set(true);
     const sub = this.http.getProxyStatistics(id, { limit: 150 }).subscribe({
       next: stats => {
-        this.statistics = stats;
-        this.isLoadingStatistics = false;
+        this.statistics.set(stats);
+        this.isLoadingStatistics.set(false);
         this.updateChart();
       },
       error: err => {
-        this.isLoadingStatistics = false;
+        this.isLoadingStatistics.set(false);
         const message = err?.error?.error ?? err?.message ?? 'Failed to load proxy statistics';
         NotificationService.showError(message);
       }
@@ -958,32 +963,32 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   openStatisticResponse(row: ProxyStatistic): void {
-    if (!this.proxyId) {
+    if (!this.proxyId()) {
       NotificationService.showError('Unable to determine proxy identifier');
       return;
     }
 
-    this.isResponseBodyModalVisible = true;
-    this.isLoadingResponseBody = true;
-    this.selectedStatistic = row;
-    this.selectedResponseBody = '';
-    this.selectedRegex = null;
-    this.highlightedResponseBody = null;
-    this.responseBodyError = null;
+    this.isResponseBodyModalVisible.set(true);
+    this.isLoadingResponseBody.set(true);
+    this.selectedStatistic.set(row);
+    this.selectedResponseBody.set('');
+    this.selectedRegex.set(null);
+    this.highlightedResponseBody.set(null);
+    this.responseBodyError.set(null);
 
     this.responseBodySubscription?.unsubscribe();
-    const sub = this.http.getProxyStatisticResponseBody(this.proxyId, row.id).subscribe({
+    const sub = this.http.getProxyStatisticResponseBody(this.proxyId()!, row.id).subscribe({
       next: detail => {
-        this.selectedResponseBody = detail.response_body;
-        this.selectedRegex = detail.regex;
-        this.highlightedResponseBody = this.buildHighlightedResponse(detail.response_body, detail.regex);
-        this.isLoadingResponseBody = false;
+        this.selectedResponseBody.set(detail.response_body);
+        this.selectedRegex.set(detail.regex);
+        this.highlightedResponseBody.set(this.buildHighlightedResponse(detail.response_body, detail.regex));
+        this.isLoadingResponseBody.set(false);
       },
       error: err => {
-        this.responseBodyError = err?.error?.error ?? err?.message ?? 'Failed to load response body';
-        this.selectedRegex = null;
-        this.highlightedResponseBody = this.buildHighlightedResponse('', null);
-        this.isLoadingResponseBody = false;
+        this.responseBodyError.set(err?.error?.error ?? err?.message ?? 'Failed to load response body');
+        this.selectedRegex.set(null);
+        this.highlightedResponseBody.set(this.buildHighlightedResponse('', null));
+        this.isLoadingResponseBody.set(false);
       }
     });
 
@@ -992,13 +997,13 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   onResponseDialogHide(): void {
-    this.isResponseBodyModalVisible = false;
+    this.isResponseBodyModalVisible.set(false);
     this.responseBodySubscription?.unsubscribe();
     this.responseBodySubscription = undefined;
-    this.selectedResponseBody = '';
-    this.selectedRegex = null;
-    this.highlightedResponseBody = null;
-    this.responseBodyError = null;
+    this.selectedResponseBody.set('');
+    this.selectedRegex.set(null);
+    this.highlightedResponseBody.set(null);
+    this.responseBodyError.set(null);
   }
 
   private buildHighlightedResponse(body: string, regex: string | null): SafeHtml {
@@ -1134,13 +1139,12 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   }
 
   private updateChart(): void {
-    this.chronologicalStats = this.computeChronologicalStatistics();
-    const points: ProxyStatistic[] = this.chronologicalStats;
+    const points: ProxyStatistic[] = this.chronologicalStats();
 
     const palette = this.getThemePalette();
 
     if (!points.length) {
-      this.chartData = {
+      this.chartData.set({
         labels: [],
         datasets: [
           {
@@ -1153,8 +1157,8 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
             borderWidth: 2,
           }
         ]
-      };
-      this.chartOptions = this.buildDefaultChartOptions(palette);
+      });
+      this.chartOptions.set(this.buildDefaultChartOptions(palette));
       return;
     }
 
@@ -1170,7 +1174,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     });
     const values = points.map(p => p.response_time);
 
-    this.chartData = {
+    this.chartData.set({
       labels,
       datasets: [
         {
@@ -1185,20 +1189,22 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
           borderWidth: 2,
         }
       ]
-    };
+    });
 
-    this.chartOptions = this.buildDefaultChartOptions(palette);
+    this.chartOptions.set(this.buildDefaultChartOptions(palette));
   }
 
   private computeChronologicalStatistics(): ProxyStatistic[] {
-    if (this.statistics.length) {
-      return [...this.statistics].sort((a, b) => {
+    const statistics = this.statistics();
+    if (statistics.length) {
+      return [...statistics].sort((a, b) => {
         return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
       });
     }
 
-    if (this.detail?.latest_statistic) {
-      return [this.detail.latest_statistic];
+    const detail = this.detail();
+    if (detail?.latest_statistic) {
+      return [detail.latest_statistic];
     }
 
     return [];

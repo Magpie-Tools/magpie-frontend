@@ -1,4 +1,4 @@
-@if (!hasLoaded) {
+@if (!hasLoaded()) {
   <app-loading class="flex items-center justify-center mt-20"></app-loading>
 } @else {
   <div class="proxy-container p-8 min-h-screen text-gray-300">
@@ -6,13 +6,13 @@
     <div class="actions mb-4 flex flex-wrap items-center justify-between gap-4">
       <div class="flex flex-wrap items-center gap-4">
         <app-export-proxies
-          [allProxies]="dataSource.data"
-          [selectedProxies]="selection.selected.slice()"
+          [allProxies]="dataSource()"
+          [selectedProxies]="selectedProxies()"
         ></app-export-proxies>
 
         <app-delete-proxies
-          [allProxies]="dataSource.data"
-          [selectedProxies]="selection.selected.slice()"
+          [allProxies]="dataSource()"
+          [selectedProxies]="selectedProxies()"
           (proxiesDeleted)="onProxiesDeleted()"
         ></app-delete-proxies>
       </div>
@@ -22,7 +22,7 @@
           label="Refresh"
           icon="pi pi-refresh"
           styleClass="p-button-outlined"
-          [disabled]="isLoading"
+          [disabled]="isLoading()"
           (onClick)="refreshList()"
         ></p-button>
 
@@ -30,7 +30,7 @@
           type="search"
           class="proxy-search-input"
           placeholder="Search proxies"
-          [ngModel]="searchTerm"
+          [ngModel]="searchTerm()"
           (ngModelChange)="onSearchTermChange($event)"
           aria-label="Search proxies"
         />
@@ -43,21 +43,21 @@
     </div>
 
     <p-table
-      [value]="dataSource.data"
+      [value]="dataSource()"
       [paginator]="true"
-      [rows]="pageSize"
-      [totalRecords]="totalItems"
+      [rows]="pageSize()"
+      [totalRecords]="totalItems()"
       [lazy]="true"
       (onLazyLoad)="onLazyLoad($event)"
         [rowsPerPageOptions]="[20, 40, 60, 100]"
-      [selection]="selection.selected"
-      [(selection)]="selectedProxies"
+      [selection]="selectedProxies()"
+      (selectionChange)="onSelectionChange($event)"
       dataKey="id"
       class="p-datatable-gridlines p-datatable-sm"
-      [sortField]="sortField"
-      [sortOrder]="sortOrder ?? 0"
+      [sortField]="sortField()"
+      [sortOrder]="sortOrder() ?? 0"
       (onSort)="onSort($event)"
-      [loading]="isLoading"
+      [loading]="isLoading()"
     >
       <ng-template pTemplate="header">
         <tr>

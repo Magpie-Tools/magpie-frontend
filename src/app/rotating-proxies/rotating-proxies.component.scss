@@ -8,14 +8,6 @@ $accent: rgba(var(--theme-primary-500-rgb), 1);
   display: block;
 }
 
-.rotating-loading {
-  padding: 3rem;
-  text-align: center;
-  color: $muted;
-  font-size: 1.05rem;
-  letter-spacing: 0.01em;
-}
-
 .rotating-proxies-page {
   display: flex;
   justify-content: center;

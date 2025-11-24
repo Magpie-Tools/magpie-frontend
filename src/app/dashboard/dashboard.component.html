@@ -1,40 +1,40 @@
-@if (dashboardInfo.loading) {
+@if (dashboardInfo().loading) {
   <app-loading class="flex items-center justify-center mt-20"></app-loading>
 }
 
-@if (dashboardInfo.error) {
+@if (dashboardInfo().error) {
   <div class="mt-4 text-center text-red-400">
-    {{ dashboardInfo.error }}
+    {{ dashboardInfo().error }}
   </div>
 }
 
-@if (dashboardInfo.loaded) {
+@if (dashboardInfo().loaded) {
   <div class="dashboard-container">
     <div class="flex flex-wrap -m-2">
       <div class="w-full md:w-1/3 p-2">
         <app-kpi-card
           title="Alive Proxies"
-          [value]="conversionRate.value"
-          [displayValue]="conversionRate.value | number"
-          [chartValues]="conversionRate.history">
+          [value]="conversionRate().value"
+          [displayValue]="conversionRate().value | number"
+          [chartValues]="conversionRate().history">
         </app-kpi-card>
       </div>
 
       <div class="w-full md:w-1/3 p-2">
         <app-kpi-card
           title="Total Proxies"
-          [value]="avgOrderValue.value"
-          [displayValue]="avgOrderValue.value | number"
-          [chartValues]="avgOrderValue.history">
+          [value]="avgOrderValue().value"
+          [displayValue]="avgOrderValue().value | number"
+          [chartValues]="avgOrderValue().history">
         </app-kpi-card>
       </div>
 
       <div class="w-full md:w-1/3 p-2">
         <app-kpi-card
           title="Scraped Proxies"
-          [value]="orderQuantity.value"
-          [displayValue]="orderQuantity.value | number"
-          [chartValues]="orderQuantity.history">
+          [value]="orderQuantity().value"
+          [displayValue]="orderQuantity().value | number"
+          [chartValues]="orderQuantity().history">
         </app-kpi-card>
       </div>
     </div>
@@ -42,47 +42,47 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
       <div class="lg:col-span-2">
         <app-proxies-per-hour-card
-          [chartData]="proxiesLineData"
-          [chartOptions]="proxiesLineOptions">
+          [chartData]="proxiesLineData()"
+          [chartOptions]="proxiesLineOptions()">
         </app-proxies-per-hour-card>
       </div>
 
       <div class="lg:col-span-1">
         <app-proxy-history-card
-          [history]="proxyHistory"
-          [refreshing]="proxyHistoryRefreshing"
+          [history]="proxyHistory()"
+          [refreshing]="proxyHistoryRefreshing()"
           (refresh)="onProxyHistoryRefresh()">
         </app-proxy-history-card>
       </div>
 
       <div class="lg:col-span-2">
         <app-proxies-per-country-card
-          [countries]="majorCountries"
-          [chartData]="visitorPieData"
+          [countries]="majorCountries()"
+          [chartData]="visitorPieData()"
           [chartOptions]="pieChartOptions">
         </app-proxies-per-country-card>
       </div>
 
       <div class="lg:col-span-1">
         <app-judge-by-percentage-card
-          [data]="judgeTrafficData"
+          [data]="judgeTrafficData()"
           [periodOptions]="judgePeriodOptions">
         </app-judge-by-percentage-card>
       </div>
 
       <div class="lg:col-span-2">
         <app-proxy-reputation-card
-          [breakdown]="reputationBreakdown"
-          [chartData]="reputationChartData"
-          [chartOptions]="reputationChartOptions">
+          [breakdown]="reputationBreakdown()"
+          [chartData]="reputationChartData()"
+          [chartOptions]="reputationChartOptions()">
         </app-proxy-reputation-card>
       </div>
 
-  <!--    @if (anonymitySummary) {-->
+  <!--    @if (anonymitySummary()) {-->
   <!--      <div class="lg:col-span-1">-->
   <!--        <app-proxies-by-anonymity-card-->
-  <!--          [summary]="anonymitySummary"-->
-  <!--          [segments]="anonymitySegments">-->
+  <!--          [summary]="anonymitySummary()"-->
+  <!--          [segments]="anonymitySegments()">-->
   <!--        </app-proxies-by-anonymity-card>-->
   <!--      </div>-->
   <!--    }-->

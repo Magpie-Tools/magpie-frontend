@@ -1,4 +1,4 @@
-@if (loading) {
+@if (loading()) {
   <div class="rotating-loading">Loading rotating proxies…</div>
 } @else {
   <div class="rotating-proxies-page text-gray-200">
@@ -14,7 +14,7 @@
           type="button"
           label="Refresh"
           icon="pi pi-refresh"
-          [disabled]="loading"
+          [disabled]="loading()"
           (onClick)="loadInitialData()"
           styleClass="refresh-button"
         >
@@ -42,7 +42,7 @@
                        placeholder="My rotating proxy"
                        maxlength="120"
                        formControlName="name"
-                       [disabled]="submitting || noProtocolsAvailable">
+                       [disabled]="submitting() || noProtocolsAvailable()">
                 @if (createForm.get('name')?.invalid && (createForm.get('name')?.dirty || createForm.get('name')?.touched)) {
                   <p class="field-error">Name is required and must be under 120 characters.</p>
                 }
@@ -52,15 +52,15 @@
                 <label class="field-label" for="rotatorProtocol">Protocol</label>
                 <p-select inputId="rotatorProtocol"
                           class="w-full"
-                          [options]="protocolOptions"
+                          [options]="protocolOptions()"
                           optionLabel="label"
                           optionValue="value"
                           placeholder="Select a protocol"
                           formControlName="protocol"
-                          [disabled]="submitting || noProtocolsAvailable">
+                          [disabled]="submitting() || noProtocolsAvailable()">
                 </p-select>
                 <p class="field-hint">
-                  @if (noProtocolsAvailable) {
+                  @if (noProtocolsAvailable()) {
                     Enable at least one protocol in your account settings to create a rotator.
                   } @else {
                     Ports are assigned automatically within the published range.
@@ -77,7 +77,7 @@
                                [options]="reputationOptions"
                                optionLabel="label"
                                optionValue="value"
-                               [disabled]="submitting">
+                               [disabled]="submitting()">
                 </p-multiSelect>
                 <p class="field-hint">Pick which proxy reputations this rotator can serve. Leave empty to use every available proxy.</p>
               </div>
@@ -90,12 +90,12 @@
                   <p class="field-hint">Require credentials before a client can use the rotator.</p>
                 </div>
                 <label class="auth-toggle">
-                  <input type="checkbox" formControlName="authRequired" [disabled]="submitting">
+                  <input type="checkbox" formControlName="authRequired" [disabled]="submitting()">
                   <span>Require authentication</span>
                 </label>
               </div>
 
-              @if (authEnabled) {
+              @if (authEnabled()) {
                 <div class="auth-grid">
                   <div class="field-group">
                     <label class="field-label" for="authUsername">Auth Username</label>
@@ -105,7 +105,7 @@
                            class="p-inputtext-sm w-full"
                            maxlength="120"
                            formControlName="authUsername"
-                           [disabled]="submitting">
+                           [disabled]="submitting()">
                   </div>
 
                   <div class="field-group">
@@ -116,7 +116,7 @@
                            class="p-inputtext-sm w-full"
                            maxlength="120"
                            formControlName="authPassword"
-                           [disabled]="submitting">
+                           [disabled]="submitting()">
                   </div>
                 </div>
               }
@@ -128,8 +128,8 @@
                       type="submit"
                       label="Create Rotator"
                       icon="pi pi-plus"
-                      [disabled]="createForm.invalid || submitting || noProtocolsAvailable"
-                      [loading]="submitting">
+                      [disabled]="createForm.invalid || submitting() || noProtocolsAvailable()"
+                      [loading]="submitting()">
               </button>
             </div>
           </form>
@@ -141,27 +141,27 @@
               <h3 class="section-title">Latest Rotation</h3>
               <p class="section-hint">Peek at the most recently served proxy from your rotators.</p>
             </div>
-            <span class="pill" [class.pill-muted]="!preview">{{ preview ? 'Live' : 'Waiting' }}</span>
+            <span class="pill" [class.pill-muted]="!preview()">{{ preview() ? 'Live' : 'Waiting' }}</span>
           </div>
 
-          @if (preview) {
+          @if (preview()) {
             <div class="preview-content">
               <div class="preview-row">
                 <span class="label">Rotator</span>
-                @if (rotatorConnectionString(previewRotator)) {
-                  <span class="value">{{ rotatorConnectionString(previewRotator) }}</span>
+                @if (rotatorConnectionString(previewRotator())) {
+                  <span class="value">{{ rotatorConnectionString(previewRotator()) }}</span>
                 } @else {
                   <span class="value muted">Unavailable</span>
                 }
               </div>
               <div class="preview-row">
                 <span class="label">Address</span>
-                <span class="value">{{ preview.ip }}:{{ preview.port }}</span>
+                <span class="value">{{ preview()?.ip }}:{{ preview()?.port }}</span>
               </div>
               <div class="preview-row">
                 <span class="label">Authentication</span>
-                @if (preview.has_auth && preview.username && preview.password) {
-                  <span class="value">{{ preview.username }} / {{ preview.password }}</span>
+                @if (preview()?.has_auth && preview()?.username && preview()?.password) {
+                  <span class="value">{{ preview()?.username }} / {{ preview()?.password }}</span>
                 } @else {
                   <span class="value muted">None</span>
                 }
@@ -172,13 +172,13 @@
               <button pButton type="button"
                       label="Copy Proxy"
                       icon="pi pi-copy"
-                      (click)="copyPreview(preview)">
+                      (click)="copyPreview(preview())">
               </button>
               <button pButton type="button"
                       label="Copy Rotator"
                       icon="pi pi-copy"
-                      (click)="copyRotatorConnection(previewRotator)"
-                      [disabled]="!rotatorConnectionString(previewRotator)">
+                      (click)="copyRotatorConnection(previewRotator())"
+                      [disabled]="!rotatorConnectionString(previewRotator())">
               </button>
             </div>
           } @else {
@@ -196,11 +196,11 @@
             <h3 class="section-title">Existing Rotators</h3>
             <p class="section-hint">Manage endpoints, rotate them manually, or remove what you no longer need.</p>
           </div>
-          <div class="pill">{{ rotatingProxies.length }} total</div>
+          <div class="pill">{{ rotatingProxies().length }} total</div>
         </div>
 
         <div class="table-shell">
-          <p-table [value]="rotatingProxies" [tableStyle]="{'min-width': '720px'}" responsiveLayout="scroll" class="rotators-table">
+          <p-table [value]="rotatingProxies()" [tableStyle]="{'min-width': '720px'}" responsiveLayout="scroll" class="rotators-table">
             <ng-template pTemplate="header">
               <tr>
                 <th>Name</th>
@@ -260,15 +260,15 @@
                             icon="pi pi-sync"
                             label="Rotate"
                             (click)="rotate(proxy)"
-                            [loading]="rotateLoading.has(proxy.id)"
-                            [disabled]="rotateLoading.has(proxy.id)">
+                            [loading]="isRotating(proxy.id)"
+                            [disabled]="isRotating(proxy.id)">
                     </button>
                     <button pButton type="button"
                             icon="pi pi-trash"
                             label="Delete"
                             severity="danger"
                             (click)="deleteProxy(proxy)"
-                            [disabled]="rotateLoading.has(proxy.id)">
+                            [disabled]="isRotating(proxy.id)">
                     </button>
                   </div>
                 </td>
@@ -293,37 +293,38 @@
 }
 
 <p-dialog
-  [(visible)]="detailsVisible"
+  [visible]="detailsVisible()"
+  (visibleChange)="detailsVisible.set($event)"
   [modal]="true"
   [dismissableMask]="true"
   [style]="{width: '625px'}"
   [breakpoints]="{'960px': '70vw', '640px': '90vw'}"
   (onHide)="onDetailsHide()"
-  [header]="selectedRotator ? selectedRotator.name + ' · ' + protocolLabel(selectedRotator.protocol) : 'Rotator Details'">
-  @if (selectedRotator) {
+  [header]="selectedRotator() ? selectedRotator()?.name + ' · ' + protocolLabel(selectedRotator()?.protocol ?? '') : 'Rotator Details'">
+  @if (selectedRotator()) {
     <div class="details-dialog">
       <div class="details-grid">
         <div class="detail-row">
           <span class="label">Endpoint</span>
-          <span class="value">{{ rotatorEndpoint(selectedRotator) }}</span>
+          <span class="value">{{ rotatorEndpoint(selectedRotator()) }}</span>
         </div>
         <div class="detail-row">
           <span class="label">Connection</span>
-          @if (rotatorConnectionString(selectedRotator)) {
-            <span class="value">{{ rotatorConnectionString(selectedRotator) }}</span>
+          @if (rotatorConnectionString(selectedRotator())) {
+            <span class="value">{{ rotatorConnectionString(selectedRotator()) }}</span>
           } @else {
             <span class="value muted">Unavailable</span>
           }
         </div>
         <div class="detail-row">
           <span class="label">Reputation Filter</span>
-          <span class="value">{{ reputationFilterSummary(selectedRotator.reputation_labels) }}</span>
+          <span class="value">{{ reputationFilterSummary(selectedRotator()?.reputation_labels) }}</span>
         </div>
         <div class="detail-row">
           <span class="label">Authentication</span>
-          @if (selectedRotator.auth_required && selectedRotator.auth_username && selectedRotator.auth_password) {
-            <span class="value">{{ selectedRotator.auth_username }} / {{ selectedRotator.auth_password }}</span>
-          } @else if (selectedRotator.auth_required) {
+          @if (selectedRotator()?.auth_required && selectedRotator()?.auth_username && selectedRotator()?.auth_password) {
+            <span class="value">{{ selectedRotator()?.auth_username }} / {{ selectedRotator()?.auth_password }}</span>
+          } @else if (selectedRotator()?.auth_required) {
             <span class="value muted">Credentials required</span>
           } @else {
             <span class="value muted">Not required</span>
@@ -335,20 +336,20 @@
         <button pButton type="button"
                 label="Copy Connection"
                 icon="pi pi-copy"
-                (click)="copyRotatorConnection(selectedRotator)"
-                [disabled]="!rotatorConnectionString(selectedRotator)">
+                (click)="copyRotatorConnection(selectedRotator())"
+                [disabled]="!rotatorConnectionString(selectedRotator())">
         </button>
         <button pButton type="button"
                 label="Copy Username"
                 icon="pi pi-user"
-                (click)="copyRotatorField(selectedRotator.auth_username, 'Username')"
-                [disabled]="!selectedRotator.auth_username">
+                (click)="copyRotatorField(selectedRotator()?.auth_username, 'Username')"
+                [disabled]="!selectedRotator()?.auth_username">
         </button>
         <button pButton type="button"
                 label="Copy Password"
                 icon="pi pi-lock"
-                (click)="copyRotatorField(selectedRotator.auth_password, 'Password')"
-                [disabled]="!selectedRotator.auth_password">
+                (click)="copyRotatorField(selectedRotator()?.auth_password, 'Password')"
+                [disabled]="!selectedRotator()?.auth_password">
         </button>
       </div>
     </div>

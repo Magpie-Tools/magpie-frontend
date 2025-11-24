@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {CommonModule, DatePipe} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {forkJoin, Subject} from 'rxjs';
@@ -38,17 +38,17 @@ type RotatingProxyPreview = RotatingProxyNext & { name: string };
 })
 export class RotatingProxiesComponent implements OnInit, OnDestroy {
   createForm: FormGroup;
-  rotatingProxies: RotatingProxy[] = [];
-  protocolOptions: { label: string; value: string }[] = [];
-  loading = false;
-  submitting = false;
-  rotateLoading = new Set<number>();
-  preview: RotatingProxyPreview | null = null;
-  noProtocolsAvailable = false;
-  authEnabled = false;
-  previewRotator: RotatingProxy | null = null;
-  selectedRotator: RotatingProxy | null = null;
-  detailsVisible = false;
+  rotatingProxies = signal<RotatingProxy[]>([]);
+  protocolOptions = signal<{ label: string; value: string }[]>([]);
+  loading = signal(false);
+  submitting = signal(false);
+  rotateLoading = signal<Set<number>>(new Set());
+  preview = signal<RotatingProxyPreview | null>(null);
+  noProtocolsAvailable = signal(false);
+  authEnabled = signal(false);
+  previewRotator = signal<RotatingProxy | null>(null);
+  selectedRotator = signal<RotatingProxy | null>(null);
+  detailsVisible = signal(false);
   readonly reputationOptions = [
     {label: 'Good', value: 'good'},
     {label: 'Neutral', value: 'neutral'},
@@ -63,7 +63,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
 
   private readonly loopbackHost = '127.0.0.1';
   private readonly defaultRotatorHost = this.resolveDefaultHost();
-  rotatorHost = this.loopbackHost;
+  rotatorHost = signal(this.loopbackHost);
   private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder, private http: HttpService) {
@@ -81,10 +81,11 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     this.createForm.get('authRequired')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(value => {
-        this.authEnabled = !!value;
+        const enabled = !!value;
+        this.authEnabled.set(enabled);
         const usernameControl = this.createForm.get('authUsername');
         const passwordControl = this.createForm.get('authPassword');
-        if (this.authEnabled) {
+        if (enabled) {
           usernameControl?.enable({emitEvent: false});
           usernameControl?.addValidators(Validators.required);
           passwordControl?.enable({emitEvent: false});
@@ -110,7 +111,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   }
 
   loadInitialData(): void {
-    this.loading = true;
+    this.loading.set(true);
     forkJoin({
       proxies: this.http.getRotatingProxies(),
       settings: this.http.getUserSettings(),
@@ -119,33 +120,35 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: ({proxies, settings}) => {
           const rawProxies = proxies ?? [];
-          const currentSelectedId = this.selectedRotator?.id ?? null;
-          if (!this.rotatorHost) {
-            this.rotatorHost = this.loopbackHost || this.defaultRotatorHost;
+          const currentSelectedId = this.selectedRotator()?.id ?? null;
+          if (!this.rotatorHost()) {
+            this.rotatorHost.set(this.loopbackHost || this.defaultRotatorHost);
           }
 
           const enriched = rawProxies.map(proxy => this.enrichRotator(proxy));
-          this.rotatingProxies = enriched;
+          this.rotatingProxies.set(enriched);
           if (currentSelectedId) {
             const current = enriched.find(item => item.id === currentSelectedId) ?? null;
-            this.selectedRotator = current;
-            if (!current && this.detailsVisible) {
-              this.detailsVisible = false;
+            this.selectedRotator.set(current);
+            if (!current && this.detailsVisible()) {
+              this.detailsVisible.set(false);
             }
-          } else if (this.selectedRotator) {
-            const updated = enriched.find(item => item.id === this.selectedRotator?.id) ?? null;
-            this.selectedRotator = updated;
-            if (!updated && this.detailsVisible) {
-              this.detailsVisible = false;
+          } else if (this.selectedRotator()) {
+            const updated = enriched.find(item => item.id === this.selectedRotator()?.id) ?? null;
+            this.selectedRotator.set(updated);
+            if (!updated && this.detailsVisible()) {
+              this.detailsVisible.set(false);
             }
           }
-          if (!this.selectedRotator && this.detailsVisible) {
-            this.detailsVisible = false;
+          if (!this.selectedRotator() && this.detailsVisible()) {
+            this.detailsVisible.set(false);
           }
 
-          this.protocolOptions = this.buildProtocolOptions(settings);
-          this.noProtocolsAvailable = this.protocolOptions.length === 0;
-          if (this.noProtocolsAvailable) {
+          const options = this.buildProtocolOptions(settings);
+          this.protocolOptions.set(options);
+          const noneAvailable = options.length === 0;
+          this.noProtocolsAvailable.set(noneAvailable);
+          if (noneAvailable) {
             this.createForm.get('protocol')?.disable({emitEvent: false});
             this.createForm.get('name')?.disable({emitEvent: false});
           } else {
@@ -153,20 +156,20 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
             this.createForm.get('name')?.enable({emitEvent: false});
             const currentProtocol = this.createForm.get('protocol')?.value;
             if (!currentProtocol) {
-              this.createForm.patchValue({protocol: this.protocolOptions[0].value}, {emitEvent: false});
+              this.createForm.patchValue({protocol: options[0].value}, {emitEvent: false});
             }
           }
-          this.loading = false;
+          this.loading.set(false);
         },
         error: err => {
-          this.loading = false;
+          this.loading.set(false);
           NotificationService.showError('Failed to load rotating proxies: ' + this.getErrorMessage(err));
         }
       });
   }
 
   createRotator(): void {
-    if (this.createForm.invalid || this.submitting) {
+    if (this.createForm.invalid || this.submitting()) {
       this.createForm.markAllAsTouched();
       return;
     }
@@ -194,29 +197,29 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.submitting = true;
+    this.submitting.set(true);
     this.http.createRotatingProxy(payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: proxy => {
           const enriched = this.enrichRotator(proxy);
           if (enriched.listen_host) {
-            this.rotatorHost = enriched.listen_host;
-          } else if (!this.rotatorHost) {
-            this.rotatorHost = this.defaultRotatorHost;
+            this.rotatorHost.set(enriched.listen_host);
+          } else if (!this.rotatorHost()) {
+            this.rotatorHost.set(this.defaultRotatorHost);
           }
-          this.rotatingProxies = [enriched, ...this.rotatingProxies];
-          if (this.detailsVisible) {
-            this.selectedRotator = enriched;
+          this.rotatingProxies.update(list => [enriched, ...list]);
+          if (this.detailsVisible()) {
+            this.selectedRotator.set(enriched);
           }
-          this.submitting = false;
+          this.submitting.set(false);
           this.createForm.patchValue({name: ''}, {emitEvent: false});
           this.createForm.get('authUsername')?.reset('', {emitEvent: false});
           this.createForm.get('authPassword')?.reset('', {emitEvent: false});
           NotificationService.showSuccess('Rotating proxy created.');
         },
         error: err => {
-          this.submitting = false;
+          this.submitting.set(false);
           NotificationService.showError('Could not create rotating proxy: ' + this.getErrorMessage(err));
         }
       });
@@ -231,16 +234,19 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.rotatingProxies = this.rotatingProxies.filter(item => item.id !== proxy.id);
-          if (this.preview && this.preview.proxy_id === proxy.id) {
-            this.preview = null;
+          this.rotatingProxies.update(list => list.filter(item => item.id !== proxy.id));
+          const preview = this.preview();
+          if (preview && preview.proxy_id === proxy.id) {
+            this.preview.set(null);
           }
-          if (this.previewRotator && this.previewRotator.id === proxy.id) {
-            this.previewRotator = null;
+          const previewRotator = this.previewRotator();
+          if (previewRotator && previewRotator.id === proxy.id) {
+            this.previewRotator.set(null);
           }
-          if (this.selectedRotator && this.selectedRotator.id === proxy.id) {
-            this.selectedRotator = null;
-            this.detailsVisible = false;
+          const currentSelected = this.selectedRotator();
+          if (currentSelected && currentSelected.id === proxy.id) {
+            this.selectedRotator.set(null);
+            this.detailsVisible.set(false);
           }
           NotificationService.showSuccess('Rotating proxy deleted.');
         },
@@ -251,45 +257,60 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   }
 
   rotate(proxy: RotatingProxy): void {
-    if (!proxy || this.rotateLoading.has(proxy.id)) {
+    if (!proxy || this.isRotating(proxy.id)) {
       return;
     }
 
-    this.rotateLoading.add(proxy.id);
+    this.rotateLoading.update(set => {
+      const next = new Set(set);
+      next.add(proxy.id);
+      return next;
+    });
     this.http.getNextRotatingProxy(proxy.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: res => {
-          this.rotateLoading.delete(proxy.id);
+          this.rotateLoading.update(set => {
+            const next = new Set(set);
+            next.delete(proxy.id);
+            return next;
+          });
           const address = `${res.ip}:${res.port}`;
           let updatedRotator: RotatingProxy | null = null;
-          this.rotatingProxies = this.rotatingProxies.map(item => {
-            if (item.id !== proxy.id) {
-              return item;
-            }
-            const enriched = this.enrichRotator({
-              ...item,
-              last_served_proxy: address,
-              last_rotation_at: new Date().toISOString(),
-            });
-            updatedRotator = enriched;
-            return enriched;
-          });
+          this.rotatingProxies.update(list =>
+            list.map(item => {
+              if (item.id !== proxy.id) {
+                return item;
+              }
+              const enriched = this.enrichRotator({
+                ...item,
+                last_served_proxy: address,
+                last_rotation_at: new Date().toISOString(),
+              });
+              updatedRotator = enriched;
+              return enriched;
+            })
+          );
           if (!updatedRotator) {
             updatedRotator = this.enrichRotator(proxy);
           }
           if (updatedRotator.listen_host) {
-            this.rotatorHost = updatedRotator.listen_host;
+            this.rotatorHost.set(updatedRotator.listen_host);
           }
-          this.previewRotator = updatedRotator;
-          if (this.selectedRotator && this.selectedRotator.id === updatedRotator.id) {
-            this.selectedRotator = updatedRotator;
+          this.previewRotator.set(updatedRotator);
+          const currentSelected = this.selectedRotator();
+          if (currentSelected && currentSelected.id === updatedRotator.id) {
+            this.selectedRotator.set(updatedRotator);
           }
-          this.preview = {...res, name: proxy.name};
+          this.preview.set({...res, name: proxy.name});
           NotificationService.showSuccess(`Serving ${address}`);
         },
         error: err => {
-          this.rotateLoading.delete(proxy.id);
+          this.rotateLoading.update(set => {
+            const next = new Set(set);
+            next.delete(proxy.id);
+            return next;
+          });
           NotificationService.showError('Could not rotate proxy: ' + this.getErrorMessage(err));
         }
       });
@@ -322,12 +343,16 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   }
 
   showRotatorDetails(proxy: RotatingProxy): void {
-    this.selectedRotator = proxy;
-    this.detailsVisible = true;
+    this.selectedRotator.set(proxy);
+    this.detailsVisible.set(true);
   }
 
   onDetailsHide(): void {
-    this.detailsVisible = false;
+    this.detailsVisible.set(false);
+  }
+
+  isRotating(id: number): boolean {
+    return this.rotateLoading().has(id);
   }
 
   rotatorEndpoint(proxy: RotatingProxy | null | undefined): string {
@@ -451,8 +476,8 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     if (candidate) {
       return candidate;
     }
-    if (this.rotatorHost) {
-      return this.rotatorHost;
+    if (this.rotatorHost()) {
+      return this.rotatorHost();
     }
     if (this.defaultRotatorHost) {
       return this.defaultRotatorHost;
