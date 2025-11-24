@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {DecimalPipe, NgIf} from '@angular/common';
+import {DecimalPipe} from '@angular/common';
 import {Subject} from 'rxjs';
 import {finalize, takeUntil} from 'rxjs/operators';
 import {ProxyCheck} from '../models/ProxyCheck';
@@ -40,7 +40,6 @@ interface DashboardStatus {
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   imports: [
-    NgIf,
     DecimalPipe,
     KpiCardComponent,
     ProxiesPerHourCardComponent,
