@@ -2,48 +2,50 @@
   <ng-template pTemplate="header">
     <div class="reputation-card__header p-3">
       <span class="reputation-card__title">Reputation Pulse
-      <span class="reputation-card__subtitle ml-2" *ngIf="total > 0; else emptyState">
-        {{ total | number }} proxies scored
+        @if (total > 0) {
+          <span class="reputation-card__subtitle ml-2">
+            {{ total | number }} proxies scored
+          </span>
+        } @else {
+          <span class="reputation-card__subtitle">No reputation data yet</span>
+        }
       </span>
-
-      </span>
-      <ng-template #emptyState>
-        <span class="reputation-card__subtitle">No reputation data yet</span>
-      </ng-template>
     </div>
   </ng-template>
 
   <div class="reputation-card__body">
     <div class="reputation-card__chart">
-      <p-chart
-        *ngIf="total > 0; else emptyChart"
-        type="bar"
-        [data]="chartData"
-        [options]="chartOptions">
-      </p-chart>
-      <ng-template #emptyChart>
+      @if (total > 0) {
+        <p-chart
+          type="bar"
+          [data]="chartData"
+          [options]="chartOptions">
+        </p-chart>
+      } @else {
         <div class="reputation-card__empty">
           <i class="pi pi-globe text-3xl text-neutral-600"></i>
           <p class="reputation-card__empty-text">
             We will visualise reputations as soon as your proxies collect scores.
           </p>
         </div>
-      </ng-template>
+      }
     </div>
 
     <div class="reputation-card__details ml-[20%]">
-      <div
-        class="reputation-card__legend"
-        *ngFor="let entry of entries; trackBy: trackByKey">
-        <span class="legend-swatch" [ngStyle]="{'background': entry.color}"></span>
-        <div class="legend-text">
-          <span class="legend-label">{{ entry.title }}</span>
-          <span class="legend-value">
-            {{ entry.value | number }} proxies
-            <span class="legend-value__pct" *ngIf="total > 0">({{ entry.percentage | number:'1.1-1' }}%)</span>
-          </span>
+      @for (entry of entries; track entry.title) {
+        <div class="reputation-card__legend">
+          <span class="legend-swatch" [ngStyle]="{'background': entry.color}"></span>
+          <div class="legend-text">
+            <span class="legend-label">{{ entry.title }}</span>
+            <span class="legend-value">
+              {{ entry.value | number }} proxies
+              @if (total > 0) {
+                <span class="legend-value__pct">({{ entry.percentage | number:'1.1-1' }}%)</span>
+              }
+            </span>
+          </div>
         </div>
-      </div>
+      }
     </div>
   </div>
 </p-card>

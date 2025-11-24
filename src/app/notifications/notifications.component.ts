@@ -1,11 +1,10 @@
 import {Component, OnInit, inject} from '@angular/core';
-import {NgIf} from '@angular/common';
 import {UpdateNotificationService} from '../services/update-notification.service';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [NgIf],
+  imports: [],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })

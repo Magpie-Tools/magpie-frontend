@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {Card} from 'primeng/card';
 import {PrimeTemplate} from 'primeng/api';
-import {NgForOf, NgClass, NgStyle, DecimalPipe, NgIf} from '@angular/common';
+import {NgClass, NgStyle, DecimalPipe} from '@angular/common';
 
 interface AnonymitySummary {
   total: number;
@@ -20,7 +20,7 @@ interface AnonymitySegment {
 @Component({
   selector: 'app-proxies-by-anonymity-card',
   standalone: true,
-  imports: [Card, PrimeTemplate, NgForOf, NgClass, NgStyle, DecimalPipe, NgIf],
+  imports: [Card, PrimeTemplate, NgClass, NgStyle, DecimalPipe],
   templateUrl: './proxies-by-anonymity-card.component.html',
   styleUrl: './proxies-by-anonymity-card.component.scss'
 })

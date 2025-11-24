@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {Card} from 'primeng/card';
 import {PrimeTemplate} from 'primeng/api';
-import {NgForOf, NgIf, NgStyle} from '@angular/common';
+import {NgStyle} from '@angular/common';
 import {UIChart} from 'primeng/chart';
 
 interface CountryBreakdown {
@@ -13,7 +13,7 @@ interface CountryBreakdown {
 @Component({
   selector: 'app-proxies-per-country-card',
   standalone: true,
-  imports: [Card, PrimeTemplate, NgForOf, UIChart, NgStyle, NgIf],
+  imports: [Card, PrimeTemplate, UIChart, NgStyle],
   templateUrl: './proxies-per-country-card.component.html',
   styleUrl: './proxies-per-country-card.component.scss'
 })

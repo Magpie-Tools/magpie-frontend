@@ -2,13 +2,13 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {Card} from 'primeng/card';
 import {PrimeTemplate} from 'primeng/api';
 import {Button} from 'primeng/button';
-import {NgForOf, NgStyle, DatePipe, NgIf} from '@angular/common';
+import {NgStyle, DatePipe} from '@angular/common';
 import {ProxyCheck} from '../../../models/ProxyCheck';
 
 @Component({
   selector: 'app-proxy-history-card',
   standalone: true,
-  imports: [Card, PrimeTemplate, Button, NgForOf, DatePipe, NgStyle, NgIf],
+  imports: [Card, PrimeTemplate, Button, DatePipe, NgStyle],
   templateUrl: './proxy-history-card.component.html',
   styleUrl: './proxy-history-card.component.scss'
 })

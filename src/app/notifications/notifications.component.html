@@ -1,18 +1,26 @@
-<div *ngIf="updateAvailable()" class="update-banner">
-  <div class="text-block">
-    <span class="title">New update available on GitHub</span>
-    <span class="subtitle" *ngIf="remoteCommit() as commit">
-      Latest commit <strong>{{ commit.shortSha }}</strong>
-      <ng-container *ngIf="commit.message">&mdash; {{ commit.message }}</ng-container>
-    </span>
-    <span class="subtitle" *ngIf="localCommit() as current">
-      You are on <strong>{{ current }}</strong>
-    </span>
-    <span class="hint">Run the update script to pull the latest changes.</span>
+@if (updateAvailable()) {
+  <div class="update-banner">
+    <div class="text-block">
+      <span class="title">New update available on GitHub</span>
+      @if (remoteCommit(); as commit) {
+        <span class="subtitle">
+          Latest commit <strong>{{ commit.shortSha }}</strong>
+          @if (commit.message) {
+            &mdash; {{ commit.message }}
+          }
+        </span>
+      }
+      @if (localCommit(); as current) {
+        <span class="subtitle">
+          You are on <strong>{{ current }}</strong>
+        </span>
+      }
+      <span class="hint">Run the update script to pull the latest changes.</span>
+    </div>
+
+    <button type="button" class="action-button" (click)="viewLatestCommit()">
+      View on GitHub
+    </button>
+
   </div>
-
-  <button type="button" class="action-button" (click)="viewLatestCommit()">
-    View on GitHub
-  </button>
-
-</div>
+}
