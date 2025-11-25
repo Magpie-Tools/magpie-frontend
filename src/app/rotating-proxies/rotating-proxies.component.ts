@@ -16,6 +16,7 @@ import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {CreateRotatingProxy, RotatingProxy, RotatingProxyNext} from '../models/RotatingProxy';
 import {UserSettings} from '../models/UserSettings';
+import {LoadingComponent} from '../ui-elements/loading/loading.component';
 
 type RotatingProxyPreview = RotatingProxyNext & { name: string };
 
@@ -32,6 +33,7 @@ type RotatingProxyPreview = RotatingProxyNext & { name: string };
     MultiSelectModule,
     DatePipe,
     DialogModule,
+    LoadingComponent,
   ],
   templateUrl: './rotating-proxies.component.html',
   styleUrl: './rotating-proxies.component.scss'
