@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Output, computed, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpService} from '../../services/http.service';
@@ -31,29 +31,37 @@ export class AddScrapeSourceComponent {
   @Output() showAddScrapeSourcesMessage = new EventEmitter<boolean>();
   @Output() scrapeSourcesAdded = new EventEmitter<void>();
 
-  file: File | undefined;
-  scrapeSourceTextarea: string = "";
-  clipboardScrapeSources: string = "";
+  readonly file = signal<File | undefined>(undefined);
+  readonly scrapeSourceTextarea = signal<string>("");
+  readonly clipboardScrapeSources = signal<string>("");
 
-  fileSourcesCount: number = 0;
-  uniqueFileSourcesCount: number = 0;
+  readonly fileSourcesCount = signal(0);
+  readonly uniqueFileSourcesCount = signal(0);
 
-  textAreaSourcesCount: number = 0;
-  uniqueTextAreaSourcesCount: number = 0;
+  readonly textAreaSourcesCount = signal(0);
+  readonly uniqueTextAreaSourcesCount = signal(0);
 
-  clipboardSourcesCount: number = 0;
-  uniqueClipboardSourcesCount: number = 0;
+  readonly clipboardSourcesCount = signal(0);
+  readonly uniqueClipboardSourcesCount = signal(0);
 
-  dialogVisible = false;
-  showPopup = false;
-  popupStatus: 'processing' | 'success' | 'error' = 'processing';
-  addedSourceCount = 0;
+  readonly dialogVisible = signal(false);
+  readonly showPopup = signal(false);
+  readonly popupStatus = signal<'processing' | 'success' | 'error'>('processing');
+  readonly addedSourceCount = signal(0);
+
+  readonly sourcesCount = computed(() =>
+    this.textAreaSourcesCount() + this.fileSourcesCount() + this.clipboardSourcesCount()
+  );
+  readonly uniqueSourcesCount = computed(() =>
+    this.uniqueFileSourcesCount() + this.uniqueTextAreaSourcesCount() + this.uniqueClipboardSourcesCount()
+  );
 
   constructor(private service: HttpService) { }
 
   async pasteFromClipboard(): Promise<void> {
     try {
-      this.clipboardScrapeSources = await navigator.clipboard.readText();
+      const text = await navigator.clipboard.readText();
+      this.clipboardScrapeSources.set(text);
       this.processClipboardSources();
     } catch (err) {
       console.error('Failed to read clipboard:', err);
@@ -61,22 +69,23 @@ export class AddScrapeSourceComponent {
   }
 
   clearClipboardSources(): void {
-    this.clipboardScrapeSources = "";
-    this.clipboardSourcesCount = 0;
-    this.uniqueClipboardSourcesCount = 0;
+    this.clipboardScrapeSources.set("");
+    this.clipboardSourcesCount.set(0);
+    this.uniqueClipboardSourcesCount.set(0);
   }
 
   processClipboardSources() {
-    if (!this.clipboardScrapeSources) {
+    const clipboard = this.clipboardScrapeSources();
+    if (!clipboard) {
       this.clearClipboardSources();
       return;
     }
 
-    const lines = this.clipboardScrapeSources.split(/\r?\n/);
+    const lines = clipboard.split(/\r?\n/);
     const sources = lines.filter(line => (line.match(/:/g) || []).length === 1);
 
-    this.clipboardSourcesCount = sources.length;
-    this.uniqueClipboardSourcesCount = Array.from(new Set(sources)).length;
+    this.clipboardSourcesCount.set(sources.length);
+    this.uniqueClipboardSourcesCount.set(Array.from(new Set(sources)).length);
   }
 
   triggerFileInput(fileInput: HTMLInputElement): void {
@@ -84,11 +93,11 @@ export class AddScrapeSourceComponent {
   }
 
   openDialog(): void {
-    this.dialogVisible = true;
+    this.dialogVisible.set(true);
   }
 
   closeDialog(): void {
-    this.dialogVisible = false;
+    this.dialogVisible.set(false);
     this.resetFormState();
   }
 
@@ -99,7 +108,8 @@ export class AddScrapeSourceComponent {
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.file = input.files[0];
+      const file = input.files[0];
+      this.file.set(file);
 
       const reader = new FileReader();
       reader.onload = (_: ProgressEvent<FileReader>) => {
@@ -107,69 +117,75 @@ export class AddScrapeSourceComponent {
         const lines = content.split(/\r?\n/);
         let sources = lines.filter(line => (line.match(/:/g) || []).length === 1)
 
-        this.fileSourcesCount = sources.length;
-        this.uniqueFileSourcesCount = Array.from(new Set(sources)).length;
+        this.fileSourcesCount.set(sources.length);
+        this.uniqueFileSourcesCount.set(Array.from(new Set(sources)).length);
       };
 
-      reader.readAsText(this.file);
+      reader.readAsText(file);
     }
   }
 
   onFileClear(): void {
-    this.file = undefined;
-    this.fileSourcesCount = 0;
-    this.uniqueFileSourcesCount = 0;
+    this.file.set(undefined);
+    this.fileSourcesCount.set(0);
+    this.uniqueFileSourcesCount.set(0);
   }
 
   addTextAreaSources() {
-    const lines = this.scrapeSourceTextarea.split(/\r?\n/);
+    const lines = this.scrapeSourceTextarea().split(/\r?\n/);
     let sources = lines.filter(line => (line.match(/:/g) || []).length === 1)
 
-    this.textAreaSourcesCount = sources.length;
-    this.uniqueTextAreaSourcesCount = Array.from(new Set(sources)).length;
+    this.textAreaSourcesCount.set(sources.length);
+    this.uniqueTextAreaSourcesCount.set(Array.from(new Set(sources)).length);
+  }
+
+  onTextareaChange(value: string) {
+    this.scrapeSourceTextarea.set(value);
+    this.addTextAreaSources();
   }
 
   getSourcesCount() {
-    return this.textAreaSourcesCount + this.fileSourcesCount + this.clipboardSourcesCount;
+    return this.sourcesCount();
   }
 
   getUniqueSourcesCount() {
-    return this.uniqueFileSourcesCount + this.uniqueTextAreaSourcesCount + this.uniqueClipboardSourcesCount;
+    return this.uniqueSourcesCount();
   }
 
   submitScrapeSources() {
-    if (this.file || this.scrapeSourceTextarea || this.clipboardScrapeSources) {
-      this.showPopup = true;
-      this.popupStatus = 'processing';
+    if (this.file() || this.scrapeSourceTextarea() || this.clipboardScrapeSources()) {
+      this.showPopup.set(true);
+      this.popupStatus.set('processing');
 
       const formData = new FormData();
 
-      if (this.file) {
-        formData.append('file', this.file);
+      const file = this.file();
+      if (file) {
+        formData.append('file', file);
       } else {
         formData.append('file', '');
       }
 
-      if (this.scrapeSourceTextarea) {
-        formData.append('scrapeSourceTextarea', this.scrapeSourceTextarea);
+      if (this.scrapeSourceTextarea()) {
+        formData.append('scrapeSourceTextarea', this.scrapeSourceTextarea());
       }
 
-      if (this.clipboardScrapeSources) {
-        formData.append('clipboardScrapeSources', this.clipboardScrapeSources);
+      if (this.clipboardScrapeSources()) {
+        formData.append('clipboardScrapeSources', this.clipboardScrapeSources());
       }
 
       this.service.uploadScrapeSources(formData).subscribe({
         next: (response) => {
-          this.addedSourceCount = response.sourceCount;
-          this.popupStatus = 'success';
-          this.dialogVisible = false;
+          this.addedSourceCount.set(response.sourceCount);
+          this.popupStatus.set('success');
+          this.dialogVisible.set(false);
 
           this.showAddScrapeSourcesMessage.emit(false);
           this.scrapeSourcesAdded.emit();
           this.resetFormState();
         },
         error: (err) => {
-          this.popupStatus = 'error';
+          this.popupStatus.set('error');
           const reason = err?.error?.message ?? err?.error?.error ?? 'Unknown error';
           NotificationService.showError("There has been an error while uploading the scrape sources! " + reason)
         },
@@ -180,15 +196,13 @@ export class AddScrapeSourceComponent {
   }
 
   onPopupClose() {
-    this.showPopup = false;
+    this.showPopup.set(false);
   }
 
   private resetFormState(): void {
-    this.scrapeSourceTextarea = "";
+    this.scrapeSourceTextarea.set("");
     this.addTextAreaSources();
-    this.clipboardScrapeSources = "";
     this.clearClipboardSources();
-    this.file = undefined;
     this.onFileClear();
   }
 }
