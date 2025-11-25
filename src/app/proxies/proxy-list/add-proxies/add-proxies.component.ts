@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Output, computed, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from "@angular/forms";
 import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.component';
@@ -25,32 +25,43 @@ export class AddProxiesComponent {
   @Output() showAddProxiesMessage = new EventEmitter<boolean>();
   @Output() proxiesAdded = new EventEmitter<void>();
 
-  file: File | undefined;
-  ProxyTextarea: string = "";
-  clipboardProxies: string = "";
+  readonly file = signal<File | undefined>(undefined);
+  readonly proxyTextarea = signal<string>("");
+  readonly clipboardProxies = signal<string>("");
 
-  fileProxiesNoAuthCount: number = 0;
-  fileProxiesWithAuthCount: number = 0;
-  uniqueFileProxiesCount: number = 0;
+  readonly fileProxiesNoAuthCount = signal(0);
+  readonly fileProxiesWithAuthCount = signal(0);
+  readonly uniqueFileProxiesCount = signal(0);
 
-  textAreaProxiesNoAuthCount: number = 0;
-  textAreaProxiesWithAuthCount: number = 0;
-  uniqueTextAreaProxiesCount: number = 0;
+  readonly textAreaProxiesNoAuthCount = signal(0);
+  readonly textAreaProxiesWithAuthCount = signal(0);
+  readonly uniqueTextAreaProxiesCount = signal(0);
 
-  clipboardProxiesNoAuthCount: number = 0;
-  clipboardProxiesWithAuthCount: number = 0;
-  uniqueClipboardProxiesCount: number = 0;
+  readonly clipboardProxiesNoAuthCount = signal(0);
+  readonly clipboardProxiesWithAuthCount = signal(0);
+  readonly uniqueClipboardProxiesCount = signal(0);
 
-  dialogVisible = false;
-  showPopup = false;
-  popupStatus: 'processing' | 'success' | 'error' = 'processing';
-  addedProxyCount = 0;
+  readonly dialogVisible = signal(false);
+  readonly showPopup = signal(false);
+  readonly popupStatus = signal<'processing' | 'success' | 'error'>('processing');
+  readonly addedProxyCount = signal(0);
+
+  readonly proxiesWithoutAuthCount = computed(() =>
+    this.textAreaProxiesNoAuthCount() + this.fileProxiesNoAuthCount() + this.clipboardProxiesNoAuthCount()
+  );
+  readonly proxiesWithAuthCount = computed(() =>
+    this.textAreaProxiesWithAuthCount() + this.fileProxiesWithAuthCount() + this.clipboardProxiesWithAuthCount()
+  );
+  readonly uniqueProxiesCount = computed(() =>
+    this.uniqueFileProxiesCount() + this.uniqueTextAreaProxiesCount() + this.uniqueClipboardProxiesCount()
+  );
 
   constructor(private service: HttpService) { }
 
   async pasteFromClipboard(): Promise<void> {
     try {
-      this.clipboardProxies = await navigator.clipboard.readText();
+      const text = await navigator.clipboard.readText();
+      this.clipboardProxies.set(text);
       this.processClipboardProxies();
     } catch (err) {
       console.error('Failed to read clipboard:', err);
@@ -58,24 +69,25 @@ export class AddProxiesComponent {
   }
 
   clearClipboardProxies(): void {
-    this.clipboardProxies = "";
-    this.clipboardProxiesNoAuthCount = 0;
-    this.clipboardProxiesWithAuthCount = 0;
-    this.uniqueClipboardProxiesCount = 0;
+    this.clipboardProxies.set("");
+    this.clipboardProxiesNoAuthCount.set(0);
+    this.clipboardProxiesWithAuthCount.set(0);
+    this.uniqueClipboardProxiesCount.set(0);
   }
 
   processClipboardProxies() {
-    if (!this.clipboardProxies) {
+    const clipboard = this.clipboardProxies();
+    if (!clipboard) {
       this.clearClipboardProxies();
       return;
     }
 
-    const lines = this.clipboardProxies.split(/\r?\n/);
+    const lines = clipboard.split(/\r?\n/);
     const proxies = lines.filter(line => (line.match(/:/g) || []).length === 1);
 
-    this.clipboardProxiesNoAuthCount = proxies.length;
-    this.clipboardProxiesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
-    this.uniqueClipboardProxiesCount = Array.from(new Set(proxies)).length;
+    this.clipboardProxiesNoAuthCount.set(proxies.length);
+    this.clipboardProxiesWithAuthCount.set(lines.filter(line => (line.match(/:/g) || []).length === 3).length);
+    this.uniqueClipboardProxiesCount.set(Array.from(new Set(proxies)).length);
   }
 
   triggerFileInput(fileInput: HTMLInputElement): void {
@@ -83,11 +95,11 @@ export class AddProxiesComponent {
   }
 
   openDialog(): void {
-    this.dialogVisible = true;
+    this.dialogVisible.set(true);
   }
 
   closeDialog(): void {
-    this.dialogVisible = false;
+    this.dialogVisible.set(false);
     this.resetFormState();
   }
 
@@ -98,7 +110,8 @@ export class AddProxiesComponent {
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.file = input.files[0];
+      const file = input.files[0];
+      this.file.set(file);
 
       const reader = new FileReader();
       reader.onload = (_: ProgressEvent<FileReader>) => {
@@ -106,81 +119,82 @@ export class AddProxiesComponent {
         const lines = content.split(/\r?\n/);
         let proxies = lines.filter(line => (line.match(/:/g) || []).length === 1)
 
-        this.fileProxiesNoAuthCount = proxies.length;
-        this.fileProxiesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
-        this.uniqueFileProxiesCount = Array.from(new Set(proxies)).length;
+        this.fileProxiesNoAuthCount.set(proxies.length);
+        this.fileProxiesWithAuthCount.set(lines.filter(line => (line.match(/:/g) || []).length === 3).length);
+        this.uniqueFileProxiesCount.set(Array.from(new Set(proxies)).length);
       };
 
-      reader.readAsText(this.file);
+      reader.readAsText(file);
     }
   }
 
   onFileClear(): void {
-    this.file = undefined;
-    this.fileProxiesWithAuthCount = 0;
-    this.fileProxiesNoAuthCount = 0;
-    this.uniqueFileProxiesCount = 0;
+    this.file.set(undefined);
+    this.fileProxiesWithAuthCount.set(0);
+    this.fileProxiesNoAuthCount.set(0);
+    this.uniqueFileProxiesCount.set(0);
   }
 
   addTextAreaProxies() {
-    const lines = this.ProxyTextarea.split(/\r?\n/);
+    const lines = this.proxyTextarea().split(/\r?\n/);
     let proxies = lines.filter(line => (line.match(/:/g) || []).length === 1)
 
-    this.textAreaProxiesNoAuthCount = proxies.length;
-    this.textAreaProxiesWithAuthCount = lines.filter(line => (line.match(/:/g) || []).length === 3).length;
-    this.uniqueTextAreaProxiesCount = Array.from(new Set(proxies)).length;
+    this.textAreaProxiesNoAuthCount.set(proxies.length);
+    this.textAreaProxiesWithAuthCount.set(lines.filter(line => (line.match(/:/g) || []).length === 3).length);
+    this.uniqueTextAreaProxiesCount.set(Array.from(new Set(proxies)).length);
+  }
+
+  onTextareaChange(value: string) {
+    this.proxyTextarea.set(value);
+    this.addTextAreaProxies();
   }
 
   getProxiesWithoutAuthCount() {
-    return this.textAreaProxiesNoAuthCount + this.fileProxiesNoAuthCount + this.clipboardProxiesNoAuthCount;
+    return this.proxiesWithoutAuthCount();
   }
 
   getProxiesWithAuthCount() {
-    return this.textAreaProxiesWithAuthCount + this.fileProxiesWithAuthCount + this.clipboardProxiesWithAuthCount;
+    return this.proxiesWithAuthCount();
   }
 
   getUniqueProxiesCount() {
-    return this.uniqueFileProxiesCount + this.uniqueTextAreaProxiesCount + this.uniqueClipboardProxiesCount;
+    return this.uniqueProxiesCount();
   }
 
   submitProxies() {
-    if (this.file || this.ProxyTextarea || this.clipboardProxies) {
-      this.showPopup = true;
-      this.popupStatus = 'processing';
+    if (this.file() || this.proxyTextarea() || this.clipboardProxies()) {
+      this.showPopup.set(true);
+      this.popupStatus.set('processing');
 
       const formData = new FormData();
 
-      if (this.file) {
-        formData.append('file', this.file);
+      const file = this.file();
+      if (file) {
+        formData.append('file', file);
       } else {
         formData.append('file', '');
       }
 
-      if (this.ProxyTextarea) {
-        formData.append('proxyTextarea', this.ProxyTextarea);
+      if (this.proxyTextarea()) {
+        formData.append('proxyTextarea', this.proxyTextarea());
       }
 
-      if (this.clipboardProxies) {
-        formData.append('clipboardProxies', this.clipboardProxies);
+      if (this.clipboardProxies()) {
+        formData.append('clipboardProxies', this.clipboardProxies());
       }
 
       this.service.uploadProxies(formData).subscribe({
         next: (response) => {
-          this.addedProxyCount = response.proxyCount;
-          this.popupStatus = 'success';
-          this.dialogVisible = false;
+          this.addedProxyCount.set(response.proxyCount);
+          this.popupStatus.set('success');
+          this.dialogVisible.set(false);
 
-          this.file = undefined;
-          this.ProxyTextarea = "";
-          this.clipboardProxies = "";
-          this.onFileClear();
-          this.clearClipboardProxies();
-          this.addTextAreaProxies();
+          this.resetFormState();
           this.showAddProxiesMessage.emit(false);
           this.proxiesAdded.emit();
         },
         error: (err) => {
-          this.popupStatus = 'error';
+          this.popupStatus.set('error');
           NotificationService.showError("Could not upload proxies: " + err.error.message)
         },
       });
@@ -190,13 +204,13 @@ export class AddProxiesComponent {
   }
 
   onPopupClose() {
-    this.showPopup = false;
+    this.showPopup.set(false);
   }
 
   private resetFormState(): void {
-    this.ProxyTextarea = "";
-    this.clipboardProxies = "";
-    this.file = undefined;
+    this.proxyTextarea.set("");
+    this.clipboardProxies.set("");
+    this.file.set(undefined);
     this.onFileClear();
     this.clearClipboardProxies();
     this.addTextAreaProxies();

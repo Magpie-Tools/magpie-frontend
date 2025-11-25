@@ -8,7 +8,8 @@
 </div>
 
 <p-dialog
-  [(visible)]="dialogVisible"
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
   [modal]="true"
   [draggable]="false"
   [resizable]="false"
@@ -36,10 +37,10 @@
                 label="Paste from Clipboard"
                 styleClass="w-full"
                 (onClick)="pasteFromClipboard()"
-                [disabled]="clipboardProxies != ''"
+                [disabled]="clipboardProxies() !== ''"
               ></p-button>
             </div>
-            @if (clipboardProxies) {
+            @if (clipboardProxies()) {
               <p-button
                 type="button"
                 styleClass="p-button-danger p-button-sm mt-1"
@@ -56,11 +57,11 @@
                 label="Import from File"
                 styleClass="w-full"
                 (onClick)="triggerFileInput(fileInput)"
-                [disabled]="file != undefined"
+                [disabled]="file() !== undefined"
               ></p-button>
               <input type="file" #fileInput (change)="onFileSelected($event)">
             </div>
-            @if (file != undefined) {
+            @if (file() !== undefined) {
               <p-button
                 type="button"
                 styleClass="p-button-danger p-button-sm mt-1"
@@ -75,8 +76,8 @@
           <textarea
             maxlength="109999"
             placeholder="Bulk add Proxies&#10;127.0.0.1:66535"
-            [(ngModel)]="ProxyTextarea"
-            (ngModelChange)="addTextAreaProxies()"
+            [ngModel]="proxyTextarea()"
+            (ngModelChange)="onTextareaChange($event)"
             class="w-full h-48 p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 resize-none theme-focus"
           ></textarea>
         </div>
@@ -110,16 +111,16 @@
         label="Add Proxies to Queue"
         styleClass="p-button-success"
         (onClick)="submitProxies()"
-        [disabled]="!file && !ProxyTextarea && !clipboardProxies"
+        [disabled]="!file() && !proxyTextarea() && !clipboardProxies()"
       ></p-button>
     </div>
   </ng-template>
 </p-dialog>
 
-@if (showPopup) {
+@if (showPopup()) {
   <app-procesing-popup
-    [status]="popupStatus"
-    [count]="addedProxyCount"
+    [status]="popupStatus()"
+    [count]="addedProxyCount()"
     [item]="'proxies'"
     (closed)="onPopupClose()"
   ></app-procesing-popup>
