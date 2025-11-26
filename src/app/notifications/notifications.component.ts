@@ -35,10 +35,6 @@ export class NotificationsComponent implements OnInit {
     this.newReleases.set([]);
   }
 
-  trackRelease(_index: number, release: ReleaseNote): number | string {
-    return release.id ?? release.tagName;
-  }
-
   retry(): void {
     this.loadReleases();
   }

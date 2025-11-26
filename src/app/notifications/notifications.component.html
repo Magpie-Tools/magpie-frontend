@@ -63,7 +63,7 @@
         </div>
       } @else {
         <div class="divide-y divide-slate-800">
-          @for (release of newReleases(); track trackRelease) {
+          @for (release of newReleases(); track release.id) {
             <article class="px-5 py-5">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="space-y-1">
@@ -111,7 +111,7 @@
         </div>
       } @else {
         <ul class="divide-y divide-slate-800">
-          @for (release of allReleases(); track trackRelease) {
+          @for (release of allReleases(); track release.id) {
             <li class="px-5 py-4">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
