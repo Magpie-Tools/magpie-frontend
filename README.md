@@ -54,8 +54,20 @@ The production image serves the compiled application through Nginx and proxies
 docker build -t magpie-frontend:dev .
 ```
 
+After authenticating to the target registry, publish the default multi-platform
+image with:
+
+```bash
+./scripts/push-docker-image.sh <tag>
+```
+
+Set `MAGPIE_FRONTEND_IMAGE` to publish under another image name,
+`DOCKER_PLATFORMS` to change target platforms, or `PUSH_LATEST=0` to avoid
+updating the `latest` tag.
+
 ## Related repositories
 
+- [Distribution and deployment](https://github.com/Kuucheen/magpie)
 - [Backend](https://github.com/Magpie-Tools/magpie-backend)
 - [Website](https://github.com/Magpie-Tools/magpie-website)
 - [Documentation](https://github.com/Magpie-Tools/magpie-docs)
