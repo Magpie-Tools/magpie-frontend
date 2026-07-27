@@ -167,7 +167,7 @@ export class AccountComponent {
 
   private redirectToGithub(): void {
     if (typeof globalThis !== 'undefined' && globalThis.location) {
-      globalThis.location.href = 'https://github.com/Kuucheen';
+      globalThis.location.href = 'https://github.com/Magpie-Tools';
     }
   }
 }
