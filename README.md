@@ -67,7 +67,7 @@ updating the `latest` tag.
 
 ## Related repositories
 
-- [Distribution and deployment](https://github.com/Kuucheen/magpie)
+- [Distribution and deployment](https://github.com/Magpie-Tools/magpie)
 - [Backend](https://github.com/Magpie-Tools/magpie-backend)
 - [Website](https://github.com/Magpie-Tools/magpie-website)
 - [Documentation](https://github.com/Magpie-Tools/magpie-docs)
