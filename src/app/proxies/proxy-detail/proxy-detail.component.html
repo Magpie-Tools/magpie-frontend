@@ -15,7 +15,7 @@
             Proxy
             @if (detail()?.ip) {
               <span class="proxy-address inline-flex items-center gap-1.5 flex-wrap ml-2 text-base">
-                <button type="button" class="address-chip" (click)="copyIp()" title="Copy IP">
+                <button type="button" class="address-chip" (click)="copyIp()" title="Copy host">
                   {{ detail()?.ip }}
                 </button>
                 @if (detail()?.port !== undefined && detail()?.port !== null) {
@@ -29,7 +29,7 @@
                     icon="pi pi-copy"
                     class="copy-address-button"
                     (click)="copyFullAddress()"
-                    title="Copy IP and port"
+                    title="Copy host and port"
                   ></button>
                   @if (fullCredentialAddress) {
                     <button
@@ -38,7 +38,7 @@
                       icon="pi pi-link"
                       class="copy-address-button"
                       (click)="copyFullCredentialAddress()"
-                      title="Copy IP, port, username and password"
+                      title="Copy host, port, username and password"
                     ></button>
                   }
                 }

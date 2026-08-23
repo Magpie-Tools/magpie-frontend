@@ -23,7 +23,7 @@
   <ng-template pTemplate="header">
     <div class="flex items-center gap-2 text-lg font-semibold">
       <span>Add Proxies</span>
-      <app-tooltip [text]="'IPv4: 192.0.2.1:8080\nIPv6: [2001:db8::1]:8080\nAuth: user:pass@host:port\nAuth: host:port:user:pass'"></app-tooltip>
+      <app-tooltip [text]="'Hostname: gateway.provider.example:8080\nIPv4: 192.0.2.1:8080\nIPv6: [2001:db8::1]:8080\nAuth: user:pass@host:port\nAuth: host:port:user:pass'"></app-tooltip>
     </div>
   </ng-template>
 
@@ -76,7 +76,7 @@
         <div>
           <textarea
             maxlength="109999"
-            placeholder="Bulk add proxies&#10;192.0.2.1:8080&#10;[2001:db8::1]:8080"
+            placeholder="Bulk add proxies&#10;gateway.provider.example:8080&#10;192.0.2.1:8080&#10;[2001:db8::1]:8080"
             [ngModel]="proxyTextarea()"
             (ngModelChange)="onTextareaChange($event)"
             class="w-full h-48 p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 resize-none theme-focus"
@@ -166,8 +166,8 @@
           <div class="text-gray-400">Blacklisted</div>
           <div class="text-right font-semibold text-white">{{ uploadDetails()?.blacklistedCount }}</div>
 
-          <div class="text-gray-400">Invalid IP</div>
-          <div class="text-right font-semibold text-white">{{ uploadDetails()?.invalidIpCount }}</div>
+          <div class="text-gray-400">Invalid address</div>
+          <div class="text-right font-semibold text-white">{{ uploadDetails()?.invalidAddressCount ?? uploadDetails()?.invalidIpCount }}</div>
 
           <div class="text-gray-400">Invalid port</div>
           <div class="text-right font-semibold text-white">{{ uploadDetails()?.invalidPortCount }}</div>

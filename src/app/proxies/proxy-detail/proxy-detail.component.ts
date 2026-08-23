@@ -14,6 +14,7 @@ import {Subscription} from 'rxjs';
 import {ClipboardService} from '../../services/clipboard.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {LoadingComponent} from '../../ui-elements/loading/loading.component';
+import {formatHostPort, isIPAddress} from '../../shared/proxy-address';
 
 interface ThemePalette {
   primary: string;
@@ -147,12 +148,12 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     if (port === undefined || port === null || `${port}`.trim() === '') {
       return ip;
     }
-    return `${ip}:${port}`;
+    return formatHostPort(ip, port);
   }
 
   get externalLookupLinks(): { label: string; url: string; icon: string }[] {
     const ip = this.detail()?.ip?.toString().trim();
-    if (!ip) {
+    if (!ip || !isIPAddress(ip)) {
       return [];
     }
 
@@ -195,7 +196,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     if (!value) {
       return;
     }
-    this.copyToClipboard(value, 'IP address copied');
+    this.copyToClipboard(value, 'Proxy host copied');
   }
 
   copyPort(): void {
@@ -311,7 +312,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       return '';
     }
 
-    return `${ip}:${port}:${credentials.username}:${credentials.password}`;
+    return `${formatHostPort(ip, port)}:${credentials.username}:${credentials.password}`;
   }
 
   get latestStatistic(): ProxyStatistic | null {

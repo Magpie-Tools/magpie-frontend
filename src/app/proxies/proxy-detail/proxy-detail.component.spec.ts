@@ -83,4 +83,14 @@ describe('ProxyDetailComponent', () => {
     expect(judgeValue).toBeDefined();
     expect(judgeValue?.title).toBe(longJudge);
   });
+
+  it('formats hostname and IPv6 routes and hides IP-only lookup links for hostnames', () => {
+    component.detail.update(detail => detail ? {...detail, ip: 'gateway.provider.example', port: 3128} : detail);
+    expect(component.fullAddress).toBe('gateway.provider.example:3128');
+    expect(component.externalLookupLinks).toEqual([]);
+
+    component.detail.update(detail => detail ? {...detail, ip: '2001:db8::1', port: 8080} : detail);
+    expect(component.fullAddress).toBe('[2001:db8::1]:8080');
+    expect(component.externalLookupLinks.length).toBeGreaterThan(0);
+  });
 });

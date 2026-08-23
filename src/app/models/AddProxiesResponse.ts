@@ -2,6 +2,8 @@ export interface AddProxiesDetails {
   submittedCount: number;
   parsedCount: number;
   invalidFormatCount: number;
+  invalidAddressCount?: number;
+  /** Deprecated API alias for invalidAddressCount. */
   invalidIpCount: number;
   invalidPortCount: number;
   blacklistedCount: number;

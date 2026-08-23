@@ -34,4 +34,16 @@ describe('AddProxiesComponent', () => {
     expect(component.getProxiesWithAuthCount()).toBe(2);
     expect(component.getUniqueProxiesCount()).toBe(4);
   });
+
+  it('counts provider hostname routes and authentication correctly', () => {
+    component.onTextareaChange([
+      'gateway.provider.example:8080',
+      'user:pass@gateway2.provider.example:8080',
+      'gateway3.provider.example:8080:user:pass',
+    ].join('\n'));
+
+    expect(component.getProxiesWithoutAuthCount()).toBe(1);
+    expect(component.getProxiesWithAuthCount()).toBe(2);
+    expect(component.getUniqueProxiesCount()).toBe(3);
+  });
 });
