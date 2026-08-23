@@ -139,6 +139,14 @@
   line-height: 1.1;
 }
 
+.column-picker__required {
+  width: fit-content;
+  color: #86efac;
+  font-size: 0.64rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
 .column-picker__example {
   color: rgba(156, 163, 175, 0.56);
   font-size: 0.72rem;

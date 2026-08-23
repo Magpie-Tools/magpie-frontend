@@ -19,11 +19,13 @@ import {
   buildFilterOptionList,
   createDefaultProxyFilterValues,
   normalizeFilterOptions,
+  normalizeIdSelection,
   normalizeNumber,
   normalizePercentage,
   normalizeSelection,
 } from '../../../shared/proxy-filters';
 import {BulkScopeSelectorComponent} from '../../../shared/bulk-scope-selector/bulk-scope-selector.component';
+import {ProxyTag} from '../../../models/ProxyTag';
 
 type DeleteFormDefaults = {
   filter: boolean;
@@ -60,6 +62,7 @@ export class DeleteProxiesComponent implements OnChanges {
   countryOptions: ProxyFilterOption[] = [];
   typeOptions: ProxyFilterOption[] = [];
   anonymityOptions: ProxyFilterOption[] = [];
+  tagOptions: ProxyTag[] = [];
 
   private defaultFormValues: DeleteFormDefaults;
   private filterOptionsLoaded = false;
@@ -103,6 +106,7 @@ export class DeleteProxiesComponent implements OnChanges {
       types: [this.defaultFormValues.types],
       anonymityLevels: [this.defaultFormValues.anonymityLevels],
       reputationLabels: [this.defaultFormValues.reputationLabels],
+      tagIds: [this.defaultFormValues.tagIds],
     });
   }
 
@@ -124,6 +128,7 @@ export class DeleteProxiesComponent implements OnChanges {
       types: [],
       anonymityLevels: [],
       reputationLabels: [],
+      tagIds: [],
     });
   }
 
@@ -252,6 +257,7 @@ export class DeleteProxiesComponent implements OnChanges {
       anonymityLevels: filtersEnabled ? normalizeSelection(formValue.anonymityLevels) : [],
       proxyStatus: filtersEnabled ? (formValue.proxyStatus ?? 'all') : 'all',
       reputationLabels: reputationSelection,
+      tagIds: filtersEnabled ? normalizeIdSelection(formValue.tagIds) : [],
       scope,
     };
   }
@@ -267,6 +273,7 @@ export class DeleteProxiesComponent implements OnChanges {
         this.countryOptions = buildFilterOptionList(normalized.countries);
         this.typeOptions = buildFilterOptionList(normalized.types);
         this.anonymityOptions = buildFilterOptionList(normalized.anonymityLevels);
+        this.tagOptions = normalized.tags ?? [];
         this.filterOptionsLoaded = true;
       },
       error: err => {

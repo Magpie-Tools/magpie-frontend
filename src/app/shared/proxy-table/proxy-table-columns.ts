@@ -11,6 +11,7 @@ export type ProxyTableColumnId =
   | 'response_time'
   | 'estimated_type'
   | 'country'
+  | 'tags'
   | 'reputation'
   | 'latest_check'
   | 'check_now'
@@ -23,6 +24,7 @@ export interface ProxyTableColumnDefinition {
   tooltip?: string;
   example?: string;
   skeletonWidth?: string;
+  required?: boolean;
 }
 
 export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition[] = [
@@ -118,6 +120,13 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
     skeletonWidth: '6rem',
   },
   {
+    id: 'tags',
+    label: 'Tags',
+    example: 'Provider A, Residential',
+    skeletonWidth: '7rem',
+    required: true,
+  },
+  {
     id: 'reputation',
     label: 'Reputation',
     sortField: 'reputation',
@@ -148,6 +157,7 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
 export const DEFAULT_PROXY_TABLE_COLUMNS: readonly ProxyTableColumnId[] = [
   'alive',
   'ip_port',
+  'tags',
   'response_time',
   'estimated_type',
   'country',
@@ -194,6 +204,11 @@ export function normalizeProxyTableColumns(value: unknown): ProxyTableColumnId[]
 
   if (normalized.length === 0) {
     return [...DEFAULT_PROXY_TABLE_COLUMNS];
+  }
+
+  if (!seen.has('tags')) {
+    const hostColumnIndex = Math.max(normalized.indexOf('ip_port'), normalized.indexOf('ip'));
+    normalized.splice(hostColumnIndex >= 0 ? hostColumnIndex + 1 : 0, 0, 'tags');
   }
 
   return normalized;

@@ -32,4 +32,15 @@ describe('proxy-filters', () => {
       minHealthSocks5: 45,
     });
   });
+
+  it('normalizes proxy tag selections and emits one active tag filter', () => {
+    const filters = buildFiltersFromFormValue({
+      ...createDefaultProxyFilterValues(),
+      tagIds: [7, 3, 7, 0, -1, 2.5],
+    });
+
+    expect(filters.tagIds).toEqual([7, 3]);
+    expect(activeProxyFilterCount(filters)).toBe(1);
+    expect(buildProxyListFilterPayload(filters)).toEqual({tagIds: [7, 3]});
+  });
 });

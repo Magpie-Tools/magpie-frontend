@@ -17,5 +17,6 @@ export interface ExportSettings {
   anonymityLevels: string[]
   proxyStatus: 'all' | 'alive' | 'dead'
   reputationLabels: string[]
+  tagIds: number[]
   outputFormat: string
 }

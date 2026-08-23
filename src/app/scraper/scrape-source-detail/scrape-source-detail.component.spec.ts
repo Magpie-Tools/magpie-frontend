@@ -14,6 +14,8 @@ describe('ScrapeSourceDetailComponent', () => {
     getScrapeSourceDetail: jasmine.Spy;
     getScrapeSourceProxyPage: jasmine.Spy;
     getProxyFilterOptions: jasmine.Spy;
+    getProxyTags: jasmine.Spy;
+    replaceProxyTags: jasmine.Spy;
   };
 
   beforeEach(async () => {
@@ -39,7 +41,9 @@ describe('ScrapeSourceDetailComponent', () => {
     httpServiceStub = {
       getScrapeSourceDetail: jasmine.createSpy('getScrapeSourceDetail').and.returnValue(of(detail)),
       getScrapeSourceProxyPage: jasmine.createSpy('getScrapeSourceProxyPage').and.returnValue(of({ proxies: [], total: 0 })),
-      getProxyFilterOptions: jasmine.createSpy('getProxyFilterOptions').and.returnValue(of({countries: [], types: [], anonymityLevels: []})),
+      getProxyFilterOptions: jasmine.createSpy('getProxyFilterOptions').and.returnValue(of({countries: [], types: [], anonymityLevels: [], tags: []})),
+      getProxyTags: jasmine.createSpy('getProxyTags').and.returnValue(of([])),
+      replaceProxyTags: jasmine.createSpy('replaceProxyTags').and.returnValue(of([])),
     };
 
     await TestBed.configureTestingModule({

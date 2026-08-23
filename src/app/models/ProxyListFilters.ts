@@ -12,4 +12,5 @@ export interface ProxyListFilters {
   maxTimeout?: number;
   maxRetries?: number;
   reputationLabels?: string[];
+  tagIds?: number[];
 }

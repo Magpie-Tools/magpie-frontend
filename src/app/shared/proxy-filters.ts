@@ -2,6 +2,7 @@ import { FormGroup } from '@angular/forms';
 import { ProxyFilterOptions } from '../models/ProxyFilterOptions';
 import { ProxyListFilters } from '../models/ProxyListFilters';
 import {normalizeNumber} from './number-utils';
+import {ProxyTag} from '../models/ProxyTag';
 
 export {normalizeNumber} from './number-utils';
 
@@ -27,6 +28,7 @@ export type ProxyListFilterFormValues = {
   types: string[];
   anonymityLevels: string[];
   reputationLabels: string[];
+  tagIds: number[];
 };
 
 export type ProxyListAppliedFilters = {
@@ -43,6 +45,7 @@ export type ProxyListAppliedFilters = {
   types: string[];
   anonymityLevels: string[];
   reputationLabels: string[];
+  tagIds: number[];
 };
 
 export const PROXY_STATUS_OPTIONS: ProxyFilterOption[] = [
@@ -76,6 +79,7 @@ export function createDefaultProxyFilterValues(): ProxyListFilterFormValues {
     types: [],
     anonymityLevels: [],
     reputationLabels: [],
+    tagIds: [],
   };
 }
 
@@ -94,6 +98,7 @@ export function createDefaultProxyListAppliedFilters(): ProxyListAppliedFilters 
     types: [],
     anonymityLevels: [],
     reputationLabels: [],
+    tagIds: [],
   };
 }
 
@@ -138,6 +143,9 @@ export function activeProxyFilterCount(filters: ProxyListAppliedFilters): number
   if (filters.reputationLabels.length > 0) {
     count += 1;
   }
+  if (filters.tagIds.length > 0) {
+    count += 1;
+  }
   return count;
 }
 
@@ -146,7 +154,12 @@ export function normalizeFilterOptions(options: ProxyFilterOptions): ProxyFilter
     countries: sortFilterOptions(options.countries),
     types: sortFilterOptions(options.types),
     anonymityLevels: sortFilterOptions(options.anonymityLevels),
+    tags: sortProxyTags(options.tags),
   };
+}
+
+export function sortProxyTags(tags: readonly ProxyTag[] | null | undefined): ProxyTag[] {
+  return [...(tags ?? [])].sort((a, b) => a.name.localeCompare(b.name) || a.id - b.id);
 }
 
 export function sortFilterOptions(values: string[]): string[] {
@@ -185,6 +198,7 @@ export function syncFilterFormWithApplied(form: FormGroup, filters: ProxyListApp
     types: [...filters.types],
     anonymityLevels: [...filters.anonymityLevels],
     reputationLabels: [...filters.reputationLabels],
+    tagIds: [...filters.tagIds],
   }, { emitEvent: false });
 }
 
@@ -217,6 +231,7 @@ export function buildFiltersFromFormValue(formValue: ProxyListFilterFormValues):
     types: normalizeSelection(formValue.types),
     anonymityLevels: normalizeSelection(formValue.anonymityLevels),
     reputationLabels: normalizeSelection(formValue.reputationLabels),
+    tagIds: normalizeIdSelection(formValue.tagIds),
   };
 }
 
@@ -262,6 +277,9 @@ export function buildProxyListFilterPayload(filters: ProxyListAppliedFilters): P
   if (filters.reputationLabels.length > 0) {
     payload.reputationLabels = filters.reputationLabels;
   }
+  if (filters.tagIds.length > 0) {
+    payload.tagIds = filters.tagIds;
+  }
 
   return Object.keys(payload).length > 0 ? payload : undefined;
 }
@@ -279,6 +297,23 @@ export function normalizeSelection(values: string[] | null | undefined): string[
     }
     seen.add(trimmed);
     normalized.push(trimmed);
+  }
+  return normalized;
+}
+
+export function normalizeIdSelection(values: number[] | null | undefined): number[] {
+  if (!values || values.length === 0) {
+    return [];
+  }
+  const seen = new Set<number>();
+  const normalized: number[] = [];
+  for (const value of values) {
+    const id = Number(value);
+    if (!Number.isInteger(id) || id <= 0 || seen.has(id)) {
+      continue;
+    }
+    seen.add(id);
+    normalized.push(id);
   }
   return normalized;
 }

@@ -61,6 +61,9 @@
                 </span>
                 <div class="column-picker__label-wrap">
                   <span class="column-picker__label">{{ column.label }}</span>
+                  @if (column.required) {
+                    <span class="column-picker__required">Pinned</span>
+                  }
                   @if (column.example) {
                     <span class="column-picker__example">{{ column.example }}</span>
                   }
@@ -70,7 +73,7 @@
                 <p-button
                   icon="pi pi-eye-slash"
                   styleClass="p-button-text p-button-sm"
-                  [disabled]="visibleColumnCount() <= 1"
+                  [disabled]="visibleColumnCount() <= 1 || column.required"
                   (onClick)="hideColumn(column.id)"
                 ></p-button>
               </div>

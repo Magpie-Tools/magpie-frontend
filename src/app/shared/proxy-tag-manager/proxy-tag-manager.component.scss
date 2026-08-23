@@ -1,0 +1,223 @@
+.tag-manager {
+  display: grid;
+  gap: 1rem;
+  color: var(--theme-text-color, #e5e7eb);
+}
+
+.tag-manager__intro {
+  margin: 0;
+  color: rgba(148, 163, 184, 0.88);
+  font-size: 0.82rem;
+}
+
+.tag-manager__editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 9rem auto;
+  align-items: end;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.tag-manager__field {
+  display: grid;
+  gap: 0.35rem;
+
+  label {
+    color: rgba(203, 213, 225, 0.8);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  input[type='text'] {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 0.55rem;
+    background: rgba(15, 23, 42, 0.5);
+    color: inherit;
+
+    &:focus {
+      outline: none;
+      border-color: var(--theme-primary-500, #22c55e);
+      box-shadow: 0 0 0 3px rgba(var(--theme-primary-500-rgb, 34, 197, 94), 0.15);
+    }
+  }
+}
+
+.tag-manager__color-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 0.55rem;
+  background: rgba(15, 23, 42, 0.5);
+
+  input {
+    width: 2rem;
+    height: 1.7rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  span {
+    font-size: 0.72rem;
+    color: rgba(203, 213, 225, 0.72);
+  }
+}
+
+.tag-manager__editor-actions,
+.tag-manager__row-actions,
+.tag-manager__delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tag-manager__catalog {
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.8rem;
+}
+
+.tag-manager__catalog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+
+  h3 {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  span {
+    color: rgba(148, 163, 184, 0.8);
+    font-size: 0.75rem;
+  }
+}
+
+.tag-manager__list {
+  max-height: 18rem;
+  overflow: auto;
+}
+
+.tag-manager__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.65rem;
+  padding: 0.65rem 0.9rem;
+
+  & + & {
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+  }
+}
+
+.tag-manager__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.tag-manager__swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1);
+}
+
+.tag-manager__name {
+  overflow: hidden;
+  color: #f1f5f9;
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-manager__hex {
+  margin-top: 0.1rem;
+  color: rgba(148, 163, 184, 0.72);
+  font-size: 0.68rem;
+}
+
+.tag-manager__row-actions button,
+.tag-manager__cancel-delete,
+.tag-manager__confirm-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: rgba(203, 213, 225, 0.75);
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.055);
+    color: #f8fafc;
+  }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.52;
+  }
+}
+
+.tag-manager__delete-confirm {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  font-size: 0.72rem;
+  color: #fecaca;
+}
+
+.tag-manager__confirm-delete {
+  border-color: rgba(248, 113, 113, 0.38);
+  color: #fecaca;
+}
+
+.tag-manager__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 7rem;
+  padding: 1rem;
+  color: rgba(148, 163, 184, 0.84);
+  text-align: center;
+  font-size: 0.82rem;
+}
+
+::ng-deep .proxy-tag-manager-dialog .p-dialog-content {
+  padding-top: 0.5rem;
+}
+
+@media (max-width: 720px) {
+  .tag-manager__editor {
+    grid-template-columns: 1fr;
+  }
+
+  .tag-manager__editor-actions {
+    justify-content: flex-end;
+  }
+
+  .tag-manager__row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

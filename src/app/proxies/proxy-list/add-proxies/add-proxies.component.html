@@ -28,6 +28,26 @@
   </ng-template>
 
   <div class="p-6 bg-neutral-900 text-gray-200">
+    <div class="import-tags">
+      <div>
+        <div class="import-tags__label">Apply tags on import</div>
+        <div class="import-tags__hint">Selected tags are added without removing tags from proxies you already own.</div>
+      </div>
+      <app-proxy-tag-selector
+        [availableTags]="tagService.tags()"
+        [selectedTags]="selectedTags()"
+        [compact]="false"
+        [maxVisibleTags]="3"
+        (selectionChange)="onTagSelectionChange($event)"
+        (manageTags)="importTagManager.open()"
+      ></app-proxy-tag-selector>
+      <app-proxy-tag-manager
+        #importTagManager
+        [showTrigger]="false"
+        (tagsChanged)="pruneSelectedTags()"
+      ></app-proxy-tag-manager>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
       <div class="space-y-5">
         <div class="flex flex-col gap-4">

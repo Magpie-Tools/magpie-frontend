@@ -52,11 +52,14 @@ import {
   createDefaultProxyFilterValues,
   createDefaultProxyListAppliedFilters,
   normalizeFilterOptions,
+  normalizeIdSelection,
   normalizeNumber,
   normalizePercentage,
   normalizeSelection,
   syncFilterFormWithApplied,
 } from '../../shared/proxy-filters';
+import {ProxyTagService} from '../../services/proxy-tag.service';
+import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 
 @Component({
   selector: 'app-proxy-list',
@@ -73,6 +76,7 @@ import {
     ProxyFilterPanelComponent,
     ProxyTableComponent,
     ColumnPickerPanelComponent,
+    ProxyTagManagerComponent,
   ],
   templateUrl: './proxy-list.component.html',
   styleUrls: ['./proxy-list.component.scss']
@@ -97,7 +101,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   searchTerm = signal('');
   filterPanelOpen = signal(false);
   filterOptionsLoaded = signal(false);
-  filterOptions = signal<ProxyFilterOptions>({countries: [], types: [], anonymityLevels: []});
+  filterOptions = signal<ProxyFilterOptions>({countries: [], types: [], anonymityLevels: [], tags: []});
   countryOptions = signal<ProxyFilterOption[]>([]);
   typeOptions = signal<ProxyFilterOption[]>([]);
   anonymityOptions = signal<ProxyFilterOption[]>([]);
@@ -107,6 +111,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   columnPanelOpen = signal(false);
   isSavingColumnPreferences = signal(false);
   checkingProxyIds = signal<Record<number, boolean>>({});
+  savingTagProxyIds = signal<Record<number, boolean>>({});
   filterForm: FormGroup;
   readonly proxyStatusOptions = PROXY_STATUS_OPTIONS;
   readonly proxyReputationOptions = PROXY_REPUTATION_OPTIONS;
@@ -139,7 +144,8 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     private fb: FormBuilder,
     private notification: NotificationService,
     private settingsService: SettingsService,
-    private userService: UserService
+    private userService: UserService,
+    readonly tagService: ProxyTagService,
   ) {
     this.navigationStart$ = this.router.events.pipe(
       filter((event): event is NavigationStart => event instanceof NavigationStart)
@@ -165,6 +171,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
       types: [this.defaultFilterValues.types],
       anonymityLevels: [this.defaultFilterValues.anonymityLevels],
       reputationLabels: [this.defaultFilterValues.reputationLabels],
+      tagIds: [this.defaultFilterValues.tagIds],
     });
   }
 
@@ -173,6 +180,11 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.tagService.load().subscribe({
+      error: err => this.notification.showError(
+        'Could not load proxy tags: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'),
+      ),
+    });
     this.columnPickerColumns.set(this.resolveColumnPickerColumns());
     this.syncColumnsFromSettings(this.settingsService.getUserSettings());
     this.userSettingsSubscription = this.settingsService.userSettings$
@@ -405,6 +417,19 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 300);
   }
 
+  clearSearch(): void {
+    if (!this.searchTerm()) {
+      return;
+    }
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+      this.searchDebounceHandle = undefined;
+    }
+    this.searchTerm.set('');
+    this.page.set(1);
+    this.getAndSetProxyList();
+  }
+
   toggleFilterPanel(event?: Event | { originalEvent?: Event }): void {
     this.stopTriggerEvent(event);
     const nextState = !this.filterPanelOpen();
@@ -582,6 +607,46 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   onProxiesAdded(): void {
     this.selection.clear();
     this.selectedProxies.set([]);
+    this.page.set(1);
+    this.getAndSetProxyList();
+  }
+
+  onTagSelectionChange(event: {proxy: ProxyInfo; tagIds: number[]}): void {
+    const proxy = event.proxy;
+    if (!proxy?.id || this.savingTagProxyIds()[proxy.id]) {
+      return;
+    }
+
+    this.savingTagProxyIds.update(current => ({...current, [proxy.id]: true}));
+    this.tagService.replaceProxyTags(proxy.id, event.tagIds).subscribe({
+      next: tags => {
+        proxy.tags = tags;
+        this.dataSource.set([...this.dataSource()]);
+      },
+      error: err => {
+        const message = err?.error?.error ?? err?.message ?? 'Unknown error';
+        this.notification.showError('Could not update proxy tags: ' + message);
+      },
+    }).add(() => {
+      this.savingTagProxyIds.update(current => {
+        const next = {...current};
+        delete next[proxy.id];
+        return next;
+      });
+    });
+  }
+
+  onTagCatalogChanged(): void {
+    const validTagIds = new Set(this.tagService.tags().map(tag => tag.id));
+    const current = this.appliedFilters();
+    const tagIds = current.tagIds.filter(id => validTagIds.has(id));
+    if (tagIds.length === current.tagIds.length) {
+      return;
+    }
+
+    const next = {...current, tagIds};
+    this.appliedFilters.set(next);
+    this.persistFilters(next);
     this.page.set(1);
     this.getAndSetProxyList();
   }
@@ -902,6 +967,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     const countriesRaw = Array.isArray(value['countries']) ? value['countries'] : [];
     const typesRaw = Array.isArray(value['types']) ? value['types'] : [];
     const anonymityRaw = Array.isArray(value['anonymityLevels']) ? value['anonymityLevels'] : [];
+    const tagIdsRaw = Array.isArray(value['tagIds']) ? value['tagIds'] : [];
 
     return {
       status,
@@ -917,6 +983,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
       types: normalizeSelection(typesRaw.map(item => `${item}`)),
       anonymityLevels: normalizeSelection(anonymityRaw.map(item => `${item}`)),
       reputationLabels: filteredReputation,
+      tagIds: normalizeIdSelection(tagIdsRaw.map(item => Number(item))),
     };
   }
 

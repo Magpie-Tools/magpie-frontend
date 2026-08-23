@@ -7,6 +7,7 @@ export interface ColumnPickerItem {
   id: string;
   label: string;
   example?: string;
+  required?: boolean;
 }
 
 @Component({
@@ -74,6 +75,9 @@ export class ColumnPickerPanelComponent implements OnChanges {
   }
 
   hideColumn(id: string): void {
+    if (this.columnById.get(id)?.required) {
+      return;
+    }
     const current = this.editorColumns();
     if (current.length <= 1) {
       return;
@@ -94,7 +98,8 @@ export class ColumnPickerPanelComponent implements OnChanges {
     if (current.length <= 1) {
       return;
     }
-    this.editorColumns.set([current[0]]);
+    const required = current.filter(id => this.columnById.get(id)?.required);
+    this.editorColumns.set(required.length > 0 ? required : [current[0]]);
   }
 
   showAllColumns(): void {
@@ -102,7 +107,9 @@ export class ColumnPickerPanelComponent implements OnChanges {
   }
 
   saveChanges(): void {
-    const normalized = this.ensureVisibleColumn(this.normalizeAgainstAvailable(this.editorColumns()));
+    const normalized = this.ensureRequiredColumns(
+      this.ensureVisibleColumn(this.normalizeAgainstAvailable(this.editorColumns())),
+    );
     this.save.emit(normalized);
   }
 
@@ -167,11 +174,11 @@ export class ColumnPickerPanelComponent implements OnChanges {
   private resolveInitialColumns(): string[] {
     const normalizedSelected = this.normalizeAgainstAvailable(this.selectedColumnIds);
     if (normalizedSelected.length > 0) {
-      return normalizedSelected;
+      return this.ensureRequiredColumns(normalizedSelected);
     }
 
     const normalizedDefaults = this.normalizeAgainstAvailable(this.defaultColumnIds);
-    return this.ensureVisibleColumn(normalizedDefaults);
+    return this.ensureRequiredColumns(this.ensureVisibleColumn(normalizedDefaults));
   }
 
   private normalizeAgainstAvailable(ids: readonly string[]): string[] {
@@ -197,5 +204,17 @@ export class ColumnPickerPanelComponent implements OnChanges {
 
     const firstColumnId = this.columns[0]?.id;
     return firstColumnId ? [firstColumnId] : [];
+  }
+
+  private ensureRequiredColumns(ids: string[]): string[] {
+    const next = [...ids];
+    const selected = new Set(next);
+    for (const column of this.columns) {
+      if (column.required && !selected.has(column.id)) {
+        next.push(column.id);
+        selected.add(column.id);
+      }
+    }
+    return next;
   }
 }

@@ -200,41 +200,45 @@
           <p class="text-xs muted-text">Total: {{ proxyTotal() }} proxies</p>
         </div>
         <div class="proxy-list__actions">
-        <div #filterToggleAnchor>
+          <app-proxy-tag-manager
+            #sourceTagManager
+            (tagsChanged)="onTagCatalogChanged()"
+          ></app-proxy-tag-manager>
+          <div #filterToggleAnchor>
+            <p-button
+              [label]="filterButtonLabel()"
+              icon="pi pi-filter"
+              [styleClass]="filterToggleClass()"
+              (onClick)="toggleFilterPanel($event)"
+            ></p-button>
+          </div>
+          <div #columnToggleAnchor>
+            <p-button
+              label="Columns"
+              icon="pi pi-table"
+              styleClass="p-button-outlined"
+              [disabled]="isSavingColumnPreferences()"
+              (onClick)="openColumnPanel($event)"
+            ></p-button>
+          </div>
+          <input
+            #proxySearchInput
+            type="search"
+            class="proxy-search-input"
+            placeholder="Search proxies"
+            [value]="proxySearchTerm()"
+            (input)="onProxySearchTermChange(proxySearchInput.value)"
+            aria-label="Search proxies"
+          />
           <p-button
-            [label]="filterButtonLabel()"
-            icon="pi pi-filter"
-            [styleClass]="filterToggleClass()"
-            (onClick)="toggleFilterPanel($event)"
-          ></p-button>
-        </div>
-        <div #columnToggleAnchor>
-          <p-button
-            label="Columns"
-            icon="pi pi-table"
+            label="Refresh"
+            icon="pi pi-refresh"
             styleClass="p-button-outlined"
-            [disabled]="isSavingColumnPreferences()"
-            (onClick)="openColumnPanel($event)"
+            [disabled]="proxyLoading()"
+            (onClick)="refreshProxyList()"
           ></p-button>
         </div>
-        <input
-          #proxySearchInput
-          type="search"
-          class="proxy-search-input"
-          placeholder="Search proxies"
-          [value]="proxySearchTerm()"
-          (input)="onProxySearchTermChange(proxySearchInput.value)"
-          aria-label="Search proxies"
-        />
-        <p-button
-          label="Refresh"
-          icon="pi pi-refresh"
-          styleClass="p-button-outlined"
-          [disabled]="proxyLoading()"
-          (onClick)="refreshProxyList()"
-        ></p-button>
       </div>
-    </div>
 
       @if (filterPanelOpen()) {
         <div #filterPanelRef>
@@ -245,6 +249,7 @@
             [anonymityOptions]="anonymityOptions()"
             [proxyStatusOptions]="proxyStatusOptions"
             [proxyReputationOptions]="proxyReputationOptions"
+            [tagOptions]="tagService.tags()"
             [floating]="true"
             (clear)="clearFilters()"
             (apply)="applyFilters()"
@@ -282,11 +287,15 @@
       [sortField]="proxySortField()"
       [sortOrder]="proxySortOrder()"
       [columns]="displayedColumns()"
+      [availableTags]="tagService.tags()"
+      [savingTagProxyIds]="savingTagProxyIds()"
       [emptyReputationLabel]="'N/A'"
       [missingReputationScoreLabel]="'N/A'"
       (lazyLoad)="onProxyLazyLoad($event)"
       (sort)="onProxySort($event)"
       (viewProxy)="onViewProxy($event)"
+      (tagSelectionChange)="onTagSelectionChange($event)"
+      (manageTags)="sourceTagManager.open()"
     ></app-proxy-table>
   </section>
 </div>

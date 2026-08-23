@@ -105,6 +105,25 @@
                 <div class="label">Estimated Type</div>
                 <div class="value capitalize">{{ detail()?.estimated_type || 'N/A' }}</div>
               </div>
+              <div class="detail-item detail-item--tags sm:col-span-2">
+                <div class="label">Tags</div>
+                <div class="value">
+                  <app-proxy-tag-selector
+                    [availableTags]="tagService.tags()"
+                    [selectedTags]="detail()?.tags ?? []"
+                    [saving]="savingTags()"
+                    [compact]="false"
+                    [maxVisibleTags]="5"
+                    (selectionChange)="updateTags($event)"
+                    (manageTags)="detailTagManager.open()"
+                  ></app-proxy-tag-selector>
+                  <app-proxy-tag-manager
+                    #detailTagManager
+                    [showTrigger]="false"
+                    (tagsChanged)="onTagCatalogChanged()"
+                  ></app-proxy-tag-manager>
+                </div>
+              </div>
               <div class="detail-item">
                 <div class="label">Authentication</div>
                 <div class="value break-all">

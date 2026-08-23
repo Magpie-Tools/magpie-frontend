@@ -1,0 +1,206 @@
+:host {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.proxy-tag-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.15rem;
+  max-width: 100%;
+  padding: 0.32rem 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--theme-text-color, #e2e8f0);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+
+  &:hover:not(:disabled) {
+    border-color: rgba(var(--theme-primary-500-rgb, 34, 197, 94), 0.55);
+    background: rgba(var(--theme-primary-500-rgb, 34, 197, 94), 0.08);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--theme-primary-500, #22c55e);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-500-rgb, 34, 197, 94), 0.18);
+  }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.62;
+  }
+
+  &--compact {
+    min-height: 1.9rem;
+    padding: 0.22rem 0.4rem;
+    font-size: 0.78rem;
+  }
+
+  &--empty {
+    color: rgba(203, 213, 225, 0.72);
+    white-space: nowrap;
+  }
+}
+
+.proxy-tag-selector__chips {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.proxy-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  max-width: 9rem;
+  padding: 0.16rem 0.42rem;
+  border: 1px solid color-mix(in srgb, var(--proxy-tag-color) 48%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--proxy-tag-color) 13%, transparent);
+  color: #e5e7eb;
+}
+
+.proxy-tag-chip__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--proxy-tag-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--proxy-tag-color) 20%, transparent);
+}
+
+.proxy-tag-chip__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.proxy-tag-selector__more {
+  color: rgba(203, 213, 225, 0.72);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.proxy-tag-selector__edit {
+  color: rgba(148, 163, 184, 0.7);
+  font-size: 0.7rem;
+}
+
+::ng-deep .proxy-tag-popover .p-popover-content {
+  padding: 0;
+}
+
+.proxy-tag-menu {
+  width: min(20rem, calc(100vw - 2rem));
+  color: #e5e7eb;
+}
+
+.proxy-tag-menu__header,
+.proxy-tag-menu__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem;
+}
+
+.proxy-tag-menu__header {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.proxy-tag-menu__title {
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.proxy-tag-menu__subtitle {
+  margin-top: 0.15rem;
+  color: rgba(148, 163, 184, 0.8);
+  font-size: 0.72rem;
+}
+
+.proxy-tag-menu__list {
+  max-height: 17rem;
+  overflow: auto;
+  padding: 0.45rem;
+}
+
+.proxy-tag-menu__option {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.45rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.84rem;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.055);
+  }
+
+  input {
+    accent-color: var(--theme-primary-500, #22c55e);
+  }
+}
+
+.proxy-tag-menu__color {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+}
+
+.proxy-tag-menu__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 1.5rem 1rem;
+  color: rgba(148, 163, 184, 0.85);
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.proxy-tag-menu__footer {
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.proxy-tag-menu__text-button,
+.proxy-tag-menu__manage,
+.proxy-tag-menu__apply {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.proxy-tag-menu__text-button {
+  color: rgba(148, 163, 184, 0.9);
+  font-size: 0.75rem;
+}
+
+.proxy-tag-menu__manage {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgba(203, 213, 225, 0.82);
+  font-size: 0.78rem;
+}
+
+.proxy-tag-menu__apply {
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.5rem;
+  background: var(--theme-primary-500, #22c55e);
+  color: var(--theme-primary-contrast, #07140b);
+  font-size: 0.8rem;
+  font-weight: 650;
+
+  &:hover {
+    background: var(--theme-primary-600, #16a34a);
+  }
+}

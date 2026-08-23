@@ -24,6 +24,7 @@ import {AddProxiesResponse} from '../models/AddProxiesResponse';
 import {ProxyListFilters} from '../models/ProxyListFilters';
 import {ScrapeSourceListFilters} from '../models/ScrapeSourceListFilters';
 import {ProxyFilterOptions} from '../models/ProxyFilterOptions';
+import {ProxyTag, ProxyTagAssignmentResponse, ProxyTagWriteRequest} from '../models/ProxyTag';
 
 @Injectable({
   providedIn: 'root'
@@ -61,8 +62,12 @@ export class HttpService {
     return this.http.post<string>(this.apiUrl + '/deleteAccount', payload)
   }
 
-  uploadProxies(formData: FormData) {
-    return this.http.post<AddProxiesResponse>(this.apiUrl + '/addProxies', formData);
+  uploadProxies(formData: FormData, tagIds: readonly number[] = []) {
+    let params = new HttpParams();
+    tagIds.forEach(tagId => {
+      params = params.append('tagId', tagId.toString());
+    });
+    return this.http.post<AddProxiesResponse>(this.apiUrl + '/addProxies', formData, {params});
   }
 
   deleteProxies(settings: DeleteSettings) {
@@ -114,6 +119,28 @@ export class HttpService {
 
   getProxyFilterOptions() {
     return this.http.get<ProxyFilterOptions>(`${this.apiUrl}/proxyFilters`);
+  }
+
+  getProxyTags() {
+    return this.http.get<ProxyTag[]>(`${this.apiUrl}/proxyTags`);
+  }
+
+  createProxyTag(payload: ProxyTagWriteRequest) {
+    return this.http.post<ProxyTag>(`${this.apiUrl}/proxyTags`, payload);
+  }
+
+  updateProxyTag(tagId: number, payload: ProxyTagWriteRequest) {
+    return this.http.put<ProxyTag>(`${this.apiUrl}/proxyTags/${tagId}`, payload);
+  }
+
+  deleteProxyTag(tagId: number) {
+    return this.http.delete<void>(`${this.apiUrl}/proxyTags/${tagId}`);
+  }
+
+  replaceProxyTags(proxyId: number, tagIds: readonly number[]) {
+    return this.http.put<ProxyTagAssignmentResponse>(`${this.apiUrl}/proxies/${proxyId}/tags`, {tagIds}).pipe(
+      map(response => response?.tags ?? []),
+    );
   }
 
   getProxyCount() {
@@ -372,6 +399,12 @@ export class HttpService {
     if (filters.reputationLabels?.length) {
       filters.reputationLabels.forEach(label => {
         params = params.append('reputation', label);
+      });
+    }
+
+    if (filters.tagIds?.length) {
+      filters.tagIds.forEach(tagId => {
+        params = params.append('tagId', tagId.toString());
       });
     }
 

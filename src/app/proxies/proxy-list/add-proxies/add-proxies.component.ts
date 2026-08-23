@@ -9,6 +9,10 @@ import {HttpService} from '../../../services/http.service';
 import {ClipboardService} from '../../../services/clipboard.service';
 import {NotificationService} from '../../../services/notification-service.service';
 import {AddProxiesDetails} from '../../../models/AddProxiesResponse';
+import {ProxyTagService} from '../../../services/proxy-tag.service';
+import {ProxyTagSelectorComponent} from '../../../shared/proxy-tag-selector/proxy-tag-selector.component';
+import {ProxyTagManagerComponent} from '../../../shared/proxy-tag-manager/proxy-tag-manager.component';
+import {ProxyTag} from '../../../models/ProxyTag';
 
 @Component({
     selector: 'app-add-proxies',
@@ -17,7 +21,9 @@ import {AddProxiesDetails} from '../../../models/AddProxiesResponse';
     TooltipComponent,
     ProcesingPopupComponent,
     Button,
-    DialogModule
+    DialogModule,
+    ProxyTagSelectorComponent,
+    ProxyTagManagerComponent,
 ],
     templateUrl: './add-proxies.component.html',
     styleUrl: './add-proxies.component.scss'
@@ -50,6 +56,7 @@ export class AddProxiesComponent {
   readonly addedProxyCount = signal(0);
   readonly detailsVisible = signal(false);
   readonly uploadDetails = signal<AddProxiesDetails | null>(null);
+  readonly selectedTagIds = signal<number[]>([]);
   readonly hasUploadDetails = computed(() => this.uploadDetails() !== null);
 
   readonly proxiesWithoutAuthCount = computed(() =>
@@ -65,7 +72,8 @@ export class AddProxiesComponent {
   constructor(
     private service: HttpService,
     private clipboardService: ClipboardService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    readonly tagService: ProxyTagService,
   ) { }
 
   async pasteFromClipboard(): Promise<void> {
@@ -104,6 +112,9 @@ export class AddProxiesComponent {
 
   openDialog(): void {
     this.dialogVisible.set(true);
+    this.tagService.load().subscribe({
+      error: err => this.notification.showError('Could not load proxy tags: ' + this.getUploadErrorMessage(err)),
+    });
   }
 
   closeDialog(): void {
@@ -197,7 +208,7 @@ export class AddProxiesComponent {
         formData.append('clipboardProxies', this.clipboardProxies());
       }
 
-      this.service.uploadProxies(formData).subscribe({
+      this.service.uploadProxies(formData, this.selectedTagIds()).subscribe({
         next: (response) => {
           this.uploadDetails.set(response.details ?? null);
           this.addedProxyCount.set(response.proxyCount);
@@ -238,6 +249,20 @@ export class AddProxiesComponent {
       return `${durationMs} ms`;
     }
     return `${(durationMs / 1000).toFixed(2)} s`;
+  }
+
+  selectedTags(): ProxyTag[] {
+    const selected = new Set(this.selectedTagIds());
+    return this.tagService.tags().filter(tag => selected.has(tag.id));
+  }
+
+  onTagSelectionChange(tagIds: number[]): void {
+    this.selectedTagIds.set(tagIds);
+  }
+
+  pruneSelectedTags(): void {
+    const valid = new Set(this.tagService.tags().map(tag => tag.id));
+    this.selectedTagIds.set(this.selectedTagIds().filter(id => valid.has(id)));
   }
 
   private getUploadErrorMessage(err: any): string {
@@ -294,5 +319,6 @@ export class AddProxiesComponent {
     this.onFileClear();
     this.clearClipboardProxies();
     this.addTextAreaProxies();
+    this.selectedTagIds.set([]);
   }
 }

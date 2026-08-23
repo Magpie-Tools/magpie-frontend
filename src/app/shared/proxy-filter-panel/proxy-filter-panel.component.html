@@ -196,6 +196,24 @@
               placeholder="Select anonymity levels"
             ></p-multiSelect>
           </div>
+          <div>
+            <label for="filterTags" class="filter-label">Tags</label>
+            <p-multiSelect
+              id="filterTags"
+              formControlName="tagIds"
+              [options]="tagOptions"
+              optionLabel="name"
+              optionValue="id"
+              display="chip"
+              [showClear]="true"
+              class="w-full"
+              panelStyleClass="proxy-filter-panel__overlay bg-gray-800 text-white"
+              [appendTo]="'body'"
+              [scrollHeight]="'200px'"
+              [filter]="true"
+              placeholder="Select tags"
+            ></p-multiSelect>
+          </div>
         </div>
       </div>
     </div>

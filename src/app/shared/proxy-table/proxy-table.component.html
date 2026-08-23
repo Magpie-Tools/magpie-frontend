@@ -272,6 +272,18 @@
           @case ('country') {
             <td>{{ proxy.country }}</td>
           }
+          @case ('tags') {
+            <td class="proxy-tags-cell" (click)="$event.stopPropagation()">
+              <app-proxy-tag-selector
+                [availableTags]="availableTags"
+                [selectedTags]="proxy.tags ?? []"
+                [saving]="isSavingProxyTags(proxy.id)"
+                [compact]="true"
+                (selectionChange)="onTagSelectionChange(proxy, $event)"
+                (manageTags)="manageTags.emit()"
+              ></app-proxy-tag-selector>
+            </td>
+          }
           @case ('reputation') {
             <td class="reputation-cell">
               @if (proxy.__meta?.hasReputation) {

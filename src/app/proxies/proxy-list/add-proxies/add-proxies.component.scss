@@ -47,6 +47,37 @@ input[type="file"] {
   display: none;
 }
 
+.import-tags {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.import-tags__label {
+  color: #f1f5f9;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.import-tags__hint {
+  margin-top: 0.2rem;
+  color: rgba(148, 163, 184, 0.78);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 640px) {
+  .import-tags {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 /* Custom textarea styles to match the dark theme */
 textarea {
   background-color: #374151;

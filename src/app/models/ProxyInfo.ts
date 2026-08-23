@@ -1,4 +1,5 @@
 import {ProxyReputationSummary} from './ProxyReputation';
+import {ProxyTag} from './ProxyTag';
 
 export interface ProxyHealthSummary {
   "overall"?: number;
@@ -20,6 +21,7 @@ export interface ProxyInfo {
   "health"?: ProxyHealthSummary | null;
   "latest_check": Date;
   "reputation"?: ProxyReputationSummary | null;
+  "tags"?: ProxyTag[];
 }
 
 export interface ProxyPage {

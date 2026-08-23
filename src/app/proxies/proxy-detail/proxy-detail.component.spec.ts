@@ -31,6 +31,8 @@ describe('ProxyDetailComponent', () => {
     const httpServiceStub = {
       getProxyDetail: jasmine.createSpy('getProxyDetail').and.returnValue(of(detail)),
       getProxyStatistics: jasmine.createSpy('getProxyStatistics').and.returnValue(of([] as ProxyStatistic[])),
+      getProxyTags: jasmine.createSpy('getProxyTags').and.returnValue(of([])),
+      replaceProxyTags: jasmine.createSpy('replaceProxyTags').and.returnValue(of([])),
     } satisfies Partial<HttpService>;
 
     await TestBed.configureTestingModule({

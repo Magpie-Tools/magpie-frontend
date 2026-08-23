@@ -575,6 +575,14 @@
     }
   }
 
+  .detail-item--tags {
+    .value {
+      display: flex;
+      align-items: center;
+      min-height: 2.15rem;
+    }
+  }
+
   .status-pill {
     background: rgba(var(--theme-primary-500-rgb, 59, 130, 246), 0.16);
     color: var(--theme-primary-200, #bfdbfe);

@@ -17,5 +17,6 @@ export interface DeleteSettings {
   anonymityLevels: string[];
   proxyStatus: 'all' | 'alive' | 'dead';
   reputationLabels: string[];
+  tagIds: number[];
   scope: 'all' | 'selected';
 }

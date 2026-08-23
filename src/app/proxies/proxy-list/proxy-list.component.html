@@ -1,63 +1,90 @@
 <div class="proxy-container p-8 min-h-screen text-gray-300">
-  <!-- Top Actions -->
   <div class="actions-wrapper">
-    <div class="actions mb-4 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex flex-wrap items-center gap-4">
-        <app-export-proxies
-          [allProxies]="dataSource()"
-          [selectedProxies]="selectedProxies()"
-        ></app-export-proxies>
+    <section class="proxy-workbench" aria-label="Proxy list controls">
+      <div class="proxy-workbench__actions-row">
+        <div class="proxy-workbench__context">
+          <div class="proxy-workbench__eyebrow">Proxy inventory</div>
+          <div class="proxy-workbench__summary">
+            @if (selectedProxies().length > 0) {
+              {{ selectedProxies().length }} selected
+            } @else if (hasLoaded()) {
+              {{ totalItems() }} proxies
+            } @else {
+              Loading proxies…
+            }
+          </div>
+          <div class="proxy-workbench__bulk-actions">
+            <app-export-proxies
+              [allProxies]="dataSource()"
+              [selectedProxies]="selectedProxies()"
+            ></app-export-proxies>
 
-        <app-delete-proxies
-          [allProxies]="dataSource()"
-          [selectedProxies]="selectedProxies()"
-          (proxiesDeleted)="onProxiesDeleted()"
-        ></app-delete-proxies>
+            <app-delete-proxies
+              [allProxies]="dataSource()"
+              [selectedProxies]="selectedProxies()"
+              (proxiesDeleted)="onProxiesDeleted()"
+            ></app-delete-proxies>
+          </div>
+        </div>
+
+        <nav class="proxy-workbench__tools" aria-label="Proxy tools">
+          <app-proxy-tag-manager
+            #tagManager
+            (tagsChanged)="onTagCatalogChanged()"
+          ></app-proxy-tag-manager>
+
+          <p-button
+            label="Refresh"
+            icon="pi pi-refresh"
+            styleClass="p-button-outlined"
+            [disabled]="isLoading()"
+            (onClick)="refreshList()"
+          ></p-button>
+
+          <div #filterToggleAnchor>
+            <p-button
+              [label]="filterButtonLabel()"
+              icon="pi pi-filter"
+              [styleClass]="filterToggleClass()"
+              (onClick)="toggleFilterPanel($event)"
+            ></p-button>
+          </div>
+
+          <div #columnToggleAnchor>
+            <p-button
+              label="Columns"
+              icon="pi pi-table"
+              styleClass="p-button-outlined"
+              [disabled]="isSavingColumnPreferences()"
+              (onClick)="openColumnPanel($event)"
+            ></p-button>
+          </div>
+
+          <app-add-proxies
+            (showAddProxiesMessage)="showAddProxiesMessage.emit($event)"
+            (proxiesAdded)="onProxiesAdded()"
+          ></app-add-proxies>
+        </nav>
       </div>
 
-      <div class="flex flex-wrap items-center gap-4">
-        <p-button
-          label="Refresh"
-          icon="pi pi-refresh"
-          styleClass="p-button-outlined"
-          [disabled]="isLoading()"
-          (onClick)="refreshList()"
-        ></p-button>
-
-        <div #filterToggleAnchor>
-          <p-button
-            [label]="filterButtonLabel()"
-            icon="pi pi-filter"
-            [styleClass]="filterToggleClass()"
-            (onClick)="toggleFilterPanel($event)"
-          ></p-button>
-        </div>
-
-        <div #columnToggleAnchor>
-          <p-button
-            label="Columns"
-            icon="pi pi-table"
-            styleClass="p-button-outlined"
-            [disabled]="isSavingColumnPreferences()"
-            (onClick)="openColumnPanel($event)"
-          ></p-button>
-        </div>
-
+      <div class="proxy-workbench__search-row">
+        <i class="pi pi-search" aria-hidden="true"></i>
         <input
           type="search"
           class="proxy-search-input"
-          placeholder="Search proxies"
+          placeholder="Search by host, port, country, status, reputation, or tag"
           [ngModel]="searchTerm()"
           (ngModelChange)="onSearchTermChange($event)"
           aria-label="Search proxies"
         />
-
-        <app-add-proxies
-          (showAddProxiesMessage)="showAddProxiesMessage.emit($event)"
-          (proxiesAdded)="onProxiesAdded()"
-        ></app-add-proxies>
+        @if (searchTerm()) {
+          <button type="button" class="proxy-workbench__clear-search" aria-label="Clear search" (click)="clearSearch()">
+            <i class="pi pi-times" aria-hidden="true"></i>
+          </button>
+        }
+        <span class="proxy-workbench__search-hint">Filters apply across all pages</span>
       </div>
-    </div>
+    </section>
 
     @if (filterPanelOpen()) {
       <div #filterPanelRef>
@@ -68,6 +95,7 @@
           [anonymityOptions]="anonymityOptions()"
           [proxyStatusOptions]="proxyStatusOptions"
           [proxyReputationOptions]="proxyReputationOptions"
+          [tagOptions]="tagService.tags()"
           [floating]="true"
           (clear)="clearFilters()"
           (apply)="applyFilters()"
@@ -108,6 +136,8 @@
     [sortField]="sortField()"
     [sortOrder]="sortOrder()"
     [checkingProxyIds]="checkingProxyIds()"
+    [savingTagProxyIds]="savingTagProxyIds()"
+    [availableTags]="tagService.tags()"
     [columns]="proxyTableColumns()"
     pageScrollTargetStorageKey="magpie-proxy-list-page-scroll-target"
     (lazyLoad)="onLazyLoad($event)"
@@ -117,5 +147,7 @@
     (sort)="onSort($event)"
     (checkNow)="checkProxyNow($event)"
     (viewProxy)="onViewProxy($event)"
+    (tagSelectionChange)="onTagSelectionChange($event)"
+    (manageTags)="tagManager.open()"
   ></app-proxy-table>
 </div>

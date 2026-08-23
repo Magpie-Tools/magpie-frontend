@@ -6,6 +6,7 @@ import {ProxyListComponent} from './proxy-list.component';
 import {HttpService} from '../../services/http.service';
 import {SettingsService} from '../../services/settings.service';
 import {UserService} from '../../services/authorization/user.service';
+import {ProxyInfo} from '../../models/ProxyInfo';
 
 describe('ProxyListComponent', () => {
   let component: ProxyListComponent;
@@ -13,13 +14,17 @@ describe('ProxyListComponent', () => {
   let httpServiceStub: {
     getProxyPage: jasmine.Spy;
     getProxyFilterOptions: jasmine.Spy;
+    getProxyTags: jasmine.Spy;
+    replaceProxyTags: jasmine.Spy;
     requeueProxy: jasmine.Spy;
   };
 
   beforeEach(async () => {
     httpServiceStub = {
       getProxyPage: jasmine.createSpy('getProxyPage').and.returnValue(of({proxies: [], total: 0})),
-      getProxyFilterOptions: jasmine.createSpy('getProxyFilterOptions').and.returnValue(of({countries: [], types: [], anonymityLevels: []})),
+      getProxyFilterOptions: jasmine.createSpy('getProxyFilterOptions').and.returnValue(of({countries: [], types: [], anonymityLevels: [], tags: []})),
+      getProxyTags: jasmine.createSpy('getProxyTags').and.returnValue(of([])),
+      replaceProxyTags: jasmine.createSpy('replaceProxyTags').and.returnValue(of([])),
       requeueProxy: jasmine.createSpy('requeueProxy').and.returnValue(of({message: 'Proxy queued successfully', proxy_id: 1})),
     };
     const settingsServiceStub = {
@@ -123,5 +128,29 @@ describe('ProxyListComponent', () => {
       sortField: null,
       sortOrder: null,
     }));
+  });
+
+  it('replaces a proxy tag selection and updates the row in place', () => {
+    const proxy: ProxyInfo = {
+      id: 42,
+      ip: 'gateway.provider.example',
+      port: 8080,
+      estimated_type: 'http',
+      response_time: 120,
+      country: 'DE',
+      anonymity_level: 'elite',
+      alive: true,
+      latest_check: new Date(),
+      tags: [],
+    };
+    const assignedTags = [{id: 7, name: 'Residential', color: '#22c55e'}];
+    httpServiceStub.replaceProxyTags.and.returnValue(of(assignedTags));
+    component.dataSource.set([proxy]);
+
+    component.onTagSelectionChange({proxy, tagIds: [7]});
+
+    expect(httpServiceStub.replaceProxyTags).toHaveBeenCalledWith(42, [7]);
+    expect(component.dataSource()[0].tags).toEqual(assignedTags);
+    expect(component.savingTagProxyIds()[42]).toBeUndefined();
   });
 });

@@ -40,6 +40,8 @@ import {
   syncFilterFormWithApplied,
 } from '../../shared/proxy-filters';
 import {filter, finalize} from 'rxjs/operators';
+import {ProxyTagService} from '../../services/proxy-tag.service';
+import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 
 type HealthTone = 'healthy' | 'mixed' | 'unhealthy' | 'empty';
 type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
@@ -57,6 +59,7 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
     ProxyFilterPanelComponent,
     ProxyTableComponent,
     ColumnPickerPanelComponent,
+    ProxyTagManagerComponent,
   ],
   templateUrl: './scrape-source-detail.component.html',
   styleUrl: './scrape-source-detail.component.scss'
@@ -81,7 +84,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   proxySortOrder = signal<number | null>(null);
   filterPanelOpen = signal(false);
   filterOptionsLoaded = signal(false);
-  filterOptions = signal<ProxyFilterOptions>({countries: [], types: [], anonymityLevels: []});
+  filterOptions = signal<ProxyFilterOptions>({countries: [], types: [], anonymityLevels: [], tags: []});
   countryOptions = signal<ProxyFilterOption[]>([]);
   typeOptions = signal<ProxyFilterOption[]>([]);
   anonymityOptions = signal<ProxyFilterOption[]>([]);
@@ -89,6 +92,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   displayedColumns = signal<ProxyTableColumnId[]>([...DEFAULT_PROXY_TABLE_COLUMNS]);
   columnPanelOpen = signal(false);
   isSavingColumnPreferences = signal(false);
+  savingTagProxyIds = signal<Record<number, boolean>>({});
   filterForm: FormGroup;
   readonly proxyStatusOptions = PROXY_STATUS_OPTIONS;
   readonly proxyReputationOptions = PROXY_REPUTATION_OPTIONS;
@@ -110,6 +114,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     private clipboardService: ClipboardService,
     private notification: NotificationService,
     private settingsService: SettingsService,
+    readonly tagService: ProxyTagService,
   ) {
     this.filterForm = this.fb.group({
       proxyStatus: [this.defaultFilterValues.proxyStatus],
@@ -128,10 +133,16 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
       types: [this.defaultFilterValues.types],
       anonymityLevels: [this.defaultFilterValues.anonymityLevels],
       reputationLabels: [this.defaultFilterValues.reputationLabels],
+      tagIds: [this.defaultFilterValues.tagIds],
     });
   }
 
   ngOnInit(): void {
+    this.tagService.load().subscribe({
+      error: err => this.notification.showError(
+        'Could not load proxy tags: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'),
+      ),
+    });
     this.syncColumnsFromSettings(this.settingsService.getUserSettings());
     const settingsSub = this.settingsService.userSettings$
       .pipe(filter((settings): settings is UserSettings => !!settings))
@@ -483,6 +494,42 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     const sourceId = this.sourceId();
     const queryParams = sourceId ? { sourceId } : undefined;
     this.router.navigate(['/proxies', proxy.id], { queryParams }).catch(() => {});
+  }
+
+  onTagSelectionChange(event: {proxy: ProxyInfo; tagIds: number[]}): void {
+    const proxy = event.proxy;
+    if (!proxy?.id || this.savingTagProxyIds()[proxy.id]) {
+      return;
+    }
+
+    this.savingTagProxyIds.update(current => ({...current, [proxy.id]: true}));
+    this.tagService.replaceProxyTags(proxy.id, event.tagIds).subscribe({
+      next: tags => {
+        proxy.tags = tags;
+        this.proxies.set([...this.proxies()]);
+      },
+      error: err => this.notification.showError(
+        'Could not update proxy tags: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'),
+      ),
+    }).add(() => {
+      this.savingTagProxyIds.update(current => {
+        const next = {...current};
+        delete next[proxy.id];
+        return next;
+      });
+    });
+  }
+
+  onTagCatalogChanged(): void {
+    const valid = new Set(this.tagService.tags().map(tag => tag.id));
+    const current = this.appliedFilters();
+    const tagIds = current.tagIds.filter(id => valid.has(id));
+    if (tagIds.length === current.tagIds.length) {
+      return;
+    }
+    this.appliedFilters.set({...current, tagIds});
+    this.proxyPage.set(1);
+    this.loadProxyList();
   }
 
   copyUrl(): void {

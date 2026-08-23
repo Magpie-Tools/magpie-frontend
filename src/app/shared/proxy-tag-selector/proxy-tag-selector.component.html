@@ -1,0 +1,73 @@
+<button
+  type="button"
+  class="proxy-tag-selector"
+  [class.proxy-tag-selector--compact]="compact"
+  [class.proxy-tag-selector--empty]="displayTags().length === 0"
+  [disabled]="disabled || saving"
+  [attr.aria-label]="displayTags().length ? 'Edit proxy tags' : 'Add proxy tags'"
+  (click)="open($event, tagPopover)"
+>
+  @if (saving) {
+    <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+  } @else if (displayTags().length === 0) {
+    <i class="pi pi-plus" aria-hidden="true"></i>
+    <span>Add tags</span>
+  } @else {
+    <span class="proxy-tag-selector__chips">
+      @for (tag of visibleTags(); track tag.id) {
+        <span class="proxy-tag-chip" [style.--proxy-tag-color]="tag.color">
+          <span class="proxy-tag-chip__dot" aria-hidden="true"></span>
+          <span class="proxy-tag-chip__name">{{ tag.name }}</span>
+        </span>
+      }
+      @if (hiddenTagCount() > 0) {
+        <span class="proxy-tag-selector__more">+{{ hiddenTagCount() }}</span>
+      }
+    </span>
+    <i class="pi pi-pencil proxy-tag-selector__edit" aria-hidden="true"></i>
+  }
+</button>
+
+<p-popover #tagPopover styleClass="proxy-tag-popover" [appendTo]="'body'">
+  <div class="proxy-tag-menu" (click)="$event.stopPropagation()">
+    <div class="proxy-tag-menu__header">
+      <div>
+        <div class="proxy-tag-menu__title">Proxy tags</div>
+        <div class="proxy-tag-menu__subtitle">A proxy can use several tags.</div>
+      </div>
+      @if (draftTagIds.length > 0) {
+        <button type="button" class="proxy-tag-menu__text-button" (click)="clear()">Clear</button>
+      }
+    </div>
+
+    <div class="proxy-tag-menu__list">
+      @if (availableTags.length === 0) {
+        <div class="proxy-tag-menu__empty">
+          <i class="pi pi-tags" aria-hidden="true"></i>
+          <span>Create a tag to classify this proxy.</span>
+        </div>
+      } @else {
+        @for (tag of availableTags; track tag.id) {
+          <label class="proxy-tag-menu__option" [attr.for]="inputPrefix + '-' + tag.id">
+            <input
+              type="checkbox"
+              [id]="inputPrefix + '-' + tag.id"
+              [checked]="isSelected(tag.id)"
+              (change)="toggleTag(tag.id, $any($event.target).checked)"
+            />
+            <span class="proxy-tag-menu__color" [style.background-color]="tag.color" aria-hidden="true"></span>
+            <span>{{ tag.name }}</span>
+          </label>
+        }
+      }
+    </div>
+
+    <div class="proxy-tag-menu__footer">
+      <button type="button" class="proxy-tag-menu__manage" (click)="openManager(tagPopover)">
+        <i class="pi pi-cog" aria-hidden="true"></i>
+        Manage tags
+      </button>
+      <button type="button" class="proxy-tag-menu__apply" (click)="apply(tagPopover)">Apply</button>
+    </div>
+  </div>
+</p-popover>

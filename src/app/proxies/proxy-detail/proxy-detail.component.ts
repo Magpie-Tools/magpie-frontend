@@ -15,6 +15,9 @@ import {ClipboardService} from '../../services/clipboard.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {LoadingComponent} from '../../ui-elements/loading/loading.component';
 import {formatHostPort, isIPAddress} from '../../shared/proxy-address';
+import {ProxyTagService} from '../../services/proxy-tag.service';
+import {ProxyTagSelectorComponent} from '../../shared/proxy-tag-selector/proxy-tag-selector.component';
+import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 
 interface ThemePalette {
   primary: string;
@@ -56,6 +59,8 @@ interface ReputationSignalStructuredItem {
     LoadingComponent,
     DatePipe,
     NgClass,
+    ProxyTagSelectorComponent,
+    ProxyTagManagerComponent,
   ],
   templateUrl: './proxy-detail.component.html',
   styleUrl: './proxy-detail.component.scss'
@@ -78,6 +83,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   isSignalDialogVisible = signal(false);
   signalDialogTitle = signal('');
   signalDialogEntries = signal<ReputationSignalEntry[]>([]);
+  savingTags = signal(false);
 
   chartData = signal<any>({ labels: [], datasets: [] });
   chartOptions = signal<any>(this.buildDefaultChartOptions());
@@ -97,9 +103,15 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     private clipboardService: ClipboardService,
     private sanitizer: DomSanitizer,
     private notification: NotificationService,
+    readonly tagService: ProxyTagService,
   ) {}
 
   ngOnInit(): void {
+    this.tagService.load().subscribe({
+      error: err => this.notification.showError(
+        'Could not load proxy tags: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'),
+      ),
+    });
     this.setReturnTarget();
     const sub = this.route.paramMap.subscribe(params => {
       const rawId = params.get('id');
@@ -579,6 +591,28 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       return 'progress-bar__fill--poor';
     }
     return 'progress-bar__fill--unknown';
+  }
+
+  updateTags(tagIds: number[]): void {
+    const proxyId = this.proxyId();
+    if (!proxyId || this.savingTags()) {
+      return;
+    }
+
+    this.savingTags.set(true);
+    this.tagService.replaceProxyTags(proxyId, tagIds).subscribe({
+      next: tags => this.detail.update(detail => detail ? {...detail, tags} : detail),
+      error: err => this.notification.showError(
+        'Could not update proxy tags: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'),
+      ),
+    }).add(() => this.savingTags.set(false));
+  }
+
+  onTagCatalogChanged(): void {
+    const valid = new Set(this.tagService.tags().map(tag => tag.id));
+    this.detail.update(detail => detail
+      ? {...detail, tags: (detail.tags ?? []).filter(tag => valid.has(tag.id))}
+      : detail);
   }
 
   private loadProxyDetail(id: number): void {

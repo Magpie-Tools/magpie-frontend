@@ -1,0 +1,109 @@
+@if (showTrigger) {
+  <p-button
+    type="button"
+    [label]="triggerLabel"
+    icon="pi pi-tags"
+    [styleClass]="triggerStyleClass"
+    (onClick)="open()"
+  ></p-button>
+}
+
+<p-dialog
+  header="Manage proxy tags"
+  [visible]="visible()"
+  (visibleChange)="setVisible($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [appendTo]="'body'"
+  [baseZIndex]="1500"
+  [breakpoints]="{'640px': '95vw'}"
+  [style]="{width: '36rem'}"
+  styleClass="proxy-tag-manager-dialog"
+>
+  <div class="tag-manager">
+    <p class="tag-manager__intro">Use short, recognizable labels. Tag names are private to your account.</p>
+
+    <section class="tag-manager__editor" aria-label="Tag editor">
+      <div class="tag-manager__field tag-manager__field--name">
+        <label for="proxyTagName">Name</label>
+        <input
+          id="proxyTagName"
+          type="text"
+          maxlength="40"
+          placeholder="For example, Provider A"
+          [disabled]="saving()"
+          [ngModel]="tagName()"
+          (ngModelChange)="tagName.set($event)"
+          (keydown.enter)="save()"
+        />
+      </div>
+      <div class="tag-manager__field tag-manager__field--color">
+        <label for="proxyTagColor">Color</label>
+        <div class="tag-manager__color-control">
+          <input
+            id="proxyTagColor"
+            type="color"
+            [disabled]="saving()"
+            [ngModel]="tagColor()"
+            (ngModelChange)="tagColor.set($event)"
+          />
+          <span>{{ tagColor() }}</span>
+        </div>
+      </div>
+      <div class="tag-manager__editor-actions">
+        @if (editingTagId()) {
+          <p-button label="Cancel" styleClass="p-button-text" [disabled]="saving()" (onClick)="cancelEdit()"></p-button>
+        }
+        <p-button
+          [label]="editingTagId() ? 'Save changes' : 'Create tag'"
+          icon="pi pi-check"
+          [loading]="saving()"
+          [disabled]="saving() || !tagName().trim()"
+          (onClick)="save()"
+        ></p-button>
+      </div>
+    </section>
+
+    <section class="tag-manager__catalog" aria-label="Existing tags">
+      <div class="tag-manager__catalog-header">
+        <h3>Your tags</h3>
+        <span>{{ tagService.tags().length }}</span>
+      </div>
+
+      @if (tagService.loading()) {
+        <div class="tag-manager__empty"><i class="pi pi-spin pi-spinner"></i> Loading tags…</div>
+      } @else if (tagService.tags().length === 0) {
+        <div class="tag-manager__empty">No tags yet. Create your first one above.</div>
+      } @else {
+        <div class="tag-manager__list">
+          @for (tag of tagService.tags(); track tag.id) {
+            <div class="tag-manager__row">
+              <div class="tag-manager__identity">
+                <span class="tag-manager__swatch" [style.background-color]="tag.color" aria-hidden="true"></span>
+                <div>
+                  <div class="tag-manager__name">{{ tag.name }}</div>
+                  <div class="tag-manager__hex">{{ tag.color }}</div>
+                </div>
+              </div>
+
+              @if (deletingTagId() === tag.id) {
+                <div class="tag-manager__delete-confirm">
+                  <span>Remove from every proxy?</span>
+                  <button type="button" class="tag-manager__cancel-delete" [disabled]="saving()" (click)="cancelDelete()">Cancel</button>
+                  <button type="button" class="tag-manager__confirm-delete" [disabled]="saving()" (click)="confirmDelete(tag)">Delete</button>
+                </div>
+              } @else {
+                <div class="tag-manager__row-actions">
+                  <button type="button" aria-label="Edit tag" [disabled]="saving()" (click)="edit(tag)"><i class="pi pi-pencil"></i></button>
+                  <button type="button" aria-label="Delete tag" [disabled]="saving()" (click)="requestDelete(tag)"><i class="pi pi-trash"></i></button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+  </div>
+</p-dialog>

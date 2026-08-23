@@ -7,6 +7,7 @@ import {Select} from 'primeng/select';
 import {MultiSelectModule} from 'primeng/multiselect';
 import {NgClass} from '@angular/common';
 import {ProxyFilterOption} from '../proxy-filters';
+import {ProxyTag} from '../../models/ProxyTag';
 
 @Component({
   selector: 'app-proxy-filter-panel',
@@ -31,6 +32,7 @@ export class ProxyFilterPanelComponent {
   @Input() anonymityOptions: ProxyFilterOption[] = [];
   @Input() proxyStatusOptions: ProxyFilterOption[] = [];
   @Input() proxyReputationOptions: ProxyFilterOption[] = [];
+  @Input() tagOptions: ProxyTag[] = [];
   @Input() floating = true;
   @Input() showHeader = true;
 

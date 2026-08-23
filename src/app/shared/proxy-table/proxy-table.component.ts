@@ -24,6 +24,8 @@ import {ProxyReputation} from '../../models/ProxyReputation';
 import {ClipboardService} from '../../services/clipboard.service';
 import {HealthBarCellComponent} from '../health-bar-cell/health-bar-cell.component';
 import {formatHostPort} from '../proxy-address';
+import {ProxyTag} from '../../models/ProxyTag';
+import {ProxyTagSelectorComponent} from '../proxy-tag-selector/proxy-tag-selector.component';
 import {
   DEFAULT_PROXY_TABLE_COLUMNS,
   ProxyTableColumnDefinition,
@@ -54,6 +56,7 @@ type PageScrollTarget = 'top' | 'bottom';
     SkeletonModule,
     Tooltip,
     HealthBarCellComponent,
+    ProxyTagSelectorComponent,
   ],
   templateUrl: './proxy-table.component.html',
   styleUrls: ['./proxy-table.component.scss'],
@@ -103,6 +106,8 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input() sortField: string | null = null;
   @Input() sortOrder: number | null = null;
   @Input() checkingProxyIds: Record<number, boolean> = {};
+  @Input() savingTagProxyIds: Record<number, boolean> = {};
+  @Input() availableTags: readonly ProxyTag[] = [];
 
   @Input() emptyReputationLabel = '—';
   @Input() missingReputationScoreLabel: string | null = null;
@@ -118,6 +123,8 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   @Output() sort = new EventEmitter<{ field: string; order: number }>();
   @Output() checkNow = new EventEmitter<ProxyInfo>();
   @Output() viewProxy = new EventEmitter<ProxyInfo>();
+  @Output() tagSelectionChange = new EventEmitter<{proxy: ProxyInfo; tagIds: number[]}>();
+  @Output() manageTags = new EventEmitter<void>();
 
   copiedValueKey: string | null = null;
   pageJumpValue = this.page;
@@ -277,6 +284,14 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
 
   isCheckingProxy(proxyId: number): boolean {
     return this.checkingProxyIds[proxyId];
+  }
+
+  isSavingProxyTags(proxyId: number): boolean {
+    return !!this.savingTagProxyIds[proxyId];
+  }
+
+  onTagSelectionChange(proxy: ProxyInfo, tagIds: number[]): void {
+    this.tagSelectionChange.emit({proxy, tagIds});
   }
 
   onCheckNow(event: Event | { originalEvent?: Event }, proxy: ProxyInfo): void {
