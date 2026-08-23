@@ -71,4 +71,21 @@ describe('RotatingProxiesComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('brackets IPv6 listener addresses in endpoints and connection URLs', () => {
+    const rotator = {
+      id: 2,
+      name: 'IPv6 rotator',
+      protocol: 'http',
+      listen_protocol: 'http',
+      alive_proxy_count: 1,
+      listen_port: 19001,
+      listen_host: '2001:db8::5',
+      auth_required: false,
+      created_at: new Date().toISOString(),
+    };
+
+    expect(component.rotatorEndpoint(rotator)).toBe('[2001:db8::5]:19001');
+    expect(component.rotatorConnectionString(rotator)).toBe('http://[2001:db8::5]:19001');
+  });
 });

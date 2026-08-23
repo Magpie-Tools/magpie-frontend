@@ -23,6 +23,7 @@ import {ProxyInfo} from '../../models/ProxyInfo';
 import {ProxyReputation} from '../../models/ProxyReputation';
 import {ClipboardService} from '../../services/clipboard.service';
 import {HealthBarCellComponent} from '../health-bar-cell/health-bar-cell.component';
+import {formatHostPort} from '../proxy-address';
 import {
   DEFAULT_PROXY_TABLE_COLUMNS,
   ProxyTableColumnDefinition,
@@ -330,6 +331,10 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
     await this.clipboardService.copyText(value);
   }
 
+  formatProxyAddress(proxy: ProxyInfo): string {
+    return formatHostPort(proxy.ip, proxy.port);
+  }
+
   private decorateProxies(): void {
     if (!this._proxies.length) {
       return;
@@ -412,7 +417,7 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
 
   private resolveCopyValue(proxy: ProxyInfo, field: 'ip' | 'ip_port' | 'port'): string {
     if (field === 'ip_port') {
-      return `${proxy.ip}:${proxy.port}`;
+      return this.formatProxyAddress(proxy);
     }
     if (field === 'port') {
       return `${proxy.port}`;

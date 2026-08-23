@@ -3,7 +3,6 @@ export interface AddProxiesDetails {
   parsedCount: number;
   invalidFormatCount: number;
   invalidIpCount: number;
-  invalidIpv4Count: number;
   invalidPortCount: number;
   blacklistedCount: number;
   processingMs: number;

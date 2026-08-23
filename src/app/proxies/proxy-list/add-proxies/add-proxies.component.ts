@@ -92,12 +92,10 @@ export class AddProxiesComponent {
       return;
     }
 
-    const lines = clipboard.split(/\r?\n/);
-    const proxies = lines.filter(line => (line.match(/:/g) || []).length === 1);
-
-    this.clipboardProxiesNoAuthCount.set(proxies.length);
-    this.clipboardProxiesWithAuthCount.set(lines.filter(line => (line.match(/:/g) || []).length === 3).length);
-    this.uniqueClipboardProxiesCount.set(Array.from(new Set(proxies)).length);
+    const summary = this.summarizeProxyInput(clipboard);
+    this.clipboardProxiesNoAuthCount.set(summary.withoutAuth);
+    this.clipboardProxiesWithAuthCount.set(summary.withAuth);
+    this.uniqueClipboardProxiesCount.set(summary.unique);
   }
 
   triggerFileInput(fileInput: HTMLInputElement): void {
@@ -134,12 +132,10 @@ export class AddProxiesComponent {
       const reader = new FileReader();
       reader.onload = (_: ProgressEvent<FileReader>) => {
         const content = reader.result as string;
-        const lines = content.split(/\r?\n/);
-        let proxies = lines.filter(line => (line.match(/:/g) || []).length === 1)
-
-        this.fileProxiesNoAuthCount.set(proxies.length);
-        this.fileProxiesWithAuthCount.set(lines.filter(line => (line.match(/:/g) || []).length === 3).length);
-        this.uniqueFileProxiesCount.set(Array.from(new Set(proxies)).length);
+        const summary = this.summarizeProxyInput(content);
+        this.fileProxiesNoAuthCount.set(summary.withoutAuth);
+        this.fileProxiesWithAuthCount.set(summary.withAuth);
+        this.uniqueFileProxiesCount.set(summary.unique);
       };
 
       reader.readAsText(file);
@@ -154,12 +150,10 @@ export class AddProxiesComponent {
   }
 
   addTextAreaProxies() {
-    const lines = this.proxyTextarea().split(/\r?\n/);
-    let proxies = lines.filter(line => (line.match(/:/g) || []).length === 1)
-
-    this.textAreaProxiesNoAuthCount.set(proxies.length);
-    this.textAreaProxiesWithAuthCount.set(lines.filter(line => (line.match(/:/g) || []).length === 3).length);
-    this.uniqueTextAreaProxiesCount.set(Array.from(new Set(proxies)).length);
+    const summary = this.summarizeProxyInput(this.proxyTextarea());
+    this.textAreaProxiesNoAuthCount.set(summary.withoutAuth);
+    this.textAreaProxiesWithAuthCount.set(summary.withAuth);
+    this.uniqueTextAreaProxiesCount.set(summary.unique);
   }
 
   onTextareaChange(value: string) {
@@ -259,6 +253,38 @@ export class AddProxiesComponent {
       return `${size / mb} MB`;
     }
     return `${size} bytes`;
+  }
+
+  private summarizeProxyInput(value: string): { withoutAuth: number; withAuth: number; unique: number } {
+    const lines = value
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+    let withAuth = 0;
+    for (const line of lines) {
+      if (this.proxyLineHasAuth(line)) {
+        withAuth++;
+      }
+    }
+    return {
+      withoutAuth: lines.length - withAuth,
+      withAuth,
+      unique: new Set(lines).size,
+    };
+  }
+
+  private proxyLineHasAuth(line: string): boolean {
+    if (line.includes('@')) {
+      return true;
+    }
+    if (line.startsWith('[')) {
+      const closingBracket = line.indexOf(']');
+      if (closingBracket < 0) {
+        return false;
+      }
+      return line.slice(closingBracket + 1).split(':').length >= 4;
+    }
+    return line.split(':').length >= 4;
   }
 
   private resetFormState(): void {

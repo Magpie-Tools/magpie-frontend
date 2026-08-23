@@ -22,6 +22,7 @@ import {UserSettings} from '../models/UserSettings';
 import {TooltipComponent} from '../tooltip/tooltip.component';
 import {SkeletonModule} from 'primeng/skeleton';
 import {StyleClass} from 'primeng/styleclass';
+import {formatHostPort} from '../shared/proxy-address';
 
 type RotatorInstanceOption = {
   label: string;
@@ -350,7 +351,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
             next.delete(proxy.id);
             return next;
           });
-          const address = `${res.ip}:${res.port}`;
+          const address = formatHostPort(res.ip, res.port);
           let updatedRotator: RotatingProxy | null = null;
           this.rotatingProxies.update(list =>
             list.map(item => {
@@ -437,7 +438,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
 
     const host = (proxy.listen_host ?? '').toString().trim();
     if (host) {
-      return `${host}:${proxy.listen_port}`;
+      return formatHostPort(host, proxy.listen_port);
     }
 
     return `${proxy.listen_port}`;
@@ -603,7 +604,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
 
   private enrichRotator(proxy: RotatingProxy): RotatingProxy {
     const listenHost = this.resolveHostValue(proxy.listen_host);
-    const listenAddress = listenHost ? `${listenHost}:${proxy.listen_port}` : `${proxy.listen_port}`;
+    const listenAddress = formatHostPort(listenHost, proxy.listen_port);
     const transportProtocol = (proxy.transport_protocol ?? 'tcp').toString().trim().toLowerCase() || 'tcp';
     const listenTransportProtocol = (proxy.listen_transport_protocol ?? transportProtocol).toString().trim().toLowerCase() || transportProtocol;
     const uptimeFilterType = this.normalizeUptimeFilterType(proxy.uptime_filter_type);

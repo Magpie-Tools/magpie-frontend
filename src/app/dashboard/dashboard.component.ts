@@ -28,6 +28,7 @@ import {
   FastestAliveProxiesCardComponent,
   FastestAliveProxyCountryLegend
 } from './cards/fastest-alive-proxies-card/fastest-alive-proxies-card.component';
+import {formatHostPort} from '../shared/proxy-address';
 
 interface SparklineMetric {
   value: number;
@@ -361,7 +362,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
           const entry: ProxyCheck = {
             id: `#${proxy.id}`,
-            ip: `${proxy.ip}:${proxy.port}`,
+            ip: formatHostPort(proxy.ip, proxy.port),
             status,
             date: latest,
             time: this.toTimeLabel(latest)
@@ -392,7 +393,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           : 0;
         return {
           rank: index + 1,
-          proxy: `${proxy.ip}:${proxy.port}`,
+          proxy: formatHostPort(proxy.ip, proxy.port),
           responseTime: proxy.responseTime,
           country,
           reputation,

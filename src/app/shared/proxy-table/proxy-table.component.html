@@ -243,7 +243,7 @@
                 tooltipPosition="top"
                 (click)="copyProxyValue($event, proxy, 'ip_port')"
               >
-                <span class="copy-value__text">{{ proxy.ip }}:{{ proxy.port }}</span>
+                <span class="copy-value__text">{{ formatProxyAddress(proxy) }}</span>
                 <i class="pi" [ngClass]="isCopied(proxy, 'ip_port') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
               </button>
             </td>

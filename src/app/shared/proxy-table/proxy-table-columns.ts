@@ -77,14 +77,14 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
     id: 'ip',
     label: 'IP Address',
     sortField: 'ip',
-    example: '127.0.0.1',
+    example: '2001:db8::1',
     skeletonWidth: '7rem',
   },
   {
     id: 'ip_port',
     label: 'IP:Port',
     sortField: 'ip_port',
-    example: '127.0.0.1:8080',
+    example: '[2001:db8::1]:8080',
     skeletonWidth: '10rem',
   },
   {

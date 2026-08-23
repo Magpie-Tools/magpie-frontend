@@ -21,4 +21,17 @@ describe('AddProxiesComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('counts bracketed IPv6 proxies and authentication correctly', () => {
+    component.onTextareaChange([
+      '192.0.2.1:8080',
+      '[2001:db8::1]:8080',
+      'user:pass@[2001:db8::2]:8080',
+      '[2001:db8::3]:8080:user:pass',
+    ].join('\n'));
+
+    expect(component.getProxiesWithoutAuthCount()).toBe(2);
+    expect(component.getProxiesWithAuthCount()).toBe(2);
+    expect(component.getUniqueProxiesCount()).toBe(4);
+  });
 });
