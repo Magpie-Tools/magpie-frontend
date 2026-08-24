@@ -8,7 +8,7 @@
           These judges help determine whether proxies are alive, anonymous and returning the expected payload.
         </p>
       </div>
-      <button type="button" class="add-judge-button" (click)="addJudge()">
+      <button type="button" class="add-judge-button" [disabled]="!workspaces.canOperate()" (click)="addJudge()">
         <i class="pi pi-plus"></i>
         Add Judge
       </button>
@@ -28,6 +28,7 @@
             <button
               type="button"
               class="icon-button"
+              [disabled]="!workspaces.canOperate()"
               (click)="removeJudge(i)"
               [attr.aria-label]="'Remove judge #' + (i + 1)"
             >
@@ -73,13 +74,17 @@
 
     <footer class="panel-footer flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mt-6">
       <p class="text-xs text-gray-500 max-w-xl">
-        Settings will be saved and applied to new checker sessions.
+        @if (workspaces.canOperate()) {
+          Settings will be saved and applied to new checker sessions.
+        } @else {
+          Your viewer role can inspect these judges but cannot change them.
+        }
       </p>
       <p-button
         type="button"
         label="Save Judges"
         (onClick)="onSubmit()"
-        [disabled]="!judgesForm.dirty"
+        [disabled]="!workspaces.canOperate() || !judgesForm.dirty"
         styleClass="save-judges-button"
       >
       </p-button>

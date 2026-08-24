@@ -1,0 +1,212 @@
+<div class="workspace-page">
+  @if (workspaces.current(); as workspace) {
+    <header class="workspace-hero">
+      <div>
+        <p class="workspace-eyebrow">Infrastructure boundary</p>
+        <h1>{{ workspace.name }}</h1>
+        <p class="workspace-subtitle">
+          Proxies, rotators, sources, judges, settings, members, and capacity belong to this workspace.
+        </p>
+      </div>
+      <div class="workspace-identity">
+        <span class="role-chip">{{ workspace.role | titlecase }}</span>
+        @if (workspace.billing_admin) {
+          <span class="billing-chip">Billing admin</span>
+        }
+      </div>
+    </header>
+
+    <div class="workspace-grid workspace-grid--summary">
+      <section class="workspace-card capacity-card">
+        <div class="card-heading">
+          <div>
+            <p class="card-kicker">Managed route capacity</p>
+            <h2>{{ workspaces.capacityLabel(workspace) }}</h2>
+          </div>
+          <span class="plan-chip">{{ workspace.subscription.plan_code }}</span>
+        </div>
+
+        @if (workspace.capacity.activation_limit !== null) {
+          <div class="capacity-track" aria-hidden="true">
+            <div class="capacity-fill" [style.width.%]="capacityPercent()"></div>
+          </div>
+          <div class="capacity-scale">
+            <span>{{ capacityPercent() }}% active</span>
+            <span>{{ workspace.capacity.activation_limit | number }} limit</span>
+          </div>
+          @if (capacityPercent() >= 100) {
+            <div class="capacity-alert capacity-alert--critical">
+              Capacity reached. New routes stay stored and paused until capacity is available.
+            </div>
+          } @else if (capacityPercent() >= 80) {
+            <div class="capacity-alert">
+              Capacity is above 80%. Review paused routes or plan additional capacity before the limit is reached.
+            </div>
+          }
+        } @else {
+          <div class="unlimited-capacity"><i class="pi pi-infinity"></i> Unlimited self-hosted activation</div>
+        }
+
+        <div class="metric-row">
+          <div><strong>{{ workspace.capacity.active_routes | number }}</strong><span>Active</span></div>
+          <div><strong>{{ workspace.capacity.stored_routes | number }}</strong><span>Stored</span></div>
+          <div><strong>{{ overflowStoredRoutes() | number }}</strong><span>Paused or archived</span></div>
+        </div>
+        <p class="capacity-note">
+          Paused and archived routes stay stored. They are not checked or served by rotators and do not consume active capacity.
+        </p>
+      </section>
+
+      <section class="workspace-card subscription-card">
+        <p class="card-kicker">Subscription entitlement</p>
+        <div class="subscription-status">
+          <span [ngClass]="'subscription-status--' + workspace.subscription.status"></span>
+          {{ workspace.subscription.status | titlecase }}
+        </div>
+        <dl>
+          <div><dt>Included routes</dt><dd>{{ workspace.capacity.included_routes | number }}</dd></div>
+          <div><dt>Additional routes</dt><dd>{{ workspace.capacity.additional_routes | number }}</dd></div>
+          <div><dt>Overage policy</dt><dd>{{ workspace.capacity.overage_mode | titlecase }}</dd></div>
+          <div>
+            <dt>Statistics retention</dt>
+            <dd>{{ workspace.subscription.statistics_retention_days ? (workspace.subscription.statistics_retention_days + ' days') : 'Instance default' }}</dd>
+          </div>
+          <div>
+            <dt>Minimum check interval</dt>
+            <dd>{{ workspace.subscription.minimum_check_interval_seconds ? (workspace.subscription.minimum_check_interval_seconds + ' seconds') : 'Instance default' }}</dd>
+          </div>
+        </dl>
+        <p class="billing-note">Billing controls will attach to this entitlement without changing ownership or memberships.</p>
+      </section>
+    </div>
+
+    <div class="workspace-grid">
+      <section class="workspace-card">
+        <div class="card-heading">
+          <div>
+            <p class="card-kicker">Workspace details</p>
+            <h2>Name and selection</h2>
+          </div>
+        </div>
+        <label class="field-label" for="workspace-name">Workspace name</label>
+        <div class="inline-form">
+          <input
+            id="workspace-name"
+            type="text"
+            maxlength="120"
+            [(ngModel)]="workspaceName"
+            [disabled]="!workspaces.canAdminister() || savingWorkspace()"
+          />
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="!workspaces.canAdminister() || savingWorkspace() || !workspaceName.trim() || workspaceName.trim() === workspace.name"
+            (click)="renameWorkspace()"
+          >
+            @if (savingWorkspace()) { <i class="pi pi-spin pi-spinner"></i> }
+            Save
+          </button>
+        </div>
+        @if (!workspaces.canAdminister()) {
+          <p class="field-help">Your {{ workspace.role }} role can view workspace details but cannot change them.</p>
+        }
+
+        <div class="section-divider"></div>
+        <p class="card-kicker">New boundary</p>
+        <h2>Create another workspace</h2>
+        <p class="field-help">The new workspace starts with its own capacity, settings, judges, sources, and owner membership.</p>
+        <div class="inline-form">
+          <input type="text" maxlength="120" placeholder="Production, Side project…" [(ngModel)]="newWorkspaceName" />
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="creatingWorkspace() || !newWorkspaceName.trim()"
+            (click)="createWorkspace()"
+          >
+            @if (creatingWorkspace()) { <i class="pi pi-spin pi-spinner"></i> }
+            Create
+          </button>
+        </div>
+      </section>
+
+      <section class="workspace-card members-card">
+        <div class="card-heading">
+          <div>
+            <p class="card-kicker">Access</p>
+            <h2>Members and roles</h2>
+          </div>
+          <span class="member-count">{{ members().length }} members</span>
+        </div>
+
+        @if (workspaces.canAdminister()) {
+          <div class="invite-form">
+            <input type="email" placeholder="member@example.com" [(ngModel)]="inviteEmail" aria-label="Member email" />
+            <select [(ngModel)]="inviteRole" aria-label="Member role">
+              @for (role of inviteRoles; track role) { <option [ngValue]="role">{{ role | titlecase }}</option> }
+            </select>
+            @if (workspaces.isOwner()) {
+              <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="inviteBillingAdmin" /> Billing admin
+              </label>
+            }
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="addingMember() || !inviteEmail.trim()"
+              (click)="addMember()"
+            >
+              @if (addingMember()) { <i class="pi pi-spin pi-spinner"></i> }
+              Add member
+            </button>
+          </div>
+        }
+
+        <div class="member-list">
+          @if (loadingMembers()) {
+            <div class="empty-state"><i class="pi pi-spin pi-spinner"></i> Loading members…</div>
+          } @else {
+            @for (member of members(); track member.user_id) {
+              <article class="member-row">
+                <div class="member-avatar">{{ member.email.slice(0, 1).toUpperCase() }}</div>
+                <div class="member-identity">
+                  <strong>{{ member.email }}</strong>
+                  <span>Joined {{ member.joined_at | date : 'mediumDate' }}</span>
+                </div>
+                <select
+                  [(ngModel)]="member.role"
+                  [disabled]="!canEditMember(member) || savingMemberIds()[member.user_id]"
+                  aria-label="Role for {{ member.email }}"
+                >
+                  @for (role of memberRoles; track role) {
+                    <option [ngValue]="role" [disabled]="role === 'owner' && !workspaces.isOwner()">{{ role | titlecase }}</option>
+                  }
+                </select>
+                <label class="checkbox-label member-billing">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="member.billing_admin"
+                    [disabled]="!workspaces.isOwner() || savingMemberIds()[member.user_id]"
+                  />
+                  Billing
+                </label>
+                <div class="member-actions">
+                  <button type="button" class="icon-button" title="Save member" [disabled]="!canEditMember(member) || savingMemberIds()[member.user_id]" (click)="saveMember(member)">
+                    <i class="pi" [ngClass]="savingMemberIds()[member.user_id] ? 'pi-spin pi-spinner' : 'pi-check'"></i>
+                  </button>
+                  <button type="button" class="icon-button icon-button--danger" title="Remove member" [disabled]="!canEditMember(member) || savingMemberIds()[member.user_id]" (click)="removeMember(member)">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </article>
+            } @empty {
+              <div class="empty-state">No members found.</div>
+            }
+          }
+        </div>
+        <p class="capacity-note">Removing a member revokes access only. It never removes routes or changes workspace capacity.</p>
+      </section>
+    </div>
+  } @else {
+    <div class="workspace-card empty-state">Loading workspace…</div>
+  }
+</div>

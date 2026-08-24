@@ -18,6 +18,8 @@ import {formatHostPort, isIPAddress} from '../../shared/proxy-address';
 import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagSelectorComponent} from '../../shared/proxy-tag-selector/proxy-tag-selector.component';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
+import {WorkspaceService} from '../../services/workspace.service';
+import {ManagedProxyState} from '../../models/Workspace';
 
 interface ThemePalette {
   primary: string;
@@ -84,6 +86,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   signalDialogTitle = signal('');
   signalDialogEntries = signal<ReputationSignalEntry[]>([]);
   savingTags = signal(false);
+  changingLifecycle = signal(false);
 
   chartData = signal<any>({ labels: [], datasets: [] });
   chartOptions = signal<any>(this.buildDefaultChartOptions());
@@ -104,6 +107,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private notification: NotificationService,
     readonly tagService: ProxyTagService,
+    readonly workspaces: WorkspaceService,
   ) {}
 
   ngOnInit(): void {
@@ -257,6 +261,31 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       return;
     }
     this.copyToClipboard(value, 'Proxy endpoint copied');
+  }
+
+  changeLifecycle(state: ManagedProxyState): void {
+    const proxyId = this.proxyId();
+    if (!proxyId || !this.workspaces.canOperate() || this.changingLifecycle()) {
+      return;
+    }
+    this.changingLifecycle.set(true);
+    this.http.updateManagedProxyLifecycle(proxyId, state).subscribe({
+      next: () => {
+        this.detail.update(detail => detail ? {
+          ...detail,
+          state,
+          pause_reason: state === 'paused' ? 'manual' : '',
+        } : detail);
+        this.workspaces.refresh().subscribe();
+        this.notification.showSuccess(
+          state === 'active' ? 'Proxy route activated' : state === 'paused' ? 'Proxy route paused' : 'Proxy route archived',
+        );
+      },
+      error: error => {
+        const message = error?.error?.error ?? error?.message ?? 'Unknown error';
+        this.notification.showError('Could not change proxy lifecycle: ' + message);
+      },
+    }).add(() => this.changingLifecycle.set(false));
   }
 
   private copyToClipboard(value: string, successMessage: string): void {
@@ -595,7 +624,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
 
   updateTags(tagIds: number[]): void {
     const proxyId = this.proxyId();
-    if (!proxyId || this.savingTags()) {
+    if (!proxyId || !this.workspaces.canOperate() || this.savingTags()) {
       return;
     }
 

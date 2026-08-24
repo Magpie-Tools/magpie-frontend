@@ -26,6 +26,7 @@ import {HealthBarCellComponent} from '../health-bar-cell/health-bar-cell.compone
 import {formatHostPort} from '../proxy-address';
 import {ProxyTag} from '../../models/ProxyTag';
 import {ProxyTagSelectorComponent} from '../proxy-tag-selector/proxy-tag-selector.component';
+import {ManagedProxyState} from '../../models/Workspace';
 import {
   DEFAULT_PROXY_TABLE_COLUMNS,
   ProxyTableColumnDefinition,
@@ -108,6 +109,9 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input() checkingProxyIds: Record<number, boolean> = {};
   @Input() savingTagProxyIds: Record<number, boolean> = {};
   @Input() availableTags: readonly ProxyTag[] = [];
+  @Input() tagEditingEnabled = true;
+  @Input() lifecycleEnabled = false;
+  @Input() lifecycleChangingIds: Record<number, boolean> = {};
 
   @Input() emptyReputationLabel = '—';
   @Input() missingReputationScoreLabel: string | null = null;
@@ -125,6 +129,7 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   @Output() viewProxy = new EventEmitter<ProxyInfo>();
   @Output() tagSelectionChange = new EventEmitter<{proxy: ProxyInfo; tagIds: number[]}>();
   @Output() manageTags = new EventEmitter<void>();
+  @Output() lifecycleChange = new EventEmitter<{proxy: ProxyInfo; state: ManagedProxyState}>();
 
   copiedValueKey: string | null = null;
   pageJumpValue = this.page;
@@ -288,6 +293,30 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
 
   isSavingProxyTags(proxyId: number): boolean {
     return !!this.savingTagProxyIds[proxyId];
+  }
+
+  managedState(proxy: ProxyInfo): ManagedProxyState {
+    return proxy.state ?? 'active';
+  }
+
+  isChangingLifecycle(proxyId: number): boolean {
+    return !!this.lifecycleChangingIds[proxyId];
+  }
+
+  lifecycleLabel(proxy: ProxyInfo): string {
+    return this.managedState(proxy) === 'active' ? 'Pause' : 'Activate';
+  }
+
+  lifecycleIcon(proxy: ProxyInfo): string {
+    return this.managedState(proxy) === 'active' ? 'pi-pause' : 'pi-play';
+  }
+
+  onLifecycleChange(event: Event, proxy: ProxyInfo, state: ManagedProxyState): void {
+    event.stopPropagation();
+    if (!this.lifecycleEnabled || this.isChangingLifecycle(proxy.id)) {
+      return;
+    }
+    this.lifecycleChange.emit({proxy, state});
   }
 
   onTagSelectionChange(proxy: ProxyInfo, tagIds: number[]): void {

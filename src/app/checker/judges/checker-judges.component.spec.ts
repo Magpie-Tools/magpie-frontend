@@ -4,6 +4,7 @@ import {of} from 'rxjs';
 import {CheckerJudgesComponent} from './checker-judges.component';
 import {UserSettings} from '../../models/UserSettings';
 import {SettingsService} from '../../services/settings.service';
+import {WorkspaceService} from '../../services/workspace.service';
 
 class SettingsServiceStub {
   private settings: UserSettings = {
@@ -40,6 +41,7 @@ describe('CheckerJudgesComponent', () => {
       imports: [CheckerJudgesComponent],
       providers: [
         { provide: SettingsService, useClass: SettingsServiceStub },
+        { provide: WorkspaceService, useValue: {canOperate: () => true} },
         MessageService,
       ]
     }).compileComponents();

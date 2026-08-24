@@ -1,4 +1,5 @@
 <div class="rotating-proxies-page text-gray-200">
+  @if (workspaces.canOperate()) {
   <section class="surface-panel create-card">
     <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
       <div>
@@ -11,7 +12,7 @@
     <form [formGroup]="createForm" (ngSubmit)="createRotator()" class="create-form">
       @if (noProtocolsAvailable()) {
         <div class="form-alert">
-          Enable at least one protocol in your account settings to create a rotator.
+          Enable at least one protocol in your workspace settings to create a rotator.
         </div>
       }
       @if (!hasAvailableInstances()) {
@@ -297,6 +298,16 @@
       </div>
     </form>
   </section>
+  } @else {
+    <section class="surface-panel create-card">
+      <div class="section-header">
+        <div>
+          <h3 class="section-title">Rotators are read-only</h3>
+          <p class="section-hint">Your viewer role can inspect and use this workspace's rotators. An operator can create or remove them.</p>
+        </div>
+      </div>
+    </section>
+  }
 
   <section class="surface-panel list-card">
       <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -447,16 +458,18 @@
                           [loading]="isRotating(proxy.id)"
                           [disabled]="isRotating(proxy.id)">
                   </button>
-                  <button pButton type="button"
-                          class="p-button-rounded p-button-text action-icon action-icon-delete"
-                          icon="pi pi-trash"
-                          pTooltip="Delete rotator"
-                          tooltipPosition="top"
-                          aria-label="Delete"
-                          severity="danger"
-                          (click)="deleteProxy(proxy)"
-                          [disabled]="isRotating(proxy.id)">
-                  </button>
+                  @if (workspaces.canOperate()) {
+                    <button pButton type="button"
+                            class="p-button-rounded p-button-text action-icon action-icon-delete"
+                            icon="pi pi-trash"
+                            pTooltip="Delete rotator"
+                            tooltipPosition="top"
+                            aria-label="Delete"
+                            severity="danger"
+                            (click)="deleteProxy(proxy)"
+                            [disabled]="isRotating(proxy.id)">
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

@@ -7,11 +7,13 @@
           [selectedSources]="selectedScrapeSources"
         ></app-export-sources>
 
-        <app-delete-sources
-          [allSources]="scrapeSources"
-          [selectedSources]="selectedScrapeSources"
-          (sourcesDeleted)="onScrapeSourcesDeleted()"
-        ></app-delete-sources>
+        @if (workspaces.canOperate()) {
+          <app-delete-sources
+            [allSources]="scrapeSources"
+            [selectedSources]="selectedScrapeSources"
+            (sourcesDeleted)="onScrapeSourcesDeleted()"
+          ></app-delete-sources>
+        }
       </div>
 
       <div class="flex flex-wrap items-center gap-4">
@@ -51,10 +53,12 @@
           aria-label="Search scrape sources"
         />
 
-        <app-add-scrape-source
-          (showAddScrapeSourcesMessage)="onShowAddScrapeSourcesMessage($event)"
-          (scrapeSourcesAdded)="onScrapeSourcesAdded()"
-        ></app-add-scrape-source>
+        @if (workspaces.canOperate()) {
+          <app-add-scrape-source
+            (showAddScrapeSourcesMessage)="onShowAddScrapeSourcesMessage($event)"
+            (scrapeSourcesAdded)="onScrapeSourcesAdded()"
+          ></app-add-scrape-source>
+        }
       </div>
     </div>
 

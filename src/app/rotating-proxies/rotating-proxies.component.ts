@@ -23,6 +23,7 @@ import {TooltipComponent} from '../tooltip/tooltip.component';
 import {SkeletonModule} from 'primeng/skeleton';
 import {StyleClass} from 'primeng/styleclass';
 import {formatHostPort} from '../shared/proxy-address';
+import {WorkspaceService} from '../services/workspace.service';
 
 type RotatorInstanceOption = {
   label: string;
@@ -109,7 +110,8 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private http: HttpService,
     private clipboardService: ClipboardService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    readonly workspaces: WorkspaceService,
   ) {
     this.createForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(120)]],
@@ -230,6 +232,9 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   }
 
   createRotator(): void {
+    if (!this.workspaces.canOperate()) {
+      return;
+    }
     if (this.createForm.invalid || this.submitting()) {
       this.createForm.markAllAsTouched();
       return;
@@ -310,7 +315,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   }
 
   deleteProxy(proxy: RotatingProxy): void {
-    if (!proxy) {
+    if (!proxy || !this.workspaces.canOperate()) {
       return;
     }
 

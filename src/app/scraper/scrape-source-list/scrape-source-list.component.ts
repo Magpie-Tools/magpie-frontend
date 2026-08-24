@@ -43,6 +43,7 @@ import {filter, finalize} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
 import {HealthBarCellComponent} from '../../shared/health-bar-cell/health-bar-cell.component';
 import {ColumnPickerPanelComponent} from '../../shared/column-picker-panel/column-picker-panel.component';
+import {WorkspaceService} from '../../services/workspace.service';
 
 interface ScrapeSourceView extends ScrapeSourceInfo {
   urlHead: string;
@@ -144,6 +145,7 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     private settingsService: SettingsService,
     private userService: UserService,
     private fb: FormBuilder,
+    readonly workspaces: WorkspaceService,
   ) {
     this.filterForm = this.fb.group({
       http: [this.defaultFilterValues.http],

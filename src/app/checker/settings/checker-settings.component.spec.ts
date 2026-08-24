@@ -4,6 +4,7 @@ import {of} from 'rxjs';
 import {CheckerSettingsComponent} from './checker-settings.component';
 import {SettingsService} from '../../services/settings.service';
 import {UserSettings} from '../../models/UserSettings';
+import {WorkspaceService} from '../../services/workspace.service';
 
 class SettingsServiceStub {
   private settings: UserSettings = {
@@ -42,6 +43,7 @@ describe('CheckerSettingsComponent', () => {
       imports: [CheckerSettingsComponent],
       providers: [
         { provide: SettingsService, useClass: SettingsServiceStub },
+        { provide: WorkspaceService, useValue: {canOperate: () => true} },
         MessageService,
       ]
     }).compileComponents();

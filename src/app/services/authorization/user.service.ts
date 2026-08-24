@@ -93,6 +93,7 @@ export class UserService {
   public static logout() {
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem('magpie-jwt');
+      window.localStorage.removeItem('magpie-workspace-id');
     }
     AuthInterceptor.setToken('');
     UserService.setLoggedIn(false);

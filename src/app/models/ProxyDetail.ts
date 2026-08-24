@@ -1,6 +1,7 @@
 import {ProxyStatistic} from './ProxyStatistic';
 import {ProxyReputationBreakdown} from './ProxyReputation';
 import {ProxyTag} from './ProxyTag';
+import {ManagedProxyState} from './Workspace';
 
 export interface ProxyDetail {
   id: number;
@@ -16,4 +17,6 @@ export interface ProxyDetail {
   latest_statistic?: ProxyStatistic | null;
   reputation?: ProxyReputationBreakdown | null;
   tags?: ProxyTag[];
+  state?: ManagedProxyState;
+  pause_reason?: string;
 }

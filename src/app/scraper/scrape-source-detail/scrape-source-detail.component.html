@@ -202,6 +202,7 @@
         <div class="proxy-list__actions">
           <app-proxy-tag-manager
             #sourceTagManager
+            [showTrigger]="workspaces.canOperate()"
             (tagsChanged)="onTagCatalogChanged()"
           ></app-proxy-tag-manager>
           <div #filterToggleAnchor>
@@ -288,6 +289,7 @@
       [sortOrder]="proxySortOrder()"
       [columns]="displayedColumns()"
       [availableTags]="tagService.tags()"
+      [tagEditingEnabled]="workspaces.canOperate()"
       [savingTagProxyIds]="savingTagProxyIds()"
       [emptyReputationLabel]="'N/A'"
       [missingReputationScoreLabel]="'N/A'"

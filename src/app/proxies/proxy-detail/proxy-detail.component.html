@@ -65,6 +65,30 @@
           ></span>
           {{ overallAliveLabel }}
         </span>
+        @if (detail(); as managed) {
+          <span class="managed-state-pill" [ngClass]="'managed-state-pill--' + (managed.state ?? 'active')">
+            {{ managed.state ?? 'active' }}
+            @if (managed.pause_reason) { <span>· {{ managed.pause_reason }}</span> }
+          </span>
+          @if (workspaces.canOperate()) {
+            <div class="lifecycle-actions">
+              @if ((managed.state ?? 'active') === 'active') {
+                <button type="button" class="lifecycle-button" [disabled]="changingLifecycle()" (click)="changeLifecycle('paused')">
+                  <i class="pi pi-pause"></i> Pause
+                </button>
+              } @else {
+                <button type="button" class="lifecycle-button" [disabled]="changingLifecycle()" (click)="changeLifecycle('active')">
+                  <i class="pi" [ngClass]="changingLifecycle() ? 'pi-spin pi-spinner' : 'pi-play'"></i> Activate
+                </button>
+                @if (managed.state === 'paused') {
+                  <button type="button" class="lifecycle-button lifecycle-button--archive" [disabled]="changingLifecycle()" (click)="changeLifecycle('archived')">
+                    <i class="pi pi-box"></i> Archive
+                  </button>
+                }
+              }
+            </div>
+          }
+        }
         <div class="text-sm muted-text flex flex-col sm:flex-row sm:items-center sm:gap-2 basis-full">
           <span class="shrink-0">Proxy ID {{ proxyId() || '—' }}</span>
           @if (externalLookupLinks.length) {
@@ -112,6 +136,7 @@
                     [availableTags]="tagService.tags()"
                     [selectedTags]="detail()?.tags ?? []"
                     [saving]="savingTags()"
+                    [disabled]="!workspaces.canOperate()"
                     [compact]="false"
                     [maxVisibleTags]="5"
                     (selectionChange)="updateTags($event)"

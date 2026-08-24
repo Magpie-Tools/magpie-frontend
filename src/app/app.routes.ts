@@ -23,6 +23,7 @@ import {AdminBlacklistComponent} from './admin/admin-blacklist/admin-blacklist.c
 import {ScraperComponent} from './scraper/scraper.component';
 import {ScrapeSourceDetailComponent} from './scraper/scrape-source-detail/scrape-source-detail.component';
 import {NotificationsComponent} from './notifications/notifications.component';
+import {WorkspaceComponent} from './workspace/workspace.component';
 
 const authGuard = [AuthGuardService];
 const adminGuard = [AuthGuardAdminService];
@@ -44,6 +45,7 @@ export const routes: Routes = [
   {path: 'global/other', redirectTo: 'plugins', pathMatch: 'full'},
 
   {path: 'account', component: AccountComponent, canActivate: authGuard},
+  {path: 'workspace', component: WorkspaceComponent, canActivate: authGuard, data: {title: 'Workspace'}},
   {path: 'addProxies', component: AddProxiesComponent, canActivate: authGuard},
   {path: 'rotating', component: RotatingProxiesComponent, canActivate: authGuard},
   {path: 'proxies', component: ProxiesComponent, canActivate: authGuard},

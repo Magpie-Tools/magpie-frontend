@@ -25,6 +25,13 @@ import {ProxyListFilters} from '../models/ProxyListFilters';
 import {ScrapeSourceListFilters} from '../models/ScrapeSourceListFilters';
 import {ProxyFilterOptions} from '../models/ProxyFilterOptions';
 import {ProxyTag, ProxyTagAssignmentResponse, ProxyTagWriteRequest} from '../models/ProxyTag';
+import {
+  ManagedProxyState,
+  Workspace,
+  WorkspaceMember,
+  WorkspaceMemberCreateRequest,
+  WorkspaceMemberWriteRequest,
+} from '../models/Workspace';
 
 @Injectable({
   providedIn: 'root'
@@ -60,6 +67,46 @@ export class HttpService {
 
   deleteAccount(payload: DeleteAccount) {
     return this.http.post<string>(this.apiUrl + '/deleteAccount', payload)
+  }
+
+  getWorkspaces() {
+    return this.http.get<{workspaces: Workspace[]}>(`${this.apiUrl}/workspaces`).pipe(
+      map(response => response?.workspaces ?? []),
+    );
+  }
+
+  createWorkspace(name: string) {
+    return this.http.post<Workspace>(`${this.apiUrl}/workspaces`, {name});
+  }
+
+  renameWorkspace(workspaceId: number, name: string) {
+    return this.http.patch<void>(`${this.apiUrl}/workspaces/${workspaceId}`, {name});
+  }
+
+  selectWorkspace(workspaceId: number) {
+    return this.http.post<void>(`${this.apiUrl}/workspaces/${workspaceId}/select`, {});
+  }
+
+  getWorkspaceMembers(workspaceId: number) {
+    return this.http.get<{members: WorkspaceMember[]}>(`${this.apiUrl}/workspaces/${workspaceId}/members`).pipe(
+      map(response => response?.members ?? []),
+    );
+  }
+
+  addWorkspaceMember(workspaceId: number, payload: WorkspaceMemberCreateRequest) {
+    return this.http.post<WorkspaceMember>(`${this.apiUrl}/workspaces/${workspaceId}/members`, payload);
+  }
+
+  updateWorkspaceMember(workspaceId: number, userId: number, payload: WorkspaceMemberWriteRequest) {
+    return this.http.patch<void>(`${this.apiUrl}/workspaces/${workspaceId}/members/${userId}`, payload);
+  }
+
+  removeWorkspaceMember(workspaceId: number, userId: number) {
+    return this.http.delete<void>(`${this.apiUrl}/workspaces/${workspaceId}/members/${userId}`);
+  }
+
+  updateManagedProxyLifecycle(proxyId: number, state: ManagedProxyState) {
+    return this.http.put<void>(`${this.apiUrl}/proxies/${proxyId}/lifecycle`, {state});
   }
 
   uploadProxies(formData: FormData, tagIds: readonly number[] = []) {

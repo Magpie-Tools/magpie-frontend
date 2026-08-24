@@ -60,6 +60,8 @@ import {
 } from '../../shared/proxy-filters';
 import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
+import {WorkspaceService} from '../../services/workspace.service';
+import {ManagedProxyState} from '../../models/Workspace';
 
 @Component({
   selector: 'app-proxy-list',
@@ -112,6 +114,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   isSavingColumnPreferences = signal(false);
   checkingProxyIds = signal<Record<number, boolean>>({});
   savingTagProxyIds = signal<Record<number, boolean>>({});
+  lifecycleChangingIds = signal<Record<number, boolean>>({});
   filterForm: FormGroup;
   readonly proxyStatusOptions = PROXY_STATUS_OPTIONS;
   readonly proxyReputationOptions = PROXY_REPUTATION_OPTIONS;
@@ -146,6 +149,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     private settingsService: SettingsService,
     private userService: UserService,
     readonly tagService: ProxyTagService,
+    readonly workspaces: WorkspaceService,
   ) {
     this.navigationStart$ = this.router.events.pipe(
       filter((event): event is NavigationStart => event instanceof NavigationStart)
@@ -649,6 +653,35 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.persistFilters(next);
     this.page.set(1);
     this.getAndSetProxyList();
+  }
+
+  onLifecycleChange(event: {proxy: ProxyInfo; state: ManagedProxyState}): void {
+    const {proxy, state} = event;
+    if (!proxy?.id || !this.workspaces.canOperate() || this.lifecycleChangingIds()[proxy.id]) {
+      return;
+    }
+    this.lifecycleChangingIds.update(current => ({...current, [proxy.id]: true}));
+    this.http.updateManagedProxyLifecycle(proxy.id, state).subscribe({
+      next: () => {
+        proxy.state = state;
+        proxy.pause_reason = state === 'paused' ? 'manual' : '';
+        this.dataSource.set([...this.dataSource()]);
+        this.workspaces.refresh().subscribe();
+        this.notification.showSuccess(
+          state === 'active' ? 'Proxy route activated' : state === 'paused' ? 'Proxy route paused' : 'Proxy route archived',
+        );
+      },
+      error: err => {
+        const message = err?.error?.error ?? err?.message ?? 'Unknown error';
+        this.notification.showError('Could not change proxy lifecycle: ' + message);
+      },
+    }).add(() => {
+      this.lifecycleChangingIds.update(current => {
+        const next = {...current};
+        delete next[proxy.id];
+        return next;
+      });
+    });
   }
 
   refreshList(): void {

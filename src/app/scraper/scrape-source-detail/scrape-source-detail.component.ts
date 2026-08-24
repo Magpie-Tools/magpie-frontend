@@ -42,6 +42,7 @@ import {
 import {filter, finalize} from 'rxjs/operators';
 import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
+import {WorkspaceService} from '../../services/workspace.service';
 
 type HealthTone = 'healthy' | 'mixed' | 'unhealthy' | 'empty';
 type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
@@ -115,6 +116,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     private settingsService: SettingsService,
     readonly tagService: ProxyTagService,
+    readonly workspaces: WorkspaceService,
   ) {
     this.filterForm = this.fb.group({
       proxyStatus: [this.defaultFilterValues.proxyStatus],
@@ -498,7 +500,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
 
   onTagSelectionChange(event: {proxy: ProxyInfo; tagIds: number[]}): void {
     const proxy = event.proxy;
-    if (!proxy?.id || this.savingTagProxyIds()[proxy.id]) {
+    if (!proxy?.id || !this.workspaces.canOperate() || this.savingTagProxyIds()[proxy.id]) {
       return;
     }
 

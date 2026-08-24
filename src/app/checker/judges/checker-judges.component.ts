@@ -9,6 +9,7 @@ import {NotificationService} from '../../services/notification-service.service';
 import {UserSettings} from '../../models/UserSettings';
 import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
+import {WorkspaceService} from '../../services/workspace.service';
 
 @Component({
   selector: 'app-checker-judges',
@@ -24,7 +25,8 @@ export class CheckerJudgesComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    readonly workspaces: WorkspaceService,
   ) {
     this.judgesForm = this.fb.array<FormGroup>([]);
   }
@@ -50,12 +52,15 @@ export class CheckerJudgesComponent implements OnInit, OnDestroy {
   }
 
   addJudge(): void {
+    if (!this.workspaces.canOperate()) {
+      return;
+    }
     this.judgesForm.push(this.createJudgeGroup('', 'default'));
     this.judgesForm.markAsDirty();
   }
 
   removeJudge(index: number): void {
-    if (index < 0 || index >= this.judgesForm.length) {
+    if (!this.workspaces.canOperate() || index < 0 || index >= this.judgesForm.length) {
       return;
     }
 
@@ -64,6 +69,9 @@ export class CheckerJudgesComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
+    if (!this.workspaces.canOperate()) {
+      return;
+    }
     const current = this.settingsService.getUserSettings();
     const payload = {
       HTTPProtocol: current?.http_protocol ?? false,

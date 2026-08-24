@@ -25,9 +25,17 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     const token: string | null =
       AuthInterceptor.token || localStorage.getItem('magpie-jwt');
+    const workspaceId = typeof window !== 'undefined'
+      ? window.localStorage.getItem('magpie-workspace-id')
+      : null;
 
     const authReq = token
-      ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      ? req.clone({
+          setHeaders: {
+            Authorization: `Bearer ${token}`,
+            ...(workspaceId ? {'X-Workspace-ID': workspaceId} : {}),
+          },
+        })
       : req;
 
     return next.handle(authReq).pipe(

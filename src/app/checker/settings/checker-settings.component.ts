@@ -12,6 +12,7 @@ import {UserSettings} from '../../models/UserSettings';
 import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
 import {TooltipComponent} from '../../tooltip/tooltip.component';
+import {WorkspaceService} from '../../services/workspace.service';
 
 @Component({
   selector: 'app-checker-settings',
@@ -34,7 +35,8 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    readonly workspaces: WorkspaceService,
   ) {
     this.settingsForm = this.createForm();
     this.configureAutoRemoveThresholdToggle();
@@ -98,6 +100,9 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
+    if (!this.workspaces.canOperate()) {
+      return;
+    }
     const current = this.settingsService.getUserSettings();
     const payload = {
       ...this.settingsForm.getRawValue(),

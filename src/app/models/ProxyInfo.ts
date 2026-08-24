@@ -1,5 +1,6 @@
 import {ProxyReputationSummary} from './ProxyReputation';
 import {ProxyTag} from './ProxyTag';
+import {ManagedProxyState} from './Workspace';
 
 export interface ProxyHealthSummary {
   "overall"?: number;
@@ -22,6 +23,8 @@ export interface ProxyInfo {
   "latest_check": Date;
   "reputation"?: ProxyReputationSummary | null;
   "tags"?: ProxyTag[];
+  "state"?: ManagedProxyState;
+  "pause_reason"?: string;
 }
 
 export interface ProxyPage {

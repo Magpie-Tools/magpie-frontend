@@ -5,6 +5,7 @@ import {MessageService} from 'primeng/api';
 import {RotatingProxiesComponent} from './rotating-proxies.component';
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
+import {WorkspaceService} from '../services/workspace.service';
 
 const httpServiceMock = {
   getRotatingProxies: jasmine.createSpy().and.returnValue(of([])),
@@ -57,6 +58,7 @@ describe('RotatingProxiesComponent', () => {
         MessageService,
         NotificationService,
         {provide: HttpService, useValue: httpServiceMock},
+        {provide: WorkspaceService, useValue: {canOperate: () => true}},
       ]
     })
     .compileComponents();

@@ -19,17 +19,20 @@
               [selectedProxies]="selectedProxies()"
             ></app-export-proxies>
 
-            <app-delete-proxies
-              [allProxies]="dataSource()"
-              [selectedProxies]="selectedProxies()"
-              (proxiesDeleted)="onProxiesDeleted()"
-            ></app-delete-proxies>
+            @if (workspaces.canOperate()) {
+              <app-delete-proxies
+                [allProxies]="dataSource()"
+                [selectedProxies]="selectedProxies()"
+                (proxiesDeleted)="onProxiesDeleted()"
+              ></app-delete-proxies>
+            }
           </div>
         </div>
 
         <nav class="proxy-workbench__tools" aria-label="Proxy tools">
           <app-proxy-tag-manager
             #tagManager
+            [showTrigger]="workspaces.canOperate()"
             (tagsChanged)="onTagCatalogChanged()"
           ></app-proxy-tag-manager>
 
@@ -60,10 +63,12 @@
             ></p-button>
           </div>
 
-          <app-add-proxies
-            (showAddProxiesMessage)="showAddProxiesMessage.emit($event)"
-            (proxiesAdded)="onProxiesAdded()"
-          ></app-add-proxies>
+          @if (workspaces.canOperate()) {
+            <app-add-proxies
+              (showAddProxiesMessage)="showAddProxiesMessage.emit($event)"
+              (proxiesAdded)="onProxiesAdded()"
+            ></app-add-proxies>
+          }
         </nav>
       </div>
 
@@ -138,6 +143,9 @@
     [checkingProxyIds]="checkingProxyIds()"
     [savingTagProxyIds]="savingTagProxyIds()"
     [availableTags]="tagService.tags()"
+    [tagEditingEnabled]="workspaces.canOperate()"
+    [lifecycleEnabled]="workspaces.canOperate()"
+    [lifecycleChangingIds]="lifecycleChangingIds()"
     [columns]="proxyTableColumns()"
     pageScrollTargetStorageKey="magpie-proxy-list-page-scroll-target"
     (lazyLoad)="onLazyLoad($event)"
@@ -149,5 +157,6 @@
     (viewProxy)="onViewProxy($event)"
     (tagSelectionChange)="onTagSelectionChange($event)"
     (manageTags)="tagManager.open()"
+    (lifecycleChange)="onLifecycleChange($event)"
   ></app-proxy-table>
 </div>

@@ -146,7 +146,7 @@
 
         <div class="auto-remove-toggle flex justify-between items-center flex-col gap-3 sm:flex-row">
           <div class="flex-1">
-            <p class="field-label">Auto-remove failing proxies</p>
+            <p class="field-label">Auto-pause failing proxies</p>
             <p class="field-hint">
               When enabled, proxies that fail back-to-back checks will be removed from your list automatically.
             </p>
@@ -168,18 +168,24 @@
             min="1"
             max="255"
           />
-          <p class="field-hint">Magpie removes a proxy after it fails this many checks in a row.</p>
+          <p class="field-hint">Magpie pauses a managed proxy after it fails this many checks in a row.</p>
         </div>
       </section>
     </div>
 
     <footer class="panel-footer flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mt-6">
-      <p class="text-xs text-gray-500 max-w-xl">Settings will be saved and applied to new checker sessions.</p>
+      <p class="text-xs text-gray-500 max-w-xl">
+        @if (workspaces.canOperate()) {
+          Settings will be saved and applied to new checker sessions.
+        } @else {
+          Your viewer role can inspect these settings but cannot change them.
+        }
+      </p>
       <p-button
         type="button"
         label="Save Settings"
         (onClick)="onSubmit()"
-        [disabled]="!settingsForm.dirty"
+        [disabled]="!workspaces.canOperate() || !settingsForm.dirty"
         styleClass="save-settings-button"
       >
       </p-button>
