@@ -10,6 +10,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 
 import { User } from '../../models/UserModel';
 import { HttpService } from '../../services/http.service';
+import {getAuthToken, saveAuthToken} from '../../services/authorization/auth-token-storage';
 import { UserService } from '../../services/authorization/user.service';
 import { AuthInterceptor } from '../../services/auth-interceptor.interceptor';
 import { NotificationService } from '../../services/notification-service.service';
@@ -59,7 +60,7 @@ export class LoginComponent implements OnDestroy {
 
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
     const isBrowser = typeof window !== 'undefined';
-    const hasToken = isBrowser && !!window.localStorage.getItem('magpie-jwt');
+    const hasToken = isBrowser && !!getAuthToken();
     if (returnUrl) {
       this.autoLoginChecking.set(true);
     } else {
@@ -82,11 +83,7 @@ export class LoginComponent implements OnDestroy {
 
     this.http.loginUser(user).subscribe({
       next: (response) => {
-        if (this.shouldRemember) {
-          localStorage.setItem('magpie-jwt', response.token);
-        } else {
-          localStorage.removeItem('magpie-jwt');
-        }
+        saveAuthToken(response.token, this.shouldRemember);
         AuthInterceptor.setToken(response.token);
         this.workspaces.reset();
         UserService.setLoggedIn(true);

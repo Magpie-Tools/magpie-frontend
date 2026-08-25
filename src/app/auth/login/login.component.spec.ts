@@ -20,6 +20,8 @@ describe('LoginComponent', () => {
   let resetWorkspacesSpy: jasmine.Spy;
 
   beforeEach(async () => {
+    UserService.setLoggedIn(false);
+    spyOn(UserService, 'setRole');
     loginUserSpy = jasmine.createSpy('loginUser');
     showErrorSpy = jasmine.createSpy('showError');
     resetWorkspacesSpy = jasmine.createSpy('reset');
@@ -70,8 +72,8 @@ describe('LoginComponent', () => {
   afterEach(() => {
     AuthInterceptor.setToken('');
     UserService.setLoggedIn(false);
-    UserService.setRole('user');
     window.localStorage.removeItem('magpie-jwt');
+    window.sessionStorage.removeItem('magpie-jwt');
     window.sessionStorage.removeItem('magpie-return-url');
   });
 
@@ -86,6 +88,22 @@ describe('LoginComponent', () => {
 
     expect(resetWorkspacesSpy).toHaveBeenCalledTimes(1);
     expect(UserService.authState()).toBe('authenticated');
+    expect(window.sessionStorage.getItem('magpie-jwt')).toBe('new-account-token');
+    expect(window.localStorage.getItem('magpie-jwt')).toBeNull();
+  });
+
+  it('should persist a remembered login across browser sessions', () => {
+    loginUserSpy.and.returnValue(of({token: 'remembered-token', role: 'user'}));
+    component.rememberPass.set(true);
+    component.loginForm.setValue({
+      email: 'remembered@example.com',
+      password: 'password123',
+    });
+
+    component.onLogin();
+
+    expect(window.localStorage.getItem('magpie-jwt')).toBe('remembered-token');
+    expect(window.sessionStorage.getItem('magpie-jwt')).toBeNull();
   });
 
   it('should show the backend login error detail', () => {

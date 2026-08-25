@@ -9,6 +9,7 @@ import { ButtonModule } from 'primeng/button';
 
 import { HttpService } from '../../services/http.service';
 import { User } from '../../models/UserModel';
+import {saveAuthToken} from '../../services/authorization/auth-token-storage';
 import { UserService } from '../../services/authorization/user.service';
 import { AuthInterceptor } from '../../services/auth-interceptor.interceptor';
 import { NotificationService } from '../../services/notification-service.service';
@@ -60,7 +61,7 @@ export class RegisterComponent {
 
     this.http.registerUser(user).subscribe({
       next: (response) => {
-        localStorage.removeItem('magpie-jwt');
+        saveAuthToken(response.token, false);
         AuthInterceptor.setToken(response.token);
         this.workspaces.reset();
         UserService.setLoggedIn(true);

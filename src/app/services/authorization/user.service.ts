@@ -5,6 +5,7 @@ import {NotificationService} from '../notification-service.service';
 import {AuthInterceptor} from '../auth-interceptor.interceptor';
 import {BehaviorSubject} from 'rxjs';
 import {WorkspaceService} from '../workspace.service';
+import {clearAuthToken, getAuthToken} from './auth-token-storage';
 
 type AuthState = 'checking' | 'authenticated' | 'unauthenticated';
 
@@ -32,7 +33,7 @@ export class UserService {
       return;
     }
 
-    const token = window.localStorage.getItem('magpie-jwt');
+    const token = getAuthToken();
     if (token) {
       UserService.setAuthState('checking');
       this.getAndSetRole();
@@ -93,9 +94,7 @@ export class UserService {
   }
 
   public logout() {
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem('magpie-jwt');
-    }
+    clearAuthToken();
     AuthInterceptor.setToken('');
     this.workspaces.reset();
     UserService.setLoggedIn(false);

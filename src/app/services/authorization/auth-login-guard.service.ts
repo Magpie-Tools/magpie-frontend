@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { HttpService } from '../http.service';
 import { UserService } from './user.service';
+import {getAuthToken} from './auth-token-storage';
 
 @Injectable({
   providedIn: 'root'
@@ -16,9 +17,7 @@ export class AuthLoginGuardService implements CanActivate, CanActivateChild {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> {
-    const token = typeof window !== 'undefined'
-      ? window.localStorage.getItem('magpie-jwt')
-      : null;
+    const token = getAuthToken();
     const authState = UserService.authState();
 
     if (!token) {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {UserService} from './user.service';
 import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot, UrlTree} from '@angular/router';
+import {getAuthToken} from './auth-token-storage';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ export class AuthGuardService implements CanActivate, CanActivateChild {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree | Promise<boolean | UrlTree> {
     const returnUrl = state.url || '';
-    const hasToken = typeof window !== 'undefined' && !!window.localStorage.getItem('magpie-jwt');
+    const hasToken = !!getAuthToken();
 
     if (UserService.authState() === 'checking') {
       this.storeReturnUrl(returnUrl);

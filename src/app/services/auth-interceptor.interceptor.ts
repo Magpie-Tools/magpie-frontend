@@ -9,6 +9,7 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import {getAuthToken} from './authorization/auth-token-storage';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -23,8 +24,7 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const token: string | null =
-      AuthInterceptor.token || localStorage.getItem('magpie-jwt');
+    const token: string | null = AuthInterceptor.token || getAuthToken();
     const workspaceId = typeof window !== 'undefined'
       ? window.localStorage.getItem('magpie-workspace-id')
       : null;
