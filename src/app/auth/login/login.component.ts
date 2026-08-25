@@ -14,6 +14,7 @@ import { UserService } from '../../services/authorization/user.service';
 import { AuthInterceptor } from '../../services/auth-interceptor.interceptor';
 import { NotificationService } from '../../services/notification-service.service';
 import { ThemeService } from '../../services/theme.service';
+import { WorkspaceService } from '../../services/workspace.service';
 import { LoadingComponent } from '../../ui-elements/loading/loading.component';
 
 @Component({
@@ -46,7 +47,8 @@ export class LoginComponent implements OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     protected themeService: ThemeService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private workspaces: WorkspaceService,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -86,6 +88,7 @@ export class LoginComponent implements OnDestroy {
           localStorage.removeItem('magpie-jwt');
         }
         AuthInterceptor.setToken(response.token);
+        this.workspaces.reset();
         UserService.setLoggedIn(true);
         UserService.setRole(response.role);
         const returnUrl = typeof window !== 'undefined'

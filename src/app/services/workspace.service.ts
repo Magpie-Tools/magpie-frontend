@@ -1,6 +1,6 @@
 import {computed, Injectable, signal} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {finalize, shareReplay, tap} from 'rxjs/operators';
+import {Observable, of, Subject} from 'rxjs';
+import {finalize, shareReplay, takeUntil, tap} from 'rxjs/operators';
 import {Workspace, WorkspaceRole} from '../models/Workspace';
 import {HttpService} from './http.service';
 
@@ -16,6 +16,9 @@ export class WorkspaceService {
   readonly isOwner = computed(() => this.current()?.role === 'owner');
 
   private loadRequest?: Observable<Workspace[]>;
+  private readonly sessionReset = new Subject<void>();
+  private sessionVersion = 0;
+  private loadRequestId = 0;
 
   constructor(private readonly http: HttpService) {}
 
@@ -28,12 +31,21 @@ export class WorkspaceService {
     }
 
     this.loading.set(true);
+    const sessionVersion = this.sessionVersion;
+    const requestId = ++this.loadRequestId;
     this.loadRequest = this.http.getWorkspaces().pipe(
+      takeUntil(this.sessionReset),
       tap(workspaces => {
+        if (!this.isCurrentRequest(sessionVersion, requestId)) {
+          return;
+        }
         this.workspaces.set(workspaces);
         this.setInitialWorkspace(workspaces);
       }),
       finalize(() => {
+        if (!this.isCurrentRequest(sessionVersion, requestId)) {
+          return;
+        }
         this.loading.set(false);
         this.loadRequest = undefined;
       }),
@@ -61,6 +73,17 @@ export class WorkspaceService {
 
   refresh(): Observable<Workspace[]> {
     return this.load(true);
+  }
+
+  reset(): void {
+    this.sessionVersion += 1;
+    this.loadRequestId += 1;
+    this.sessionReset.next();
+    this.loadRequest = undefined;
+    this.loading.set(false);
+    this.workspaces.set([]);
+    this.current.set(null);
+    this.clearWorkspaceId();
   }
 
   updateCachedWorkspace(updated: Workspace): void {
@@ -94,6 +117,10 @@ export class WorkspaceService {
       ?? workspaces[0];
     this.current.set(selected);
     this.persistWorkspaceId(selected.id);
+  }
+
+  private isCurrentRequest(sessionVersion: number, requestId: number): boolean {
+    return sessionVersion === this.sessionVersion && requestId === this.loadRequestId;
   }
 
   private roleRank(role?: WorkspaceRole): number {

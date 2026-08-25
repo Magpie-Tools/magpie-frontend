@@ -13,6 +13,7 @@ import { UserService } from '../../services/authorization/user.service';
 import { AuthInterceptor } from '../../services/auth-interceptor.interceptor';
 import { NotificationService } from '../../services/notification-service.service';
 import { ThemeService } from '../../services/theme.service';
+import { WorkspaceService } from '../../services/workspace.service';
 import { passwordPolicyMessages, passwordPolicyValidators } from '../password-policy';
 
 @Component({
@@ -38,7 +39,8 @@ export class RegisterComponent {
     private router: Router,
     private user: UserService,
     protected themeService: ThemeService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private workspaces: WorkspaceService,
   ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -60,6 +62,7 @@ export class RegisterComponent {
       next: (response) => {
         localStorage.removeItem('magpie-jwt');
         AuthInterceptor.setToken(response.token);
+        this.workspaces.reset();
         UserService.setLoggedIn(true);
         this.user.getAndSetRole();
         this.notification.showSuccess('Registration successful');

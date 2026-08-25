@@ -8,6 +8,7 @@ import { HttpService } from '../../services/http.service';
 import { NotificationService } from '../../services/notification-service.service';
 import { ThemeService } from '../../services/theme.service';
 import { UserService } from '../../services/authorization/user.service';
+import { WorkspaceService } from '../../services/workspace.service';
 import { passwordMinLength } from '../password-policy';
 
 describe('RegisterComponent', () => {
@@ -46,6 +47,12 @@ describe('RegisterComponent', () => {
           useValue: {
             showError: showErrorSpy,
             showSuccess: jasmine.createSpy('showSuccess'),
+          },
+        },
+        {
+          provide: WorkspaceService,
+          useValue: {
+            reset: jasmine.createSpy('reset'),
           },
         },
       ],

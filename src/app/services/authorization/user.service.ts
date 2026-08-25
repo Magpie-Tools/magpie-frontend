@@ -4,6 +4,7 @@ import {Router} from '@angular/router';
 import {NotificationService} from '../notification-service.service';
 import {AuthInterceptor} from '../auth-interceptor.interceptor';
 import {BehaviorSubject} from 'rxjs';
+import {WorkspaceService} from '../workspace.service';
 
 type AuthState = 'checking' | 'authenticated' | 'unauthenticated';
 
@@ -19,7 +20,8 @@ export class UserService {
   constructor(
     private http: HttpService,
     private router: Router,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private workspaces: WorkspaceService,
   ) {
     this.initializeSession();
   }
@@ -90,18 +92,18 @@ export class UserService {
     return UserService.role === 'admin';
   }
 
-  public static logout() {
+  public logout() {
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem('magpie-jwt');
-      window.localStorage.removeItem('magpie-workspace-id');
     }
     AuthInterceptor.setToken('');
+    this.workspaces.reset();
     UserService.setLoggedIn(false);
     UserService.setRole('user');
   }
 
   public logoutAndRedirect() {
-    UserService.logout()
+    this.logout()
     this.router.navigate(['/login']);
   }
 
