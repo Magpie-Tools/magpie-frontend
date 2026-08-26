@@ -47,6 +47,39 @@ export interface WorkspaceMemberWriteRequest {
   billing_admin: boolean;
 }
 
-export interface WorkspaceMemberCreateRequest extends WorkspaceMemberWriteRequest {
+export type WorkspaceInvitationNotificationStatus = 'not_configured' | 'queued' | 'failed';
+
+export interface WorkspaceInvitation {
+  id: number;
+  workspace_id: number;
+  workspace_name: string;
+  invitee_user_id: number;
+  invitee_email: string;
+  inviter_user_id?: number;
+  inviter_email: string;
+  role: Exclude<WorkspaceRole, 'owner'>;
+  billing_admin: boolean;
+  notification_status: WorkspaceInvitationNotificationStatus;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkspaceInvitationWriteRequest {
+  role: Exclude<WorkspaceRole, 'owner'>;
+  billing_admin: boolean;
+}
+
+export interface WorkspaceInvitationCreateRequest extends WorkspaceInvitationWriteRequest {
   email: string;
+}
+
+export interface WorkspaceInvitationResponse {
+  invitation: WorkspaceInvitation;
+  warning?: string;
+}
+
+export interface WorkspaceInvitationAcceptance {
+  workspace_id: number;
+  workspace_name: string;
 }

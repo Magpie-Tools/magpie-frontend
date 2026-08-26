@@ -6,6 +6,7 @@ import {signal} from '@angular/core';
 import {of} from 'rxjs';
 import {WorkspaceService} from '../../services/workspace.service';
 import {NotificationService} from '../../services/notification-service.service';
+import {WorkspaceInvitationService} from '../../services/workspace-invitation.service';
 
 describe('TopbarComponent', () => {
   let component: TopbarComponent;
@@ -25,6 +26,13 @@ describe('TopbarComponent', () => {
             load: () => of([]),
             switchTo: () => of(undefined),
             capacityLabel: () => '',
+          },
+        },
+        {
+          provide: WorkspaceInvitationService,
+          useValue: {
+            pendingCount: signal(0),
+            load: () => of([]),
           },
         },
         {provide: NotificationService, useValue: {showError: jasmine.createSpy('showError')}},

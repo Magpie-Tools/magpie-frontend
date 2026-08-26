@@ -2,6 +2,7 @@ import {TestBed} from '@angular/core/testing';
 import {Subject, of} from 'rxjs';
 import {Workspace} from '../models/Workspace';
 import {HttpService} from './http.service';
+import {WorkspaceInvitationService} from './workspace-invitation.service';
 import {WorkspaceService} from './workspace.service';
 
 describe('WorkspaceService', () => {
@@ -45,6 +46,10 @@ describe('WorkspaceService', () => {
         {
           provide: HttpService,
           useValue: {getWorkspaces},
+        },
+        {
+          provide: WorkspaceInvitationService,
+          useValue: {reset: jasmine.createSpy('resetInvitations')},
         },
       ],
     });

@@ -5,6 +5,7 @@ import { ButtonDirective } from 'primeng/button';
 import { LayoutService } from '../../services/layout.service';
 import {WorkspaceService} from '../../services/workspace.service';
 import {NotificationService} from '../../services/notification-service.service';
+import {WorkspaceInvitationService} from '../../services/workspace-invitation.service';
 
 @Component({
   selector: 'app-topbar',
@@ -19,34 +20,47 @@ import {NotificationService} from '../../services/notification-service.service';
 
       <span class="topbar-title">{{ title() }}</span>
 
-      <div class="workspace-switcher" aria-label="Current workspace">
-        @if (workspaces.loading() && workspaces.workspaces().length === 0) {
-          <span class="workspace-switcher__loading">Loading workspace…</span>
-        } @else if (workspaces.current(); as current) {
-          <div class="workspace-switcher__summary">
-            <span class="workspace-switcher__capacity">{{ workspaces.capacityLabel(current) }}</span>
-            <span class="workspace-switcher__role">{{ current.role }}</span>
-          </div>
-          <label class="sr-only" for="workspace-select">Workspace</label>
-          <select
-            id="workspace-select"
-            class="workspace-switcher__select"
-            [value]="current.id"
-            (change)="onWorkspaceChange($event)"
-          >
-            @for (workspace of workspaces.workspaces(); track workspace.id) {
-              <option [value]="workspace.id">{{ workspace.name }}</option>
-            }
-          </select>
-          <a
-            routerLink="/workspace"
-            class="workspace-switcher__settings"
-            aria-label="Workspace settings"
-            title="Workspace settings"
-          >
-            <i class="pi pi-cog" aria-hidden="true"></i>
-          </a>
-        }
+      <div class="topbar-actions">
+        <a
+          routerLink="/invitations"
+          class="invitation-link"
+          [attr.aria-label]="'Workspace invitations, ' + invitations.pendingCount() + ' pending'"
+          title="Workspace invitations"
+        >
+          <i class="pi pi-inbox" aria-hidden="true"></i>
+          @if (invitations.pendingCount() > 0) {
+            <span class="invitation-link__count">{{ invitations.pendingCount() > 99 ? '99+' : invitations.pendingCount() }}</span>
+          }
+        </a>
+
+        <div class="workspace-switcher" aria-label="Current workspace">
+          @if (workspaces.loading() && workspaces.workspaces().length === 0) {
+            <span class="workspace-switcher__loading">Loading workspace…</span>
+          } @else if (workspaces.current(); as current) {
+            <div class="workspace-switcher__summary">
+              <span class="workspace-switcher__capacity">{{ workspaces.capacityLabel(current) }}</span>
+            </div>
+            <label class="sr-only" for="workspace-select">Workspace</label>
+            <select
+              id="workspace-select"
+              class="workspace-switcher__select"
+              [value]="current.id"
+              (change)="onWorkspaceChange($event)"
+            >
+              @for (workspace of workspaces.workspaces(); track workspace.id) {
+                <option [value]="workspace.id">{{ workspace.name }}</option>
+              }
+            </select>
+            <a
+              routerLink="/workspace"
+              class="workspace-switcher__settings"
+              aria-label="Workspace settings"
+              title="Workspace settings"
+            >
+              <i class="pi pi-cog" aria-hidden="true"></i>
+            </a>
+          }
+        </div>
       </div>
     </header>
   `,
@@ -60,6 +74,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
               private router: Router,
               private route: ActivatedRoute,
               readonly workspaces: WorkspaceService,
+              readonly invitations: WorkspaceInvitationService,
               private notification: NotificationService) {}
 
   ngOnInit() {
@@ -72,6 +87,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
         this.notification.showError('Could not load workspaces: ' + message);
       },
     });
+    this.invitations.load().subscribe({error: () => undefined});
   }
 
   ngOnDestroy() { this.sub?.unsubscribe?.(); }

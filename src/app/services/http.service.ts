@@ -28,8 +28,12 @@ import {ProxyTag, ProxyTagAssignmentResponse, ProxyTagWriteRequest} from '../mod
 import {
   ManagedProxyState,
   Workspace,
+  WorkspaceInvitation,
+  WorkspaceInvitationAcceptance,
+  WorkspaceInvitationCreateRequest,
+  WorkspaceInvitationResponse,
+  WorkspaceInvitationWriteRequest,
   WorkspaceMember,
-  WorkspaceMemberCreateRequest,
   WorkspaceMemberWriteRequest,
 } from '../models/Workspace';
 
@@ -93,16 +97,44 @@ export class HttpService {
     );
   }
 
-  addWorkspaceMember(workspaceId: number, payload: WorkspaceMemberCreateRequest) {
-    return this.http.post<WorkspaceMember>(`${this.apiUrl}/workspaces/${workspaceId}/members`, payload);
-  }
-
   updateWorkspaceMember(workspaceId: number, userId: number, payload: WorkspaceMemberWriteRequest) {
     return this.http.patch<void>(`${this.apiUrl}/workspaces/${workspaceId}/members/${userId}`, payload);
   }
 
   removeWorkspaceMember(workspaceId: number, userId: number) {
     return this.http.delete<void>(`${this.apiUrl}/workspaces/${workspaceId}/members/${userId}`);
+  }
+
+  getWorkspaceInvitations(workspaceId: number) {
+    return this.http.get<{invitations: WorkspaceInvitation[]}>(`${this.apiUrl}/workspaces/${workspaceId}/invitations`).pipe(
+      map(response => response?.invitations ?? []),
+    );
+  }
+
+  createWorkspaceInvitation(workspaceId: number, payload: WorkspaceInvitationCreateRequest) {
+    return this.http.post<WorkspaceInvitationResponse>(`${this.apiUrl}/workspaces/${workspaceId}/invitations`, payload);
+  }
+
+  updateWorkspaceInvitation(workspaceId: number, invitationId: number, payload: WorkspaceInvitationWriteRequest) {
+    return this.http.patch<WorkspaceInvitationResponse>(`${this.apiUrl}/workspaces/${workspaceId}/invitations/${invitationId}`, payload);
+  }
+
+  revokeWorkspaceInvitation(workspaceId: number, invitationId: number) {
+    return this.http.delete<void>(`${this.apiUrl}/workspaces/${workspaceId}/invitations/${invitationId}`);
+  }
+
+  getPendingWorkspaceInvitations() {
+    return this.http.get<{invitations: WorkspaceInvitation[]}>(`${this.apiUrl}/invitations`).pipe(
+      map(response => response?.invitations ?? []),
+    );
+  }
+
+  acceptWorkspaceInvitation(invitationId: number) {
+    return this.http.post<WorkspaceInvitationAcceptance>(`${this.apiUrl}/invitations/${invitationId}/accept`, {});
+  }
+
+  declineWorkspaceInvitation(invitationId: number) {
+    return this.http.post<void>(`${this.apiUrl}/invitations/${invitationId}/decline`, {});
   }
 
   updateManagedProxyLifecycle(proxyId: number, state: ManagedProxyState) {

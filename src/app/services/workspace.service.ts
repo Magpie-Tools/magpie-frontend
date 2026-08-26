@@ -3,6 +3,7 @@ import {Observable, of, Subject} from 'rxjs';
 import {finalize, shareReplay, takeUntil, tap} from 'rxjs/operators';
 import {Workspace, WorkspaceRole} from '../models/Workspace';
 import {HttpService} from './http.service';
+import {WorkspaceInvitationService} from './workspace-invitation.service';
 
 const workspaceStorageKey = 'magpie-workspace-id';
 
@@ -20,7 +21,10 @@ export class WorkspaceService {
   private sessionVersion = 0;
   private loadRequestId = 0;
 
-  constructor(private readonly http: HttpService) {}
+  constructor(
+    private readonly http: HttpService,
+    private readonly invitations: WorkspaceInvitationService,
+  ) {}
 
   load(force = false): Observable<Workspace[]> {
     if (!force && this.workspaces().length > 0) {
@@ -54,7 +58,7 @@ export class WorkspaceService {
     return this.loadRequest;
   }
 
-  switchTo(workspaceId: number): Observable<void> {
+  switchTo(workspaceId: number, reload = true): Observable<void> {
     const workspace = this.workspaces().find(candidate => candidate.id === workspaceId);
     if (!workspace || workspace.id === this.current()?.id) {
       return of(undefined);
@@ -64,7 +68,7 @@ export class WorkspaceService {
       tap(() => {
         this.persistWorkspaceId(workspace.id);
         this.current.set(workspace);
-        if (typeof window !== 'undefined') {
+        if (reload && typeof window !== 'undefined') {
           window.location.reload();
         }
       }),
@@ -83,6 +87,7 @@ export class WorkspaceService {
     this.loading.set(false);
     this.workspaces.set([]);
     this.current.set(null);
+    this.invitations.reset();
     this.clearWorkspaceId();
   }
 
