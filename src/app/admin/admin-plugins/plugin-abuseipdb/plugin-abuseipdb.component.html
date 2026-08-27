@@ -1,116 +1,92 @@
-<div class="plugin-abuseipdb-page text-gray-200">
-  <form
-    [formGroup]="form"
-    (ngSubmit)="onSubmit()"
-    class="settings-panel bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-lg">
-    <header class="panel-header flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <a routerLink="/plugins" class="back-link">
-          <i class="pi pi-arrow-left"></i>
-          Plugins
-        </a>
-        <div class="plugin-heading">
-          <span class="plugin-logo-shell">
-            <img src="https://www.abuseipdb.com/favicon.ico" alt="AbuseIPDB logo" class="plugin-logo"/>
-          </span>
-          <div>
-            <h2 class="text-xl font-semibold text-white mb-1">AbuseIPDB</h2>
-            <p class="text-sm text-gray-400 max-w-3xl">
-              Check proxy IPs against AbuseIPDB and weight the reputation score toward abuse intelligence.
-            </p>
-          </div>
+<div class="plugin-abuseipdb-page">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="settings-stage">
+    <header class="admin-context">
+      <div class="admin-context__copy">
+        <a routerLink="/plugins" class="back-link" aria-label="Back to plugins"><i class="pi pi-arrow-left" aria-hidden="true"></i></a>
+        <span class="plugin-mark"><img src="https://www.abuseipdb.com/favicon.ico" alt="AbuseIPDB logo"/></span>
+        <div>
+          <span class="context-eyebrow">Reputation intelligence</span>
+          <h1>AbuseIPDB</h1>
+          <p>Use community abuse reports to strengthen every proxy reputation score.</p>
         </div>
       </div>
 
-      <p-toggleswitch
-        inputId="abuseipdb-enabled"
-        formControlName="enabled"
-        [ariaLabel]="'Toggle AbuseIPDB plugin'">
-      </p-toggleswitch>
+      <label class="master-toggle" for="abuseipdb-enabled">
+        <span><strong>{{ pluginEnabled() ? 'Enabled' : 'Disabled' }}</strong><small>Abuse intelligence</small></span>
+        <p-toggleswitch inputId="abuseipdb-enabled" formControlName="enabled" ariaLabel="Toggle AbuseIPDB plugin"></p-toggleswitch>
+      </label>
     </header>
 
-    <div class="panel-body mt-6" [class.disabled]="!pluginEnabled()">
-      <div class="tab-stack">
-        <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-          <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h3 class="section-title">API Access</h3>
-              <p class="section-hint">Provide the AbuseIPDB API key used for the v2 check endpoint.</p>
-            </div>
+    <div class="settings-grid" [class.plugin-disabled]="!pluginEnabled()">
+      <section class="settings-card settings-card--access">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-key" aria-hidden="true"></i></span>
+          <div>
+            <h2>How should Magpie query AbuseIPDB?</h2>
+            <p>Connect the v2 API and define how far back reports should influence a proxy.</p>
           </div>
+        </div>
 
-          <div class="field-grid mt-4">
-            <div class="field-group">
-              <label class="field-label" for="abuseipdb-api-key">API Key</label>
-              <input
-                id="abuseipdb-api-key"
-                type="text"
-                pInputText
-                formControlName="api_key"
-                autocomplete="off"
-                placeholder="Enter AbuseIPDB API key"
-                class="p-inputtext-sm w-full"/>
-            </div>
+        <div class="field-group">
+          <label for="abuseipdb-api-key">AbuseIPDB API key</label>
+          <input id="abuseipdb-api-key" type="text" pInputText formControlName="api_key" autocomplete="off" placeholder="Enter your API key"/>
+          <small>The key is used only for IP check requests.</small>
+        </div>
 
-            <div class="field-group">
-              <label class="field-label" for="abuseipdb-max-age">Report max age</label>
-              <p-inputNumber
-                inputId="abuseipdb-max-age"
-                formControlName="max_age_in_days"
-                [min]="1"
-                [max]="365"
-                [showButtons]="true"
-                suffix=" days"
-                styleClass="w-full">
-              </p-inputNumber>
-            </div>
+        <div class="age-policy">
+          <span class="age-policy__icon"><i class="pi pi-history" aria-hidden="true"></i></span>
+          <div class="age-policy__copy"><strong>Report max age</strong><small>Ignore reports older than this window.</small></div>
+          <p-inputNumber inputId="abuseipdb-max-age" formControlName="max_age_in_days" [min]="1" [max]="365" [showButtons]="true" suffix=" days"></p-inputNumber>
+        </div>
+      </section>
+
+      <section class="settings-card settings-card--quota">
+        <div class="card-heading card-heading--with-badge">
+          <span class="card-icon"><i class="pi pi-chart-bar" aria-hidden="true"></i></span>
+          <div>
+            <h2>How much daily capacity remains?</h2>
+            <p>Magpie reads rate-limit headers and spreads checks across the reset window.</p>
           </div>
-        </section>
+          <span class="quota-badge">{{ quotaDisplay() }}</span>
+        </div>
 
-        <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-          <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h3 class="section-title">Daily Checks</h3>
-              <p class="section-hint">The backend updates this from AbuseIPDB rate limit headers and spreads checks across the reset window.</p>
-            </div>
-            <div class="quota-number">{{ quotaDisplay() }}</div>
+        <div class="quota-visual" [attr.aria-label]="quotaUsagePercent() + '% of daily quota used'">
+          <div class="quota-scale"><span [style.width.%]="quotaUsagePercent()"></span></div>
+          <div class="quota-legend"><span>{{ quotaUsagePercent() }}% used</span><strong>{{ quotaRemaining() ?? 'Unknown' }} remaining</strong></div>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-card">
+            <span class="meta-icon"><i class="pi pi-clock" aria-hidden="true"></i></span>
+            <div><small>Quota resets</small><strong>{{ quotaResetLabel() }}</strong></div>
           </div>
-
-          <div class="quota-bar mt-4" aria-hidden="true">
-            <span class="quota-bar__fill" [style.width.%]="quotaUsagePercent()"></span>
+          <div class="meta-card">
+            <span class="meta-icon"><i class="pi pi-verified" aria-hidden="true"></i></span>
+            <div><small>Last API check</small><strong>{{ lastCheckedLabel() }}</strong></div>
           </div>
+        </div>
 
-          <div class="meta-grid mt-5">
-            <div class="meta-info">
-              <span class="meta-label">Resets</span>
-              <span class="meta-value">{{ quotaResetLabel() }}</span>
-            </div>
-            <div class="meta-info">
-              <span class="meta-label">Last API check</span>
-              <span class="meta-value">{{ lastCheckedLabel() }}</span>
-            </div>
+        @if (lastError()) {
+          <div class="error-note" role="alert">
+            <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+            <div><strong>Latest check failed</strong><span>{{ lastError() }}</span></div>
           </div>
-
-          @if (lastError()) {
-            <div class="error-note mt-5">
-              {{ lastError() }}
-            </div>
-          }
-        </section>
-      </div>
+        }
+      </section>
     </div>
 
-    <footer class="panel-footer mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <p class="text-xs text-gray-500 max-w-xl">
-        AbuseIPDB scores are applied strongly to the proxy's overall reputation after a proxy has been checked.
-      </p>
-      <p-button
-        type="submit"
-        label="Save Settings"
-        icon="pi pi-save"
-        [disabled]="form.invalid || form.pristine"
-        styleClass="save-button">
-      </p-button>
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span class="save-state__dot" [class.is-dirty]="form.dirty" aria-hidden="true"></span>
+        <div>
+          @if (form.dirty) {
+            <strong>Unsaved AbuseIPDB changes</strong><p>New credentials and report policy apply after saving.</p>
+          } @else {
+            <strong>AbuseIPDB is up to date</strong><p>Quota health refreshes automatically every hour.</p>
+          }
+        </div>
+      </div>
+      <p-button type="submit" label="Save AbuseIPDB settings" icon="pi pi-check" [disabled]="form.invalid || form.pristine" styleClass="save-button"></p-button>
     </footer>
   </form>
 </div>

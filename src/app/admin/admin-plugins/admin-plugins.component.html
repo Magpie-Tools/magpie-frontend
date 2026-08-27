@@ -1,50 +1,94 @@
-<div class="admin-plugins-page text-gray-200">
-  <section class="plugins-panel bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-lg">
-    <header class="panel-header">
-      <h2 class="text-xl font-semibold text-white mb-1">Plugins</h2>
-      <p class="text-sm text-gray-400 max-w-3xl">
-        Select a plugin to manage its settings.
-      </p>
+<div class="admin-plugins-page">
+  <main class="settings-stage">
+    <header class="admin-context">
+      <div class="admin-context__copy">
+        <span class="context-icon"><i class="pi pi-th-large" aria-hidden="true"></i></span>
+        <div>
+          <span class="context-eyebrow">System extensions</span>
+          <h1>Plugins</h1>
+          <p>Add trusted data sources to proxy enrichment and reputation scoring.</p>
+        </div>
+      </div>
+
+      <div class="plugin-summary" aria-label="Plugin summary">
+        <span><strong>{{ enabledPluginCount }}</strong> enabled</span>
+        <span class="summary-divider" aria-hidden="true"></span>
+        <span><strong>{{ configuredPluginCount }}</strong> configured</span>
+      </div>
     </header>
 
-    <div class="plugin-grid mt-6">
+    <section class="plugin-grid" aria-label="Available plugins">
       @for (plugin of plugins; track plugin.id) {
         <article
-          class="plugin-tile"
-          [class.plugin-tile-disabled]="!isPluginEnabled(plugin.id)"
-          [class.plugin-tile-incomplete]="isPluginIncomplete(plugin.id)"
+          class="plugin-card"
+          [class.is-disabled]="!isPluginEnabled(plugin.id)"
+          [class.needs-attention]="isPluginIncomplete(plugin.id)"
           [pTooltip]="getPluginIncompleteReason(plugin.id) ?? undefined"
           tooltipPosition="top">
-          <a
-            class="plugin-main"
-            [routerLink]="plugin.route"
-            [attr.aria-label]="'Open ' + plugin.name + ' settings'">
+          <div class="plugin-card__topline">
             <span class="plugin-logo-shell">
               <img [src]="plugin.logo" [alt]="plugin.provider + ' logo'" class="plugin-logo"/>
             </span>
-          </a>
 
-          <div class="plugin-footer">
-            <a
-              class="plugin-name"
-              [routerLink]="plugin.route"
-              [attr.aria-label]="'Open ' + plugin.name + ' settings'">
-              {{ plugin.name }}
+            <div class="plugin-state">
+              <span class="state-dot" [class.is-live]="isPluginEnabled(plugin.id)" aria-hidden="true"></span>
+              @if (isPluginTogglePending(plugin.id)) {
+                Updating
+              } @else if (isPluginEnabled(plugin.id)) {
+                Enabled
+              } @else {
+                Disabled
+              }
+            </div>
+          </div>
+
+          <div class="plugin-card__copy">
+            <span class="provider-label">{{ plugin.provider }}</span>
+            <h2>{{ plugin.name }}</h2>
+            <p>{{ plugin.description }}</p>
+          </div>
+
+          <div class="capability-list" aria-label="Plugin capabilities">
+            @for (capability of plugin.capabilities; track capability) {
+              <span><i class="pi pi-check" aria-hidden="true"></i>{{ capability }}</span>
+            }
+          </div>
+
+          @if (getPluginIncompleteReason(plugin.id); as incompleteReason) {
+            <div class="attention-note">
+              <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+              <span>{{ incompleteReason }}</span>
+            </div>
+          } @else {
+            <div class="configuration-state">
+              <i [class]="isPluginConfigured(plugin.id) ? 'pi pi-lock' : 'pi pi-key'" aria-hidden="true"></i>
+              {{ isPluginConfigured(plugin.id) ? 'Credentials configured' : 'Credentials not configured' }}
+            </div>
+          }
+
+          <footer class="plugin-card__footer">
+            <a class="configure-link" [routerLink]="plugin.route" [attr.aria-label]="'Configure ' + plugin.name">
+              Configure plugin
+              <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
             </a>
 
-            <p-toggleswitch
-              class="plugin-switch"
-              styleClass="plugin-switch-control"
-              [size]="'small'"
-              [ngModel]="isPluginEnabled(plugin.id)"
-              [ngModelOptions]="{standalone: true}"
-              [disabled]="!settings() || isPluginTogglePending(plugin.id)"
-              [ariaLabel]="'Toggle ' + plugin.name"
-              (onChange)="togglePlugin(plugin.id, $event)">
-            </p-toggleswitch>
-          </div>
+            <label class="plugin-toggle-label" [for]="plugin.id + '-enabled'">
+              <span>Use plugin</span>
+              <p-toggleswitch
+                [inputId]="plugin.id + '-enabled'"
+                styleClass="plugin-switch-control"
+                [ngModel]="isPluginEnabled(plugin.id)"
+                [ngModelOptions]="{standalone: true}"
+                [disabled]="!settings() || isPluginTogglePending(plugin.id)"
+                [ariaLabel]="'Toggle ' + plugin.name"
+                (onChange)="togglePlugin(plugin.id, $event)">
+              </p-toggleswitch>
+            </label>
+          </footer>
         </article>
       }
-    </div>
-  </section>
+    </section>
+
+    <p class="instant-note"><i class="pi pi-bolt" aria-hidden="true"></i>Plugin switches apply immediately. Open a plugin to manage its credentials and operating policy.</p>
+  </main>
 </div>

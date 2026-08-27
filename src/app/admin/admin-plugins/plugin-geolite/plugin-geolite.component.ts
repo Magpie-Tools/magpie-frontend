@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Subject} from 'rxjs';
@@ -14,6 +14,7 @@ import {ToggleSwitchModule} from 'primeng/toggleswitch';
 import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
 import {NotificationService} from '../../../services/notification-service.service';
+import {gsap} from 'gsap';
 
 @Component({
   selector: 'app-plugin-geolite',
@@ -31,7 +32,7 @@ import {NotificationService} from '../../../services/notification-service.servic
   templateUrl: './plugin-geolite.component.html',
   styleUrl: './plugin-geolite.component.scss'
 })
-export class PluginGeoliteComponent implements OnInit, OnDestroy {
+export class PluginGeoliteComponent implements OnInit, AfterViewInit, OnDestroy {
   daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
   hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
   minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
@@ -40,12 +41,14 @@ export class PluginGeoliteComponent implements OnInit, OnDestroy {
   lastUpdatedLabel = 'Never';
   pluginEnabled = signal(false);
   private destroy$ = new Subject<void>();
+  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
     private notification: NotificationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private elementRef: ElementRef<HTMLElement>
   ) {
     this.form = this.fb.group({
       enabled: [false],
@@ -80,7 +83,22 @@ export class PluginGeoliteComponent implements OnInit, OnDestroy {
     this.syncControlStates();
   }
 
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    this.animationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.admin-context, .settings-card, .save-dock',
+        {opacity: 0, y: 22, scale: 0.99},
+        {opacity: 1, y: 0, scale: 1, duration: 0.68, stagger: 0.06, ease: 'power3.out', clearProps: 'transform'}
+      );
+    }, this.elementRef.nativeElement);
+  }
+
   ngOnDestroy(): void {
+    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -124,6 +142,21 @@ export class PluginGeoliteComponent implements OnInit, OnDestroy {
 
   get updateTimerGroup(): FormGroup | null {
     return this.form.get('update_timer') as FormGroup | null;
+  }
+
+  get updateCadenceLabel(): string {
+    const timer = this.form.getRawValue().update_timer ?? {};
+    const timerParts: Array<[number, string]> = [
+      [Number(timer.days ?? 0), 'day'],
+      [Number(timer.hours ?? 0), 'hour'],
+      [Number(timer.minutes ?? 0), 'minute'],
+      [Number(timer.seconds ?? 0), 'second']
+    ];
+    const parts = timerParts
+      .filter(([value]) => value > 0)
+      .map(([value, unit]) => `${value} ${unit}${value === 1 ? '' : 's'}`);
+
+    return parts.length ? parts.join(' ') : 'Continuous';
   }
 
   private updateFormWithSettings(settings: GlobalSettings): void {

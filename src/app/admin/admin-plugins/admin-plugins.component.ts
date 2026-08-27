@@ -1,4 +1,4 @@
-import {Component, computed, OnDestroy, OnInit, signal} from '@angular/core';
+import {AfterViewInit, Component, computed, ElementRef, OnDestroy, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {SettingsService} from '../../services/settings.service';
@@ -8,6 +8,7 @@ import {filter, takeUntil} from 'rxjs/operators';
 import {NotificationService} from '../../services/notification-service.service';
 import {ToggleSwitchChangeEvent, ToggleSwitchModule} from 'primeng/toggleswitch';
 import {TooltipModule} from 'primeng/tooltip';
+import {gsap} from 'gsap';
 
 @Component({
   selector: 'app-admin-plugins',
@@ -21,21 +22,27 @@ import {TooltipModule} from 'primeng/tooltip';
   templateUrl: './admin-plugins.component.html',
   styleUrl: './admin-plugins.component.scss'
 })
-export class AdminPluginsComponent implements OnInit, OnDestroy {
+export class AdminPluginsComponent implements OnInit, AfterViewInit, OnDestroy {
   plugins = [
     {
       id: 'geolite',
       name: 'GeoLite',
       provider: 'MaxMind',
       logo: 'https://media.licdn.com/dms/image/v2/C560BAQHAOUxYoh2u1Q/company-logo_200_200/company-logo_200_200/0/1671072899861/maxmind_logo?e=2147483647&v=beta&t=WWP-k6AqK1YM0ePQFUi28aEUGjpcuLPSsdKdCSS1940',
-      route: '/plugins/geolite'
+      route: '/plugins/geolite',
+      icon: 'pi pi-map-marker',
+      description: 'Enrich every proxy with country, city, and network data from MaxMind.',
+      capabilities: ['Location data', 'Scheduled updates', 'Local database']
     },
     {
       id: 'abuseipdb',
       name: 'AbuseIPDB',
       provider: 'AbuseIPDB',
       logo: 'https://www.abuseipdb.com/favicon.ico',
-      route: '/plugins/abuseipdb'
+      route: '/plugins/abuseipdb',
+      icon: 'pi pi-shield',
+      description: 'Add community abuse intelligence to proxy reputation scoring.',
+      capabilities: ['IP reputation', 'Quota tracking', 'Age policy']
     }
   ];
 
@@ -46,10 +53,12 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
   }));
   pendingPluginIds = signal<ReadonlySet<string>>(new Set());
   private destroy$ = new Subject<void>();
+  private animationContext?: gsap.Context;
 
   constructor(
     private settingsService: SettingsService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private elementRef: ElementRef<HTMLElement>
   ) {}
 
   ngOnInit(): void {
@@ -63,9 +72,42 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
       });
   }
 
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    this.animationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.admin-context, .plugin-card',
+        {opacity: 0, y: 22, scale: 0.99},
+        {opacity: 1, y: 0, scale: 1, duration: 0.68, stagger: 0.07, ease: 'power3.out', clearProps: 'transform'}
+      );
+    }, this.elementRef.nativeElement);
+  }
+
   ngOnDestroy(): void {
+    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  get enabledPluginCount(): number {
+    return this.plugins.filter(plugin => this.isPluginEnabled(plugin.id)).length;
+  }
+
+  get configuredPluginCount(): number {
+    return this.plugins.filter(plugin => this.isPluginConfigured(plugin.id)).length;
+  }
+
+  isPluginConfigured(pluginId: string): boolean {
+    if (pluginId === 'geolite') {
+      return !!this.settings()?.plugins?.geolite?.api_key?.trim();
+    }
+    if (pluginId === 'abuseipdb') {
+      return !!this.settings()?.plugins?.abuseipdb?.api_key?.trim();
+    }
+    return false;
   }
 
   isPluginEnabled(pluginId: string): boolean {
