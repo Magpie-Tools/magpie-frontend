@@ -1,173 +1,163 @@
-<div class="admin-blacklist-page text-gray-200">
-  <form [formGroup]="form" class="settings-panel bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-lg">
-    <header class="panel-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h2 class="text-xl font-semibold text-white mb-1">Blacklist Sources</h2>
-        <p class="text-sm text-gray-400 max-w-3xl">
-          Control which external blocklists are ingested and how often they are refreshed. New sources trigger an immediate sweep so
-          blacklisted IPs are removed from every account.
-        </p>
+<div class="admin-blacklist-page">
+  <form [formGroup]="form" class="settings-stage" (ngSubmit)="onSubmit()">
+    <header class="admin-context">
+      <div class="admin-context__copy">
+        <span class="context-icon"><i class="pi pi-ban" aria-hidden="true"></i></span>
+        <div>
+          <span class="context-eyebrow">System defaults</span>
+          <h1>Global blacklist</h1>
+          <p>Keep blocked networks and websites out of every workspace.</p>
+        </div>
       </div>
+      <div class="scope-badge"><span aria-hidden="true"></span>Applies globally</div>
     </header>
 
-    <div class="panel-body mt-6">
-      <div class="tab-stack">
-        <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-          <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h3 class="section-title">Refresh Cadence</h3>
-              <p class="section-hint">Set the schedule used to download blacklist sources and purge matching proxies.</p>
+    <div class="settings-grid">
+      <section class="settings-card settings-card--cadence">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-clock" aria-hidden="true"></i></span>
+          <div class="card-heading__copy">
+            <h2>When should lists refresh?</h2>
+            <p>Set the interval between blacklist downloads and proxy purges.</p>
+          </div>
+        </div>
+
+        <div class="cadence-summary"><span>Every</span><strong>{{ blacklistCadenceLabel }}</strong></div>
+
+        <div class="timer-grid" formGroupName="blacklist_timer">
+          <div class="timer-field">
+            <label for="blacklist-days">Days</label>
+            <p-select inputId="blacklist-days" [options]="daysList" formControlName="days" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+          </div>
+          <div class="timer-field">
+            <label for="blacklist-hours">Hours</label>
+            <p-select inputId="blacklist-hours" [options]="hoursList" formControlName="hours" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+          </div>
+          <div class="timer-field">
+            <label for="blacklist-minutes">Minutes</label>
+            <p-select inputId="blacklist-minutes" [options]="minutesList" formControlName="minutes" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+          </div>
+          <div class="timer-field">
+            <label for="blacklist-seconds">Seconds</label>
+            <p-select inputId="blacklist-seconds" [options]="secondsList" formControlName="seconds" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-card settings-card--enforcement">
+        <div class="enforcement-copy">
+          <div class="card-heading">
+            <span class="card-icon"><i class="pi pi-shield" aria-hidden="true"></i></span>
+            <div class="card-heading__copy">
+              <h2>What happens after a match?</h2>
+              <p>A refresh checks every managed proxy and stops blocked hosts from entering the system again.</p>
             </div>
           </div>
 
-          <div class="timer-grid mt-4" formGroupName="blacklist_timer">
-            <div class="timer-field">
-              <label class="field-label">Days</label>
-              <p-select
-                [options]="daysList"
-                formControlName="days"
-                optionLabel="label"
-                optionValue="value"
-                class="w-full">
-              </p-select>
+          <div class="enforcement-path" aria-label="Blacklist enforcement path">
+            <div class="enforcement-step">
+              <span class="enforcement-node"><i class="pi pi-download" aria-hidden="true"></i></span>
+              <div><strong>Download</strong><small>Fetch every source</small></div>
             </div>
-            <div class="timer-field">
-              <label class="field-label">Hours</label>
-              <p-select
-                [options]="hoursList"
-                formControlName="hours"
-                optionLabel="label"
-                optionValue="value"
-                class="w-full">
-              </p-select>
+            <span class="enforcement-line" aria-hidden="true"></span>
+            <div class="enforcement-step">
+              <span class="enforcement-node"><i class="pi pi-search" aria-hidden="true"></i></span>
+              <div><strong>Match</strong><small>Compare IPs and CIDRs</small></div>
             </div>
-            <div class="timer-field">
-              <label class="field-label">Minutes</label>
-              <p-select
-                [options]="minutesList"
-                formControlName="minutes"
-                optionLabel="label"
-                optionValue="value"
-                class="w-full">
-              </p-select>
-            </div>
-            <div class="timer-field">
-              <label class="field-label">Seconds</label>
-              <p-select
-                [options]="secondsList"
-                formControlName="seconds"
-                optionLabel="label"
-                optionValue="value"
-                class="w-full">
-              </p-select>
+            <span class="enforcement-line" aria-hidden="true"></span>
+            <div class="enforcement-step">
+              <span class="enforcement-node enforcement-node--danger"><i class="pi pi-times" aria-hidden="true"></i></span>
+              <div><strong>Purge</strong><small>Remove matching proxies</small></div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-          <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h3 class="section-title">Blacklist Sources</h3>
-              <p class="section-hint">
-                Add URLs that return IP lists. Each save instantly scrapes new entries and removes any matching proxies from every user.
-              </p>
-            </div>
+        <div class="enforcement-visual" aria-hidden="true">
+          <span class="enforcement-orbit enforcement-orbit--outer"></span>
+          <span class="enforcement-orbit enforcement-orbit--inner"></span>
+          <span class="enforcement-core"><i class="pi pi-ban"></i></span>
+        </div>
+      </section>
+
+      <section class="settings-card settings-card--sources">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-cloud-download" aria-hidden="true"></i></span>
+          <div class="card-heading__copy">
+            <h2>IP blacklist sources</h2>
+            <p>Add plain-text feeds containing IPv4, IPv6, or CIDR entries.</p>
           </div>
+          <span class="card-count">{{ configuredSourceCount }} {{ configuredSourceCount === 1 ? 'source' : 'sources' }}</span>
+        </div>
 
-          <div class="mt-4" formArrayName="blacklist_sources">
-            <div class="source-list flex flex-col gap-4">
-              @for (source of sources.controls; track source; let i = $index) {
-                <div class="source-row flex items-start gap-3" [attr.data-index]="i">
-                  <div class="field-group flex-1">
-                    <label class="field-label" for="blacklist-source-{{i}}">Source URL</label>
-                    <input
-                      id="blacklist-source-{{i}}"
-                      type="url"
-                      [formControlName]="i"
-                      pInputText
-                      class="p-inputtext-sm w-full"
-                      placeholder="https://example.com/drop.txt"/>
-                  </div>
-                  @if (sources.length > 1) {
-                    <button
-                      type="button"
-                      class="icon-button remove mt-6"
-                      (click)="removeSource(i)">
-                      <i class="pi pi-trash"></i>
-                    </button>
-                  }
+        <div formArrayName="blacklist_sources" class="entry-editor">
+          <div class="entry-list">
+            @for (source of sources.controls; track source; let i = $index) {
+              <div class="entry-row" [attr.data-index]="i">
+                <span class="entry-index">{{ i + 1 }}</span>
+                <div class="field-group">
+                  <label class="field-label" for="blacklist-source-{{ i }}">Source URL</label>
+                  <input id="blacklist-source-{{ i }}" type="url" [formControlName]="i" pInputText placeholder="https://example.com/drop.txt" />
                 </div>
-              }
-            </div>
-            <div class="mt-3">
-              <button type="button" class="chip-button" (click)="addSource()">
-                <i class="pi pi-plus"></i>
-                <span>Add Source</span>
-              </button>
-            </div>
-            <small class="hint-text block mt-2">Accepted sources return plain text with IPv4 or IPv6 addresses and CIDRs. Provider hostnames are not resolved for IP blacklist matching.</small>
-          </div>
-        </section>
-
-        <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-          <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h3 class="section-title">Website Blacklist</h3>
-              <p class="section-hint">
-                Domains listed here are never contacted&mdash;they cannot be used as judges, scrape sources, or blacklist feeds.
-              </p>
-            </div>
+                @if (sources.length > 1) {
+                  <button type="button" class="icon-button icon-button--remove" (click)="removeSource(i)" [attr.aria-label]="'Remove blacklist source ' + (i + 1)">
+                    <i class="pi pi-trash" aria-hidden="true"></i>
+                  </button>
+                }
+              </div>
+            }
           </div>
 
-          <div class="mt-4" formArrayName="website_blacklist">
-            <div class="source-list flex flex-col gap-4">
-              @for (site of blockedSites.controls; track site; let i = $index) {
-                <div class="source-row flex items-start gap-3" [attr.data-index]="i">
-                  <div class="field-group flex-1">
-                    <label class="field-label" for="blocked-site-{{i}}">Website</label>
-                    <input
-                      id="blocked-site-{{i}}"
-                      type="text"
-                      [formControlName]="i"
-                      pInputText
-                      class="p-inputtext-sm w-full"
-                      placeholder="example.com or https://example.com"/>
-                  </div>
-                  @if (blockedSites.length > 1) {
-                    <button
-                      type="button"
-                      class="icon-button remove mt-6"
-                      (click)="removeBlockedSite(i)">
-                      <i class="pi pi-trash"></i>
-                    </button>
-                  }
+          <button type="button" class="add-button" (click)="addSource()"><i class="pi pi-plus" aria-hidden="true"></i>Add source</button>
+          <p class="entry-note">Provider hostnames are not resolved for IP matching. New feeds are scraped as soon as you save.</p>
+        </div>
+      </section>
+
+      <section class="settings-card settings-card--websites">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-globe" aria-hidden="true"></i></span>
+          <div class="card-heading__copy">
+            <h2>Website blacklist</h2>
+            <p>Prevent specific hosts and their subdomains from receiving any request.</p>
+          </div>
+          <span class="card-count">{{ blockedSiteCount }} {{ blockedSiteCount === 1 ? 'website' : 'websites' }}</span>
+        </div>
+
+        <div formArrayName="website_blacklist" class="entry-editor">
+          <div class="entry-list">
+            @for (site of blockedSites.controls; track site; let i = $index) {
+              <div class="entry-row" [attr.data-index]="i">
+                <span class="entry-index">{{ i + 1 }}</span>
+                <div class="field-group">
+                  <label class="field-label" for="blocked-site-{{ i }}">Website</label>
+                  <input id="blocked-site-{{ i }}" type="text" [formControlName]="i" pInputText placeholder="example.com or https://example.com" />
                 </div>
-              }
-            </div>
-            <div class="mt-3">
-              <button type="button" class="chip-button" (click)="addBlockedSite()">
-                <i class="pi pi-plus"></i>
-                <span>Add Website</span>
-              </button>
-            </div>
-            <small class="hint-text block mt-2">Entries are matched by hostname (including subdomains) and take effect immediately.</small>
+                @if (blockedSites.length > 1) {
+                  <button type="button" class="icon-button icon-button--remove" (click)="removeBlockedSite(i)" [attr.aria-label]="'Remove blocked website ' + (i + 1)">
+                    <i class="pi pi-trash" aria-hidden="true"></i>
+                  </button>
+                }
+              </div>
+            }
           </div>
-        </section>
-      </div>
+
+          <button type="button" class="add-button" (click)="addBlockedSite()"><i class="pi pi-plus" aria-hidden="true"></i>Add website</button>
+          <p class="entry-note">Blocked hosts cannot act as judges, scrape sources, or blacklist feeds.</p>
+        </div>
+      </section>
     </div>
 
-    <footer class="panel-footer mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <p class="text-xs text-gray-500 max-w-xl">
-        Saving updates the cadence and immediately scrapes newly added sources to keep blacklisted IPs out of every account.
-      </p>
-      <p-button
-        type="button"
-        label="Save Settings"
-        icon="pi pi-save"
-        (onClick)="onSubmit()"
-        [disabled]="!form.dirty"
-        styleClass="save-button">
-      </p-button>
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span class="save-state__dot" [class.is-dirty]="form.dirty" aria-hidden="true"></span>
+        <div>
+          @if (form.dirty) {
+            <strong>Unsaved global changes</strong><p>Saving new IP feeds starts an immediate scrape and purge.</p>
+          } @else {
+            <strong>Global blacklist is up to date</strong><p>Changes will appear here before you save.</p>
+          }
+        </div>
+      </div>
+      <p-button type="submit" label="Save global blacklist" icon="pi pi-check" [disabled]="!form.dirty || form.invalid" styleClass="save-button"></p-button>
     </footer>
   </form>
 </div>

@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {SettingsService} from '../../services/settings.service';
 import {GlobalSettings} from '../../models/GlobalSettings';
@@ -9,6 +9,7 @@ import {SelectModule} from 'primeng/select';
 import {InputTextModule} from 'primeng/inputtext';
 import {ButtonModule} from 'primeng/button';
 import {NotificationService} from '../../services/notification-service.service';
+import {gsap} from 'gsap';
 
 @Component({
   selector: 'app-admin-blacklist',
@@ -22,7 +23,7 @@ import {NotificationService} from '../../services/notification-service.service';
   templateUrl: './admin-blacklist.component.html',
   styleUrl: './admin-blacklist.component.scss'
 })
-export class AdminBlacklistComponent implements OnInit, OnDestroy {
+export class AdminBlacklistComponent implements OnInit, AfterViewInit, OnDestroy {
   daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
   hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
   minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
@@ -30,11 +31,13 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
 
   form: FormGroup;
   private destroy$ = new Subject<void>();
+  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private elementRef: ElementRef<HTMLElement>
   ) {
     this.form = this.fb.group({
       blacklist_timer: this.fb.group({
@@ -57,7 +60,37 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
       .subscribe(settings => this.applySettings(settings));
   }
 
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const host = this.elementRef.nativeElement;
+    this.animationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.admin-context, .settings-card, .save-dock',
+        {opacity: 0, y: 22, scale: 0.99},
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.68,
+          stagger: 0.055,
+          ease: 'power3.out',
+          clearProps: 'transform',
+        }
+      );
+
+      gsap.fromTo(
+        '.enforcement-node',
+        {opacity: 0.15, scale: 0.78},
+        {opacity: 1, scale: 1, duration: 0.62, stagger: 0.12, delay: 0.18, ease: 'back.out(1.45)'}
+      );
+    }, host);
+  }
+
   ngOnDestroy(): void {
+    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -68,6 +101,29 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
 
   get blockedSites(): FormArray<FormControl<string>> {
     return this.form.get('website_blacklist') as FormArray<FormControl<string>>;
+  }
+
+  get blacklistCadenceLabel(): string {
+    const timer = this.form.get('blacklist_timer')?.value ?? {};
+    const timerParts: Array<[number, string]> = [
+      [Number(timer.days ?? 0), 'day'],
+      [Number(timer.hours ?? 0), 'hour'],
+      [Number(timer.minutes ?? 0), 'minute'],
+      [Number(timer.seconds ?? 0), 'second'],
+    ];
+    const parts = timerParts
+      .filter(([value]) => value > 0)
+      .map(([value, unit]) => `${value} ${unit}${value === 1 ? '' : 's'}`);
+
+    return parts.length ? parts.join(' ') : 'Continuous';
+  }
+
+  get configuredSourceCount(): number {
+    return this.sources.controls.filter(control => control.value.trim().length > 0).length;
+  }
+
+  get blockedSiteCount(): number {
+    return this.blockedSites.controls.filter(control => control.value.trim().length > 0).length;
   }
 
   addSource(): void {
