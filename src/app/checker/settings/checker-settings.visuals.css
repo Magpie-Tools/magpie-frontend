@@ -1,0 +1,143 @@
+.p-select-overlay {
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 0.9rem !important;
+  background: rgba(12, 12, 14, 0.98) !important;
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(16px);
+}
+
+.p-select-overlay .p-select-option {
+  margin: 0.25rem;
+  border-radius: 0.65rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.8rem;
+}
+
+.p-select-overlay .p-select-option.p-select-option-selected {
+  background: rgba(var(--theme-primary-500-rgb), 0.2);
+  color: var(--theme-primary-200);
+}
+
+.p-select-overlay .transport-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.p-select-overlay .transport-chip {
+  padding: 0.12rem 0.42rem;
+  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.25);
+  border-radius: 999px;
+  background: rgba(var(--theme-primary-500-rgb), 0.1);
+  color: var(--theme-primary-200);
+  font-size: 0.56rem;
+}
+
+@container checker-settings (max-width: 1040px) {
+  .checker-settings-page .settings-stage .settings-card--protocols,
+  .checker-settings-page .settings-stage .settings-card--transport,
+  .checker-settings-page .settings-stage .settings-card--performance,
+  .checker-settings-page .settings-stage .settings-card--validation {
+    grid-column: span 6;
+  }
+
+  .checker-settings-page .settings-stage .settings-card--cleanup {
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 0.7fr);
+  }
+
+  .checker-settings-page .settings-stage .protocol-accordion {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checker-settings-page .settings-stage .protocol-choice,
+  .checker-settings-page .settings-stage .protocol-choice.is-active {
+    min-height: 7.8rem;
+  }
+
+  .checker-settings-page .settings-stage .protocol-choice__copy small,
+  .checker-settings-page .settings-stage .protocol-choice.is-active .protocol-choice__copy small {
+    max-height: 2rem;
+    opacity: 1;
+    transform: none;
+  }
+
+  .checker-settings-page .settings-stage .performance-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container checker-settings (max-width: 760px) {
+  .checker-settings-page .settings-stage.settings-stage {
+    border-radius: 1.25rem;
+  }
+
+  .checker-settings-page .settings-stage .settings-card--protocols,
+  .checker-settings-page .settings-stage .settings-card--transport,
+  .checker-settings-page .settings-stage .settings-card--performance,
+  .checker-settings-page .settings-stage .settings-card--validation,
+  .checker-settings-page .settings-stage .settings-card--cleanup {
+    grid-column: 1 / -1;
+  }
+
+  .checker-settings-page .settings-stage .settings-card--cleanup {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container checker-settings (max-width: 520px) {
+  .checker-settings-page .settings-stage.settings-stage {
+    padding: 0.8rem;
+  }
+
+  .checker-settings-page .settings-stage .settings-card {
+    border-radius: 1.05rem;
+  }
+
+  .checker-settings-page .settings-stage .card-heading {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .checker-settings-page .settings-stage .card-count {
+    grid-column: 2;
+    width: fit-content;
+  }
+
+  .checker-settings-page .settings-stage .protocol-accordion {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .checker-settings-page .settings-stage .protocol-choice,
+  .checker-settings-page .settings-stage .protocol-choice.is-active {
+    min-height: 6.8rem;
+  }
+
+  .checker-settings-page .settings-stage .decision-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .checker-settings-page .settings-stage .decision-row app-checkbox {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .checker-settings-page .settings-stage .save-dock {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .checker-settings-page .settings-stage .save-settings-button.p-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checker-settings-page .settings-stage .settings-card,
+  .checker-settings-page .settings-stage .protocol-choice,
+  .checker-settings-page .settings-stage .decision-row,
+  .checker-settings-page .settings-stage .decision-row__icon,
+  .checker-settings-page .settings-stage .protocol-choice__icon {
+    transition-duration: 0.01ms !important;
+  }
+}

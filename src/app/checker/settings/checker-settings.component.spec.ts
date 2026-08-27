@@ -60,6 +60,13 @@ describe('CheckerSettingsComponent', () => {
     expect(component.settingsForm.getRawValue().AutoRemoveFailureThreshold).toBe(3);
   });
 
+  it('starts with the settings grid instead of a hero', () => {
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('.settings-hero')).toBeNull();
+    expect(element.querySelector('.settings-stage > .settings-grid')).not.toBeNull();
+  });
+
   it('normalizes auto-remove threshold before saving', () => {
     const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
     component.settingsForm.patchValue({
@@ -70,5 +77,22 @@ describe('CheckerSettingsComponent', () => {
     component.onSubmit();
 
     expect(service.lastPayload.AutoRemoveFailureThreshold).toBe(1);
+  });
+
+  it('toggles protocol choices through the card controls', () => {
+    expect(component.selectedProtocolCount).toBe(2);
+
+    component.toggleProtocol('SOCKS4Protocol');
+
+    expect(component.settingsForm.value.SOCKS4Protocol).toBeTrue();
+    expect(component.selectedProtocolCount).toBe(3);
+    expect(component.settingsForm.dirty).toBeTrue();
+  });
+
+  it('summarizes the configured retry window', () => {
+    component.settingsForm.patchValue({Retries: 2, Timeout: 7500});
+
+    expect(component.totalAttempts).toBe(3);
+    expect(component.configuredAttemptWindow).toBe('23 sec');
   });
 });

@@ -1,194 +1,268 @@
-<div class="checker-settings-page text-gray-200" [formGroup]="settingsForm">
-  <section class="settings-panel bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-lg">
-    <header class="panel-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h2 class="text-xl font-semibold text-white mb-1">Checker Preferences</h2>
-        <p class="text-sm text-gray-400 max-w-2xl">
-          Personalize how the proxy checker behaves. Toggle which proxy protocols to test, control performance
-          thresholds, and decide whether SOCKS proxies should use HTTPS during validation.
-        </p>
-      </div>
-    </header>
-
-    <div class="panel-body flex flex-col gap-6">
-      <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-        <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h3 class="section-title">Protocols</h3>
-            <p class="section-hint">Choose the proxy types the checker will validate during a run.</p>
+<div class="checker-settings-page" [formGroup]="settingsForm">
+  <section class="settings-stage">
+    <div class="settings-grid">
+      <section class="settings-card settings-card--protocols">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-compass" aria-hidden="true"></i></span>
+          <div class="card-heading__copy">
+            <h2>What should Magpie test?</h2>
+            <p>Turn on every proxy type you want included in a checker run.</p>
           </div>
+          <span class="card-count">{{ selectedProtocolCount }} active</span>
         </div>
-        <div class="protocol-grid">
-          <div class="protocol-option">
-            <app-checkbox label="HTTP" formControlName="HTTPProtocol"></app-checkbox>
-          </div>
-          <div class="protocol-option">
-            <app-checkbox label="HTTPS" formControlName="HTTPSProtocol"></app-checkbox>
-          </div>
-          <div class="protocol-option">
-            <app-checkbox label="SOCKS4" formControlName="SOCKS4Protocol"></app-checkbox>
-          </div>
-          <div class="protocol-option">
-            <app-checkbox label="SOCKS5" formControlName="SOCKS5Protocol"></app-checkbox>
-          </div>
+
+        <div class="protocol-accordion" role="group" aria-label="Proxy protocols">
+          @for (protocol of protocolOptions; track protocol.control) {
+            <button
+              type="button"
+              class="protocol-choice"
+              [class.is-active]="settingsForm.get(protocol.control)?.value"
+              [attr.aria-pressed]="!!settingsForm.get(protocol.control)?.value"
+              [disabled]="!workspaces.canOperate()"
+              (click)="toggleProtocol(protocol.control)"
+            >
+              <span class="protocol-choice__icon"><i [class]="protocol.icon" aria-hidden="true"></i></span>
+              <span class="protocol-choice__copy">
+                <strong>{{ protocol.label }}</strong>
+                <small>{{ protocol.description }}</small>
+              </span>
+              <span class="protocol-choice__state">
+                {{ settingsForm.get(protocol.control)?.value ? 'On' : 'Off' }}
+              </span>
+            </button>
+          }
         </div>
       </section>
 
-      <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-        <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h3 class="section-title">Transport Layer</h3>
-            <p class="section-hint">Select the network transport used during proxy validation.</p>
+      <section class="settings-card settings-card--transport">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-directions" aria-hidden="true"></i></span>
+          <div class="card-heading__copy">
+            <h2>How should requests travel?</h2>
+            <p>Choose the transport Magpie uses to reach each proxy.</p>
           </div>
         </div>
-        <div class="field-grid">
-          <div class="field-group">
-            <label class="field-label" for="transport-protocol">
-              Transport protocol
-              <app-tooltip [text]="transportProtocolTooltip"></app-tooltip>
-            </label>
-            <p-select
-              inputId="transport-protocol"
-              [options]="transportProtocolOptions"
-              formControlName="TransportProtocol"
-              optionLabel="label"
-              optionValue="value"
-              class="w-full"
-              [appendTo]="'body'"
-              [scrollHeight]="'200px'"
-              placeholder="Select transport">
-              <ng-template pTemplate="selectedItem" let-option>
-                @if (option) {
-                  <span class="transport-option">
-                    <span>{{ option.label ?? option }}</span>
-                    @if ((option.value ?? option) === 'tcp') {
-                      <p-chip class="transport-chip">Default</p-chip>
-                    }
-                  </span>
-                }
-              </ng-template>
-              <ng-template pTemplate="item" let-option>
-                <div class="transport-option">
+
+        <div class="field-group transport-field">
+          <label class="field-label" for="transport-protocol">
+            Transport protocol
+            <app-tooltip [text]="transportProtocolTooltip"></app-tooltip>
+          </label>
+          <p-select
+            inputId="transport-protocol"
+            [options]="transportProtocolOptions"
+            formControlName="TransportProtocol"
+            optionLabel="label"
+            optionValue="value"
+            class="w-full"
+            [appendTo]="'body'"
+            [scrollHeight]="'200px'"
+            placeholder="Select transport"
+          >
+            <ng-template pTemplate="selectedItem" let-option>
+              @if (option) {
+                <span class="transport-option">
                   <span>{{ option.label ?? option }}</span>
                   @if ((option.value ?? option) === 'tcp') {
                     <p-chip class="transport-chip">Default</p-chip>
                   }
-                </div>
-              </ng-template>
-            </p-select>
-            <p class="field-hint">HTTP/3 and QUIC require proxies that speak HTTP/3 and HTTPS judges.</p>
-          </div>
+                </span>
+              }
+            </ng-template>
+            <ng-template pTemplate="item" let-option>
+              <div class="transport-option">
+                <span>{{ option.label ?? option }}</span>
+                @if ((option.value ?? option) === 'tcp') {
+                  <p-chip class="transport-chip">Default</p-chip>
+                }
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+
+        <div class="transport-explainer">
+          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          @switch (settingsForm.get('TransportProtocol')?.value) {
+            @case ('quic') {
+              <p><strong>QUIC</strong> uses HTTP/3 with datagram support. Your proxy and judge both need HTTP/3 support.</p>
+            }
+            @case ('http3') {
+              <p><strong>HTTP/3</strong> uses reliable QUIC streams. Your proxy and judge both need HTTP/3 support.</p>
+            }
+            @default {
+              <p><strong>TCP</strong> has the broadest compatibility and works with standard HTTP judges.</p>
+            }
+          }
         </div>
       </section>
 
-      <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-        <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h3 class="section-title">Performance Tuning</h3>
-            <p class="section-hint">Fine-tune the retry and timeout thresholds to match your infrastructure.</p>
+      <section class="settings-card settings-card--performance">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-gauge" aria-hidden="true"></i></span>
+          <div class="card-heading__copy">
+            <h2>How patient should a check be?</h2>
+            <p>Balance slower networks against quicker failure detection.</p>
           </div>
         </div>
-        <div class="field-grid">
+
+        <div class="performance-fields">
           <div class="field-group">
             <label class="field-label" for="retries">Retries</label>
-            <input
-              id="retries"
-              formControlName="Retries"
-              type="number"
-              pInputText
-              class="p-inputtext-sm w-full"
-              placeholder="2"
-            />
-            <p class="field-hint">How many times to re-attempt before marking a proxy as failed.</p>
+            <div class="input-with-unit">
+              <input
+                id="retries"
+                formControlName="Retries"
+                type="number"
+                pInputText
+                inputmode="numeric"
+                placeholder="2"
+                min="0"
+              />
+              <span>after failure</span>
+            </div>
+            <p class="field-hint">Extra attempts after the first request fails.</p>
           </div>
+
           <div class="field-group">
-            <label class="field-label" for="timeout">Timeout (ms)</label>
+            <label class="field-label" for="timeout">Timeout</label>
+            <div class="input-with-unit">
+              <input
+                id="timeout"
+                formControlName="Timeout"
+                type="number"
+                pInputText
+                inputmode="numeric"
+                placeholder="7500"
+                min="1"
+              />
+              <span>milliseconds</span>
+            </div>
+            <p class="field-hint">Maximum wait for each attempt.</p>
+          </div>
+        </div>
+
+        <div class="performance-summary">
+          <span class="performance-summary__value">{{ totalAttempts }}</span>
+          <p>
+            <strong>attempts at most</strong>
+            <span>Up to {{ configuredAttemptWindow }} of configured wait time per proxy.</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="settings-card settings-card--validation">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-shield" aria-hidden="true"></i></span>
+          <div class="card-heading__copy">
+            <h2>SOCKS validation</h2>
+            <p>Control which judges receive SOCKS4 and SOCKS5 requests.</p>
+          </div>
+        </div>
+
+        <div
+          class="decision-row"
+          [class.is-active]="settingsForm.get('UseHttpsForSocks')?.value"
+        >
+          <div class="decision-row__icon"><i class="pi pi-lock" aria-hidden="true"></i></div>
+          <div class="decision-row__copy">
+            <strong>Use HTTPS judges for SOCKS</strong>
+            <p>SOCKS4 and SOCKS5 checks will use your HTTPS judge list.</p>
+            <span>
+              {{ settingsForm.get('UseHttpsForSocks')?.value ? 'HTTPS judges active' : 'Standard judge routing' }}
+            </span>
+          </div>
+          <app-checkbox label="Enabled" formControlName="UseHttpsForSocks"></app-checkbox>
+        </div>
+      </section>
+
+      <section class="settings-card settings-card--cleanup">
+        <div class="cleanup-main">
+          <div class="card-heading">
+            <span class="card-icon"><i class="pi pi-filter" aria-hidden="true"></i></span>
+            <div class="card-heading__copy">
+              <h2>Pause persistently failing proxies</h2>
+              <p>Keep a noisy proxy out of future runs after a consecutive failure streak.</p>
+            </div>
+          </div>
+
+          <div
+            class="decision-row cleanup-toggle"
+            [class.is-active]="settingsForm.get('AutoRemoveFailingProxies')?.value"
+          >
+            <div class="decision-row__icon"><i class="pi pi-pause" aria-hidden="true"></i></div>
+            <div class="decision-row__copy">
+              <strong>Automatic pause</strong>
+              <p>A successful check resets the failure streak. A paused proxy stays in your managed list.</p>
+              <span>
+                {{ settingsForm.get('AutoRemoveFailingProxies')?.value ? 'Failure tracking active' : 'No automatic action' }}
+              </span>
+            </div>
+            <app-checkbox label="Enabled" formControlName="AutoRemoveFailingProxies"></app-checkbox>
+          </div>
+        </div>
+
+        <div
+          class="cleanup-threshold"
+          [class.is-disabled]="!settingsForm.get('AutoRemoveFailingProxies')?.value"
+        >
+          <div class="cleanup-threshold__topline">
+            <span>Failure threshold</span>
+            <i class="pi pi-arrow-right" aria-hidden="true"></i>
+            <strong>{{ cleanupThreshold }}</strong>
+          </div>
+
+          <label class="field-label" for="failure-threshold">Consecutive failed checks</label>
+          <div class="input-with-unit">
             <input
-              id="timeout"
-              formControlName="Timeout"
+              id="failure-threshold"
+              formControlName="AutoRemoveFailureThreshold"
               type="number"
               pInputText
-              class="p-inputtext-sm w-full"
-              placeholder="7500"
+              inputmode="numeric"
+              placeholder="3"
+              min="1"
+              max="255"
             />
-            <p class="field-hint">Maximum wait time per attempt before moving on from a proxy.</p>
+            <span>failures</span>
           </div>
-        </div>
-      </section>
 
-      <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-        <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h3 class="section-title">Validation Options</h3>
-<!--            <p class="section-hint">Extend HTTPS checks to SOCKS proxies when you need extra certainty.</p>-->
+          <div class="failure-path" aria-hidden="true">
+            <span class="failure-path__start"><i class="pi pi-server"></i></span>
+            <span class="failure-path__line"></span>
+            <span class="failure-path__failure"><i class="pi pi-times"></i></span>
+            <span class="failure-path__line"></span>
+            <span class="failure-path__pause"><i class="pi pi-pause"></i></span>
           </div>
-        </div>
-        <div class="flex justify-between items-center flex-col gap-3 sm:flex-row">
-          <div class="flex-1">
-            <p class="field-label">Use HTTPS for SOCKS</p>
-            <p class="field-hint">Will use HTTPS judges for SOCKS4/5 proxy validation.</p>
-          </div>
-          <div class="protocol-option self-start">
-            <app-checkbox label="Enable" formControlName="UseHttpsForSocks"></app-checkbox>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-        <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h3 class="section-title">Automatic Cleanup</h3>
-            <p class="section-hint">
-              Let Magpie prune noisy proxies by removing them after they fail a set number of consecutive checks.
-            </p>
-          </div>
-        </div>
-
-        <div class="auto-remove-toggle flex justify-between items-center flex-col gap-3 sm:flex-row">
-          <div class="flex-1">
-            <p class="field-label">Auto-pause failing proxies</p>
-            <p class="field-hint">
-              When enabled, proxies that fail back-to-back checks will be removed from your list automatically.
-            </p>
-          </div>
-          <div class="protocol-option self-start">
-            <app-checkbox label="Enable" formControlName="AutoRemoveFailingProxies"></app-checkbox>
-          </div>
-        </div>
-
-        <div class="threshold-field field-group mt-5 sm:max-w-xs">
-          <label class="field-label" for="failure-threshold">Failure threshold</label>
-          <input
-            id="failure-threshold"
-            formControlName="AutoRemoveFailureThreshold"
-            type="number"
-            pInputText
-            class="p-inputtext-sm w-full"
-            placeholder="3"
-            min="1"
-            max="255"
-          />
-          <p class="field-hint">Magpie pauses a managed proxy after it fails this many checks in a row.</p>
+          <p class="field-hint">The proxy pauses when its streak reaches {{ cleanupThreshold }}.</p>
         </div>
       </section>
     </div>
 
-    <footer class="panel-footer flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mt-6">
-      <p class="text-xs text-gray-500 max-w-xl">
-        @if (workspaces.canOperate()) {
-          Settings will be saved and applied to new checker sessions.
-        } @else {
-          Your viewer role can inspect these settings but cannot change them.
-        }
-      </p>
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span class="save-state__dot" [class.is-dirty]="settingsForm.dirty" aria-hidden="true"></span>
+        <div>
+          @if (!workspaces.canOperate()) {
+            <strong>Viewer access</strong>
+            <p>You can inspect these settings, but you cannot change them.</p>
+          } @else if (settingsForm.dirty) {
+            <strong>Unsaved changes</strong>
+            <p>Save when these settings look right.</p>
+          } @else {
+            <strong>Everything is up to date</strong>
+            <p>Changes will appear here before you save.</p>
+          }
+        </div>
+      </div>
+
       <p-button
         type="button"
-        label="Save Settings"
+        label="Save checker settings"
+        icon="pi pi-check"
         (onClick)="onSubmit()"
-        [disabled]="!workspaces.canOperate() || !settingsForm.dirty"
+        [disabled]="!workspaces.canOperate() || !settingsForm.dirty || settingsForm.invalid"
         styleClass="save-settings-button"
-      >
-      </p-button>
+      ></p-button>
     </footer>
   </section>
 </div>
