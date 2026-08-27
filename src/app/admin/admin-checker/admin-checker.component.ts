@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
 import {CheckboxComponent} from "../../checkbox/checkbox.component";
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 
@@ -13,6 +13,7 @@ import {NotificationService} from '../../services/notification-service.service';
 import {Subject} from 'rxjs';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {ConfirmationService} from 'primeng/api';
+import {gsap} from 'gsap';
 
 @Component({
   selector: 'app-admin-checker',
@@ -36,20 +37,28 @@ import {ConfirmationService} from 'primeng/api';
     templateUrl: './admin-checker.component.html',
     styleUrl: './admin-checker.component.scss'
 })
-export class AdminCheckerComponent implements OnInit, OnDestroy {
+export class AdminCheckerComponent implements OnInit, AfterViewInit, OnDestroy {
   settingsForm: FormGroup;
+  readonly protocolOptions = [
+    {label: 'HTTP', control: 'http', icon: 'pi pi-globe', description: 'Standard web traffic'},
+    {label: 'HTTPS', control: 'https', icon: 'pi pi-lock', description: 'Encrypted web traffic'},
+    {label: 'SOCKS4', control: 'socks4', icon: 'pi pi-sitemap', description: 'IPv4 socket routing'},
+    {label: 'SOCKS5', control: 'socks5', icon: 'pi pi-shield', description: 'Modern socket routing'},
+  ];
   daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
   hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
   minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
   secondsList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Seconds`, value: i }));
   isRequeueing = false;
   private destroy$ = new Subject<void>();
+  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
     private notification: NotificationService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private elementRef: ElementRef<HTMLElement>
   ) {
     this.settingsForm = this.createDefaultForm();
   }
@@ -89,7 +98,31 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
       });
   }
 
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const host = this.elementRef.nativeElement;
+    this.animationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.admin-context, .settings-card, .save-dock',
+        {opacity: 0, y: 20, scale: 0.99},
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.65,
+          stagger: 0.055,
+          ease: 'power3.out',
+          clearProps: 'transform',
+        }
+      );
+    }, host);
+  }
+
   ngOnDestroy(): void {
+    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -266,6 +299,51 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     return this.settingsForm.get('proxy_header') as FormArray;
   }
 
+  get selectedProtocolCount(): number {
+    const protocols = this.settingsForm.get('protocols') as FormGroup;
+    return this.protocolOptions.filter(option => !!protocols.get(option.control)?.value).length;
+  }
+
+  get checkerCadenceLabel(): string {
+    return this.formatTimer('checker_timer');
+  }
+
+  get judgeCadenceLabel(): string {
+    return this.formatTimer('judge_timer');
+  }
+
+  get checkerAttemptWindow(): string {
+    const timeout = Number(this.settingsForm.get('timeout')?.value ?? 0);
+    const retries = Number(this.settingsForm.get('retries')?.value ?? 0);
+    const attempts = Math.max(1, Math.round(Number.isFinite(retries) ? retries : 0) + 1);
+    const totalMilliseconds = Math.max(0, Number.isFinite(timeout) ? timeout : 0) * attempts;
+
+    if (totalMilliseconds < 1000) {
+      return `${Math.round(totalMilliseconds)} ms`;
+    }
+
+    const seconds = totalMilliseconds / 1000;
+    return seconds < 60
+      ? `${Number(seconds.toFixed(seconds >= 10 ? 0 : 1))} sec`
+      : `${Number((seconds / 60).toFixed(1))} min`;
+  }
+
+  get threadLimit(): number {
+    const controlName = this.settingsForm.get('dynamic_threads')?.value ? 'max_threads' : 'threads';
+    const value = Number(this.settingsForm.get(controlName)?.value ?? 0);
+    return Math.max(0, Math.round(Number.isFinite(value) ? value : 0));
+  }
+
+  toggleProtocol(controlName: string): void {
+    const control = this.settingsForm.get(`protocols.${controlName}`);
+    if (!control) {
+      return;
+    }
+
+    control.setValue(!control.value);
+    control.markAsDirty();
+  }
+
   onSubmit() {
     this.settingsService.saveGlobalSettings(this.settingsForm.value).subscribe({
       next: (resp) => {
@@ -355,5 +433,20 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
   removeProxyHeader(index: number): void {
     this.proxyHeaders.removeAt(index);
     this.settingsForm.markAsDirty();
+  }
+
+  private formatTimer(groupName: string): string {
+    const timer = this.settingsForm.get(groupName)?.value ?? {};
+    const timerParts: Array<[number, string]> = [
+      [Number(timer.days ?? 0), 'day'],
+      [Number(timer.hours ?? 0), 'hour'],
+      [Number(timer.minutes ?? 0), 'minute'],
+      [Number(timer.seconds ?? 0), 'second'],
+    ];
+    const parts = timerParts
+      .filter(([value]) => value > 0)
+      .map(([value, unit]) => `${value} ${unit}${value === 1 ? '' : 's'}`);
+
+    return parts.length ? parts.join(' ') : 'Continuous';
   }
 }

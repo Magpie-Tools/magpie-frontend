@@ -1,335 +1,268 @@
-<div class="admin-checker-page text-gray-200">
-  <form [formGroup]="settingsForm" class="settings-panel bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-lg">
-    <header class="panel-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h2 class="text-xl font-semibold text-white mb-1">Admin Checker Configuration</h2>
-        <p class="text-sm text-gray-400 max-w-3xl">
-          Fine-tune how the admin checker validates proxies, refreshes judges, and keeps you in sync. These
-          settings shape the cadence, performance, and safeguards used during automated checks.
-        </p>
+<div class="admin-checker-page">
+  <form [formGroup]="settingsForm" class="settings-stage" (ngSubmit)="onSubmit()">
+    <header class="admin-context">
+      <div class="admin-context__copy">
+        <span class="context-icon"><i class="pi pi-sliders-h" aria-hidden="true"></i></span>
+        <div>
+          <span class="context-eyebrow">System defaults</span>
+          <h1>Global checker</h1>
+          <p>Set the baseline used for proxy checks across every workspace.</p>
+        </div>
       </div>
+      <div class="scope-badge"><span aria-hidden="true"></span>Applies globally</div>
     </header>
 
-    <div class="panel-body mt-6">
-      <p-tabs value="0">
-        <p-tablist class="tablist">
-          <p-tab value="0">Common</p-tab>
-          <p-tab value="1">Judges</p-tab>
-          <p-tab value="2">IP</p-tab>
-        </p-tablist>
+    <p-tabs value="0" class="settings-tabs">
+      <p-tablist aria-label="Global checker sections">
+        <p-tab value="0"><i class="pi pi-gauge" aria-hidden="true"></i>Common</p-tab>
+        <p-tab value="1"><i class="pi pi-check-circle" aria-hidden="true"></i>Judges</p-tab>
+        <p-tab value="2"><i class="pi pi-map-marker" aria-hidden="true"></i>IP lookup</p-tab>
+      </p-tablist>
 
-        <p-tabpanels>
-          <!-- Common Tab -->
-          <p-tabpanel value="0">
-            <div class="tab-stack">
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Protocols</h3>
-                    <p class="section-hint">Select the proxy types that should be included in each automated pass.</p>
-                  </div>
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div class="settings-grid settings-grid--common">
+            <section class="settings-card settings-card--protocols">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-compass" aria-hidden="true"></i></span>
+                <div class="card-heading__copy">
+                  <h2>What should Magpie test?</h2>
+                  <p>Choose every proxy type included in a global checker pass.</p>
                 </div>
-                <div class="protocol-grid" formGroupName="protocols">
-                  <div class="protocol-option">
-                    <app-checkbox label="HTTP" formControlName="http"></app-checkbox>
-                  </div>
-                  <div class="protocol-option">
-                    <app-checkbox label="HTTPS" formControlName="https"></app-checkbox>
-                  </div>
-                  <div class="protocol-option">
-                    <app-checkbox label="SOCKS4" formControlName="socks4"></app-checkbox>
-                  </div>
-                  <div class="protocol-option">
-                    <app-checkbox label="SOCKS5" formControlName="socks5"></app-checkbox>
-                  </div>
-                </div>
-              </section>
+                <span class="card-count">{{ selectedProtocolCount }} active</span>
+              </div>
 
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Checker Cadence</h3>
-                    <p class="section-hint">
-                      Define how often proxies should be scheduled for another validation pass. When Dynamic Threads is
-                      enabled, this target cadence also informs automatic thread sizing.
-                    </p>
-                  </div>
-                </div>
-                <div class="timer-grid" formGroupName="checker_timer">
-                  <div class="timer-field">
-                    <label class="field-label">Days</label>
-                    <p-select
-                      [options]="daysList"
-                      formControlName="days"
-                      placeholder="Select Days"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                  <div class="timer-field">
-                    <label class="field-label">Hours</label>
-                    <p-select
-                      [options]="hoursList"
-                      formControlName="hours"
-                      placeholder="Select Hours"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                  <div class="timer-field">
-                    <label class="field-label">Minutes</label>
-                    <p-select
-                      [options]="minutesList"
-                      formControlName="minutes"
-                      placeholder="Select Minutes"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                  <div class="timer-field">
-                    <label class="field-label">Seconds</label>
-                    <p-select
-                      [options]="secondsList"
-                      formControlName="seconds"
-                      placeholder="Select Seconds"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                </div>
-              </section>
+              <div class="protocol-accordion" formGroupName="protocols" role="group" aria-label="Proxy protocols">
+                @for (protocol of protocolOptions; track protocol.control) {
+                  <button
+                    type="button"
+                    class="protocol-choice"
+                    [class.is-active]="settingsForm.get('protocols.' + protocol.control)?.value"
+                    [attr.aria-pressed]="!!settingsForm.get('protocols.' + protocol.control)?.value"
+                    (click)="toggleProtocol(protocol.control)"
+                  >
+                    <span class="protocol-choice__icon"><i [class]="protocol.icon" aria-hidden="true"></i></span>
+                    <span class="protocol-choice__copy">
+                      <strong>{{ protocol.label }}</strong>
+                      <small>{{ protocol.description }}</small>
+                    </span>
+                    <span class="protocol-choice__state">{{ settingsForm.get('protocols.' + protocol.control)?.value ? 'On' : 'Off' }}</span>
+                  </button>
+                }
+              </div>
+            </section>
 
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Checker Performance</h3>
-                    <p class="section-hint">Balance throughput and reliability by tuning concurrency and retry limits.</p>
-                  </div>
+            <section class="settings-card settings-card--cadence">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-clock" aria-hidden="true"></i></span>
+                <div class="card-heading__copy">
+                  <h2>When should checks repeat?</h2>
+                  <p>Set the target time between global validation passes.</p>
                 </div>
-                <div class="field-grid">
-                  <div class="field-group">
-                    <label class="field-label" for="threads">
-                      Threads
-                      <app-tooltip [text]="'Determines how many proxies are checked concurrently.'"></app-tooltip>
-                    </label>
-                    <input id="threads" formControlName="threads" type="number" pInputText class="p-inputtext-sm w-full"/>
-                  </div>
-                  <div class="field-group">
-                    <label class="field-label" for="retries">Retries</label>
-                    <input id="retries" formControlName="retries" type="number" pInputText class="p-inputtext-sm w-full"/>
-                  </div>
-                  <div class="field-group">
-                    <label class="field-label" for="timeout">Timeout (ms)</label>
-                    <input id="timeout" formControlName="timeout" type="number" pInputText class="p-inputtext-sm w-full"/>
-                  </div>
+              </div>
+              <div class="cadence-summary"><span>Every</span><strong>{{ checkerCadenceLabel }}</strong></div>
+              <div class="timer-grid" formGroupName="checker_timer">
+                <div class="timer-field">
+                  <label for="checker-days">Days</label>
+                  <p-select inputId="checker-days" [options]="daysList" formControlName="days" optionLabel="label" optionValue="value" appendTo="body"></p-select>
                 </div>
-              </section>
+                <div class="timer-field">
+                  <label for="checker-hours">Hours</label>
+                  <p-select inputId="checker-hours" [options]="hoursList" formControlName="hours" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                </div>
+                <div class="timer-field">
+                  <label for="checker-minutes">Minutes</label>
+                  <p-select inputId="checker-minutes" [options]="minutesList" formControlName="minutes" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                </div>
+                <div class="timer-field">
+                  <label for="checker-seconds">Seconds</label>
+                  <p-select inputId="checker-seconds" [options]="secondsList" formControlName="seconds" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                </div>
+              </div>
+            </section>
 
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Automation Enhancements</h3>
-                    <p class="section-hint">
-                      Enable helper features that keep the checker responsive under varying load. Dynamic Threads adjusts
-                      concurrency to try to meet the cadence above; with it off, the fixed Threads value is used instead.
-                    </p>
-                  </div>
+            <section class="settings-card settings-card--performance">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-bolt" aria-hidden="true"></i></span>
+                <div class="card-heading__copy">
+                  <h2>How hard should it work?</h2>
+                  <p>Balance concurrency, patience, and retry depth.</p>
                 </div>
-                <div class="toggle-grid">
-                  <div class="toggle-option dynamic-threads-option">
-                    <app-checkbox label="Dynamic Threads" formControlName="dynamic_threads"></app-checkbox>
+              </div>
+              <div class="performance-fields">
+                <div class="field-group field-group--wide">
+                  <label class="field-label" [for]="settingsForm.get('dynamic_threads')?.value ? 'max_threads' : 'threads'">
+                    {{ settingsForm.get('dynamic_threads')?.value ? 'Maximum threads' : 'Threads' }}
+                    <app-tooltip [text]="'The number of proxy checks Magpie can run at once.'"></app-tooltip>
+                  </label>
+                  <div class="input-with-unit">
                     @if (settingsForm.get('dynamic_threads')?.value) {
-                      <div class="dynamic-max-threads">
-                        <label class="field-label" for="max_threads">
-                          Max Threads
-                          <app-tooltip [text]="'Upper thread limit while Dynamic Threads is enabled.'"></app-tooltip>
-                        </label>
-                        <input id="max_threads" formControlName="max_threads" type="number" pInputText class="p-inputtext-sm dynamic-max-threads-input"/>
-                      </div>
+                      <input id="max_threads" formControlName="max_threads" type="number" pInputText inputmode="numeric" min="1" />
+                    } @else {
+                      <input id="threads" formControlName="threads" type="number" pInputText inputmode="numeric" min="1" />
+                    }
+                    <span>concurrent</span>
+                  </div>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="retries">Retries</label>
+                  <div class="input-with-unit"><input id="retries" formControlName="retries" type="number" pInputText inputmode="numeric" min="0" /><span>after failure</span></div>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="timeout">Timeout</label>
+                  <div class="input-with-unit"><input id="timeout" formControlName="timeout" type="number" pInputText inputmode="numeric" min="1" /><span>milliseconds</span></div>
+                </div>
+              </div>
+              <div class="performance-summary">
+                <strong>{{ threadLimit }}</strong>
+                <p><span>thread ceiling</span><small>Up to {{ checkerAttemptWindow }} of configured wait per proxy.</small></p>
+              </div>
+            </section>
+
+            <section class="settings-card settings-card--automation">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-sparkles" aria-hidden="true"></i></span>
+                <div class="card-heading__copy">
+                  <h2>Let Magpie adapt</h2>
+                  <p>Choose which automatic behaviors run around every check.</p>
+                </div>
+              </div>
+              <div class="decision-list">
+                <div class="decision-row" [class.is-active]="settingsForm.get('dynamic_threads')?.value">
+                  <span class="decision-row__icon"><i class="pi pi-chart-line" aria-hidden="true"></i></span>
+                  <div class="decision-row__copy">
+                    <strong>Dynamic threads</strong><p>Adjust concurrency to stay close to the checker cadence.</p>
+                    <span>{{ settingsForm.get('dynamic_threads')?.value ? 'Adapts up to ' + threadLimit + ' threads' : 'Uses a fixed thread count' }}</span>
+                  </div>
+                  <app-checkbox label="Enabled" formControlName="dynamic_threads"></app-checkbox>
+                </div>
+                <div class="decision-row" [class.is-active]="settingsForm.get('use_https_for_socks')?.value">
+                  <span class="decision-row__icon"><i class="pi pi-lock" aria-hidden="true"></i></span>
+                  <div class="decision-row__copy">
+                    <strong>HTTPS judges for SOCKS</strong><p>Route SOCKS4 and SOCKS5 checks through secure judges.</p>
+                    <span>{{ settingsForm.get('use_https_for_socks')?.value ? 'Secure judge routing' : 'Standard judge routing' }}</span>
+                  </div>
+                  <app-checkbox label="Enabled" formControlName="use_https_for_socks"></app-checkbox>
+                </div>
+                <div class="decision-row" [class.is-active]="settingsForm.get('save_responses')?.value">
+                  <span class="decision-row__icon"><i class="pi pi-save" aria-hidden="true"></i></span>
+                  <div class="decision-row__copy">
+                    <strong>Save request responses</strong><p>Keep response bodies available for inspection and debugging.</p>
+                    <span>{{ settingsForm.get('save_responses')?.value ? 'Responses retained' : 'Responses discarded' }}</span>
+                  </div>
+                  <app-checkbox label="Enabled" formControlName="save_responses"></app-checkbox>
+                </div>
+              </div>
+            </section>
+          </div>
+        </p-tabpanel>
+
+        <p-tabpanel value="1">
+          <div class="settings-grid settings-grid--judges">
+            <section class="settings-card settings-card--judge-performance">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-gauge" aria-hidden="true"></i></span>
+                <div class="card-heading__copy"><h2>How should judges respond?</h2><p>Set the concurrency and patience used to validate judge endpoints.</p></div>
+              </div>
+              <div class="stacked-fields">
+                <div class="field-group">
+                  <label class="field-label" for="judges_threads">Judge threads</label>
+                  <div class="input-with-unit"><input id="judges_threads" formControlName="judges_threads" type="number" pInputText inputmode="numeric" min="1" /><span>concurrent</span></div>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="judges_timeout">Judge timeout</label>
+                  <div class="input-with-unit"><input id="judges_timeout" formControlName="judges_timeout" type="number" pInputText inputmode="numeric" min="1" /><span>milliseconds</span></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-card settings-card--judge-cadence">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-sync" aria-hidden="true"></i></span>
+                <div class="card-heading__copy"><h2>When should judges refresh?</h2><p>Control how often Magpie revalidates the shared judge pool.</p></div>
+              </div>
+              <div class="cadence-summary cadence-summary--inline"><span>Refresh every</span><strong>{{ judgeCadenceLabel }}</strong></div>
+              <div class="timer-grid" formGroupName="judge_timer">
+                <div class="timer-field"><label for="judge-days">Days</label><p-select inputId="judge-days" [options]="daysList" formControlName="days" optionLabel="label" optionValue="value" appendTo="body"></p-select></div>
+                <div class="timer-field"><label for="judge-hours">Hours</label><p-select inputId="judge-hours" [options]="hoursList" formControlName="hours" optionLabel="label" optionValue="value" appendTo="body"></p-select></div>
+                <div class="timer-field"><label for="judge-minutes">Minutes</label><p-select inputId="judge-minutes" [options]="minutesList" formControlName="minutes" optionLabel="label" optionValue="value" appendTo="body"></p-select></div>
+                <div class="timer-field"><label for="judge-seconds">Seconds</label><p-select inputId="judge-seconds" [options]="secondsList" formControlName="seconds" optionLabel="label" optionValue="value" appendTo="body"></p-select></div>
+              </div>
+            </section>
+
+            <section class="settings-card settings-card--judge-list">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-verified" aria-hidden="true"></i></span>
+                <div class="card-heading__copy"><h2>Default judges</h2><p>These endpoints become the starting judge list for every new account.</p></div>
+                <span class="card-count">{{ judges.length }} endpoints</span>
+              </div>
+              <div formArrayName="judges" class="judge-list">
+                @for (judge of judges.controls; track judge; let i = $index) {
+                  <div [formGroupName]="i" class="judge-row">
+                    <span class="judge-index">{{ i + 1 }}</span>
+                    <div class="field-group"><label class="field-label" for="judge-url-{{ i }}">Judge URL</label><input id="judge-url-{{ i }}" formControlName="url" type="url" pInputText placeholder="https://judge.example.com" /></div>
+                    <div class="field-group">
+                      <label class="field-label" for="judge-regex-{{ i }}">Response regex <app-tooltip [text]="'Use default for Magpie\'s built-in response matching, or provide a custom regular expression.'"></app-tooltip></label>
+                      <input id="judge-regex-{{ i }}" formControlName="regex" type="text" pInputText placeholder="default" />
+                    </div>
+                    @if (judges.length > 1) {
+                      <button type="button" class="icon-button icon-button--remove" (click)="removeJudge(i)" [attr.aria-label]="'Remove judge ' + (i + 1)"><i class="pi pi-trash" aria-hidden="true"></i></button>
                     }
                   </div>
-                  <div class="toggle-option">
-                    <app-checkbox label="Use HTTPS for SOCKS" formControlName="use_https_for_socks"></app-checkbox>
-                  </div>
-                  <div class="toggle-option">
-                    <app-checkbox label="Save Request Responses" formControlName="save_responses"></app-checkbox>
-                  </div>
-                </div>
-              </section>
-            </div>
-          </p-tabpanel>
+                }
+              </div>
+              <button type="button" class="add-button" (click)="addJudge()"><i class="pi pi-plus" aria-hidden="true"></i>Add judge</button>
+            </section>
+          </div>
+        </p-tabpanel>
 
-          <!-- Judges Tab -->
-          <p-tabpanel value="1">
-            <div class="tab-stack">
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Judge Performance</h3>
-                    <p class="section-hint">Adjust throughput and tolerance for judge validation requests.</p>
-                  </div>
+        <p-tabpanel value="2">
+          <div class="settings-grid settings-grid--ip">
+            <section class="settings-card settings-card--ip">
+              <div class="ip-visual" aria-hidden="true">
+                <span class="ip-visual__orbit ip-visual__orbit--outer"></span>
+                <span class="ip-visual__orbit ip-visual__orbit--inner"></span>
+                <span class="ip-visual__core"><i class="pi pi-map-marker"></i></span>
+              </div>
+              <div class="ip-content">
+                <div class="card-heading">
+                  <span class="card-icon"><i class="pi pi-map" aria-hidden="true"></i></span>
+                  <div class="card-heading__copy"><h2>Where is this checker?</h2><p>Magpie calls this endpoint at startup to learn the host’s public IP.</p></div>
                 </div>
-                <div class="field-grid">
-                  <div class="field-group">
-                    <label class="field-label" for="judges_threads">Judge Threads</label>
-                    <input id="judges_threads" formControlName="judges_threads" type="number" pInputText class="p-inputtext-sm w-full"/>
-                  </div>
-                  <div class="field-group">
-                    <label class="field-label" for="judges_timeout">Judge Timeout (ms)</label>
-                    <input id="judges_timeout" formControlName="judges_timeout" type="number" pInputText class="p-inputtext-sm w-full"/>
-                  </div>
+                <div class="field-group ip-field">
+                  <label class="field-label" for="iplookup">IP lookup URL <app-tooltip [text]="'The response should contain the checker host\'s public IP address.'"></app-tooltip></label>
+                  <input id="iplookup" formControlName="iplookup" type="url" pInputText placeholder="https://ident.me" />
+                  <p class="field-hint">Use a stable endpoint that returns one plain-text IP address.</p>
                 </div>
-              </section>
+                <div class="ip-path">
+                  <span><i class="pi pi-server" aria-hidden="true"></i>Checker host</span><i class="pi pi-arrow-right" aria-hidden="true"></i>
+                  <span><i class="pi pi-globe" aria-hidden="true"></i>Lookup endpoint</span><i class="pi pi-arrow-right" aria-hidden="true"></i>
+                  <span><i class="pi pi-check" aria-hidden="true"></i>Public IP</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
 
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Judge Refresh Cadence</h3>
-                    <p class="section-hint">Decide how frequently the platform should refresh judge endpoints.</p>
-                  </div>
-                </div>
-                <div class="timer-grid" formGroupName="judge_timer">
-                  <div class="timer-field">
-                    <label class="field-label">Days</label>
-                    <p-select
-                      [options]="daysList"
-                      formControlName="days"
-                      placeholder="Select Days"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                  <div class="timer-field">
-                    <label class="field-label">Hours</label>
-                    <p-select
-                      [options]="hoursList"
-                      formControlName="hours"
-                      placeholder="Select Hours"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                  <div class="timer-field">
-                    <label class="field-label">Minutes</label>
-                    <p-select
-                      [options]="minutesList"
-                      formControlName="minutes"
-                      placeholder="Select Minutes"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                  <div class="timer-field">
-                    <label class="field-label">Seconds</label>
-                    <p-select
-                      [options]="secondsList"
-                      formControlName="seconds"
-                      placeholder="Select Seconds"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                </div>
-              </section>
-
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Default Judges</h3>
-                    <p class="section-hint">By default, these judges are added to every new account.</p>
-                  </div>
-                </div>
-                <div formArrayName="judges" class="judge-list flex flex-col gap-4">
-                  @for (judge of judges.controls; track judge; let i = $index) {
-                    <div [formGroupName]="i" class="judge-row">
-                      <div class="field-group">
-                        <label class="field-label" for="judge-url-{{i}}">URL</label>
-                        <input id="judge-url-{{i}}" formControlName="url" type="text" pInputText class="p-inputtext-sm w-full"/>
-                      </div>
-                      <div class="field-group">
-                        <label class="field-label" for="judge-regex-{{i}}">
-                          Regex
-                          <app-tooltip [text]="'If the regex is set to default...etc'"></app-tooltip>
-                        </label>
-                        <input id="judge-regex-{{i}}" formControlName="regex" type="text" pInputText class="p-inputtext-sm w-full"/>
-                      </div>
-                      @if (judges.length > 1) {
-                        <button type="button" class="icon-button remove" (click)="removeJudge(i)">
-                          <i class="pi pi-trash"></i>
-                        </button>
-                      }
-                    </div>
-                  }
-                </div>
-                <div class="judge-actions mt-3">
-                  <button type="button" class="chip-button" (click)="addJudge()">
-                    <i class="pi pi-plus"></i>
-                    <span>Add Judge</span>
-                  </button>
-                </div>
-              </section>
-            </div>
-          </p-tabpanel>
-
-          <!-- IP Tab Placeholder -->
-          <p-tabpanel value="2">
-            <div class="tab-stack">
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title text-white">IP Lookup</h3>
-                    <p class="section-hint text-gray-400">Configure the lookup endpoint used to determine the checker host's public IP.
-                      <app-tooltip [text]="'This website is requested on startup so the checker can compare proxy responses against the server\'s actual IP.'"></app-tooltip>
-                    </p>
-                  </div>
-                </div>
-
-                <div class="field-group mt-4">
-                  <label class="field-label" for="iplookup">
-                    Lookup URL
-                  </label>
-                  <input id="iplookup" formControlName="iplookup" type="url" pInputText class="p-inputtext-sm w-full" placeholder="https://ident.me"/>
-                </div>
-              </section>
-            </div>
-          </p-tabpanel>
-        </p-tabpanels>
-      </p-tabs>
-    </div>
-
-    <footer class="panel-footer flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mt-8">
-      <p class="text-xs text-gray-500 max-w-xl">Changes will apply immediately. Save to persist them for future sessions.</p>
-      <div class="panel-actions">
-        <p-button
-          type="button"
-          label="Requeue All Proxies"
-          icon="pi pi-refresh"
-          (onClick)="confirmRequeueAllProxies()"
-          [loading]="isRequeueing"
-          styleClass="requeue-proxies-button">
-        </p-button>
-        <p-button
-          type="button"
-          label="Save Settings"
-          (onClick)="onSubmit()"
-          [disabled]="!settingsForm.dirty"
-          styleClass="save-settings-button">
-        </p-button>
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span class="save-state__dot" [class.is-dirty]="settingsForm.dirty" aria-hidden="true"></span>
+        <div>
+          @if (settingsForm.dirty) {
+            <strong>Unsaved global changes</strong><p>Save when the checker baseline looks right.</p>
+          } @else {
+            <strong>Global settings are up to date</strong><p>Changes will appear here before you save.</p>
+          }
+        </div>
+      </div>
+      <div class="save-actions">
+        <p-button type="button" label="Requeue all proxies" icon="pi pi-refresh" (onClick)="confirmRequeueAllProxies()" [loading]="isRequeueing" styleClass="requeue-proxies-button"></p-button>
+        <p-button type="submit" label="Save global settings" icon="pi pi-check" [disabled]="!settingsForm.dirty || settingsForm.invalid" styleClass="save-settings-button"></p-button>
       </div>
     </footer>
   </form>
 
-  <p-confirmDialog
-    [style]="{width: '450px'}"
-    [baseZIndex]="10000"
-    rejectButtonStyleClass="p-button-outlined">
-  </p-confirmDialog>
+  <p-confirmDialog [style]="{width: 'min(450px, calc(100vw - 2rem))'}" [baseZIndex]="10000" rejectButtonStyleClass="p-button-outlined"></p-confirmDialog>
 </div>
