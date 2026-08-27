@@ -1,93 +1,146 @@
-<div class="checker-judges-page text-gray-200">
-  <section class="judges-panel bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-lg">
-    <header class="panel-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h2 class="text-xl font-semibold text-white mb-1">Judge Endpoints</h2>
-        <p class="text-sm text-gray-400 max-w-2xl">
-          Configure the endpoints the checker will call and optionally fine-tune the validation with a custom regex.
-          These judges help determine whether proxies are alive, anonymous and returning the expected payload.
-        </p>
-      </div>
-      <button type="button" class="add-judge-button" [disabled]="!workspaces.canOperate()" (click)="addJudge()">
-        <i class="pi pi-plus"></i>
-        Add Judge
-      </button>
-    </header>
+<div class="checker-judges-page">
+  <form class="settings-stage" (ngSubmit)="onSubmit()">
+    <div class="settings-grid">
+      <section class="settings-card settings-card--flow">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-verified" aria-hidden="true"></i></span>
+          <div class="card-heading__copy">
+            <h1>How does a judge verify a proxy?</h1>
+            <p>Magpie sends a request through the proxy, then checks the judge response for the expected evidence.</p>
+          </div>
+        </div>
 
-    <div class="judge-list flex flex-col gap-4">
-      @for (judge of judgeControls; track judge; let i = $index) {
-        <article [formGroup]="judge"
-                 class="judge-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-          <div class="card-header flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div>
-              <div class="judge-chip">Judge {{ i + 1 }}</div>
-              <p class="text-xs text-gray-400 mt-2">
-                Define the endpoint to call and how to confirm the response is valid for this judge.
-              </p>
+        <div class="judge-flow" aria-label="Judge verification flow">
+          <div class="flow-step">
+            <span class="flow-node"><i class="pi pi-server" aria-hidden="true"></i></span>
+            <div><strong>Proxy</strong><small>Routes the request</small></div>
+          </div>
+          <span class="flow-line" aria-hidden="true"></span>
+          <div class="flow-step">
+            <span class="flow-node"><i class="pi pi-globe" aria-hidden="true"></i></span>
+            <div><strong>Judge</strong><small>Returns connection data</small></div>
+          </div>
+          <span class="flow-line" aria-hidden="true"></span>
+          <div class="flow-step">
+            <span class="flow-node flow-node--active"><i class="pi pi-check" aria-hidden="true"></i></span>
+            <div><strong>Verify</strong><small>Matches headers or regex</small></div>
+          </div>
+        </div>
+
+        <div class="judge-orbit" aria-hidden="true">
+          <span class="judge-orbit__ring judge-orbit__ring--outer"></span>
+          <span class="judge-orbit__ring judge-orbit__ring--inner"></span>
+          <span class="judge-orbit__core"><i class="pi pi-verified"></i></span>
+        </div>
+
+        <div class="flow-summary">
+          <div><strong>{{ configuredJudgeCount }}</strong><span>configured</span></div>
+          <div><strong>{{ defaultRegexCount }}</strong><span>default matching</span></div>
+        </div>
+
+        <div class="validation-note">
+          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          <p><strong>Default matching</strong> inspects returned headers for anonymity. Use a custom regex only when a judge returns a specific payload.</p>
+        </div>
+      </section>
+
+      <section class="settings-card settings-card--editor">
+        <div class="editor-heading">
+          <div class="card-heading">
+            <span class="card-icon"><i class="pi pi-link" aria-hidden="true"></i></span>
+            <div class="card-heading__copy">
+              <h2>Judge endpoints</h2>
+              <p>Add every endpoint the checker may call during a proxy test.</p>
             </div>
-            <button
-              type="button"
-              class="icon-button"
-              [disabled]="!workspaces.canOperate()"
-              (click)="removeJudge(i)"
-              [attr.aria-label]="'Remove judge #' + (i + 1)"
-            >
-              <i class="pi pi-trash"></i>
-            </button>
+            <span class="card-count">{{ configuredJudgeCount }} {{ configuredJudgeCount === 1 ? 'judge' : 'judges' }}</span>
           </div>
 
-          <div class="card-body grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-            <div class="field-group">
-              <label class="field-label" for="judge-url-{{ i }}">Judge URL</label>
-              <input
-                id="judge-url-{{ i }}"
-                formControlName="url"
-                type="text"
-                pInputText
-                class="p-inputtext-sm w-full"
-                placeholder="https://example.com/judge"
-              />
-              <p class="field-hint">Should return headers or other data that verifies the proxy connection.</p>
-            </div>
+          <button type="button" class="add-button" [disabled]="!workspaces.canOperate()" (click)="addJudge()">
+            <i class="pi pi-plus" aria-hidden="true"></i>
+            Add judge
+          </button>
+        </div>
 
-            <div class="field-group">
-              <label class="field-label" for="judge-regex-{{ i }}">
-                Custom Regex
-                <app-tooltip
-                  [text]="'If the regex is set to default, the program validates the response using headers to detect anonymity. Provide your own regex to match specific content in the judge response.'"
-                ></app-tooltip>
-              </label>
-              <input
-                id="judge-regex-{{ i }}"
-                formControlName="regex"
-                type="text"
-                pInputText
-                class="p-inputtext-sm w-full"
-                placeholder="default"
-              />
-              <p class="field-hint">Leave as <code>default</code> to rely on header-based validation.</p>
-            </div>
-          </div>
-        </article>
-      }
+        <div class="judge-list">
+          @for (judge of judgeControls; track judge; let i = $index) {
+            <article [formGroup]="judge" class="judge-row">
+              <span class="judge-index">{{ i + 1 }}</span>
+
+              <div class="judge-fields">
+                <div class="field-group field-group--url">
+                  <label class="field-label" for="judge-url-{{ i }}">Judge URL</label>
+                  <input
+                    id="judge-url-{{ i }}"
+                    formControlName="url"
+                    type="url"
+                    pInputText
+                    placeholder="https://example.com/judge"
+                    [readOnly]="!workspaces.canOperate()"
+                  />
+                  <p class="field-hint">The endpoint should return headers or connection data.</p>
+                </div>
+
+                <div class="field-group field-group--regex">
+                  <label class="field-label" for="judge-regex-{{ i }}">
+                    Response regex
+                    <app-tooltip
+                      [text]="'Use default for header-based anonymity checks, or provide a regular expression that matches the judge response.'"
+                    ></app-tooltip>
+                  </label>
+                  <input
+                    id="judge-regex-{{ i }}"
+                    formControlName="regex"
+                    type="text"
+                    pInputText
+                    placeholder="default"
+                    [readOnly]="!workspaces.canOperate()"
+                  />
+                  <p class="field-hint">Use <code>default</code> unless this judge needs a content match.</p>
+                </div>
+              </div>
+
+              <div class="judge-state">
+                <span [class.is-default]="usesDefaultRegex(judge)">
+                  {{ usesDefaultRegex(judge) ? 'Header match' : 'Custom match' }}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                class="icon-button icon-button--remove"
+                [disabled]="!workspaces.canOperate()"
+                (click)="removeJudge(i)"
+                [attr.aria-label]="'Remove judge ' + (i + 1)"
+              >
+                <i class="pi pi-trash" aria-hidden="true"></i>
+              </button>
+            </article>
+          }
+        </div>
+      </section>
     </div>
 
-    <footer class="panel-footer flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mt-6">
-      <p class="text-xs text-gray-500 max-w-xl">
-        @if (workspaces.canOperate()) {
-          Settings will be saved and applied to new checker sessions.
-        } @else {
-          Your viewer role can inspect these judges but cannot change them.
-        }
-      </p>
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span class="save-state__dot" [class.is-dirty]="judgesForm.dirty" aria-hidden="true"></span>
+        <div>
+          @if (!workspaces.canOperate()) {
+            <strong>Viewer access</strong><p>You can inspect these judges, but you cannot change them.</p>
+          } @else if (judgesForm.dirty) {
+            <strong>Unsaved judge changes</strong><p>Save when the endpoint list looks right.</p>
+          } @else {
+            <strong>Judges are up to date</strong><p>Changes will appear here before you save.</p>
+          }
+        </div>
+      </div>
+
       <p-button
-        type="button"
-        label="Save Judges"
-        (onClick)="onSubmit()"
-        [disabled]="!workspaces.canOperate() || !judgesForm.dirty"
+        type="submit"
+        label="Save judges"
+        icon="pi pi-check"
+        [disabled]="!workspaces.canOperate() || !judgesForm.dirty || judgesForm.invalid"
         styleClass="save-judges-button"
-      >
-      </p-button>
+      ></p-button>
     </footer>
-  </section>
+  </form>
 </div>
