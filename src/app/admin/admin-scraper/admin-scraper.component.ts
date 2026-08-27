@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from '../../services/settings.service';
 import {Subject} from 'rxjs';
@@ -16,6 +16,7 @@ import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {ConfirmationService} from 'primeng/api';
 import {NotificationService} from '../../services/notification-service.service';
 import {GlobalSettings} from '../../models/GlobalSettings';
+import {gsap} from 'gsap';
 
 @Component({
   selector: 'app-admin-scraper',
@@ -36,7 +37,7 @@ import {GlobalSettings} from '../../models/GlobalSettings';
   templateUrl: './admin-scraper.component.html',
   styleUrl: './admin-scraper.component.scss'
 })
-export class AdminScraperComponent implements OnInit, OnDestroy {
+export class AdminScraperComponent implements OnInit, AfterViewInit, OnDestroy {
   daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
   hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
   minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
@@ -44,12 +45,14 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
   isRequeueingSources = false;
   private destroy$ = new Subject<void>();
+  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
     private notification: NotificationService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private elementRef: ElementRef<HTMLElement>
   ) {
     this.settingsForm = this.createDefaultForm();
   }
@@ -89,7 +92,37 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
     this.updateProxyLimitState(proxyLimitCtrl?.value ?? false);
   }
 
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const host = this.elementRef.nativeElement;
+    this.animationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.admin-context, .settings-card, .save-dock',
+        {opacity: 0, y: 22, scale: 0.99},
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.68,
+          stagger: 0.055,
+          ease: 'power3.out',
+          clearProps: 'transform',
+        }
+      );
+
+      gsap.fromTo(
+        '.card-heading__copy p',
+        {opacity: 0.18},
+        {opacity: 1, duration: 0.8, stagger: 0.07, delay: 0.16, ease: 'power2.out'}
+      );
+    }, host);
+  }
+
   ngOnDestroy(): void {
+    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -174,6 +207,54 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
 
   get scrapeSites(): FormArray<FormControl<string>> {
     return this.settingsForm.get('scrape_sites') as FormArray<FormControl<string>>;
+  }
+
+  get scraperCadenceLabel(): string {
+    const timer = this.settingsForm.get('scraper_timer')?.value ?? {};
+    const timerParts: Array<[number, string]> = [
+      [Number(timer.days ?? 0), 'day'],
+      [Number(timer.hours ?? 0), 'hour'],
+      [Number(timer.minutes ?? 0), 'minute'],
+      [Number(timer.seconds ?? 0), 'second'],
+    ];
+    const parts = timerParts
+      .filter(([value]) => value > 0)
+      .map(([value, unit]) => `${value} ${unit}${value === 1 ? '' : 's'}`);
+
+    return parts.length ? parts.join(' ') : 'Continuous';
+  }
+
+  get scraperThreadLimit(): number {
+    const controlName = this.settingsForm.get('scraper_dynamic_threads')?.value
+      ? 'scraper_max_threads'
+      : 'scraper_threads';
+    const value = Number(this.settingsForm.get(controlName)?.value ?? 0);
+    return Math.max(0, Math.round(Number.isFinite(value) ? value : 0));
+  }
+
+  get scraperAttemptWindow(): string {
+    const timeout = Number(this.settingsForm.get('scraper_timeout')?.value ?? 0);
+    const retries = Number(this.settingsForm.get('scraper_retries')?.value ?? 0);
+    const attempts = Math.max(1, Math.round(Number.isFinite(retries) ? retries : 0) + 1);
+    const totalMilliseconds = Math.max(0, Number.isFinite(timeout) ? timeout : 0) * attempts;
+
+    if (totalMilliseconds < 1000) {
+      return `${Math.round(totalMilliseconds)} ms`;
+    }
+
+    const seconds = totalMilliseconds / 1000;
+    return seconds < 60
+      ? `${Number(seconds.toFixed(seconds >= 10 ? 0 : 1))} sec`
+      : `${Number((seconds / 60).toFixed(1))} min`;
+  }
+
+  get proxyLimitLabel(): string {
+    if (!this.settingsForm.get('proxy_limit_enabled')?.value) {
+      return 'No account limit';
+    }
+
+    const value = Number(this.settingsForm.get('proxy_limit_max_per_user')?.value ?? 0);
+    return value > 0 ? `${Math.round(value).toLocaleString()} per account` : 'No account limit';
   }
 
   addScrapeSite(): void {

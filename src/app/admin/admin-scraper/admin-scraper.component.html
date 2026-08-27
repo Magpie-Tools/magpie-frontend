@@ -1,296 +1,246 @@
-<div class="admin-scraper-page text-gray-200">
-  <form [formGroup]="settingsForm" class="settings-panel bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-lg">
-    <header class="panel-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h2 class="text-xl font-semibold text-white mb-1">Admin Scraper Configuration</h2>
-        <p class="text-sm text-gray-400 max-w-3xl">
-          Control how the scraper revisits sources and balances throughput.
-        </p>
+<div class="admin-scraper-page">
+  <form [formGroup]="settingsForm" class="settings-stage" (ngSubmit)="onSubmit()">
+    <header class="admin-context">
+      <div class="admin-context__copy">
+        <span class="context-icon"><i class="pi pi-cloud-download" aria-hidden="true"></i></span>
+        <div>
+          <span class="context-eyebrow">System defaults</span>
+          <h1>Global scraper</h1>
+          <p>Control how Magpie revisits sources and distributes collected proxies.</p>
+        </div>
       </div>
+      <div class="scope-badge"><span aria-hidden="true"></span>Applies globally</div>
     </header>
 
-    <div class="panel-body mt-6">
-      <p-tabs value="0">
-        <p-tablist class="tablist">
-          <p-tab value="0">Common</p-tab>
-          <p-tab value="1">Sources</p-tab>
-        </p-tablist>
+    <p-tabs value="0" class="settings-tabs">
+      <p-tablist aria-label="Global scraper sections">
+        <p-tab value="0"><i class="pi pi-sliders-h" aria-hidden="true"></i>Common</p-tab>
+        <p-tab value="1"><i class="pi pi-link" aria-hidden="true"></i>Sources</p-tab>
+      </p-tablist>
 
-        <p-tabpanels>
-          <p-tabpanel value="0">
-            <div class="tab-stack">
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Scraper Cadence</h3>
-                    <p class="section-hint">Define the interval used to sweep every configured scrape source.</p>
-                  </div>
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div class="settings-grid settings-grid--common">
+            <section class="settings-card settings-card--cadence">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-clock" aria-hidden="true"></i></span>
+                <div class="card-heading__copy">
+                  <h2>When should scraping repeat?</h2>
+                  <p>Set the target interval between complete source sweeps.</p>
                 </div>
-                <div class="timer-grid" formGroupName="scraper_timer">
-                  <div class="timer-field">
-                    <label class="field-label">Days</label>
-                    <p-select
-                      [options]="daysList"
-                      formControlName="days"
-                      placeholder="Select Days"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                  <div class="timer-field">
-                    <label class="field-label">Hours</label>
-                    <p-select
-                      [options]="hoursList"
-                      formControlName="hours"
-                      placeholder="Select Hours"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                  <div class="timer-field">
-                    <label class="field-label">Minutes</label>
-                    <p-select
-                      [options]="minutesList"
-                      formControlName="minutes"
-                      placeholder="Select Minutes"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                  <div class="timer-field">
-                    <label class="field-label">Seconds</label>
-                    <p-select
-                      [options]="secondsList"
-                      formControlName="seconds"
-                      placeholder="Select Seconds"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="w-full">
-                    </p-select>
-                  </div>
-                </div>
-              </section>
+              </div>
 
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Scraper Performance</h3>
-                    <p class="section-hint">Balance concurrency and reliability to keep results flowing without excess load.</p>
-                  </div>
-                </div>
-                <div class="field-grid">
-                  <div class="field-group">
-                    <label class="field-label" for="scraper_threads">
-                      Threads
-                      <i class="pi pi-info-circle text-gray-400 cursor-help"
-                         pTooltip="Determines how many proxies are checked concurrently."
-                         tooltipPosition="top">
-                      </i>
-                    </label>
-                    <p-inputNumber
-                      formControlName="scraper_threads"
-                      [min]="1"
-                      [max]="10000"
-                      [inputId]="'scraper_threads'"
-                      class="w-full">
-                    </p-inputNumber>
-                  </div>
-                  <div class="field-group">
-                    <label class="field-label" for="scraper_retries">Retries</label>
-                    <p-inputNumber
-                      formControlName="scraper_retries"
-                      [min]="0"
-                      [max]="100"
-                      [inputId]="'scraper_retries'"
-                      class="w-full">
-                    </p-inputNumber>
-                  </div>
-                  <div class="field-group">
-                    <label class="field-label" for="scraper_timeout">Timeout (ms)</label>
-                    <p-inputNumber
-                      formControlName="scraper_timeout"
-                      [min]="1000"
-                      [max]="60000"
-                      [step]="500"
-                      [inputId]="'scraper_timeout'"
-                      class="w-full">
-                    </p-inputNumber>
-                  </div>
-                </div>
-              </section>
+              <div class="cadence-summary"><span>Every</span><strong>{{ scraperCadenceLabel }}</strong></div>
 
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Automation Controls</h3>
-                    <p class="section-hint">Enable helper features that adapt scraping behaviour to changing load.</p>
-                  </div>
+              <div class="timer-grid" formGroupName="scraper_timer">
+                <div class="timer-field">
+                  <label for="scraper-days">Days</label>
+                  <p-select inputId="scraper-days" [options]="daysList" formControlName="days" optionLabel="label" optionValue="value" appendTo="body"></p-select>
                 </div>
-                <div class="toggle-stack">
-                  <div class="toggle-card">
-                    <div class="toggle-leading">
-                      <p-checkbox
-                        formControlName="scraper_dynamic_threads"
-                        [binary]="true"
-                        inputId="dynamic-threads">
-                      </p-checkbox>
-                    </div>
-                    <label for="dynamic-threads" class="toggle-content">
-                      <span class="toggle-title">Dynamic Threads</span>
-                      <span class="toggle-hint">Automatically scale thread usage based on available proxies and checker demand.</span>
-                    </label>
+                <div class="timer-field">
+                  <label for="scraper-hours">Hours</label>
+                  <p-select inputId="scraper-hours" [options]="hoursList" formControlName="hours" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                </div>
+                <div class="timer-field">
+                  <label for="scraper-minutes">Minutes</label>
+                  <p-select inputId="scraper-minutes" [options]="minutesList" formControlName="minutes" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                </div>
+                <div class="timer-field">
+                  <label for="scraper-seconds">Seconds</label>
+                  <p-select inputId="scraper-seconds" [options]="secondsList" formControlName="seconds" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-card settings-card--performance">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-bolt" aria-hidden="true"></i></span>
+                <div class="card-heading__copy">
+                  <h2>How hard should it work?</h2>
+                  <p>Tune concurrency, retries, and patience for every source request.</p>
+                </div>
+              </div>
+
+              <div class="performance-fields">
+                <div class="field-group field-group--wide">
+                  <label class="field-label" [for]="settingsForm.get('scraper_dynamic_threads')?.value ? 'scraper_max_threads' : 'scraper_threads'">
+                    {{ settingsForm.get('scraper_dynamic_threads')?.value ? 'Maximum threads' : 'Threads' }}
+                    <i class="pi pi-info-circle" pTooltip="The number of source requests Magpie can run at once." tooltipPosition="top" aria-hidden="true"></i>
+                  </label>
+                  <div class="number-with-unit">
                     @if (settingsForm.get('scraper_dynamic_threads')?.value) {
-                      <div class="toggle-inline-field">
-                        <label class="field-label" for="scraper_max_threads">
-                          Max Threads
-                          <i class="pi pi-info-circle text-gray-400 cursor-help"
-                             pTooltip="Upper thread limit while Dynamic Threads is enabled."
-                             tooltipPosition="top">
-                          </i>
-                        </label>
-                        <p-inputNumber
-                          formControlName="scraper_max_threads"
-                          [min]="1"
-                          [max]="10000"
-                          [inputId]="'scraper_max_threads'"
-                          class="scraper-max-threads-input">
-                        </p-inputNumber>
-                      </div>
+                      <p-inputNumber formControlName="scraper_max_threads" [min]="1" [max]="10000" inputId="scraper_max_threads"></p-inputNumber>
+                    } @else {
+                      <p-inputNumber formControlName="scraper_threads" [min]="1" [max]="10000" inputId="scraper_threads"></p-inputNumber>
                     }
+                    <span>concurrent</span>
                   </div>
+                </div>
 
-                  <div class="toggle-card">
-                    <div class="toggle-leading">
-                      <p-checkbox
-                        formControlName="scraper_respect_robots_txt"
-                        [binary]="true"
-                        inputId="respect-robots">
-                      </p-checkbox>
-                    </div>
-                    <label for="respect-robots" class="toggle-content">
-                      <span class="toggle-title">Respect robots.txt</span>
-                      <span class="toggle-hint">Check each source against its robots.txt rules and skip paths that disallow the scraper.</span>
-                    </label>
+                <div class="field-group">
+                  <label class="field-label" for="scraper_retries">Retries</label>
+                  <div class="number-with-unit">
+                    <p-inputNumber formControlName="scraper_retries" [min]="0" [max]="100" inputId="scraper_retries"></p-inputNumber>
+                    <span>after failure</span>
                   </div>
+                </div>
 
-                  <div class="toggle-card">
-                    <div class="toggle-leading">
-                      <p-checkbox
-                        formControlName="proxy_limit_enabled"
-                        [binary]="true"
-                        inputId="proxy-limit-enabled">
-                      </p-checkbox>
-                    </div>
-                    <div class="toggle-content">
-                      <label for="proxy-limit-enabled" class="toggle-title">Enforce Proxy Limit</label>
-                      <span class="toggle-hint">Restrict how many proxies each account can store to prevent hoarding.</span>
+                <div class="field-group">
+                  <label class="field-label" for="scraper_timeout">Timeout</label>
+                  <div class="number-with-unit">
+                    <p-inputNumber formControlName="scraper_timeout" [min]="1000" [max]="60000" [step]="500" inputId="scraper_timeout"></p-inputNumber>
+                    <span>milliseconds</span>
+                  </div>
+                </div>
+              </div>
 
-                      <div class="proxy-grid mt-4">
-                        <div class="field-group">
-                          <label class="field-label" for="proxy_limit_max_per_user">Max Proxies Per User</label>
-                          <p-inputNumber
-                            formControlName="proxy_limit_max_per_user"
-                            [min]="0"
-                            [max]="1000000"
-                            [step]="50"
-                            [useGrouping]="false"
-                            [inputId]="'proxy_limit_max_per_user'"
-                            class="w-full">
-                          </p-inputNumber>
-                        </div>
-                        <div class="toggle-inline">
-                          <p-checkbox
-                            formControlName="proxy_limit_exclude_admins"
-                            [binary]="true"
-                            inputId="proxy-limit-exclude-admins">
-                          </p-checkbox>
-                          <label for="proxy-limit-exclude-admins" class="toggle-inline-label">Exclude admins from limit</label>
-                        </div>
+              <div class="performance-summary">
+                <strong>{{ scraperThreadLimit }}</strong>
+                <p><span>thread ceiling</span><small>Up to {{ scraperAttemptWindow }} of configured wait per source.</small></p>
+              </div>
+            </section>
+
+            <section class="settings-card settings-card--behavior">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-sparkles" aria-hidden="true"></i></span>
+                <div class="card-heading__copy">
+                  <h2>Let the scraper adapt</h2>
+                  <p>Choose the rules Magpie follows while collecting proxies.</p>
+                </div>
+              </div>
+
+              <div class="decision-list">
+                <div class="decision-row" [class.is-active]="settingsForm.get('scraper_dynamic_threads')?.value">
+                  <span class="decision-row__icon"><i class="pi pi-chart-line" aria-hidden="true"></i></span>
+                  <div class="decision-row__copy">
+                    <strong>Dynamic threads</strong>
+                    <p>Scale concurrency against the available work and current demand.</p>
+                    <span>{{ settingsForm.get('scraper_dynamic_threads')?.value ? 'Adapts up to ' + scraperThreadLimit + ' threads' : 'Uses a fixed thread count' }}</span>
+                  </div>
+                  <p-checkbox formControlName="scraper_dynamic_threads" [binary]="true" inputId="dynamic-threads" ariaLabel="Enable dynamic threads"></p-checkbox>
+                </div>
+
+                <div class="decision-row" [class.is-active]="settingsForm.get('scraper_respect_robots_txt')?.value">
+                  <span class="decision-row__icon"><i class="pi pi-shield" aria-hidden="true"></i></span>
+                  <div class="decision-row__copy">
+                    <strong>Respect robots.txt</strong>
+                    <p>Read each source policy and skip paths that disallow scraping.</p>
+                    <span>{{ settingsForm.get('scraper_respect_robots_txt')?.value ? 'Source policies enforced' : 'Source policies ignored' }}</span>
+                  </div>
+                  <p-checkbox formControlName="scraper_respect_robots_txt" [binary]="true" inputId="respect-robots" ariaLabel="Respect robots.txt"></p-checkbox>
+                </div>
+              </div>
+
+              <div class="process-rail" aria-label="Scraper process">
+                <span><i class="pi pi-download" aria-hidden="true"></i>Fetch</span>
+                <i class="pi pi-arrow-right" aria-hidden="true"></i>
+                <span><i class="pi pi-code" aria-hidden="true"></i>Parse</span>
+                <i class="pi pi-arrow-right" aria-hidden="true"></i>
+                <span><i class="pi pi-filter" aria-hidden="true"></i>Normalize</span>
+                <i class="pi pi-arrow-right" aria-hidden="true"></i>
+                <span><i class="pi pi-database" aria-hidden="true"></i>Store</span>
+              </div>
+            </section>
+
+            <section class="settings-card settings-card--limits">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-users" aria-hidden="true"></i></span>
+                <div class="card-heading__copy">
+                  <h2>How much can accounts keep?</h2>
+                  <p>Cap stored proxies per account after sources finish scraping.</p>
+                </div>
+              </div>
+
+              <div class="limit-summary" [class.is-active]="settingsForm.get('proxy_limit_enabled')?.value">
+                <div>
+                  <span>Account allowance</span>
+                  <strong>{{ proxyLimitLabel }}</strong>
+                </div>
+                <p-checkbox formControlName="proxy_limit_enabled" [binary]="true" inputId="proxy-limit-enabled" ariaLabel="Enforce proxy limit"></p-checkbox>
+              </div>
+
+              <div class="limit-fields" [class.is-disabled]="!settingsForm.get('proxy_limit_enabled')?.value">
+                <div class="field-group">
+                  <label class="field-label" for="proxy_limit_max_per_user">Maximum proxies per account</label>
+                  <p-inputNumber formControlName="proxy_limit_max_per_user" [min]="0" [max]="1000000" [step]="50" [useGrouping]="false" inputId="proxy_limit_max_per_user"></p-inputNumber>
+                </div>
+
+                <label class="inline-check" for="proxy-limit-exclude-admins">
+                  <p-checkbox formControlName="proxy_limit_exclude_admins" [binary]="true" inputId="proxy-limit-exclude-admins"></p-checkbox>
+                  <span><strong>Exclude administrators</strong><small>Admin accounts can store more than the limit.</small></span>
+                </label>
+              </div>
+            </section>
+          </div>
+        </p-tabpanel>
+
+        <p-tabpanel value="1">
+          <div class="settings-grid settings-grid--sources">
+            <section class="settings-card settings-card--sources">
+              <div class="sources-intro">
+                <div class="card-heading">
+                  <span class="card-icon"><i class="pi pi-link" aria-hidden="true"></i></span>
+                  <div class="card-heading__copy">
+                    <h2>Default scrape sources</h2>
+                    <p>Every new account starts with these proxy source URLs.</p>
+                  </div>
+                  <span class="card-count">{{ scrapeSites.length }} {{ scrapeSites.length === 1 ? 'source' : 'sources' }}</span>
+                </div>
+
+                <div class="source-flow" aria-hidden="true">
+                  <span class="source-flow__node"><i class="pi pi-globe"></i></span>
+                  <span class="source-flow__line"></span>
+                  <span class="source-flow__node"><i class="pi pi-cloud-download"></i></span>
+                  <span class="source-flow__line"></span>
+                  <span class="source-flow__node source-flow__node--active"><i class="pi pi-server"></i></span>
+                </div>
+
+                <p class="source-note">URLs stay exactly as entered. Query parameters such as <code>?protocols=http,https</code> are preserved.</p>
+              </div>
+
+              <div class="sources-editor" formArrayName="scrape_sites">
+                <div class="scrape-site-list">
+                  @for (site of scrapeSites.controls; track site; let i = $index) {
+                    <div class="scrape-site-row" [attr.data-index]="i">
+                      <span class="source-index">{{ i + 1 }}</span>
+                      <div class="field-group">
+                        <label class="field-label" for="scrape-site-{{ i }}">Source URL</label>
+                        <input id="scrape-site-{{ i }}" type="url" [formControlName]="i" pInputText placeholder="https://example.com/proxies.txt" />
                       </div>
+                      @if (scrapeSites.length > 1) {
+                        <button type="button" class="icon-button icon-button--remove" (click)="removeScrapeSite(i)" [attr.aria-label]="'Remove source ' + (i + 1)">
+                          <i class="pi pi-trash" aria-hidden="true"></i>
+                        </button>
+                      }
                     </div>
-                  </div>
-                </div>
-              </section>
-            </div>
-          </p-tabpanel>
-
-          <p-tabpanel value="1">
-            <div class="tab-stack">
-              <section class="section-card bg-neutral-950/40 border border-neutral-800 rounded-xl p-5">
-                <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 class="section-title">Default Scrape Sites</h3>
-                    <p class="section-hint">By default, these sources are added to every new account.</p>
-                  </div>
+                  }
                 </div>
 
-                <div class="mt-4" formArrayName="scrape_sites">
-                  <div class="scrape-site-list flex flex-col gap-4">
-                    @for (site of scrapeSites.controls; track site; let i = $index) {
-                      <div class="scrape-site-row flex items-start gap-3" [attr.data-index]="i">
-                        <div class="field-group flex-1">
-                          <label class="field-label" for="scrape-site-{{i}}">Source URL</label>
-                          <input
-                            id="scrape-site-{{i}}"
-                            type="text"
-                            [formControlName]="i"
-                            pInputText
-                            class="p-inputtext-sm w-full"
-                            placeholder="https://example.com/proxies"/>
-                        </div>
-                        @if (scrapeSites.length > 1) {
-                          <button
-                            type="button"
-                            class="icon-button remove mt-6"
-                            (click)="removeScrapeSite(i)">
-                            <i class="pi pi-trash"></i>
-                          </button>
-                        }
-                      </div>
-                    }
-                  </div>
-                  <div class="mt-3">
-                    <button type="button" class="chip-button" (click)="addScrapeSite()">
-                      <i class="pi pi-plus"></i>
-                      <span>Add Source</span>
-                    </button>
-                  </div>
-                  <small class="hint-text block mt-2">URLs are saved exactly as entered, including query parameters such as <code>?protocols=http,https</code>.</small>
-                </div>
-              </section>
-            </div>
-          </p-tabpanel>
-        </p-tabpanels>
-      </p-tabs>
-    </div>
+                <button type="button" class="add-button" (click)="addScrapeSite()"><i class="pi pi-plus" aria-hidden="true"></i>Add source</button>
+              </div>
+            </section>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
 
-    <footer class="panel-footer mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <p class="text-xs text-gray-500 max-w-xl">Changes will apply immediately. Save to persist them for future sessions.</p>
-      <div class="panel-actions">
-        <p-button
-          label="Requeue All Sources"
-          icon="pi pi-refresh"
-          (onClick)="confirmRequeueAllScrapeSources()"
-          [loading]="isRequeueingSources"
-          styleClass="requeue-sources-button">
-        </p-button>
-        <p-button
-          label="Save Settings"
-          icon="pi pi-save"
-          (onClick)="onSubmit()"
-          [disabled]="!settingsForm.dirty"
-          styleClass="save-button">
-        </p-button>
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span class="save-state__dot" [class.is-dirty]="settingsForm.dirty" aria-hidden="true"></span>
+        <div>
+          @if (settingsForm.dirty) {
+            <strong>Unsaved global changes</strong><p>Save when the scraper baseline looks right.</p>
+          } @else {
+            <strong>Global settings are up to date</strong><p>Changes will appear here before you save.</p>
+          }
+        </div>
+      </div>
+      <div class="save-actions">
+        <p-button type="button" label="Requeue all sources" icon="pi pi-refresh" (onClick)="confirmRequeueAllScrapeSources()" [loading]="isRequeueingSources" styleClass="requeue-sources-button"></p-button>
+        <p-button type="submit" label="Save global settings" icon="pi pi-check" [disabled]="!settingsForm.dirty || settingsForm.invalid" styleClass="save-button"></p-button>
       </div>
     </footer>
   </form>
 
-  <p-confirmDialog
-    [style]="{width: '450px'}"
-    [baseZIndex]="10000"
-    rejectButtonStyleClass="p-button-outlined">
-  </p-confirmDialog>
+  <p-confirmDialog [style]="{width: 'min(450px, calc(100vw - 2rem))'}" [baseZIndex]="10000" rejectButtonStyleClass="p-button-outlined"></p-confirmDialog>
 </div>
