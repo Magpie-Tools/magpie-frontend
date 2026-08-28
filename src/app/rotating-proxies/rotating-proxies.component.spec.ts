@@ -137,6 +137,24 @@ describe('RotatingProxiesComponent', () => {
     expect(labelStyle.whiteSpace).toBe('nowrap');
     expect(triggerStyle.flexShrink).toBe('0');
   });
+
+  it('gives the closed reputation multiselect label the available field width', () => {
+    const multiselect = fixture.nativeElement.querySelector('.p-multiselect') as HTMLElement;
+    const labelContainer = multiselect.querySelector('.p-multiselect-label-container') as HTMLElement;
+    const label = multiselect.querySelector('.p-multiselect-label') as HTMLElement;
+    const trigger = multiselect.querySelector('.p-multiselect-dropdown') as HTMLElement;
+    multiselect.style.width = '320px';
+
+    const containerStyle = getComputedStyle(labelContainer);
+    const labelStyle = getComputedStyle(label);
+    const labelRect = label.getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+
+    expect(containerStyle.flexGrow).toBe('1');
+    expect(labelStyle.width).not.toBe('1%');
+    expect(labelRect.width).toBeGreaterThan(triggerRect.width * 2);
+    expect(triggerRect.left).toBeGreaterThan(labelRect.left);
+  });
 });
 
 function createRotatorFixture(overrides: Partial<RotatingProxy> = {}): RotatingProxy {

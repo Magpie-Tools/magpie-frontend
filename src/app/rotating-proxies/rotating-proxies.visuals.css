@@ -32,17 +32,34 @@
 
 .rotating-proxies-page .p-select-label,
 .rotating-proxies-page .p-multiselect-label {
+  padding: 0.62rem 0.72rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rotating-proxies-page .p-select-label {
   display: flex;
   width: 1%;
   min-width: 0;
   flex: 1 1 auto;
   align-items: center;
   overflow: hidden;
-  padding: 0.62rem 0.72rem;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.68rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.rotating-proxies-page .p-multiselect-label-container {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.rotating-proxies-page .p-multiselect-label {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .rotating-proxies-page .p-select-dropdown,
