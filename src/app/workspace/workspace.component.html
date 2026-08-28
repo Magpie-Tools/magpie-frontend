@@ -1,620 +1,315 @@
 <main class="workspace-page">
   @if (workspaceError()) {
     <section class="page-error" role="alert">
-      <div>
-        <strong>Workspace could not be loaded</strong>
-        <span>{{ workspaceError() }}</span>
-      </div>
+      <span class="error-icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
+      <div><strong>Workspace could not be loaded</strong><span>{{ workspaceError() }}</span></div>
       <button type="button" class="button button--quiet" (click)="loadWorkspace(true)">Try again</button>
     </section>
   } @else if (workspaces.loading() && !workspaces.current()) {
-    <div class="workspace-skeleton" aria-label="Loading workspace">
+    <div class="workspace-stage workspace-skeleton" aria-label="Loading workspace">
       <div class="skeleton-heading">
         <p-skeleton width="14rem" height="1.9rem"></p-skeleton>
         <p-skeleton width="20rem" height="0.8rem"></p-skeleton>
       </div>
-      @for (_ of [1, 2, 3]; track $index) {
-        <section class="settings-section skeleton-section">
-          <p-skeleton width="9rem" height="1rem"></p-skeleton>
-          <p-skeleton width="100%" height="8rem"></p-skeleton>
-        </section>
-      }
+      <div class="workspace-grid">
+        @for (_ of [1, 2, 3, 4]; track $index) {
+          <section class="workspace-card skeleton-section">
+            <p-skeleton width="9rem" height="1rem"></p-skeleton>
+            <p-skeleton width="100%" height="8rem"></p-skeleton>
+          </section>
+        }
+      </div>
     </div>
   } @else if (workspaces.current(); as workspace) {
-    <header class="page-heading">
-      <div>
-        <h1>{{ workspace.name }}</h1>
-        <p>
-          {{ workspace.personal ? 'Personal workspace' : 'Shared workspace' }}
-          <span aria-hidden="true">·</span>
-          {{ workspace.role | titlecase }} access
-          @if (workspace.billing_admin) {
-            <span aria-hidden="true">·</span>
-            Billing access
+    <div class="workspace-stage">
+      <header class="workspace-context">
+        <div class="workspace-context__identity">
+          <span class="workspace-mark">{{ workspace.name.slice(0, 1).toUpperCase() }}</span>
+          <div>
+            <span class="context-eyebrow">{{ workspace.personal ? 'Personal workspace' : 'Shared workspace' }}</span>
+            <h1>{{ workspace.name }}</h1>
+            <p>{{ workspace.role | titlecase }} access@if (workspace.billing_admin) {<span aria-hidden="true"> · </span>Billing access}</p>
+          </div>
+        </div>
+
+        <div class="workspace-context__team">
+          @if (members().length > 0) {
+            <div class="avatar-stack" aria-label="Workspace members">
+              @for (member of members().slice(0, 4); track member.user_id) {
+                <span class="workspace-avatar" [attr.title]="member.email">{{ member.email.slice(0, 1).toUpperCase() }}</span>
+              }
+              @if (members().length > 4) {
+                <span class="workspace-avatar workspace-avatar--count">+{{ members().length - 4 }}</span>
+              }
+            </div>
           }
-        </p>
-      </div>
-    </header>
+          <div class="access-state"><span aria-hidden="true"></span>{{ workspace.subscription.status | titlecase }}</div>
+        </div>
+      </header>
 
-    <section class="settings-section capacity-section" aria-labelledby="capacity-title">
-      <div class="section-heading">
-        <div>
-          <h2 id="capacity-title">Route capacity</h2>
-          <p>Only active routes are checked and served by rotators.</p>
-        </div>
-        <div class="plan-summary">
-          <strong>{{ workspace.subscription.plan_code }}</strong>
-          <span>{{ workspace.subscription.status | titlecase }}</span>
-        </div>
-      </div>
+      <div class="workspace-grid">
+        <section class="workspace-card capacity-card" aria-labelledby="capacity-title">
+          <div class="card-heading">
+            <span class="card-icon"><i class="pi pi-sitemap" aria-hidden="true"></i></span>
+            <div><h2 id="capacity-title">How much route capacity is in use?</h2><p>Only active routes are checked and served by rotators.</p></div>
+          </div>
 
-      <div class="capacity-overview">
-        <div class="capacity-figure">
-          <strong>{{ workspace.capacity.active_routes | number }}</strong>
-          @if (workspace.capacity.activation_limit === null) {
-            <span>active routes · unlimited</span>
-          } @else {
-            <span>of {{ workspace.capacity.activation_limit | number }} active routes</span>
-          }
-        </div>
-
-        @if (workspace.capacity.activation_limit !== null) {
-          <div class="capacity-progress" role="progressbar" aria-label="Active route capacity" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="capacityPercent()">
-            <span [style.width.%]="capacityPercent()"></span>
-          </div>
-          <div class="capacity-scale">
-            <span>{{ capacityPercent() }}% used</span>
-            <span>{{ (workspace.capacity.activation_limit - workspace.capacity.active_routes) > 0 ? ((workspace.capacity.activation_limit - workspace.capacity.active_routes) | number) : 0 }} available</span>
-          </div>
-        }
-
-        @if (capacityMessage(); as message) {
-          <p class="capacity-warning" [class.capacity-warning--critical]="capacityPercent() >= 100">
-            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
-            {{ message }}
-          </p>
-        }
-      </div>
-
-      <dl class="capacity-metrics">
-        <div>
-          <dt>Stored routes</dt>
-          <dd>{{ workspace.capacity.stored_routes | number }}</dd>
-        </div>
-        <div>
-          <dt>Paused or archived</dt>
-          <dd>{{ overflowStoredRoutes() | number }}</dd>
-        </div>
-        <div>
-          <dt>Included routes</dt>
-          <dd>{{ workspace.capacity.included_routes | number }}</dd>
-        </div>
-        <div>
-          <dt>Additional routes</dt>
-          <dd>{{ workspace.capacity.additional_routes | number }}</dd>
-        </div>
-      </dl>
-
-      <div class="entitlement-grid">
-        <dl>
-          <div>
-            <dt>Overage policy</dt>
-            <dd>{{ workspace.capacity.overage_mode | titlecase }}</dd>
-          </div>
-          <div>
-            <dt>Overage routes</dt>
-            <dd>{{ workspace.capacity.overage_routes | number }}</dd>
-          </div>
-          <div>
-            <dt>Included operators</dt>
-            <dd>{{ workspace.subscription.included_operators | number }}</dd>
-          </div>
-        </dl>
-        <dl>
-          <div>
-            <dt>Statistics retention</dt>
-            <dd>{{ workspace.subscription.statistics_retention_days ? (workspace.subscription.statistics_retention_days + ' days') : 'Instance default' }}</dd>
-          </div>
-          <div>
-            <dt>Minimum check interval</dt>
-            <dd>{{ workspace.subscription.minimum_check_interval_seconds ? (workspace.subscription.minimum_check_interval_seconds + ' seconds') : 'Instance default' }}</dd>
-          </div>
-          <div>
-            <dt>Billing period</dt>
-            <dd>
-              @if (workspace.subscription.current_period_start && workspace.subscription.current_period_end) {
-                {{ workspace.subscription.current_period_start | date : 'mediumDate' }} – {{ workspace.subscription.current_period_end | date : 'mediumDate' }}
+          <div class="capacity-hero">
+            <div class="capacity-figure">
+              <strong class="metric-value">{{ workspace.capacity.active_routes | number }}</strong>
+              @if (workspace.capacity.activation_limit === null) {
+                <span>active routes with no limit</span>
               } @else {
-                Not set
+                <span>of {{ workspace.capacity.activation_limit | number }} active routes</span>
               }
-            </dd>
+            </div>
+
+            @if (workspace.capacity.activation_limit !== null) {
+              <div class="capacity-progress" role="progressbar" aria-label="Active route capacity" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="capacityPercent()">
+                <span [style.width.%]="capacityPercent()"></span>
+              </div>
+              <div class="capacity-scale"><span>{{ capacityPercent() }}% used</span><span>{{ (workspace.capacity.activation_limit - workspace.capacity.active_routes) > 0 ? ((workspace.capacity.activation_limit - workspace.capacity.active_routes) | number) : 0 }} available</span></div>
+            }
           </div>
-          <div>
-            <dt>Cancellation</dt>
-            <dd>{{ workspace.subscription.cancel_at_period_end ? 'At period end' : 'Not scheduled' }}</dd>
+
+          @if (capacityMessage(); as message) {
+            <p class="capacity-warning" [class.capacity-warning--critical]="capacityPercent() >= 100"><i class="pi pi-exclamation-circle" aria-hidden="true"></i>{{ message }}</p>
+          }
+
+          <dl class="capacity-metrics">
+            <div><dt>Stored</dt><dd class="metric-value">{{ workspace.capacity.stored_routes | number }}</dd></div>
+            <div><dt>Paused or archived</dt><dd class="metric-value">{{ overflowStoredRoutes() | number }}</dd></div>
+            <div><dt>Included</dt><dd class="metric-value">{{ workspace.capacity.included_routes | number }}</dd></div>
+            <div><dt>Additional</dt><dd class="metric-value">{{ workspace.capacity.additional_routes | number }}</dd></div>
+          </dl>
+
+          <p class="card-note"><i class="pi pi-info-circle" aria-hidden="true"></i>Paused and archived routes stay stored without using active capacity.</p>
+        </section>
+
+        <section class="workspace-card plan-card" aria-labelledby="plan-title">
+          <div class="card-heading card-heading--split">
+            <span class="card-icon"><i class="pi pi-sparkles" aria-hidden="true"></i></span>
+            <div><h2 id="plan-title">What does this plan include?</h2><p>Limits that shape checking, retention, and team access.</p></div>
+            <span class="plan-state"><strong>{{ workspace.subscription.plan_code }}</strong><small>{{ workspace.subscription.status | titlecase }}</small></span>
           </div>
-        </dl>
-      </div>
 
-      <p class="section-note">Paused and archived routes remain stored without consuming active capacity.</p>
-    </section>
+          <div class="plan-accordions">
+            <details open>
+              <summary><span><i class="pi pi-database" aria-hidden="true"></i>Capacity policy</span><i class="pi pi-chevron-down" aria-hidden="true"></i></summary>
+              <dl>
+                <div><dt>Overage policy</dt><dd>{{ workspace.capacity.overage_mode | titlecase }}</dd></div>
+                <div><dt>Overage routes</dt><dd>{{ workspace.capacity.overage_routes | number }}</dd></div>
+                <div><dt>Included operators</dt><dd>{{ workspace.subscription.included_operators | number }}</dd></div>
+              </dl>
+            </details>
+            <details open>
+              <summary><span><i class="pi pi-clock" aria-hidden="true"></i>Data and billing</span><i class="pi pi-chevron-down" aria-hidden="true"></i></summary>
+              <dl>
+                <div><dt>Statistics retention</dt><dd>{{ workspace.subscription.statistics_retention_days ? (workspace.subscription.statistics_retention_days + ' days') : 'Instance default' }}</dd></div>
+                <div><dt>Minimum check interval</dt><dd>{{ workspace.subscription.minimum_check_interval_seconds ? (workspace.subscription.minimum_check_interval_seconds + ' seconds') : 'Instance default' }}</dd></div>
+                <div>
+                  <dt>Billing period</dt>
+                  <dd>
+                    @if (workspace.subscription.current_period_start && workspace.subscription.current_period_end) {
+                      {{ workspace.subscription.current_period_start | date : 'mediumDate' }} to {{ workspace.subscription.current_period_end | date : 'mediumDate' }}
+                    } @else { Not set }
+                  </dd>
+                </div>
+                <div><dt>Cancellation</dt><dd>{{ workspace.subscription.cancel_at_period_end ? 'At period end' : 'Not scheduled' }}</dd></div>
+              </dl>
+            </details>
+          </div>
+        </section>
 
-    <section class="settings-section" aria-labelledby="details-title">
-      <div class="section-heading">
-        <div>
-          <h2 id="details-title">Workspace details</h2>
-          <p>Name and ownership boundary for workspace data.</p>
-        </div>
-      </div>
+        <section class="workspace-card identity-card" aria-labelledby="details-title">
+          <div class="card-heading">
+            <span class="card-icon"><i class="pi pi-pencil" aria-hidden="true"></i></span>
+            <div><h2 id="details-title">What identifies this workspace?</h2><p>The name appears in navigation, invitations, and account records.</p></div>
+          </div>
 
-      <div class="detail-layout">
-        <div class="detail-primary">
-          <label class="field-label" for="workspace-name">Workspace name</label>
-          @if (workspaces.canAdminister()) {
-            <div class="inline-form">
-              <input
-                id="workspace-name"
-                class="text-input"
-                type="text"
-                maxlength="120"
-                [(ngModel)]="workspaceName"
-                [disabled]="savingWorkspace()"
-              />
-              @if (workspaceName.trim() && workspaceName.trim() !== workspace.name) {
-                <button type="button" class="button button--primary" [disabled]="savingWorkspace()" (click)="renameWorkspace()">
-                  @if (savingWorkspace()) {
-                    <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-                  }
-                  Save
+          <div class="identity-form">
+            <label class="field-label" for="workspace-name">Workspace name</label>
+            @if (workspaces.canAdminister()) {
+              <div class="inline-form">
+                <input id="workspace-name" class="text-input" type="text" maxlength="120" [(ngModel)]="workspaceName" [disabled]="savingWorkspace()" />
+                @if (workspaceName.trim() && workspaceName.trim() !== workspace.name) {
+                  <button type="button" class="button button--primary" [disabled]="savingWorkspace()" (click)="renameWorkspace()">
+                    @if (savingWorkspace()) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}Save name
+                  </button>
+                }
+              </div>
+            } @else {
+              <div class="read-only-value">{{ workspace.name }}</div>
+            }
+          </div>
+
+          <dl class="workspace-facts">
+            <div><dt>Type</dt><dd>{{ workspace.personal ? 'Personal' : 'Shared' }}</dd></div>
+            <div><dt>Your role</dt><dd>{{ workspace.role | titlecase }}</dd></div>
+            <div><dt>Created</dt><dd>{{ workspace.created_at | date : 'mediumDate' }}</dd></div>
+          </dl>
+        </section>
+
+        <section class="workspace-card create-card" aria-labelledby="create-title">
+          <button type="button" class="disclosure" [attr.aria-expanded]="createExpanded()" aria-controls="create-workspace-form" (click)="createExpanded.set(!createExpanded())">
+            <span class="card-icon"><i class="pi pi-plus" aria-hidden="true"></i></span>
+            <span class="disclosure__copy"><strong id="create-title">Create another workspace</strong><small>Start a separate boundary for routes, settings, members, and capacity.</small></span>
+            <i class="pi disclosure__chevron" [class.pi-chevron-down]="!createExpanded()" [class.pi-chevron-up]="createExpanded()" aria-hidden="true"></i>
+          </button>
+          @if (createExpanded()) {
+            <div id="create-workspace-form" class="create-form">
+              <label class="field-label" for="new-workspace-name">New workspace name</label>
+              <div class="inline-form">
+                <input id="new-workspace-name" class="text-input" type="text" maxlength="120" placeholder="Production" [(ngModel)]="newWorkspaceName" />
+                <button type="button" class="button button--primary" [disabled]="creatingWorkspace() || !newWorkspaceName.trim()" (click)="createWorkspace()">
+                  @if (creatingWorkspace()) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}Create workspace
                 </button>
+              </div>
+            </div>
+          } @else {
+            <div class="boundary-visual" aria-hidden="true">
+              <span><i class="pi pi-box"></i></span><i class="pi pi-arrow-right"></i><span><i class="pi pi-box"></i></span>
+            </div>
+          }
+        </section>
+
+        <section class="workspace-card access-card" aria-labelledby="access-title">
+          <div class="card-heading card-heading--split">
+            <span class="card-icon"><i class="pi pi-users" aria-hidden="true"></i></span>
+            <div><h2 id="access-title">Who can use this workspace?</h2><p>Members enter after accepting an invitation. Role changes apply when saved.</p></div>
+            <span class="section-count">{{ members().length }} {{ members().length === 1 ? 'member' : 'members' }}</span>
+          </div>
+
+          @if (workspaces.canAdminister()) {
+            <form class="invite-form" (ngSubmit)="sendInvitation()">
+              <div class="form-heading"><span class="invite-icon"><i class="pi pi-user-plus" aria-hidden="true"></i></span><div><strong>Invite a member</strong><span>Existing Magpie accounts only. Invitations expire automatically.</span></div></div>
+              <div class="invite-fields">
+                <label><span>Email address</span><input class="text-input" type="email" name="inviteEmail" autocomplete="off" placeholder="member@example.com" [(ngModel)]="inviteEmail" /></label>
+                <label><span>Role</span><select class="select-input" name="inviteRole" [(ngModel)]="inviteRole">@for (role of invitationRoleOptions(); track role) {<option [ngValue]="role">{{ role | titlecase }}</option>}</select></label>
+                @if (workspaces.isOwner()) {
+                  <label class="checkbox-field"><input type="checkbox" name="inviteBillingAdmin" [(ngModel)]="inviteBillingAdmin" /><span>Billing access</span></label>
+                }
+                <button type="submit" class="button button--primary invite-submit" [disabled]="sendingInvitation() || !inviteEmail.trim()">@if (sendingInvitation()) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}Send invitation</button>
+              </div>
+              @if (inviteError()) {<p class="form-error" role="alert">{{ inviteError() }}</p>}
+            </form>
+          }
+
+          <div class="subsection-heading">
+            <div><h3>Members</h3><p>Owners control roles, billing access, and membership.</p></div>
+            @if (showMemberSearch()) {
+              <label class="search-field"><i class="pi pi-search" aria-hidden="true"></i><span class="sr-only">Search members</span><input type="search" placeholder="Search members" [ngModel]="memberSearch()" (ngModelChange)="memberSearch.set($event)" /></label>
+            }
+          </div>
+
+          @if (membersError()) {
+            <div class="inline-error" role="alert"><div><strong>Members could not be loaded</strong><span>{{ membersError() }}</span></div><button type="button" class="button button--quiet" (click)="loadMembers()">Try again</button></div>
+          } @else if (loadingMembers()) {
+            <div class="data-list" aria-label="Loading members">
+              @for (_ of [1, 2, 3]; track $index) {
+                <div class="data-row member-grid member-row--skeleton"><div><p-skeleton width="13rem" height=".9rem"></p-skeleton><p-skeleton width="7rem" height=".7rem"></p-skeleton></div><p-skeleton width="6rem" height="2.2rem"></p-skeleton><p-skeleton width="4rem" height=".8rem"></p-skeleton><p-skeleton width="6rem" height=".8rem"></p-skeleton><p-skeleton width="5rem" height="2.2rem"></p-skeleton></div>
               }
             </div>
           } @else {
-            <div class="read-only-value">{{ workspace.name }}</div>
-          }
-        </div>
-
-        <dl class="workspace-facts">
-          <div>
-            <dt>Type</dt>
-            <dd>{{ workspace.personal ? 'Personal' : 'Shared' }}</dd>
-          </div>
-          <div>
-            <dt>Your role</dt>
-            <dd>{{ workspace.role | titlecase }}</dd>
-          </div>
-          <div>
-            <dt>Created</dt>
-            <dd>{{ workspace.created_at | date : 'mediumDate' }}</dd>
-          </div>
-        </dl>
-      </div>
-    </section>
-
-    <section class="settings-section access-section" aria-labelledby="access-title">
-      <div class="section-heading">
-        <div>
-          <h2 id="access-title">Access</h2>
-          <p>Members can use the workspace only after accepting an invitation.</p>
-        </div>
-        <span class="section-count">{{ members().length }} {{ members().length === 1 ? 'member' : 'members' }}</span>
-      </div>
-
-      @if (workspaces.canAdminister()) {
-        <form class="invite-form" (ngSubmit)="sendInvitation()">
-          <div class="form-heading">
-            <strong>Invite a member</strong>
-            <span>Existing Magpie accounts only. Invitations expire automatically.</span>
-          </div>
-          <div class="invite-fields">
-            <label>
-              <span>Email address</span>
-              <input class="text-input" type="email" name="inviteEmail" autocomplete="off" placeholder="member@example.com" [(ngModel)]="inviteEmail" />
-            </label>
-            <label>
-              <span>Role</span>
-              <select class="select-input" name="inviteRole" [(ngModel)]="inviteRole">
-                @for (role of invitationRoleOptions(); track role) {
-                  <option [ngValue]="role">{{ role | titlecase }}</option>
+            <div class="data-list member-list">
+              <div class="data-header member-grid" aria-hidden="true"><span>Member</span><span>Role</span><span>Billing</span><span>Joined</span><span></span></div>
+              @for (member of filteredMembers(); track member.user_id) {
+                @if (memberEdits[member.user_id]; as edit) {
+                  <article class="data-row member-grid">
+                    <div class="identity-cell"><span class="avatar" aria-hidden="true">{{ member.email.slice(0, 1).toUpperCase() }}</span><div><strong>{{ member.email }}</strong><span>{{ member.role === 'owner' ? 'Workspace owner' : 'User account' }}</span></div></div>
+                    <div class="control-cell" data-label="Role">
+                      @if (canEditMemberRole(member)) {
+                        <select class="select-input select-input--compact" [ngModel]="edit.role" (ngModelChange)="setMemberRole(member, $event)" [disabled]="savingMemberIds()[member.user_id]" [attr.aria-label]="'Role for ' + member.email">@for (role of memberRoleOptions(); track role) {<option [ngValue]="role">{{ role | titlecase }}</option>}</select>
+                      } @else {<span class="plain-value">{{ member.role | titlecase }}</span>}
+                    </div>
+                    <div class="control-cell" data-label="Billing">
+                      @if (canEditMemberBilling(member)) {
+                        <label class="compact-checkbox"><input type="checkbox" [ngModel]="edit.billing_admin" (ngModelChange)="setMemberBilling(member, $event)" [disabled]="savingMemberIds()[member.user_id]" [attr.aria-label]="'Billing access for ' + member.email" /><span>{{ edit.billing_admin ? 'Yes' : 'No' }}</span></label>
+                      } @else {<span class="plain-value">{{ member.billing_admin ? 'Yes' : 'No' }}</span>}
+                    </div>
+                    <span class="plain-value joined-value" data-label="Joined">{{ member.joined_at | date : 'mediumDate' }}</span>
+                    <div class="row-actions">
+                      @if (isMemberDirty(member)) {<button type="button" class="button button--quiet button--compact" [disabled]="savingMemberIds()[member.user_id]" (click)="saveMember(member)">@if (savingMemberIds()[member.user_id]) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}Save</button>}
+                      @if (canRemoveMember(member) || memberRemovalReason(member)) {
+                        <span class="tooltip-target" [pTooltip]="memberRemovalReason(member)" tooltipPosition="top" [attr.tabindex]="memberRemovalReason(member) ? 0 : null" [attr.aria-label]="memberRemovalReason(member) ?? null">
+                          <button type="button" class="icon-button icon-button--danger" [disabled]="!canRemoveMember(member) || savingMemberIds()[member.user_id]" [attr.aria-label]="'Remove ' + member.email" (click)="requestMemberRemoval(member)"><i class="pi pi-trash" aria-hidden="true"></i></button>
+                        </span>
+                      }
+                    </div>
+                  </article>
                 }
-              </select>
-            </label>
-            @if (workspaces.isOwner()) {
-              <label class="checkbox-field">
-                <input type="checkbox" name="inviteBillingAdmin" [(ngModel)]="inviteBillingAdmin" />
-                <span>Billing access</span>
-              </label>
-            }
-            <button type="submit" class="button button--primary invite-submit" [disabled]="sendingInvitation() || !inviteEmail.trim()">
-              @if (sendingInvitation()) {
-                <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-              }
-              Send invitation
-            </button>
-          </div>
-          @if (inviteError()) {
-            <p class="form-error" role="alert">{{ inviteError() }}</p>
-          }
-        </form>
-      }
-
-      <div class="subsection-heading">
-        <div>
-          <h3>Members</h3>
-          <p>Role changes apply immediately after saving.</p>
-        </div>
-        @if (showMemberSearch()) {
-          <label class="search-field">
-            <i class="pi pi-search" aria-hidden="true"></i>
-            <span class="sr-only">Search members</span>
-            <input
-              type="search"
-              placeholder="Search members"
-              [ngModel]="memberSearch()"
-              (ngModelChange)="memberSearch.set($event)"
-            />
-          </label>
-        }
-      </div>
-
-      @if (membersError()) {
-        <div class="inline-error" role="alert">
-          <div>
-            <strong>Members could not be loaded</strong>
-            <span>{{ membersError() }}</span>
-          </div>
-          <button type="button" class="button button--quiet" (click)="loadMembers()">Try again</button>
-        </div>
-      } @else if (loadingMembers()) {
-        <div class="data-list" aria-label="Loading members">
-          @for (_ of [1, 2, 3]; track $index) {
-            <div class="data-row member-row member-row--skeleton">
-              <div><p-skeleton width="13rem" height=".9rem"></p-skeleton><p-skeleton width="7rem" height=".7rem"></p-skeleton></div>
-              <p-skeleton width="6rem" height="2.2rem"></p-skeleton>
-              <p-skeleton width="4rem" height=".8rem"></p-skeleton>
-              <p-skeleton width="6rem" height=".8rem"></p-skeleton>
-              <p-skeleton width="5rem" height="2.2rem"></p-skeleton>
+              } @empty {<div class="list-empty">No members match your search.</div>}
             </div>
           }
-        </div>
-      } @else {
-        <div class="data-list member-list">
-          <div class="data-header member-grid" aria-hidden="true">
-            <span>Member</span>
-            <span>Role</span>
-            <span>Billing</span>
-            <span>Joined</span>
-            <span></span>
-          </div>
-          @for (member of filteredMembers(); track member.user_id) {
-            @if (memberEdits[member.user_id]; as edit) {
-              <article class="data-row member-grid">
-                <div class="identity-cell">
-                  <span class="avatar" aria-hidden="true">{{ member.email.slice(0, 1).toUpperCase() }}</span>
-                  <div>
-                    <strong>{{ member.email }}</strong>
-                    <span>User account</span>
-                  </div>
-                </div>
 
-                <div class="control-cell" data-label="Role">
-                  @if (canEditMemberRole(member)) {
-                    <select
-                      class="select-input select-input--compact"
-                      [ngModel]="edit.role"
-                      (ngModelChange)="setMemberRole(member, $event)"
-                      [disabled]="savingMemberIds()[member.user_id]"
-                      [attr.aria-label]="'Role for ' + member.email"
-                    >
-                      @for (role of memberRoleOptions(); track role) {
-                        <option [ngValue]="role">{{ role | titlecase }}</option>
-                      }
-                    </select>
-                  } @else {
-                    <span class="plain-value">{{ member.role | titlecase }}</span>
+          <p class="section-note">Removing a member revokes access only. Routes and capacity do not change.</p>
+
+          @if (workspaces.canAdminister()) {
+            <div class="subsection-heading pending-heading"><div><h3>Pending invitations</h3><p>Edit access without renewing the expiry. Notification emails cannot be resent.</p></div><span class="section-count">{{ invitations().length }} pending</span></div>
+
+            @if (invitationsError()) {
+              <div class="inline-error" role="alert"><div><strong>Invitations could not be loaded</strong><span>{{ invitationsError() }}</span></div><button type="button" class="button button--quiet" (click)="loadInvitations()">Try again</button></div>
+            } @else if (loadingInvitations()) {
+              <div class="data-list" aria-label="Loading pending invitations">
+                @for (_ of [1, 2]; track $index) {<div class="data-row invitation-grid invitation-row--skeleton"><div><p-skeleton width="12rem" height=".9rem"></p-skeleton><p-skeleton width="8rem" height=".7rem"></p-skeleton></div><p-skeleton width="6rem" height="2.2rem"></p-skeleton><p-skeleton width="4rem" height=".8rem"></p-skeleton><p-skeleton width="8rem" height=".8rem"></p-skeleton><p-skeleton width="7rem" height=".8rem"></p-skeleton><p-skeleton width="5rem" height="2.2rem"></p-skeleton></div>}
+              </div>
+            } @else if (invitations().length === 0) {
+              <div class="list-empty list-empty--bordered">No pending invitations.</div>
+            } @else {
+              <div class="data-list invitation-list">
+                <div class="data-header invitation-grid" aria-hidden="true"><span>Recipient</span><span>Role</span><span>Billing</span><span>Expires</span><span>Notification</span><span></span></div>
+                @for (invitation of invitations(); track invitation.id) {
+                  @if (invitationEdits[invitation.id]; as edit) {
+                    <article class="data-row invitation-grid">
+                      <div class="identity-cell identity-cell--invitation"><span class="avatar avatar--pending" aria-hidden="true"><i class="pi pi-envelope"></i></span><div><strong>{{ invitation.invitee_email }}</strong><span>Invited by {{ invitation.inviter_email }}</span></div></div>
+                      <div class="control-cell" data-label="Role">
+                        @if (canManageInvitation(invitation)) {<select class="select-input select-input--compact" [ngModel]="edit.role" (ngModelChange)="setInvitationRole(invitation, $event)" [disabled]="savingInvitationIds()[invitation.id]" [attr.aria-label]="'Invitation role for ' + invitation.invitee_email">@for (role of invitationRoleOptions(); track role) {<option [ngValue]="role">{{ role | titlecase }}</option>}</select>} @else {<span class="plain-value">{{ invitation.role | titlecase }}</span>}
+                      </div>
+                      <div class="control-cell" data-label="Billing">
+                        @if (workspaces.isOwner() && canManageInvitation(invitation)) {<label class="compact-checkbox"><input type="checkbox" [ngModel]="edit.billing_admin" (ngModelChange)="setInvitationBilling(invitation, $event)" [disabled]="savingInvitationIds()[invitation.id]" [attr.aria-label]="'Invitation billing access for ' + invitation.invitee_email" /><span>{{ edit.billing_admin ? 'Yes' : 'No' }}</span></label>} @else {<span class="plain-value">{{ invitation.billing_admin ? 'Yes' : 'No' }}</span>}
+                      </div>
+                      <span class="plain-value" data-label="Expires">{{ invitation.expires_at | date : 'mediumDate' }}</span>
+                      <span class="notification-state" [class.notification-state--failed]="invitation.notification_status === 'failed'" data-label="Notification"><i class="pi" [class]="'pi ' + notificationIcon(invitation.notification_status)" aria-hidden="true"></i>{{ notificationLabel(invitation.notification_status) }}</span>
+                      <div class="row-actions">
+                        @if (invitationDirty(invitation)) {<button type="button" class="button button--quiet button--compact" [disabled]="savingInvitationIds()[invitation.id]" (click)="saveInvitation(invitation)">@if (savingInvitationIds()[invitation.id]) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}Save</button>}
+                        @if (canManageInvitation(invitation)) {<button type="button" class="icon-button icon-button--danger" [disabled]="savingInvitationIds()[invitation.id]" [attr.aria-label]="'Revoke invitation for ' + invitation.invitee_email" (click)="requestInvitationRevoke(invitation)"><i class="pi pi-times" aria-hidden="true"></i></button>}
+                      </div>
+                    </article>
                   }
-                </div>
-
-                <div class="control-cell" data-label="Billing">
-                  @if (canEditMemberBilling(member)) {
-                    <label class="compact-checkbox">
-                      <input
-                        type="checkbox"
-                        [ngModel]="edit.billing_admin"
-                        (ngModelChange)="setMemberBilling(member, $event)"
-                        [disabled]="savingMemberIds()[member.user_id]"
-                        [attr.aria-label]="'Billing access for ' + member.email"
-                      />
-                      <span>{{ edit.billing_admin ? 'Yes' : 'No' }}</span>
-                    </label>
-                  } @else {
-                    <span class="plain-value">{{ member.billing_admin ? 'Yes' : 'No' }}</span>
-                  }
-                </div>
-
-                <span class="plain-value joined-value" data-label="Joined">{{ member.joined_at | date : 'mediumDate' }}</span>
-
-                <div class="row-actions">
-                  @if (isMemberDirty(member)) {
-                    <button type="button" class="button button--quiet button--compact" [disabled]="savingMemberIds()[member.user_id]" (click)="saveMember(member)">
-                      @if (savingMemberIds()[member.user_id]) {
-                        <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-                      }
-                      Save
-                    </button>
-                  }
-                  @if (canRemoveMember(member) || memberRemovalReason(member)) {
-                    <span
-                      class="tooltip-target"
-                      [pTooltip]="memberRemovalReason(member)"
-                      tooltipPosition="top"
-                      [attr.tabindex]="memberRemovalReason(member) ? 0 : null"
-                      [attr.aria-label]="memberRemovalReason(member) ?? null"
-                    >
-                      <button
-                        type="button"
-                        class="icon-button icon-button--danger"
-                        [disabled]="!canRemoveMember(member) || savingMemberIds()[member.user_id]"
-                        [attr.aria-label]="'Remove ' + member.email"
-                        (click)="requestMemberRemoval(member)"
-                      >
-                        <i class="pi pi-trash" aria-hidden="true"></i>
-                      </button>
-                    </span>
-                  }
-                </div>
-              </article>
-            }
-          } @empty {
-            <div class="list-empty">No members match your search.</div>
-          }
-        </div>
-      }
-
-      <p class="section-note">Removing a member revokes access only. It does not remove routes or change capacity.</p>
-
-      @if (workspaces.canAdminister()) {
-        <div class="subsection-heading pending-heading">
-          <div>
-            <h3>Pending invitations</h3>
-            <p>Edit access without renewing the expiry. Notification emails cannot be resent.</p>
-          </div>
-          <span class="section-count">{{ invitations().length }} pending</span>
-        </div>
-
-        @if (invitationsError()) {
-          <div class="inline-error" role="alert">
-            <div>
-              <strong>Invitations could not be loaded</strong>
-              <span>{{ invitationsError() }}</span>
-            </div>
-            <button type="button" class="button button--quiet" (click)="loadInvitations()">Try again</button>
-          </div>
-        } @else if (loadingInvitations()) {
-          <div class="data-list" aria-label="Loading pending invitations">
-            @for (_ of [1, 2]; track $index) {
-              <div class="data-row invitation-grid invitation-row--skeleton">
-                <div><p-skeleton width="12rem" height=".9rem"></p-skeleton><p-skeleton width="8rem" height=".7rem"></p-skeleton></div>
-                <p-skeleton width="6rem" height="2.2rem"></p-skeleton>
-                <p-skeleton width="4rem" height=".8rem"></p-skeleton>
-                <p-skeleton width="8rem" height=".8rem"></p-skeleton>
-                <p-skeleton width="7rem" height=".8rem"></p-skeleton>
-                <p-skeleton width="5rem" height="2.2rem"></p-skeleton>
+                }
               </div>
             }
-          </div>
-        } @else if (invitations().length === 0) {
-          <div class="list-empty list-empty--bordered">No pending invitations.</div>
-        } @else {
-          <div class="data-list invitation-list">
-            <div class="data-header invitation-grid" aria-hidden="true">
-              <span>Recipient</span>
-              <span>Role</span>
-              <span>Billing</span>
-              <span>Expires</span>
-              <span>Notification</span>
-              <span></span>
-            </div>
-            @for (invitation of invitations(); track invitation.id) {
-              @if (invitationEdits[invitation.id]; as edit) {
-                <article class="data-row invitation-grid">
-                  <div class="identity-cell identity-cell--invitation">
-                    <div>
-                      <strong>{{ invitation.invitee_email }}</strong>
-                      <span>Invited by {{ invitation.inviter_email }}</span>
-                    </div>
-                  </div>
-
-                  <div class="control-cell" data-label="Role">
-                    @if (canManageInvitation(invitation)) {
-                      <select
-                        class="select-input select-input--compact"
-                        [ngModel]="edit.role"
-                        (ngModelChange)="setInvitationRole(invitation, $event)"
-                        [disabled]="savingInvitationIds()[invitation.id]"
-                        [attr.aria-label]="'Invitation role for ' + invitation.invitee_email"
-                      >
-                        @for (role of invitationRoleOptions(); track role) {
-                          <option [ngValue]="role">{{ role | titlecase }}</option>
-                        }
-                      </select>
-                    } @else {
-                      <span class="plain-value">{{ invitation.role | titlecase }}</span>
-                    }
-                  </div>
-
-                  <div class="control-cell" data-label="Billing">
-                    @if (workspaces.isOwner() && canManageInvitation(invitation)) {
-                      <label class="compact-checkbox">
-                        <input
-                          type="checkbox"
-                          [ngModel]="edit.billing_admin"
-                          (ngModelChange)="setInvitationBilling(invitation, $event)"
-                          [disabled]="savingInvitationIds()[invitation.id]"
-                          [attr.aria-label]="'Invitation billing access for ' + invitation.invitee_email"
-                        />
-                        <span>{{ edit.billing_admin ? 'Yes' : 'No' }}</span>
-                      </label>
-                    } @else {
-                      <span class="plain-value">{{ invitation.billing_admin ? 'Yes' : 'No' }}</span>
-                    }
-                  </div>
-
-                  <span class="plain-value" data-label="Expires">{{ invitation.expires_at | date : 'mediumDate' }}</span>
-
-                  <span class="notification-state" [class.notification-state--failed]="invitation.notification_status === 'failed'" data-label="Notification">
-                    <i class="pi" [class]="'pi ' + notificationIcon(invitation.notification_status)" aria-hidden="true"></i>
-                    {{ notificationLabel(invitation.notification_status) }}
-                  </span>
-
-                  <div class="row-actions">
-                    @if (invitationDirty(invitation)) {
-                      <button type="button" class="button button--quiet button--compact" [disabled]="savingInvitationIds()[invitation.id]" (click)="saveInvitation(invitation)">
-                        @if (savingInvitationIds()[invitation.id]) {
-                          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-                        }
-                        Save
-                      </button>
-                    }
-                    @if (canManageInvitation(invitation)) {
-                      <button type="button" class="icon-button icon-button--danger" [disabled]="savingInvitationIds()[invitation.id]" [attr.aria-label]="'Revoke invitation for ' + invitation.invitee_email" (click)="requestInvitationRevoke(invitation)">
-                        <i class="pi pi-times" aria-hidden="true"></i>
-                      </button>
-                    }
-                  </div>
-                </article>
-              }
-            }
-          </div>
-        }
-      }
-    </section>
-
-    <section class="settings-section create-section" aria-labelledby="create-title">
-      <button type="button" class="disclosure" [attr.aria-expanded]="createExpanded()" aria-controls="create-workspace-form" (click)="createExpanded.set(!createExpanded())">
-        <span>
-          <strong id="create-title">Create another workspace</strong>
-          <small>Start a separate boundary for routes, settings, members, and capacity.</small>
-        </span>
-        <i class="pi" [class.pi-chevron-down]="!createExpanded()" [class.pi-chevron-up]="createExpanded()" aria-hidden="true"></i>
-      </button>
-      @if (createExpanded()) {
-        <div id="create-workspace-form" class="create-form">
-          <label class="field-label" for="new-workspace-name">Workspace name</label>
-          <div class="inline-form">
-            <input id="new-workspace-name" class="text-input" type="text" maxlength="120" placeholder="Production" [(ngModel)]="newWorkspaceName" />
-            <button type="button" class="button button--primary" [disabled]="creatingWorkspace() || !newWorkspaceName.trim()" (click)="createWorkspace()">
-              @if (creatingWorkspace()) {
-                <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-              }
-              Create workspace
-            </button>
-          </div>
-        </div>
-      }
-    </section>
-  } @else {
-    <section class="page-error">
-      <div>
-        <strong>No workspace is available</strong>
-        <span>Reload the page or create a workspace after signing in again.</span>
+          }
+        </section>
       </div>
-      <button type="button" class="button button--quiet" (click)="loadWorkspace(true)">Reload</button>
-    </section>
+    </div>
+  } @else {
+    <section class="page-error"><span class="error-icon"><i class="pi pi-folder-open" aria-hidden="true"></i></span><div><strong>No workspace is available</strong><span>Reload the page or create a workspace after signing in again.</span></div><button type="button" class="button button--quiet" (click)="loadWorkspace(true)">Reload</button></section>
   }
 </main>
 
-<p-dialog
-  [visible]="!!removalTarget()"
-  (visibleChange)="!$event && removalTarget.set(null)"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="!removingMember()"
-  [closable]="!removingMember()"
-  [style]="{ width: '30rem' }"
-  [breakpoints]="{ '640px': '94vw' }"
-  [appendTo]="'body'"
->
-  <ng-template pTemplate="header">
-    <span class="dialog-title">Remove workspace member</span>
-  </ng-template>
+<p-dialog [visible]="!!removalTarget()" (visibleChange)="!$event && removalTarget.set(null)" [modal]="true" [draggable]="false" [resizable]="false" [dismissableMask]="!removingMember()" [closable]="!removingMember()" [style]="{ width: '30rem' }" [breakpoints]="{ '640px': '94vw' }" [appendTo]="'body'">
+  <ng-template pTemplate="header"><span class="dialog-title">Remove workspace member</span></ng-template>
   @if (removalTarget(); as member) {
-    <div class="dialog-body">
-      <p>Remove <strong>{{ member.email }}</strong> from this workspace?</p>
-      <p class="dialog-note">Their access ends immediately. Workspace routes and capacity are not changed.</p>
-    </div>
-    <div class="dialog-actions">
-      <button type="button" class="button button--quiet" [disabled]="removingMember()" (click)="removalTarget.set(null)">Cancel</button>
-      <button type="button" class="button button--danger" [disabled]="removingMember()" (click)="confirmMemberRemoval()">
-        @if (removingMember()) {
-          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-        }
-        Remove member
-      </button>
-    </div>
+    <div class="dialog-body"><p>Remove <strong>{{ member.email }}</strong> from this workspace?</p><p class="dialog-note">Their access ends immediately. Workspace routes and capacity do not change.</p></div>
+    <div class="dialog-actions"><button type="button" class="button button--quiet" [disabled]="removingMember()" (click)="removalTarget.set(null)">Cancel</button><button type="button" class="button button--danger" [disabled]="removingMember()" (click)="confirmMemberRemoval()">@if (removingMember()) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}Remove member</button></div>
   }
 </p-dialog>
 
-<p-dialog
-  [visible]="!!ownershipChange()"
-  (visibleChange)="!$event && ownershipChange.set(null)"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="true"
-  [style]="{ width: '32rem' }"
-  [breakpoints]="{ '640px': '94vw' }"
-  [appendTo]="'body'"
->
-  <ng-template pTemplate="header">
-    <span class="dialog-title">Confirm ownership change</span>
-  </ng-template>
+<p-dialog [visible]="!!ownershipChange()" (visibleChange)="!$event && ownershipChange.set(null)" [modal]="true" [draggable]="false" [resizable]="false" [dismissableMask]="true" [style]="{ width: '32rem' }" [breakpoints]="{ '640px': '94vw' }" [appendTo]="'body'">
+  <ng-template pTemplate="header"><span class="dialog-title">Confirm ownership change</span></ng-template>
   @if (ownershipChange(); as change) {
     <div class="dialog-body">
-      @if (change.role === 'owner') {
-        <p>Make <strong>{{ change.member.email }}</strong> a workspace owner?</p>
-        <p class="dialog-note">Owners can manage all members, billing access, and ownership. Existing owners keep their access.</p>
-      } @else {
-        <p>Change <strong>{{ change.member.email }}</strong> from owner to {{ change.role }}?</p>
-        <p class="dialog-note">Owner access is removed immediately. The workspace must always keep at least one owner.</p>
-      }
+      @if (change.role === 'owner') {<p>Make <strong>{{ change.member.email }}</strong> a workspace owner?</p><p class="dialog-note">Owners can manage all members, billing access, and ownership. Existing owners keep their access.</p>} @else {<p>Change <strong>{{ change.member.email }}</strong> from owner to {{ change.role }}?</p><p class="dialog-note">Owner access ends immediately. The workspace must always keep at least one owner.</p>}
     </div>
-    <div class="dialog-actions">
-      <button type="button" class="button button--quiet" (click)="ownershipChange.set(null)">Cancel</button>
-      <button type="button" class="button button--primary" (click)="confirmOwnershipChange()">Confirm change</button>
-    </div>
+    <div class="dialog-actions"><button type="button" class="button button--quiet" (click)="ownershipChange.set(null)">Cancel</button><button type="button" class="button button--primary" (click)="confirmOwnershipChange()">Confirm change</button></div>
   }
 </p-dialog>
 
-<p-dialog
-  [visible]="!!revokeTarget()"
-  (visibleChange)="!$event && revokeTarget.set(null)"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="!revokingInvitation()"
-  [closable]="!revokingInvitation()"
-  [style]="{ width: '30rem' }"
-  [breakpoints]="{ '640px': '94vw' }"
-  [appendTo]="'body'"
->
-  <ng-template pTemplate="header">
-    <span class="dialog-title">Revoke invitation</span>
-  </ng-template>
+<p-dialog [visible]="!!revokeTarget()" (visibleChange)="!$event && revokeTarget.set(null)" [modal]="true" [draggable]="false" [resizable]="false" [dismissableMask]="!revokingInvitation()" [closable]="!revokingInvitation()" [style]="{ width: '30rem' }" [breakpoints]="{ '640px': '94vw' }" [appendTo]="'body'">
+  <ng-template pTemplate="header"><span class="dialog-title">Revoke invitation</span></ng-template>
   @if (revokeTarget(); as invitation) {
-    <div class="dialog-body">
-      <p>Revoke the invitation for <strong>{{ invitation.invitee_email }}</strong>?</p>
-      <p class="dialog-note">The invitation disappears from their inbox and cannot be accepted.</p>
-    </div>
-    <div class="dialog-actions">
-      <button type="button" class="button button--quiet" [disabled]="revokingInvitation()" (click)="revokeTarget.set(null)">Cancel</button>
-      <button type="button" class="button button--danger" [disabled]="revokingInvitation()" (click)="confirmInvitationRevoke()">
-        @if (revokingInvitation()) {
-          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-        }
-        Revoke invitation
-      </button>
-    </div>
+    <div class="dialog-body"><p>Revoke the invitation for <strong>{{ invitation.invitee_email }}</strong>?</p><p class="dialog-note">The invitation disappears from their inbox and cannot be accepted.</p></div>
+    <div class="dialog-actions"><button type="button" class="button button--quiet" [disabled]="revokingInvitation()" (click)="revokeTarget.set(null)">Cancel</button><button type="button" class="button button--danger" [disabled]="revokingInvitation()" (click)="confirmInvitationRevoke()">@if (revokingInvitation()) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}Revoke invitation</button></div>
   }
 </p-dialog>

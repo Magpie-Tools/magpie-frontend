@@ -1,5 +1,7 @@
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/outfit";
 @import "./app/checker/settings/checker-settings.visuals.css";
+@import "./app/workspace/workspace.visuals.css";
 @import "primeicons/primeicons.css";
 @import "tailwindcss";
 @plugin "tailwindcss-primeui";
