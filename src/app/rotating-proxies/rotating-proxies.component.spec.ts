@@ -122,6 +122,21 @@ describe('RotatingProxiesComponent', () => {
     expect(component.selectedRotator()).toBe(rotator);
     expect(component.detailsVisible()).toBeTrue();
   });
+
+  it('keeps closed select labels readable beside their dropdown trigger', () => {
+    const select = fixture.nativeElement.querySelector('.p-select') as HTMLElement;
+    const label = select.querySelector('.p-select-label') as HTMLElement;
+    const trigger = select.querySelector('.p-select-dropdown') as HTMLElement;
+    const selectStyle = getComputedStyle(select);
+    const labelStyle = getComputedStyle(label);
+    const triggerStyle = getComputedStyle(trigger);
+
+    expect(selectStyle.display).toBe('flex');
+    expect(selectStyle.flexWrap).toBe('nowrap');
+    expect(labelStyle.flexGrow).toBe('1');
+    expect(labelStyle.whiteSpace).toBe('nowrap');
+    expect(triggerStyle.flexShrink).toBe('0');
+  });
 });
 
 function createRotatorFixture(overrides: Partial<RotatingProxy> = {}): RotatingProxy {
