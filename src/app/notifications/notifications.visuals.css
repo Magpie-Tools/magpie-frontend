@@ -1,0 +1,185 @@
+.release-dialog__header {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.16rem;
+}
+
+.release-dialog__eyebrow {
+  color: var(--theme-primary-200);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.63rem;
+}
+
+.release-dialog__title {
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 1.05rem;
+  font-weight: 580;
+  letter-spacing: -0.025em;
+}
+
+.release-dialog__meta {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.64rem;
+}
+
+.release-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.release-dialog__actions {
+  display: flex;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dialog-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.66rem;
+  text-decoration: none;
+}
+
+.dialog-link i {
+  color: var(--theme-primary-300);
+  font-size: 0.6rem;
+}
+
+.dialog-link:hover,
+.dialog-link:focus-visible {
+  color: #fff;
+}
+
+.release-dialog__markdown {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.76rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.release-dialog__markdown > :first-child { margin-top: 0; }
+.release-dialog__markdown > :last-child { margin-bottom: 0; }
+
+.release-dialog__markdown h1,
+.release-dialog__markdown h2,
+.release-dialog__markdown h3,
+.release-dialog__markdown h4 {
+  margin: 1.35rem 0 0.6rem;
+  color: rgba(255, 255, 255, 0.94);
+  font-weight: 580;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.release-dialog__markdown h1 { font-size: 1.3rem; }
+.release-dialog__markdown h2 { font-size: 1.1rem; }
+.release-dialog__markdown h3,
+.release-dialog__markdown h4 { font-size: 0.92rem; }
+
+.release-dialog__markdown p,
+.release-dialog__markdown ul,
+.release-dialog__markdown ol,
+.release-dialog__markdown blockquote,
+.release-dialog__markdown pre,
+.release-dialog__markdown table { margin: 0 0 0.95rem; }
+
+.release-dialog__markdown ul,
+.release-dialog__markdown ol { padding-left: 1.35rem; }
+.release-dialog__markdown ul { list-style: disc; }
+.release-dialog__markdown ol { list-style: decimal; }
+.release-dialog__markdown li + li { margin-top: 0.25rem; }
+
+.release-dialog__markdown a {
+  color: var(--theme-primary-200);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.release-dialog__markdown code {
+  padding: 0.15rem 0.38rem;
+  border-radius: 0.38rem;
+  background: rgba(255, 255, 255, 0.06);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.88em;
+}
+
+.release-dialog__markdown pre {
+  overflow: auto;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.release-dialog__markdown pre code { padding: 0; background: transparent; }
+
+.release-dialog__markdown blockquote {
+  padding-left: 1rem;
+  border-left: 2px solid rgba(var(--theme-primary-300-rgb), 0.42);
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.release-dialog__markdown hr {
+  margin: 1.15rem 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.release-dialog__markdown table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.release-dialog__markdown th,
+.release-dialog__markdown td {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+  vertical-align: top;
+}
+
+.release-dialog__markdown th {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.release-dialog.p-dialog {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(205, 158, 191, 0.14), transparent 24rem),
+    rgba(28, 28, 31, 0.98);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.release-dialog .p-dialog-header {
+  padding: 1.25rem 1.4rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  background: transparent;
+}
+
+.release-dialog .p-dialog-content {
+  padding: 1.1rem 1.4rem 1.4rem;
+  background: transparent;
+}
+
+.release-dialog .p-dialog-close-button { color: rgba(255, 255, 255, 0.55); }
+
+@media (max-width: 560px) {
+  .release-dialog__actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .release-dialog__actions .dialog-link { margin-left: 0; }
+}

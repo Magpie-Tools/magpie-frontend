@@ -1,10 +1,13 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
-import { Button } from 'primeng/button';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { marked } from 'marked';
 import { BuildInfo, ReleaseNote, UpdateNotificationService } from '../services/update-notification.service';
 import { LoadingComponent } from '../ui-elements/loading/loading.component';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const RELEASE_SECTION_HEADINGS = new Set([
   "what's changed",
@@ -63,11 +66,11 @@ function normalizeReleaseBodyToMarkdown(body: string): string {
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, DatePipe, LoadingComponent, Button, DialogModule],
+  imports: [CommonModule, DatePipe, LoadingComponent, DialogModule],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })
-export class NotificationsComponent implements OnInit {
+export class NotificationsComponent implements OnInit, AfterViewInit, OnDestroy {
   status = signal<{ loading: boolean; error?: string | null }>({ loading: true, error: null });
   newReleases = signal<ReleaseNote[]>([]);
   allReleases = signal<ReleaseNote[]>([]);
@@ -102,11 +105,35 @@ export class NotificationsComponent implements OnInit {
       gfm: true
     }) as string;
   });
+  private shellAnimationContext?: gsap.Context;
+  private contentAnimationContext?: gsap.Context;
 
-  constructor(private updates: UpdateNotificationService) {}
+  constructor(
+    private updates: UpdateNotificationService,
+    private elementRef: ElementRef<HTMLElement>
+  ) {}
 
   ngOnInit(): void {
     this.loadReleases();
+  }
+
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    this.shellAnimationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.notifications-context',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', clearProps: 'transform' }
+      );
+    }, this.elementRef.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.shellAnimationContext?.revert();
+    this.contentAnimationContext?.revert();
   }
 
   markAllSeen(): void {
@@ -147,6 +174,7 @@ export class NotificationsComponent implements OnInit {
         this.latestTag.set(feed.latestTag);
         this.backendBuild.set(feed.backendBuild);
         this.status.set({ loading: false, error: null });
+        this.scheduleContentAnimation();
       },
       error: (err: Error) => {
         this.status.set({
@@ -155,5 +183,84 @@ export class NotificationsComponent implements OnInit {
         });
       }
     });
+  }
+
+  private scheduleContentAnimation(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    requestAnimationFrame(() => this.animateContent());
+  }
+
+  private animateContent(): void {
+    this.contentAnimationContext?.revert();
+
+    const host = this.elementRef.nativeElement;
+    const scrollContainer = host.closest('main') as HTMLElement | null;
+    const scroller = scrollContainer ?? undefined;
+
+    this.contentAnimationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.notification-card',
+        { opacity: 0, y: 26, scale: 0.985 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.7,
+          stagger: 0.065,
+          ease: 'power3.out',
+          clearProps: 'transform'
+        }
+      );
+
+      gsap.utils.toArray<HTMLElement>('.archive-row').forEach((row) => {
+        const preview = row.querySelector<HTMLElement>('.archive-preview');
+        if (!preview) {
+          return;
+        }
+
+        gsap.fromTo(
+          preview,
+          { opacity: 0.42 },
+          {
+            opacity: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: row,
+              scroller,
+              start: 'top 92%',
+              end: 'center 58%',
+              scrub: 0.35
+            }
+          }
+        );
+      });
+
+      const archiveLayout = host.querySelector<HTMLElement>('.archive-layout');
+      const archiveIntro = host.querySelector<HTMLElement>('.archive-intro');
+      const archiveList = host.querySelector<HTMLElement>('.archive-list');
+
+      if (
+        archiveLayout &&
+        archiveIntro &&
+        archiveList &&
+        window.matchMedia('(min-width: 901px)').matches &&
+        archiveList.scrollHeight > archiveIntro.offsetHeight + 180
+      ) {
+        ScrollTrigger.create({
+          trigger: archiveLayout,
+          endTrigger: archiveList,
+          scroller,
+          start: 'top top+=24',
+          end: 'bottom bottom-=24',
+          pin: archiveIntro,
+          pinSpacing: false
+        });
+      }
+    }, host);
+
+    requestAnimationFrame(() => ScrollTrigger.refresh());
   }
 }
