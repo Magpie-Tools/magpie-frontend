@@ -1,112 +1,108 @@
 <main class="invitation-page">
-  <header class="page-heading">
-    <div>
-      <h1>Workspace invitations</h1>
-      <p>Review pending invitations for your Magpie account.</p>
-    </div>
-    @if (invitations.pendingCount() > 0) {
-      <span class="pending-summary">{{ invitations.pendingCount() }} pending</span>
-    }
-  </header>
-
-  @if (acceptedWorkspace(); as accepted) {
-    <section class="accepted-notice" aria-live="polite">
-      <div>
-        <i class="pi pi-check" aria-hidden="true"></i>
+  <div class="invitation-stage">
+    <header class="invitation-context">
+      <div class="invitation-context__copy">
+        <span class="context-icon"><i class="pi pi-envelope" aria-hidden="true"></i></span>
         <div>
-          <strong>You joined {{ accepted.workspace_name }}</strong>
-          <span>Your current workspace was not changed.</span>
+          <span class="context-eyebrow">Account access</span>
+          <h1>Workspace invitations</h1>
+          <p>Choose which shared workspaces should appear in your Magpie account.</p>
         </div>
       </div>
-      <button type="button" class="button button--primary" [disabled]="openingWorkspace()" (click)="openAcceptedWorkspace()">
-        @if (openingWorkspace()) {
-          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-        }
-        Open workspace
-      </button>
-    </section>
-  }
+      <div class="pending-summary"><span aria-hidden="true"></span>{{ invitations.pendingCount() }} pending</div>
+    </header>
 
-  <section class="invitation-section" aria-labelledby="pending-invitations-title">
-    <div class="section-heading">
-      <div>
-        <h2 id="pending-invitations-title">Pending</h2>
-        <p>Access is granted only after you accept.</p>
-      </div>
-    </div>
+    <div class="invitation-grid">
+      @if (acceptedWorkspace(); as accepted) {
+        <section class="accepted-notice" aria-live="polite">
+          <div class="accepted-notice__identity">
+            <span class="accepted-icon"><i class="pi pi-check" aria-hidden="true"></i></span>
+            <div><strong>You joined {{ accepted.workspace_name }}</strong><span>Your current workspace was not changed.</span></div>
+          </div>
+          <button type="button" class="button button--primary" [disabled]="openingWorkspace()" (click)="openAcceptedWorkspace()">
+            @if (openingWorkspace()) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}
+            Open workspace
+            <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+          </button>
+        </section>
+      }
 
-    @if (invitations.error()) {
-      <div class="inline-error" role="alert">
-        <div>
-          <strong>Invitations could not be loaded</strong>
-          <span>{{ invitations.error() }}</span>
+      <aside class="invitation-card guide-card" aria-labelledby="guide-title">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-share-alt" aria-hidden="true"></i></span>
+          <div><h2 id="guide-title">What happens after you decide?</h2><p>Accepting adds a workspace without replacing the one you are using now.</p></div>
         </div>
-        <button type="button" class="button button--quiet" (click)="load()">Try again</button>
-      </div>
-    } @else if (invitations.loading()) {
-      <div class="invitation-list" aria-label="Loading invitations">
-        @for (_ of [1, 2, 3]; track $index) {
-          <div class="invitation-row invitation-row--skeleton">
-            <div>
-              <p-skeleton width="12rem" height="1rem"></p-skeleton>
-              <p-skeleton width="18rem" height="0.75rem"></p-skeleton>
-            </div>
-            <p-skeleton width="8rem" height="0.8rem"></p-skeleton>
-            <p-skeleton width="11rem" height="2.25rem"></p-skeleton>
+
+        <div class="decision-flow" aria-label="Invitation decision flow">
+          <div class="flow-step"><span class="flow-node"><i class="pi pi-envelope" aria-hidden="true"></i></span><div><strong>Review</strong><small>Check access and inviter</small></div></div>
+          <span class="flow-line" aria-hidden="true"></span>
+          <div class="flow-step"><span class="flow-node"><i class="pi pi-check" aria-hidden="true"></i></span><div><strong>Accept</strong><small>Add the workspace</small></div></div>
+          <span class="flow-line" aria-hidden="true"></span>
+          <div class="flow-step"><span class="flow-node"><i class="pi pi-external-link" aria-hidden="true"></i></span><div><strong>Open</strong><small>Switch when ready</small></div></div>
+        </div>
+
+        <div class="guide-note"><i class="pi pi-shield" aria-hidden="true"></i><span>You receive only the role and billing access shown on the invitation.</span></div>
+      </aside>
+
+      <section class="invitation-card inbox-card" aria-labelledby="pending-invitations-title">
+        <div class="card-heading card-heading--split">
+          <span class="card-icon"><i class="pi pi-inbox" aria-hidden="true"></i></span>
+          <div><h2 id="pending-invitations-title">Which workspaces are waiting?</h2><p>Invitations disappear after you accept or decline them.</p></div>
+          <span class="card-count">{{ invitations.pendingCount() }} {{ invitations.pendingCount() === 1 ? 'invitation' : 'invitations' }}</span>
+        </div>
+
+        @if (invitations.error()) {
+          <div class="inline-error" role="alert">
+            <span class="error-icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
+            <div><strong>Invitations could not be loaded</strong><span>{{ invitations.error() }}</span></div>
+            <button type="button" class="button button--quiet" (click)="load()">Try again</button>
+          </div>
+        } @else if (invitations.loading()) {
+          <div class="invitation-list" aria-label="Loading invitations">
+            @for (_ of [1, 2, 3]; track $index) {
+              <div class="invitation-row invitation-row--skeleton">
+                <div><p-skeleton width="12rem" height="1rem"></p-skeleton><p-skeleton width="18rem" height="0.75rem"></p-skeleton></div>
+                <p-skeleton width="8rem" height="0.8rem"></p-skeleton>
+                <p-skeleton width="11rem" height="2.25rem"></p-skeleton>
+              </div>
+            }
+          </div>
+        } @else if (invitations.invitations().length === 0) {
+          <div class="empty-state">
+            <span class="empty-orbit" aria-hidden="true"><i class="pi pi-inbox"></i></span>
+            <strong>Your invitation inbox is clear</strong>
+            <span>New invitations appear here even when email delivery is not configured.</span>
+          </div>
+        } @else {
+          <div class="invitation-list">
+            @for (invitation of invitations.invitations(); track invitation.id) {
+              <article class="invitation-row">
+                <div class="invitation-identity">
+                  <span class="workspace-avatar" aria-hidden="true">{{ invitation.workspace_name.slice(0, 1).toUpperCase() }}</span>
+                  <div><strong>{{ invitation.workspace_name }}</strong><span><span class="inviter-avatar">{{ invitation.inviter_email.slice(0, 1).toUpperCase() }}</span>Invited by {{ invitation.inviter_email }}</span></div>
+                </div>
+
+                <dl class="invitation-details">
+                  <div><dt>Access</dt><dd>{{ invitation.role | titlecase }}@if (invitation.billing_admin) {<span aria-hidden="true"> · </span>Billing}</dd></div>
+                  <div><dt>Expires</dt><dd>{{ invitation.expires_at | date : 'medium' }}</dd></div>
+                </dl>
+
+                <div class="invitation-actions">
+                  <button type="button" class="button button--quiet" [disabled]="invitationBusy(invitation.id)" (click)="decline(invitation)">
+                    @if (decliningIds()[invitation.id]) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}
+                    Decline
+                  </button>
+                  <button type="button" class="button button--primary" [disabled]="invitationBusy(invitation.id)" (click)="accept(invitation)">
+                    @if (acceptingIds()[invitation.id]) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}
+                    Accept invitation
+                    <i class="pi pi-arrow-right" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </article>
+            }
           </div>
         }
-      </div>
-    } @else if (invitations.invitations().length === 0) {
-      <div class="empty-state">
-        <i class="pi pi-inbox" aria-hidden="true"></i>
-        <strong>No pending invitations</strong>
-        <span>New workspace invitations will appear here even when email delivery is not configured.</span>
-      </div>
-    } @else {
-      <div class="invitation-list">
-        @for (invitation of invitations.invitations(); track invitation.id) {
-          <article class="invitation-row">
-            <div class="invitation-identity">
-              <strong>{{ invitation.workspace_name }}</strong>
-              <span>Invited by {{ invitation.inviter_email }}</span>
-            </div>
-            <dl class="invitation-details">
-              <div>
-                <dt>Access</dt>
-                <dd>{{ invitation.role | titlecase }}@if (invitation.billing_admin) { · Billing }</dd>
-              </div>
-              <div>
-                <dt>Expires</dt>
-                <dd>{{ invitation.expires_at | date : 'medium' }}</dd>
-              </div>
-            </dl>
-            <div class="invitation-actions">
-              <button
-                type="button"
-                class="button button--quiet"
-                [disabled]="invitationBusy(invitation.id)"
-                (click)="decline(invitation)"
-              >
-                @if (decliningIds()[invitation.id]) {
-                  <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-                }
-                Decline
-              </button>
-              <button
-                type="button"
-                class="button button--primary"
-                [disabled]="invitationBusy(invitation.id)"
-                (click)="accept(invitation)"
-              >
-                @if (acceptingIds()[invitation.id]) {
-                  <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-                }
-                Accept
-              </button>
-            </div>
-          </article>
-        }
-      </div>
-    }
-  </section>
+      </section>
+    </div>
+  </div>
 </main>

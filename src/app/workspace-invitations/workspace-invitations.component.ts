@@ -1,5 +1,5 @@
 import {CommonModule, DatePipe, TitleCasePipe} from '@angular/common';
-import {Component, OnInit, signal} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import {SkeletonModule} from 'primeng/skeleton';
 import {finalize, map, switchMap} from 'rxjs/operators';
@@ -7,6 +7,7 @@ import {WorkspaceInvitation, WorkspaceInvitationAcceptance} from '../models/Work
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceInvitationService} from '../services/workspace-invitation.service';
 import {WorkspaceService} from '../services/workspace.service';
+import {gsap} from 'gsap';
 
 @Component({
   selector: 'app-workspace-invitations',
@@ -15,21 +16,46 @@ import {WorkspaceService} from '../services/workspace.service';
   templateUrl: './workspace-invitations.component.html',
   styleUrl: './workspace-invitations.component.scss',
 })
-export class WorkspaceInvitationsComponent implements OnInit {
+export class WorkspaceInvitationsComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly acceptingIds = signal<Record<number, boolean>>({});
   readonly decliningIds = signal<Record<number, boolean>>({});
   readonly acceptedWorkspace = signal<WorkspaceInvitationAcceptance | null>(null);
   readonly openingWorkspace = signal(false);
+  private animationContext?: gsap.Context;
 
   constructor(
     readonly invitations: WorkspaceInvitationService,
     private readonly workspaces: WorkspaceService,
     private readonly router: Router,
     private readonly notification: NotificationService,
+    private readonly elementRef: ElementRef<HTMLElement>,
   ) {}
 
   ngOnInit(): void {
     this.load();
+  }
+
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    this.animationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.invitation-context, .accepted-notice, .invitation-card',
+        {opacity: 0, y: 24, scale: 0.985},
+        {opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.065, ease: 'power3.out', clearProps: 'transform'},
+      );
+      gsap.fromTo(
+        '.workspace-avatar, .flow-node',
+        {opacity: 0, scale: 0.76},
+        {opacity: 1, scale: 1, duration: 0.52, stagger: 0.06, delay: 0.16, ease: 'back.out(1.35)'},
+      );
+    }, this.elementRef.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.animationContext?.revert();
   }
 
   load(): void {
