@@ -6,6 +6,7 @@ import {RotatingProxiesComponent} from './rotating-proxies.component';
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
+import {RotatingProxy} from '../models/RotatingProxy';
 
 const httpServiceMock = {
   getRotatingProxies: jasmine.createSpy().and.returnValue(of([])),
@@ -90,4 +91,56 @@ describe('RotatingProxiesComponent', () => {
     expect(component.rotatorEndpoint(rotator)).toBe('[2001:db8::5]:19001');
     expect(component.rotatorConnectionString(rotator)).toBe('http://[2001:db8::5]:19001');
   });
+
+  it('summarizes the managed pool and available instance capacity', () => {
+    component.rotatingProxies.set([
+      createRotatorFixture({id: 1, alive_proxy_count: 7}),
+      createRotatorFixture({id: 2, alive_proxy_count: 5}),
+    ]);
+    component.instanceOptions.set([
+      {label: 'Berlin', value: 'berlin', freePorts: 3},
+      {label: 'Frankfurt', value: 'frankfurt', freePorts: 4},
+    ]);
+
+    expect(component.totalMatchingProxies()).toBe(12);
+    expect(component.availablePortCount()).toBe(7);
+  });
+
+  it('opens connection details from a managed endpoint card', () => {
+    const rotator = createRotatorFixture({name: 'Production pool', alive_proxy_count: 18});
+    component.rotatingProxies.set([rotator]);
+    component.hasLoaded.set(true);
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('.rotator-card') as HTMLElement;
+    expect(card.textContent).toContain('Production pool');
+    expect(card.textContent).toContain('18');
+
+    const detailsButton = card.querySelector('.text-action') as HTMLButtonElement;
+    detailsButton.click();
+
+    expect(component.selectedRotator()).toBe(rotator);
+    expect(component.detailsVisible()).toBeTrue();
+  });
 });
+
+function createRotatorFixture(overrides: Partial<RotatingProxy> = {}): RotatingProxy {
+  return {
+    id: 1,
+    name: 'Rotator',
+    instance_id: 'instance-1',
+    instance_name: 'Primary',
+    instance_region: 'eu-central',
+    protocol: 'http',
+    listen_protocol: 'http',
+    transport_protocol: 'tcp',
+    listen_transport_protocol: 'tcp',
+    alive_proxy_count: 0,
+    listen_port: 19000,
+    listen_host: '127.0.0.1',
+    auth_required: false,
+    reputation_labels: ['good', 'neutral'],
+    created_at: new Date().toISOString(),
+    ...overrides,
+  };
+}

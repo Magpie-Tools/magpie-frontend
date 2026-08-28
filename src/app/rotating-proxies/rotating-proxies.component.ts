@@ -1,15 +1,13 @@
-import {Component, OnDestroy, OnInit, signal} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {forkJoin, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {TableModule} from 'primeng/table';
 import {ButtonModule} from 'primeng/button';
 import {InputTextModule} from 'primeng/inputtext';
 import {SelectModule} from 'primeng/select';
 import {DialogModule} from 'primeng/dialog';
 import {MultiSelectModule} from 'primeng/multiselect';
-import {Chip} from 'primeng/chip';
 import {TooltipModule} from 'primeng/tooltip';
 
 import {environment} from '../../environments/environment';
@@ -21,9 +19,12 @@ import {CreateRotatingProxy, RotatingProxy, RotatingProxyInstance} from '../mode
 import {UserSettings} from '../models/UserSettings';
 import {TooltipComponent} from '../tooltip/tooltip.component';
 import {SkeletonModule} from 'primeng/skeleton';
-import {StyleClass} from 'primeng/styleclass';
 import {formatHostPort} from '../shared/proxy-address';
 import {WorkspaceService} from '../services/workspace.service';
+import {gsap} from 'gsap';
+import {ScrollTrigger} from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 type RotatorInstanceOption = {
   label: string;
@@ -37,23 +38,20 @@ type RotatorInstanceOption = {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    TableModule,
     ButtonModule,
     InputTextModule,
     SelectModule,
     MultiSelectModule,
-    Chip,
     DatePipe,
     DialogModule,
     TooltipComponent,
     TooltipModule,
     SkeletonModule,
-    StyleClass,
   ],
   templateUrl: './rotating-proxies.component.html',
   styleUrl: './rotating-proxies.component.scss'
 })
-export class RotatingProxiesComponent implements OnInit, OnDestroy {
+export class RotatingProxiesComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly protocolOptionList: { label: string; value: string }[] = [
     {label: 'HTTP', value: 'http'},
     {label: 'HTTPS', value: 'https'},
@@ -99,18 +97,27 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     poor: 'Bad',
   };
   readonly skeletonRows = Array.from({ length: 5 });
+  readonly totalMatchingProxies = computed(() =>
+    this.rotatingProxies().reduce((total, proxy) => total + Math.max(0, proxy.alive_proxy_count ?? 0), 0)
+  );
+  readonly availablePortCount = computed(() =>
+    this.instanceOptions().reduce((total, instance) => total + Math.max(0, instance.freePorts), 0)
+  );
 
   private readonly loopbackHost = '127.0.0.1';
   private readonly defaultRotatorHost = this.resolveDefaultHost();
   rotatorHost = signal(this.loopbackHost);
   private destroy$ = new Subject<void>();
   private authCopyFeedbackTimeout?: ReturnType<typeof setTimeout>;
+  private shellAnimationContext?: gsap.Context;
+  private fleetAnimationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
     private clipboardService: ClipboardService,
     private notification: NotificationService,
+    private elementRef: ElementRef<HTMLElement>,
     readonly workspaces: WorkspaceService,
   ) {
     this.createForm = this.fb.group({
@@ -141,11 +148,27 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     this.loadInitialData();
   }
 
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    this.shellAnimationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.rotating-context, .composer-card',
+        {opacity: 0, y: 24, scale: 0.99},
+        {opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.07, ease: 'power3.out', clearProps: 'transform'},
+      );
+    }, this.elementRef.nativeElement);
+  }
+
   ngOnDestroy(): void {
     if (this.authCopyFeedbackTimeout) {
       clearTimeout(this.authCopyFeedbackTimeout);
       this.authCopyFeedbackTimeout = undefined;
     }
+    this.shellAnimationContext?.revert();
+    this.fleetAnimationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -222,6 +245,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
           this.updateFormDisabledStates();
           this.loading.set(false);
           this.hasLoaded.set(true);
+          this.scheduleFleetAnimation();
       },
       error: err => {
         this.loading.set(false);
@@ -726,5 +750,63 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
 
     this.instanceOptions.set(options);
     this.hasAvailableInstances.set(options.length > 0);
+  }
+
+  private scheduleFleetAnimation(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      this.fleetAnimationContext?.revert();
+
+      const host = this.elementRef.nativeElement;
+      const scrollContainer = host.closest('main') as HTMLElement | null;
+      const scroller = scrollContainer ?? undefined;
+
+      this.fleetAnimationContext = gsap.context(() => {
+        gsap.utils.toArray<HTMLElement>('.rotator-card').forEach((card, index) => {
+          gsap.fromTo(
+            card,
+            {opacity: 0, y: 26, scale: 0.97},
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.68,
+              delay: index * 0.045,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: card,
+                scroller,
+                start: 'top 94%',
+                toggleActions: 'play none none reverse',
+              },
+            },
+          );
+
+          const poolCount = card.querySelector<HTMLElement>('.pool-count');
+          if (poolCount) {
+            gsap.fromTo(
+              poolCount,
+              {opacity: 0.16},
+              {
+                opacity: 1,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: card,
+                  scroller,
+                  start: 'top 92%',
+                  end: 'center 62%',
+                  scrub: 0.3,
+                },
+              },
+            );
+          }
+        });
+      }, host);
+
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+    });
   }
 }

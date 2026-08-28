@@ -3,6 +3,7 @@
 @import "./app/checker/settings/checker-settings.visuals.css";
 @import "./app/workspace/workspace.visuals.css";
 @import "./app/notifications/notifications.visuals.css";
+@import "./app/rotating-proxies/rotating-proxies.visuals.css";
 @import "primeicons/primeicons.css";
 @import "tailwindcss";
 @plugin "tailwindcss-primeui";

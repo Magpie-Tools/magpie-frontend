@@ -1,682 +1,542 @@
-<div class="rotating-proxies-page text-gray-200">
-  @if (workspaces.canOperate()) {
-  <section class="surface-panel create-card">
-    <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <h3 class="section-title">Create Rotator</h3>
-        <p class="section-hint">Generate a rotating endpoint with optional filters and credentials.</p>
+<main class="rotating-proxies-page">
+  <section class="rotating-stage">
+    <header class="rotating-context">
+      <div class="rotating-context__copy">
+        <span class="context-icon"><i class="pi pi-sync" aria-hidden="true"></i></span>
+        <div>
+          <span class="context-eyebrow">Route infrastructure</span>
+          <h1>Rotating proxies</h1>
+          <p>Build stable listener endpoints backed by your healthy proxy pool.</p>
+        </div>
       </div>
-      <span class="pill subtle-pill">Ports auto-assigned</span>
-    </div>
 
-    <form [formGroup]="createForm" (ngSubmit)="createRotator()" class="create-form">
-      @if (noProtocolsAvailable()) {
-        <div class="form-alert">
-          Enable at least one protocol in your workspace settings to create a rotator.
+      <div class="context-metrics" aria-label="Rotator summary">
+        <div>
+          <strong>{{ rotatingProxies().length }}</strong>
+          <span>rotators</span>
         </div>
-      }
-      @if (!hasAvailableInstances()) {
-        <div class="form-alert">
-          No instance currently has free rotator ports. Free ports on an instance before creating a new rotator.
+        <span class="metric-divider" aria-hidden="true"></span>
+        <div>
+          <strong>{{ totalMatchingProxies() }}</strong>
+          <span>matching proxies</span>
         </div>
-      }
+      </div>
+    </header>
 
-      <div class="create-layout">
-        <div class="flow-column">
-          <section class="form-section">
-            <p class="section-step">Step 1</p>
-            <h4 class="subsection-title">Basics</h4>
-            <p class="subsection-hint">Choose a clear name so this endpoint is easy to find later.</p>
-            <div class="field-group">
-              <label class="field-label" for="rotatorName">Name</label>
-              <input id="rotatorName"
-                     type="text"
-                     pInputText
-                     class="p-inputtext-sm w-full"
-                     placeholder="My rotating proxy"
-                     maxlength="120"
-                     formControlName="name">
-              @if (createForm.get('name')?.invalid && (createForm.get('name')?.dirty || createForm.get('name')?.touched)) {
-                <p class="field-error">Name is required and must be under 120 characters.</p>
-              }
+    @if (workspaces.canOperate()) {
+      <form class="composer-card" [formGroup]="createForm" (ngSubmit)="createRotator()" aria-labelledby="composer-title">
+        <div class="section-heading">
+          <div class="card-heading">
+            <span class="card-icon"><i class="pi pi-directions" aria-hidden="true"></i></span>
+            <div class="card-heading__copy">
+              <h2 id="composer-title">Compose a listener route</h2>
+              <p>Choose where clients connect and which proxies can answer.</p>
+            </div>
+          </div>
+          <span class="availability-pill">
+            <span aria-hidden="true"></span>
+            {{ availablePortCount() }} ports available
+          </span>
+        </div>
+
+        @if (noProtocolsAvailable()) {
+          <div class="form-alert" role="alert">
+            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            Enable at least one protocol in workspace checker settings before creating a rotator.
+          </div>
+        }
+        @if (!hasAvailableInstances()) {
+          <div class="form-alert" role="alert">
+            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            No instance has a free rotator port. Free a port before creating another endpoint.
+          </div>
+        }
+
+        <div class="route-accordion">
+          <section class="route-stage route-stage--identity">
+            <div class="stage-heading">
+              <span class="stage-icon"><i class="pi pi-tag" aria-hidden="true"></i></span>
+              <div>
+                <h3>Name and location</h3>
+                <p>Identify the endpoint and choose its host.</p>
+              </div>
+            </div>
+
+            <div class="stage-fields">
+              <div class="field-group">
+                <label class="field-label" for="rotatorName">Rotator name</label>
+                <input
+                  id="rotatorName"
+                  type="text"
+                  pInputText
+                  placeholder="Production pool"
+                  maxlength="120"
+                  formControlName="name">
+                @if (createForm.get('name')?.invalid && (createForm.get('name')?.dirty || createForm.get('name')?.touched)) {
+                  <p class="field-error">Enter a name under 120 characters.</p>
+                }
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="rotatorInstance">Instance</label>
+                <p-select
+                  inputId="rotatorInstance"
+                  [options]="instanceOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select an instance"
+                  [appendTo]="'body'"
+                  formControlName="instanceId">
+                </p-select>
+                @if (createForm.get('instanceId')?.invalid && (createForm.get('instanceId')?.dirty || createForm.get('instanceId')?.touched)) {
+                  <p class="field-error">Select an instance with a free port.</p>
+                } @else {
+                  <p class="field-hint">Only instances with free ports appear here.</p>
+                }
+              </div>
             </div>
           </section>
 
-              <section class="form-section">
-                <p class="section-step">Step 2</p>
-                <h4 class="subsection-title">How Clients Connect</h4>
-                <p class="subsection-hint">Set the protocol and transport clients use for the rotator endpoint.</p>
-                <div class="form-row">
-                  <div class="field-group">
-                    <label class="field-label" for="listenProtocol">Rotator Protocol</label>
-                    <p-select inputId="listenProtocol"
-                              class="w-full"
-                              [options]="listenProtocolOptions()"
-                              optionLabel="label"
-                              optionValue="value"
-                              placeholder="Select a protocol"
-                              formControlName="listenProtocol">
-                    </p-select>
-                  </div>
-                  <div class="field-group">
-                    <label class="field-label" for="listenTransportProtocol">
-                      Rotator Transport
-                      <app-tooltip [text]="transportProtocolTooltip"></app-tooltip>
-                    </label>
-                    <p-select inputId="listenTransportProtocol"
-                              class="w-full"
-                              [options]="transportProtocolOptions"
-                              optionLabel="label"
-                              optionValue="value"
-                              placeholder="Select a transport"
-                              formControlName="listenTransportProtocol">
-                      <ng-template pTemplate="selectedItem" let-option>
-                        @if (option) {
-                          <div class="transport-option">
-                            <span>{{ option.label }}</span>
-                            @if (option.value === 'tcp') {
-                              <p-chip class="transport-chip">Default</p-chip>
-                            }
-                          </div>
-                        }
-                      </ng-template>
-                      <ng-template pTemplate="item" let-option>
-                        <div class="transport-option">
-                          <span>{{ option.label }}</span>
-                          @if (option.value === 'tcp') {
-                            <p-chip class="transport-chip">Default</p-chip>
-                          }
-                        </div>
-                      </ng-template>
-                    </p-select>
-                  </div>
-                </div>
-              </section>
+          <div class="route-arrow" aria-hidden="true"><i class="pi pi-arrow-right"></i></div>
 
-              <section class="form-section">
-                <p class="section-step">Step 3</p>
-                <h4 class="subsection-title">What The Rotator Serves</h4>
-                <p class="subsection-hint">Pick the protocol and transport used when connecting to upstream proxies.</p>
-                <div class="form-row">
-                  <div class="field-group">
-                    <label class="field-label" for="rotatorProtocol">Proxy Protocol</label>
-                    <p-select inputId="rotatorProtocol"
-                              class="w-full"
-                              [options]="protocolOptions()"
-                              optionLabel="label"
-                              optionValue="value"
-                              placeholder="Select a protocol"
-                              formControlName="protocol">
-                    </p-select>
-                  </div>
-                  <div class="field-group">
-                    <label class="field-label" for="transportProtocol">
-                      Proxy Transport
-                      <app-tooltip [text]="transportProtocolTooltip"></app-tooltip>
-                    </label>
-                    <p-select inputId="transportProtocol"
-                              class="w-full"
-                              [options]="transportProtocolOptions"
-                              optionLabel="label"
-                              optionValue="value"
-                              placeholder="Select a transport"
-                              formControlName="transportProtocol">
-                      <ng-template pTemplate="selectedItem" let-option>
-                        @if (option) {
-                          <div class="transport-option">
-                            <span>{{ option.label }}</span>
-                            @if (option.value === 'tcp') {
-                              <p-chip class="transport-chip">Default</p-chip>
-                            }
-                          </div>
-                        }
-                      </ng-template>
-                      <ng-template pTemplate="item" let-option>
-                        <div class="transport-option">
-                          <span>{{ option.label }}</span>
-                          @if (option.value === 'tcp') {
-                            <p-chip class="transport-chip">Default</p-chip>
-                          }
-                        </div>
-                      </ng-template>
-                    </p-select>
-                  </div>
-                </div>
-              </section>
-
-              <section class="form-section">
-                <p class="section-step">Step 4</p>
-                <h4 class="subsection-title">Choose Instance</h4>
-                <p class="subsection-hint">Select the region/instance that will host this rotator endpoint.</p>
-                <div class="field-group">
-                  <label class="field-label" for="rotatorInstance">Instance</label>
-                  <p-select inputId="rotatorInstance"
-                            class="w-full"
-                            [options]="instanceOptions()"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select an instance"
-                            formControlName="instanceId">
-                  </p-select>
-                  @if (createForm.get('instanceId')?.invalid && (createForm.get('instanceId')?.dirty || createForm.get('instanceId')?.touched)) {
-                    <p class="field-error">Please select an instance.</p>
-                  } @else {
-                    <p class="field-hint">Only instances with free rotator ports are shown.</p>
-                  }
-                </div>
-              </section>
+          <section class="route-stage route-stage--listener">
+            <div class="stage-heading">
+              <span class="stage-icon"><i class="pi pi-wifi" aria-hidden="true"></i></span>
+              <div>
+                <h3>Client listener</h3>
+                <p>How applications reach this endpoint.</p>
+              </div>
             </div>
 
-            <aside class="support-column">
-              <section class="form-section">
-                <p class="section-step">Optional</p>
-                <h4 class="subsection-title">Traffic Filters</h4>
-                <p class="subsection-hint">Skip these if you want the broadest proxy pool.</p>
-                <div class="field-group">
-                  <label class="field-label" for="uptimePercentage">Uptime Filter</label>
-                  <div class="uptime-controls">
-                    <p-select inputId="uptimeFilterType"
-                              class="w-full"
-                              [options]="uptimeFilterTypeOptions"
-                              optionLabel="label"
-                              optionValue="value"
-                              formControlName="uptimeFilterType">
-                    </p-select>
-                    <input id="uptimePercentage"
-                           type="number"
-                           pInputText
-                           class="p-inputtext-sm w-full"
-                           min="0"
-                           max="100"
-                           step="0.1"
-                           placeholder="0-100"
-                           formControlName="uptimePercentage">
-                  </div>
-                  @if (createForm.get('uptimePercentage')?.invalid && (createForm.get('uptimePercentage')?.dirty || createForm.get('uptimePercentage')?.touched)) {
-                    <p class="field-error">Uptime percentage must be between 0 and 100.</p>
-                  } @else {
-                    <p class="field-hint">Leave empty to allow any uptime ratio.</p>
-                  }
-                </div>
-                <div class="field-group">
-                  <label class="field-label" for="reputationFilter">Reputation Filter</label>
-                  <p-multiSelect inputId="reputationFilter"
-                                 class="w-full"
-                                 formControlName="reputationLabels"
-                                 [options]="reputationOptions"
-                                 optionLabel="label"
-                                 optionValue="value">
-                  </p-multiSelect>
-                  <p class="field-hint">Choose which proxy reputations this rotator can use.</p>
-                </div>
-              </section>
+            <div class="stage-fields stage-fields--paired">
+              <div class="field-group">
+                <label class="field-label" for="listenProtocol">Protocol</label>
+                <p-select
+                  inputId="listenProtocol"
+                  [options]="listenProtocolOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select a protocol"
+                  [appendTo]="'body'"
+                  formControlName="listenProtocol">
+                </p-select>
+              </div>
 
-              <section class="form-section auth-section">
-                <h4 class="subsection-title">Authentication</h4>
-                <p class="subsection-hint">Require credentials before clients can use this rotator.</p>
-                <label class="auth-toggle">
-                  <input type="checkbox" formControlName="authRequired">
-                  <span>Require authentication</span>
+              <div class="field-group">
+                <label class="field-label" for="listenTransportProtocol">
+                  Transport
+                  <app-tooltip [text]="transportProtocolTooltip"></app-tooltip>
                 </label>
+                <p-select
+                  inputId="listenTransportProtocol"
+                  [options]="transportProtocolOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select a transport"
+                  [appendTo]="'body'"
+                  formControlName="listenTransportProtocol">
+                  <ng-template pTemplate="selectedItem" let-option>
+                    @if (option) {
+                      <span class="transport-option">{{ option.label }}@if (option.value === 'tcp') {<span>Default</span>}</span>
+                    }
+                  </ng-template>
+                  <ng-template pTemplate="item" let-option>
+                    <span class="transport-option">{{ option.label }}@if (option.value === 'tcp') {<span>Default</span>}</span>
+                  </ng-template>
+                </p-select>
+              </div>
+            </div>
+          </section>
 
-                @if (authEnabled()) {
-                  <div class="auth-grid">
-                    <div class="field-group">
-                      <label class="field-label" for="authUsername">Auth Username</label>
-                      <input id="authUsername"
-                             type="text"
-                             pInputText
-                             class="p-inputtext-sm w-full"
-                             maxlength="120"
-                             formControlName="authUsername">
-                    </div>
+          <div class="route-arrow" aria-hidden="true"><i class="pi pi-arrow-right"></i></div>
 
-                    <div class="field-group">
-                      <label class="field-label" for="authPassword">Auth Password</label>
-                      <input id="authPassword"
-                             type="text"
-                             pInputText
-                             class="p-inputtext-sm w-full"
-                             maxlength="120"
-                             formControlName="authPassword">
-                    </div>
+          <section class="route-stage route-stage--upstream">
+            <div class="stage-heading">
+              <span class="stage-icon"><i class="pi pi-server" aria-hidden="true"></i></span>
+              <div>
+                <h3>Upstream pool</h3>
+                <p>What the rotator serves behind the listener.</p>
+              </div>
+            </div>
+
+            <div class="stage-fields stage-fields--paired">
+              <div class="field-group">
+                <label class="field-label" for="rotatorProtocol">Proxy protocol</label>
+                <p-select
+                  inputId="rotatorProtocol"
+                  [options]="protocolOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select a protocol"
+                  [appendTo]="'body'"
+                  formControlName="protocol">
+                </p-select>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="transportProtocol">
+                  Proxy transport
+                  <app-tooltip [text]="transportProtocolTooltip"></app-tooltip>
+                </label>
+                <p-select
+                  inputId="transportProtocol"
+                  [options]="transportProtocolOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select a transport"
+                  [appendTo]="'body'"
+                  formControlName="transportProtocol">
+                  <ng-template pTemplate="selectedItem" let-option>
+                    @if (option) {
+                      <span class="transport-option">{{ option.label }}@if (option.value === 'tcp') {<span>Default</span>}</span>
+                    }
+                  </ng-template>
+                  <ng-template pTemplate="item" let-option>
+                    <span class="transport-option">{{ option.label }}@if (option.value === 'tcp') {<span>Default</span>}</span>
+                  </ng-template>
+                </p-select>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="policy-grid">
+          <section class="policy-card policy-card--traffic">
+            <div class="policy-heading">
+              <span class="stage-icon"><i class="pi pi-filter" aria-hidden="true"></i></span>
+              <div><h3>Traffic policy</h3><p>Narrow the eligible proxy pool when a route needs stricter quality.</p></div>
+            </div>
+
+            <div class="policy-fields">
+              <div class="field-group">
+                <label class="field-label" for="uptimePercentage">Uptime filter</label>
+                <div class="uptime-controls">
+                  <p-select
+                    inputId="uptimeFilterType"
+                    [options]="uptimeFilterTypeOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    [appendTo]="'body'"
+                    formControlName="uptimeFilterType">
+                  </p-select>
+                  <div class="input-with-unit">
+                    <input
+                      id="uptimePercentage"
+                      type="number"
+                      pInputText
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      placeholder="Any"
+                      formControlName="uptimePercentage">
+                    <span>%</span>
                   </div>
+                </div>
+                @if (createForm.get('uptimePercentage')?.invalid && (createForm.get('uptimePercentage')?.dirty || createForm.get('uptimePercentage')?.touched)) {
+                  <p class="field-error">Use a percentage from 0 to 100.</p>
+                } @else {
+                  <p class="field-hint">Leave empty to accept any uptime.</p>
                 }
-              </section>
+              </div>
 
-              <section class="form-section summary-section">
-                <h4 class="subsection-title">Request Summary</h4>
-                <p class="subsection-hint">Quick sanity check before creating the rotator.</p>
-                <div class="summary-list">
-                  <div class="summary-item">
-                    <span class="summary-label">Rotator</span>
-                    <span class="summary-value">
-                      {{ protocolLabel(createForm.get('listenProtocol')?.value ?? '') || 'Not set' }}
-                      /
-                      {{ transportLabel(createForm.get('listenTransportProtocol')?.value ?? '') || 'Not set' }}
-                    </span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="summary-label">Serves</span>
-                    <span class="summary-value">
-                      {{ protocolLabel(createForm.get('protocol')?.value ?? '') || 'Not set' }}
-                      /
-                      {{ transportLabel(createForm.get('transportProtocol')?.value ?? '') || 'Not set' }}
-                    </span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="summary-label">Instance</span>
-                    <span class="summary-value">{{ instanceSummary(createForm.get('instanceId')?.value) }}</span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="summary-label">Reputation</span>
-                    <span class="summary-value">{{ reputationFilterSummary(createForm.get('reputationLabels')?.value) }}</span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="summary-label">Uptime</span>
-                    <span class="summary-value">{{ uptimeFilterSummary(createForm.get('uptimeFilterType')?.value, createForm.get('uptimePercentage')?.value) }}</span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="summary-label">Auth</span>
-                    <span class="summary-value">{{ createForm.get('authRequired')?.value ? 'Required' : 'Not required' }}</span>
-                  </div>
+              <div class="field-group">
+                <label class="field-label" for="reputationFilter">Reputation</label>
+                <p-multiSelect
+                  inputId="reputationFilter"
+                  formControlName="reputationLabels"
+                  [options]="reputationOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  [appendTo]="'body'">
+                </p-multiSelect>
+                <p class="field-hint">Selected labels may serve traffic.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="policy-card policy-card--access" [class.is-active]="authEnabled()">
+            <div class="policy-heading">
+              <span class="stage-icon"><i class="pi pi-lock" aria-hidden="true"></i></span>
+              <div><h3>Client access</h3><p>Protect the listener with a username and password.</p></div>
+            </div>
+
+            <label class="auth-toggle">
+              <span>
+                <strong>Require authentication</strong>
+                <small>{{ authEnabled() ? 'Credentials required' : 'Open listener' }}</small>
+              </span>
+              <input type="checkbox" formControlName="authRequired">
+            </label>
+
+            @if (authEnabled()) {
+              <div class="auth-grid">
+                <div class="field-group">
+                  <label class="field-label" for="authUsername">Username</label>
+                  <input id="authUsername" type="text" pInputText maxlength="120" formControlName="authUsername">
                 </div>
-              </section>
-        </aside>
-      </div>
-
-      <div class="form-footer flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <p class="field-hint mb-0">Ports are assigned automatically after creation.</p>
-        <button pButton
-                type="submit"
-                label="Create Rotator"
-                icon="pi pi-plus"
-                pStyleClass="create-rotator-button"
-                [disabled]="createForm.invalid || submitting() || noProtocolsAvailable() || !hasAvailableInstances()"
-                [loading]="submitting()">
-        </button>
-      </div>
-    </form>
-  </section>
-  } @else {
-    <section class="surface-panel create-card">
-      <div class="section-header">
-        <div>
-          <h3 class="section-title">Rotators are read-only</h3>
-          <p class="section-hint">Your viewer role can inspect and use this workspace's rotators. An operator can create or remove them.</p>
-        </div>
-      </div>
-    </section>
-  }
-
-  <section class="surface-panel list-card">
-      <div class="section-header flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h3 class="section-title">Existing Rotators</h3>
-          <p class="section-hint">Manage endpoints, rotate them manually, or remove what you no longer need.</p>
-        </div>
-        <div class="flex items-center gap-2 self-start sm:self-auto">
-          <div class="pill">
-            @if (!hasLoaded()) {
-              <p-skeleton width="3.5rem" height="0.75rem"></p-skeleton>
+                <div class="field-group">
+                  <label class="field-label" for="authPassword">Password</label>
+                  <input id="authPassword" type="text" pInputText maxlength="120" formControlName="authPassword">
+                </div>
+              </div>
             } @else {
-              {{ rotatingProxies().length }} total
+              <div class="access-visual" aria-hidden="true">
+                <span><i class="pi pi-desktop"></i></span>
+                <i class="pi pi-arrow-right"></i>
+                <span><i class="pi pi-wifi"></i></span>
+              </div>
             }
+          </section>
+        </div>
+
+        <footer class="summary-dock">
+          <div class="summary-route" aria-label="Route summary">
+            <span>{{ protocolLabel(createForm.get('listenProtocol')?.value ?? '') || 'Listener' }}</span>
+            <i class="pi pi-arrow-right" aria-hidden="true"></i>
+            <strong>{{ protocolLabel(createForm.get('protocol')?.value ?? '') || 'Upstream' }}</strong>
           </div>
-          <p-button
-            type="button"
-            label="Refresh"
-            icon="pi pi-refresh"
-            [disabled]="loading()"
-            (onClick)="loadInitialData()"
-            styleClass="p-button-outlined refresh-button"
-          >
-          </p-button>
+          <dl class="summary-facts">
+            <div><dt>Instance</dt><dd>{{ instanceSummary(createForm.get('instanceId')?.value) }}</dd></div>
+            <div><dt>Reputation</dt><dd>{{ reputationFilterSummary(createForm.get('reputationLabels')?.value) }}</dd></div>
+            <div><dt>Uptime</dt><dd>{{ uptimeFilterSummary(createForm.get('uptimeFilterType')?.value, createForm.get('uptimePercentage')?.value) }}</dd></div>
+            <div><dt>Access</dt><dd>{{ createForm.get('authRequired')?.value ? 'Protected' : 'Open' }}</dd></div>
+          </dl>
+          <button
+            pButton
+            type="submit"
+            class="create-button"
+            icon="pi pi-plus"
+            label="Create rotator"
+            [disabled]="createForm.invalid || submitting() || noProtocolsAvailable() || !hasAvailableInstances()"
+            [loading]="submitting()">
+          </button>
+        </footer>
+      </form>
+    } @else {
+      <section class="read-only-card">
+        <span class="card-icon"><i class="pi pi-eye" aria-hidden="true"></i></span>
+        <div><h2>Rotators are read-only</h2><p>Your workspace role can inspect and use endpoints. An operator can create or remove them.</p></div>
+      </section>
+    }
+
+    <section class="fleet-section" aria-labelledby="fleet-title">
+      <div class="fleet-heading">
+        <div class="card-heading">
+          <span class="card-icon"><i class="pi pi-sitemap" aria-hidden="true"></i></span>
+          <div class="card-heading__copy">
+            <h2 id="fleet-title">Managed endpoints</h2>
+            <p>Inspect listener routes, request an immediate rotation, or remove an endpoint.</p>
+          </div>
+        </div>
+        <div class="fleet-actions">
+          <span class="fleet-count">
+            @if (!hasLoaded()) { Loading } @else { {{ rotatingProxies().length }} total }
+          </span>
+          <button type="button" class="refresh-button" [disabled]="loading()" (click)="loadInitialData()">
+            <i class="pi" [class.pi-refresh]="!loading()" [class.pi-spinner]="loading()" [class.pi-spin]="loading()" aria-hidden="true"></i>
+            Refresh
+          </button>
         </div>
       </div>
 
-      <div class="table-shell">
-        <p-table
-          [value]="rotatingProxies()"
-          [tableStyle]="{'width': '100%'}"
-          responsiveLayout="scroll"
-          class="rotators-table"
-          [loading]="loading()"
-          [showLoader]="hasLoaded()"
-        >
-          <ng-template pTemplate="header">
-            <tr>
-              <th>Name</th>
-              <th>Filters</th>
-              <th>Protocols</th>
-              <th>Health</th>
-              <th class="actions">Actions</th>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="loadingbody">
-            @if (!hasLoaded()) {
-              @for (row of skeletonRows; track $index) {
-                <tr class="rotator-skeleton-row">
-                  <td>
-                    <div class="rotator-skeleton-name">
-                      <p-skeleton width="8.5rem" height="0.9rem"></p-skeleton>
-                      <p-skeleton width="7rem" height="0.7rem"></p-skeleton>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="rotator-skeleton-access">
-                      <p-skeleton width="12rem" height="0.85rem"></p-skeleton>
-                      <p-skeleton width="12rem" height="0.85rem"></p-skeleton>
-                      <p-skeleton width="10rem" height="0.85rem"></p-skeleton>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="rotator-skeleton-access">
-                      <p-skeleton width="10rem" height="0.85rem"></p-skeleton>
-                      <p-skeleton width="10rem" height="0.85rem"></p-skeleton>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="rotator-skeleton-access">
-                      <p-skeleton width="2.5rem" height="0.95rem"></p-skeleton>
-                      <p-skeleton width="5.5rem" height="0.65rem"></p-skeleton>
-                    </div>
-                  </td>
-                  <td class="actions">
-                    <div class="rotator-skeleton-actions">
-                      <p-skeleton width="2.2rem" height="2.2rem" borderRadius="999px"></p-skeleton>
-                      <p-skeleton width="2.2rem" height="2.2rem" borderRadius="999px"></p-skeleton>
-                      <p-skeleton width="2.2rem" height="2.2rem" borderRadius="999px"></p-skeleton>
-                    </div>
-                  </td>
-                </tr>
-              }
-            }
-          </ng-template>
-          <ng-template pTemplate="body" let-proxy>
-            <tr>
-              <td class="name-cell">
-                <div class="name">{{ proxy.name }}</div>
-                <div class="created">Created {{ proxy.created_at | date:'short' }}</div>
-              </td>
-              <td class="filters-cell">
-                <div class="filter-line">
-                  <span class="filter-label">Instance</span>
-                  <span class="filter-value">{{ proxy.instance_name || proxy.instance_id || 'Unknown' }} · {{ proxy.instance_region || 'Unknown' }}</span>
-                </div>
-                <div class="filter-line">
-                  <span class="filter-label">Reputation</span>
-                  <span class="filter-value">{{ reputationFilterSummary(proxy.reputation_labels) }}</span>
-                </div>
-                <div class="filter-line">
-                  <span class="filter-label">Uptime</span>
-                  <span class="filter-value">{{ uptimeFilterSummary(proxy.uptime_filter_type, proxy.uptime_percentage) }}</span>
-                </div>
-              </td>
-              <td class="protocols-cell">
-                <div class="protocol-line">
-                  <span class="line-label">Clients</span>
-                  <div class="chip-inline">
-                    <p-chip class="protocol-chip">{{ protocolLabel(proxy.listen_protocol ?? proxy.protocol) }}</p-chip>
-                    @if (proxy.listen_transport_protocol ?? proxy.transport_protocol) {
-                      <p-chip class="transport-chip">{{ transportLabel(proxy.listen_transport_protocol ?? proxy.transport_protocol ?? '') }}</p-chip>
-                    }
+      @if (loading() && !hasLoaded()) {
+        <div class="rotator-grid" aria-label="Loading rotating proxies">
+          @for (row of skeletonRows.slice(0, 4); track $index) {
+            <article class="rotator-card skeleton-card">
+              <div class="skeleton-line"><p-skeleton width="9rem" height="1rem"></p-skeleton><p-skeleton width="4rem" height="1rem"></p-skeleton></div>
+              <p-skeleton width="60%" height="2.6rem"></p-skeleton>
+              <p-skeleton width="100%" height="5rem"></p-skeleton>
+            </article>
+          }
+        </div>
+      } @else if (!rotatingProxies().length) {
+        <div class="empty-state">
+          <span class="state-icon"><i class="pi pi-sync" aria-hidden="true"></i></span>
+          <div><strong>No rotating proxies yet</strong><span>Create a listener route above to start serving healthy proxies.</span></div>
+        </div>
+      } @else {
+        <div class="rotator-grid">
+          @for (proxy of rotatingProxies(); track proxy.id) {
+            <article class="rotator-card">
+              <header class="rotator-card__header">
+                <div class="rotator-identity">
+                  <span class="rotator-state" [class.is-live]="proxy.alive_proxy_count > 0" aria-hidden="true"></span>
+                  <div>
+                    <h3>{{ proxy.name }}</h3>
+                    <p>Created {{ proxy.created_at | date:'mediumDate' }}</p>
                   </div>
                 </div>
-                <div class="protocol-line">
-                  <span class="line-label">Upstream</span>
-                  <div class="chip-inline">
-                    <p-chip class="protocol-chip">{{ protocolLabel(proxy.protocol) }}</p-chip>
-                    @if (proxy.transport_protocol) {
-                      <p-chip class="transport-chip">{{ transportLabel(proxy.transport_protocol ?? '') }}</p-chip>
-                    }
-                  </div>
+                <span class="instance-badge">{{ proxy.instance_region || proxy.instance_name || proxy.instance_id || 'Unknown' }}</span>
+              </header>
+
+              <div class="pool-summary">
+                <strong class="pool-count">{{ proxy.alive_proxy_count }}</strong>
+                <span>healthy proxies match this route</span>
+              </div>
+
+              <div class="route-visual">
+                <div>
+                  <span>Clients</span>
+                  <strong>{{ protocolLabel(proxy.listen_protocol ?? proxy.protocol) }}</strong>
+                  <small>{{ transportLabel(proxy.listen_transport_protocol ?? proxy.transport_protocol ?? '') }}</small>
                 </div>
-              </td>
-              <td class="health-cell">
-                <div class="alive-count">{{ proxy.alive_proxy_count }}</div>
-                <span class="muted health-hint">matching proxies</span>
-              </td>
-              <td class="actions">
-                <div class="action-buttons">
-                  <button pButton type="button"
-                          class="p-button-rounded p-button-text action-icon action-icon-details"
-                          icon="pi pi-eye"
-                          pTooltip="View details"
-                          tooltipPosition="top"
-                          aria-label="Details"
-                          (click)="showRotatorDetails(proxy)"
-                          [disabled]="isRotating(proxy.id)">
-                  </button>
-                  <button pButton type="button"
-                          class="p-button-rounded p-button-text action-icon action-icon-rotate"
-                          icon="pi pi-sync"
-                          pTooltip="Rotate now"
-                          tooltipPosition="top"
-                          aria-label="Rotate"
-                          (click)="rotate(proxy)"
-                          [loading]="isRotating(proxy.id)"
-                          [disabled]="isRotating(proxy.id)">
+                <span class="route-line" aria-hidden="true"><i class="pi pi-arrow-right"></i></span>
+                <div>
+                  <span>Upstream</span>
+                  <strong>{{ protocolLabel(proxy.protocol) }}</strong>
+                  <small>{{ transportLabel(proxy.transport_protocol ?? '') }}</small>
+                </div>
+              </div>
+
+              <dl class="rotator-facts">
+                <div><dt>Instance</dt><dd>{{ proxy.instance_name || proxy.instance_id || 'Unknown' }}</dd></div>
+                <div><dt>Reputation</dt><dd>{{ reputationFilterSummary(proxy.reputation_labels) }}</dd></div>
+                <div><dt>Uptime</dt><dd>{{ uptimeFilterSummary(proxy.uptime_filter_type, proxy.uptime_percentage) }}</dd></div>
+                <div><dt>Endpoint</dt><dd>{{ rotatorEndpoint(proxy) }}</dd></div>
+              </dl>
+
+              <footer class="rotator-actions">
+                <button type="button" class="text-action" (click)="showRotatorDetails(proxy)" [disabled]="isRotating(proxy.id)">
+                  View connection
+                  <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                </button>
+                <div>
+                  <button
+                    type="button"
+                    class="icon-action icon-action--rotate"
+                    [attr.aria-label]="'Rotate ' + proxy.name"
+                    [pTooltip]="isRotating(proxy.id) ? 'Rotating' : 'Rotate now'"
+                    tooltipPosition="top"
+                    (click)="rotate(proxy)"
+                    [disabled]="isRotating(proxy.id)">
+                    <i class="pi" [class.pi-sync]="!isRotating(proxy.id)" [class.pi-spinner]="isRotating(proxy.id)" [class.pi-spin]="isRotating(proxy.id)" aria-hidden="true"></i>
                   </button>
                   @if (workspaces.canOperate()) {
-                    <button pButton type="button"
-                            class="p-button-rounded p-button-text action-icon action-icon-delete"
-                            icon="pi pi-trash"
-                            pTooltip="Delete rotator"
-                            tooltipPosition="top"
-                            aria-label="Delete"
-                            severity="danger"
-                            (click)="deleteProxy(proxy)"
-                            [disabled]="isRotating(proxy.id)">
+                    <button
+                      type="button"
+                      class="icon-action icon-action--danger"
+                      [attr.aria-label]="'Delete ' + proxy.name"
+                      pTooltip="Delete rotator"
+                      tooltipPosition="top"
+                      (click)="deleteProxy(proxy)"
+                      [disabled]="isRotating(proxy.id)">
+                      <i class="pi pi-trash" aria-hidden="true"></i>
                     </button>
                   }
                 </div>
-              </td>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="5">
-                <div class="empty-state">
-                  <p>No rotating proxies yet.</p>
-                  <p class="field-hint">Create one above to start rotating through healthy proxies.</p>
-                </div>
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
+              </footer>
+            </article>
+          }
+        </div>
+      }
+    </section>
   </section>
-</div>
+</main>
 
 <p-dialog
   [visible]="detailsVisible()"
   (visibleChange)="detailsVisible.set($event)"
   [modal]="true"
   [dismissableMask]="true"
-  [style]="{width: '680px', 'max-width': '95vw'}"
-  [breakpoints]="{'960px': '78vw', '640px': '95vw'}"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: '720px', 'max-width': '95vw'}"
+  [breakpoints]="{'960px': '82vw', '640px': '95vw'}"
   (onHide)="onDetailsHide()"
-  [header]="selectedRotator() ? selectedRotator()?.name + ' · ' + protocolLabel(selectedRotator()?.listen_protocol ?? selectedRotator()?.protocol ?? '') : 'Rotator Details'">
+  styleClass="rotator-dialog">
+  <ng-template pTemplate="header">
+    <div class="rotator-dialog__header">
+      <span>{{ selectedRotator() ? protocolLabel(selectedRotator()?.listen_protocol ?? selectedRotator()?.protocol ?? '') + ' listener' : 'Rotator' }}</span>
+      <strong>{{ selectedRotator()?.name || 'Connection details' }}</strong>
+      @if (selectedRotator()) {
+        <small>{{ selectedRotator()?.instance_name || selectedRotator()?.instance_id || 'Unknown instance' }} · {{ selectedRotator()?.instance_region || 'Unknown region' }}</small>
+      }
+    </div>
+  </ng-template>
+
   @if (selectedRotator(); as rotator) {
-    <div class="details-dialog mt-4">
-      <section class="details-connection">
-        <div class="connection-meta">
-          <div class="meta-item">
-            <span class="label">Endpoint</span>
+    <div class="details-dialog">
+      <section class="connection-panel">
+        <div class="connection-heading">
+          <span class="dialog-icon"><i class="pi pi-link" aria-hidden="true"></i></span>
+          <div><strong>Connect to this listener</strong><span>Click either value to copy it.</span></div>
+        </div>
+
+        <div class="connection-values">
+          <div>
+            <span class="detail-label">Endpoint</span>
             @if (rotatorEndpoint(rotator); as endpoint) {
               <button
                 type="button"
-                class="auth-copy-value endpoint-copy-value"
-                [class.auth-copy-value--copied]="isDetailFieldCopied('endpoint')"
-                [pTooltip]="isDetailFieldCopied('endpoint') ? 'Copied' : 'Click to copy'"
-                tooltipPosition="top"
-                (click)="copyDetailField('endpoint', endpoint)"
-              >
-                <span class="copy-value__text">{{ endpoint }}</span>
+                class="copy-value"
+                [class.is-copied]="isDetailFieldCopied('endpoint')"
+                (click)="copyDetailField('endpoint', endpoint)">
+                <span>{{ endpoint }}</span>
                 <i class="pi" [ngClass]="isDetailFieldCopied('endpoint') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
               </button>
-            } @else {
-              <span class="value muted">Unavailable</span>
             }
           </div>
-          <div class="meta-item">
-            <span class="label">Instance</span>
-            <span class="value">
-              {{ rotator.instance_name || rotator.instance_id || 'Unknown' }}
-              ·
-              {{ rotator.instance_region || 'Unknown' }}
-            </span>
+          <div>
+            <span class="detail-label">Connection URL</span>
+            @if (rotatorConnectionString(rotator); as connectionString) {
+              <button
+                type="button"
+                class="copy-value copy-value--wide"
+                [class.is-copied]="isDetailFieldCopied('connection')"
+                (click)="copyDetailField('connection', connectionString)">
+                <span>{{ connectionString }}</span>
+                <i class="pi" [ngClass]="isDetailFieldCopied('connection') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
+              </button>
+            }
           </div>
-        </div>
-
-        <div class="connection-field">
-          <span class="label">Connection URL</span>
-          @if (rotatorConnectionString(rotator); as connectionString) {
-            <button
-              type="button"
-              class="auth-copy-value connection-copy-value"
-              [class.auth-copy-value--copied]="isDetailFieldCopied('connection')"
-              [pTooltip]="isDetailFieldCopied('connection') ? 'Copied' : 'Click to copy'"
-              tooltipPosition="top"
-              (click)="copyDetailField('connection', connectionString)"
-            >
-              <span class="copy-value__text">{{ connectionString }}</span>
-              <i class="pi" [ngClass]="isDetailFieldCopied('connection') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
-            </button>
-          } @else {
-            <span class="value muted">Unavailable</span>
-          }
         </div>
       </section>
 
       <div class="details-grid">
         <section class="detail-card">
-          <h4>Listener</h4>
-          <div class="detail-row">
-            <span class="label">Protocol</span>
-            <span class="value">
-              @if (rotator.listen_protocol ?? rotator.protocol) {
-                <p-chip class="protocol-chip">{{ protocolLabel(rotator.listen_protocol ?? rotator.protocol) }}</p-chip>
-              } @else {
-                <span class="muted">Unavailable</span>
-              }
-            </span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Transport</span>
-            <span class="value">
-              @if (rotator.listen_transport_protocol ?? rotator.transport_protocol) {
-                <p-chip class="transport-chip">{{ transportLabel(rotator.listen_transport_protocol ?? rotator.transport_protocol ?? '') }}</p-chip>
-              } @else {
-                <span class="muted">Unavailable</span>
-              }
-            </span>
-          </div>
-          <div class="detail-row">
-            <span class="label">IP / Port</span>
-            <span class="value">
-              <span class="auth-copy-values ip-port-copy-values">
+          <div class="detail-card__heading"><span class="dialog-icon"><i class="pi pi-wifi" aria-hidden="true"></i></span><h3>Listener</h3></div>
+          <dl>
+            <div><dt>Protocol</dt><dd>{{ protocolLabel(rotator.listen_protocol ?? rotator.protocol) }}</dd></div>
+            <div><dt>Transport</dt><dd>{{ transportLabel(rotator.listen_transport_protocol ?? rotator.transport_protocol ?? '') }}</dd></div>
+            <div>
+              <dt>IP and port</dt>
+              <dd class="inline-copy-values">
                 @if (rotator.listen_host; as listenHost) {
-                  <button
-                    type="button"
-                    class="auth-copy-value"
-                    [class.auth-copy-value--copied]="isDetailFieldCopied('ip')"
-                    [pTooltip]="isDetailFieldCopied('ip') ? 'Copied' : 'Click to copy'"
-                    tooltipPosition="top"
-                    (click)="copyDetailField('ip', listenHost)"
-                  >
-                    <span class="copy-value__text">{{ listenHost }}</span>
-                    <i class="pi" [ngClass]="isDetailFieldCopied('ip') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
-                  </button>
-                } @else {
-                  <span class="muted">Unknown</span>
+                  <button type="button" class="copy-value copy-value--compact" [class.is-copied]="isDetailFieldCopied('ip')" (click)="copyDetailField('ip', listenHost)">{{ listenHost }}<i class="pi" [ngClass]="isDetailFieldCopied('ip') ? 'pi-check' : 'pi-copy'"></i></button>
                 }
-                <span class="auth-copy-divider">/</span>
-                <button
-                  type="button"
-                  class="auth-copy-value"
-                  [class.auth-copy-value--copied]="isDetailFieldCopied('port')"
-                  [pTooltip]="isDetailFieldCopied('port') ? 'Copied' : 'Click to copy'"
-                  tooltipPosition="top"
-                  (click)="copyDetailField('port', '' + rotator.listen_port)"
-                >
-                  <span class="copy-value__text">{{ rotator.listen_port }}</span>
-                  <i class="pi" [ngClass]="isDetailFieldCopied('port') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
-                </button>
-              </span>
-            </span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Auth</span>
-            @if (rotator.auth_required && rotator.auth_username && rotator.auth_password) {
-              <span class="value auth-copy-values">
-                <button
-                  type="button"
-                  class="auth-copy-value"
-                  [class.auth-copy-value--copied]="isDetailFieldCopied('username')"
-                  [pTooltip]="isDetailFieldCopied('username') ? 'Copied' : 'Click to copy'"
-                  tooltipPosition="top"
-                  (click)="copyDetailField('username', rotator.auth_username)"
-                >
-                  <span class="copy-value__text">{{ rotator.auth_username }}</span>
-                  <i class="pi" [ngClass]="isDetailFieldCopied('username') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
-                </button>
-                <span class="auth-copy-divider">/</span>
-                <button
-                  type="button"
-                  class="auth-copy-value"
-                  [class.auth-copy-value--copied]="isDetailFieldCopied('password')"
-                  [pTooltip]="isDetailFieldCopied('password') ? 'Copied' : 'Click to copy'"
-                  tooltipPosition="top"
-                  (click)="copyDetailField('password', rotator.auth_password)"
-                >
-                  <span class="copy-value__text">{{ rotator.auth_password }}</span>
-                  <i class="pi" [ngClass]="isDetailFieldCopied('password') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
-                </button>
-              </span>
-            } @else if (rotator.auth_required) {
-              <span class="value muted">Credentials required</span>
-            } @else {
-              <span class="value muted">Not required</span>
-            }
-          </div>
+                <button type="button" class="copy-value copy-value--compact" [class.is-copied]="isDetailFieldCopied('port')" (click)="copyDetailField('port', '' + rotator.listen_port)">{{ rotator.listen_port }}<i class="pi" [ngClass]="isDetailFieldCopied('port') ? 'pi-check' : 'pi-copy'"></i></button>
+              </dd>
+            </div>
+            <div>
+              <dt>Authentication</dt>
+              <dd>
+                @if (rotator.auth_required && rotator.auth_username && rotator.auth_password) {
+                  <span class="inline-copy-values">
+                    <button type="button" class="copy-value copy-value--compact" [class.is-copied]="isDetailFieldCopied('username')" (click)="copyDetailField('username', rotator.auth_username)">{{ rotator.auth_username }}<i class="pi" [ngClass]="isDetailFieldCopied('username') ? 'pi-check' : 'pi-copy'"></i></button>
+                    <button type="button" class="copy-value copy-value--compact" [class.is-copied]="isDetailFieldCopied('password')" (click)="copyDetailField('password', rotator.auth_password)">{{ rotator.auth_password }}<i class="pi" [ngClass]="isDetailFieldCopied('password') ? 'pi-check' : 'pi-copy'"></i></button>
+                  </span>
+                } @else if (rotator.auth_required) {
+                  Credentials required
+                } @else {
+                  Not required
+                }
+              </dd>
+            </div>
+          </dl>
         </section>
 
         <section class="detail-card">
-          <h4>Routing Rules</h4>
-          <div class="detail-row">
-            <span class="label">Serves</span>
-            <span class="value">
-              @if (rotator.protocol) {
-                <p-chip class="protocol-chip">{{ protocolLabel(rotator.protocol) }}</p-chip>
-              } @else {
-                <span class="muted">Unavailable</span>
-              }
-            </span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Proxy transport</span>
-            <span class="value">
-              @if (rotator.transport_protocol) {
-                <p-chip class="transport-chip">{{ transportLabel(rotator.transport_protocol) }}</p-chip>
-              } @else {
-                <span class="muted">Unavailable</span>
-              }
-            </span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Reputation</span>
-            <span class="value">{{ reputationFilterSummary(rotator.reputation_labels) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Uptime</span>
-            <span class="value">{{ uptimeFilterSummary(rotator.uptime_filter_type, rotator.uptime_percentage) }}</span>
-          </div>
+          <div class="detail-card__heading"><span class="dialog-icon"><i class="pi pi-filter" aria-hidden="true"></i></span><h3>Routing policy</h3></div>
+          <dl>
+            <div><dt>Proxy protocol</dt><dd>{{ protocolLabel(rotator.protocol) }}</dd></div>
+            <div><dt>Proxy transport</dt><dd>{{ transportLabel(rotator.transport_protocol ?? '') }}</dd></div>
+            <div><dt>Reputation</dt><dd>{{ reputationFilterSummary(rotator.reputation_labels) }}</dd></div>
+            <div><dt>Uptime</dt><dd>{{ uptimeFilterSummary(rotator.uptime_filter_type, rotator.uptime_percentage) }}</dd></div>
+          </dl>
         </section>
       </div>
     </div>
   } @else {
-    <div class="empty-details muted">Select a rotator to view details.</div>
+    <div class="empty-details">Select a rotator to view its connection details.</div>
   }
 </p-dialog>
