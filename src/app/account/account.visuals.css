@@ -1,0 +1,45 @@
+.account-danger-dialog.p-dialog {
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 1.1rem;
+  background: rgba(13, 13, 15, 0.98);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.58);
+  color: #fff;
+  overflow: hidden;
+}
+
+.account-danger-dialog .p-dialog-header,
+.account-danger-dialog .p-dialog-content {
+  background: transparent;
+  color: inherit;
+}
+
+.account-danger-dialog .p-dialog-header {
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(248, 113, 113, 0.12);
+}
+
+.account-danger-dialog .p-dialog-content {
+  padding-top: 1.15rem;
+}
+
+.account-danger-dialog .p-dialog-close-button {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.account-danger-dialog .p-dialog-close-button:hover,
+.account-danger-dialog .p-dialog-close-button:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.account-danger-dialog .password-input,
+.account-danger-dialog .p-password {
+  display: flex;
+  width: 100%;
+}
+
+.account-danger-dialog .p-password-input,
+.account-danger-dialog .p-inputtext {
+  width: 100%;
+  min-width: 0;
+}

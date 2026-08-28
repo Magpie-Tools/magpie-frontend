@@ -21,4 +21,33 @@ describe('AccountComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('renders the three account settings cards', () => {
+    const cards = fixture.nativeElement.querySelectorAll('.account-card');
+
+    expect(cards.length).toBe(3);
+  });
+
+  it('tracks the password policy as the user types', () => {
+    component.passwordForm.setValue({
+      oldPassword: 'CurrentPassword1',
+      newPassword: 'Replacement1',
+      newPasswordCheck: 'Replacement1',
+    });
+
+    expect(component.metPasswordRequirementCount).toBe(component.passwordRequirements.length);
+    expect(component.passwordForm.valid).toBeTrue();
+  });
+
+  it('clears destructive confirmation state when the dialog closes', () => {
+    component.deleteDialogVisible = true;
+    component.deletingAccount = true;
+    component.deleteAccountForm.setValue({password: 'CurrentPassword1'});
+
+    component.onDeleteDialogHide();
+
+    expect(component.deleteDialogVisible).toBeFalse();
+    expect(component.deletingAccount).toBeFalse();
+    expect(component.deleteAccountForm.get('password')?.value).toBe('');
+  });
 });
