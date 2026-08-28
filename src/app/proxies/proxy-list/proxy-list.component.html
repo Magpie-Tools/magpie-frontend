@@ -1,162 +1,236 @@
-<div class="proxy-container p-8 min-h-screen text-gray-300">
-  <div class="actions-wrapper">
-    <section class="proxy-workbench" aria-label="Proxy list controls">
-      <div class="proxy-workbench__actions-row">
-        <div class="proxy-workbench__context">
-          <div class="proxy-workbench__eyebrow">Proxy inventory</div>
-          <div class="proxy-workbench__summary">
+<main class="proxies-page">
+  <section class="proxies-stage">
+    <header class="proxies-context">
+      <div class="proxies-context__copy">
+        <span class="context-icon"><i class="pi pi-server" aria-hidden="true"></i></span>
+        <div>
+          <span class="context-eyebrow">Route inventory</span>
+          <h1>Managed proxies</h1>
+          <p>Search, inspect, tag, and control every proxy route in the current workspace.</p>
+        </div>
+      </div>
+
+      <div class="workspace-state">
+        <span class="workspace-state__dot" aria-hidden="true"></span>
+        <span>
+          <small>Current workspace</small>
+          <strong>{{ workspaces.current()?.name || 'Workspace' }}</strong>
+        </span>
+      </div>
+    </header>
+
+    <div class="inventory-grid">
+      <div class="actions-wrapper">
+        <section class="inventory-toolbar" aria-labelledby="workbench-title">
+          <div class="inventory-toolbar__topline">
+            <div class="card-heading">
+              <span class="card-icon"><i class="pi pi-sliders-h" aria-hidden="true"></i></span>
+              <div class="card-heading__copy">
+                <h2 id="workbench-title">Find the routes you need</h2>
+                <p>Search every page, narrow the inventory, or adjust the table before taking action.</p>
+              </div>
+            </div>
+
+            <div class="toolbar-actions" aria-label="Proxy tools">
+              <app-proxy-tag-manager
+                #tagManager
+                class="toolbar-action toolbar-action--tags"
+                [showTrigger]="workspaces.canOperate()"
+                (tagsChanged)="onTagCatalogChanged()"
+              ></app-proxy-tag-manager>
+
+              <button
+                type="button"
+                class="tool-button"
+                [disabled]="isLoading()"
+                (click)="refreshList()"
+              >
+                <i class="pi" [class.pi-spin]="isLoading()" [class.pi-spinner]="isLoading()" [class.pi-refresh]="!isLoading()" aria-hidden="true"></i>
+                Refresh
+              </button>
+
+              <div #filterToggleAnchor>
+                <button
+                  type="button"
+                  class="tool-button"
+                  [class.is-active]="hasActiveFilters()"
+                  [attr.aria-expanded]="filterPanelOpen()"
+                  (click)="toggleFilterPanel($event)"
+                >
+                  <i class="pi pi-filter" aria-hidden="true"></i>
+                  {{ filterButtonLabel() }}
+                </button>
+              </div>
+
+              <div #columnToggleAnchor>
+                <button
+                  type="button"
+                  class="tool-button"
+                  [class.is-active]="columnPanelOpen()"
+                  [disabled]="isSavingColumnPreferences()"
+                  [attr.aria-expanded]="columnPanelOpen()"
+                  (click)="openColumnPanel($event)"
+                >
+                  <i class="pi pi-table" aria-hidden="true"></i>
+                  Columns
+                </button>
+              </div>
+
+              <app-export-proxies
+                class="toolbar-action toolbar-action--export"
+                [allProxies]="dataSource()"
+                [selectedProxies]="selectedProxies()"
+              ></app-export-proxies>
+
+              @if (workspaces.canOperate()) {
+                <app-delete-proxies
+                  class="toolbar-action toolbar-action--delete"
+                  [allProxies]="dataSource()"
+                  [selectedProxies]="selectedProxies()"
+                  (proxiesDeleted)="onProxiesDeleted()"
+                ></app-delete-proxies>
+
+                <app-add-proxies
+                  class="toolbar-action toolbar-action--add"
+                  (proxiesAdded)="onProxiesAdded()"
+                ></app-add-proxies>
+              }
+            </div>
+          </div>
+
+          <div class="search-bar">
+            <i class="pi pi-search" aria-hidden="true"></i>
+            <input
+              type="search"
+              class="proxy-search-input"
+              placeholder="Search host, port, country, status, reputation, or tag"
+              [ngModel]="searchTerm()"
+              (ngModelChange)="onSearchTermChange($event)"
+              aria-label="Search proxies"
+            />
+            @if (searchTerm()) {
+              <button type="button" class="search-clear" aria-label="Clear search" (click)="clearSearch()">
+                <i class="pi pi-times" aria-hidden="true"></i>
+              </button>
+            }
+            <span class="search-scope">Searches all pages</span>
+          </div>
+        </section>
+
+        @if (filterPanelOpen()) {
+          <div #filterPanelRef>
+            <app-proxy-filter-panel
+              [form]="filterForm"
+              [countryOptions]="countryOptions()"
+              [typeOptions]="typeOptions()"
+              [anonymityOptions]="anonymityOptions()"
+              [proxyStatusOptions]="proxyStatusOptions"
+              [proxyReputationOptions]="proxyReputationOptions"
+              [tagOptions]="tagService.tags()"
+              [floating]="true"
+              (clear)="clearFilters()"
+              (apply)="applyFilters()"
+            ></app-proxy-filter-panel>
+          </div>
+        }
+
+        @if (columnPanelOpen()) {
+          <app-column-picker-panel
+            #columnPanelRef
+            class="column-panel"
+            [columns]="columnPickerColumns()"
+            [selectedColumnIds]="displayedColumns()"
+            [defaultColumnIds]="defaultProxyTableColumns"
+            [saving]="isSavingColumnPreferences()"
+            (cancel)="closeColumnPanel()"
+            (save)="saveColumnPreferences($event)"
+            (dragStarted)="onColumnEditorDragStart()"
+            (dragEnded)="onColumnEditorDragEnd()"
+          ></app-column-picker-panel>
+        }
+      </div>
+
+      <section class="inventory-card" aria-labelledby="inventory-title">
+        <div class="inventory-card__heading">
+          <div class="card-heading">
+            <span class="card-icon"><i class="pi pi-th-large" aria-hidden="true"></i></span>
+            <div class="card-heading__copy">
+              <h2 id="inventory-title">Proxy routes</h2>
+              <p>Sort columns, copy addresses, edit tags, and open a route for its full check history.</p>
+            </div>
+          </div>
+
+          <div class="inventory-state" [class.inventory-state--selected]="selectedProxies().length > 0" aria-live="polite">
+            <span aria-hidden="true"></span>
             @if (selectedProxies().length > 0) {
               {{ selectedProxies().length }} selected
             } @else if (hasLoaded()) {
-              {{ totalItems() }} proxies
+              {{ totalItems().toLocaleString() }} total
             } @else {
-              Loading proxies…
-            }
-          </div>
-          <div class="proxy-workbench__bulk-actions">
-            <app-export-proxies
-              [allProxies]="dataSource()"
-              [selectedProxies]="selectedProxies()"
-            ></app-export-proxies>
-
-            @if (workspaces.canOperate()) {
-              <app-delete-proxies
-                [allProxies]="dataSource()"
-                [selectedProxies]="selectedProxies()"
-                (proxiesDeleted)="onProxiesDeleted()"
-              ></app-delete-proxies>
+              Loading routes
             }
           </div>
         </div>
 
-        <nav class="proxy-workbench__tools" aria-label="Proxy tools">
-          <app-proxy-tag-manager
-            #tagManager
-            [showTrigger]="workspaces.canOperate()"
-            (tagsChanged)="onTagCatalogChanged()"
-          ></app-proxy-tag-manager>
-
-          <p-button
-            label="Refresh"
-            icon="pi pi-refresh"
-            styleClass="p-button-outlined"
-            [disabled]="isLoading()"
-            (onClick)="refreshList()"
-          ></p-button>
-
-          <div #filterToggleAnchor>
-            <p-button
-              [label]="filterButtonLabel()"
-              icon="pi pi-filter"
-              [styleClass]="filterToggleClass()"
-              (onClick)="toggleFilterPanel($event)"
-            ></p-button>
+        @if (hasLoaded() && !isLoading() && totalItems() === 0) {
+          <div class="empty-inventory">
+            <span class="empty-inventory__icon"><i class="pi pi-inbox" aria-hidden="true"></i></span>
+            <strong>{{ searchTerm() || hasActiveFilters() ? 'No matching proxy routes' : 'No proxy routes yet' }}</strong>
+            <p>
+              {{ searchTerm() || hasActiveFilters()
+                ? 'Clear the search or filters to widen the result set.'
+                : 'Use Add proxies above to import the first routes into this workspace.' }}
+            </p>
+            @if (searchTerm() || hasActiveFilters()) {
+              <div class="empty-inventory__actions">
+                @if (searchTerm()) {
+                  <button type="button" class="button button--quiet" (click)="clearSearch()">Clear search</button>
+                }
+                @if (hasActiveFilters()) {
+                  <button type="button" class="button button--primary" (click)="clearFilters()">Clear filters</button>
+                }
+              </div>
+            }
           </div>
-
-          <div #columnToggleAnchor>
-            <p-button
-              label="Columns"
-              icon="pi pi-table"
-              styleClass="p-button-outlined"
-              [disabled]="isSavingColumnPreferences()"
-              (onClick)="openColumnPanel($event)"
-            ></p-button>
-          </div>
-
-          @if (workspaces.canOperate()) {
-            <app-add-proxies
-              (showAddProxiesMessage)="showAddProxiesMessage.emit($event)"
-              (proxiesAdded)="onProxiesAdded()"
-            ></app-add-proxies>
-          }
-        </nav>
-      </div>
-
-      <div class="proxy-workbench__search-row">
-        <i class="pi pi-search" aria-hidden="true"></i>
-        <input
-          type="search"
-          class="proxy-search-input"
-          placeholder="Search by host, port, country, status, reputation, or tag"
-          [ngModel]="searchTerm()"
-          (ngModelChange)="onSearchTermChange($event)"
-          aria-label="Search proxies"
-        />
-        @if (searchTerm()) {
-          <button type="button" class="proxy-workbench__clear-search" aria-label="Clear search" (click)="clearSearch()">
-            <i class="pi pi-times" aria-hidden="true"></i>
-          </button>
+        } @else {
+          <app-proxy-table
+            class="inventory-table"
+            [proxies]="dataSource()"
+            [loading]="isLoading()"
+            [hasLoaded]="hasLoaded()"
+            [page]="page()"
+            [pageSize]="pageSize()"
+            [totalRecords]="totalItems()"
+            [rowsPerPageOptions]="rowsPerPageOptions"
+            [skeletonRows]="skeletonRows"
+            [selectionEnabled]="true"
+            [selection]="selectedProxies()"
+            [selectionModel]="selection"
+            [isAllSelected]="isAllSelected()"
+            [sortable]="true"
+            [sortField]="sortField()"
+            [sortOrder]="sortOrder()"
+            [checkingProxyIds]="checkingProxyIds()"
+            [savingTagProxyIds]="savingTagProxyIds()"
+            [availableTags]="tagService.tags()"
+            [tagEditingEnabled]="workspaces.canOperate()"
+            [lifecycleEnabled]="workspaces.canOperate()"
+            [lifecycleChangingIds]="lifecycleChangingIds()"
+            [columns]="proxyTableColumns()"
+            pageScrollTargetStorageKey="magpie-proxy-list-page-scroll-target"
+            (lazyLoad)="onLazyLoad($event)"
+            (selectionChange)="onSelectionChange($event)"
+            (masterToggle)="masterToggle()"
+            (toggleSelection)="toggleSelection($event)"
+            (sort)="onSort($event)"
+            (checkNow)="checkProxyNow($event)"
+            (viewProxy)="onViewProxy($event)"
+            (tagSelectionChange)="onTagSelectionChange($event)"
+            (manageTags)="tagManager.open()"
+            (lifecycleChange)="onLifecycleChange($event)"
+          ></app-proxy-table>
         }
-        <span class="proxy-workbench__search-hint">Filters apply across all pages</span>
-      </div>
-    </section>
-
-    @if (filterPanelOpen()) {
-      <div #filterPanelRef>
-        <app-proxy-filter-panel
-          [form]="filterForm"
-          [countryOptions]="countryOptions()"
-          [typeOptions]="typeOptions()"
-          [anonymityOptions]="anonymityOptions()"
-          [proxyStatusOptions]="proxyStatusOptions"
-          [proxyReputationOptions]="proxyReputationOptions"
-          [tagOptions]="tagService.tags()"
-          [floating]="true"
-          (clear)="clearFilters()"
-          (apply)="applyFilters()"
-        ></app-proxy-filter-panel>
-      </div>
-    }
-
-    @if (columnPanelOpen()) {
-      <app-column-picker-panel
-        #columnPanelRef
-        class="column-panel"
-        [columns]="columnPickerColumns()"
-        [selectedColumnIds]="displayedColumns()"
-        [defaultColumnIds]="defaultProxyTableColumns"
-        [saving]="isSavingColumnPreferences()"
-        (cancel)="closeColumnPanel()"
-        (save)="saveColumnPreferences($event)"
-        (dragStarted)="onColumnEditorDragStart()"
-        (dragEnded)="onColumnEditorDragEnd()"
-      ></app-column-picker-panel>
-    }
-  </div>
-
-  <app-proxy-table
-    [proxies]="dataSource()"
-    [loading]="isLoading()"
-    [hasLoaded]="hasLoaded()"
-    [page]="page()"
-    [pageSize]="pageSize()"
-    [totalRecords]="totalItems()"
-    [rowsPerPageOptions]="rowsPerPageOptions"
-    [skeletonRows]="skeletonRows"
-    [selectionEnabled]="true"
-    [selection]="selectedProxies()"
-    [selectionModel]="selection"
-    [isAllSelected]="isAllSelected()"
-    [sortable]="true"
-    [sortField]="sortField()"
-    [sortOrder]="sortOrder()"
-    [checkingProxyIds]="checkingProxyIds()"
-    [savingTagProxyIds]="savingTagProxyIds()"
-    [availableTags]="tagService.tags()"
-    [tagEditingEnabled]="workspaces.canOperate()"
-    [lifecycleEnabled]="workspaces.canOperate()"
-    [lifecycleChangingIds]="lifecycleChangingIds()"
-    [columns]="proxyTableColumns()"
-    pageScrollTargetStorageKey="magpie-proxy-list-page-scroll-target"
-    (lazyLoad)="onLazyLoad($event)"
-    (selectionChange)="onSelectionChange($event)"
-    (masterToggle)="masterToggle()"
-    (toggleSelection)="toggleSelection($event)"
-    (sort)="onSort($event)"
-    (checkNow)="checkProxyNow($event)"
-    (viewProxy)="onViewProxy($event)"
-    (tagSelectionChange)="onTagSelectionChange($event)"
-    (manageTags)="tagManager.open()"
-    (lifecycleChange)="onLifecycleChange($event)"
-  ></app-proxy-table>
-</div>
+      </section>
+    </div>
+  </section>
+</main>

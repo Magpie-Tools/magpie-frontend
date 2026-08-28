@@ -1,4 +1,4 @@
-import {Component, signal} from '@angular/core';
+import {Component} from '@angular/core';
 
 import {ProxyListComponent} from './proxy-list/proxy-list.component';
 
@@ -11,5 +11,4 @@ import {ProxyListComponent} from './proxy-list/proxy-list.component';
     styleUrl: './proxies.component.scss'
 })
 export class ProxiesComponent {
-  showNoProxiesMessage = signal(false);
 }

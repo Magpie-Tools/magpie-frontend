@@ -2,12 +2,11 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
   OnDestroy,
   OnInit,
-  Output,
   ViewChild,
+  computed,
   signal
 } from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -15,7 +14,6 @@ import {HttpService} from '../../services/http.service';
 import {ProxyInfo} from '../../models/ProxyInfo';
 import {SelectionModel} from '@angular/cdk/collections';
 import {TableLazyLoadEvent} from 'primeng/table'; // Keep this for onLazyLoad
-import {ButtonModule} from 'primeng/button';
 import {NotificationService} from '../../services/notification-service.service';
 import {Observable, Subscription} from 'rxjs';
 import {filter, finalize, takeUntil} from 'rxjs/operators';
@@ -62,6 +60,10 @@ import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
+import {gsap} from 'gsap';
+import {ScrollTrigger} from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 @Component({
   selector: 'app-proxy-list',
@@ -69,7 +71,6 @@ import {ManagedProxyState} from '../../models/Workspace';
   imports: [
     ReactiveFormsModule,
     FormsModule,
-    ButtonModule,
     InputNumberModule,
     MultiSelectModule,
     AddProxiesComponent,
@@ -84,7 +85,6 @@ import {ManagedProxyState} from '../../models/Workspace';
   styleUrls: ['./proxy-list.component.scss']
 })
 export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Output() showAddProxiesMessage = new EventEmitter<boolean>();
   @ViewChild('filterToggleAnchor') private filterToggleAnchor?: ElementRef<HTMLElement>;
   @ViewChild('filterPanelRef') private filterPanelRef?: ElementRef<HTMLElement>;
   @ViewChild('columnToggleAnchor') private columnToggleAnchor?: ElementRef<HTMLElement>;
@@ -115,6 +115,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   checkingProxyIds = signal<Record<number, boolean>>({});
   savingTagProxyIds = signal<Record<number, boolean>>({});
   lifecycleChangingIds = signal<Record<number, boolean>>({});
+  readonly activeFilterCount = computed(() => activeProxyFilterCount(this.appliedFilters()));
   filterForm: FormGroup;
   readonly proxyStatusOptions = PROXY_STATUS_OPTIONS;
   readonly proxyReputationOptions = PROXY_REPUTATION_OPTIONS;
@@ -140,6 +141,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   private userSettingsSubscription?: Subscription;
   private roleSubscription?: Subscription;
   private suppressOutsideCloseUntil = 0;
+  private animationContext?: gsap.Context;
 
   constructor(
     private http: HttpService,
@@ -150,6 +152,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     private userService: UserService,
     readonly tagService: ProxyTagService,
     readonly workspaces: WorkspaceService,
+    private readonly elementRef: ElementRef<HTMLElement>,
   ) {
     this.navigationStart$ = this.router.events.pipe(
       filter((event): event is NavigationStart => event instanceof NavigationStart)
@@ -179,8 +182,57 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  ngAfterViewInit() {
-    // PrimeNG table handles sorting internally with pSortableColumn and (onSort)
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const host = this.elementRef.nativeElement;
+    const scrollContainer = host.closest('main') as HTMLElement | null;
+    const scroller = scrollContainer ?? undefined;
+
+    this.animationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.proxies-context',
+        {opacity: 0, y: 20},
+        {opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', clearProps: 'transform'},
+      );
+
+      gsap.utils.toArray<HTMLElement>('.inventory-toolbar, .inventory-card').forEach((card, index) => {
+        gsap.from(card, {
+          opacity: 0,
+          y: 28,
+          scale: 0.985,
+          duration: 0.7,
+          delay: index * 0.045,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: card,
+            scroller,
+            start: 'top 94%',
+            toggleActions: 'play none none reverse',
+          },
+        });
+      });
+
+      gsap.fromTo(
+        '.proxies-context__copy p',
+        {opacity: 0.38},
+        {
+          opacity: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.proxies-context',
+            scroller,
+            start: 'top 96%',
+            end: 'bottom 74%',
+            scrub: 0.35,
+          },
+        },
+      );
+    }, host);
+
+    requestAnimationFrame(() => ScrollTrigger.refresh());
   }
 
   ngOnInit(): void {
@@ -278,7 +330,6 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
           this.totalItems.set(res.total ?? data.length);
           this.pruneSelection();
           this.hasLoaded.set(true);
-          this.showAddProxiesMessage.emit(this.totalItems() === 0 && this.hasLoaded());
           this.restoreScrollPosition();
         },
         error: err => {
@@ -293,6 +344,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.animationContext?.revert();
     this.proxyListSubscription?.unsubscribe();
     this.navigationSubscription?.unsubscribe();
     this.userSettingsSubscription?.unsubscribe();
@@ -538,10 +590,6 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
       return 'p-button-outlined filter-toggle filter-toggle--active';
     }
     return 'p-button-outlined filter-toggle';
-  }
-
-  private activeFilterCount(): number {
-    return activeProxyFilterCount(this.appliedFilters());
   }
 
   private ensureFilterOptionsLoaded(): void {

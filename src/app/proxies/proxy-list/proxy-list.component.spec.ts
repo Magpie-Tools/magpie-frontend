@@ -57,6 +57,14 @@ describe('ProxyListComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('renders the redesigned inventory workbench', () => {
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('.summary-card')).toBeNull();
+    expect(element.querySelector('.inventory-toolbar')).not.toBeNull();
+    expect(element.querySelector('.inventory-card')).not.toBeNull();
+  });
+
   it('keeps the filter panel open when clicking an appended filter select overlay', () => {
     const overlay = document.createElement('div');
     const option = document.createElement('button');
