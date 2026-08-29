@@ -13,6 +13,7 @@ import {ScrapeSourceFilterPanelComponent} from '../scrape-source-filter-panel/sc
 import {BulkScopeSelectorComponent} from '../../../shared/bulk-scope-selector/bulk-scope-selector.component';
 import {buildDatedExportFileName, downloadTextFile, extractHttpErrorMessage} from '../../../shared/export-file-utils';
 import {normalizeNumber} from '../../../shared/number-utils';
+import {animateDialogSections} from '../../../shared/dialog-motion';
 
 type ExportSourcesFormDefaults = {
   output: string;
@@ -105,6 +106,10 @@ export class ExportSourcesComponent implements OnChanges {
 
     this.exportOption = this.canExportSelected() ? 'selected' : 'all';
     this.dialogVisible = true;
+  }
+
+  animateDialog(): void {
+    animateDialogSections('export-dialog');
   }
 
   closeDialog(): void {

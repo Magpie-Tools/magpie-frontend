@@ -13,6 +13,4 @@ import {ScrapeSourceListComponent} from './scrape-source-list/scrape-source-list
   standalone: true
 })
 export class ScraperComponent {
-  showNoSourceMessage: boolean = false;
-
 }

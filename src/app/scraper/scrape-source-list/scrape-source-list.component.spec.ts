@@ -64,4 +64,16 @@ describe('ScrapeSourceListComponent', () => {
 
     expect(window.localStorage.getItem(pageSizeStorageKey)).toBe('60');
   });
+
+  it('clears the search and reloads the first page', () => {
+    component.searchTerm = 'example.com';
+    component.page = 2;
+    spyOn(component, 'refreshList');
+
+    component.clearSearch();
+
+    expect(component.searchTerm).toBe('');
+    expect(component.page).toBe(0);
+    expect(component.refreshList).toHaveBeenCalled();
+  });
 });

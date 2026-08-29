@@ -1,11 +1,9 @@
 import {
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
   OnDestroy,
   OnInit,
-  Output,
   signal,
   ViewChild
 } from '@angular/core';
@@ -94,7 +92,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   private readonly pageScrollTargetStorageKey = 'magpie-scrape-source-list-page-scroll-target';
   private readonly pageSizeStorageKey = 'magpie-scrape-source-list-page-size';
 
-  @Output() showAddScrapeSourceMessage = new EventEmitter<boolean>();
   @ViewChild('filterToggleAnchor') private filterToggleAnchor?: ElementRef<HTMLElement>;
   @ViewChild('filterPanelRef') private filterPanelRef?: ElementRef<HTMLElement>;
   @ViewChild('columnToggleAnchor') private columnToggleAnchor?: ElementRef<HTMLElement>;
@@ -254,15 +251,12 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.hasLoaded = true;
         this.applyPendingPageScroll();
-        const shouldShowEmptyState = this.totalItems === 0 && sources.length === 0;
-        this.showAddScrapeSourceMessage.emit(shouldShowEmptyState);
       },
       error: err => {
         this.notification.showError("Could not get scraping sources" + err.error.message);
         this.loading = false;
         this.hasLoaded = true;
         this.applyPendingPageScroll();
-        this.showAddScrapeSourceMessage.emit(false);
       }
     });
   }
@@ -275,8 +269,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: res => {
         this.totalItems = res ?? 0;
-        const shouldShowEmptyState = this.totalItems === 0 && this.hasLoaded && this.scrapeSources.length === 0;
-        this.showAddScrapeSourceMessage.emit(shouldShowEmptyState);
       },
       error: err => {
         this.notification.showError("Could not get scrape sources count " + err.error.message);
@@ -413,6 +405,21 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     }, 300);
   }
 
+  clearSearch(): void {
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+      this.searchDebounceHandle = undefined;
+    }
+
+    if (!this.searchTerm) {
+      return;
+    }
+
+    this.searchTerm = '';
+    this.resetPaginatorToFirstPage();
+    this.refreshList();
+  }
+
   openColumnPanel(event?: Event | { originalEvent?: Event }): void {
     this.stopTriggerEvent(event);
     if (this.columnPanelOpen) {
@@ -518,10 +525,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   onScrapeSourcesDeleted(): void {
     this.resetPaginatorToFirstPage();
     this.refreshList();
-  }
-
-  onShowAddScrapeSourcesMessage(value: boolean): void {
-    this.showAddScrapeSourceMessage.emit(value);
   }
 
   onViewSource(event: Event | { originalEvent?: Event }, source: ScrapeSourceView): void {

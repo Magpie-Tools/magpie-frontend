@@ -5,13 +5,14 @@ import {HttpService} from '../../services/http.service';
 
 import {ButtonModule} from 'primeng/button';
 import {TextareaModule} from 'primeng/textarea';
-import {TooltipModule} from 'primeng/tooltip';
 import {DialogModule} from 'primeng/dialog';
 import {ClipboardService} from '../../services/clipboard.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {
   ProcesingPopupComponent
 } from '../../proxies/proxy-list/add-proxies/procesing-popup/procesing-popup.component';
+import {TooltipComponent} from '../../tooltip/tooltip.component';
+import {animateDialogSections} from '../../shared/dialog-motion';
 
 @Component({
   selector: 'app-add-scrape-source',
@@ -21,8 +22,8 @@ import {
     FormsModule,
     ButtonModule,
     TextareaModule,
-    TooltipModule,
-    DialogModule
+    DialogModule,
+    TooltipComponent,
 ],
   templateUrl: './add-scrape-source.component.html',
   styleUrl: './add-scrape-source.component.scss'
@@ -100,6 +101,10 @@ export class AddScrapeSourceComponent {
 
   openDialog(): void {
     this.dialogVisible.set(true);
+  }
+
+  animateDialog(): void {
+    animateDialogSections('proxy-add-dialog');
   }
 
   closeDialog(): void {

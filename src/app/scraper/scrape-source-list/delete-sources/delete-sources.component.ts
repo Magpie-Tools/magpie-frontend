@@ -11,6 +11,7 @@ import {TooltipComponent} from '../../../tooltip/tooltip.component';
 import {ScrapeSourceFilterPanelComponent} from '../scrape-source-filter-panel/scrape-source-filter-panel.component';
 import {BulkScopeSelectorComponent} from '../../../shared/bulk-scope-selector/bulk-scope-selector.component';
 import {normalizeNumber} from '../../../shared/number-utils';
+import {animateDialogSections} from '../../../shared/dialog-motion';
 
 type DeleteSourcesFormDefaults = {
   filter: boolean;
@@ -99,6 +100,10 @@ export class DeleteSourcesComponent implements OnChanges {
 
     this.deleteOption = this.canDeleteSelected() ? 'selected' : 'all';
     this.dialogVisible = true;
+  }
+
+  animateDialog(): void {
+    animateDialogSections('delete-dialog');
   }
 
   closeDialog(): void {
