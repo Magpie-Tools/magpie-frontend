@@ -37,8 +37,8 @@ import {
   ScrapeSourceListColumnDefinition,
   ScrapeSourceListColumnId
 } from './scrape-source-list-columns';
-import {filter, finalize} from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+import {filter, finalize, map, observeOn} from 'rxjs/operators';
+import {asapScheduler, Subscription} from 'rxjs';
 import {HealthBarCellComponent} from '../../shared/health-bar-cell/health-bar-cell.component';
 import {ColumnPickerPanelComponent} from '../../shared/column-picker-panel/column-picker-panel.component';
 import {WorkspaceService} from '../../services/workspace.service';
@@ -98,16 +98,16 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   @ViewChild('columnPanelRef', { read: ElementRef }) private columnPanelRef?: ElementRef<HTMLElement>;
   @ViewChild('scrapeSourceTableRoot', { read: ElementRef }) private scrapeSourceTableRoot?: ElementRef<HTMLElement>;
 
-  scrapeSources: ScrapeSourceView[] = [];
+  scrapeSources = signal<ScrapeSourceView[]>([]);
   selection = new SelectionModel<ScrapeSourceView>(true, []);
   selectedScrapeSources: ScrapeSourceView[] = [];
   page = 0; // PrimeNG uses 0-based pagination
   pageJumpValue = 1;
   pageScrollTarget: PageScrollTarget = 'top';
   pageSize = 40;
-  totalItems = 0;
-  hasLoaded = false;
-  loading = false;
+  totalItems = signal(0);
+  hasLoaded = signal(false);
+  loading = signal(false);
   searchTerm = '';
   checkingRobots: Record<number, boolean> = {};
   scrapingSources: Record<number, boolean> = {};
@@ -130,6 +130,9 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   appliedFilters: ScrapeSourceAppliedFilters = this.createDefaultAppliedFilters();
 
   private subscriptions = new Subscription();
+  private scrapeSourceListSubscription?: Subscription;
+  private scrapeSourceListRequestId = 0;
+  private destroyed = false;
   private suppressOutsideCloseUntil = 0;
   private searchDebounceHandle?: ReturnType<typeof setTimeout>;
   private readonly defaultFilterValues: ScrapeSourceFilterFormValues = this.createDefaultFilterValues();
@@ -190,6 +193,9 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
+    this.scrapeSourceListRequestId++;
+    this.scrapeSourceListSubscription?.unsubscribe();
     this.subscriptions.unsubscribe();
     if (this.searchDebounceHandle) {
       clearTimeout(this.searchDebounceHandle);
@@ -233,29 +239,42 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   }
 
   getAndSetScrapeSourcesList() {
-    this.loading = true;
+    const requestId = ++this.scrapeSourceListRequestId;
+    this.scrapeSourceListSubscription?.unsubscribe();
+    this.loading.set(true);
     const trimmedSearch = this.searchTerm.trim();
-    this.http.getScrapingSourcePage(this.page + 1, {
+    this.scrapeSourceListSubscription = this.http.getScrapingSourcePage(this.page + 1, {
       rows: this.pageSize,
       search: trimmedSearch.length > 0 ? trimmedSearch : undefined,
       filters: this.buildFilterPayload(this.appliedFilters),
-    }).subscribe({
-      next: res => {
+    }).pipe(
+      observeOn(asapScheduler),
+      map(res => {
         const sources = Array.isArray(res) ? res : [];
-        this.scrapeSources = this.applySort(
+        return this.applySort(
           sources.map(source => this.buildViewSource(source)),
           this.sortField,
           this.sortOrder
         );
+      }),
+      finalize(() => {
+        queueMicrotask(() => {
+          if (!this.destroyed && requestId === this.scrapeSourceListRequestId) {
+            this.loading.set(false);
+          }
+        });
+      })
+    ).subscribe({
+      next: sources => {
+        this.scrapeSources.set(sources);
         this.syncSelectionWithData();
-        this.loading = false;
-        this.hasLoaded = true;
+        this.hasLoaded.set(true);
         this.applyPendingPageScroll();
       },
       error: err => {
-        this.notification.showError("Could not get scraping sources" + err.error.message);
-        this.loading = false;
-        this.hasLoaded = true;
+        const message = err?.error?.message ?? err?.message ?? 'Unknown error';
+        this.notification.showError('Could not get scraping sources: ' + message);
+        this.hasLoaded.set(true);
         this.applyPendingPageScroll();
       }
     });
@@ -268,10 +287,11 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
       filters: this.buildFilterPayload(this.appliedFilters),
     }).subscribe({
       next: res => {
-        this.totalItems = res ?? 0;
+        this.totalItems.set(res ?? 0);
       },
       error: err => {
-        this.notification.showError("Could not get scrape sources count " + err.error.message);
+        const message = err?.error?.message ?? err?.message ?? 'Unknown error';
+        this.notification.showError('Could not get scrape sources count: ' + message);
       }
     });
   }
@@ -298,7 +318,7 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     }
 
     if (sortChanged) {
-      this.scrapeSources = this.applySort([...this.scrapeSources], this.sortField, this.sortOrder);
+      this.scrapeSources.set(this.applySort([...this.scrapeSources()], this.sortField, this.sortOrder));
       this.syncSelectionWithData();
     }
 
@@ -309,11 +329,11 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   }
 
   get totalPages(): number {
-    if (!Number.isFinite(this.totalItems) || !Number.isFinite(this.pageSize) || this.pageSize <= 0) {
+    if (!Number.isFinite(this.totalItems()) || !Number.isFinite(this.pageSize) || this.pageSize <= 0) {
       return 1;
     }
 
-    return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
+    return Math.max(1, Math.ceil(this.totalItems() / this.pageSize));
   }
 
   get pageScrollTargetIcon(): string {
@@ -369,19 +389,19 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   }
 
   isAllSelected(): boolean {
-    return this.scrapeSources.length > 0 && this.selection.selected.length === this.scrapeSources.length;
+    return this.scrapeSources().length > 0 && this.selection.selected.length === this.scrapeSources().length;
   }
 
   isSomeSelected(): boolean {
     const count = this.selection.selected.length;
-    return count > 0 && count < this.scrapeSources.length;
+    return count > 0 && count < this.scrapeSources().length;
   }
 
   masterToggle(): void {
     if (this.isAllSelected()) {
       this.selection.clear();
     } else {
-      this.scrapeSources.forEach(source => this.selection.select(source));
+      this.scrapeSources().forEach(source => this.selection.select(source));
     }
     this.selectedScrapeSources = [...this.selection.selected];
   }
@@ -966,7 +986,7 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     const selectedIds = new Set(this.selection.selected.map(source => source.id));
     this.selection.clear();
 
-    this.scrapeSources.forEach(source => {
+    this.scrapeSources().forEach(source => {
       if (selectedIds.has(source.id)) {
         this.selection.select(source);
       }
