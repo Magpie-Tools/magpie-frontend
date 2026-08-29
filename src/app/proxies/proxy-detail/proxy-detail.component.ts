@@ -155,18 +155,15 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       gsap.fromTo(
-        '.detail-context__copy p',
-        {opacity: 0.38},
+        '.route-utility-bar',
+        {opacity: 0, y: 10},
         {
           opacity: 1,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: '.detail-context',
-            scroller,
-            start: 'top 97%',
-            end: 'bottom 76%',
-            scrub: 0.35,
-          },
+          y: 0,
+          duration: 0.5,
+          delay: 0.08,
+          ease: 'power2.out',
+          clearProps: 'transform',
         },
       );
     }, host);

@@ -1,11 +1,53 @@
 import { Component, signal, OnDestroy, OnInit } from '@angular/core';
-import {ActivatedRoute, NavigationEnd, Router, RouterLink} from '@angular/router';
+import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { filter } from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 import { ButtonDirective } from 'primeng/button';
 import { LayoutService } from '../../services/layout.service';
 import {WorkspaceService} from '../../services/workspace.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {WorkspaceInvitationService} from '../../services/workspace-invitation.service';
+
+export interface TopbarBreadcrumb {
+  label: string;
+  routerLink?: string;
+}
+
+const ROUTE_LABELS: Readonly<Record<string, string>> = {
+  addProxies: 'Add proxies',
+  abuseipdb: 'AbuseIPDB',
+  geolite: 'GeoLite',
+};
+
+export function buildTopbarBreadcrumbs(url: string): TopbarBreadcrumb[] {
+  const path = url.split(/[?#]/, 1)[0];
+  const rawSegments = path.split('/').filter(Boolean).map(segment => segment.split(';', 1)[0]);
+  if (rawSegments.length === 0) {
+    return [{label: 'Dashboard'}];
+  }
+
+  return rawSegments.map((rawSegment, index) => {
+    const segment = decodeURIComponent(rawSegment);
+    const isProxyDetailRoot = index === 0 && segment === 'proxies' && rawSegments.length > 1;
+    const label = isProxyDetailRoot ? 'Proxy' : formatRouteLabel(segment);
+    const isLast = index === rawSegments.length - 1;
+    return {
+      label,
+      ...(isLast ? {} : {routerLink: '/' + rawSegments.slice(0, index + 1).join('/')}),
+    };
+  });
+}
+
+function formatRouteLabel(segment: string): string {
+  const configured = ROUTE_LABELS[segment];
+  if (configured) {
+    return configured;
+  }
+  return segment
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/-/g, ' ')
+    .replace(/^\w/, character => character.toUpperCase());
+}
 
 @Component({
   selector: 'app-topbar',
@@ -18,7 +60,18 @@ import {WorkspaceInvitationService} from '../../services/workspace-invitation.se
               aria-label="Toggle sidebar"
               (click)="layout.toggleSidebar()"></button>
 
-      <span class="topbar-title">{{ title() }}</span>
+      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb">
+        @for (item of breadcrumbs(); track $index; let last = $last) {
+          @if (item.routerLink && !last) {
+            <a class="topbar-breadcrumb__link" [routerLink]="item.routerLink">{{ item.label }}</a>
+          } @else {
+            <span class="topbar-breadcrumb__current" [attr.aria-current]="last ? 'page' : null">{{ item.label }}</span>
+          }
+          @if (!last) {
+            <span class="topbar-breadcrumb__separator" aria-hidden="true">/</span>
+          }
+        }
+      </nav>
 
       <div class="topbar-actions">
         <a
@@ -67,18 +120,17 @@ import {WorkspaceInvitationService} from '../../services/workspace-invitation.se
   styleUrls: ['./topbar.component.scss']
 })
 export class TopbarComponent implements OnInit, OnDestroy {
-  title = signal('Dashboard');
-  private sub?: any;
+  breadcrumbs = signal<TopbarBreadcrumb[]>([{label: 'Dashboard'}]);
+  private sub?: Subscription;
 
   constructor(public layout: LayoutService,
               private router: Router,
-              private route: ActivatedRoute,
               readonly workspaces: WorkspaceService,
               readonly invitations: WorkspaceInvitationService,
               private notification: NotificationService) {}
 
   ngOnInit() {
-    const set = () => this.title.set(this.resolveTitle(this.route));
+    const set = () => this.breadcrumbs.set(buildTopbarBreadcrumbs(this.router.url));
     set();
     this.sub = this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(set);
     this.workspaces.load().subscribe({
@@ -105,13 +157,4 @@ export class TopbarComponent implements OnInit, OnDestroy {
     });
   }
 
-  private resolveTitle(ar: ActivatedRoute): string {
-    let r = ar;
-    while (r.firstChild) r = r.firstChild;
-    const fromData = r.snapshot.data['title'] as string | undefined;
-    if (fromData) return fromData;
-
-    const last = this.router.url.split('/').filter(Boolean).pop() ?? 'dashboard';
-    return last.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-  }
 }

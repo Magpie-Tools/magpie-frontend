@@ -6,7 +6,46 @@
   padding: 0 .75rem; color: #cfcfcf;
   position: sticky; top: 0; z-index: 10;
 }
-.topbar-title { font-weight: 600; font-size: .95rem; opacity: .95; }
+.topbar-breadcrumb {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: .4rem;
+  overflow-x: auto;
+  font-size: .95rem;
+  font-weight: 600;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.topbar-breadcrumb::-webkit-scrollbar {
+  display: none;
+}
+
+.topbar-breadcrumb__link {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, .56);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.topbar-breadcrumb__link:hover,
+.topbar-breadcrumb__link:focus-visible {
+  color: rgba(255, 255, 255, .95);
+  outline: 0;
+}
+
+.topbar-breadcrumb__current {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, .92);
+}
+
+.topbar-breadcrumb__separator {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, .24);
+  font-weight: 450;
+}
 
 .topbar-actions,
 .workspace-switcher {
@@ -127,8 +166,8 @@
 }
 
 @media (max-width: 560px) {
-  .topbar-title {
-    display: none;
+  .topbar-breadcrumb {
+    font-size: .8rem;
   }
 
   .workspace-switcher__select {

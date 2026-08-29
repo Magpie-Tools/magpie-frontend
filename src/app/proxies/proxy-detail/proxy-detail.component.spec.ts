@@ -86,6 +86,27 @@ describe('ProxyDetailComponent', () => {
     expect(judgeValue?.title).toBe(longJudge);
   });
 
+  it('offers separate copy controls for the IP, port, and full address', () => {
+    const copyIp = spyOn(component, 'copyIp');
+    const copyPort = spyOn(component, 'copyPort');
+    const copyFullAddress = spyOn(component, 'copyFullAddress');
+    fixture.detectChanges();
+
+    const copyTargets = fixture.debugElement.queryAll(By.css('.endpoint-copy-target'));
+    const copyAll = fixture.debugElement.query(By.css('.endpoint-copy-all'));
+
+    expect(copyTargets.length).toBe(2);
+    expect(copyAll).toBeTruthy();
+
+    copyTargets[0].nativeElement.click();
+    copyTargets[1].nativeElement.click();
+    copyAll.nativeElement.click();
+
+    expect(copyIp).toHaveBeenCalled();
+    expect(copyPort).toHaveBeenCalled();
+    expect(copyFullAddress).toHaveBeenCalled();
+  });
+
   it('formats hostname and IPv6 routes and hides IP-only lookup links for hostnames', () => {
     component.detail.update(detail => detail ? {...detail, ip: 'gateway.provider.example', port: 3128} : detail);
     expect(component.fullAddress).toBe('gateway.provider.example:3128');

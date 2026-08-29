@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TopbarComponent } from './topbar.component';
+import {buildTopbarBreadcrumbs, TopbarComponent} from './topbar.component';
 import {provideRouter} from '@angular/router';
 import {signal} from '@angular/core';
 import {of} from 'rxjs';
@@ -47,5 +47,25 @@ describe('TopbarComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('builds a singular proxy breadcrumb for detail routes', () => {
+    expect(buildTopbarBreadcrumbs('/proxies/37530?sourceId=2')).toEqual([
+      {label: 'Proxy', routerLink: '/proxies'},
+      {label: '37530'},
+    ]);
+  });
+
+  it('preserves every route layer and product casing', () => {
+    expect(buildTopbarBreadcrumbs('/plugins/geolite')).toEqual([
+      {label: 'Plugins', routerLink: '/plugins'},
+      {label: 'GeoLite'},
+    ]);
+
+    expect(buildTopbarBreadcrumbs('/global/plugins/abuseipdb')).toEqual([
+      {label: 'Global', routerLink: '/global'},
+      {label: 'Plugins', routerLink: '/global/plugins'},
+      {label: 'AbuseIPDB'},
+    ]);
   });
 });
