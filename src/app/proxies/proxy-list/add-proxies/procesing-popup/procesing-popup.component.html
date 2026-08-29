@@ -1,32 +1,51 @@
 <div class="popup-overlay" [class.popup-overlay--hidden]="hideOverlay">
-  <div class="popup-content">
+  <section
+    class="popup-content"
+    [class.popup-content--processing]="status === 'processing'"
+    [class.popup-content--success]="status === 'success'"
+    [class.popup-content--error]="status === 'error'"
+    role="dialog"
+    aria-modal="true"
+    aria-live="polite"
+  >
     <app-star-background></app-star-background>
-    @if (status == 'processing') {
-      <div class="message-container">
-        <div [@textAnimation]="textState" class="message">
-          {{ currentMessage }}
-        </div>
-      </div>
+
+    <div class="popup-status-icon">
+      @if (status === 'processing') {
+        <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+      } @else if (status === 'success') {
+        <i class="pi pi-check" aria-hidden="true"></i>
+      } @else {
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+      }
+    </div>
+
+    @if (status === 'processing') {
+      <span class="popup-eyebrow">Adding routes</span>
+      <h2>Processing your import</h2>
+      <div [@textAnimation]="textState" class="message">{{ currentMessage }}</div>
+      <div class="progress-track" aria-hidden="true"><span></span></div>
     }
 
     @if (status === 'success') {
-      <div class="result-message success">
-        Successfully added <br>{{ count }} {{ item }}
-      </div>
+      <span class="popup-eyebrow">Import complete</span>
+      <h2>{{ count }} {{ item }} added</h2>
+      <p>The new routes are queued and ready for checking.</p>
     }
 
     @if (status === 'error') {
-      <div class="result-message error">
-        Something went wrong while adding the {{ item }} <br>Please try again
+      <span class="popup-eyebrow">Import stopped</span>
+      <h2>Could not add {{ item }}</h2>
+      <p>Review the error notification, then update the input and try again.</p>
+    }
+
+    @if (status !== 'processing') {
+      <div class="action-buttons">
+        @if (status === 'success' && showDetailsButton) {
+          <button class="details-button" type="button" (click)="onDetails()">View details</button>
+        }
+        <button class="close-button" type="button" (click)="onClose()">Close</button>
       </div>
     }
-  </div>
-  @if (status !== 'processing') {
-    <div class="action-buttons">
-      @if (status === 'success' && showDetailsButton) {
-        <button class="details-button" (click)="onDetails()">Details</button>
-      }
-      <button class="close-button" (click)="onClose()">Close</button>
-    </div>
-  }
+  </section>
 </div>

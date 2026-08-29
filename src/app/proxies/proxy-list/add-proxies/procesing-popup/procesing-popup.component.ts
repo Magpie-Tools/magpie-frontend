@@ -140,13 +140,11 @@ export class ProcesingPopupComponent implements OnInit, OnChanges, OnDestroy, Af
 
   private initializeMessages(): void {
     this.messages = [
-      `Please wait while we add your ${this.item}.`,
-      'This can take a few seconds.',
-      'Just a little longer, we’re on it.',
-      'Hang tight, we’re working on it.',
-      'Almost there... just a moment more.',
-      `Seems like you added a lot of ${ this.item }, but don’t worry, we’ll handle it.`,
-      'Loading... good things take time!',
+      `Validating ${this.item}.`,
+      'Normalizing route formats.',
+      'Removing duplicate entries.',
+      'Preparing routes for the checker.',
+      'Finalizing the import.',
     ];
     this.currentMessageIndex = 0;
   }

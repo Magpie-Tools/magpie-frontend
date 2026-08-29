@@ -1,126 +1,286 @@
-$danger-color: #f87171;
-$panel-border: rgba(148, 163, 184, 0.22);
-$control-bg: rgba(255, 255, 255, 0.04);
-$control-border: rgba(148, 163, 184, 0.25);
+:host {
+  display: block;
+  font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
+}
 
-.theme-card {
-  border: 1px solid $panel-border;
-  background: linear-gradient(180deg, rgba(28, 28, 28, 0.92) 0%, rgba(18, 18, 18, 0.94) 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+.proxy-dialog-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
 
-  &--active {
-    border-color: $danger-color;
-    box-shadow: 0 0 0 1px rgba($danger-color, 0.35);
+.proxy-dialog-heading__icon,
+.danger-notice__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  background: rgba(127, 29, 29, 0.13);
+  color: #f4a7a7;
+}
+
+.proxy-dialog-heading__icon {
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 0.82rem;
+  font-size: 0.88rem;
+}
+
+.proxy-dialog-heading__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.08rem;
+
+  > span {
+    color: rgba(239, 156, 156, 0.64);
+    font-size: 0.58rem;
+    font-weight: 620;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
-  &--disabled {
-    pointer-events: none;
+  > strong {
+    color: rgba(255, 255, 255, 0.94);
+    font-size: 0.96rem;
+    font-weight: 590;
+    letter-spacing: -0.025em;
   }
+}
+
+.proxy-dialog-heading__tooltip {
+  margin-inline-start: 0.15rem;
 }
 
 .delete-dialog__body {
-  background: linear-gradient(180deg, rgba(20, 20, 20, 0.96) 0%, rgba(12, 12, 12, 0.98) 100%);
+  display: grid;
+  gap: 0.8rem;
+  padding: 1.1rem;
+  background:
+    radial-gradient(circle at 82% 0%, rgba(185, 52, 52, 0.1), transparent 22rem),
+    #09090b;
+  color: rgba(255, 255, 255, 0.78);
 }
 
-.delete-card {
-  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35);
+.danger-notice,
+.dialog-section {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.105);
+  background: rgba(255, 255, 255, 0.028);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
-::ng-deep .delete-dialog .delete-number-input {
-  min-height: 2.25rem;
-  padding: 0.35rem 0.6rem;
-  font-size: 0.82rem;
-  text-align: center;
+.danger-notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.72rem;
+  padding: 0.82rem 0.9rem;
+  border-color: rgba(248, 113, 113, 0.2);
+  border-radius: 0.9rem;
+  background: linear-gradient(115deg, rgba(127, 29, 29, 0.11), rgba(255, 255, 255, 0.018));
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    color: rgba(255, 224, 224, 0.9);
+    font-size: 0.76rem;
+    font-weight: 590;
+  }
+
+  p {
+    margin-top: 0.18rem;
+    color: rgba(240, 188, 188, 0.48);
+    font-size: 0.62rem;
+    line-height: 1.45;
+  }
 }
 
+.danger-notice__icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.68rem;
+  font-size: 0.72rem;
+}
+
+.danger-notice__state {
+  padding: 0.38rem 0.55rem;
+  border: 1px solid rgba(248, 113, 113, 0.16);
+  border-radius: 999px;
+  background: rgba(127, 29, 29, 0.1);
+  color: rgba(239, 174, 174, 0.58);
+  font-size: 0.58rem;
+  white-space: nowrap;
+}
+
+.dialog-section {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.95rem;
+  border-radius: 0.95rem;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.75rem;
+    font-weight: 590;
+  }
+
+  p {
+    max-width: 38rem;
+    margin-top: 0.2rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.62rem;
+    line-height: 1.45;
+  }
+}
+
+.section-heading--split {
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.filter-disabled-copy {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.72rem;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 0.72rem;
+  color: rgba(255, 255, 255, 0.36);
+  font-size: 0.61rem;
+}
+
+.proxy-dialog-footer {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  > span {
+    color: rgba(239, 174, 174, 0.46);
+    font-size: 0.59rem;
+  }
+
+  > div {
+    display: flex;
+    gap: 0.45rem;
+  }
+}
+
+::ng-deep .delete-dialog.p-dialog,
 ::ng-deep .delete-dialog .p-dialog {
-  border-radius: 1rem;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  background: linear-gradient(180deg, rgba(24, 24, 24, 0.96) 0%, rgba(14, 14, 14, 0.96) 100%);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
   overflow: hidden;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 1.2rem;
+  background: #09090b;
+  color: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 32px 86px rgba(0, 0, 0, 0.64), inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 ::ng-deep .delete-dialog .p-dialog-header {
-  padding: 1.25rem 1.5rem;
-  background: rgba(18, 18, 18, 0.92);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 1rem 1rem 0 0;
-}
-
-::ng-deep .delete-dialog .p-dialog-header-icon {
-  color: rgba(226, 232, 240, 0.7);
-}
-
-::ng-deep .delete-dialog .p-dialog-header-icon:hover {
-  color: #f8fafc;
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid rgba(248, 113, 113, 0.14);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(185, 52, 52, 0.12), transparent 16rem),
+    rgba(12, 12, 14, 0.98);
 }
 
 ::ng-deep .delete-dialog .p-dialog-content {
   background: transparent;
+  color: inherit;
 }
 
 ::ng-deep .delete-dialog .p-dialog-footer {
-  background: rgba(14, 14, 14, 0.92);
-  border-top: 1px solid rgba(148, 163, 184, 0.2);
-  padding: 0.75rem 0;
-  align-items: center;
-  border-radius: 0 0 1rem 1rem;
+  padding: 0.78rem 1.15rem;
+  border-top: 1px solid rgba(248, 113, 113, 0.12);
+  background: rgba(11, 11, 13, 0.98);
 }
 
-::ng-deep .delete-dialog .delete-input {
-  background: $control-bg;
-  border: 1px solid $control-border;
-  color: #e2e8f0;
+::ng-deep .delete-dialog .p-dialog-close-button {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 0.68rem;
+  color: rgba(255, 255, 255, 0.42);
 }
 
-::ng-deep .delete-dialog .p-inputtext,
-::ng-deep .delete-dialog .p-select,
-::ng-deep .delete-dialog .p-multiselect,
-::ng-deep .delete-dialog .p-inputnumber {
-  background: $control-bg;
-  border: 1px solid $control-border;
-  color: #e2e8f0;
-  border-radius: 0.5rem;
-  min-height: 2.25rem;
+::ng-deep .delete-dialog .p-dialog-close-button:hover {
+  background: rgba(127, 29, 29, 0.14);
+  color: #fecaca;
 }
 
-::ng-deep .delete-dialog .p-inputtext:focus,
-::ng-deep .delete-dialog .p-select.p-focus,
-::ng-deep .delete-dialog .p-multiselect.p-focus,
-::ng-deep .delete-dialog .p-inputnumber:focus-within {
-  border-color: $danger-color;
-  box-shadow: 0 0 0 2px rgba($danger-color, 0.18);
+::ng-deep .delete-dialog .p-radiobutton-checked .p-radiobutton-box {
+  border-color: #f87171;
+  background: rgba(185, 28, 28, 0.72);
 }
 
-::ng-deep .delete-dialog .p-select-label,
-::ng-deep .delete-dialog .p-multiselect-label,
-::ng-deep .delete-dialog .p-inputtext {
-  padding: 0.35rem 0.6rem;
-  font-size: 0.82rem;
+::ng-deep .delete-dialog .p-radiobutton-checked .p-radiobutton-icon {
+  background: #fff1f2;
 }
 
-::ng-deep .delete-dialog .p-inputnumber {
-  border-radius: 0.5rem;
-  overflow: hidden;
+::ng-deep .delete-dialog .dialog-button.p-button {
+  min-height: 2.35rem;
+  border-radius: 0.68rem;
+  font-size: 0.65rem;
+  font-weight: 590;
+  box-shadow: none;
 }
 
-::ng-deep .delete-dialog .p-inputnumber .p-inputtext {
-  min-height: 2.25rem;
+::ng-deep .delete-dialog .dialog-button--quiet.p-button {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.58);
 }
 
-::ng-deep .delete-dialog .p-inputnumber-button {
-  background: $control-bg;
-  border-color: $control-border;
+::ng-deep .delete-dialog .dialog-button--danger.p-button {
+  border-color: rgba(239, 68, 68, 0.42);
+  background: rgba(127, 29, 29, 0.52);
+  color: #fecaca;
 }
 
-::ng-deep .delete-dialog .p-multiselect-token {
-  border-radius: 999px;
-  padding: 0.1rem 0.45rem;
-  font-size: 0.68rem;
-  font-weight: 600;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(148, 163, 184, 0.16);
-  color: rgba(226, 232, 240, 0.9);
+::ng-deep .delete-dialog .dialog-button--danger.p-button:hover:not(:disabled) {
+  border-color: rgba(248, 113, 113, 0.62);
+  background: rgba(153, 27, 27, 0.68);
+  color: #fff1f2;
+}
+
+@media (max-width: 560px) {
+  .danger-notice {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .danger-notice__state {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .section-heading--split,
+  .proxy-dialog-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .proxy-dialog-footer > div {
+    width: 100%;
+  }
+
+  ::ng-deep .delete-dialog .dialog-button.p-button {
+    width: 100%;
+  }
 }

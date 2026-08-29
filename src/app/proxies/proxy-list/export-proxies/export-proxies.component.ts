@@ -28,6 +28,7 @@ import {
 import {ProxyTag} from '../../../models/ProxyTag';
 import {BulkScopeSelectorComponent} from '../../../shared/bulk-scope-selector/bulk-scope-selector.component';
 import {buildDatedExportFileName, downloadTextFile, extractHttpErrorMessage} from '../../../shared/export-file-utils';
+import {animateDialogSections} from '../../../shared/dialog-motion';
 
 type ExportFormDefaults = {
   output: string;
@@ -152,6 +153,10 @@ export class ExportProxiesComponent implements OnChanges {
     this.ensureFilterOptionsLoaded();
     this.exportOption = this.canExportSelected() ? 'selected' : 'all';
     this.dialogVisible = true;
+  }
+
+  animateDialog(): void {
+    animateDialogSections('export-dialog');
   }
 
   closeDialog(): void {

@@ -6,6 +6,7 @@ import {finalize} from 'rxjs/operators';
 import {ProxyTag} from '../../models/ProxyTag';
 import {NotificationService} from '../../services/notification-service.service';
 import {ProxyTagService} from '../../services/proxy-tag.service';
+import {animateDialogSections} from '../dialog-motion';
 
 @Component({
   selector: 'app-proxy-tag-manager',
@@ -38,6 +39,10 @@ export class ProxyTagManagerComponent {
     this.tagService.load().subscribe({
       error: err => this.notification.showError('Could not load tags: ' + this.errorMessage(err)),
     });
+  }
+
+  animateDialog(): void {
+    animateDialogSections('proxy-tag-manager-dialog');
   }
 
   close(): void {

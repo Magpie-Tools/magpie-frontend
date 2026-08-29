@@ -16,43 +16,65 @@
   [resizable]="false"
   [dismissableMask]="true"
   [appendTo]="'body'"
-  [breakpoints]="{ '960px': '90vw', '640px': '95vw' }"
-  [style]="{ width: '60rem' }"
+  [breakpoints]="{ '960px': '92vw', '640px': '96vw' }"
+  [style]="{ width: '58rem' }"
   [contentStyle]="{ padding: '0' }"
   styleClass="export-dialog"
+  (onShow)="animateDialog()"
   (onHide)="onDialogHide()"
 >
   <ng-template pTemplate="header">
-    <div class="export-dialog__title flex items-center gap-2 text-lg font-semibold">
-      <span>Export Proxies</span>
-      <app-tooltip [text]="'Export proxies with optional filters, output formats, and status selections.'"></app-tooltip>
+    <div class="proxy-dialog-heading">
+      <span class="proxy-dialog-heading__icon"><i class="pi pi-upload" aria-hidden="true"></i></span>
+      <div class="proxy-dialog-heading__copy">
+        <span>Download routes</span>
+        <strong>Export proxies</strong>
+      </div>
+      <app-tooltip
+        class="proxy-dialog-heading__tooltip"
+        [text]="'Export proxies with optional filters, output formats, and status selections.'"
+      ></app-tooltip>
     </div>
   </ng-template>
 
-  <div class="export-dialog__body text-gray-200 p-6 space-y-6">
-    <section class="space-y-3">
-      <p class="text-sm text-gray-400">Choose how you want to format and filter your export file.</p>
+  <div class="proxy-dialog-body export-dialog__body">
+    <section class="dialog-intro">
+      <span class="dialog-intro__icon"><i class="pi pi-file-export" aria-hidden="true"></i></span>
+      <div>
+        <h3>Build an export file</h3>
+        <p>Choose the route scope and define the exact fields written to each line.</p>
+      </div>
+      <span class="dialog-intro__state">{{ selectedProxies.length }} selected</span>
+    </section>
+
+    <section class="dialog-section" aria-labelledby="export-scope-title">
+      <div class="section-heading">
+        <div>
+          <h3 id="export-scope-title">Choose the scope</h3>
+          <p>Export the current selection or all routes available to this workspace.</p>
+        </div>
+      </div>
       <app-bulk-scope-selector
         [(scope)]="exportOption"
         radioName="exportOption"
         allInputId="exportAll"
         selectedInputId="exportSelected"
-        allTitle="All Proxies"
+        allTitle="All proxies"
         allDescription="Export every proxy currently available."
-        selectedTitle="Selected Proxies"
-        selectedDescription="Export only the proxies you highlighted in the table."
+        selectedTitle="Selected proxies"
+        selectedDescription="Export only the routes highlighted in the table."
         [selectedDisabled]="!canExportSelected()"
       ></app-bulk-scope-selector>
     </section>
 
-    <div [formGroup]="exportForm" class="space-y-6">
-      <section class="export-card rounded-xl p-5 space-y-5 theme-card">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div [formGroup]="exportForm" class="export-dialog__settings">
+      <section class="dialog-section export-card">
+        <div class="section-heading section-heading--split">
           <div>
-            <h4 class="text-base font-semibold text-white">Filter Before Export</h4>
-            <p class="text-sm text-gray-400">Toggle to limit which proxies are included.</p>
+            <h3>Limit the export</h3>
+            <p>Enable filters if the chosen scope still contains routes you do not need.</p>
           </div>
-          <app-checkbox label="Enable Filters" formControlName="filter"></app-checkbox>
+          <app-checkbox label="Enable filters" formControlName="filter"></app-checkbox>
         </div>
 
         @if (exportForm.get('filter')?.value) {
@@ -70,51 +92,57 @@
             (clear)="clearExportFilters()"
           ></app-proxy-filter-panel>
         } @else {
-          <p class="text-sm text-gray-500">Turn on filters to narrow the export by protocol or performance thresholds.</p>
+          <div class="filter-disabled-copy"><i class="pi pi-filter-slash" aria-hidden="true"></i> No additional filters will be applied.</div>
         }
       </section>
 
-      <section class="export-card rounded-xl p-5 space-y-5 theme-card">
-        <div>
-          <label for="outputFormat" class="block mb-2 text-sm font-medium text-gray-300">Output Format</label>
-          <div class="flex flex-wrap gap-2 mb-2">
+      <section class="dialog-section export-card" aria-labelledby="output-format-title">
+        <div class="section-heading">
+          <div>
+            <h3 id="output-format-title">Output format</h3>
+            <p>Add fields in the order they should appear. Semicolons separate each value.</p>
+          </div>
+        </div>
+
+        <div class="format-builder">
+          <div class="format-presets" aria-label="Available export fields">
             @for (text of predefinedFilters; track text) {
-              <p-button
-                [label]="text"
-                styleClass="p-button-outlined p-button-secondary p-button-sm export-format-button"
-                (onClick)="addToFilter(text)"
-              ></p-button>
+              <button type="button" class="format-preset" (click)="addToFilter(text)">
+                <i class="pi pi-plus" aria-hidden="true"></i>{{ text }}
+              </button>
             }
           </div>
-          <input
-            id="outputFormat"
-            pInputText
-            formControlName="output"
-            type="text"
-            class="export-input w-full theme-focus"
-          />
+          <label for="outputFormat">Format string</label>
+          <div class="format-input-shell">
+            <i class="pi pi-code" aria-hidden="true"></i>
+            <input id="outputFormat" pInputText formControlName="output" type="text" class="export-input" />
+          </div>
         </div>
       </section>
     </div>
   </div>
 
   <ng-template pTemplate="footer">
-    <div class="w-full flex items-center justify-end gap-3 px-6">
-      <p-button
-        type="button"
-        label="Cancel"
-        styleClass="p-button-text"
-        (onClick)="closeDialog()"
-        [disabled]="isExporting"
-      ></p-button>
-      <p-button
-        type="button"
-        label="Export"
-        styleClass="p-button-success"
-        (onClick)="submitExport()"
-        [disabled]="isExporting || exportForm.invalid || (exportOption === 'selected' && !canExportSelected())"
-        [loading]="isExporting"
-      ></p-button>
+    <div class="proxy-dialog-footer">
+      <span>The export downloads as a plain-text file.</span>
+      <div>
+        <p-button
+          type="button"
+          label="Cancel"
+          styleClass="dialog-button dialog-button--quiet"
+          (onClick)="closeDialog()"
+          [disabled]="isExporting"
+        ></p-button>
+        <p-button
+          type="button"
+          label="Export file"
+          icon="pi pi-download"
+          styleClass="dialog-button dialog-button--primary"
+          (onClick)="submitExport()"
+          [disabled]="isExporting || exportForm.invalid || (exportOption === 'selected' && !canExportSelected())"
+          [loading]="isExporting"
+        ></p-button>
+      </div>
     </div>
   </ng-template>
 </p-dialog>

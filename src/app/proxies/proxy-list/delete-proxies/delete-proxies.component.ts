@@ -26,6 +26,7 @@ import {
 } from '../../../shared/proxy-filters';
 import {BulkScopeSelectorComponent} from '../../../shared/bulk-scope-selector/bulk-scope-selector.component';
 import {ProxyTag} from '../../../models/ProxyTag';
+import {animateDialogSections} from '../../../shared/dialog-motion';
 
 type DeleteFormDefaults = {
   filter: boolean;
@@ -148,6 +149,10 @@ export class DeleteProxiesComponent implements OnChanges {
     this.ensureFilterOptionsLoaded();
     this.deleteOption = this.canDeleteSelected() ? 'selected' : 'all';
     this.dialogVisible = true;
+  }
+
+  animateDialog(): void {
+    animateDialogSections('delete-dialog');
   }
 
   closeDialog(): void {

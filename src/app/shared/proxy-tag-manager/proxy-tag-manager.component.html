@@ -9,7 +9,6 @@
 }
 
 <p-dialog
-  header="Manage proxy tags"
   [visible]="visible()"
   (visibleChange)="setVisible($event)"
   [modal]="true"
@@ -19,11 +18,30 @@
   [appendTo]="'body'"
   [baseZIndex]="1500"
   [breakpoints]="{'640px': '95vw'}"
-  [style]="{width: '36rem'}"
+  [style]="{width: '40rem'}"
+  [contentStyle]="{padding: '0'}"
   styleClass="proxy-tag-manager-dialog"
+  (onShow)="animateDialog()"
 >
+  <ng-template pTemplate="header">
+    <div class="proxy-dialog-heading">
+      <span class="proxy-dialog-heading__icon"><i class="pi pi-tags" aria-hidden="true"></i></span>
+      <div class="proxy-dialog-heading__copy">
+        <span>Workspace labels</span>
+        <strong>Manage proxy tags</strong>
+      </div>
+    </div>
+  </ng-template>
+
   <div class="tag-manager">
-    <p class="tag-manager__intro">Use short, recognizable labels. Tag names and assignments belong to the active workspace.</p>
+    <section class="tag-manager__intro">
+      <span class="tag-manager__intro-icon"><i class="pi pi-palette" aria-hidden="true"></i></span>
+      <div>
+        <h3>Keep route groups easy to scan</h3>
+        <p>Use short labels. Names, colors, and assignments belong to the active workspace.</p>
+      </div>
+      <span class="tag-manager__count">{{ tagService.tags().length }} tags</span>
+    </section>
 
     <section class="tag-manager__editor" aria-label="Tag editor">
       <div class="tag-manager__field tag-manager__field--name">
@@ -54,11 +72,12 @@
       </div>
       <div class="tag-manager__editor-actions">
         @if (editingTagId()) {
-          <p-button label="Cancel" styleClass="p-button-text" [disabled]="saving()" (onClick)="cancelEdit()"></p-button>
+          <p-button label="Cancel" styleClass="tag-button tag-button--quiet" [disabled]="saving()" (onClick)="cancelEdit()"></p-button>
         }
         <p-button
           [label]="editingTagId() ? 'Save changes' : 'Create tag'"
           icon="pi pi-check"
+          styleClass="tag-button tag-button--primary"
           [loading]="saving()"
           [disabled]="saving() || !tagName().trim()"
           (onClick)="save()"
@@ -68,14 +87,21 @@
 
     <section class="tag-manager__catalog" aria-label="Existing tags">
       <div class="tag-manager__catalog-header">
-        <h3>Your tags</h3>
+        <div>
+          <h3>Your tags</h3>
+          <p>Edit colors or remove labels from every assigned proxy.</p>
+        </div>
         <span>{{ tagService.tags().length }}</span>
       </div>
 
       @if (tagService.loading()) {
-        <div class="tag-manager__empty"><i class="pi pi-spin pi-spinner"></i> Loading tags…</div>
+        <div class="tag-manager__empty"><i class="pi pi-spin pi-spinner"></i> Loading tags</div>
       } @else if (tagService.tags().length === 0) {
-        <div class="tag-manager__empty">No tags yet. Create your first one above.</div>
+        <div class="tag-manager__empty">
+          <span><i class="pi pi-tag" aria-hidden="true"></i></span>
+          <strong>No tags yet</strong>
+          <p>Create the first workspace label above.</p>
+        </div>
       } @else {
         <div class="tag-manager__list">
           @for (tag of tagService.tags(); track tag.id) {
