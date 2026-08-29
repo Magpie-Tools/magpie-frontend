@@ -16,7 +16,6 @@
     <span class="proxy-tag-selector__chips">
       @for (tag of visibleTags(); track tag.id) {
         <span class="proxy-tag-chip" [style.--proxy-tag-color]="tag.color">
-          <span class="proxy-tag-chip__dot" aria-hidden="true"></span>
           <span class="proxy-tag-chip__name">{{ tag.name }}</span>
         </span>
       }

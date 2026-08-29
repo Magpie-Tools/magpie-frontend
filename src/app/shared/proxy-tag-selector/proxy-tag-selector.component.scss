@@ -65,15 +65,6 @@
   color: #e5e7eb;
 }
 
-.proxy-tag-chip__dot {
-  width: 0.45rem;
-  height: 0.45rem;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--proxy-tag-color);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--proxy-tag-color) 20%, transparent);
-}
-
 .proxy-tag-chip__name {
   overflow: hidden;
   text-overflow: ellipsis;
