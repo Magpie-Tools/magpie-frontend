@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, computed, signal} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal} from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {UIChart} from 'primeng/chart';
@@ -20,6 +20,10 @@ import {ProxyTagSelectorComponent} from '../../shared/proxy-tag-selector/proxy-t
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
+import {gsap} from 'gsap';
+import {ScrollTrigger} from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface ThemePalette {
   primary: string;
@@ -67,7 +71,7 @@ interface ReputationSignalStructuredItem {
   templateUrl: './proxy-detail.component.html',
   styleUrl: './proxy-detail.component.scss'
 })
-export class ProxyDetailComponent implements OnInit, OnDestroy {
+export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   proxyId = signal<number | undefined>(undefined);
   detail = signal<ProxyDetail | null>(null);
   statistics = signal<ProxyStatistic[]>([]);
@@ -98,6 +102,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
   private responseBodySubscription?: Subscription;
+  private animationContext?: gsap.Context;
 
   constructor(
     private route: ActivatedRoute,
@@ -108,7 +113,66 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     readonly tagService: ProxyTagService,
     readonly workspaces: WorkspaceService,
+    private readonly elementRef: ElementRef<HTMLElement>,
   ) {}
+
+  ngAfterViewInit(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const host = this.elementRef.nativeElement;
+    const scrollContainer = host.closest('main') as HTMLElement | null;
+    const scroller = scrollContainer ?? undefined;
+
+    this.animationContext = gsap.context(() => {
+      gsap.fromTo(
+        '.detail-context',
+        {opacity: 0, y: 18},
+        {opacity: 1, y: 0, duration: 0.62, ease: 'power3.out', clearProps: 'transform'},
+      );
+
+      gsap.utils.toArray<HTMLElement>('.route-card').forEach((card, index) => {
+        gsap.fromTo(
+          card,
+          {opacity: 0, y: 26, scale: 0.988},
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.68,
+            delay: index * 0.035,
+            ease: 'power3.out',
+            clearProps: 'transform',
+            scrollTrigger: {
+              trigger: card,
+              scroller,
+              start: 'top 94%',
+              toggleActions: 'play none none reverse',
+            },
+          },
+        );
+      });
+
+      gsap.fromTo(
+        '.detail-context__copy p',
+        {opacity: 0.38},
+        {
+          opacity: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.detail-context',
+            scroller,
+            start: 'top 97%',
+            end: 'bottom 76%',
+            scrub: 0.35,
+          },
+        },
+      );
+    }, host);
+
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+  }
 
   ngOnInit(): void {
     this.tagService.load().subscribe({
@@ -137,6 +201,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.responseBodySubscription?.unsubscribe();
     this.subscriptions.unsubscribe();
+    this.animationContext?.revert();
   }
 
   private setReturnTarget(): void {

@@ -1,136 +1,155 @@
-<div class="proxy-detail-page lg:px-10">
-  <a
-    [routerLink]="returnLink()"
-    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors back-button"
-  >
-    <i class="pi pi-arrow-left text-xs"></i>
-    {{ returnLabel() }}
-  </a>
-
-  <div class="mt-6 flex flex-col gap-6">
-    <section class="detail-card p-6 shadow detail-overview">
-      <div class="flex flex-wrap items-start gap-4 detail-overview__header">
-        <div class="flex-1 min-w-0 w-full">
-          <h1 class="text-2xl font-semibold">
-            Proxy
-            @if (detail()?.ip) {
-              <span class="proxy-address inline-flex items-center gap-1.5 flex-wrap ml-2 text-base">
-                <button type="button" class="address-chip" (click)="copyIp()" title="Copy host">
-                  {{ detail()?.ip }}
-                </button>
-                @if (detail()?.port !== undefined && detail()?.port !== null) {
-                  <span class="value-separator">:</span>
-                  <button type="button" class="address-chip" (click)="copyPort()" title="Copy Port">
-                    {{ detail()?.port }}
-                  </button>
-                  <button
-                    type="button"
-                    pButton
-                    icon="pi pi-copy"
-                    class="copy-address-button"
-                    (click)="copyFullAddress()"
-                    title="Copy host and port"
-                  ></button>
-                  @if (fullCredentialAddress) {
-                    <button
-                      type="button"
-                      pButton
-                      icon="pi pi-link"
-                      class="copy-address-button"
-                      (click)="copyFullCredentialAddress()"
-                      title="Copy host, port, username and password"
-                    ></button>
-                  }
-                }
-              </span>
-            } @else {
-              <span class="ml-2">{{ proxyId() || '—' }}</span>
-            }
-          </h1>
-        </div>
-        <span
-          class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold uppercase tracking-wide flex-shrink-0 ml-auto status-pill"
-          [ngClass]="{
-            'status-pill--dead': overallAliveStatus === 'dead',
-            'status-pill--unknown': overallAliveStatus === 'unknown'
-          }"
-        >
-          <span
-            class="status-dot"
-            [ngClass]="{
-              alive: overallAliveStatus === 'alive',
-              dead: overallAliveStatus === 'dead',
-              unknown: overallAliveStatus === 'unknown'
-            }"
-          ></span>
-          {{ overallAliveLabel }}
-        </span>
-        @if (detail(); as managed) {
-          <span class="managed-state-pill" [ngClass]="'managed-state-pill--' + (managed.state ?? 'active')">
-            {{ managed.state ?? 'active' }}
-            @if (managed.pause_reason) { <span>· {{ managed.pause_reason }}</span> }
-          </span>
-          @if (workspaces.canOperate()) {
-            <div class="lifecycle-actions">
-              @if ((managed.state ?? 'active') === 'active') {
-                <button type="button" class="lifecycle-button" [disabled]="changingLifecycle()" (click)="changeLifecycle('paused')">
-                  <i class="pi pi-pause"></i> Pause
-                </button>
-              } @else {
-                <button type="button" class="lifecycle-button" [disabled]="changingLifecycle()" (click)="changeLifecycle('active')">
-                  <i class="pi" [ngClass]="changingLifecycle() ? 'pi-spin pi-spinner' : 'pi-play'"></i> Activate
-                </button>
-                @if (managed.state === 'paused') {
-                  <button type="button" class="lifecycle-button lifecycle-button--archive" [disabled]="changingLifecycle()" (click)="changeLifecycle('archived')">
-                    <i class="pi pi-box"></i> Archive
-                  </button>
-                }
-              }
-            </div>
-          }
-        }
-        <div class="text-sm muted-text flex flex-col sm:flex-row sm:items-center sm:gap-2 basis-full">
-          <span class="shrink-0">Proxy ID {{ proxyId() || '—' }}</span>
-          @if (externalLookupLinks.length) {
-            <span class="hidden sm:inline muted-divider" aria-hidden="true">|</span>
-            <div class="flex flex-wrap items-center gap-2 mt-2 sm:mt-0 w-full sm:flex-1 sm:min-w-0">
-              @for (link of externalLookupLinks; track link.url) {
-                <a
-                  class="external-link-chip"
-                  [href]="link.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  @if (link.icon != '') {
-                    <img [src]="link.icon" alt="" />
-                  }
-                  {{ link.label }}
-                  <i class="pi pi-external-link"></i>
-                </a>
-              }
-            </div>
-          }
+<main class="proxy-detail-page">
+  <section class="detail-stage">
+    <header class="detail-context">
+      <div class="detail-context__copy">
+        <a [routerLink]="returnLink()" class="back-button" [attr.aria-label]="returnLabel()">
+          <i class="pi pi-arrow-left" aria-hidden="true"></i>
+        </a>
+        <span class="context-icon"><i class="pi pi-directions" aria-hidden="true"></i></span>
+        <div>
+          <span class="context-eyebrow">Proxy route · ID {{ proxyId() || '—' }}</span>
+          <h1>{{ fullAddress || 'Loading proxy route' }}</h1>
+          <p>Inspect the connection, latest judge result, reputation signals, and complete check history.</p>
         </div>
       </div>
 
-      <div class="mt-6 detail-overview__content">
+      <div class="context-state">
+        <span
+          class="status-dot"
+          [ngClass]="{
+            alive: overallAliveStatus === 'alive',
+            dead: overallAliveStatus === 'dead',
+            unknown: overallAliveStatus === 'unknown'
+          }"
+          aria-hidden="true"
+        ></span>
+        <span>
+          <small>Latest route state</small>
+          <strong>{{ overallAliveLabel }}</strong>
+        </span>
+      </div>
+    </header>
+
+    <div class="detail-grid">
+      <section class="route-card route-dashboard" aria-labelledby="route-overview-title">
         @if (isLoadingDetail()) {
-          <div class="flex justify-center py-10">
-            <app-loading></app-loading>
-          </div>
+          <div class="card-loading"><app-loading></app-loading></div>
         } @else {
-          <div class="detail-overview__layout">
-            <div class="detail-overview__grid grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div class="detail-item">
-                <div class="label">Country</div>
-                <div class="value capitalize">{{ detail()?.country || 'Unknown' }}</div>
+          <div class="dashboard-primary">
+            <div class="endpoint-summary">
+              <div class="card-heading">
+                <span class="card-icon"><i class="pi pi-link" aria-hidden="true"></i></span>
+                <div class="card-heading__copy">
+                  <span class="card-eyebrow">Route endpoint</span>
+                  <h2 id="route-overview-title">{{ fullAddress || 'Unknown route' }}</h2>
+                </div>
               </div>
-              <div class="detail-item">
-                <div class="label">Estimated Type</div>
-                <div class="value capitalize">{{ detail()?.estimated_type || 'N/A' }}</div>
+
+              <div class="endpoint-actions">
+                <button type="button" class="action-button action-button--primary" (click)="copyFullAddress()">
+                  <i class="pi pi-copy" aria-hidden="true"></i>
+                  Copy address
+                </button>
+                @if (fullCredentialAddress) {
+                  <button type="button" class="action-button" (click)="copyFullCredentialAddress()">
+                    <i class="pi pi-key" aria-hidden="true"></i>
+                    Copy with auth
+                  </button>
+                }
               </div>
-              <div class="detail-item detail-item--tags sm:col-span-2">
-                <div class="label">Tags</div>
+
+              @if (externalLookupLinks.length) {
+                <div class="lookup-rail" aria-label="External IP intelligence">
+                  @for (link of externalLookupLinks; track link.url) {
+                    <a class="external-link-chip" [href]="link.url" target="_blank" rel="noopener noreferrer">
+                      @if (link.icon) { <img [src]="link.icon" alt="" /> }
+                      {{ link.label }}
+                      <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="health-summary">
+              <div class="health-summary__state">
+                <span
+                  class="signal-orbit"
+                  [ngClass]="{
+                    'signal-orbit--dead': overallAliveStatus === 'dead',
+                    'signal-orbit--unknown': overallAliveStatus === 'unknown'
+                  }"
+                >
+                  <i
+                    class="pi"
+                    [ngClass]="{
+                      'pi-check': overallAliveStatus === 'alive',
+                      'pi-times': overallAliveStatus === 'dead',
+                      'pi-minus': overallAliveStatus === 'unknown'
+                    }"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+                <span>
+                  <small>Latest check</small>
+                  <strong>{{ overallAliveLabel }}</strong>
+                  <em>{{ detail()?.latest_check ? (detail()?.latest_check | date : 'short') : 'Never checked' }}</em>
+                </span>
+              </div>
+
+              <div class="health-summary__response">
+                <span>Response</span>
+                <strong>
+                  {{ latestStatistic?.response_time ?? '—' }}
+                  @if (latestStatistic) { <small>ms</small> }
+                </strong>
+              </div>
+
+              <div class="mini-chart" aria-label="Recent response-time trend">
+                @if (isLoadingStatistics()) {
+                  <app-loading></app-loading>
+                } @else if (chartData()?.datasets?.[0]?.data?.length) {
+                  <p-chart type="line" [data]="chartData()" [options]="chartOptions()"></p-chart>
+                } @else {
+                  <span>No trend yet</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="fact-strip">
+            <div class="detail-item">
+              <span class="label">Country</span>
+              <span class="value capitalize">{{ detail()?.country || 'Unknown' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Type</span>
+              <span class="value capitalize">{{ detail()?.estimated_type || 'N/A' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Protocol</span>
+              <span class="value capitalize">{{ latestStatistic?.protocol || 'Unknown' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Anonymity</span>
+              <span class="value capitalize">{{ latestStatistic?.anonymity_level || 'Unknown' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Judge</span>
+              <span class="value value--truncate" [title]="latestStatistic?.judge || 'Unknown'">
+                {{ latestStatistic?.judge || 'Unknown' }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Added</span>
+              <span class="value">{{ detail()?.created_at ? (detail()?.created_at | date : 'shortDate') : 'Unknown' }}</span>
+            </div>
+          </div>
+
+          <div class="dashboard-secondary">
+            <div class="access-summary">
+              <div class="compact-field compact-field--tags">
+                <span class="label">Tags</span>
                 <div class="value">
                   <app-proxy-tag-selector
                     [availableTags]="tagService.tags()"
@@ -149,257 +168,168 @@
                   ></app-proxy-tag-manager>
                 </div>
               </div>
-              <div class="detail-item">
-                <div class="label">Authentication</div>
-                <div class="value break-all">
-                  @if (authenticationCredentials; as credentials) {
-                    <span class="auth-credentials inline-flex items-center gap-1.5 flex-wrap">
-                      <button
-                        type="button"
-                        class="credential-chip"
-                        (click)="copyUsername()"
-                        title="Copy username"
-                      >
-                        {{ credentials.username }}
-                      </button>
-                      <span class="value-separator">:</span>
-                      <button
-                        type="button"
-                        class="credential-chip"
-                        (click)="copyPassword()"
-                        title="Copy password"
-                      >
-                        {{ credentials.password }}
-                      </button>
-                      <button
-                        type="button"
-                        pButton
-                        icon="pi pi-copy"
-                        class="copy-credential-button"
-                        (click)="copyAuthCredentials()"
-                        title="Copy username and password"
-                      ></button>
-                    </span>
-                  } @else {
-                    {{ authenticationDisplay }}
-                  }
-                </div>
-              </div>
-              <div class="detail-item">
-                <div class="label">Latest Protocol</div>
-                <div class="value capitalize">{{ latestStatistic?.protocol || 'Unknown' }}</div>
-              </div>
-              <div class="detail-item">
-                <div class="label">Anonymity</div>
-                <div class="value capitalize">{{ latestStatistic?.anonymity_level || 'Unknown' }}</div>
-              </div>
-              <div class="detail-item">
-                <div class="label">Latest Judge</div>
-                <div
-                  class="value value--truncate"
-                  [title]="latestStatistic?.judge || 'Unknown'"
-                >
-                  {{ latestStatistic?.judge || 'Unknown' }}
-                </div>
-              </div>
-              <div class="detail-item">
-                <div class="label">Response Time</div>
-                <div class="value">
-                  {{ latestStatistic?.response_time ?? '—' }}
-                  @if (latestStatistic) {
-                    <span> ms</span>
-                  }
-                </div>
-              </div>
-              <div></div>
-              <div class="detail-item">
-                <div class="label">Last Check</div>
-                <div class="value">{{ detail()?.latest_check ? (detail()?.latest_check | date : 'medium') : 'Never' }}</div>
-              </div>
-              <div class="detail-item">
-                <div class="label">Created</div>
-                <div class="value">{{ detail()?.created_at ? (detail()?.created_at | date : 'medium') : 'Unknown' }}</div>
-              </div>
-            </div>
 
-            <div class="stats-chart">
-              <div class="stats-chart__header">
-                <div>
-                  <h2 class="text-lg font-semibold">Response Time</h2>
-                  <p class="text-xs muted-text">Most recent {{ chronologicalStats().length }} checks</p>
-                </div>
-              </div>
-
-              <div class="stats-chart__body">
-                @if (isLoadingStatistics()) {
-                  <div class="flex justify-center items-center h-full"><app-loading></app-loading></div>
-                } @else if (chartData()?.datasets?.[0]?.data?.length) {
-                  <p-chart
-                    type="line"
-                    [data]="chartData()"
-                    [options]="chartOptions()"
-                    class="h-56 w-full"
-                  ></p-chart>
-                } @else {
-                  <div class="flex items-center justify-center h-full text-sm muted-text">
-                    No statistics recorded yet.
+              <div class="compact-field">
+                <span class="label">Authentication</span>
+                @if (authenticationCredentials; as credentials) {
+                  <div class="auth-credentials">
+                    <button type="button" class="copy-value" (click)="copyUsername()" title="Copy username">
+                      {{ credentials.username }}
+                    </button>
+                    <span class="value-separator">:</span>
+                    <button type="button" class="copy-value" (click)="copyPassword()" title="Copy password">
+                      {{ credentials.password }}
+                    </button>
+                    <button type="button" class="icon-button" (click)="copyAuthCredentials()" title="Copy credentials">
+                      <i class="pi pi-copy" aria-hidden="true"></i>
+                    </button>
                   </div>
+                } @else {
+                  <span class="value">{{ authenticationDisplay }}</span>
                 }
               </div>
-            </div>
-          </div>
-        }
-      </div>
-    </section>
-  </div>
 
-  @if (hasReputation) {
-    <section class="detail-card simple-reputation mt-8">
-      <div class="simple-reputation__header">
-        <div>
-          <div class="label">Reputation</div>
-          @if (reputationOverall) {
-            <p class="muted-text">
-              Composite score from the proxy's latest signals.
-            </p>
-          }
-        </div>
-        @if (reputationOverall; as overall) {
-          <div class="simple-reputation__summary">
-            <div class="simple-reputation__score">
-              {{ reputationScoreDisplay(overall) }}
-              <span>/100</span>
-            </div>
-            <span [ngClass]="reputationBadgeClass(overall.label)">
-              {{ (overall.label || 'Unknown') | titlecase }}
-            </span>
-          </div>
-        } @else {
-          <div class="muted-text text-sm">No overall score yet.</div>
-        }
-        @if (hasSignals(reputationOverall)) {
-          <button
-            type="button"
-            pButton
-            icon="pi pi-sparkles"
-            label="Signals"
-            class="signals-button p-button-outlined"
-            (click)="openSignalsDialog(reputationOverall!)"
-          ></button>
-        }
-      </div>
-
-      @if (reputationOverall; as overall) {
-        <div class="simple-reputation__progress">
-          <div class="progress-bar">
-            <div
-              class="progress-bar__fill"
-              [ngClass]="progressFillClass(overall.label)"
-              [style.width.%]="reputationScorePercent(overall)"
-            ></div>
-          </div>
-          <span class="progress-bar__value">{{ reputationScorePercent(overall) }}%</span>
-        </div>
-      }
-
-      @if (reputationProtocols.length > 0) {
-        <div class="simple-reputation__protocols">
-          @for (protocol of reputationProtocols; track protocol.kind) {
-            <div class="protocol-row">
-              <div class="protocol-row__top">
-                <span class="protocol-row__name">{{ protocol.kind | uppercase }}</span>
-                <span class="protocol-row__score">{{ reputationScoreDisplay(protocol) }}</span>
-              </div>
-              <div class="progress-bar">
-                <div
-                  class="progress-bar__fill"
-                  [ngClass]="progressFillClass(protocol.label)"
-                  [style.width.%]="reputationScorePercent(protocol)"
-                ></div>
-              </div>
-              <div class="protocol-row__footer">
-                <span class="protocol-row__badge" [ngClass]="reputationBadgeClass(protocol.label)">
-                  {{ (protocol.label || 'Unknown') | titlecase }}
-                </span>
-                @if (hasSignals(protocol)) {
-                  <button
-                    type="button"
-                    pButton
-                    class="p-button-text protocol-row__signals"
-                    label="Signals"
-                    (click)="openSignalsDialog(protocol)"
-                  ></button>
-                }
-              </div>
-            </div>
-          }
-        </div>
-      }
-    </section>
-  }
-
-  <section class="mt-8 detail-card p-6 shadow">
-    <div class="flex items-center justify-between gap-4 flex-wrap">
-      <div>
-        <h2 class="text-lg font-semibold">Proxy Statistic History</h2>
-        <p class="text-xs muted-text">Chronological list of judge results</p>
-      </div>
-      <span class="text-xs muted-text">{{ statistics().length }} entries</span>
-    </div>
-
-    <div class="mt-4">
-      @if (isLoadingStatistics()) {
-        <div class="flex justify-center py-8"><app-loading></app-loading></div>
-      } @else {
-        <p-table
-          [value]="statistics()"
-          [tableStyleClass]="'proxy-stat-table'"
-        >
-          <ng-template pTemplate="header">
-            <tr>
-              <th>Checked At</th>
-              <th>Status</th>
-              <th>Response Time</th>
-              <th>Attempt</th>
-              <th>Protocol</th>
-              <th>Anonymity</th>
-              <th>Judge</th>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-row>
-            <tr
-              class="proxy-stat-row"
-              role="button"
-              tabindex="0"
-              title="View judge response body"
-              (click)="openStatisticResponse(row)"
-              (keydown.enter)="openStatisticResponse(row)"
-              (keydown.space)="openStatisticResponse(row); $event.preventDefault()"
-            >
-              <td>{{ row.created_at | date : 'medium' }}</td>
-              <td>
-                <div class="flex items-center gap-2">
-                  <span
-                    class="status-dot status-dot--small"
-                    [ngClass]="row.alive ? 'alive' : 'dead'"
-                  ></span>
-                  <span class="text-sm">{{ row.alive ? 'Alive' : 'Dead' }}</span>
+              @if (detail(); as managed) {
+                <div class="compact-field compact-field--lifecycle">
+                  <span class="label">Workspace state</span>
+                  <div class="lifecycle-row">
+                    <span class="managed-state-pill" [ngClass]="'managed-state-pill--' + (managed.state ?? 'active')">
+                      <i class="pi pi-circle-fill" aria-hidden="true"></i>
+                      {{ managed.state ?? 'active' }}
+                    </span>
+                    @if (workspaces.canOperate()) {
+                      @if ((managed.state ?? 'active') === 'active') {
+                        <button type="button" class="action-button" [disabled]="changingLifecycle()" (click)="changeLifecycle('paused')">
+                          <i class="pi" [ngClass]="changingLifecycle() ? 'pi-spin pi-spinner' : 'pi-pause'" aria-hidden="true"></i>
+                          Pause
+                        </button>
+                      } @else {
+                        <button type="button" class="action-button action-button--primary" [disabled]="changingLifecycle()" (click)="changeLifecycle('active')">
+                          <i class="pi" [ngClass]="changingLifecycle() ? 'pi-spin pi-spinner' : 'pi-play'" aria-hidden="true"></i>
+                          Activate
+                        </button>
+                        @if (managed.state === 'paused') {
+                          <button type="button" class="action-button action-button--warning" [disabled]="changingLifecycle()" (click)="changeLifecycle('archived')">
+                            <i class="pi pi-box" aria-hidden="true"></i>
+                            Archive
+                          </button>
+                        }
+                      }
+                    }
+                  </div>
                 </div>
-              </td>
-              <td>{{ row.response_time }} ms</td>
-              <td>{{ row.attempt + 1}}</td>
-              <td class="capitalize">{{ row.protocol || 'Unknown' }}</td>
-              <td class="capitalize">{{ row.anonymity_level || 'Unknown' }}</td>
-              <td>{{ row.judge || 'Unknown' }}</td>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="7" class="text-center py-6 muted-text">No statistics recorded yet.</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      }
+              }
+            </div>
+
+            <div class="reputation-summary">
+              <div class="reputation-summary__heading">
+                <span>
+                  <small>Reputation</small>
+                  @if (reputationOverall; as overall) {
+                    <strong>{{ reputationScoreDisplay(overall) }}<em>/100</em></strong>
+                  } @else {
+                    <strong>—</strong>
+                  }
+                </span>
+                @if (reputationOverall; as overall) {
+                  <span [ngClass]="reputationBadgeClass(overall.label)">
+                    {{ (overall.label || 'Unknown') | titlecase }}
+                  </span>
+                  @if (hasSignals(overall)) {
+                    <button type="button" class="icon-button" (click)="openSignalsDialog(overall)" title="View reputation signals">
+                      <i class="pi pi-sparkles" aria-hidden="true"></i>
+                    </button>
+                  }
+                }
+              </div>
+
+              @if (reputationProtocols.length > 0) {
+                <div class="protocol-list">
+                  @for (protocol of reputationProtocols; track protocol.kind) {
+                    <button
+                      type="button"
+                      class="protocol-row"
+                      [disabled]="!hasSignals(protocol)"
+                      (click)="openSignalsDialog(protocol)"
+                    >
+                      <span>{{ protocol.kind | uppercase }}</span>
+                      <span class="reputation-meter">
+                        <span [ngClass]="progressFillClass(protocol.label)" [style.width.%]="reputationScorePercent(protocol)"></span>
+                      </span>
+                      <strong>{{ reputationScoreDisplay(protocol) }}</strong>
+                    </button>
+                  }
+                </div>
+              } @else {
+                <p>No reputation data yet.</p>
+              }
+            </div>
+          </div>
+        }
+      </section>
+
+      <section class="route-card history-card" aria-labelledby="history-title">
+        <div class="history-card__heading">
+          <div class="card-heading card-heading--compact">
+            <span class="card-icon"><i class="pi pi-history" aria-hidden="true"></i></span>
+            <div class="card-heading__copy">
+              <span class="card-eyebrow">Judge activity</span>
+              <h2 id="history-title">Check history</h2>
+              <p>Select any result to inspect its recorded response body.</p>
+            </div>
+          </div>
+          <span class="entry-count">{{ statistics().length }} entries</span>
+        </div>
+
+        <div class="history-table">
+          @if (isLoadingStatistics()) {
+            <div class="card-loading"><app-loading></app-loading></div>
+          } @else {
+            <p-table [value]="statistics()" [tableStyleClass]="'proxy-stat-table'">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Checked at</th>
+                  <th>Status</th>
+                  <th>Response</th>
+                  <th>Attempt</th>
+                  <th>Protocol</th>
+                  <th>Anonymity</th>
+                  <th>Judge</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row>
+                <tr
+                  class="proxy-stat-row"
+                  role="button"
+                  tabindex="0"
+                  title="View judge response body"
+                  (click)="openStatisticResponse(row)"
+                  (keydown.enter)="openStatisticResponse(row)"
+                  (keydown.space)="openStatisticResponse(row); $event.preventDefault()"
+                >
+                  <td>{{ row.created_at | date : 'medium' }}</td>
+                  <td>
+                    <span class="table-status">
+                      <span class="status-dot status-dot--small" [ngClass]="row.alive ? 'alive' : 'dead'"></span>
+                      {{ row.alive ? 'Alive' : 'Dead' }}
+                    </span>
+                  </td>
+                  <td>{{ row.response_time }} ms</td>
+                  <td>{{ row.attempt + 1 }}</td>
+                  <td class="capitalize">{{ row.protocol || 'Unknown' }}</td>
+                  <td class="capitalize">{{ row.anonymity_level || 'Unknown' }}</td>
+                  <td class="judge-cell" [title]="row.judge || 'Unknown'">{{ row.judge || 'Unknown' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="7" class="empty-table">No check history recorded yet.</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          }
+        </div>
+      </section>
     </div>
   </section>
 
@@ -444,7 +374,7 @@
     </ng-template>
 
     @if (signalDialogEntries().length) {
-      <div class="signal-dialog__list mt-5">
+      <div class="signal-dialog__list">
         @for (signal of signalDialogEntries(); track signal) {
           <div class="signal-dialog__item">
             <div class="signal-dialog__key">{{ signal.key }}</div>
@@ -470,12 +400,12 @@
         }
       </div>
     } @else {
-      <div class="signal-dialog__empty muted-text">No signals available.</div>
+      <div class="signal-dialog__empty">No signals available.</div>
     }
   </p-dialog>
 
   <p-dialog
-    header="Judge Response"
+    header="Judge response"
     [visible]="isResponseBodyModalVisible()"
     (visibleChange)="isResponseBodyModalVisible.set($event)"
     [modal]="true"
@@ -487,7 +417,7 @@
     (onHide)="onResponseDialogHide()"
   >
     @if (selectedStatistic(); as stat) {
-      <div class="stat-response-dialog__meta mt-4">
+      <div class="stat-response-dialog__meta">
         <div class="meta-row">
           <span class="meta-label">Checked</span>
           <span class="meta-value">{{ stat.created_at | date : 'medium' }}</span>
@@ -515,20 +445,14 @@
 
     <div class="stat-response-dialog__content">
       @if (isLoadingResponseBody()) {
-        <div class="stat-response-dialog__loading">
-          <app-loading></app-loading>
-        </div>
+        <div class="stat-response-dialog__loading"><app-loading></app-loading></div>
       } @else if (responseBodyError()) {
-        <div class="stat-response-dialog__error">
-          {{ responseBodyError() }}
-        </div>
+        <div class="stat-response-dialog__error">{{ responseBodyError() }}</div>
       } @else if (selectedResponseBody()) {
         <pre class="stat-response-dialog__body" [innerHTML]="highlightedResponseBody()"></pre>
       } @else {
-        <div class="stat-response-dialog__empty">
-          No response body recorded for this check.
-        </div>
+        <div class="stat-response-dialog__empty">No response body recorded for this check.</div>
       }
     </div>
   </p-dialog>
-</div>
+</main>
