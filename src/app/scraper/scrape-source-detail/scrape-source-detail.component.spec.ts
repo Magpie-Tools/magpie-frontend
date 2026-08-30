@@ -5,6 +5,7 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {of} from 'rxjs';
 import {ScrapeSourceDetailComponent} from './scrape-source-detail.component';
 import {ScrapeSourceDetail} from '../../models/ScrapeSourceDetail';
+import {ProxyInfo} from '../../models/ProxyInfo';
 import {HttpService} from '../../services/http.service';
 
 describe('ScrapeSourceDetailComponent', () => {
@@ -67,6 +68,28 @@ describe('ScrapeSourceDetailComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the proxy status dot when the source payload has an empty lifecycle state', () => {
+    const proxy: ProxyInfo = {
+      id: 12,
+      ip: '192.0.2.12',
+      port: 8080,
+      estimated_type: 'datacenter',
+      response_time: 120,
+      country: 'DE',
+      anonymity_level: 'elite',
+      alive: true,
+      latest_check: new Date(),
+      state: '' as ProxyInfo['state'],
+    };
+
+    component.proxies.set([proxy]);
+    component.proxyHasLoaded.set(true);
+    component.proxyTotal.set(1);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-proxy-table .status-dot.alive')).not.toBeNull();
   });
 
   it('reloads the first page with server sort parameters when sorting proxies', () => {

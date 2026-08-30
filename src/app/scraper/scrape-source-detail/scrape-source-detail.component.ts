@@ -10,7 +10,6 @@ import {NotificationService} from '../../services/notification-service.service';
 import {LoadingComponent} from '../../ui-elements/loading/loading.component';
 import {ProxyInfo} from '../../models/ProxyInfo';
 import {TableLazyLoadEvent} from 'primeng/table';
-import {ButtonModule} from 'primeng/button';
 import {ProxyListFilters} from '../../models/ProxyListFilters';
 import {ProxyFilterOptions} from '../../models/ProxyFilterOptions';
 import {ProxyFilterPanelComponent} from '../../shared/proxy-filter-panel/proxy-filter-panel.component';
@@ -56,7 +55,6 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
     DatePipe,
     NgClass,
     LoadingComponent,
-    ButtonModule,
     ProxyFilterPanelComponent,
     ProxyTableComponent,
     ColumnPickerPanelComponent,
@@ -485,11 +483,8 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     return `Filters (${count})`;
   }
 
-  filterToggleClass(): string {
-    if (this.activeFilterCount() > 0) {
-      return 'p-button-outlined filter-toggle filter-toggle--active';
-    }
-    return 'p-button-outlined filter-toggle';
+  hasActiveFilters(): boolean {
+    return this.activeFilterCount() > 0;
   }
 
   onViewProxy(proxy: ProxyInfo): void {

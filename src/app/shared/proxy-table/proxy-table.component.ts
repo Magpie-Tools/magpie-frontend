@@ -296,7 +296,7 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   managedState(proxy: ProxyInfo): ManagedProxyState {
-    return proxy.state ?? 'active';
+    return proxy.state === 'paused' || proxy.state === 'archived' ? proxy.state : 'active';
   }
 
   isChangingLifecycle(proxyId: number): boolean {
