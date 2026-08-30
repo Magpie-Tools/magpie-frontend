@@ -15,7 +15,7 @@ import {ProxyCheck} from '../../../models/ProxyCheck';
 export class ProxyHistoryCardComponent {
   @Input() title = 'Proxy History';
   @Input() history: ProxyCheck[] = [];
-  @Input() styleClass = 'transaction-card bg-neutral-900 border border-neutral-800 h-full';
+  @Input() styleClass = 'dashboard-card history-card';
   @Input() refreshing = false;
   @Output() refresh = new EventEmitter<void>();
 

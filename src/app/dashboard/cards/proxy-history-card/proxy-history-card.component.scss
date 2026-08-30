@@ -1,0 +1,95 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+:host ::ng-deep .history-card .p-card-body,
+:host ::ng-deep .history-card .p-card-content {
+  height: 100%;
+}
+
+:host ::ng-deep .history-card .p-card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .history-refresh.p-button {
+  width: 2.1rem;
+  padding: 0;
+}
+
+.history-list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-top: 1rem;
+  padding: 0 1.35rem 0.7rem;
+}
+
+.history-row {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 3.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.065);
+  transition: background-color 0.2s ease, padding 0.2s ease;
+}
+
+.history-row:hover {
+  margin-inline: -0.45rem;
+  padding-inline: 0.45rem;
+  border-radius: 0.68rem;
+  background: rgba(var(--theme-primary-500-rgb), 0.045);
+}
+
+.history-row__status {
+  display: inline-flex;
+  width: 1.8rem;
+  height: 1.8rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid currentColor;
+  border-radius: 0.58rem;
+  background: color-mix(in srgb, currentColor 9%, transparent);
+  font-size: 0.68rem;
+}
+
+.history-row__route {
+  min-width: 0;
+}
+
+.history-row__route strong,
+.history-row__route span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-row__route strong {
+  color: rgba(255, 255, 255, 0.79);
+  font-size: 0.67rem;
+  font-weight: 570;
+}
+
+.history-row__route span {
+  margin-top: 0.17rem;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 0.55rem;
+}
+
+.history-row__latency {
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-empty {
+  flex: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .history-row { transition: none; }
+}

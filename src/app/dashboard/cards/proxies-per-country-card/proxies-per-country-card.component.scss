@@ -1,138 +1,208 @@
-.flag {
-  display: inline-flex;
+:host {
+  display: block;
+  height: 100%;
+}
+
+.country-card__header {
   align-items: center;
-  justify-content: center;
-  width: 1.9rem;
-  height: 1.2rem;
-  font-size: 1.05rem;
-  border-radius: 0.35rem;
 }
 
-.more-btn {
-  padding: 0.4rem 0.85rem;
-  border-radius: 0.5rem;
-  background: #29292b;
-  color: #e5e7eb;
-  border: 1px solid #313132;
-  font-weight: 600;
-  font-size: 0.85rem;
-  transition: all 0.15s ease;
+.country-tabs {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 0.35rem;
 }
 
-.more-btn:hover {
-  background: #3a3a3c;
-  border-color: #424243;
-  color: #ffffff;
-}
-
-.all-countries-list {
-  max-height: 65vh;
-  overflow-y: auto;
-}
-
-.search-wrapper {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding-bottom: 0.4rem;
-}
-
-.search-input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #1f2937;
-  background: #252525;
-  color: #e5e7eb;
-  padding: 0.55rem 0.75rem;
-  font-size: 0.9rem;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--theme-primary-500, #348566);
-  box-shadow: 0 0 0 1px var(--theme-primary-500, #348566);
+.country-card__body {
+  min-height: 22.2rem;
 }
 
 .map-panel {
   display: flex;
+  min-height: 20rem;
   flex-direction: column;
 }
 
 .map-frame {
   position: relative;
-  height: 22rem;
+  flex: 1;
+  min-height: 18rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.9rem;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(var(--theme-primary-500-rgb), 0.08), transparent 58%),
+    rgba(255, 255, 255, 0.012);
+}
+
+:host ::ng-deep .map-chart,
+:host ::ng-deep .map-chart .p-chart,
+:host ::ng-deep .map-chart canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .map-caption {
-  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.65rem;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 0.58rem;
 }
 
-:host ::ng-deep .map-chart {
-  width: 100%;
-  height: 100%;
-}
-
-.tab-toggle {
+.map-caption span {
   display: inline-flex;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.tab-btn {
-  padding: 0.35rem 0.75rem;
-  color: #cbd5e1;
-  background: #29292b;
-  border: 1px solid #313132;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.85rem;
-  transition: all 0.15s ease;
+.map-caption i {
+  color: var(--theme-primary-300);
 }
 
-.tab-btn:not(.active):hover {
-  color: #e5e7eb;
-  background: #3a3a3c;
-  border-color: #424243;
-}
-
-.tab-btn.active {
-  color: var(--theme-primary-contrast, #0b1220);
-  background: var(--theme-primary-500, #348566);
-  border-color: var(--theme-primary-500, #348566);
+.country-list {
+  display: grid;
+  gap: 0.42rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .country-row {
   position: relative;
+  min-height: 2.65rem;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 0.72rem;
+  background: rgba(255, 255, 255, 0.018);
   isolation: isolate;
 }
 
 .country-row__progress {
   position: absolute;
+  z-index: -1;
   inset: 0;
   width: 0;
-  background: #292929;
-  border-radius: 0.2rem;
-  opacity: 0.6;
-  z-index: 0;
-  transition: width 0.2s ease, opacity 0.2s ease;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(var(--theme-primary-500-rgb), 0.14), rgba(var(--theme-primary-500-rgb), 0.025));
+  transition: width 0.3s ease;
 }
 
 .country-row__content {
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.8rem;
-  margin-left: 0.2rem;
+  min-height: 2.65rem;
+  padding: 0.42rem 0.62rem;
 }
 
-.country-row:hover {
-  background: #1f2125;
-  border-radius: 0.2rem;
+.country-row__identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.6rem;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.67rem;
+  font-weight: 560;
 }
 
-.country-row:hover .country-row__progress {
-  opacity: 0.75;
+.country-row__identity > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flag {
+  display: inline-flex;
+  width: 1.8rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.9rem;
+}
+
+.country-row__value {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.country-row__value strong,
+.country-row__value span {
+  display: block;
+}
+
+.country-row__value strong {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.65rem;
+  font-weight: 590;
+  font-variant-numeric: tabular-nums;
+}
+
+.country-row__value span {
+  margin-top: 0.12rem;
+  color: rgba(255, 255, 255, 0.32);
+  font-size: 0.53rem;
+}
+
+.country-more {
+  width: 100%;
+  margin-top: 0.65rem;
+}
+
+.all-countries-list {
+  max-height: 65vh;
+  padding: 1rem;
+  overflow-y: auto;
+  background: #101012;
+}
+
+.country-search {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.7rem;
+  margin-bottom: 0.7rem;
+  padding: 0 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  background: #171719;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.country-search input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.84);
+  font: inherit;
+  font-size: 0.68rem;
+}
+
+.country-search:focus-within {
+  border-color: rgba(var(--theme-primary-300-rgb), 0.5);
+  box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.1);
+}
+
+@media (max-width: 640px) {
+  .country-card__header { align-items: flex-start; }
+  .country-card__body { min-height: 19rem; }
+  .map-panel { min-height: 17rem; }
+  .map-frame { min-height: 15rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .country-row__progress { transition: none; }
 }

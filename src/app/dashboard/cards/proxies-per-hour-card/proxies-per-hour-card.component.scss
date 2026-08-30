@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.throughput-card__body {
+  height: 24rem;
+}
+
+:host ::ng-deep .throughput-card__body p-chart,
+:host ::ng-deep .throughput-card__body .p-chart,
+:host ::ng-deep .throughput-card__body canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chart-state {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.36rem 0.56rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.58rem;
+  white-space: nowrap;
+}
+
+.chart-state > span {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--theme-primary-300);
+}
+
+@media (max-width: 640px) {
+  .chart-state { display: none; }
+  .throughput-card__body { height: 19rem; }
+}

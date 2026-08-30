@@ -14,6 +14,6 @@ export class ProxiesPerHourCardComponent {
   @Input() title = 'Proxies per Hour (Last 7 Days)';
   @Input() chartData: any = {};
   @Input() chartOptions: any = {};
-  @Input() styleClass = 'chart-card bg-neutral-900 border border-neutral-800 h-full';
+  @Input() styleClass = 'dashboard-card throughput-card';
   @Input() chartType: 'line' | 'bar' | 'pie' | 'doughnut' | 'radar' | 'polarArea' = 'line';
 }

@@ -214,7 +214,7 @@ const COUNTRY_CODE_OVERRIDES: Record<string, string> = {
 export class ProxiesPerCountryCardComponent implements OnChanges, AfterViewInit {
   @Input() title = 'Proxies per country';
   @Input() countries: CountryBreakdown[] = [];
-  @Input() styleClass = 'chart-card bg-neutral-900 border border-neutral-800 mb-4';
+  @Input() styleClass = 'dashboard-card country-card';
 
   viewMode: 'map' | 'countries' = 'map';
   mapData: ChartData<'choropleth'> = { labels: [], datasets: [] };

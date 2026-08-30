@@ -13,9 +13,10 @@ import {UIChart} from 'primeng/chart';
 })
 export class KpiCardComponent implements OnChanges {
   @Input() title = '';
+  @Input() icon = 'pi pi-chart-line';
   @Input() value: number | string = 0;
   @Input() change?: number | null;
-  @Input() styleClass = 'kpi-card bg-neutral-900 border border-neutral-800 rounded-2xl shadow-md';
+  @Input() styleClass = 'dashboard-card metric-card';
   @Input() displayValue?: string | null;
   @Input() changeSuffix = '%';
   @Input() chartValues: Array<number | null | undefined> = [];

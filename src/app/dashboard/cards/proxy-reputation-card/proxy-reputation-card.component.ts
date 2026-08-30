@@ -23,7 +23,7 @@ export class ProxyReputationCardComponent {
   @Input({ required: true }) chartData!: any;
   @Input({ required: true }) chartOptions!: any;
 
-  readonly cardStyleClass = 'chart-card bg-neutral-900 border border-neutral-800 reputation-card';
+  readonly cardStyleClass = 'dashboard-card reputation-card';
   readonly labels: Array<{ key: keyof ReputationBreakdown; title: string }> = [
     { key: 'good', title: 'Good' },
     { key: 'neutral', title: 'Neutral' },

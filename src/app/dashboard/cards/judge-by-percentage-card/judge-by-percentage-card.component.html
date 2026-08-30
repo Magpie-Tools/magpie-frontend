@@ -1,50 +1,49 @@
-<p-card class="bg-[#0f1a23] border border-neutral-800 rounded-2xl shadow-md overflow-hidden">
+<p-card class="dashboard-card judge-card">
   <ng-template pTemplate="header">
-    <div class="flex justify-between items-center w-full p-3">
-      <h3 class="text-white m-0">Judges by proxies alive</h3>
-    </div>
-  </ng-template>
-  @if (total() > 0) {
-    <div class="mt-4">
-      <div class="relative w-full h-2 rounded-full bg-neutral-800/70 shadow-inner overflow-hidden">
-        <div class="relative flex h-full">
-          @for (seg of segments(); track $index; let first = $first; let last = $last) {
-            <div
-              class="segment"
-              [ngClass]="{
-                'rounded-l-full': first,
-                'rounded-r-full': last
-              }"
-              [ngStyle]="{
-                width: seg.widthPct + '%',
-                backgroundColor: seg.color
-              }">
-            </div>
-          }
+    <div class="dashboard-card__header">
+      <div class="dashboard-card__heading">
+        <span class="dashboard-card__icon"><i class="pi pi-check-circle" aria-hidden="true"></i></span>
+        <div class="dashboard-card__copy">
+          <h2 class="dashboard-card__title">Which judges report alive routes?</h2>
+          <span class="dashboard-card__subtitle">Share of successful checks attributed to each judge.</span>
         </div>
       </div>
     </div>
+  </ng-template>
 
-    <!-- List -->
-    <div class="mt-4 space-y-2">
-      @for (e of entries(); track e.key) {
-        <div class="flex items-center justify-between text-sm">
-          <div class="flex items-center gap-2">
-            <span class="inline-block h-2.5 w-2.5 rounded-full" [ngStyle]="{ background: e.color }"></span>
-            <span class="text-neutral-300">{{ e.key }}</span>
+  @if (total() > 0) {
+    <div class="dashboard-card__body judge-card__body">
+      <div class="judge-summary">
+        <strong>{{ total() | number }}</strong>
+        <span>alive results</span>
+      </div>
+
+      <div class="judge-segments" aria-label="Judge share">
+        @for (seg of segments(); track $index; let first = $first; let last = $last) {
+          <span
+            class="judge-segment"
+            [class.judge-segment--first]="first"
+            [class.judge-segment--last]="last"
+            [ngStyle]="{ width: seg.widthPct + '%', backgroundColor: seg.color }">
+          </span>
+        }
+      </div>
+
+      <div class="judge-list">
+        @for (entry of entries(); track entry.key) {
+          <div class="judge-row">
+            <span class="judge-row__dot" [ngStyle]="{ background: entry.color }"></span>
+            <span class="judge-row__name">{{ entry.key }}</span>
+            <span class="judge-row__count">{{ entry.value | number }}</span>
+            <strong>{{ entry.pct | number : '1.0-0' }}%</strong>
           </div>
-          <div class="tabular-nums font-semibold text-neutral-100">
-            {{ e.pct | number : '1.0-0' }}%
-          </div>
-        </div>
-      }
+        }
+      </div>
     </div>
   } @else {
-    <div class="flex flex-col items-center justify-center text-center gap-3 py-10 px-6 text-neutral-400">
-      <i class="pi pi-chart-pie text-3xl text-neutral-600 mt-2"></i>
-      <p class="text-sm mb-2">
-        We will highlight judges once your proxies start reporting alive metrics.
-      </p>
+    <div class="dashboard-empty">
+      <span class="dashboard-empty__icon"><i class="pi pi-check-circle" aria-hidden="true"></i></span>
+      <p>Judge distribution will appear after proxies begin reporting alive results.</p>
     </div>
   }
 </p-card>

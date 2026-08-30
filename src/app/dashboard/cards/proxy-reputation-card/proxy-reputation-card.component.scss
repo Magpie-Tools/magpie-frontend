@@ -1,120 +1,104 @@
-.reputation-card {
-  &__header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
+:host {
+  display: block;
+  height: 100%;
+}
 
-  &__title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #f3f4f6;
-  }
+.reputation-card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(12rem, 0.9fr);
+  gap: 1rem;
+  padding: 1.15rem 1.35rem 1.35rem;
+}
 
-  &__subtitle {
-    font-size: 0.825rem;
-    color: #9ca3af;
-  }
+.reputation-card__chart {
+  display: flex;
+  min-height: 17rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.012);
+}
 
-  &__body {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+:host ::ng-deep .reputation-card__chart p-chart,
+:host ::ng-deep .reputation-card__chart .p-chart,
+:host ::ng-deep .reputation-card__chart canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
 
-    @media (min-width: 1024px) {
-      flex-direction: row;
-    }
-  }
+.reputation-card__details {
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.018);
+}
 
-  &__chart {
-    flex: 1;
-    min-height: 240px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.reputation-card__details-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.1rem 0.1rem 0.55rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.52rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
 
-  &__details {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    justify-content: space-between;
-  }
-
-  &__legend {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.5rem;
-    color: #94a3b8;
-  }
-
-  &__empty-text {
-    font-size: 0.9rem;
-    line-height: 1.4;
-  }
+.reputation-card__legend {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.58rem;
+  flex: 1;
+  min-height: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
 }
 
 .legend-swatch {
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 9999px;
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+  width: 0.56rem;
+  height: 0.56rem;
+  border-radius: 50%;
+  box-shadow: 0 0 0.7rem currentColor;
 }
 
 .legend-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  min-width: 0;
+}
+
+.legend-label,
+.legend-value {
+  display: block;
 }
 
 .legend-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #e5e7eb;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.65rem;
+  font-weight: 570;
 }
 
 .legend-value {
-  font-size: 0.8rem;
-  color: #9ca3af;
-
-  &__pct {
-    margin-left: 0.25rem;
-    color: #60a5fa;
-  }
+  margin-top: 0.14rem;
+  color: rgba(255, 255, 255, 0.32);
+  font-size: 0.54rem;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 9999px;
-  padding: 0.1rem 0.5rem;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: rgba(148, 163, 184, 0.2);
-  color: #d1d5db;
+.reputation-card__legend strong {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.63rem;
+  font-weight: 590;
+  font-variant-numeric: tabular-nums;
+}
 
-  &--good {
-    background: rgba(34, 197, 94, 0.18);
-    color: #86efac;
-  }
+.reputation-card__empty {
+  min-height: 100%;
+}
 
-  &--neutral {
-    background: rgba(249, 115, 22, 0.18);
-    color: #fb923c;
-  }
-
-  &--poor {
-    background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
-  }
+@media (max-width: 720px) {
+  .reputation-card__body { grid-template-columns: 1fr; }
+  .reputation-card__chart { min-height: 15rem; }
 }

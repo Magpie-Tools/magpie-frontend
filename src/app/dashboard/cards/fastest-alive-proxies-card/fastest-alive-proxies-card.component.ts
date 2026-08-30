@@ -27,7 +27,7 @@ export class FastestAliveProxiesCardComponent {
   @Input() sortDirection: FastestAliveSortDirection = 'fastest-right';
   @Output() sortDirectionChange = new EventEmitter<FastestAliveSortDirection>();
 
-  readonly cardStyleClass = 'chart-card bg-neutral-900 border border-neutral-800 fastest-alive-card';
+  readonly cardStyleClass = 'dashboard-card fastest-alive-card';
   readonly reputationLegend = [
     { label: 'Good', className: 'shape-dot shape-dot--good' },
     { label: 'Neutral', className: 'shape-dot shape-dot--neutral' },

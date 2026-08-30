@@ -1,47 +1,48 @@
 <p-card [class]="styleClass">
   <ng-template pTemplate="header">
-    <div class="flex justify-between items-center w-full p-3">
-      <h3 class="text-white m-0">{{ title }}</h3>
-      <div class="flex gap-2">
-        <p-button
-          icon="pi pi-refresh"
-          styleClass="p-button-rounded p-button-text p-button-sm text-neutral-400"
-          [loading]="refreshing"
-          [disabled]="refreshing"
-          (onClick)="onRefreshClick()">
-        </p-button>
+    <div class="dashboard-card__header">
+      <div class="dashboard-card__heading">
+        <span class="dashboard-card__icon"><i class="pi pi-history" aria-hidden="true"></i></span>
+        <div class="dashboard-card__copy">
+          <h2 class="dashboard-card__title">{{ title }}</h2>
+          <span class="dashboard-card__subtitle">Latest checks across your routes.</span>
+        </div>
       </div>
+      <p-button
+        icon="pi pi-refresh"
+        styleClass="dashboard-control history-refresh"
+        ariaLabel="Refresh proxy history"
+        [loading]="refreshing"
+        [disabled]="refreshing"
+        (onClick)="onRefreshClick()">
+      </p-button>
     </div>
   </ng-template>
 
   @if (history.length) {
-    <div class="transaction-list">
+    <div class="history-list">
       @for (check of history; track check.id) {
-        <div class="flex items-center gap-3 p-3 border-b border-neutral-800">
-          <div class="transaction-icon">
-            <i class="{{ getStatusIcon(check.status) }} text-xl" [ngStyle]="{ color: getStatusColor(check.status) }"></i>
-          </div>
-          <div class="flex-1">
-            <div class="text-white text-sm font-medium">{{ check.ip }}</div>
-            <div class="text-neutral-400 text-xs">
+        <article class="history-row">
+          <span class="history-row__status" [ngStyle]="{ color: getStatusColor(check.status) }">
+            <i [class]="getStatusIcon(check.status)" aria-hidden="true"></i>
+          </span>
+          <div class="history-row__route">
+            <strong>{{ check.ip }}</strong>
+            <span>
               @if (check.date; as date) {
                 {{ date | date:'MMM dd, yyyy' }}
               }
               {{ check.time }}
-            </div>
+            </span>
           </div>
-          <div class="text-right text-sm font-medium text-neutral-300">
-            {{ formatLatency(check.latency) }}
-          </div>
-        </div>
+          <span class="history-row__latency">{{ formatLatency(check.latency) }}</span>
+        </article>
       }
     </div>
   } @else {
-    <div class="flex flex-col items-center justify-center text-center gap-3 py-10 px-6 text-neutral-400">
-      <i class="pi pi-database text-3xl text-neutral-600"></i>
-      <p class="text-sm">
-        We haven’t captured any proxy checks yet. Refresh or come back later once the first checks are processed.
-      </p>
+    <div class="dashboard-empty history-empty">
+      <span class="dashboard-empty__icon"><i class="pi pi-database" aria-hidden="true"></i></span>
+      <p>No proxy checks yet. Refresh after the checker processes its first routes.</p>
     </div>
   }
 </p-card>

@@ -5,6 +5,7 @@
 @import "./app/notifications/notifications.visuals.css";
 @import "./app/rotating-proxies/rotating-proxies.visuals.css";
 @import "./app/account/account.visuals.css";
+@import "./app/dashboard/dashboard.visuals.css";
 @import "primeicons/primeicons.css";
 @import "tailwindcss";
 @plugin "tailwindcss-primeui";

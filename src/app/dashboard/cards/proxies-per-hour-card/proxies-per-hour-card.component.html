@@ -1,10 +1,17 @@
 <p-card [class]="styleClass">
   <ng-template pTemplate="header">
-    <div class="flex justify-between items-center w-full p-3">
-      <h3 class="text-white m-0">{{ title }}</h3>
+    <div class="dashboard-card__header">
+      <div class="dashboard-card__heading">
+        <span class="dashboard-card__icon"><i class="pi pi-wave-pulse" aria-hidden="true"></i></span>
+        <div class="dashboard-card__copy">
+          <h2 class="dashboard-card__title">{{ title }}</h2>
+          <span class="dashboard-card__subtitle">Compare inventory growth, losses, and the configured route limit.</span>
+        </div>
+      </div>
+      <span class="chart-state"><span aria-hidden="true"></span>7-day window</span>
     </div>
   </ng-template>
-  <div class="p-4">
-    <p-chart [type]="chartType" [data]="chartData" [options]="chartOptions" class="h-96 w-full"></p-chart>
+  <div class="dashboard-card__body throughput-card__body">
+    <p-chart [type]="chartType" [data]="chartData" [options]="chartOptions"></p-chart>
   </div>
 </p-card>

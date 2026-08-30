@@ -1,20 +1,23 @@
 <p-card [class]="cardStyleClass">
   <ng-template pTemplate="header">
-    <div class="fastest-alive-card__header p-3">
-      <div>
-        <h3 class="fastest-alive-card__title">Fastest Alive Proxies</h3>
-        <span class="fastest-alive-card__subtitle">{{ titleSuffix }}</span>
+    <div class="dashboard-card__header fastest-alive-card__header">
+      <div class="dashboard-card__heading">
+        <span class="dashboard-card__icon"><i class="pi pi-gauge" aria-hidden="true"></i></span>
+        <div class="dashboard-card__copy">
+          <h2 class="dashboard-card__title">How fast are the best available routes?</h2>
+          <span class="dashboard-card__subtitle">{{ titleSuffix }}. Position shows latency and country; shape shows reputation.</span>
+        </div>
       </div>
 
       @if (proxyCount > 0) {
         <div class="fastest-alive-card__tools">
           <button
             type="button"
-            class="sort-toggle"
+            class="dashboard-control sort-toggle"
             [attr.aria-label]="'Latency direction: ' + sortLabel"
             [title]="sortLabel"
             (click)="toggleSortDirection()">
-            <i [class]="sortIcon"></i>
+            <i [class]="sortIcon" aria-hidden="true"></i>
             <span>{{ sortLabel }}</span>
           </button>
 
@@ -34,14 +37,14 @@
   @if (proxyCount > 0) {
     <div class="fastest-alive-card__body">
       <div class="fastest-alive-card__chart">
-        <p-chart
-          type="scatter"
-          [data]="chartData"
-          [options]="chartOptions">
-        </p-chart>
+        <p-chart type="scatter" [data]="chartData" [options]="chartOptions"></p-chart>
       </div>
 
       <aside class="fastest-alive-card__countries" aria-label="Country color legend">
+        <div class="country-legend__heading">
+          <span>Country</span>
+          <span>Routes</span>
+        </div>
         @for (entry of countryLegend; track entry.country) {
           <div class="country-key">
             <span class="country-key__swatch" [ngStyle]="{'background': entry.color}"></span>
@@ -52,9 +55,9 @@
       </aside>
     </div>
   } @else {
-    <div class="fastest-alive-card__empty">
-      <i class="pi pi-chart-scatter text-3xl text-neutral-600"></i>
-      <p>No alive proxy latency data yet.</p>
+    <div class="dashboard-empty fastest-alive-card__empty">
+      <span class="dashboard-empty__icon"><i class="pi pi-gauge" aria-hidden="true"></i></span>
+      <p>Latency distribution will appear after Magpie finds alive proxies.</p>
     </div>
   }
 </p-card>
