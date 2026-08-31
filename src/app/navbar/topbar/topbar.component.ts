@@ -87,7 +87,6 @@ export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
         gsap.from('.topbar__navigation', {opacity: 0, y: -7, duration: 0.42, ease: 'power2.out'});
         gsap.from('.topbar-actions > *', {
           opacity: 0,
-          y: -7,
           duration: 0.4,
           delay: 0.08,
           stagger: 0.06,
