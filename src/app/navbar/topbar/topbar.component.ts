@@ -1,12 +1,12 @@
-import { Component, signal, OnDestroy, OnInit } from '@angular/core';
+import {AfterViewInit, Component, ElementRef, signal, OnDestroy, OnInit} from '@angular/core';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { filter } from 'rxjs/operators';
 import {Subscription} from 'rxjs';
-import { ButtonDirective } from 'primeng/button';
 import { LayoutService } from '../../services/layout.service';
 import {WorkspaceService} from '../../services/workspace.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {WorkspaceInvitationService} from '../../services/workspace-invitation.service';
+import {gsap} from 'gsap';
 
 export interface TopbarBreadcrumb {
   label: string;
@@ -52,82 +52,21 @@ function formatRouteLabel(segment: string): string {
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [ButtonDirective, RouterLink],
-  template: `
-    <header class="topbar">
-      <button pButton type="button" icon="pi pi-bars"
-              class="p-button-text p-button-plain mr-2"
-              aria-label="Toggle sidebar"
-              (click)="layout.toggleSidebar()"></button>
-
-      <nav class="topbar-breadcrumb" aria-label="Page breadcrumb">
-        @for (item of breadcrumbs(); track $index; let last = $last) {
-          @if (item.routerLink && !last) {
-            <a class="topbar-breadcrumb__link" [routerLink]="item.routerLink">{{ item.label }}</a>
-          } @else {
-            <span class="topbar-breadcrumb__current" [attr.aria-current]="last ? 'page' : null">{{ item.label }}</span>
-          }
-          @if (!last) {
-            <span class="topbar-breadcrumb__separator" aria-hidden="true">/</span>
-          }
-        }
-      </nav>
-
-      <div class="topbar-actions">
-        <a
-          routerLink="/invitations"
-          class="invitation-link"
-          [attr.aria-label]="'Workspace invitations, ' + invitations.pendingCount() + ' pending'"
-          title="Workspace invitations"
-        >
-          <i class="pi pi-inbox" aria-hidden="true"></i>
-          @if (invitations.pendingCount() > 0) {
-            <span class="invitation-link__count">{{ invitations.pendingCount() > 99 ? '99+' : invitations.pendingCount() }}</span>
-          }
-        </a>
-
-        <div class="workspace-switcher" aria-label="Current workspace">
-          @if (workspaces.loading() && workspaces.workspaces().length === 0) {
-            <span class="workspace-switcher__loading">Loading workspace…</span>
-          } @else if (workspaces.current(); as current) {
-            <div class="workspace-switcher__summary">
-              <span class="workspace-switcher__capacity">{{ workspaces.capacityLabel(current) }}</span>
-            </div>
-            <label class="sr-only" for="workspace-select">Workspace</label>
-            <select
-              id="workspace-select"
-              class="workspace-switcher__select"
-              [value]="current.id"
-              (change)="onWorkspaceChange($event)"
-            >
-              @for (workspace of workspaces.workspaces(); track workspace.id) {
-                <option [value]="workspace.id">{{ workspace.name }}</option>
-              }
-            </select>
-            <a
-              routerLink="/workspace"
-              class="workspace-switcher__settings"
-              aria-label="Workspace settings"
-              title="Workspace settings"
-            >
-              <i class="pi pi-cog" aria-hidden="true"></i>
-            </a>
-          }
-        </div>
-      </div>
-    </header>
-  `,
+  imports: [RouterLink],
+  templateUrl: './topbar.component.html',
   styleUrls: ['./topbar.component.scss']
 })
-export class TopbarComponent implements OnInit, OnDestroy {
+export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
   breadcrumbs = signal<TopbarBreadcrumb[]>([{label: 'Dashboard'}]);
   private sub?: Subscription;
+  private motionContext?: gsap.Context;
 
   constructor(public layout: LayoutService,
               private router: Router,
               readonly workspaces: WorkspaceService,
               readonly invitations: WorkspaceInvitationService,
-              private notification: NotificationService) {}
+              private notification: NotificationService,
+              private elementRef: ElementRef) {}
 
   ngOnInit() {
     const set = () => this.breadcrumbs.set(buildTopbarBreadcrumbs(this.router.url));
@@ -142,7 +81,26 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.invitations.load().subscribe({error: () => undefined});
   }
 
-  ngOnDestroy() { this.sub?.unsubscribe?.(); }
+  ngAfterViewInit(): void {
+    if (typeof window !== 'undefined' && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      this.motionContext = gsap.context(() => {
+        gsap.from('.topbar__navigation', {opacity: 0, y: -7, duration: 0.42, ease: 'power2.out'});
+        gsap.from('.topbar-actions > *', {
+          opacity: 0,
+          y: -7,
+          duration: 0.4,
+          delay: 0.08,
+          stagger: 0.06,
+          ease: 'power2.out',
+        });
+      }, this.elementRef.nativeElement);
+    }
+  }
+
+  ngOnDestroy() {
+    this.sub?.unsubscribe?.();
+    this.motionContext?.revert();
+  }
 
   onWorkspaceChange(event: Event): void {
     const workspaceId = Number((event.target as HTMLSelectElement | null)?.value);

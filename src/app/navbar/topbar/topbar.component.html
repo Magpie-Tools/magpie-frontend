@@ -1,0 +1,66 @@
+<header class="topbar">
+  <div class="topbar__navigation">
+    <button
+      type="button"
+      class="topbar-icon-button topbar-menu-button"
+      aria-label="Toggle sidebar"
+      [attr.aria-expanded]="layout.sidebarOpen()"
+      (click)="layout.toggleSidebar()"
+    >
+      <i class="pi pi-bars" aria-hidden="true"></i>
+    </button>
+
+    <nav class="topbar-breadcrumb" aria-label="Page breadcrumb">
+      @for (item of breadcrumbs(); track $index; let last = $last) {
+        @if (item.routerLink && !last) {
+          <a class="topbar-breadcrumb__link" [routerLink]="item.routerLink">{{ item.label }}</a>
+        } @else {
+          <span class="topbar-breadcrumb__current" [attr.aria-current]="last ? 'page' : null">{{ item.label }}</span>
+        }
+        @if (!last) {
+          <i class="pi pi-chevron-right topbar-breadcrumb__separator" aria-hidden="true"></i>
+        }
+      }
+    </nav>
+  </div>
+
+  <div class="topbar-actions">
+    <a
+      routerLink="/invitations"
+      class="topbar-icon-button invitation-link"
+      [attr.aria-label]="'Workspace invitations, ' + invitations.pendingCount() + ' pending'"
+      title="Workspace invitations"
+    >
+      <i class="pi pi-inbox" aria-hidden="true"></i>
+      @if (invitations.pendingCount() > 0) {
+        <span class="invitation-link__count">{{ invitations.pendingCount() > 99 ? '99+' : invitations.pendingCount() }}</span>
+      }
+    </a>
+
+    @if (workspaces.loading() && workspaces.workspaces().length === 0) {
+      <div class="workspace-switcher workspace-switcher--loading" aria-label="Loading workspace">
+        <span class="workspace-switcher__skeleton" aria-hidden="true"></span>
+        <span>Loading workspace</span>
+      </div>
+    } @else if (workspaces.current(); as current) {
+      <div class="workspace-switcher" aria-label="Current workspace">
+        <div class="workspace-switcher__control">
+          <label class="sr-only" for="workspace-select">Workspace</label>
+          <span class="workspace-switcher__select-wrap">
+            <select
+              id="workspace-select"
+              class="workspace-switcher__select"
+              [value]="current.id"
+              (change)="onWorkspaceChange($event)"
+            >
+              @for (workspace of workspaces.workspaces(); track workspace.id) {
+                <option [value]="workspace.id">{{ workspace.name }}</option>
+              }
+            </select>
+            <i class="pi pi-chevron-down" aria-hidden="true"></i>
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+</header>

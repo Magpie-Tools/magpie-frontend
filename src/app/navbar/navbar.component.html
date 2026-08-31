@@ -1,75 +1,90 @@
-<nav class="navbar">
-  <a class="navbar-logo" routerLink="/" routerLinkActive>
-    <img [src]="getSrcPath()" alt="Logo"/>
-    <h5>M A G P I E</h5>
+<nav class="navbar" aria-label="Primary navigation">
+  <a class="navbar-brand" routerLink="/" aria-label="Magpie dashboard">
+    <span class="navbar-brand__mark">
+      <img [src]="getSrcPath()" alt="" />
+    </span>
+    <span class="navbar-brand__copy">
+      <strong>Magpie</strong>
+    </span>
   </a>
 
-  <!-- SCROLLABLE CENTER -->
-  <div class="nav-scroll flex-1 overflow-y-auto overflow-x-hidden">
-    <!-- Always visible navigation items -->
-    <div class="navbar-section">
+  <div class="nav-scroll">
+    <section class="nav-section" aria-labelledby="core-navigation">
       <a class="navbar-item" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <i class="pi pi-home"></i><span>Dashboard</span>
+        <span class="navbar-item__icon"><i class="pi pi-chart-line" aria-hidden="true"></i></span>
+        <span>Dashboard</span>
       </a>
       <a class="navbar-item" routerLink="/proxies" routerLinkActive="active">
-        <i class="pi pi-server"></i><span>Proxies</span>
+        <span class="navbar-item__icon"><i class="pi pi-server" aria-hidden="true"></i></span>
+        <span>Proxies</span>
       </a>
       <a class="navbar-item" routerLink="/scraper" routerLinkActive="active">
-        <i class="pi pi-download"></i><span>Scraping</span>
+        <span class="navbar-item__icon"><i class="pi pi-download" aria-hidden="true"></i></span>
+        <span>Scraping</span>
       </a>
       <a class="navbar-item" routerLink="/rotating" routerLinkActive="active">
-        <i class="pi pi-sync"></i><span>Rotating Proxies</span>
+        <span class="navbar-item__icon"><i class="pi pi-sync" aria-hidden="true"></i></span>
+        <span>Rotating proxies</span>
       </a>
-    </div>
+    </section>
 
-    <!-- Grouped navigation using PanelMenu -->
-    <p-panelMenu [model]="menuItems" [multiple]="true" [style]="{'width': '100%'}">
-      <ng-template #item let-item>
-        <a pRipple class="flex items-center px-4 py-2 cursor-pointer group"
-           [routerLink]="item.routerLink"
-           routerLinkActive="active"
-           [routerLinkActiveOptions]="{ exact: false }">
-          <i [class]="item.icon + ' group-hover:text-inherit'"></i>
-          <span class="ml-2">{{ item.label }}</span>
-
-          @if (item.badge) {
-            <p-badge class="ml-auto" [value]="item.badge" />
-          }
-
-          @if (item.hasExpandable === true) {
-            <span class="ml-auto text-xs p-1">
-              <i class="pi pi-chevron-down chevron" [class.expanded]="item.expanded"></i>
+    @for (group of menuItems; track group.label) {
+      @if (group.visible !== false) {
+        <details class="nav-cluster" [open]="group.expanded === true">
+          <summary>
+            <span class="nav-cluster__identity">
+              <span class="navbar-item__icon"><i [class]="group.icon" aria-hidden="true"></i></span>
+              <span>{{ group.label }}</span>
             </span>
-          }
-        </a>
-      </ng-template>
-    </p-panelMenu>
+            <i class="pi pi-chevron-down nav-cluster__chevron" aria-hidden="true"></i>
+          </summary>
 
-    <!-- Another always visible section -->
-    <div class="navbar-section">
-      <div class="section-title">QUICK ACCESS</div>
+          <div class="nav-cluster__items">
+            @for (item of group.items; track item.label) {
+              <a class="navbar-item navbar-item--nested"
+                 [routerLink]="item.routerLink"
+                 routerLinkActive="active">
+                <span class="navbar-item__icon"><i [class]="item.icon" aria-hidden="true"></i></span>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </div>
+        </details>
+      }
+    }
+
+    <section class="nav-section nav-section--workspace" aria-labelledby="workspace-navigation">
+
       <a class="navbar-item" routerLink="/workspace" routerLinkActive="active">
-        <i class="pi pi-building"></i><span>Workspace</span>
+        <span class="navbar-item__icon"><i class="pi pi-building" aria-hidden="true"></i></span>
+        <span>Workspace</span>
       </a>
       <a class="navbar-item" routerLink="/notifications" routerLinkActive="active">
-        <i class="pi pi-bell"></i><span>Notifications</span>
+        <span class="navbar-item__icon"><i class="pi pi-bell" aria-hidden="true"></i></span>
+        <span>Notifications</span>
       </a>
-<!--      <a class="navbar-item" routerLink="/reports" routerLinkActive="active">-->
-<!--        <i class="pi pi-file-pdf"></i><span>Reports</span>-->
-<!--      </a>-->
-    </div>
+    </section>
   </div>
-  <!-- /SCROLLABLE CENTER -->
 
   <div class="account-section">
-    <p-button type="button" class="person w-full flex items-center justify-center" icon="pi pi-user" (click)="accountPopover.toggle($event)"></p-button>
-    <p-popover #accountPopover>
-      <div class="flex flex-col w-60 gap-2 p-2">
-        <button pButton type="button" class="w-full flex items-center gap-2 justify-start" (click)="user.logoutAndRedirect()">
-          <i class="pi pi-sign-out"></i><span>Logout</span>
-        </button>
-        <button pButton type="button" class="w-full flex items-center gap-2 justify-start" routerLink="account">
-          <i class="pi pi-cog"></i><span>Settings</span>
+    <button type="button" class="account-trigger" (click)="accountPopover.toggle($event)" aria-label="Open account menu">
+      <span class="account-trigger__avatar"><i class="pi pi-user" aria-hidden="true"></i></span>
+      <span class="account-trigger__copy">
+        <strong>Account</strong>
+        <small>Settings and security</small>
+      </span>
+      <i class="pi pi-ellipsis-h account-trigger__more" aria-hidden="true"></i>
+    </button>
+
+    <p-popover #accountPopover styleClass="navbar-account-popover">
+      <div class="account-menu">
+        <a class="account-menu__item" routerLink="/account" (click)="accountPopover.hide()">
+          <i class="pi pi-cog" aria-hidden="true"></i>
+          <span><strong>Account settings</strong><small>Theme, password, and security</small></span>
+        </a>
+        <button type="button" class="account-menu__item account-menu__item--danger" (click)="user.logoutAndRedirect()">
+          <i class="pi pi-sign-out" aria-hidden="true"></i>
+          <span><strong>Sign out</strong><small>End this session</small></span>
         </button>
       </div>
     </p-popover>

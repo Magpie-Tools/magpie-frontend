@@ -8,6 +8,15 @@
         [style.width.px]="layout.sidebarOpen() ? 240 : 0">
       </app-navbar>
 
+      @if (layout.sidebarOpen()) {
+        <button
+          type="button"
+          class="sidebar-scrim"
+          aria-label="Close sidebar"
+          (click)="layout.setSidebar(false)"
+        ></button>
+      }
+
       <div class="flex-1 min-w-0 flex flex-col">
         <app-topbar></app-topbar>
 

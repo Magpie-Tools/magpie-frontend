@@ -1,41 +1,34 @@
-import {AfterViewInit, Component, ElementRef, OnInit} from '@angular/core';
-import {NavigationEnd, Router, RouterLink, RouterLinkActive} from '@angular/router';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {RouterLink, RouterLinkActive} from '@angular/router';
 import {UserService} from "../services/authorization/user.service";
-import {Button, ButtonDirective} from 'primeng/button';
 import {Popover} from 'primeng/popover';
-import {PanelMenu} from 'primeng/panelmenu';
 import {MenuItem} from 'primeng/api';
-import {Ripple} from 'primeng/ripple';
-import {Badge} from 'primeng/badge';
 import {ThemeService} from '../services/theme.service';
+import {gsap} from 'gsap';
 
 @Component({
   selector: 'app-navbar',
   imports: [
     RouterLink,
     RouterLinkActive,
-    ButtonDirective,
     Popover,
-    Button,
-    PanelMenu,
-    Ripple,
-    Badge,
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent implements OnInit, AfterViewInit {
+export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   menuItems: MenuItem[] = [];
+  private adminRefreshTimer?: ReturnType<typeof setTimeout>;
+  private motionContext?: gsap.Context;
 
   constructor(protected user: UserService,
-              private router: Router,
               private elementRef: ElementRef,
               protected themeService: ThemeService,) {}
 
   ngOnInit() {
     this.updateMenuItems();
 
-    setTimeout(() => this.updateMenuItems(), 1000); //Because of admin
+    this.adminRefreshTimer = setTimeout(() => this.updateMenuItems(), 1000);
   }
 
   updateMenuItems(): void {
@@ -50,36 +43,36 @@ export class NavbarComponent implements OnInit, AfterViewInit {
           {
             label: 'Settings',
             icon: 'pi pi-cog',
-            routerLink: 'checker/settings',
+            routerLink: '/checker/settings',
           },
           {
             label: 'Judges',
             icon: 'pi pi-address-book',
-            routerLink: 'checker/judges'
+            routerLink: '/checker/judges'
           }
         ]
       },
       {
         label: 'Admin',
-        icon: 'pi pi-shield', // Add icon for the header
+        icon: 'pi pi-shield',
         styleClass: 'menu-title',
         hasExpandable: true,
         visible: UserService.isAdmin(),
         items: [
           {
             label: 'Global Checker',
-            icon: 'pi pi-globe',
-            routerLink: 'global/checker'
+            icon: 'pi pi-sliders-h',
+            routerLink: '/global/checker'
           },
           {
             label: 'Global Scraper',
-            icon: 'pi pi-globe',
-            routerLink: 'global/scraper'
+            icon: 'pi pi-cloud-download',
+            routerLink: '/global/scraper'
           },
           {
             label: 'Global Blacklist',
-            icon: 'pi pi-globe',
-            routerLink: 'global/blacklist'
+            icon: 'pi pi-ban',
+            routerLink: '/global/blacklist'
           },
           {
             label: 'Plugins',
@@ -92,46 +85,39 @@ export class NavbarComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    //FIXES FIREFOX SELECTION BUG
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        setTimeout(() => {
-          this.removeFocusFromPanelMenu();
-        }, 100);
-      }
-    });
-
-    // Listen to panel menu clicks to handle toggle events
-    const panelMenuElement = this.elementRef.nativeElement.querySelector('p-panelmenu');
-    if (panelMenuElement) {
-      panelMenuElement.addEventListener('click', (event: any) => {
-        // Check if a header was clicked (toggle action)
-        if (event.target.closest('.p-panelmenu-header')) {
-          setTimeout(() => {
-            this.removeFocusFromPanelMenu();
-          }, 150); // Slightly longer delay for panel animation
-        }
-      });
+    if (typeof window !== 'undefined' && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      this.motionContext = gsap.context(() => {
+        gsap.from('.navbar-brand__mark', {opacity: 0, scale: 0.82, duration: 0.55, ease: 'power3.out'});
+        gsap.from('.navbar-brand__copy', {opacity: 0, x: -8, duration: 0.5, delay: 0.08, ease: 'power3.out'});
+        gsap.from('.nav-section, .nav-cluster', {
+          opacity: 0,
+          y: 10,
+          duration: 0.42,
+          delay: 0.12,
+          stagger: 0.055,
+          ease: 'power2.out',
+        });
+        gsap.from('.account-section', {opacity: 0, y: 8, duration: 0.45, delay: 0.3, ease: 'power2.out'});
+      }, this.elementRef.nativeElement);
     }
   }
 
-  private removeFocusFromPanelMenu(): void {
-    const focusedElements = this.elementRef.nativeElement.querySelectorAll('.p-focus');
-    focusedElements.forEach((element: HTMLElement) => {
-      element.classList.remove('p-focus');
-      element.blur();
-    });
+  ngOnDestroy(): void {
+    if (this.adminRefreshTimer) {
+      clearTimeout(this.adminRefreshTimer);
+    }
+    this.motionContext?.revert();
   }
 
   protected getSrcPath() {
-    let start = "../../assets/logo/magpie-light-"
+    const start = "/assets/logo/magpie-light-";
     if (this.themeService.theme() === 'purple') {
-      return start + "purple.svg"
+      return start + "purple.svg";
     } else if (this.themeService.theme() === 'blue') {
-      return start + "blue.svg"
+      return start + "blue.svg";
     } else if (this.themeService.theme() === 'red') {
-      return start + "red.svg"
+      return start + "red.svg";
     }
-    return start + 'green.svg'
+    return start + 'green.svg';
   }
 }
