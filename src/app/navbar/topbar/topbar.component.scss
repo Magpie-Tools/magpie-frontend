@@ -174,7 +174,10 @@
   box-shadow: 0 0.45rem 1.2rem rgba(0, 0, 0, 0.18);
   transition: background-color 0.2s ease;
 
-  &:hover,
+  &:hover {
+    background: rgba(var(--theme-primary-500-rgb), 0.17);
+  }
+
   &:focus-within {
     background: rgba(var(--theme-primary-500-rgb), 0.2);
   }
