@@ -6,6 +6,11 @@ export interface ScrapeSourceReputationBreakdown {
 }
 
 export interface ScrapeSourceDetail {
+  fetch_mode?: 'http' | 'browser';
+  last_scraped_at?: string | null;
+  last_scrape_status?: string;
+  last_scrape_error?: string;
+  last_scrape_proxy_count?: number;
   id: number;
   url: string;
   added_at: string;

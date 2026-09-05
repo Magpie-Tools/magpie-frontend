@@ -321,3 +321,21 @@
     padding: 0.75rem 1rem;
   }
 }
+
+.source-scrape-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .35rem .65rem;
+  margin-top: .35rem;
+}
+.source-fetch-label {
+  padding: .08rem .32rem;
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: .3rem;
+  background: rgba(255, 255, 255, .025);
+  color: rgba(255, 255, 255, .42);
+  font-family: 'Geist Mono Variable', monospace;
+  font-size: .53rem;
+  line-height: 1.5;
+}

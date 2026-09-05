@@ -58,6 +58,13 @@
             </div>
           </div>
 
+          <app-source-fetch-mode class="source-fetch-settings"
+            inputId="source-javascript"
+            [enabled]="detail()?.fetch_mode === 'browser'"
+            [disabled]="!workspaces.canOperate()"
+            [saving]="savingFetchMode()"
+            (enabledChange)="setRequiresJavaScript($event)"
+          />
           <div class="fact-list">
             <div class="detail-item">
               <span class="label">Proxy count</span>
@@ -88,12 +95,23 @@
               </span>
             </div>
             <div class="detail-item detail-item--right">
-              <span class="label">Last checked</span>
+              <span class="label">Last proxy check</span>
               <span class="value">
                 {{ detail()?.last_checked_at ? (detail()?.last_checked_at | date : 'short') : 'Never' }}
               </span>
             </div>
+            <div class="detail-item">
+              <span class="label">Last scrape</span>
+              <span class="value">{{ detail()?.last_scraped_at ? (detail()?.last_scraped_at | date : 'short') : 'Never' }}</span>
+            </div>
+            <div class="detail-item detail-item--right">
+              <span class="label">Scrape result</span>
+              <app-source-scrape-status class="source-scrape-status" role="status" [status]="detail()?.last_scrape_status" />
+            </div>
           </div>
+          @if (detail()?.last_scrape_error) {
+            <p class="scrape-error"><i class="pi pi-info-circle" aria-hidden="true"></i><span>{{ detail()?.last_scrape_error }}</span></p>
+          }
         }
       </section>
 

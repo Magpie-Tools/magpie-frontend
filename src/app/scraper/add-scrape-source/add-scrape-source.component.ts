@@ -1,3 +1,4 @@
+import {SourceFetchModeComponent} from '../source-fetch-mode/source-fetch-mode.component';
 import {Component, EventEmitter, Output, computed, signal} from '@angular/core';
 
 import {HttpService} from '../../services/http.service';
@@ -16,6 +17,7 @@ import {ImportDialogContentComponent} from '../../shared/import-dialog-content/i
     ProcesingPopupComponent,
     BulkActionDialogComponent,
     ImportDialogContentComponent,
+    SourceFetchModeComponent,
 ],
   templateUrl: './add-scrape-source.component.html',
 })
@@ -25,6 +27,7 @@ export class AddScrapeSourceComponent {
   @Output() showAddScrapeSourcesMessage = new EventEmitter<boolean>();
   @Output() scrapeSourcesAdded = new EventEmitter<void>();
 
+  readonly requiresJavaScript = signal(false);
   readonly file = signal<File | undefined>(undefined);
   readonly scrapeSourceTextarea = signal<string>("");
   readonly clipboardScrapeSources = signal<string>("");
@@ -160,6 +163,7 @@ export class AddScrapeSourceComponent {
       this.popupStatus.set('processing');
 
       const formData = new FormData();
+      formData.append('fetch_mode', this.requiresJavaScript() ? 'browser' : 'http');
 
       const file = this.file();
       if (file) {
@@ -218,6 +222,7 @@ export class AddScrapeSourceComponent {
   }
 
   private resetFormState(): void {
+    this.requiresJavaScript.set(false);
     this.scrapeSourceTextarea.set("");
     this.addTextAreaSources();
     this.clearClipboardSources();

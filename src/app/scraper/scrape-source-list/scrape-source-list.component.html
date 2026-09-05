@@ -232,6 +232,10 @@
                 >
                   <span class="scrape-url-start">{{ source.urlHead }}</span><span class="scrape-url-end">{{ source.urlTail }}</span>
                 </a>
+                <div class="source-scrape-summary" [title]="source.last_scrape_error || ''">
+                  <span class="source-fetch-label">{{ source.fetch_mode === 'browser' ? 'JavaScript' : 'HTTP' }}</span>
+                  <app-source-scrape-status [status]="source.last_scrape_status" />
+                </div>
               </td>
             }
             @case ('proxy_count') {

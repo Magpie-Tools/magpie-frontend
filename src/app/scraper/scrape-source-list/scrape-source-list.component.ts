@@ -1,3 +1,4 @@
+import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
 import {
   Component,
   ElementRef,
@@ -71,6 +72,7 @@ type PageScrollTarget = 'top' | 'bottom';
   selector: 'app-scrape-source-list',
   imports: [
     CommonModule,
+    SourceScrapeStatusComponent,
     FormsModule,
     TableModule,
     ButtonModule,

@@ -34,6 +34,11 @@
     (fileSelected)="onFileSelected($event)"
     (fileClearRequested)="onFileClear()"
   >
+    <app-source-fetch-mode import-prefix
+      inputId="import-source-javascript"
+      [enabled]="requiresJavaScript()"
+      (enabledChange)="requiresJavaScript.set($event)"
+    />
     <ng-container import-summary>
       <div class="import-summary__visual"><span><i class="pi pi-globe" aria-hidden="true"></i></span></div>
       @if (getSourcesCount() > 0) {

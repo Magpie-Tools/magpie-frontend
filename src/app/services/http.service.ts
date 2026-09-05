@@ -331,6 +331,10 @@ export class HttpService {
     });
   }
 
+  updateScrapeSourceSettings(sourceId: number, fetchMode: 'http' | 'browser') {
+    return this.http.patch<{fetch_mode: 'http' | 'browser'}>(`${this.apiUrl}/scrapingSources/${sourceId}`, {fetch_mode: fetchMode});
+  }
+
   uploadScrapeSources(formData: FormData) {
     return this.http.post<{sourceCount: number}>(this.apiUrl + '/scrapingSources', formData);
   }

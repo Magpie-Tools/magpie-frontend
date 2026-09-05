@@ -856,3 +856,17 @@ input {
     transform: translateY(0);
   }
 }
+
+.source-fetch-settings { margin-top: 1rem; }
+.scrape-error {
+  display: flex;
+  align-items: baseline;
+  gap: .45rem;
+  margin: .75rem 0 0;
+  color: #e8a0a6;
+  font-size: .63rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  i { flex: 0 0 auto; font-size: .65rem; }
+  span { min-width: 0; }
+}

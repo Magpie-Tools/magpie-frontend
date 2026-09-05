@@ -1,3 +1,5 @@
+import {SourceFetchModeComponent} from '../source-fetch-mode/source-fetch-mode.component';
+import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
 import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, signal} from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {FormBuilder, FormGroup} from '@angular/forms';
@@ -51,6 +53,8 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
   standalone: true,
   imports: [
     CommonModule,
+    SourceScrapeStatusComponent,
+    SourceFetchModeComponent,
     RouterLink,
     DatePipe,
     NgClass,
@@ -69,6 +73,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   @ViewChild('columnToggleAnchor') private columnToggleAnchor?: ElementRef<HTMLElement>;
   @ViewChild('columnPanelRef', { read: ElementRef }) private columnPanelRef?: ElementRef<HTMLElement>;
 
+  savingFetchMode = signal(false);
   sourceId = signal<number | undefined>(undefined);
   detail = signal<ScrapeSourceDetail | null>(null);
   isLoading = signal(true);
@@ -535,6 +540,19 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
       return;
     }
     this.copyToClipboard(value, 'URL copied');
+  }
+
+  setRequiresJavaScript(enabled: boolean): void {
+    const sourceId = this.sourceId();
+    if (!sourceId || this.savingFetchMode() || !this.workspaces.canOperate()) return;
+    this.savingFetchMode.set(true);
+    this.subscriptions.add(this.http.updateScrapeSourceSettings(sourceId, enabled ? 'browser' : 'http').subscribe({
+      next: () => { this.savingFetchMode.set(false); this.loadScrapeSourceDetail(sourceId); },
+      error: err => {
+        this.savingFetchMode.set(false);
+        this.notification.showError('Could not save source settings: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'));
+      }
+    }));
   }
 
   private loadScrapeSourceDetail(id: number): void {
