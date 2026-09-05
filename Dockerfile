@@ -9,7 +9,8 @@ RUN npm run build
 
 # Stage 2: serve the compiled assets
 FROM nginx:alpine
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+ENV EXPORT_PROXY_READ_TIMEOUT_SECONDS=310
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist/frontend/browser/ /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

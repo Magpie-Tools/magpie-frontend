@@ -63,4 +63,21 @@ describe('ExportProxiesComponent', () => {
 
     expect(showErrorSpy).toHaveBeenCalledWith('Error while exporting proxies: Could not export proxies');
   });
+
+  for (const failure of [
+    {status: 0, error: 'http://192.0.2.1:80\n'},
+    {status: 502, error: '<html><h1>502 Bad Gateway</h1></html>'},
+  ]) {
+    it(`does not save a file after an export failure with status ${failure.status}`, () => {
+      exportProxiesSpy.and.returnValue(throwError(() => failure));
+
+      component.submitExport();
+
+      expect(createObjectUrlSpy).not.toHaveBeenCalled();
+      expect(anchorClickSpy).not.toHaveBeenCalled();
+      expect(component.isExporting).toBeFalse();
+      expect(showErrorSpy).toHaveBeenCalled();
+      expect(showErrorSpy.calls.mostRecent().args[0]).not.toContain('<html>');
+    });
+  }
 });

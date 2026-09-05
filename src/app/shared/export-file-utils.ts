@@ -24,11 +24,24 @@ export function extractHttpErrorMessage(error: unknown): string {
     return 'Unknown error';
   }
 
-  const httpError = error as {error?: unknown; message?: unknown};
+  const httpError = error as {error?: unknown; message?: unknown; status?: number};
+  if (httpError.status === 0) {
+    return 'The download connection was interrupted. Please try again.';
+  }
   const nestedMessage = extractPayloadMessage(httpError.error);
 
   if (nestedMessage) {
     return nestedMessage;
+  }
+
+  if (httpError.status === 502) {
+    return 'The backend could not complete the export. Please try again.';
+  }
+  if (httpError.status === 504) {
+    return 'The export timed out. Try exporting a smaller selection.';
+  }
+  if (typeof httpError.error === 'string' && looksLikeHtml(httpError.error)) {
+    return 'The server could not complete the export. Please try again.';
   }
 
   if (typeof httpError.message === 'string' && httpError.message.trim().length > 0) {
@@ -53,7 +66,7 @@ function extractPayloadMessage(payload: unknown): string | null {
       const parsed = JSON.parse(payload) as {error?: unknown; message?: unknown};
       return extractPayloadMessage(parsed) ?? payload;
     } catch {
-      return payload;
+      return looksLikeHtml(payload) ? null : payload;
     }
   }
 
@@ -68,4 +81,8 @@ function extractPayloadMessage(payload: unknown): string | null {
   }
 
   return null;
+}
+
+function looksLikeHtml(value: string): boolean {
+  return /^\s*(?:<!doctype\s+html|<html\b|<head\b|<body\b)/i.test(value);
 }
