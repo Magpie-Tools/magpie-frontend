@@ -26,7 +26,6 @@
         <div class="workspace-context__identity">
           <span class="workspace-mark">{{ workspace.name.slice(0, 1).toUpperCase() }}</span>
           <div>
-            <span class="context-eyebrow">{{ workspace.personal ? 'Personal workspace' : 'Shared workspace' }}</span>
             <h1>{{ workspace.name }}</h1>
             <p>{{ workspace.role | titlecase }} access@if (workspace.billing_admin) {<span aria-hidden="true"> · </span>Billing access}</p>
           </div>

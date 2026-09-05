@@ -21,6 +21,6 @@ export class AdminSettingsHeaderComponent {
   @Input({required: true}) icon = '';
   @Input({required: true}) title = '';
   @Input({required: true}) description = '';
-  @Input() eyebrow = 'System defaults';
-  @Input() badge = 'Applies globally';
+  @Input() eyebrow = '';
+  @Input() badge = 'System defaults';
 }
