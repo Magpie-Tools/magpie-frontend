@@ -1,0 +1,79 @@
+<div class="flex items-center">
+  <p-button
+    type="button"
+    [label]="triggerLabel"
+    [icon]="triggerIcon"
+    [styleClass]="triggerStyleClass"
+    [disabled]="triggerDisabled"
+    (onClick)="openRequested.emit()"
+  ></p-button>
+</div>
+
+<p-dialog
+  [visible]="visible"
+  (visibleChange)="visibleChange.emit($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [appendTo]="'body'"
+  [breakpoints]="{ '960px': '92vw', '640px': '96vw' }"
+  [style]="{ width }"
+  [contentStyle]="{ padding: '0' }"
+  [styleClass]="styleClass"
+  (onShow)="onShow()"
+  (onHide)="hidden.emit()"
+>
+  <ng-template pTemplate="header">
+    <div class="bulk-dialog-heading" [class.bulk-dialog-heading--danger]="tone === 'danger'">
+      <span class="bulk-dialog-heading__icon"><i [class]="headingIcon" aria-hidden="true"></i></span>
+      <div class="bulk-dialog-heading__copy">
+        <span>{{ headingEyebrow }}</span>
+        <strong>{{ headingTitle }}</strong>
+      </div>
+      @if (headingTooltip) {
+        <app-tooltip class="bulk-dialog-heading__tooltip" [text]="headingTooltip"></app-tooltip>
+      }
+    </div>
+  </ng-template>
+
+  <div class="bulk-dialog-body">
+    @if (introTitle) {
+      <section class="bulk-dialog-intro" [class.bulk-dialog-intro--danger]="tone === 'danger'">
+        <span class="bulk-dialog-intro__icon"><i [class]="introIcon" aria-hidden="true"></i></span>
+        <div>
+          <h3>{{ introTitle }}</h3>
+          <p>{{ introDescription }}</p>
+        </div>
+        <span class="bulk-dialog-intro__state">{{ selectedCount }} selected</span>
+      </section>
+    }
+
+    <ng-content></ng-content>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="bulk-dialog-footer">
+      <span>{{ footerNote }}</span>
+      <div>
+        <p-button
+          type="button"
+          label="Cancel"
+          styleClass="dialog-button dialog-button--quiet"
+          [disabled]="cancelDisabled"
+          (onClick)="cancelRequested.emit()"
+        ></p-button>
+        <p-button
+          type="button"
+          [label]="actionLabel"
+          [icon]="actionIcon"
+          [iconPos]="actionIconPos"
+          [styleClass]="'dialog-button dialog-button--' + (tone === 'danger' ? 'danger' : 'primary')"
+          [disabled]="actionDisabled"
+          [loading]="actionLoading"
+          (onClick)="actionRequested.emit()"
+        ></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>

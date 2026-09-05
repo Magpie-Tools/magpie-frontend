@@ -12,7 +12,8 @@ export function animateDialogSections(dialogClass: string): void {
     }
 
     const sections = dialog.querySelectorAll<HTMLElement>(
-      '.proxy-dialog-heading > *, .proxy-dialog-body > *, .proxy-dialog-footer > *, .tag-manager > *'
+      '.proxy-dialog-heading > *, .proxy-dialog-body > *, .proxy-dialog-footer > *, ' +
+      '.bulk-dialog-heading > *, .bulk-dialog-body > *, .bulk-dialog-footer > *, .tag-manager > *'
     );
 
     gsap.fromTo(

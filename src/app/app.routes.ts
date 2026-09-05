@@ -8,7 +8,6 @@ import {ForgotPasswordComponent} from './auth/forgot-password/forgot-password.co
 import {ResetPasswordComponent} from './auth/reset-password/reset-password.component';
 import {AuthGuardService} from './services/authorization/auth-guard.service';
 import {AccountComponent} from './account/account.component';
-import {AuthGuardAdminService} from './services/authorization/auth-guard-admin.service';
 import {AuthLoginGuardService} from './services/authorization/auth-login-guard.service';
 import {AddProxiesComponent} from './proxies/proxy-list/add-proxies/add-proxies.component';
 import {CheckerJudgesComponent} from './checker/judges/checker-judges.component';
@@ -27,7 +26,6 @@ import {WorkspaceComponent} from './workspace/workspace.component';
 import {WorkspaceInvitationsComponent} from './workspace-invitations/workspace-invitations.component';
 
 const authGuard = [AuthGuardService];
-const adminGuard = [AuthGuardAdminService];
 const loginGuard = [AuthLoginGuardService];
 
 export const routes: Routes = [
@@ -36,12 +34,12 @@ export const routes: Routes = [
   {path: 'forgot-password', component: ForgotPasswordComponent},
   {path: 'reset-password', component: ResetPasswordComponent},
 
-  {path: 'global/checker', component: AdminCheckerComponent, canActivate: adminGuard},
-  {path: 'global/scraper', component: AdminScraperComponent, canActivate: adminGuard},
-  {path: 'global/blacklist', component: AdminBlacklistComponent, canActivate: adminGuard},
-  {path: 'plugins', component: AdminPluginsComponent, canActivate: adminGuard},
-  {path: 'plugins/geolite', component: PluginGeoliteComponent, canActivate: adminGuard},
-  {path: 'plugins/abuseipdb', component: PluginAbuseIPDBComponent, canActivate: adminGuard},
+  {path: 'global/checker', component: AdminCheckerComponent, canActivate: authGuard, data: {requiresAdmin: true}},
+  {path: 'global/scraper', component: AdminScraperComponent, canActivate: authGuard, data: {requiresAdmin: true}},
+  {path: 'global/blacklist', component: AdminBlacklistComponent, canActivate: authGuard, data: {requiresAdmin: true}},
+  {path: 'plugins', component: AdminPluginsComponent, canActivate: authGuard, data: {requiresAdmin: true}},
+  {path: 'plugins/geolite', component: PluginGeoliteComponent, canActivate: authGuard, data: {requiresAdmin: true}},
+  {path: 'plugins/abuseipdb', component: PluginAbuseIPDBComponent, canActivate: authGuard, data: {requiresAdmin: true}},
   {path: 'global/plugins', redirectTo: 'plugins', pathMatch: 'full'},
   {path: 'global/other', redirectTo: 'plugins', pathMatch: 'full'},
 

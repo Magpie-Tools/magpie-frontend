@@ -1,32 +1,23 @@
 import {Component, EventEmitter, Output, computed, signal} from '@angular/core';
 
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpService} from '../../services/http.service';
 
-import {ButtonModule} from 'primeng/button';
-import {TextareaModule} from 'primeng/textarea';
-import {DialogModule} from 'primeng/dialog';
 import {ClipboardService} from '../../services/clipboard.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {
   ProcesingPopupComponent
 } from '../../proxies/proxy-list/add-proxies/procesing-popup/procesing-popup.component';
-import {TooltipComponent} from '../../tooltip/tooltip.component';
-import {animateDialogSections} from '../../shared/dialog-motion';
+import {BulkActionDialogComponent} from '../../shared/bulk-action-dialog/bulk-action-dialog.component';
+import {ImportDialogContentComponent} from '../../shared/import-dialog-content/import-dialog-content.component';
 
 @Component({
   selector: 'app-add-scrape-source',
   imports: [
     ProcesingPopupComponent,
-    ReactiveFormsModule,
-    FormsModule,
-    ButtonModule,
-    TextareaModule,
-    DialogModule,
-    TooltipComponent,
+    BulkActionDialogComponent,
+    ImportDialogContentComponent,
 ],
   templateUrl: './add-scrape-source.component.html',
-  styleUrl: './add-scrape-source.component.scss'
 })
 export class AddScrapeSourceComponent {
   private static readonly maxUploadFileBytes = 10 * 1024 * 1024;
@@ -95,16 +86,8 @@ export class AddScrapeSourceComponent {
     this.uniqueClipboardSourcesCount.set(Array.from(new Set(sources)).length);
   }
 
-  triggerFileInput(fileInput: HTMLInputElement): void {
-    fileInput.click();
-  }
-
   openDialog(): void {
     this.dialogVisible.set(true);
-  }
-
-  animateDialog(): void {
-    animateDialogSections('proxy-add-dialog');
   }
 
   closeDialog(): void {

@@ -1,0 +1,359 @@
+:host {
+  display: block;
+  font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.bulk-dialog-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bulk-dialog-heading__icon,
+.bulk-dialog-intro__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.22);
+  background: rgba(var(--theme-primary-500-rgb), 0.09);
+  color: var(--theme-primary-200);
+}
+
+.bulk-dialog-heading--danger .bulk-dialog-heading__icon,
+.bulk-dialog-intro--danger .bulk-dialog-intro__icon {
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(127, 29, 29, 0.13);
+  color: #f4a7a7;
+}
+
+.bulk-dialog-heading__icon {
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 0.82rem;
+  font-size: 0.88rem;
+}
+
+.bulk-dialog-heading__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.08rem;
+
+  > span {
+    color: rgba(255, 255, 255, 0.42);
+    font-size: 0.58rem;
+    font-weight: 620;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  > strong {
+    color: rgba(255, 255, 255, 0.94);
+    font-size: 0.96rem;
+    font-weight: 590;
+    letter-spacing: -0.025em;
+  }
+}
+
+.bulk-dialog-heading--danger .bulk-dialog-heading__copy > span {
+  color: rgba(239, 156, 156, 0.64);
+}
+
+.bulk-dialog-heading__tooltip {
+  margin-inline-start: 0.15rem;
+}
+
+::ng-deep {
+  .bulk-dialog-body {
+    display: grid;
+    gap: 0.8rem;
+    padding: 1.1rem;
+    background:
+      radial-gradient(circle at 82% 0%, rgba(var(--theme-primary-500-rgb), 0.09), transparent 22rem),
+      #09090b;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .bulk-action-dialog--danger .bulk-dialog-body {
+    background:
+      radial-gradient(circle at 82% 0%, rgba(185, 52, 52, 0.1), transparent 22rem),
+      #09090b;
+  }
+
+  .bulk-dialog-intro,
+  .dialog-section {
+    min-width: 0;
+    border: 1px solid rgba(255, 255, 255, 0.105);
+    background: rgba(255, 255, 255, 0.028);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  }
+
+  .bulk-dialog-intro {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.72rem;
+    padding: 0.82rem 0.9rem;
+    border-radius: 0.9rem;
+
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h3 {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.76rem;
+      font-weight: 590;
+    }
+
+    p {
+      margin-top: 0.18rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.62rem;
+      line-height: 1.45;
+    }
+  }
+
+  .bulk-dialog-intro--danger {
+    border-color: rgba(248, 113, 113, 0.2);
+    background: linear-gradient(115deg, rgba(127, 29, 29, 0.11), rgba(255, 255, 255, 0.018));
+
+    h3 { color: rgba(255, 224, 224, 0.9); }
+    p { color: rgba(240, 188, 188, 0.48); }
+  }
+
+  .bulk-dialog-intro__icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 0.68rem;
+    font-size: 0.72rem;
+  }
+
+  .bulk-dialog-intro__state {
+    padding: 0.38rem 0.55rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    background: rgba(5, 5, 7, 0.35);
+    color: rgba(255, 255, 255, 0.42);
+    font-size: 0.58rem;
+    white-space: nowrap;
+  }
+
+  .bulk-dialog-intro--danger .bulk-dialog-intro__state {
+    border-color: rgba(248, 113, 113, 0.16);
+    background: rgba(127, 29, 29, 0.1);
+    color: rgba(239, 174, 174, 0.58);
+  }
+
+  .dialog-section {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.95rem;
+    border-radius: 0.95rem;
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+
+    h3,
+    p { margin: 0; }
+
+    h3 {
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 0.75rem;
+      font-weight: 590;
+    }
+
+    p {
+      max-width: 38rem;
+      margin-top: 0.2rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.62rem;
+      line-height: 1.45;
+    }
+  }
+
+  .section-heading--split {
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .filter-disabled-copy {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 0.72rem;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 0.72rem;
+    color: rgba(255, 255, 255, 0.36);
+    font-size: 0.61rem;
+  }
+
+  .export-dialog__settings {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .bulk-dialog-footer {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    > span {
+      color: rgba(255, 255, 255, 0.34);
+      font-size: 0.59rem;
+    }
+
+    > div {
+      display: flex;
+      gap: 0.45rem;
+    }
+  }
+
+  .bulk-action-dialog--danger .bulk-dialog-footer > span {
+    color: rgba(239, 174, 174, 0.46);
+  }
+
+  .bulk-action-dialog.p-dialog,
+  .bulk-action-dialog .p-dialog {
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 1.2rem;
+    background: #09090b;
+    color: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 32px 86px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .bulk-action-dialog--danger.p-dialog,
+  .bulk-action-dialog--danger .p-dialog {
+    border-color: rgba(248, 113, 113, 0.2);
+    box-shadow: 0 32px 86px rgba(0, 0, 0, 0.64), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  }
+
+  .bulk-action-dialog .p-dialog-header {
+    padding: 1rem 1.15rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(var(--theme-primary-500-rgb), 0.1), transparent 16rem),
+      rgba(12, 12, 14, 0.98);
+  }
+
+  .bulk-action-dialog--danger .p-dialog-header {
+    border-bottom-color: rgba(248, 113, 113, 0.14);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(185, 52, 52, 0.12), transparent 16rem),
+      rgba(12, 12, 14, 0.98);
+  }
+
+  .bulk-action-dialog .p-dialog-content {
+    background: transparent;
+    color: inherit;
+  }
+
+  .bulk-action-dialog .p-dialog-footer {
+    padding: 0.78rem 1.15rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(11, 11, 13, 0.98);
+  }
+
+  .bulk-action-dialog--danger .p-dialog-footer {
+    border-top-color: rgba(248, 113, 113, 0.12);
+  }
+
+  .bulk-action-dialog .p-dialog-close-button {
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 0.68rem;
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  .bulk-action-dialog .p-dialog-close-button:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .bulk-action-dialog--danger .p-dialog-close-button:hover {
+    background: rgba(127, 29, 29, 0.14);
+    color: #fecaca;
+  }
+
+  .bulk-action-dialog--danger .p-radiobutton-checked .p-radiobutton-box {
+    border-color: #f87171;
+    background: rgba(185, 28, 28, 0.72);
+  }
+
+  .bulk-action-dialog--danger .p-radiobutton-checked .p-radiobutton-icon {
+    background: #fff1f2;
+  }
+
+  .bulk-action-dialog .dialog-button.p-button {
+    min-height: 2.35rem;
+    border-radius: 0.68rem;
+    font-size: 0.65rem;
+    font-weight: 590;
+    box-shadow: none;
+  }
+
+  .bulk-action-dialog .dialog-button--quiet.p-button {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.035);
+    color: rgba(255, 255, 255, 0.58);
+  }
+
+  .bulk-action-dialog .dialog-button--primary.p-button {
+    border-color: var(--theme-primary-400);
+    background: var(--theme-primary-500);
+    color: #090b0a;
+  }
+
+  .bulk-action-dialog .dialog-button--primary.p-button:hover:not(:disabled) {
+    border-color: var(--theme-primary-300);
+    background: var(--theme-primary-400);
+  }
+
+  .bulk-action-dialog .dialog-button--danger.p-button {
+    border-color: rgba(239, 68, 68, 0.42);
+    background: rgba(127, 29, 29, 0.52);
+    color: #fecaca;
+  }
+
+  .bulk-action-dialog .dialog-button--danger.p-button:hover:not(:disabled) {
+    border-color: rgba(248, 113, 113, 0.62);
+    background: rgba(153, 27, 27, 0.68);
+    color: #fff1f2;
+  }
+}
+
+@media (max-width: 560px) {
+  ::ng-deep {
+    .bulk-dialog-intro {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .bulk-dialog-intro__state {
+      grid-column: 2;
+      justify-self: start;
+    }
+
+    .section-heading--split,
+    .bulk-dialog-footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .bulk-dialog-footer > div {
+      width: 100%;
+    }
+
+    .bulk-action-dialog .dialog-button.p-button {
+      width: 100%;
+    }
+  }
+}

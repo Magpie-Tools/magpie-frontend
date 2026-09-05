@@ -3,7 +3,6 @@ import { Component, OnDestroy, model, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -14,9 +13,9 @@ import {getAuthToken, saveAuthToken} from '../../services/authorization/auth-tok
 import { UserService } from '../../services/authorization/user.service';
 import { AuthInterceptor } from '../../services/auth-interceptor.interceptor';
 import { NotificationService } from '../../services/notification-service.service';
-import { ThemeService } from '../../services/theme.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { LoadingComponent } from '../../ui-elements/loading/loading.component';
+import {AuthComponent} from '../auth.component';
 
 @Component({
   selector: 'app-login',
@@ -25,14 +24,14 @@ import { LoadingComponent } from '../../ui-elements/loading/loading.component';
     ReactiveFormsModule,
     FormsModule,
     RouterLink,
-    CardModule,
     InputTextModule,
     ButtonModule,
     CheckboxModule,
     LoadingComponent,
+    AuthComponent,
   ],
   templateUrl: './login.component.html',
-  styleUrl: '../auth.component.scss'
+  styleUrl: './login.component.scss'
 })
 export class LoginComponent implements OnDestroy {
   loginForm: FormGroup;
@@ -47,7 +46,6 @@ export class LoginComponent implements OnDestroy {
     private http: HttpService,
     private router: Router,
     private route: ActivatedRoute,
-    protected themeService: ThemeService,
     private notification: NotificationService,
     private workspaces: WorkspaceService,
   ) {

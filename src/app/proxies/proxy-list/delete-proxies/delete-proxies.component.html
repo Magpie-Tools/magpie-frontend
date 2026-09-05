@@ -1,125 +1,79 @@
-<div class="flex items-center">
-  <p-button
-    type="button"
-    label="Delete"
-    icon="pi pi-trash"
-    styleClass="p-button-danger"
-    (onClick)="openDialog()"
-    [disabled]="!hasAnyProxies()"
-  ></p-button>
-</div>
-
-<p-dialog
-  [(visible)]="dialogVisible"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="true"
-  [appendTo]="'body'"
-  [breakpoints]="{ '960px': '92vw', '640px': '96vw' }"
-  [style]="{ width: '58rem' }"
-  [contentStyle]="{ padding: '0' }"
-  styleClass="delete-dialog"
-  (onShow)="animateDialog()"
-  (onHide)="onDialogHide()"
+<app-bulk-action-dialog
+  [visible]="dialogVisible"
+  (visibleChange)="dialogVisible = $event"
+  dialogClass="delete-proxies-dialog"
+  triggerLabel="Delete"
+  triggerIcon="pi pi-trash"
+  triggerStyleClass="p-button-danger"
+  [triggerDisabled]="!hasAnyProxies()"
+  headingEyebrow="Permanent action"
+  headingTitle="Delete proxies"
+  headingIcon="pi pi-exclamation-triangle"
+  headingTooltip="Delete proxies in bulk with optional filters and status selections. This action cannot be undone."
+  tone="danger"
+  introIcon="pi pi-lock"
+  introTitle="Deleted routes cannot be restored"
+  introDescription="Review the scope before continuing. Filters apply only when they are enabled below."
+  [selectedCount]="selectedProxies.length"
+  footerNote="This action cannot be undone."
+  actionLabel="Delete proxies"
+  actionIcon="pi pi-trash"
+  [cancelDisabled]="isDeleting"
+  [actionDisabled]="isDeleting || (deleteOption === 'selected' && !canDeleteSelected())"
+  [actionLoading]="isDeleting"
+  (openRequested)="openDialog()"
+  (cancelRequested)="closeDialog()"
+  (actionRequested)="submitDelete()"
+  (hidden)="onDialogHide()"
 >
-  <ng-template pTemplate="header">
-    <div class="proxy-dialog-heading proxy-dialog-heading--danger">
-      <span class="proxy-dialog-heading__icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
-      <div class="proxy-dialog-heading__copy">
-        <span>Permanent action</span>
-        <strong>Delete proxies</strong>
-      </div>
-      <app-tooltip
-        class="proxy-dialog-heading__tooltip"
-        [text]="'Delete proxies in bulk with optional filters and status selections. This action cannot be undone.'"
-      ></app-tooltip>
-    </div>
-  </ng-template>
-
-  <div class="proxy-dialog-body delete-dialog__body">
-    <section class="danger-notice">
-      <span class="danger-notice__icon"><i class="pi pi-lock" aria-hidden="true"></i></span>
+  <section class="dialog-section" aria-labelledby="delete-scope-title">
+    <div class="section-heading">
       <div>
-        <h3>Deleted routes cannot be restored</h3>
-        <p>Review the scope before continuing. Filters apply only when they are enabled below.</p>
+        <h3 id="delete-scope-title">Choose the scope</h3>
+        <p>Delete the highlighted routes or every route that matches the optional filters.</p>
       </div>
-      <span class="danger-notice__state">{{ selectedProxies.length }} selected</span>
-    </section>
+    </div>
+    <app-bulk-scope-selector
+      [(scope)]="deleteOption"
+      radioName="deleteOption"
+      allInputId="deleteAll"
+      selectedInputId="deleteSelected"
+      allTitle="All proxies"
+      allDescription="Delete every proxy you own that matches the filters below."
+      selectedTitle="Selected proxies"
+      selectedDescription="Delete only the routes highlighted in the table."
+      [selectedDisabled]="!canDeleteSelected()"
+      accentColor="#f87171"
+    ></app-bulk-scope-selector>
+  </section>
 
-    <section class="dialog-section" aria-labelledby="delete-scope-title">
-      <div class="section-heading">
+  <div [formGroup]="deleteForm">
+    <section class="dialog-section delete-card">
+      <div class="section-heading section-heading--split">
         <div>
-          <h3 id="delete-scope-title">Choose the scope</h3>
-          <p>Delete the highlighted routes or every route that matches the optional filters.</p>
+          <h3>Limit the deletion</h3>
+          <p>Enable filters to narrow the chosen scope before proxies are removed.</p>
         </div>
+        <app-checkbox label="Enable filters" formControlName="filter"></app-checkbox>
       </div>
-      <app-bulk-scope-selector
-        [(scope)]="deleteOption"
-        radioName="deleteOption"
-        allInputId="deleteAll"
-        selectedInputId="deleteSelected"
-        allTitle="All proxies"
-        allDescription="Delete every proxy you own that matches the filters below."
-        selectedTitle="Selected proxies"
-        selectedDescription="Delete only the routes highlighted in the table."
-        [selectedDisabled]="!canDeleteSelected()"
-        accentColor="#f87171"
-      ></app-bulk-scope-selector>
+
+      @if (deleteForm.get('filter')?.value) {
+        <app-proxy-filter-panel
+          class="delete-filter-panel"
+          [form]="deleteForm"
+          [countryOptions]="countryOptions"
+          [typeOptions]="typeOptions"
+          [anonymityOptions]="anonymityOptions"
+          [proxyStatusOptions]="proxyStatusOptions"
+          [proxyReputationOptions]="proxyReputationOptions"
+          [tagOptions]="tagOptions"
+          [floating]="false"
+          [showHeader]="false"
+          (clear)="clearDeleteFilters()"
+        ></app-proxy-filter-panel>
+      } @else {
+        <div class="filter-disabled-copy"><i class="pi pi-filter-slash" aria-hidden="true"></i> No additional filters will be applied.</div>
+      }
     </section>
-
-    <div [formGroup]="deleteForm">
-      <section class="dialog-section delete-card">
-        <div class="section-heading section-heading--split">
-          <div>
-            <h3>Limit the deletion</h3>
-            <p>Enable filters to narrow the chosen scope before proxies are removed.</p>
-          </div>
-          <app-checkbox label="Enable filters" formControlName="filter"></app-checkbox>
-        </div>
-
-        @if (deleteForm.get('filter')?.value) {
-          <app-proxy-filter-panel
-            class="delete-filter-panel"
-            [form]="deleteForm"
-            [countryOptions]="countryOptions"
-            [typeOptions]="typeOptions"
-            [anonymityOptions]="anonymityOptions"
-            [proxyStatusOptions]="proxyStatusOptions"
-            [proxyReputationOptions]="proxyReputationOptions"
-            [tagOptions]="tagOptions"
-            [floating]="false"
-            [showHeader]="false"
-            (clear)="clearDeleteFilters()"
-          ></app-proxy-filter-panel>
-        } @else {
-          <div class="filter-disabled-copy"><i class="pi pi-filter-slash" aria-hidden="true"></i> No additional filters will be applied.</div>
-        }
-      </section>
-    </div>
   </div>
-
-  <ng-template pTemplate="footer">
-    <div class="proxy-dialog-footer">
-      <span>This action cannot be undone.</span>
-      <div>
-        <p-button
-          type="button"
-          label="Cancel"
-          styleClass="dialog-button dialog-button--quiet"
-          (onClick)="closeDialog()"
-          [disabled]="isDeleting"
-        ></p-button>
-        <p-button
-          type="button"
-          label="Delete proxies"
-          icon="pi pi-trash"
-          styleClass="dialog-button dialog-button--danger"
-          (onClick)="submitDelete()"
-          [disabled]="isDeleting || (deleteOption === 'selected' && !canDeleteSelected())"
-          [loading]="isDeleting"
-        ></p-button>
-      </div>
-    </div>
-  </ng-template>
-</p-dialog>
+</app-bulk-action-dialog>

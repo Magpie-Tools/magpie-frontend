@@ -42,6 +42,7 @@ import {asapScheduler, Subscription} from 'rxjs';
 import {HealthBarCellComponent} from '../../shared/health-bar-cell/health-bar-cell.component';
 import {ColumnPickerPanelComponent} from '../../shared/column-picker-panel/column-picker-panel.component';
 import {WorkspaceService} from '../../services/workspace.service';
+import {InventoryPageShellComponent} from '../../shared/inventory-page-shell/inventory-page-shell.component';
 
 interface ScrapeSourceView extends ScrapeSourceInfo {
   urlHead: string;
@@ -82,6 +83,7 @@ type PageScrollTarget = 'top' | 'bottom';
     ScrapeSourceFilterPanelComponent,
     HealthBarCellComponent,
     ColumnPickerPanelComponent,
+    InventoryPageShellComponent,
   ],
   templateUrl: './scrape-source-list.component.html',
   styleUrl: './scrape-source-list.component.scss',

@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, ElementRef, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, computed, OnDestroy, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {SettingsService} from '../../services/settings.service';
@@ -8,7 +8,7 @@ import {filter, takeUntil} from 'rxjs/operators';
 import {NotificationService} from '../../services/notification-service.service';
 import {ToggleSwitchChangeEvent, ToggleSwitchModule} from 'primeng/toggleswitch';
 import {TooltipModule} from 'primeng/tooltip';
-import {gsap} from 'gsap';
+import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-admin-plugins',
@@ -17,12 +17,17 @@ import {gsap} from 'gsap';
     RouterLink,
     FormsModule,
     ToggleSwitchModule,
-    TooltipModule
+    TooltipModule,
+    RevealGroupDirective
   ],
   templateUrl: './admin-plugins.component.html',
   styleUrl: './admin-plugins.component.scss'
 })
-export class AdminPluginsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AdminPluginsComponent implements OnInit, OnDestroy {
+  readonly revealSteps: readonly RevealStep[] = [{
+    selector: '.admin-context, .plugin-card',
+    to: {stagger: 0.07},
+  }];
   plugins = [
     {
       id: 'geolite',
@@ -53,12 +58,10 @@ export class AdminPluginsComponent implements OnInit, AfterViewInit, OnDestroy {
   }));
   pendingPluginIds = signal<ReadonlySet<string>>(new Set());
   private destroy$ = new Subject<void>();
-  private animationContext?: gsap.Context;
 
   constructor(
     private settingsService: SettingsService,
-    private notification: NotificationService,
-    private elementRef: ElementRef<HTMLElement>
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -72,22 +75,7 @@ export class AdminPluginsComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    this.animationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.admin-context, .plugin-card',
-        {opacity: 0, y: 22, scale: 0.99},
-        {opacity: 1, y: 0, scale: 1, duration: 0.68, stagger: 0.07, ease: 'power3.out', clearProps: 'transform'}
-      );
-    }, this.elementRef.nativeElement);
-  }
-
   ngOnDestroy(): void {
-    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }

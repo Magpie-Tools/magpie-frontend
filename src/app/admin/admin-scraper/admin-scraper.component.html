@@ -1,16 +1,10 @@
-<div class="admin-scraper-page">
+<app-admin-settings-shell class="admin-scraper-page" [appRevealGroup]="revealSteps">
   <form [formGroup]="settingsForm" class="settings-stage" (ngSubmit)="onSubmit()">
-    <header class="admin-context">
-      <div class="admin-context__copy">
-        <span class="context-icon"><i class="pi pi-cloud-download" aria-hidden="true"></i></span>
-        <div>
-          <span class="context-eyebrow">System defaults</span>
-          <h1>Global scraper</h1>
-          <p>Control how Magpie revisits sources and distributes collected proxies.</p>
-        </div>
-      </div>
-      <div class="scope-badge"><span aria-hidden="true"></span>Applies globally</div>
-    </header>
+    <app-admin-settings-header
+      icon="pi pi-cloud-download"
+      title="Global scraper"
+      description="Control how Magpie revisits sources and distributes collected proxies."
+    ></app-admin-settings-header>
 
     <p-tabs value="0" class="settings-tabs">
       <p-tablist aria-label="Global scraper sections">
@@ -224,23 +218,23 @@
       </p-tabpanels>
     </p-tabs>
 
-    <footer class="save-dock">
-      <div class="save-state" aria-live="polite">
-        <span class="save-state__dot" [class.is-dirty]="settingsForm.dirty" aria-hidden="true"></span>
-        <div>
-          @if (settingsForm.dirty) {
-            <strong>Unsaved global changes</strong><p>Save when the scraper baseline looks right.</p>
-          } @else {
-            <strong>Global settings are up to date</strong><p>Changes will appear here before you save.</p>
-          }
-        </div>
-      </div>
-      <div class="save-actions">
-        <p-button type="button" label="Requeue all sources" icon="pi pi-refresh" (onClick)="confirmRequeueAllScrapeSources()" [loading]="isRequeueingSources" styleClass="requeue-sources-button"></p-button>
-        <p-button type="submit" label="Save global settings" icon="pi pi-check" [disabled]="!settingsForm.dirty || settingsForm.invalid" styleClass="save-button"></p-button>
-      </div>
-    </footer>
+    <app-admin-settings-save-dock
+      [dirty]="settingsForm.dirty"
+      [invalid]="settingsForm.invalid"
+      dirtyDescription="Save when the scraper baseline looks right."
+      pristineTitle="Global settings are up to date"
+    >
+      <p-button
+        settings-save-action
+        type="button"
+        label="Requeue all sources"
+        icon="pi pi-refresh"
+        (onClick)="confirmRequeueAllScrapeSources()"
+        [loading]="isRequeueingSources"
+        styleClass="requeue-button"
+      ></p-button>
+    </app-admin-settings-save-dock>
   </form>
 
   <p-confirmDialog [style]="{width: 'min(450px, calc(100vw - 2rem))'}" [baseZIndex]="10000" rejectButtonStyleClass="p-button-outlined"></p-confirmDialog>
-</div>
+</app-admin-settings-shell>

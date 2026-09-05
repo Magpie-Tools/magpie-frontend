@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CheckboxComponent} from "../../checkbox/checkbox.component";
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 
@@ -13,7 +13,11 @@ import {NotificationService} from '../../services/notification-service.service';
 import {Subject} from 'rxjs';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {ConfirmationService} from 'primeng/api';
-import {gsap} from 'gsap';
+import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
+import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
+import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
+import {AdminSettingsHeaderComponent} from '../../shared/admin-settings-shell/admin-settings-header.component';
+import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/admin-settings-save-dock.component';
 
 @Component({
   selector: 'app-admin-checker',
@@ -32,12 +36,16 @@ import {gsap} from 'gsap';
     TabList,
     Tab,
     TabPanels,
+    RevealGroupDirective,
+    AdminSettingsShellComponent,
+    AdminSettingsHeaderComponent,
+    AdminSettingsSaveDockComponent,
   ],
     providers: [ConfirmationService],
     templateUrl: './admin-checker.component.html',
     styleUrl: './admin-checker.component.scss'
 })
-export class AdminCheckerComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AdminCheckerComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
   readonly protocolOptions = [
     {label: 'HTTP', control: 'http', icon: 'pi pi-globe', description: 'Standard web traffic'},
@@ -45,20 +53,23 @@ export class AdminCheckerComponent implements OnInit, AfterViewInit, OnDestroy {
     {label: 'SOCKS4', control: 'socks4', icon: 'pi pi-sitemap', description: 'IPv4 socket routing'},
     {label: 'SOCKS5', control: 'socks5', icon: 'pi pi-shield', description: 'Modern socket routing'},
   ];
-  daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
-  hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
-  minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
-  secondsList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Seconds`, value: i }));
+  readonly daysList = dayOptions;
+  readonly hoursList = hourOptions;
+  readonly minutesList = minuteOptions;
+  readonly secondsList = secondOptions;
+  readonly revealSteps: readonly RevealStep[] = [{
+    selector: '.admin-context, .settings-card, .save-dock',
+    from: {opacity: 0, y: 20, scale: 0.99},
+    to: {opacity: 1, y: 0, scale: 1, duration: 0.65, stagger: 0.055, ease: 'power3.out', clearProps: 'transform'},
+  }];
   isRequeueing = false;
   private destroy$ = new Subject<void>();
-  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
     private notification: NotificationService,
-    private confirmationService: ConfirmationService,
-    private elementRef: ElementRef<HTMLElement>
+    private confirmationService: ConfirmationService
   ) {
     this.settingsForm = this.createDefaultForm();
   }
@@ -98,31 +109,7 @@ export class AdminCheckerComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    const host = this.elementRef.nativeElement;
-    this.animationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.admin-context, .settings-card, .save-dock',
-        {opacity: 0, y: 20, scale: 0.99},
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.65,
-          stagger: 0.055,
-          ease: 'power3.out',
-          clearProps: 'transform',
-        }
-      );
-    }, host);
-  }
-
   ngOnDestroy(): void {
-    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }

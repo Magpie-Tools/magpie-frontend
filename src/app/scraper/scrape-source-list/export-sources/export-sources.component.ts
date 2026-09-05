@@ -1,19 +1,16 @@
 import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Button} from 'primeng/button';
-import {InputTextModule} from 'primeng/inputtext';
-import {DialogModule} from 'primeng/dialog';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CheckboxComponent} from '../../../checkbox/checkbox.component';
 import {HttpService} from '../../../services/http.service';
 import {NotificationService} from '../../../services/notification-service.service';
 import {ScrapeSourceInfo} from '../../../models/ScrapeSourceInfo';
 import {ScrapeSourceExportSettings} from '../../../models/ScrapeSourceExportSettings';
-import {TooltipComponent} from '../../../tooltip/tooltip.component';
 import {ScrapeSourceFilterPanelComponent} from '../scrape-source-filter-panel/scrape-source-filter-panel.component';
 import {BulkScopeSelectorComponent} from '../../../shared/bulk-scope-selector/bulk-scope-selector.component';
 import {buildDatedExportFileName, downloadTextFile, extractHttpErrorMessage} from '../../../shared/export-file-utils';
 import {normalizeNumber} from '../../../shared/number-utils';
-import {animateDialogSections} from '../../../shared/dialog-motion';
+import {BulkActionDialogComponent} from '../../../shared/bulk-action-dialog/bulk-action-dialog.component';
+import {ExportFormatBuilderComponent} from '../../../shared/export-format-builder/export-format-builder.component';
 
 type ExportSourcesFormDefaults = {
   output: string;
@@ -30,18 +27,14 @@ type ExportSourcesFormDefaults = {
   selector: 'app-export-sources',
   standalone: true,
   imports: [
-    FormsModule,
     ReactiveFormsModule,
-    Button,
-    InputTextModule,
-    DialogModule,
     CheckboxComponent,
-    TooltipComponent,
     ScrapeSourceFilterPanelComponent,
     BulkScopeSelectorComponent,
+    BulkActionDialogComponent,
+    ExportFormatBuilderComponent,
   ],
   templateUrl: './export-sources.component.html',
-  styleUrls: ['./export-sources.component.scss'],
 })
 export class ExportSourcesComponent implements OnChanges {
   @Input() selectedSources: ScrapeSourceInfo[] = [];
@@ -108,10 +101,6 @@ export class ExportSourcesComponent implements OnChanges {
     this.dialogVisible = true;
   }
 
-  animateDialog(): void {
-    animateDialogSections('export-dialog');
-  }
-
   closeDialog(): void {
     this.dialogVisible = false;
   }
@@ -126,12 +115,6 @@ export class ExportSourcesComponent implements OnChanges {
 
   canExportSelected(): boolean {
     return (this.selectedSources?.length ?? 0) > 0;
-  }
-
-  addToFilter(text: string): void {
-    const currentValue = this.exportForm.get('output')?.value;
-    const newValue = currentValue && currentValue !== '' ? `${currentValue};${text}` : text;
-    this.exportForm.get('output')?.setValue(newValue);
   }
 
   submitExport(): void {

@@ -1,0 +1,84 @@
+:host {
+  display: block;
+}
+
+.format-builder {
+  display: grid;
+  gap: 0.55rem;
+
+  > label {
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 0.6rem;
+    font-weight: 580;
+  }
+}
+
+.format-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+}
+
+.format-preset {
+  display: inline-flex;
+  min-height: 1.9rem;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.52rem;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.5);
+  font: inherit;
+  font-size: 0.57rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+
+  i {
+    color: var(--theme-primary-300);
+    font-size: 0.52rem;
+  }
+
+  &:hover {
+    border-color: rgba(var(--theme-primary-300-rgb), 0.28);
+    background: rgba(var(--theme-primary-500-rgb), 0.07);
+    color: rgba(255, 255, 255, 0.82);
+    transform: translateY(-1px);
+  }
+}
+
+.format-input-shell {
+  position: relative;
+
+  > i {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    z-index: 1;
+    color: rgba(255, 255, 255, 0.32);
+    font-size: 0.7rem;
+    transform: translateY(-50%);
+  }
+}
+
+:host ::ng-deep .export-input {
+  width: 100%;
+  min-height: 2.55rem;
+  padding: 0.62rem 0.75rem 0.62rem 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.72rem;
+  background: rgba(4, 4, 6, 0.56);
+  color: rgba(255, 255, 255, 0.82);
+  font: 0.67rem "Geist Mono", "SFMono-Regular", Consolas, monospace;
+  box-shadow: none;
+
+  &:focus {
+    border-color: rgba(var(--theme-primary-300-rgb), 0.52);
+    box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.1);
+    outline: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .format-preset { transition: none; }
+}

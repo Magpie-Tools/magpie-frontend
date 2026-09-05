@@ -1,0 +1,23 @@
+<section class="dialog-section export-card" [attr.aria-labelledby]="inputId + '-title'" [formGroup]="form">
+  <div class="section-heading">
+    <div>
+      <h3 [id]="inputId + '-title'">Output format</h3>
+      <p>Add fields in the order they should appear. Semicolons separate each value.</p>
+    </div>
+  </div>
+
+  <div class="format-builder">
+    <div class="format-presets" aria-label="Available export fields">
+      @for (field of fields; track field) {
+        <button type="button" class="format-preset" (click)="addField(field)">
+          <i class="pi pi-plus" aria-hidden="true"></i>{{ field }}
+        </button>
+      }
+    </div>
+    <label [for]="inputId">Format string</label>
+    <div class="format-input-shell">
+      <i class="pi pi-code" aria-hidden="true"></i>
+      <input [id]="inputId" pInputText formControlName="output" type="text" class="export-input" />
+    </div>
+  </div>
+</section>

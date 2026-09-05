@@ -3,7 +3,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 
@@ -13,9 +12,9 @@ import {saveAuthToken} from '../../services/authorization/auth-token-storage';
 import { UserService } from '../../services/authorization/user.service';
 import { AuthInterceptor } from '../../services/auth-interceptor.interceptor';
 import { NotificationService } from '../../services/notification-service.service';
-import { ThemeService } from '../../services/theme.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { passwordPolicyMessages, passwordPolicyValidators } from '../password-policy';
+import {AuthComponent} from '../auth.component';
 
 @Component({
   selector: 'app-register',
@@ -23,12 +22,11 @@ import { passwordPolicyMessages, passwordPolicyValidators } from '../password-po
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    CardModule,
     InputTextModule,
-    ButtonModule
+    ButtonModule,
+    AuthComponent,
   ],
-  templateUrl: './register.component.html',
-  styleUrl: '../auth.component.scss'
+  templateUrl: './register.component.html'
 })
 export class RegisterComponent {
   registerForm: FormGroup;
@@ -39,7 +37,6 @@ export class RegisterComponent {
     private http: HttpService,
     private router: Router,
     private user: UserService,
-    protected themeService: ThemeService,
     private notification: NotificationService,
     private workspaces: WorkspaceService,
   ) {

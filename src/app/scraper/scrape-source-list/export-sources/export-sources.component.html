@@ -1,142 +1,77 @@
-<div class="flex items-center">
-  <p-button
-    type="button"
-    label="Export"
-    icon="pi pi-upload"
-    styleClass="p-button-primary"
-    (onClick)="openDialog()"
-    [disabled]="!hasAnySources()"
-  ></p-button>
-</div>
-
-<p-dialog
-  [(visible)]="dialogVisible"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="true"
-  [appendTo]="'body'"
-  [breakpoints]="{ '960px': '92vw', '640px': '96vw' }"
-  [style]="{ width: '58rem' }"
-  [contentStyle]="{ padding: '0' }"
-  styleClass="export-dialog"
-  (onShow)="animateDialog()"
-  (onHide)="onDialogHide()"
+<app-bulk-action-dialog
+  [visible]="dialogVisible"
+  (visibleChange)="dialogVisible = $event"
+  dialogClass="export-sources-dialog"
+  triggerLabel="Export"
+  triggerIcon="pi pi-upload"
+  triggerStyleClass="p-button-primary"
+  [triggerDisabled]="!hasAnySources()"
+  headingEyebrow="Download sources"
+  headingTitle="Export scrape sources"
+  headingIcon="pi pi-upload"
+  headingTooltip="Export scrape sources with an optional filter and a custom output format."
+  introIcon="pi pi-file-export"
+  introTitle="Build an export file"
+  introDescription="Choose the source scope and define the fields written to each line."
+  [selectedCount]="selectedSources.length"
+  footerNote="The export downloads as a plain-text file."
+  actionLabel="Export file"
+  actionIcon="pi pi-download"
+  [cancelDisabled]="isExporting"
+  [actionDisabled]="isExporting || exportForm.invalid || (exportOption === 'selected' && !canExportSelected())"
+  [actionLoading]="isExporting"
+  (openRequested)="openDialog()"
+  (cancelRequested)="closeDialog()"
+  (actionRequested)="submitExport()"
+  (hidden)="onDialogHide()"
 >
-  <ng-template pTemplate="header">
-    <div class="proxy-dialog-heading">
-      <span class="proxy-dialog-heading__icon"><i class="pi pi-upload" aria-hidden="true"></i></span>
-      <div class="proxy-dialog-heading__copy">
-        <span>Download sources</span>
-        <strong>Export scrape sources</strong>
-      </div>
-      <app-tooltip
-        class="proxy-dialog-heading__tooltip"
-        [text]="'Export scrape sources with an optional filter and a custom output format.'"
-      ></app-tooltip>
-    </div>
-  </ng-template>
-
-  <div class="proxy-dialog-body export-dialog__body">
-    <section class="dialog-intro">
-      <span class="dialog-intro__icon"><i class="pi pi-file-export" aria-hidden="true"></i></span>
+  <section class="dialog-section" aria-labelledby="export-source-scope-title">
+    <div class="section-heading">
       <div>
-        <h3>Build an export file</h3>
-        <p>Choose the source scope and define the fields written to each line.</p>
+        <h3 id="export-source-scope-title">Choose the scope</h3>
+        <p>Export the current selection or every source available to this workspace.</p>
       </div>
-      <span class="dialog-intro__state">{{ selectedSources.length }} selected</span>
-    </section>
+    </div>
+    <app-bulk-scope-selector
+      [(scope)]="exportOption"
+      radioName="exportSourceOption"
+      allInputId="exportAllSources"
+      selectedInputId="exportSelectedSources"
+      allTitle="All sources"
+      allDescription="Export every scrape source currently available."
+      selectedTitle="Selected sources"
+      selectedDescription="Export only the sources highlighted in the table."
+      [selectedDisabled]="!canExportSelected()"
+    ></app-bulk-scope-selector>
+  </section>
 
-    <section class="dialog-section" aria-labelledby="export-source-scope-title">
-      <div class="section-heading">
+  <div [formGroup]="exportForm" class="export-dialog__settings">
+    <section class="dialog-section export-card">
+      <div class="section-heading section-heading--split">
         <div>
-          <h3 id="export-source-scope-title">Choose the scope</h3>
-          <p>Export the current selection or every source available to this workspace.</p>
+          <h3>Limit the export</h3>
+          <p>Enable filters if the chosen scope still contains sources you do not need.</p>
         </div>
+        <app-checkbox label="Enable filters" formControlName="filter"></app-checkbox>
       </div>
-      <app-bulk-scope-selector
-        [(scope)]="exportOption"
-        radioName="exportSourceOption"
-        allInputId="exportAllSources"
-        selectedInputId="exportSelectedSources"
-        allTitle="All sources"
-        allDescription="Export every scrape source currently available."
-        selectedTitle="Selected sources"
-        selectedDescription="Export only the sources highlighted in the table."
-        [selectedDisabled]="!canExportSelected()"
-      ></app-bulk-scope-selector>
+
+      @if (exportForm.get('filter')?.value) {
+        <app-scrape-source-filter-panel
+          class="export-filter-panel"
+          [form]="exportForm"
+          [floating]="false"
+          [showHeader]="false"
+          (clear)="clearExportFilters()"
+        ></app-scrape-source-filter-panel>
+      } @else {
+        <div class="filter-disabled-copy"><i class="pi pi-filter-slash" aria-hidden="true"></i> No additional filters will be applied.</div>
+      }
     </section>
 
-    <div [formGroup]="exportForm" class="export-dialog__settings">
-      <section class="dialog-section export-card">
-        <div class="section-heading section-heading--split">
-          <div>
-            <h3>Limit the export</h3>
-            <p>Enable filters if the chosen scope still contains sources you do not need.</p>
-          </div>
-          <app-checkbox label="Enable filters" formControlName="filter"></app-checkbox>
-        </div>
-
-        @if (exportForm.get('filter')?.value) {
-          <app-scrape-source-filter-panel
-            class="export-filter-panel"
-            [form]="exportForm"
-            [floating]="false"
-            [showHeader]="false"
-            (clear)="clearExportFilters()"
-          ></app-scrape-source-filter-panel>
-        } @else {
-          <div class="filter-disabled-copy"><i class="pi pi-filter-slash" aria-hidden="true"></i> No additional filters will be applied.</div>
-        }
-      </section>
-
-      <section class="dialog-section export-card" aria-labelledby="source-output-format-title">
-        <div class="section-heading">
-          <div>
-            <h3 id="source-output-format-title">Output format</h3>
-            <p>Add fields in the order they should appear. Semicolons separate each value.</p>
-          </div>
-        </div>
-
-        <div class="format-builder">
-          <div class="format-presets" aria-label="Available export fields">
-            @for (text of predefinedFilters; track text) {
-              <button type="button" class="format-preset" (click)="addToFilter(text)">
-                <i class="pi pi-plus" aria-hidden="true"></i>{{ text }}
-              </button>
-            }
-          </div>
-          <label for="sourceOutputFormat">Format string</label>
-          <div class="format-input-shell">
-            <i class="pi pi-code" aria-hidden="true"></i>
-            <input id="sourceOutputFormat" pInputText formControlName="output" type="text" class="export-input" />
-          </div>
-        </div>
-      </section>
-    </div>
+    <app-export-format-builder
+      [form]="exportForm"
+      [fields]="predefinedFilters"
+      inputId="sourceOutputFormat"
+    ></app-export-format-builder>
   </div>
-
-  <ng-template pTemplate="footer">
-    <div class="proxy-dialog-footer">
-      <span>The export downloads as a plain-text file.</span>
-      <div>
-        <p-button
-          type="button"
-          label="Cancel"
-          styleClass="dialog-button dialog-button--quiet"
-          (onClick)="closeDialog()"
-          [disabled]="isExporting"
-        ></p-button>
-        <p-button
-          type="button"
-          label="Export file"
-          icon="pi pi-download"
-          styleClass="dialog-button dialog-button--primary"
-          (onClick)="submitExport()"
-          [disabled]="isExporting || exportForm.invalid || (exportOption === 'selected' && !canExportSelected())"
-          [loading]="isExporting"
-        ></p-button>
-      </div>
-    </div>
-  </ng-template>
-</p-dialog>
+</app-bulk-action-dialog>

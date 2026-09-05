@@ -1,10 +1,7 @@
 import {Component, EventEmitter, Output, computed, signal} from '@angular/core';
 
-import {FormsModule} from "@angular/forms";
 import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.component';
-import {Button} from 'primeng/button';
 import {DialogModule} from 'primeng/dialog';
-import {TooltipComponent} from '../../../tooltip/tooltip.component';
 import {HttpService} from '../../../services/http.service';
 import {ClipboardService} from '../../../services/clipboard.service';
 import {NotificationService} from '../../../services/notification-service.service';
@@ -14,17 +11,18 @@ import {ProxyTagSelectorComponent} from '../../../shared/proxy-tag-selector/prox
 import {ProxyTagManagerComponent} from '../../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {ProxyTag} from '../../../models/ProxyTag';
 import {animateDialogSections} from '../../../shared/dialog-motion';
+import {BulkActionDialogComponent} from '../../../shared/bulk-action-dialog/bulk-action-dialog.component';
+import {ImportDialogContentComponent} from '../../../shared/import-dialog-content/import-dialog-content.component';
 
 @Component({
     selector: 'app-add-proxies',
   imports: [
-    FormsModule,
-    TooltipComponent,
     ProcesingPopupComponent,
-    Button,
     DialogModule,
     ProxyTagSelectorComponent,
     ProxyTagManagerComponent,
+    BulkActionDialogComponent,
+    ImportDialogContentComponent,
 ],
     templateUrl: './add-proxies.component.html',
     styleUrl: './add-proxies.component.scss'
@@ -105,10 +103,6 @@ export class AddProxiesComponent {
     this.clipboardProxiesNoAuthCount.set(summary.withoutAuth);
     this.clipboardProxiesWithAuthCount.set(summary.withAuth);
     this.uniqueClipboardProxiesCount.set(summary.unique);
-  }
-
-  triggerFileInput(fileInput: HTMLInputElement): void {
-    fileInput.click();
   }
 
   openDialog(): void {

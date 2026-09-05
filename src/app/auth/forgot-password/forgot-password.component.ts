@@ -4,12 +4,11 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { RouterLink } from '@angular/router';
 
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 
 import { HttpService } from '../../services/http.service';
 import { NotificationService } from '../../services/notification-service.service';
-import { ThemeService } from '../../services/theme.service';
+import {AuthComponent} from '../auth.component';
 
 @Component({
   selector: 'app-forgot-password',
@@ -17,12 +16,11 @@ import { ThemeService } from '../../services/theme.service';
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    CardModule,
     InputTextModule,
     ButtonModule,
+    AuthComponent,
   ],
-  templateUrl: './forgot-password.component.html',
-  styleUrl: '../auth.component.scss'
+  templateUrl: './forgot-password.component.html'
 })
 export class ForgotPasswordComponent implements OnDestroy {
   forgotPasswordForm: FormGroup;
@@ -35,7 +33,6 @@ export class ForgotPasswordComponent implements OnDestroy {
     private fb: FormBuilder,
     private http: HttpService,
     private notification: NotificationService,
-    protected themeService: ThemeService,
   ) {
     this.forgotPasswordForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],

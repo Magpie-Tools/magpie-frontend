@@ -1,131 +1,57 @@
-<div class="flex items-center">
-  <p-button type="button" label="Add Sources" icon="pi pi-plus" (onClick)="openDialog()"></p-button>
-</div>
-
-<p-dialog
+<app-bulk-action-dialog
   [visible]="dialogVisible()"
   (visibleChange)="dialogVisible.set($event)"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="true"
-  [appendTo]="'body'"
-  [breakpoints]="{ '960px': '92vw', '640px': '96vw' }"
-  [style]="{ width: '58rem' }"
-  [contentStyle]="{ padding: '0' }"
-  styleClass="proxy-add-dialog"
-  (onShow)="animateDialog()"
-  (onHide)="onDialogHide()"
+  dialogClass="scrape-source-add-dialog"
+  triggerLabel="Add Sources"
+  triggerIcon="pi pi-plus"
+  headingEyebrow="Expand the queue"
+  headingTitle="Add scrape sources"
+  headingIcon="pi pi-plus"
+  headingTooltip="A scrape source is a webpage that publishes proxy data. Add one URL per line, paste from your clipboard, or import a text file."
+  footerNote="Sources join the scraper queue after validation."
+  actionLabel="Add sources to queue"
+  actionIcon="pi pi-arrow-right"
+  actionIconPos="right"
+  [actionDisabled]="!file() && !scrapeSourceTextarea() && !clipboardScrapeSources()"
+  (openRequested)="openDialog()"
+  (cancelRequested)="closeDialog()"
+  (actionRequested)="submitScrapeSources()"
+  (hidden)="onDialogHide()"
 >
-  <ng-template pTemplate="header">
-    <div class="proxy-dialog-heading">
-      <span class="proxy-dialog-heading__icon"><i class="pi pi-plus" aria-hidden="true"></i></span>
-      <div class="proxy-dialog-heading__copy">
-        <span>Expand the queue</span>
-        <strong>Add scrape sources</strong>
-      </div>
-      <app-tooltip
-        class="proxy-dialog-heading__tooltip"
-        [text]="'A scrape source is a webpage that publishes proxy data. Add one URL per line, paste from your clipboard, or import a text file.'"
-      ></app-tooltip>
-    </div>
-  </ng-template>
-
-  <div class="proxy-dialog-body add-dialog__body">
-    <div class="add-dialog__grid">
-      <section class="import-source" aria-labelledby="source-input-title">
-        <div class="section-heading">
-          <span class="section-icon"><i class="pi pi-align-left" aria-hidden="true"></i></span>
-          <div>
-            <h3 id="source-input-title">Source input</h3>
-            <p>Paste URLs, choose a text file, or enter one source per line.</p>
-          </div>
-        </div>
-
-        <div class="source-actions">
-          <div class="source-action">
-            <p-button
-              type="button"
-              label="Paste from clipboard"
-              icon="pi pi-clipboard"
-              styleClass="source-button"
-              (onClick)="pasteFromClipboard()"
-              [disabled]="clipboardScrapeSources() !== ''"
-            ></p-button>
-            @if (clipboardScrapeSources()) {
-              <button type="button" class="source-clear" aria-label="Clear clipboard sources" (click)="clearClipboardSources()">
-                <i class="pi pi-times" aria-hidden="true"></i>
-              </button>
-            }
-          </div>
-
-          <div class="source-action">
-            <p-button
-              type="button"
-              label="Import from file"
-              icon="pi pi-file-import"
-              styleClass="source-button"
-              (onClick)="triggerFileInput(fileInput)"
-              [disabled]="file() !== undefined"
-            ></p-button>
-            <input type="file" #fileInput accept=".txt,.csv" (change)="onFileSelected($event)">
-            @if (file() !== undefined) {
-              <button type="button" class="source-clear" aria-label="Clear imported file" (click)="onFileClear()">
-                <i class="pi pi-times" aria-hidden="true"></i>
-              </button>
-            }
-          </div>
-        </div>
-
-        <div class="proxy-textarea-shell">
-          <textarea
-            maxlength="109999"
-            placeholder="https://provider.example/proxies&#10;http://example.net/list.txt"
-            [ngModel]="scrapeSourceTextarea()"
-            (ngModelChange)="onTextareaChange($event)"
-            aria-label="Scrape source URLs"
-          ></textarea>
-          <span>One URL per line</span>
-        </div>
-      </section>
-
-      <aside class="import-summary" aria-label="Import summary">
-        <div class="import-summary__visual"><span><i class="pi pi-globe" aria-hidden="true"></i></span></div>
-        @if (getSourcesCount() > 0) {
-          <div class="import-summary__count">{{ getSourcesCount() }}</div>
-          <div class="import-summary__label">Sources ready</div>
-          <dl class="import-summary__stats">
-            <div><dt>Unique</dt><dd>{{ getUniqueSourcesCount() }}</dd></div>
-            <div><dt>Entered</dt><dd>{{ textAreaSourcesCount() }}</dd></div>
-            <div><dt>Clipboard</dt><dd>{{ clipboardSourcesCount() }}</dd></div>
-            <div><dt>File</dt><dd>{{ fileSourcesCount() }}</dd></div>
-          </dl>
-        } @else {
-          <strong>No sources yet</strong>
-          <p>Your import summary will appear here as soon as you add source URLs.</p>
-        }
-      </aside>
-    </div>
-  </div>
-
-  <ng-template pTemplate="footer">
-    <div class="proxy-dialog-footer">
-      <span>Sources join the scraper queue after validation.</span>
-      <div>
-        <p-button type="button" label="Cancel" styleClass="dialog-button dialog-button--quiet" (onClick)="closeDialog()"></p-button>
-        <p-button
-          type="button"
-          label="Add sources to queue"
-          icon="pi pi-arrow-right"
-          iconPos="right"
-          styleClass="dialog-button dialog-button--primary"
-          (onClick)="submitScrapeSources()"
-          [disabled]="!file() && !scrapeSourceTextarea() && !clipboardScrapeSources()"
-        ></p-button>
-      </div>
-    </div>
-  </ng-template>
-</p-dialog>
+  <app-import-dialog-content
+    inputTitle="Source input"
+    inputDescription="Paste URLs, choose a text file, or enter one source per line."
+    [textareaValue]="scrapeSourceTextarea()"
+    [textareaPlaceholder]="'https://provider.example/proxies\nhttp://example.net/list.txt'"
+    textareaLabel="Scrape source URLs"
+    lineHint="One URL per line"
+    [clipboardPresent]="!!clipboardScrapeSources()"
+    [filePresent]="file() !== undefined"
+    fileAccept=".txt,.csv"
+    (textareaValueChange)="onTextareaChange($event)"
+    (pasteRequested)="pasteFromClipboard()"
+    (clipboardClearRequested)="clearClipboardSources()"
+    (fileSelected)="onFileSelected($event)"
+    (fileClearRequested)="onFileClear()"
+  >
+    <ng-container import-summary>
+      <div class="import-summary__visual"><span><i class="pi pi-globe" aria-hidden="true"></i></span></div>
+      @if (getSourcesCount() > 0) {
+        <div class="import-summary__count">{{ getSourcesCount() }}</div>
+        <div class="import-summary__label">Sources ready</div>
+        <dl class="import-summary__stats">
+          <div><dt>Unique</dt><dd>{{ getUniqueSourcesCount() }}</dd></div>
+          <div><dt>Entered</dt><dd>{{ textAreaSourcesCount() }}</dd></div>
+          <div><dt>Clipboard</dt><dd>{{ clipboardSourcesCount() }}</dd></div>
+          <div><dt>File</dt><dd>{{ fileSourcesCount() }}</dd></div>
+        </dl>
+      } @else {
+        <strong>No sources yet</strong>
+        <p>Your import summary will appear here as soon as you add source URLs.</p>
+      }
+    </ng-container>
+  </app-import-dialog-content>
+</app-bulk-action-dialog>
 
 @if (showPopup()) {
   <app-procesing-popup

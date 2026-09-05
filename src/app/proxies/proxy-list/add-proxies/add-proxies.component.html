@@ -1,38 +1,39 @@
-<div class="flex items-center">
-  <p-button type="button" label="Add Proxies" icon="pi pi-plus" (onClick)="openDialog()"></p-button>
-</div>
-
-<p-dialog
+<app-bulk-action-dialog
   [visible]="dialogVisible()"
   (visibleChange)="dialogVisible.set($event)"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="true"
-  [appendTo]="'body'"
-  [breakpoints]="{ '960px': '92vw', '640px': '96vw' }"
-  [style]="{ width: '58rem' }"
-  [contentStyle]="{ padding: '0' }"
-  styleClass="proxy-add-dialog"
-  (onShow)="animateDialog('proxy-add-dialog')"
-  (onHide)="onDialogHide()"
+  dialogClass="proxy-add-dialog"
+  triggerLabel="Add Proxies"
+  triggerIcon="pi pi-plus"
+  headingEyebrow="Import routes"
+  headingTitle="Add proxies"
+  headingIcon="pi pi-plus"
+  [headingTooltip]="'Hostname: gateway.provider.example:8080\nIPv4: 192.0.2.1:8080\nIPv6: [2001:db8::1]:8080\nAuth: user:pass@host:port\nAuth: host:port:user:pass'"
+  footerNote="Imports are queued for checking after validation."
+  actionLabel="Add proxies to queue"
+  actionIcon="pi pi-arrow-right"
+  actionIconPos="right"
+  [actionDisabled]="!file() && !proxyTextarea() && !clipboardProxies()"
+  (openRequested)="openDialog()"
+  (cancelRequested)="closeDialog()"
+  (actionRequested)="submitProxies()"
+  (hidden)="onDialogHide()"
 >
-  <ng-template pTemplate="header">
-    <div class="proxy-dialog-heading">
-      <span class="proxy-dialog-heading__icon"><i class="pi pi-plus" aria-hidden="true"></i></span>
-      <div class="proxy-dialog-heading__copy">
-        <span>Import routes</span>
-        <strong>Add proxies</strong>
-      </div>
-      <app-tooltip
-        class="proxy-dialog-heading__tooltip"
-        [text]="'Hostname: gateway.provider.example:8080\nIPv4: 192.0.2.1:8080\nIPv6: [2001:db8::1]:8080\nAuth: user:pass@host:port\nAuth: host:port:user:pass'"
-      ></app-tooltip>
-    </div>
-  </ng-template>
-
-  <div class="proxy-dialog-body add-dialog__body">
-    <section class="import-tags" aria-labelledby="import-tags-title">
+  <app-import-dialog-content
+    inputTitle="Proxy input"
+    inputDescription="Paste routes, choose a text file, or enter one route per line."
+    [textareaValue]="proxyTextarea()"
+    [textareaPlaceholder]="'gateway.provider.example:8080\n192.0.2.1:8080\n[2001:db8::1]:8080\nuser:pass@host:port'"
+    textareaLabel="Proxy routes"
+    lineHint="One route per line"
+    [clipboardPresent]="!!clipboardProxies()"
+    [filePresent]="file() !== undefined"
+    (textareaValueChange)="onTextareaChange($event)"
+    (pasteRequested)="pasteFromClipboard()"
+    (clipboardClearRequested)="clearClipboardProxies()"
+    (fileSelected)="onFileSelected($event)"
+    (fileClearRequested)="onFileClear()"
+  >
+    <section import-prefix class="import-tags" aria-labelledby="import-tags-title">
       <div class="import-tags__copy">
         <span class="section-icon"><i class="pi pi-tags" aria-hidden="true"></i></span>
         <div>
@@ -55,99 +56,23 @@
       ></app-proxy-tag-manager>
     </section>
 
-    <div class="add-dialog__grid">
-      <section class="import-source" aria-labelledby="proxy-input-title">
-        <div class="section-heading">
-          <span class="section-icon"><i class="pi pi-align-left" aria-hidden="true"></i></span>
-          <div>
-            <h3 id="proxy-input-title">Proxy input</h3>
-            <p>Paste routes, choose a text file, or enter one route per line.</p>
-          </div>
-        </div>
-
-        <div class="source-actions">
-          <div class="source-action">
-            <p-button
-              type="button"
-              label="Paste from clipboard"
-              icon="pi pi-clipboard"
-              styleClass="source-button"
-              (onClick)="pasteFromClipboard()"
-              [disabled]="clipboardProxies() !== ''"
-            ></p-button>
-            @if (clipboardProxies()) {
-              <button type="button" class="source-clear" aria-label="Clear clipboard proxies" (click)="clearClipboardProxies()">
-                <i class="pi pi-times" aria-hidden="true"></i>
-              </button>
-            }
-          </div>
-
-          <div class="source-action">
-            <p-button
-              type="button"
-              label="Import from file"
-              icon="pi pi-file-import"
-              styleClass="source-button"
-              (onClick)="triggerFileInput(fileInput)"
-              [disabled]="file() !== undefined"
-            ></p-button>
-            <input type="file" #fileInput (change)="onFileSelected($event)">
-            @if (file() !== undefined) {
-              <button type="button" class="source-clear" aria-label="Clear imported file" (click)="onFileClear()">
-                <i class="pi pi-times" aria-hidden="true"></i>
-              </button>
-            }
-          </div>
-        </div>
-
-        <div class="proxy-textarea-shell">
-          <textarea
-            maxlength="109999"
-            placeholder="gateway.provider.example:8080&#10;192.0.2.1:8080&#10;[2001:db8::1]:8080&#10;user:pass@host:port"
-            [ngModel]="proxyTextarea()"
-            (ngModelChange)="onTextareaChange($event)"
-            aria-label="Proxy routes"
-          ></textarea>
-          <span>One route per line</span>
-        </div>
-      </section>
-
-      <aside class="import-summary" aria-label="Import summary">
-        <div class="import-summary__visual"><span><i class="pi pi-server" aria-hidden="true"></i></span></div>
-        @if (getProxiesWithoutAuthCount() + getProxiesWithAuthCount() > 0) {
-          <div class="import-summary__count">{{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}</div>
-          <div class="import-summary__label">Routes ready</div>
-          <dl class="import-summary__stats">
-            <div><dt>Unique</dt><dd>{{ getUniqueProxiesCount() }}</dd></div>
-            <div><dt>With authentication</dt><dd>{{ getProxiesWithAuthCount() }}</dd></div>
-            <div><dt>Without authentication</dt><dd>{{ getProxiesWithoutAuthCount() }}</dd></div>
-          </dl>
-        } @else {
-          <strong>No routes yet</strong>
-          <p>Your import summary will appear here as soon as you add proxy data.</p>
-        }
-      </aside>
-    </div>
-  </div>
-
-  <ng-template pTemplate="footer">
-    <div class="proxy-dialog-footer">
-      <span>Imports are queued for checking after validation.</span>
-      <div>
-        <p-button type="button" label="Cancel" styleClass="dialog-button dialog-button--quiet" (onClick)="closeDialog()"></p-button>
-        <p-button
-          type="button"
-          label="Add proxies to queue"
-          icon="pi pi-arrow-right"
-          iconPos="right"
-          styleClass="dialog-button dialog-button--primary"
-          (onClick)="submitProxies()"
-          [disabled]="!file() && !proxyTextarea() && !clipboardProxies()"
-        ></p-button>
-      </div>
-    </div>
-  </ng-template>
-</p-dialog>
+    <ng-container import-summary>
+      <div class="import-summary__visual"><span><i class="pi pi-server" aria-hidden="true"></i></span></div>
+      @if (getProxiesWithoutAuthCount() + getProxiesWithAuthCount() > 0) {
+        <div class="import-summary__count">{{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}</div>
+        <div class="import-summary__label">Routes ready</div>
+        <dl class="import-summary__stats">
+          <div><dt>Unique</dt><dd>{{ getUniqueProxiesCount() }}</dd></div>
+          <div><dt>With authentication</dt><dd>{{ getProxiesWithAuthCount() }}</dd></div>
+          <div><dt>Without authentication</dt><dd>{{ getProxiesWithoutAuthCount() }}</dd></div>
+        </dl>
+      } @else {
+        <strong>No routes yet</strong>
+        <p>Your import summary will appear here as soon as you add proxy data.</p>
+      }
+    </ng-container>
+  </app-import-dialog-content>
+</app-bulk-action-dialog>
 
 @if (showPopup()) {
   <app-procesing-popup

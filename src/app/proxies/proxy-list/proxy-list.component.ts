@@ -62,6 +62,7 @@ import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
 import {gsap} from 'gsap';
 import {ScrollTrigger} from 'gsap/ScrollTrigger';
+import {InventoryPageShellComponent} from '../../shared/inventory-page-shell/inventory-page-shell.component';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -80,6 +81,7 @@ gsap.registerPlugin(ScrollTrigger);
     ProxyTableComponent,
     ColumnPickerPanelComponent,
     ProxyTagManagerComponent,
+    InventoryPageShellComponent,
   ],
   templateUrl: './proxy-list.component.html',
   styleUrls: ['./proxy-list.component.scss']
@@ -193,7 +195,7 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.animationContext = gsap.context(() => {
       gsap.fromTo(
-        '.proxies-context',
+        '.inventory-context',
         {opacity: 0, y: 20},
         {opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', clearProps: 'transform'},
       );
@@ -216,13 +218,13 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       gsap.fromTo(
-        '.proxies-context__copy p',
+        '.inventory-context__copy p',
         {opacity: 0.38},
         {
           opacity: 1,
           ease: 'none',
           scrollTrigger: {
-            trigger: '.proxies-context',
+            trigger: '.inventory-context',
             scroller,
             start: 'top 96%',
             end: 'bottom 74%',

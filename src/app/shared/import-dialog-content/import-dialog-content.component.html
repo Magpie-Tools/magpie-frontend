@@ -1,0 +1,63 @@
+<ng-content select="[import-prefix]"></ng-content>
+
+<div class="import-dialog-grid">
+  <section class="import-source" aria-labelledby="import-input-title">
+    <div class="section-heading">
+      <span class="section-icon"><i class="pi pi-align-left" aria-hidden="true"></i></span>
+      <div>
+        <h3 id="import-input-title">{{ inputTitle }}</h3>
+        <p>{{ inputDescription }}</p>
+      </div>
+    </div>
+
+    <div class="source-actions">
+      <div class="source-action">
+        <p-button
+          type="button"
+          label="Paste from clipboard"
+          icon="pi pi-clipboard"
+          styleClass="source-button"
+          [disabled]="clipboardPresent"
+          (onClick)="pasteRequested.emit()"
+        ></p-button>
+        @if (clipboardPresent) {
+          <button type="button" class="source-clear" aria-label="Clear clipboard data" (click)="clipboardClearRequested.emit()">
+            <i class="pi pi-times" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+
+      <div class="source-action">
+        <p-button
+          type="button"
+          label="Import from file"
+          icon="pi pi-file-import"
+          styleClass="source-button"
+          [disabled]="filePresent"
+          (onClick)="fileInput.click()"
+        ></p-button>
+        <input type="file" #fileInput [accept]="fileAccept" (change)="fileSelected.emit($event)">
+        @if (filePresent) {
+          <button type="button" class="source-clear" aria-label="Clear imported file" (click)="fileClearRequested.emit()">
+            <i class="pi pi-times" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="import-textarea-shell">
+      <textarea
+        maxlength="109999"
+        [placeholder]="textareaPlaceholder"
+        [ngModel]="textareaValue"
+        (ngModelChange)="textareaValueChange.emit($event)"
+        [attr.aria-label]="textareaLabel"
+      ></textarea>
+      <span>{{ lineHint }}</span>
+    </div>
+  </section>
+
+  <aside class="import-summary" aria-label="Import summary">
+    <ng-content select="[import-summary]"></ng-content>
+  </aside>
+</div>

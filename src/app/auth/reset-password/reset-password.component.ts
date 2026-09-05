@@ -4,13 +4,12 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 
 import { HttpService } from '../../services/http.service';
 import { NotificationService } from '../../services/notification-service.service';
-import { ThemeService } from '../../services/theme.service';
 import { passwordPolicyMessages, passwordPolicyValidators } from '../password-policy';
+import {AuthComponent} from '../auth.component';
 
 @Component({
   selector: 'app-reset-password',
@@ -18,12 +17,11 @@ import { passwordPolicyMessages, passwordPolicyValidators } from '../password-po
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    CardModule,
     InputTextModule,
     ButtonModule,
+    AuthComponent,
   ],
-  templateUrl: './reset-password.component.html',
-  styleUrl: '../auth.component.scss'
+  templateUrl: './reset-password.component.html'
 })
 export class ResetPasswordComponent {
   resetPasswordForm: FormGroup;
@@ -36,7 +34,6 @@ export class ResetPasswordComponent {
     private router: Router,
     private http: HttpService,
     private notification: NotificationService,
-    protected themeService: ThemeService,
   ) {
     this.token = this.route.snapshot.queryParamMap.get('token')?.trim() ?? '';
     this.resetPasswordForm = this.fb.group({

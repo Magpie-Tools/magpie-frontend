@@ -1,119 +1,73 @@
-<div class="flex items-center">
-  <p-button
-    type="button"
-    label="Delete"
-    icon="pi pi-trash"
-    styleClass="p-button-danger"
-    (onClick)="openDialog()"
-    [disabled]="!hasAnySources()"
-  ></p-button>
-</div>
-
-<p-dialog
-  [(visible)]="dialogVisible"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  [dismissableMask]="true"
-  [appendTo]="'body'"
-  [breakpoints]="{ '960px': '92vw', '640px': '96vw' }"
-  [style]="{ width: '58rem' }"
-  [contentStyle]="{ padding: '0' }"
-  styleClass="delete-dialog"
-  (onShow)="animateDialog()"
-  (onHide)="onDialogHide()"
+<app-bulk-action-dialog
+  [visible]="dialogVisible"
+  (visibleChange)="dialogVisible = $event"
+  dialogClass="delete-sources-dialog"
+  triggerLabel="Delete"
+  triggerIcon="pi pi-trash"
+  triggerStyleClass="p-button-danger"
+  [triggerDisabled]="!hasAnySources()"
+  headingEyebrow="Permanent action"
+  headingTitle="Delete scrape sources"
+  headingIcon="pi pi-exclamation-triangle"
+  headingTooltip="Delete scrape sources in bulk with an optional filter. This action cannot be undone."
+  tone="danger"
+  introIcon="pi pi-lock"
+  introTitle="Deleted sources cannot be restored"
+  introDescription="Existing proxies stay in your inventory. Review the source scope before continuing."
+  [selectedCount]="selectedSources.length"
+  footerNote="This action cannot be undone."
+  actionLabel="Delete sources"
+  actionIcon="pi pi-trash"
+  [cancelDisabled]="isDeleting"
+  [actionDisabled]="isDeleting || (deleteOption === 'selected' && !canDeleteSelected())"
+  [actionLoading]="isDeleting"
+  (openRequested)="openDialog()"
+  (cancelRequested)="closeDialog()"
+  (actionRequested)="submitDelete()"
+  (hidden)="onDialogHide()"
 >
-  <ng-template pTemplate="header">
-    <div class="proxy-dialog-heading proxy-dialog-heading--danger">
-      <span class="proxy-dialog-heading__icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
-      <div class="proxy-dialog-heading__copy">
-        <span>Permanent action</span>
-        <strong>Delete scrape sources</strong>
-      </div>
-      <app-tooltip
-        class="proxy-dialog-heading__tooltip"
-        [text]="'Delete scrape sources in bulk with an optional filter. This action cannot be undone.'"
-      ></app-tooltip>
-    </div>
-  </ng-template>
-
-  <div class="proxy-dialog-body delete-dialog__body">
-    <section class="danger-notice">
-      <span class="danger-notice__icon"><i class="pi pi-lock" aria-hidden="true"></i></span>
+  <section class="dialog-section" aria-labelledby="delete-source-scope-title">
+    <div class="section-heading">
       <div>
-        <h3>Deleted sources cannot be restored</h3>
-        <p>Existing proxies stay in your inventory. Review the source scope before continuing.</p>
+        <h3 id="delete-source-scope-title">Choose the scope</h3>
+        <p>Delete the highlighted sources or every source that matches the optional filters.</p>
       </div>
-      <span class="danger-notice__state">{{ selectedSources.length }} selected</span>
-    </section>
+    </div>
+    <app-bulk-scope-selector
+      [(scope)]="deleteOption"
+      radioName="deleteSourceOption"
+      allInputId="deleteAllSources"
+      selectedInputId="deleteSelectedSources"
+      allTitle="All sources"
+      allDescription="Delete every scrape source you own that matches the filters below."
+      selectedTitle="Selected sources"
+      selectedDescription="Delete only the sources highlighted in the table."
+      [selectedDisabled]="!canDeleteSelected()"
+      accentColor="#f87171"
+    ></app-bulk-scope-selector>
+  </section>
 
-    <section class="dialog-section" aria-labelledby="delete-source-scope-title">
-      <div class="section-heading">
+  <div [formGroup]="deleteForm">
+    <section class="dialog-section delete-card">
+      <div class="section-heading section-heading--split">
         <div>
-          <h3 id="delete-source-scope-title">Choose the scope</h3>
-          <p>Delete the highlighted sources or every source that matches the optional filters.</p>
+          <h3>Limit the deletion</h3>
+          <p>Enable filters to narrow the chosen scope before sources are removed.</p>
         </div>
+        <app-checkbox label="Enable filters" formControlName="filter"></app-checkbox>
       </div>
-      <app-bulk-scope-selector
-        [(scope)]="deleteOption"
-        radioName="deleteSourceOption"
-        allInputId="deleteAllSources"
-        selectedInputId="deleteSelectedSources"
-        allTitle="All sources"
-        allDescription="Delete every scrape source you own that matches the filters below."
-        selectedTitle="Selected sources"
-        selectedDescription="Delete only the sources highlighted in the table."
-        [selectedDisabled]="!canDeleteSelected()"
-        accentColor="#f87171"
-      ></app-bulk-scope-selector>
+
+      @if (deleteForm.get('filter')?.value) {
+        <app-scrape-source-filter-panel
+          class="delete-filter-panel"
+          [form]="deleteForm"
+          [floating]="false"
+          [showHeader]="false"
+          (clear)="clearDeleteFilters()"
+        ></app-scrape-source-filter-panel>
+      } @else {
+        <div class="filter-disabled-copy"><i class="pi pi-filter-slash" aria-hidden="true"></i> No additional filters will be applied.</div>
+      }
     </section>
-
-    <div [formGroup]="deleteForm">
-      <section class="dialog-section delete-card">
-        <div class="section-heading section-heading--split">
-          <div>
-            <h3>Limit the deletion</h3>
-            <p>Enable filters to narrow the chosen scope before sources are removed.</p>
-          </div>
-          <app-checkbox label="Enable filters" formControlName="filter"></app-checkbox>
-        </div>
-
-        @if (deleteForm.get('filter')?.value) {
-          <app-scrape-source-filter-panel
-            class="delete-filter-panel"
-            [form]="deleteForm"
-            [floating]="false"
-            [showHeader]="false"
-            (clear)="clearDeleteFilters()"
-          ></app-scrape-source-filter-panel>
-        } @else {
-          <div class="filter-disabled-copy"><i class="pi pi-filter-slash" aria-hidden="true"></i> No additional filters will be applied.</div>
-        }
-      </section>
-    </div>
   </div>
-
-  <ng-template pTemplate="footer">
-    <div class="proxy-dialog-footer">
-      <span>This action cannot be undone.</span>
-      <div>
-        <p-button
-          type="button"
-          label="Cancel"
-          styleClass="dialog-button dialog-button--quiet"
-          (onClick)="closeDialog()"
-          [disabled]="isDeleting"
-        ></p-button>
-        <p-button
-          type="button"
-          label="Delete sources"
-          icon="pi pi-trash"
-          styleClass="dialog-button dialog-button--danger"
-          (onClick)="submitDelete()"
-          [disabled]="isDeleting || (deleteOption === 'selected' && !canDeleteSelected())"
-          [loading]="isDeleting"
-        ></p-button>
-      </div>
-    </div>
-  </ng-template>
-</p-dialog>
+</app-bulk-action-dialog>

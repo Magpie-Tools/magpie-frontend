@@ -1,16 +1,12 @@
 
 import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Button} from 'primeng/button';
-import {InputTextModule} from 'primeng/inputtext';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CheckboxComponent} from '../../../checkbox/checkbox.component';
 import {SettingsService} from '../../../services/settings.service';
 import {HttpService} from '../../../services/http.service';
 import {ProxyInfo} from '../../../models/ProxyInfo';
 import {ExportSettings} from '../../../models/ExportSettings';
-import {DialogModule} from 'primeng/dialog';
 import {NotificationService} from '../../../services/notification-service.service';
-import {TooltipComponent} from '../../../tooltip/tooltip.component';
 import {ProxyFilterPanelComponent} from '../../../shared/proxy-filter-panel/proxy-filter-panel.component';
 import {
   PROXY_REPUTATION_OPTIONS,
@@ -28,7 +24,8 @@ import {
 import {ProxyTag} from '../../../models/ProxyTag';
 import {BulkScopeSelectorComponent} from '../../../shared/bulk-scope-selector/bulk-scope-selector.component';
 import {buildDatedExportFileName, downloadTextFile, extractHttpErrorMessage} from '../../../shared/export-file-utils';
-import {animateDialogSections} from '../../../shared/dialog-motion';
+import {BulkActionDialogComponent} from '../../../shared/bulk-action-dialog/bulk-action-dialog.component';
+import {ExportFormatBuilderComponent} from '../../../shared/export-format-builder/export-format-builder.component';
 
 type ExportFormDefaults = {
   output: string;
@@ -39,18 +36,14 @@ type ExportFormDefaults = {
   selector: 'app-export-proxies',
   standalone: true,
   imports: [
-    FormsModule,
     ReactiveFormsModule,
-    Button,
-    InputTextModule,
     CheckboxComponent,
-    DialogModule,
-    TooltipComponent,
     ProxyFilterPanelComponent,
     BulkScopeSelectorComponent,
+    BulkActionDialogComponent,
+    ExportFormatBuilderComponent,
   ],
   templateUrl: './export-proxies.component.html',
-  styleUrls: ['./export-proxies.component.scss'],
 })
 export class ExportProxiesComponent implements OnChanges {
   @Input() selectedProxies: ProxyInfo[] = [];
@@ -155,10 +148,6 @@ export class ExportProxiesComponent implements OnChanges {
     this.dialogVisible = true;
   }
 
-  animateDialog(): void {
-    animateDialogSections('export-dialog');
-  }
-
   closeDialog(): void {
     this.dialogVisible = false;
   }
@@ -173,12 +162,6 @@ export class ExportProxiesComponent implements OnChanges {
 
   canExportSelected(): boolean {
     return (this.selectedProxies?.length ?? 0) > 0;
-  }
-
-  addToFilter(text: string): void {
-    const currentValue = this.exportForm.get('output')?.value;
-    const newValue = currentValue && currentValue !== '' ? `${currentValue};${text}` : text;
-    this.exportForm.get('output')?.setValue(newValue);
   }
 
   submitExport(): void {

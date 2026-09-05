@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Subject, interval} from 'rxjs';
@@ -12,7 +12,7 @@ import {ToggleSwitchModule} from 'primeng/toggleswitch';
 import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
 import {NotificationService} from '../../../services/notification-service.service';
-import {gsap} from 'gsap';
+import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-plugin-abuseipdb',
@@ -23,12 +23,16 @@ import {gsap} from 'gsap';
     ButtonModule,
     InputTextModule,
     InputNumberModule,
-    ToggleSwitchModule
+    ToggleSwitchModule,
+    RevealGroupDirective
   ],
   templateUrl: './plugin-abuseipdb.component.html',
   styleUrl: './plugin-abuseipdb.component.scss'
 })
-export class PluginAbuseIPDBComponent implements OnInit, AfterViewInit, OnDestroy {
+export class PluginAbuseIPDBComponent implements OnInit, OnDestroy {
+  readonly revealSteps: readonly RevealStep[] = [{
+    selector: '.admin-context, .settings-card, .save-dock',
+  }];
   form: FormGroup;
   pluginEnabled = signal(false);
   quotaLimit = signal<number | null>(null);
@@ -37,14 +41,12 @@ export class PluginAbuseIPDBComponent implements OnInit, AfterViewInit, OnDestro
   lastCheckedLabel = signal('Never');
   lastError = signal('');
   private destroy$ = new Subject<void>();
-  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
     private notification: NotificationService,
-    private cdr: ChangeDetectorRef,
-    private elementRef: ElementRef<HTMLElement>
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       enabled: [false],
@@ -74,22 +76,7 @@ export class PluginAbuseIPDBComponent implements OnInit, AfterViewInit, OnDestro
     this.syncControlStates();
   }
 
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    this.animationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.admin-context, .settings-card, .save-dock',
-        {opacity: 0, y: 22, scale: 0.99},
-        {opacity: 1, y: 0, scale: 1, duration: 0.68, stagger: 0.06, ease: 'power3.out', clearProps: 'transform'}
-      );
-    }, this.elementRef.nativeElement);
-  }
-
   ngOnDestroy(): void {
-    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }

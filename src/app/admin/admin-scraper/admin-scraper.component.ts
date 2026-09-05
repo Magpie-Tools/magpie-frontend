@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from '../../services/settings.service';
 import {Subject} from 'rxjs';
@@ -16,7 +16,11 @@ import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {ConfirmationService} from 'primeng/api';
 import {NotificationService} from '../../services/notification-service.service';
 import {GlobalSettings} from '../../models/GlobalSettings';
-import {gsap} from 'gsap';
+import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
+import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
+import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
+import {AdminSettingsHeaderComponent} from '../../shared/admin-settings-shell/admin-settings-header.component';
+import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/admin-settings-save-dock.component';
 
 @Component({
   selector: 'app-admin-scraper',
@@ -31,28 +35,41 @@ import {gsap} from 'gsap';
     TooltipModule,
     CheckboxModule,
     InputTextModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    RevealGroupDirective,
+    AdminSettingsShellComponent,
+    AdminSettingsHeaderComponent,
+    AdminSettingsSaveDockComponent,
   ],
   providers: [ConfirmationService],
   templateUrl: './admin-scraper.component.html',
   styleUrl: './admin-scraper.component.scss'
 })
-export class AdminScraperComponent implements OnInit, AfterViewInit, OnDestroy {
-  daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
-  hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
-  minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
-  secondsList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Seconds`, value: i }));
+export class AdminScraperComponent implements OnInit, OnDestroy {
+  readonly daysList = dayOptions;
+  readonly hoursList = hourOptions;
+  readonly minutesList = minuteOptions;
+  readonly secondsList = secondOptions;
+  readonly revealSteps: readonly RevealStep[] = [
+    {
+      selector: '.admin-context, .settings-card, .save-dock',
+      to: {stagger: 0.055},
+    },
+    {
+      selector: '.card-heading__copy p',
+      from: {opacity: 0.18, y: 0, scale: 1},
+      to: {opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.07, delay: 0.16, ease: 'power2.out'},
+    },
+  ];
   settingsForm: FormGroup;
   isRequeueingSources = false;
   private destroy$ = new Subject<void>();
-  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
     private notification: NotificationService,
-    private confirmationService: ConfirmationService,
-    private elementRef: ElementRef<HTMLElement>
+    private confirmationService: ConfirmationService
   ) {
     this.settingsForm = this.createDefaultForm();
   }
@@ -92,37 +109,7 @@ export class AdminScraperComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateProxyLimitState(proxyLimitCtrl?.value ?? false);
   }
 
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    const host = this.elementRef.nativeElement;
-    this.animationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.admin-context, .settings-card, .save-dock',
-        {opacity: 0, y: 22, scale: 0.99},
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.68,
-          stagger: 0.055,
-          ease: 'power3.out',
-          clearProps: 'transform',
-        }
-      );
-
-      gsap.fromTo(
-        '.card-heading__copy p',
-        {opacity: 0.18},
-        {opacity: 1, duration: 0.8, stagger: 0.07, delay: 0.16, ease: 'power2.out'}
-      );
-    }, host);
-  }
-
   ngOnDestroy(): void {
-    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }

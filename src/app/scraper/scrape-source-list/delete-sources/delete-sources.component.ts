@@ -1,17 +1,14 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {Button} from 'primeng/button';
-import {DialogModule} from 'primeng/dialog';
+import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CheckboxComponent} from '../../../checkbox/checkbox.component';
 import {HttpService} from '../../../services/http.service';
 import {NotificationService} from '../../../services/notification-service.service';
 import {ScrapeSourceInfo} from '../../../models/ScrapeSourceInfo';
 import {ScrapeSourceDeleteSettings} from '../../../models/ScrapeSourceDeleteSettings';
-import {TooltipComponent} from '../../../tooltip/tooltip.component';
 import {ScrapeSourceFilterPanelComponent} from '../scrape-source-filter-panel/scrape-source-filter-panel.component';
 import {BulkScopeSelectorComponent} from '../../../shared/bulk-scope-selector/bulk-scope-selector.component';
 import {normalizeNumber} from '../../../shared/number-utils';
-import {animateDialogSections} from '../../../shared/dialog-motion';
+import {BulkActionDialogComponent} from '../../../shared/bulk-action-dialog/bulk-action-dialog.component';
 
 type DeleteSourcesFormDefaults = {
   filter: boolean;
@@ -27,17 +24,13 @@ type DeleteSourcesFormDefaults = {
   selector: 'app-delete-sources',
   standalone: true,
   imports: [
-    FormsModule,
     ReactiveFormsModule,
-    Button,
-    DialogModule,
     CheckboxComponent,
-    TooltipComponent,
     ScrapeSourceFilterPanelComponent,
     BulkScopeSelectorComponent,
+    BulkActionDialogComponent,
   ],
   templateUrl: './delete-sources.component.html',
-  styleUrls: ['./delete-sources.component.scss'],
 })
 export class DeleteSourcesComponent implements OnChanges {
   @Input() selectedSources: ScrapeSourceInfo[] = [];
@@ -100,10 +93,6 @@ export class DeleteSourcesComponent implements OnChanges {
 
     this.deleteOption = this.canDeleteSelected() ? 'selected' : 'all';
     this.dialogVisible = true;
-  }
-
-  animateDialog(): void {
-    animateDialogSections('delete-dialog');
   }
 
   closeDialog(): void {

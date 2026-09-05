@@ -1,16 +1,10 @@
-<div class="admin-blacklist-page">
+<app-admin-settings-shell class="admin-blacklist-page" [appRevealGroup]="revealSteps">
   <form [formGroup]="form" class="settings-stage" (ngSubmit)="onSubmit()">
-    <header class="admin-context">
-      <div class="admin-context__copy">
-        <span class="context-icon"><i class="pi pi-ban" aria-hidden="true"></i></span>
-        <div>
-          <span class="context-eyebrow">System defaults</span>
-          <h1>Global blacklist</h1>
-          <p>Keep blocked networks and websites out of every workspace.</p>
-        </div>
-      </div>
-      <div class="scope-badge"><span aria-hidden="true"></span>Applies globally</div>
-    </header>
+    <app-admin-settings-header
+      icon="pi pi-ban"
+      title="Global blacklist"
+      description="Keep blocked networks and websites out of every workspace."
+    ></app-admin-settings-header>
 
     <div class="settings-grid">
       <section class="settings-card settings-card--cadence">
@@ -146,18 +140,12 @@
       </section>
     </div>
 
-    <footer class="save-dock">
-      <div class="save-state" aria-live="polite">
-        <span class="save-state__dot" [class.is-dirty]="form.dirty" aria-hidden="true"></span>
-        <div>
-          @if (form.dirty) {
-            <strong>Unsaved global changes</strong><p>Saving new IP feeds starts an immediate scrape and purge.</p>
-          } @else {
-            <strong>Global blacklist is up to date</strong><p>Changes will appear here before you save.</p>
-          }
-        </div>
-      </div>
-      <p-button type="submit" label="Save global blacklist" icon="pi pi-check" [disabled]="!form.dirty || form.invalid" styleClass="save-button"></p-button>
-    </footer>
+    <app-admin-settings-save-dock
+      [dirty]="form.dirty"
+      [invalid]="form.invalid"
+      dirtyDescription="Saving new IP feeds starts an immediate scrape and purge."
+      pristineTitle="Global blacklist is up to date"
+      saveLabel="Save global blacklist"
+    ></app-admin-settings-save-dock>
   </form>
-</div>
+</app-admin-settings-shell>

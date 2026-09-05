@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Subject} from 'rxjs';
@@ -14,7 +14,8 @@ import {ToggleSwitchModule} from 'primeng/toggleswitch';
 import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
 import {NotificationService} from '../../../services/notification-service.service';
-import {gsap} from 'gsap';
+import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../../shared/duration-options';
+import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-plugin-geolite',
@@ -27,28 +28,30 @@ import {gsap} from 'gsap';
     InputTextModule,
     SelectModule,
     Message,
-    ToggleSwitchModule
+    ToggleSwitchModule,
+    RevealGroupDirective
   ],
   templateUrl: './plugin-geolite.component.html',
   styleUrl: './plugin-geolite.component.scss'
 })
-export class PluginGeoliteComponent implements OnInit, AfterViewInit, OnDestroy {
-  daysList = Array.from({ length: 31 }, (_, i) => ({ label: `${i} Days`, value: i }));
-  hoursList = Array.from({ length: 24 }, (_, i) => ({ label: `${i} Hours`, value: i }));
-  minutesList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Minutes`, value: i }));
-  secondsList = Array.from({ length: 60 }, (_, i) => ({ label: `${i} Seconds`, value: i }));
+export class PluginGeoliteComponent implements OnInit, OnDestroy {
+  readonly daysList = dayOptions;
+  readonly hoursList = hourOptions;
+  readonly minutesList = minuteOptions;
+  readonly secondsList = secondOptions;
+  readonly revealSteps: readonly RevealStep[] = [{
+    selector: '.admin-context, .settings-card, .save-dock',
+  }];
   form: FormGroup;
   lastUpdatedLabel = 'Never';
   pluginEnabled = signal(false);
   private destroy$ = new Subject<void>();
-  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
     private notification: NotificationService,
-    private cdr: ChangeDetectorRef,
-    private elementRef: ElementRef<HTMLElement>
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       enabled: [false],
@@ -83,22 +86,7 @@ export class PluginGeoliteComponent implements OnInit, AfterViewInit, OnDestroy 
     this.syncControlStates();
   }
 
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    this.animationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.admin-context, .settings-card, .save-dock',
-        {opacity: 0, y: 22, scale: 0.99},
-        {opacity: 1, y: 0, scale: 1, duration: 0.68, stagger: 0.06, ease: 'power3.out', clearProps: 'transform'}
-      );
-    }, this.elementRef.nativeElement);
-  }
-
   ngOnDestroy(): void {
-    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }

@@ -1,0 +1,96 @@
+<main class="inventory-page">
+  <section class="inventory-stage">
+    <header class="inventory-context">
+      <div class="inventory-context__copy">
+        <span class="context-icon"><i [class]="pageIcon" aria-hidden="true"></i></span>
+        <div>
+          <h1>{{ pageTitle }}</h1>
+          <p>{{ pageDescription }}</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="inventory-grid">
+      <div class="actions-wrapper">
+        <section class="inventory-toolbar" aria-labelledby="inventory-tools-title">
+          <div class="inventory-toolbar__topline">
+            <div class="card-heading">
+              <span class="card-icon"><i class="pi pi-sliders-h" aria-hidden="true"></i></span>
+              <div class="card-heading__copy">
+                <h2 id="inventory-tools-title">{{ toolbarTitle }}</h2>
+                <p>{{ toolbarDescription }}</p>
+              </div>
+            </div>
+
+            <div class="toolbar-actions" [attr.aria-label]="toolbarAriaLabel">
+              <ng-content select="[inventory-actions]"></ng-content>
+            </div>
+          </div>
+
+          <div class="search-bar">
+            <i class="pi pi-search" aria-hidden="true"></i>
+            <input
+              type="search"
+              class="inventory-search-input"
+              [placeholder]="searchPlaceholder"
+              [value]="searchTerm"
+              (input)="onSearchInput($event)"
+              [attr.aria-label]="searchAriaLabel"
+            />
+            @if (searchTerm) {
+              <button type="button" class="search-clear" aria-label="Clear search" (click)="clearSearch.emit()">
+                <i class="pi pi-times" aria-hidden="true"></i>
+              </button>
+            }
+            <span class="search-scope">Searches all pages</span>
+          </div>
+        </section>
+
+        <ng-content select="[inventory-overlays]"></ng-content>
+      </div>
+
+      <section class="inventory-card" aria-labelledby="inventory-list-title">
+        <div class="inventory-card__heading">
+          <div class="card-heading">
+            <span class="card-icon"><i [class]="resultIcon" aria-hidden="true"></i></span>
+            <div class="card-heading__copy">
+              <h2 id="inventory-list-title">{{ resultTitle }}</h2>
+              <p>{{ resultDescription }}</p>
+            </div>
+          </div>
+
+          <div class="inventory-state" [class.inventory-state--selected]="selectedCount > 0" aria-live="polite">
+            <span aria-hidden="true"></span>
+            @if (selectedCount > 0) {
+              {{ selectedCount }} selected
+            } @else if (hasLoaded) {
+              {{ totalItems.toLocaleString() }} total
+            } @else {
+              {{ loadingLabel }}
+            }
+          </div>
+        </div>
+
+        @if (isEmpty) {
+          <div class="empty-inventory">
+            <span class="empty-inventory__icon"><i class="pi pi-inbox" aria-hidden="true"></i></span>
+            <strong>{{ isFiltered ? filteredEmptyTitle : emptyTitle }}</strong>
+            <p>{{ isFiltered ? filteredEmptyDescription : emptyDescription }}</p>
+            @if (isFiltered) {
+              <div class="empty-inventory__actions">
+                @if (searchTerm) {
+                  <button type="button" class="button button--quiet" (click)="clearSearch.emit()">Clear search</button>
+                }
+                @if (activeFilters) {
+                  <button type="button" class="button button--primary" (click)="clearFilters.emit()">Clear filters</button>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <ng-content select="[inventory-table]"></ng-content>
+        }
+      </section>
+    </div>
+  </section>
+</main>
