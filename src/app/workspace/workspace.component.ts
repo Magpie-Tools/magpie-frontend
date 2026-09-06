@@ -1,5 +1,5 @@
 import {CommonModule, DatePipe, DecimalPipe, TitleCasePipe} from '@angular/common';
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal} from '@angular/core';
+import {Component, OnInit, computed, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {DialogModule} from 'primeng/dialog';
 import {SkeletonModule} from 'primeng/skeleton';
@@ -16,7 +16,7 @@ import {
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
-import {gsap} from 'gsap';
+import {RevealGroupDirective, RevealStep} from '../shared/reveal-group.directive';
 
 type InvitationRole = WorkspaceInvitation['role'];
 
@@ -29,6 +29,7 @@ interface OwnershipChange {
   selector: 'app-workspace',
   standalone: true,
   imports: [
+    RevealGroupDirective,
     CommonModule,
     FormsModule,
     DatePipe,
@@ -41,7 +42,7 @@ interface OwnershipChange {
   templateUrl: './workspace.component.html',
   styleUrl: './workspace.component.scss',
 })
-export class WorkspaceComponent implements OnInit, AfterViewInit, OnDestroy {
+export class WorkspaceComponent implements OnInit {
   readonly members = signal<WorkspaceMember[]>([]);
   readonly invitations = signal<WorkspaceInvitation[]>([]);
   readonly loadingMembers = signal(false);
@@ -77,40 +78,28 @@ export class WorkspaceComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly ownerMemberRoles: WorkspaceRole[] = ['owner', 'admin', 'operator', 'viewer'];
   readonly ownerInvitationRoles: InvitationRole[] = ['admin', 'operator', 'viewer'];
   readonly adminRoles: InvitationRole[] = ['operator', 'viewer'];
-  private animationContext?: gsap.Context;
+
+  readonly revealSteps: readonly RevealStep[] = [
+    {
+      selector: '.workspace-context, .workspace-card',
+      from: {opacity: 0, y: 26, scale: 0.985},
+      to: {opacity: 1, y: 0, scale: 1, duration: 0.72, stagger: 0.065, ease: 'power3.out', clearProps: 'transform'},
+    },
+    {
+      selector: '.workspace-avatar, .metric-value',
+      from: {opacity: 0, y: 0, scale: 0.78},
+      to: {opacity: 1, scale: 1, duration: 0.55, stagger: 0.05, delay: 0.18, ease: 'back.out(1.35)', clearProps: ''},
+    },
+  ];
 
   constructor(
     readonly workspaces: WorkspaceService,
     private readonly http: HttpService,
     private readonly notification: NotificationService,
-    private readonly elementRef: ElementRef<HTMLElement>,
   ) {}
 
   ngOnInit(): void {
     this.loadWorkspace();
-  }
-
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    this.animationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.workspace-context, .workspace-card',
-        {opacity: 0, y: 26, scale: 0.985},
-        {opacity: 1, y: 0, scale: 1, duration: 0.72, stagger: 0.065, ease: 'power3.out', clearProps: 'transform'},
-      );
-      gsap.fromTo(
-        '.workspace-avatar, .metric-value',
-        {opacity: 0, scale: 0.78},
-        {opacity: 1, scale: 1, duration: 0.55, stagger: 0.05, delay: 0.18, ease: 'back.out(1.35)'},
-      );
-    }, this.elementRef.nativeElement);
-  }
-
-  ngOnDestroy(): void {
-    this.animationContext?.revert();
   }
 
   loadWorkspace(force = false): void {

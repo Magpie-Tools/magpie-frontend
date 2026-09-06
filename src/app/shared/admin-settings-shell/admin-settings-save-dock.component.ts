@@ -1,16 +1,20 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, ViewEncapsulation} from '@angular/core';
 import {ButtonModule} from 'primeng/button';
 
 @Component({
   selector: 'app-admin-settings-save-dock',
   standalone: true,
   imports: [ButtonModule],
+  styleUrl: './admin-settings-save-dock.component.scss',
+  encapsulation: ViewEncapsulation.None,
   template: `
     <footer class="save-dock">
       <div class="save-state" aria-live="polite">
         <span class="save-state__dot" [class.is-dirty]="dirty" aria-hidden="true"></span>
         <div>
-          @if (dirty) {
+          @if (readOnly) {
+            <strong>{{ readOnlyTitle }}</strong><p>{{ readOnlyDescription }}</p>
+          } @else if (dirty) {
             <strong>{{ dirtyTitle }}</strong><p>{{ dirtyDescription }}</p>
           } @else {
             <strong>{{ pristineTitle }}</strong><p>{{ pristineDescription }}</p>
@@ -23,7 +27,7 @@ import {ButtonModule} from 'primeng/button';
           type="submit"
           [label]="saveLabel"
           icon="pi pi-check"
-          [disabled]="!dirty || invalid"
+          [disabled]="readOnly || !dirty || invalid"
           styleClass="save-button"
         ></p-button>
       </div>
@@ -31,6 +35,9 @@ import {ButtonModule} from 'primeng/button';
   `,
 })
 export class AdminSettingsSaveDockComponent {
+  @Input() readOnly = false;
+  @Input() readOnlyTitle = 'Viewer access';
+  @Input() readOnlyDescription = '';
   @Input() dirty = false;
   @Input() invalid = false;
   @Input() dirtyTitle = 'Unsaved global changes';

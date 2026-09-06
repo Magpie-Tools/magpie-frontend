@@ -1,3 +1,4 @@
+import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
 import {SourceFetchModeComponent} from '../source-fetch-mode/source-fetch-mode.component';
 import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
 import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, signal} from '@angular/core';
@@ -32,12 +33,11 @@ import {
   PROXY_REPUTATION_OPTIONS,
   PROXY_STATUS_OPTIONS,
   activeProxyFilterCount,
-  buildFilterOptionList,
   buildFiltersFromFormValue,
   buildProxyListFilterPayload,
   createDefaultProxyFilterValues,
+  createProxyFilterControls,
   createDefaultProxyListAppliedFilters,
-  normalizeFilterOptions,
   syncFilterFormWithApplied,
 } from '../../shared/proxy-filters';
 import {filter, finalize} from 'rxjs/operators';
@@ -122,23 +122,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     readonly workspaces: WorkspaceService,
   ) {
     this.filterForm = this.fb.group({
-      proxyStatus: [this.defaultFilterValues.proxyStatus],
-      http: [this.defaultFilterValues.http],
-      https: [this.defaultFilterValues.https],
-      socks4: [this.defaultFilterValues.socks4],
-      socks5: [this.defaultFilterValues.socks5],
-      minHealthOverall: [this.defaultFilterValues.minHealthOverall],
-      minHealthHttp: [this.defaultFilterValues.minHealthHttp],
-      minHealthHttps: [this.defaultFilterValues.minHealthHttps],
-      minHealthSocks4: [this.defaultFilterValues.minHealthSocks4],
-      minHealthSocks5: [this.defaultFilterValues.minHealthSocks5],
-      maxTimeout: [this.defaultFilterValues.maxTimeout],
-      maxRetries: [this.defaultFilterValues.maxRetries],
-      countries: [this.defaultFilterValues.countries],
-      types: [this.defaultFilterValues.types],
-      anonymityLevels: [this.defaultFilterValues.anonymityLevels],
-      reputationLabels: [this.defaultFilterValues.reputationLabels],
-      tagIds: [this.defaultFilterValues.tagIds],
+      ...createProxyFilterControls(this.defaultFilterValues),
     });
   }
 
@@ -613,20 +597,12 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     if (this.filterOptionsLoaded()) {
       return;
     }
-
-    this.http.getProxyFilterOptions().subscribe({
-      next: options => {
-        const normalized = normalizeFilterOptions(options);
-        this.filterOptions.set(normalized);
-        this.countryOptions.set(buildFilterOptionList(normalized.countries));
-        this.typeOptions.set(buildFilterOptionList(normalized.types));
-        this.anonymityOptions.set(buildFilterOptionList(normalized.anonymityLevels));
-        this.filterOptionsLoaded.set(true);
-      },
-      error: err => {
-        const message = err?.error?.message ?? err?.message ?? 'Unknown error';
-        this.notification.showError('Could not load filter options: ' + message);
-      }
+    loadProxyFilterOptions(this.http, this.notification).subscribe(options => {
+      this.filterOptions.set(options.filters);
+      this.countryOptions.set(options.countries);
+      this.typeOptions.set(options.types);
+      this.anonymityOptions.set(options.anonymityLevels);
+      this.filterOptionsLoaded.set(true);
     });
   }
 

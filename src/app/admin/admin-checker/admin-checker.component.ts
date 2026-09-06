@@ -274,18 +274,6 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     return this.settingsForm.get('judges') as FormArray;
   }
 
-  get blacklisted() {
-    return this.settingsForm.get('blacklisted') as FormArray;
-  }
-
-  get standardHeaders() {
-    return this.settingsForm.get('standard_header') as FormArray;
-  }
-
-  get proxyHeaders() {
-    return this.settingsForm.get('proxy_header') as FormArray;
-  }
-
   get selectedProtocolCount(): number {
     const protocols = this.settingsForm.get('protocols') as FormGroup;
     return this.protocolOptions.filter(option => !!protocols.get(option.control)?.value).length;
@@ -389,36 +377,6 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
 
   removeJudge(index: number): void {
     this.judges.removeAt(index);
-    this.settingsForm.markAsDirty();
-  }
-
-  addBlacklistedUrl(): void {
-    this.blacklisted.push(this.fb.control(''));
-    this.settingsForm.markAsDirty();
-  }
-
-  removeBlacklistedUrl(index: number): void {
-    this.blacklisted.removeAt(index);
-    this.settingsForm.markAsDirty();
-  }
-
-  addStandardHeader(): void {
-    this.standardHeaders.push(this.fb.control(''));
-    this.settingsForm.markAsDirty();
-  }
-
-  removeStandardHeader(index: number): void {
-    this.standardHeaders.removeAt(index);
-    this.settingsForm.markAsDirty();
-  }
-
-  addProxyHeader(): void {
-    this.proxyHeaders.push(this.fb.control(''));
-    this.settingsForm.markAsDirty();
-  }
-
-  removeProxyHeader(index: number): void {
-    this.proxyHeaders.removeAt(index);
     this.settingsForm.markAsDirty();
   }
 

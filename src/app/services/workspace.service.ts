@@ -91,24 +91,6 @@ export class WorkspaceService {
     this.clearWorkspaceId();
   }
 
-  updateCachedWorkspace(updated: Workspace): void {
-    this.workspaces.update(workspaces => workspaces.map(workspace => workspace.id === updated.id ? updated : workspace));
-    if (this.current()?.id === updated.id) {
-      this.current.set(updated);
-    }
-  }
-
-  capacityLabel(workspace = this.current()): string {
-    if (!workspace) {
-      return '';
-    }
-    const active = workspace.capacity.active_routes.toLocaleString();
-    const limit = workspace.capacity.activation_limit;
-    return limit === null
-      ? `${active} active routes`
-      : `${active} of ${limit.toLocaleString()} active routes`;
-  }
-
   private setInitialWorkspace(workspaces: Workspace[]): void {
     if (workspaces.length === 0) {
       this.current.set(null);

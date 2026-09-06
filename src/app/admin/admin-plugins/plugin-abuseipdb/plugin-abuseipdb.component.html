@@ -75,18 +75,14 @@
       </section>
     </div>
 
-    <footer class="save-dock">
-      <div class="save-state" aria-live="polite">
-        <span class="save-state__dot" [class.is-dirty]="form.dirty" aria-hidden="true"></span>
-        <div>
-          @if (form.dirty) {
-            <strong>Unsaved AbuseIPDB changes</strong><p>New credentials and report policy apply after saving.</p>
-          } @else {
-            <strong>AbuseIPDB is up to date</strong><p>Quota health refreshes automatically every hour.</p>
-          }
-        </div>
-      </div>
-      <p-button type="submit" label="Save AbuseIPDB settings" icon="pi pi-check" [disabled]="form.invalid || form.pristine" styleClass="save-button"></p-button>
-    </footer>
+    <app-admin-settings-save-dock
+      [dirty]="form.dirty"
+      [invalid]="form.invalid"
+      dirtyTitle="Unsaved AbuseIPDB changes"
+      dirtyDescription="New credentials and report policy apply after saving."
+      pristineTitle="AbuseIPDB is up to date"
+      pristineDescription="Quota health refreshes automatically every hour."
+      saveLabel="Save AbuseIPDB settings"
+    ></app-admin-settings-save-dock>
   </form>
 </div>

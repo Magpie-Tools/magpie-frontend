@@ -889,7 +889,7 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       return JSON.stringify(
         value,
-        (key, val) => {
+        (_key, val) => {
           if (typeof val === 'number') {
             if (!Number.isFinite(val)) {
               return val;

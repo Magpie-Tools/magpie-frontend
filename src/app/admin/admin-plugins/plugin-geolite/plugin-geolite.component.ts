@@ -1,10 +1,10 @@
+import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
 
-import {ButtonModule} from 'primeng/button';
 import {CheckboxModule} from 'primeng/checkbox';
 import {InputTextModule} from 'primeng/inputtext';
 import {SelectModule} from 'primeng/select';
@@ -21,9 +21,9 @@ import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.dir
   selector: 'app-plugin-geolite',
   standalone: true,
   imports: [
+    AdminSettingsSaveDockComponent,
     RouterLink,
     ReactiveFormsModule,
-    ButtonModule,
     CheckboxModule,
     InputTextModule,
     SelectModule,

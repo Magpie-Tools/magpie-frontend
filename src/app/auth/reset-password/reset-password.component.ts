@@ -1,3 +1,4 @@
+import {getHttpErrorMessage} from '../../shared/http-error';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -68,32 +69,8 @@ export class ResetPasswordComponent {
         this.router.navigate(['/login']);
       },
       error: (error: HttpErrorResponse) => {
-        this.notification.showError(`Could not reset password: ${this.getErrorMessage(error)}`);
+        this.notification.showError(`Could not reset password: ${getHttpErrorMessage(error)}`);
       }
     });
-  }
-
-  private getErrorMessage(error: HttpErrorResponse): string {
-    const apiError = error.error;
-
-    if (typeof apiError === 'string' && apiError.trim().length > 0) {
-      return apiError;
-    }
-
-    if (apiError && typeof apiError === 'object') {
-      const structuredError = apiError as { error?: unknown; message?: unknown };
-      if (typeof structuredError.error === 'string' && structuredError.error.trim().length > 0) {
-        return structuredError.error;
-      }
-      if (typeof structuredError.message === 'string' && structuredError.message.trim().length > 0) {
-        return structuredError.message;
-      }
-    }
-
-    if (error.status === 0) {
-      return 'Unable to reach the server';
-    }
-
-    return error.message?.trim() || `Request failed with status ${error.status}`;
   }
 }

@@ -87,18 +87,14 @@
       </section>
     </div>
 
-    <footer class="save-dock">
-      <div class="save-state" aria-live="polite">
-        <span class="save-state__dot" [class.is-dirty]="form.dirty" aria-hidden="true"></span>
-        <div>
-          @if (form.dirty) {
-            <strong>Unsaved GeoLite changes</strong><p>Saving can start an immediate database refresh.</p>
-          } @else {
-            <strong>GeoLite is up to date</strong><p>Changes will appear here before you save.</p>
-          }
-        </div>
-      </div>
-      <p-button type="submit" label="Save GeoLite settings" icon="pi pi-check" [disabled]="form.invalid || form.pristine" styleClass="save-button"></p-button>
-    </footer>
+    <app-admin-settings-save-dock
+      [dirty]="form.dirty"
+      [invalid]="form.invalid"
+      dirtyTitle="Unsaved GeoLite changes"
+      dirtyDescription="Saving can start an immediate database refresh."
+      pristineTitle="GeoLite is up to date"
+      pristineDescription="Changes will appear here before you save."
+      saveLabel="Save GeoLite settings"
+    ></app-admin-settings-save-dock>
   </form>
 </div>

@@ -18,7 +18,7 @@ export class CheckboxComponent implements ControlValueAccessor  {
   @Input() label: string = '';
 
   value: boolean = false;
-  onChange = (value: boolean) => {};
+  onChange = (_value: boolean) => {};
   onTouched = () => {};
 
   uniqueId: string = `checkbox-${Math.random().toString(36).substring(2, 15)}`;

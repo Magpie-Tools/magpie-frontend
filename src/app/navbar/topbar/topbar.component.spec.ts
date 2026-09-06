@@ -25,7 +25,6 @@ describe('TopbarComponent', () => {
             loading: signal(false),
             load: () => of([]),
             switchTo: () => of(undefined),
-            capacityLabel: () => '',
           },
         },
         {

@@ -1,3 +1,4 @@
+import {PageScrollTarget, readPageSize, writePageSize, readPageScrollTarget, writePageScrollTarget, scrollTableToPageTarget} from '../../shared/table-pagination';
 import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
 import {
   Component,
@@ -66,7 +67,6 @@ type ScrapeSourceAppliedFilters = {
   aliveCountOperator: '<' | '>';
   aliveCount: number;
 };
-type PageScrollTarget = 'top' | 'bottom';
 
 @Component({
   selector: 'app-scrape-source-list',
@@ -382,11 +382,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Helper method to get selection count
-  getSelectionCount(): number {
-    return this.selection.selected.length;
-  }
-
   toggleSelection(source: ScrapeSourceView): void {
     this.selection.toggle(source);
     this.selectedScrapeSources = [...this.selection.selected];
@@ -533,10 +528,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
       .filter(column => this.respectRobotsEnabled || column.id !== 'robots_check');
   }
 
-  tableColumnCount(): number {
-    return this.tableColumns().length + 1;
-  }
-
   trackByColumn(_index: number, column: ScrapeSourceListColumnDefinition): ScrapeSourceListColumnId {
     return column.id;
   }
@@ -642,133 +633,23 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   }
 
   private getStoredPageScrollTarget(): PageScrollTarget | null {
-    try {
-      const storage = this.getStorage();
-      if (!storage) {
-        return null;
-      }
-
-      const raw = storage.getItem(this.pageScrollTargetStorageKey);
-      return this.isPageScrollTarget(raw) ? raw : null;
-    } catch {
-      return null;
-    }
+    return readPageScrollTarget(this.pageScrollTargetStorageKey);
   }
 
   private persistPageScrollTarget(target: PageScrollTarget): void {
-    try {
-      const storage = this.getStorage();
-      if (!storage) {
-        return;
-      }
-
-      storage.setItem(this.pageScrollTargetStorageKey, target);
-    } catch {
-      // ignore persistence errors (private browsing, SSR)
-    }
+    writePageScrollTarget(this.pageScrollTargetStorageKey, target);
   }
 
   private getStoredPageSize(): number | null {
-    try {
-      const storage = this.getStorage();
-      if (!storage) {
-        return null;
-      }
-      const raw = storage.getItem(this.pageSizeStorageKey);
-      if (!raw) {
-        return null;
-      }
-      const parsed = Number(raw);
-      if (!Number.isFinite(parsed) || parsed <= 0) {
-        return null;
-      }
-      if (!this.rowsPerPageOptions.includes(parsed)) {
-        return null;
-      }
-      return parsed;
-    } catch {
-      return null;
-    }
+    return readPageSize(this.pageSizeStorageKey, this.rowsPerPageOptions);
   }
 
   private persistPageSize(size: number): void {
-    if (!Number.isFinite(size) || size <= 0) {
-      return;
-    }
-    try {
-      const storage = this.getStorage();
-      if (!storage) {
-        return;
-      }
-      storage.setItem(this.pageSizeStorageKey, size.toString());
-    } catch {
-      // ignore persistence errors (private browsing, SSR)
-    }
-  }
-
-  private isPageScrollTarget(value: string | null): value is PageScrollTarget {
-    return value === 'top' || value === 'bottom';
-  }
-
-  private getStorage(): Storage | null {
-    if (typeof window === 'undefined' || !window?.localStorage) {
-      return null;
-    }
-
-    return window.localStorage;
+    writePageSize(this.pageSizeStorageKey, size);
   }
 
   private scrollToPageTarget(): void {
-    const root = this.scrapeSourceTableRoot?.nativeElement;
-    if (!root || typeof window === 'undefined') {
-      return;
-    }
-
-    const innerScroller = root.querySelector<HTMLElement>('.p-datatable-wrapper');
-    if (innerScroller && innerScroller.scrollHeight > innerScroller.clientHeight) {
-      innerScroller.scrollTo({
-        top: this.pageScrollTarget === 'top' ? 0 : innerScroller.scrollHeight,
-        behavior: 'auto',
-      });
-    }
-
-    const scrollContainer = this.getScrollContainer(root);
-    if (!scrollContainer) {
-      window.scrollTo({
-        top: this.pageScrollTarget === 'top'
-          ? root.getBoundingClientRect().top + window.scrollY
-          : root.getBoundingClientRect().bottom + window.scrollY - window.innerHeight,
-        left: 0,
-        behavior: 'auto',
-      });
-      return;
-    }
-
-    const rootRect = root.getBoundingClientRect();
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const currentTop = scrollContainer.scrollTop;
-    const targetTop = this.pageScrollTarget === 'top'
-      ? currentTop + rootRect.top - containerRect.top
-      : currentTop + rootRect.bottom - containerRect.bottom;
-
-    scrollContainer.scrollTo({
-      top: Math.max(0, targetTop),
-      behavior: 'auto',
-    });
-  }
-
-  private getScrollContainer(start: HTMLElement): HTMLElement | null {
-    let parent = start.parentElement;
-    while (parent) {
-      const style = window.getComputedStyle(parent);
-      const overflowY = style.overflowY;
-      const canScroll = /(auto|scroll)/.test(overflowY) && parent.scrollHeight > parent.clientHeight;
-      if (canScroll) {
-        return parent;
-      }
-      parent = parent.parentElement;
-    }
-    return null;
+    scrollTableToPageTarget(this.scrapeSourceTableRoot?.nativeElement, this.pageScrollTarget);
   }
 
   private createDefaultFilterValues(): ScrapeSourceFilterFormValues {

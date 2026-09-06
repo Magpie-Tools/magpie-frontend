@@ -16,7 +16,7 @@ export class AuthLoginGuardService implements CanActivate, CanActivateChild {
     private userService: UserService
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> {
+  canActivate(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean | UrlTree> {
     const token = getAuthToken();
     const authState = UserService.authState();
 

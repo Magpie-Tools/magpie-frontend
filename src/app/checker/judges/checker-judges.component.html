@@ -120,27 +120,16 @@
       </section>
     </div>
 
-    <footer class="save-dock">
-      <div class="save-state" aria-live="polite">
-        <span class="save-state__dot" [class.is-dirty]="judgesForm.dirty" aria-hidden="true"></span>
-        <div>
-          @if (!workspaces.canOperate()) {
-            <strong>Viewer access</strong><p>You can inspect these judges, but you cannot change them.</p>
-          } @else if (judgesForm.dirty) {
-            <strong>Unsaved judge changes</strong><p>Save when the endpoint list looks right.</p>
-          } @else {
-            <strong>Judges are up to date</strong><p>Changes will appear here before you save.</p>
-          }
-        </div>
-      </div>
-
-      <p-button
-        type="submit"
-        label="Save judges"
-        icon="pi pi-check"
-        [disabled]="!workspaces.canOperate() || !judgesForm.dirty || judgesForm.invalid"
-        styleClass="save-judges-button"
-      ></p-button>
-    </footer>
+    <app-admin-settings-save-dock
+      [dirty]="judgesForm.dirty"
+      [invalid]="judgesForm.invalid"
+      dirtyTitle="Unsaved judge changes"
+      dirtyDescription="Save when the endpoint list looks right."
+      pristineTitle="Judges are up to date"
+      pristineDescription="Changes will appear here before you save."
+      saveLabel="Save judges"
+      [readOnly]="!workspaces.canOperate()"
+      readOnlyDescription="You can inspect these judges, but you cannot change them."
+    ></app-admin-settings-save-dock>
   </form>
 </div>

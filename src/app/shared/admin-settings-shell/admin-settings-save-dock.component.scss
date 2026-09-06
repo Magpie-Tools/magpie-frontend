@@ -1,0 +1,104 @@
+app-admin-settings-save-dock {
+  display: contents;
+  .save-dock {
+    position: sticky;
+    z-index: 8;
+    bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.95rem;
+    padding: 0.85rem 0.9rem 0.85rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 1.15rem;
+    background: rgba(10, 10, 12, 0.9);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(18px);
+  }
+
+  .save-state {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+
+    strong {
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 0.72rem;
+      font-weight: 580;
+    }
+
+    p {
+      margin: 0.12rem 0 0;
+      color: rgba(255, 255, 255, 0.38);
+      font-size: 0.63rem;
+    }
+  }
+
+  .save-state__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--theme-primary-300);
+    box-shadow: 0 0 0 0.3rem rgba(var(--theme-primary-500-rgb), 0.1);
+
+    &.is-dirty {
+      background: #d9a6cb;
+      box-shadow: 0 0 0 0.3rem rgba(217, 166, 203, 0.12), 0 0 1rem rgba(217, 166, 203, 0.3);
+    }
+  }
+
+  .save-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .save-button.p-button {
+    border-color: rgba(var(--theme-primary-300-rgb), 0.44);
+    background: linear-gradient(135deg, var(--theme-primary-600), var(--theme-primary-800));
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(var(--theme-primary-500-rgb), 0.18);
+
+    &:hover:not(:disabled) {
+      border-color: rgba(var(--theme-primary-200-rgb), 0.62);
+      box-shadow: 0 14px 30px rgba(var(--theme-primary-500-rgb), 0.26);
+      transform: translateY(-2px);
+    }
+  }
+
+  .save-button.p-button {
+    min-height: 2.7rem;
+    padding: 0.72rem 1rem;
+    border-radius: 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 580;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+}
+
+@container (max-width: 560px) {
+  app-admin-settings-save-dock {
+    .save-dock { align-items: stretch; flex-direction: column; }
+    .save-actions, .save-actions > *, .save-button.p-button { width: 100%; justify-content: center; }
+  }
+}
+
+@container (max-width: 760px) {
+  app-admin-settings-shell app-admin-settings-save-dock {
+    .save-dock { align-items: stretch; flex-direction: column; }
+    .save-actions { width: auto; justify-content: flex-end; }
+    .save-actions > *, .save-button.p-button { width: auto; }
+  }
+}
+
+@container (max-width: 520px) {
+  app-admin-settings-shell app-admin-settings-save-dock {
+    .save-actions { width: 100%; flex-direction: column; }
+    .save-actions > *, .save-button.p-button { width: 100%; justify-content: center; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  app-admin-settings-save-dock .save-button.p-button { transition: none; }
+}

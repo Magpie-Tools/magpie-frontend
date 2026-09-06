@@ -10,7 +10,6 @@ import {ExportSettings} from '../models/ExportSettings';
 import {ScrapeSourceExportSettings} from '../models/ScrapeSourceExportSettings';
 import {ScrapeSourceInfo} from '../models/ScrapeSourceInfo';
 import {ScrapeSourceDetail} from '../models/ScrapeSourceDetail';
-import {DashboardInfo} from '../models/DashboardInfo';
 import {ChangePassword} from '../models/ChangePassword';
 import {DeleteAccount} from '../models/DeleteAccount';
 import {ProxyDetail} from '../models/ProxyDetail';
@@ -222,10 +221,6 @@ export class HttpService {
     );
   }
 
-  getProxyCount() {
-    return this.http.get<number>(this.apiUrl + '/getProxyCount');
-  }
-
   getProxyDetail(proxyId: number) {
     return this.http.get<ProxyDetail>(`${this.apiUrl}/proxies/${proxyId}`);
   }
@@ -309,10 +304,6 @@ export class HttpService {
 
   saveUserSettings(payload: UserSettings) {
     return this.http.post(this.apiUrl + "/user/settings", payload)
-  }
-
-  saveUserScrapingSites(payload: string[]) {
-    return this.http.post(this.apiUrl + "/user/scrapingSites", payload)
   }
 
   getUserRole() {
@@ -420,10 +411,6 @@ export class HttpService {
 
   getRespectRobotsSetting() {
     return this.http.get<{respect_robots_txt: boolean}>(this.apiUrl + '/scrapingSources/respectRobots');
-  }
-
-  getDashboardInfo() {
-    return this.http.get<DashboardInfo>(this.apiUrl + '/getDashboardInfo');
   }
 
   private appendProxyFilterParams(params: HttpParams, filters?: ProxyListFilters): HttpParams {

@@ -102,28 +102,6 @@ export class SettingsService {
     );
   }
 
-  getScraperSettings(): Observable<GlobalSettings['scraper']> {
-    return this.settings$.pipe(
-      filter((settings): settings is GlobalSettings => settings !== undefined),
-      map(settings => settings.scraper)
-    );
-  }
-
-  getProxyLimitSettings(): Observable<GlobalSettings['proxy_limits']> {
-    return this.settings$.pipe(
-      filter((settings): settings is GlobalSettings => settings !== undefined),
-      map(settings => settings.proxy_limits)
-    );
-  }
-
-  getProtocols(): GlobalSettings["protocols"] | undefined {
-    return this.settings?.protocols;
-  }
-
-  getBlacklistSources(): string[] | undefined {
-    return this.settings?.blacklist_sources;
-  }
-
   requeueAllProxies(): Observable<{message: string; proxy_count: number}> {
     return this.http.requeueAllProxies();
   }
@@ -203,14 +181,6 @@ export class SettingsService {
         })
       ))
     );
-  }
-
-  saveUserScrapingSources(sources: string[]): Observable<any> {
-    if (this.userSettings) {
-      this.userSettings.scraping_sources = sources
-      this.userSettingsSubject.next(this.userSettings);
-    }
-    return this.http.saveUserScrapingSites(sources)
   }
 
   private transformUserSettings(formData: any): UserSettings {

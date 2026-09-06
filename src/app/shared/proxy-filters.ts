@@ -321,3 +321,40 @@ export function normalizeIdSelection(values: number[] | null | undefined): numbe
 export function normalizePercentage(value: number | string | null | undefined): number {
   return Math.min(100, normalizeNumber(value));
 }
+
+export function buildBulkProxyFilters(formValue: ProxyListFilterFormValues, filtersEnabled: boolean): ProxyListFilterFormValues & {filter: boolean} {
+  const reputationSelection = filtersEnabled ? normalizeSelection(formValue.reputationLabels) : [];
+  return {
+    filter: filtersEnabled,
+    http: filtersEnabled ? Boolean(formValue.http) : false,
+    https: filtersEnabled ? Boolean(formValue.https) : false,
+    socks4: filtersEnabled ? Boolean(formValue.socks4) : false,
+    socks5: filtersEnabled ? Boolean(formValue.socks5) : false,
+    minHealthOverall: filtersEnabled ? normalizePercentage(formValue.minHealthOverall) : 0,
+    minHealthHttp: filtersEnabled ? normalizePercentage(formValue.minHealthHttp) : 0,
+    minHealthHttps: filtersEnabled ? normalizePercentage(formValue.minHealthHttps) : 0,
+    minHealthSocks4: filtersEnabled ? normalizePercentage(formValue.minHealthSocks4) : 0,
+    minHealthSocks5: filtersEnabled ? normalizePercentage(formValue.minHealthSocks5) : 0,
+    maxRetries: filtersEnabled ? normalizeNumber(formValue.maxRetries) : 0,
+    maxTimeout: filtersEnabled ? normalizeNumber(formValue.maxTimeout) : 0,
+    countries: filtersEnabled ? normalizeSelection(formValue.countries) : [],
+    types: filtersEnabled ? normalizeSelection(formValue.types) : [],
+    anonymityLevels: filtersEnabled ? normalizeSelection(formValue.anonymityLevels) : [],
+    proxyStatus: filtersEnabled ? (formValue.proxyStatus ?? 'all') : 'all',
+    reputationLabels: reputationSelection,
+    tagIds: filtersEnabled ? normalizeIdSelection(formValue.tagIds) : [],
+  };
+}
+
+type ProxyFilterControls = {
+  [Key in keyof ProxyListFilterFormValues]: [ProxyListFilterFormValues[Key]];
+};
+
+export function createProxyFilterControls(values: ProxyListFilterFormValues): ProxyFilterControls {
+  const keys = Object.keys(createDefaultProxyFilterValues()) as Array<keyof ProxyListFilterFormValues>;
+  const entries = keys.map(key => {
+    const value = values[key];
+    return [key, [Array.isArray(value) ? [...value] : value]];
+  });
+  return Object.fromEntries(entries) as ProxyFilterControls;
+}

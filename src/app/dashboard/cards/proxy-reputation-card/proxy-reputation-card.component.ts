@@ -67,22 +67,4 @@ export class ProxyReputationCardComponent {
       };
     });
   }
-
-  trackByKey(_: number, item: { key: keyof ReputationBreakdown }): string {
-    return item.key;
-  }
-
-  proxyBadgeClass(label: string | null | undefined): string {
-    const normalized = (label ?? '').toLowerCase();
-    if (normalized === 'good') {
-      return 'badge badge--good';
-    }
-    if (normalized === 'neutral') {
-      return 'badge badge--neutral';
-    }
-    if (normalized === 'poor') {
-      return 'badge badge--poor';
-    }
-    return 'badge';
-  }
 }

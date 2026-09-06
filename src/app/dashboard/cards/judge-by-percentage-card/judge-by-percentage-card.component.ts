@@ -19,10 +19,6 @@ type TrafficMap = Record<string, number>;
 export class JudgeByPercentageCardComponent {
   @Input({ required: true }) data!: TrafficMap;
 
-  /** Optional: control the period dropdown. */
-  @Input() periodOptions = ['Yearly', 'Quarterly', 'Monthly'];
-  selectedPeriod = this.periodOptions[0];
-
   /** Cache avoids recomputing colors for keys we already processed. */
   private colorCache = new Map<string, string>();
 

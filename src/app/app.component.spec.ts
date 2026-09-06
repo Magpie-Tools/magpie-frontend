@@ -16,6 +16,13 @@ describe('AppComponent', () => {
     }).compileComponents();
   });
 
+  it('constructs the session service even without rendering a routed view', () => {
+    const initializeSession = jasmine.createSpy('initializeSession').and.returnValue({});
+    TestBed.overrideProvider(UserService, {useFactory: initializeSession});
+    TestBed.createComponent(AppComponent);
+    expect(initializeSession).toHaveBeenCalledTimes(1);
+  });
+
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;

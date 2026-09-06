@@ -117,13 +117,6 @@
 .last-update i { color: var(--theme-primary-300); }
 .last-update strong { color: rgba(255, 255, 255, 0.72); font-weight: 570; text-align: right; }
 
-.save-dock { position: sticky; z-index: 8; bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.95rem; padding: 0.85rem 0.9rem 0.85rem 1rem; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 1.15rem; background: rgba(10, 10, 12, 0.9); box-shadow: 0 22px 50px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.04); backdrop-filter: blur(18px); }
-.save-state { display: flex; align-items: center; gap: 0.7rem; }
-.save-state strong { color: rgba(255, 255, 255, 0.82); font-size: 0.72rem; font-weight: 580; }
-.save-state p { margin: 0.12rem 0 0; color: rgba(255, 255, 255, 0.38); font-size: 0.63rem; }
-.save-state__dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--theme-primary-300); box-shadow: 0 0 0 0.3rem rgba(var(--theme-primary-500-rgb), 0.1); }
-.save-state__dot.is-dirty { background: #d9a6cb; box-shadow: 0 0 0 0.3rem rgba(217, 166, 203, 0.12), 0 0 1rem rgba(217, 166, 203, 0.3); }
-
 :host ::ng-deep {
   .p-inputtext,
   .p-select { width: 100%; min-height: 2.65rem; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 0.82rem; background: rgba(255, 255, 255, 0.035); color: rgba(255, 255, 255, 0.88); font-size: 0.76rem; box-shadow: none; }
@@ -135,8 +128,6 @@
   .p-toggleswitch-slider { border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.1); }
   .p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider { border-color: rgba(var(--theme-primary-300-rgb), 0.45); background: var(--theme-primary-700); }
   .p-message { display: flex; margin-top: 0.75rem; border: 1px solid rgba(231, 184, 108, 0.25); border-radius: 0.75rem; background: rgba(121, 78, 16, 0.1); color: rgba(250, 219, 168, 0.82); font-size: 0.66rem; }
-  .save-button.p-button { min-height: 2.7rem; padding: 0.72rem 1rem; border: 1px solid rgba(var(--theme-primary-300-rgb), 0.44); border-radius: 0.8rem; background: linear-gradient(135deg, var(--theme-primary-600), var(--theme-primary-800)); color: #fff; font-size: 0.7rem; font-weight: 580; box-shadow: 0 10px 24px rgba(var(--theme-primary-500-rgb), 0.18); transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
-  .save-button.p-button:hover:not(:disabled) { border-color: rgba(var(--theme-primary-200-rgb), 0.62); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(var(--theme-primary-500-rgb), 0.26); }
 }
 
 @container plugin-geolite (max-width: 940px) {
@@ -163,8 +154,6 @@
   .timer-grid { grid-template-columns: minmax(0, 1fr); }
   .last-update { align-items: flex-start; flex-direction: column; }
   .last-update strong { text-align: left; }
-  .save-dock { align-items: stretch; flex-direction: column; }
-  :host ::ng-deep .save-button.p-button { width: 100%; justify-content: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -121,7 +121,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly proxyLineI18n: ProxyLineI18n;
 
   judgeTrafficData = signal<Record<string, number>>({});
-  judgePeriodOptions = ['Yearly', 'Monthly', 'Weekly'];
 
   private readonly destroy$ = new Subject<void>();
   private animationContext?: gsap.Context;
@@ -129,7 +128,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly kpiSkeletons = Array.from({ length: 3 });
   readonly historySkeletons = Array.from({ length: 6 });
   readonly countrySkeletons = Array.from({ length: 5 });
-  readonly reputationSkeletons = Array.from({ length: 4 });
 
   constructor(
     private graphqlService: GraphqlService,

@@ -1,3 +1,4 @@
+import {loadProxyFilterOptions} from '../../../shared/proxy-filter-options';
 
 import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -13,13 +14,9 @@ import {
   PROXY_STATUS_OPTIONS,
   ProxyFilterOption,
   ProxyListFilterFormValues,
-  buildFilterOptionList,
   createDefaultProxyFilterValues,
-  normalizeFilterOptions,
-  normalizeIdSelection,
-  normalizeNumber,
-  normalizePercentage,
-  normalizeSelection,
+  createProxyFilterControls,
+  buildBulkProxyFilters,
 } from '../../../shared/proxy-filters';
 import {ProxyTag} from '../../../models/ProxyTag';
 import {BulkScopeSelectorComponent} from '../../../shared/bulk-scope-selector/bulk-scope-selector.component';
@@ -89,23 +86,9 @@ export class ExportProxiesComponent implements OnChanges {
     this.exportForm = this.fb.group({
       output: [this.defaultFormValues.output, Validators.required],
       filter: [this.defaultFormValues.filter],
-      proxyStatus: [this.defaultFormValues.proxyStatus],
-      http: [this.defaultFormValues.http],
-      https: [this.defaultFormValues.https],
-      socks4: [this.defaultFormValues.socks4],
-      socks5: [this.defaultFormValues.socks5],
-      minHealthOverall: [this.defaultFormValues.minHealthOverall],
-      minHealthHttp: [this.defaultFormValues.minHealthHttp],
-      minHealthHttps: [this.defaultFormValues.minHealthHttps],
-      minHealthSocks4: [this.defaultFormValues.minHealthSocks4],
-      minHealthSocks5: [this.defaultFormValues.minHealthSocks5],
+      ...createProxyFilterControls(this.defaultFormValues),
       maxTimeout: [this.defaultFormValues.maxTimeout, Validators.required],
       maxRetries: [this.defaultFormValues.maxRetries, Validators.required],
-      countries: [this.defaultFormValues.countries],
-      types: [this.defaultFormValues.types],
-      anonymityLevels: [this.defaultFormValues.anonymityLevels],
-      reputationLabels: [this.defaultFormValues.reputationLabels],
-      tagIds: [this.defaultFormValues.tagIds],
     });
   }
 
@@ -223,28 +206,10 @@ export class ExportProxiesComponent implements OnChanges {
     const formValue = exportForm.getRawValue();
     const proxyIds = scope === 'selected' ? proxies.map(proxy => proxy.id) : [];
     const filtersEnabled = Boolean(formValue.filter);
-    const reputationSelection = filtersEnabled ? normalizeSelection(formValue.reputationLabels) : [];
 
     return {
       proxies: proxyIds,
-      filter: filtersEnabled,
-      http: filtersEnabled ? Boolean(formValue.http) : false,
-      https: filtersEnabled ? Boolean(formValue.https) : false,
-      socks4: filtersEnabled ? Boolean(formValue.socks4) : false,
-      socks5: filtersEnabled ? Boolean(formValue.socks5) : false,
-      minHealthOverall: filtersEnabled ? normalizePercentage(formValue.minHealthOverall) : 0,
-      minHealthHttp: filtersEnabled ? normalizePercentage(formValue.minHealthHttp) : 0,
-      minHealthHttps: filtersEnabled ? normalizePercentage(formValue.minHealthHttps) : 0,
-      minHealthSocks4: filtersEnabled ? normalizePercentage(formValue.minHealthSocks4) : 0,
-      minHealthSocks5: filtersEnabled ? normalizePercentage(formValue.minHealthSocks5) : 0,
-      maxRetries: filtersEnabled ? normalizeNumber(formValue.maxRetries) : 0,
-      maxTimeout: filtersEnabled ? normalizeNumber(formValue.maxTimeout) : 0,
-      countries: filtersEnabled ? normalizeSelection(formValue.countries) : [],
-      types: filtersEnabled ? normalizeSelection(formValue.types) : [],
-      anonymityLevels: filtersEnabled ? normalizeSelection(formValue.anonymityLevels) : [],
-      proxyStatus: filtersEnabled ? (formValue.proxyStatus ?? 'all') : 'all',
-      reputationLabels: reputationSelection,
-      tagIds: filtersEnabled ? normalizeIdSelection(formValue.tagIds) : [],
+      ...buildBulkProxyFilters(formValue, filtersEnabled),
       outputFormat: formValue.output
     };
   }
@@ -253,20 +218,12 @@ export class ExportProxiesComponent implements OnChanges {
     if (this.filterOptionsLoaded) {
       return;
     }
-
-    this.http.getProxyFilterOptions().subscribe({
-      next: options => {
-        const normalized = normalizeFilterOptions(options);
-        this.countryOptions = buildFilterOptionList(normalized.countries);
-        this.typeOptions = buildFilterOptionList(normalized.types);
-        this.anonymityOptions = buildFilterOptionList(normalized.anonymityLevels);
-        this.tagOptions = normalized.tags ?? [];
-        this.filterOptionsLoaded = true;
-      },
-      error: err => {
-        const message = err?.error?.message ?? err?.message ?? 'Unknown error';
-        this.notification.showError('Could not load filter options: ' + message);
-      }
+    loadProxyFilterOptions(this.http, this.notification).subscribe(options => {
+      this.countryOptions = options.countries;
+      this.typeOptions = options.types;
+      this.anonymityOptions = options.anonymityLevels;
+      this.tagOptions = options.filters.tags ?? [];
+      this.filterOptionsLoaded = true;
     });
   }
 

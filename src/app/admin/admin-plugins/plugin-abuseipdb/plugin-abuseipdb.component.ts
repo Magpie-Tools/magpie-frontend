@@ -1,10 +1,10 @@
+import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Subject, interval} from 'rxjs';
 import {filter, startWith, takeUntil} from 'rxjs/operators';
 
-import {ButtonModule} from 'primeng/button';
 import {InputTextModule} from 'primeng/inputtext';
 import {InputNumberModule} from 'primeng/inputnumber';
 import {ToggleSwitchModule} from 'primeng/toggleswitch';
@@ -18,9 +18,9 @@ import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.dir
   selector: 'app-plugin-abuseipdb',
   standalone: true,
   imports: [
+    AdminSettingsSaveDockComponent,
     RouterLink,
     ReactiveFormsModule,
-    ButtonModule,
     InputTextModule,
     InputNumberModule,
     ToggleSwitchModule,

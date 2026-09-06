@@ -1,4 +1,4 @@
-<main class="workspace-page">
+<main [appRevealGroup]="revealSteps" class="workspace-page">
   @if (workspaceError()) {
     <section class="page-error" role="alert">
       <span class="error-icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
