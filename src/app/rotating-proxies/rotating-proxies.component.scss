@@ -659,6 +659,8 @@ p-multiselect {
 }
 
 .rotator-card {
+  // Keep the hover offset separate from GSAP entrance transforms.
+  top: 0;
   position: relative;
   grid-column: span 6;
   display: flex;
@@ -672,7 +674,7 @@ p-multiselect {
   background:
     radial-gradient(circle at 6% 0%, rgba(var(--theme-primary-500-rgb), 0.075), transparent 14rem),
     rgba(255, 255, 255, 0.022);
-  transition: border-color 0.35s ease, background-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+  transition: border-color 0.35s ease, background-color 0.35s ease, box-shadow 0.35s ease, top 0.35s ease;
 
   &::after {
     content: "";
@@ -689,7 +691,7 @@ p-multiselect {
     border-color: rgba(var(--theme-primary-300-rgb), 0.27);
     background-color: rgba(var(--theme-primary-500-rgb), 0.025);
     box-shadow: 0 24px 48px rgba(3, 3, 5, 0.24), 0 0 2rem rgba(var(--theme-primary-500-rgb), 0.05);
-    transform: translateY(-3px);
+    top: -3px;
 
     &::after {
       opacity: 1;

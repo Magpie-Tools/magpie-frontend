@@ -30,6 +30,8 @@
 }
 
 .settings-card {
+  // Keep the hover offset separate from GSAP entrance transforms.
+  top: 0;
   position: relative;
   min-width: 0;
   overflow: hidden;
@@ -38,7 +40,7 @@
   border-radius: 1.35rem;
   background: radial-gradient(circle at 5% 0%, rgba(var(--theme-primary-500-rgb), 0.08), transparent 16rem), var(--card-surface);
   box-shadow: 0 20px 40px rgba(4, 4, 6, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.035);
-  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, top 0.35s ease;
 
   &::after {
     content: "";
@@ -54,7 +56,7 @@
   &:hover {
     border-color: rgba(226, 196, 218, 0.26);
     box-shadow: 0 28px 55px rgba(3, 3, 5, 0.28), 0 0 2.5rem rgba(var(--theme-primary-500-rgb), 0.06);
-    transform: translateY(-2px);
+    top: -2px;
 
     &::after { opacity: 1; }
   }
@@ -297,6 +299,9 @@
 }
 
 .judge-row {
+  // Keep the hover offset separate from GSAP entrance transforms.
+  top: 0;
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
@@ -306,14 +311,14 @@
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.025);
-  transition: min-height 0.35s ease, border-color 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
+  transition: min-height 0.35s ease, border-color 0.25s ease, background-color 0.25s ease, top 0.25s ease;
 
   &:hover,
   &:focus-within {
     min-height: 11.15rem;
     border-color: rgba(var(--theme-primary-300-rgb), 0.29);
     background: rgba(var(--theme-primary-500-rgb), 0.045);
-    transform: translateY(-2px);
+    top: -2px;
   }
 }
 

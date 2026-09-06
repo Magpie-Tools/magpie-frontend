@@ -136,6 +136,8 @@ dl { margin: 0; }
 }
 
 .workspace-card {
+  // Keep the hover offset separate from GSAP entrance transforms.
+  top: 0;
   position: relative;
   min-width: 0;
   overflow: hidden;
@@ -144,13 +146,13 @@ dl { margin: 0; }
   border-radius: 1.35rem;
   background: radial-gradient(circle at 5% 0%, rgba(var(--theme-primary-500-rgb), 0.08), transparent 16rem), rgba(8, 8, 10, 0.9);
   box-shadow: 0 20px 40px rgba(4, 4, 6, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.035);
-  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, top 0.35s ease;
 
   &:hover,
   &:focus-within {
     border-color: rgba(226, 196, 218, 0.27);
     box-shadow: 0 28px 55px rgba(3, 3, 5, 0.28), 0 0 2.5rem rgba(var(--theme-primary-500-rgb), 0.06);
-    transform: translateY(-2px);
+    top: -2px;
   }
 }
 
