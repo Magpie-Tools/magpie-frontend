@@ -190,7 +190,12 @@
                 }
                 <button type="submit" class="button button--primary invite-submit" [disabled]="sendingInvitation() || !inviteEmail.trim()">@if (sendingInvitation()) {<i class="pi pi-spin pi-spinner" aria-hidden="true"></i>}Send invitation</button>
               </div>
-              @if (inviteError()) {<p class="form-error" role="alert">{{ inviteError() }}</p>}
+              @if (inviteError()) {
+                <p class="form-error" role="alert">
+                  <span class="error-icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
+                  <span>{{ inviteError() }}</span>
+                </p>
+              }
             </form>
           }
 
@@ -202,7 +207,11 @@
           </div>
 
           @if (membersError()) {
-            <div class="inline-error" role="alert"><div><strong>Members could not be loaded</strong><span>{{ membersError() }}</span></div><button type="button" class="button button--quiet" (click)="loadMembers()">Try again</button></div>
+            <div class="inline-error" role="alert">
+              <span class="error-icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
+              <div><strong>Members could not be loaded</strong><span>{{ membersError() }}</span></div>
+              <button type="button" class="button button--quiet" (click)="loadMembers()">Try again</button>
+            </div>
           } @else if (loadingMembers()) {
             <div class="data-list" aria-label="Loading members">
               @for (_ of [1, 2, 3]; track $index) {
@@ -247,7 +256,11 @@
             <div class="subsection-heading pending-heading"><div><h3>Pending invitations</h3><p>Edit access without renewing the expiry. Notification emails cannot be resent.</p></div><span class="section-count">{{ invitations().length }} pending</span></div>
 
             @if (invitationsError()) {
-              <div class="inline-error" role="alert"><div><strong>Invitations could not be loaded</strong><span>{{ invitationsError() }}</span></div><button type="button" class="button button--quiet" (click)="loadInvitations()">Try again</button></div>
+              <div class="inline-error" role="alert">
+                <span class="error-icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
+                <div><strong>Invitations could not be loaded</strong><span>{{ invitationsError() }}</span></div>
+                <button type="button" class="button button--quiet" (click)="loadInvitations()">Try again</button>
+              </div>
             } @else if (loadingInvitations()) {
               <div class="data-list" aria-label="Loading pending invitations">
                 @for (_ of [1, 2]; track $index) {<div class="data-row invitation-grid invitation-row--skeleton"><div><p-skeleton width="12rem" height=".9rem"></p-skeleton><p-skeleton width="8rem" height=".7rem"></p-skeleton></div><p-skeleton width="6rem" height="2.2rem"></p-skeleton><p-skeleton width="4rem" height=".8rem"></p-skeleton><p-skeleton width="8rem" height=".8rem"></p-skeleton><p-skeleton width="7rem" height=".8rem"></p-skeleton><p-skeleton width="5rem" height="2.2rem"></p-skeleton></div>}

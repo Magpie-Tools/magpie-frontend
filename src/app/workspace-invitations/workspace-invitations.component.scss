@@ -117,10 +117,10 @@ dl { margin: 0; }
 
 .inline-error { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.7rem; margin-top: 1.4rem; padding: 0.85rem; border: 1px solid rgba(224, 104, 104, 0.26); border-radius: 0.85rem; background: rgba(127, 29, 29, 0.1); }
 .error-icon { width: 2.1rem; height: 2.1rem; border-radius: 0.68rem; color: #efa7a7; }
-.inline-error strong,
-.inline-error span { display: block; }
-.inline-error strong { color: #efb0b0; font-size: 0.7rem; }
-.inline-error span { margin-top: 0.2rem; color: rgba(232, 174, 174, 0.66); font-size: 0.62rem; }
+.inline-error > div > strong,
+.inline-error > div > span { display: block; }
+.inline-error > div > strong { color: #efb0b0; font-size: 0.7rem; }
+.inline-error > div > span { margin-top: 0.2rem; color: rgba(232, 174, 174, 0.66); font-size: 0.62rem; }
 
 .empty-state { display: flex; min-height: 16rem; flex-direction: column; align-items: center; justify-content: center; gap: 0.45rem; margin-top: 1.4rem; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 0.95rem; background: radial-gradient(circle, rgba(var(--theme-primary-500-rgb), 0.07), transparent 55%); text-align: center; }
 .empty-orbit { display: inline-flex; width: 3rem; height: 3rem; margin-bottom: 0.35rem; align-items: center; justify-content: center; border: 1px solid rgba(var(--theme-primary-300-rgb), 0.18); border-radius: 50%; color: var(--theme-primary-200); }
