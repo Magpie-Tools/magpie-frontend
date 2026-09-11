@@ -265,6 +265,12 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
         url: `https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/${encodedIp}`,
         // icon: ''
         icon: 'https://www.ipqualityscore.com/favicon.ico'
+      },
+      {
+        label: 'Censys',
+        url: `https://platform.censys.io/hosts/${encodedIp}`,
+        // icon: ''
+        icon: 'https://platform.censys.io/favicon.ico'
       }
     ];
   }
