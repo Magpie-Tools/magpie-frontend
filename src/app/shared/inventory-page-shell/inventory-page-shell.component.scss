@@ -5,10 +5,27 @@
 }
 
 .inventory-page {
+  position: relative;
   width: 100%;
   padding: 0.35rem 0 3rem;
   overflow-x: hidden;
   container: inventory-page / inline-size;
+}
+
+.inventory-page--loading .inventory-stage {
+  visibility: hidden;
+}
+
+.inventory-initial-loading {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 4rem 1rem;
+  color: var(--card-muted, rgba(222, 215, 222, 0.59));
+  font-size: 0.75rem;
 }
 
 .inventory-stage {
@@ -484,6 +501,8 @@ p { margin: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .inventory-initial-loading .pi-spin { animation: none; }
+
   ::ng-deep .tool-button,
   .button { transition: none; }
 }

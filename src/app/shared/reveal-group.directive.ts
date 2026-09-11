@@ -1,4 +1,4 @@
-import {AfterViewInit, Directive, ElementRef, Input, OnDestroy} from '@angular/core';
+import {AfterViewInit, Directive, ElementRef, Input, OnChanges, OnDestroy} from '@angular/core';
 import {gsap} from 'gsap';
 
 export interface RevealStep {
@@ -13,14 +13,31 @@ export type RevealGroupConfig = string | readonly RevealStep[];
   selector: '[appRevealGroup]',
   standalone: true,
 })
-export class RevealGroupDirective implements AfterViewInit, OnDestroy {
+export class RevealGroupDirective implements AfterViewInit, OnChanges, OnDestroy {
   @Input('appRevealGroup') config: RevealGroupConfig = '';
+  @Input() revealReady = true;
 
   private animationContext?: gsap.Context;
+  private viewInitialized = false;
+  private revealed = false;
 
   constructor(private readonly elementRef: ElementRef<HTMLElement>) {}
 
   ngAfterViewInit(): void {
+    this.viewInitialized = true;
+    this.reveal();
+  }
+
+  ngOnChanges(): void {
+    this.reveal();
+  }
+
+  private reveal(): void {
+    if (!this.viewInitialized || !this.revealReady || this.revealed) {
+      return;
+    }
+
+    this.revealed = true;
     if (
       !this.config ||
       typeof window === 'undefined' ||

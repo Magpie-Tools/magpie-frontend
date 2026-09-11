@@ -1,4 +1,16 @@
-<main class="inventory-page" appRevealGroup=".inventory-context, .inventory-toolbar, .inventory-card">
+<main
+  class="inventory-page"
+  [class.inventory-page--loading]="!initialLoadComplete"
+  [attr.aria-busy]="loading"
+  appRevealGroup=".inventory-context, .inventory-toolbar, .inventory-card"
+  [revealReady]="initialLoadComplete"
+>
+  @if (!initialLoadComplete) {
+    <div class="inventory-initial-loading" role="status">
+      <i class="pi pi-spinner pi-spin" aria-hidden="true"></i>
+      {{ loadingLabel }}
+    </div>
+  }
   <section class="inventory-stage">
     <header class="inventory-context">
       <div class="inventory-context__copy">
