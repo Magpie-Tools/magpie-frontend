@@ -1,3 +1,4 @@
+import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
 import { CommonModule, DatePipe } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
@@ -66,7 +67,7 @@ function normalizeReleaseBodyToMarkdown(body: string): string {
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, DatePipe, LoadingComponent, DialogModule],
+  imports: [PageLoadErrorComponent, CommonModule, DatePipe, LoadingComponent, DialogModule],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })

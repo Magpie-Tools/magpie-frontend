@@ -56,6 +56,21 @@ describe('NotificationsComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.archive-row').length).toBe(1);
   });
 
+  it('keeps the release header above the shared error and wires its retry', () => {
+    const header = fixture.nativeElement.querySelector('.notifications-context');
+    component.status.set({loading: false, error: 'Release feed unavailable'});
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.notifications-context')).toBe(header);
+    expect(fixture.nativeElement.querySelectorAll('h1').length).toBe(1);
+    const alert = fixture.nativeElement.querySelector('app-page-load-error [role="alert"]');
+    expect(alert.textContent).toContain('Release notes could not be loaded');
+    expect(alert.textContent).toContain('Release feed unavailable');
+    const retry = spyOn(component, 'retry');
+    alert.querySelector('button').click();
+    expect(retry).toHaveBeenCalledTimes(1);
+  });
+
   it('marks the latest release as read without clearing the archive', () => {
     component.markAllSeen();
     fixture.detectChanges();

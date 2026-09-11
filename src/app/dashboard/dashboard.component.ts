@@ -1,3 +1,4 @@
+import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
 import {Component, ElementRef, Inject, LOCALE_ID, OnDestroy, OnInit, signal} from '@angular/core';
 import {DecimalPipe} from '@angular/common';
 import {Subject} from 'rxjs';
@@ -67,6 +68,7 @@ const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirecti
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   imports: [
+    PageLoadErrorComponent,
     DecimalPipe,
     KpiCardComponent,
     ProxiesPerHourCardComponent,

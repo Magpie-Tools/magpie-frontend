@@ -485,16 +485,6 @@ dl {
   justify-content: center;
 }
 
-.state-card--error {
-  justify-content: flex-start;
-  border-color: rgba(239, 124, 124, 0.26);
-  background: rgba(104, 36, 36, 0.13);
-
-  .button {
-    margin-left: auto;
-  }
-}
-
 .state-icon {
   width: 2.35rem;
   height: 2.35rem;
@@ -881,15 +871,9 @@ dl {
     }
   }
 
-  .section-heading,
-  .state-card--error {
+  .section-heading {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .state-card--error .button {
-    width: 100%;
-    margin-left: 0;
   }
 
   .release-accordion {

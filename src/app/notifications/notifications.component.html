@@ -28,17 +28,11 @@
         </div>
       </section>
     } @else if (status().error) {
-      <section class="notification-card state-card state-card--error" role="alert">
-        <span class="state-icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
-        <div class="state-copy">
-          <strong>Release notes could not be loaded</strong>
-          <span>{{ status().error }}</span>
-        </div>
-        <button type="button" class="button button--quiet" (click)="retry()">
-          <i class="pi pi-refresh" aria-hidden="true"></i>
-          Try again
-        </button>
-      </section>
+      <app-page-load-error
+        title="Release notes could not be loaded"
+        [message]="status().error || ''"
+        (retry)="retry()"
+      />
     } @else {
       <div class="notifications-grid">
         <section class="notification-card overview-card" aria-labelledby="overview-title">

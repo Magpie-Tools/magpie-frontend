@@ -1,16 +1,16 @@
 <main class="dashboard-page">
-  @if (dashboardInfo().loading && !dashboardInfo().loaded) {
-    <section class="dashboard-stage dashboard-stage--loading" aria-label="Loading dashboard">
-      <header class="dashboard-context dashboard-skeleton">
-        <p-skeleton width="3rem" height="3rem" borderRadius="0.9rem"></p-skeleton>
+  <section class="dashboard-stage">
+    <header class="dashboard-context">
+      <div class="dashboard-context__identity">
+        <span class="dashboard-context__icon"><i class="pi pi-chart-line" aria-hidden="true"></i></span>
         <div class="dashboard-context__copy">
-          <p-skeleton width="6rem" height="0.55rem"></p-skeleton>
-          <p-skeleton width="13rem" height="1.7rem"></p-skeleton>
-          <p-skeleton width="22rem" height="0.7rem"></p-skeleton>
+          <h1>Dashboard</h1>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <div class="dashboard-grid dashboard-skeleton">
+    @if (dashboardInfo().loading && !dashboardInfo().loaded) {
+      <div class="dashboard-grid dashboard-skeleton" aria-label="Loading dashboard">
         @for (card of kpiSkeletons; track $index) {
           <section class="dashboard-skeleton-card dashboard-skeleton-card--metric">
             <div class="skeleton-line">
@@ -47,41 +47,17 @@
           </div>
         </section>
       </div>
-    </section>
-  }
+    }
 
-  @if (dashboardInfo().error) {
-    <section class="dashboard-stage dashboard-stage--message">
-      <div class="dashboard-error" role="alert">
-        <span class="dashboard-error__icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
-        <div>
-          @if (dashboardInfo().backendUnavailable) {
-            <h1>Backend unavailable</h1>
-            <p>Dashboard data cannot load while the API is unreachable.</p>
-          } @else {
-            <h1>Dashboard could not be loaded</h1>
-            <p>{{ dashboardInfo().error }}</p>
-          }
-        </div>
-        <button type="button" class="dashboard-button" (click)="retryDashboardLoad()">
-          <i class="pi pi-refresh" aria-hidden="true"></i>
-          Try again
-        </button>
-      </div>
-    </section>
-  }
+    @if (dashboardInfo().error) {
+      <app-page-load-error
+        [title]="dashboardInfo().backendUnavailable ? 'Backend unavailable' : 'Dashboard could not be loaded'"
+        [message]="dashboardInfo().backendUnavailable ? 'Dashboard data cannot load while the API is unreachable.' : dashboardInfo().error || ''"
+        (retry)="retryDashboardLoad()"
+      />
+    }
 
-  @if (dashboardInfo().loaded) {
-    <section class="dashboard-stage">
-      <header class="dashboard-context">
-        <div class="dashboard-context__identity">
-          <span class="dashboard-context__icon"><i class="pi pi-chart-line" aria-hidden="true"></i></span>
-          <div class="dashboard-context__copy">
-            <h1>Dashboard</h1>
-          </div>
-        </div>
-      </header>
-
+    @if (dashboardInfo().loaded) {
       <div class="dashboard-grid">
         <app-kpi-card
           class="dashboard-grid__kpi"
@@ -151,6 +127,6 @@
           [chartOptions]="reputationChartOptions()">
         </app-proxy-reputation-card>
       </div>
-    </section>
-  }
+    }
+  </section>
 </main>

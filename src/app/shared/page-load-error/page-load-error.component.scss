@@ -1,0 +1,91 @@
+:host {
+  display: grid;
+  min-height: min(30rem, calc(100vh - 9rem));
+  place-items: center;
+  container: page-load-error / inline-size;
+}
+
+h2, p { margin: 0; }
+
+.page-load-error__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.page-load-error {
+  display: grid;
+  width: min(100%, 40rem);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+  border: 1px solid rgba(224, 104, 104, 0.28);
+  border-radius: 1.2rem;
+  background: rgba(45, 13, 16, 0.4);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.24);
+}
+
+.page-load-error__icon {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-color: rgba(224, 104, 104, 0.3);
+  border-radius: 0.85rem;
+  background: rgba(127, 29, 29, 0.16);
+  color: #efaaaa;
+}
+
+.page-load-error h2 {
+  color: rgba(255, 255, 255, 0.93);
+  font-size: 0.92rem;
+  font-weight: 590;
+}
+
+.page-load-error p {
+  margin-top: 0.3rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.retry-button {
+  display: inline-flex;
+  min-height: 2.45rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.78rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.72rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.76);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 580;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.retry-button:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.retry-button:focus-visible {
+  outline: 2px solid var(--theme-primary-300);
+  outline-offset: 0.2rem;
+}
+
+@container page-load-error (max-width: 620px) {
+  .page-load-error { grid-template-columns: auto minmax(0, 1fr); }
+  .retry-button { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .retry-button { transition: none; }
+}

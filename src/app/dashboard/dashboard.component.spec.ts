@@ -49,6 +49,25 @@ describe('DashboardComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('keeps one dashboard header through errors and retries', () => {
+    const header = fixture.nativeElement.querySelector('.dashboard-context');
+    component.dashboardInfo.set({loading: false, loaded: false, error: 'Connection failed', backendUnavailable: true});
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.dashboard-context')).toBe(header);
+    expect(fixture.nativeElement.querySelectorAll('h1').length).toBe(1);
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('Backend unavailable');
+
+    const retry = spyOn(component, 'retryDashboardLoad');
+    fixture.nativeElement.querySelector('app-page-load-error button').click();
+    expect(retry).toHaveBeenCalledTimes(1);
+
+    component.dashboardInfo.set({loading: true, loaded: false});
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.dashboard-context')).toBe(header);
+    expect(fixture.nativeElement.querySelector('[role="alert"]')).toBeNull();
+  });
+
   it('should aggregate duplicate unknown country buckets', () => {
     (component as any).updateCountryBreakdown([
       {country: 'Unknown', count: 10},
