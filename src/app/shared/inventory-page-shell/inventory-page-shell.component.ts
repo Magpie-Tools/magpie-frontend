@@ -1,8 +1,10 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {RevealGroupDirective} from '../reveal-group.directive';
 
 @Component({
   selector: 'app-inventory-page-shell',
   standalone: true,
+  imports: [RevealGroupDirective],
   templateUrl: './inventory-page-shell.component.html',
   styleUrl: './inventory-page-shell.component.scss',
 })

@@ -1,7 +1,6 @@
 import {readPageSize, writePageSize} from '../../shared/table-pagination';
 import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
 import {
-  AfterViewInit,
   Component,
   ElementRef,
   HostListener,
@@ -61,11 +60,7 @@ import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
-import {gsap} from 'gsap';
-import {ScrollTrigger} from 'gsap/ScrollTrigger';
 import {InventoryPageShellComponent} from '../../shared/inventory-page-shell/inventory-page-shell.component';
-
-gsap.registerPlugin(ScrollTrigger);
 
 @Component({
   selector: 'app-proxy-list',
@@ -87,7 +82,7 @@ gsap.registerPlugin(ScrollTrigger);
   templateUrl: './proxy-list.component.html',
   styleUrls: ['./proxy-list.component.scss']
 })
-export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ProxyListComponent implements OnInit, OnDestroy {
   @ViewChild('filterToggleAnchor') private filterToggleAnchor?: ElementRef<HTMLElement>;
   @ViewChild('filterPanelRef') private filterPanelRef?: ElementRef<HTMLElement>;
   @ViewChild('columnToggleAnchor') private columnToggleAnchor?: ElementRef<HTMLElement>;
@@ -144,7 +139,6 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   private userSettingsSubscription?: Subscription;
   private roleSubscription?: Subscription;
   private suppressOutsideCloseUntil = 0;
-  private animationContext?: gsap.Context;
 
   constructor(
     private http: HttpService,
@@ -155,7 +149,6 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     private userService: UserService,
     readonly tagService: ProxyTagService,
     readonly workspaces: WorkspaceService,
-    private readonly elementRef: ElementRef<HTMLElement>,
   ) {
     this.navigationStart$ = this.router.events.pipe(
       filter((event): event is NavigationStart => event instanceof NavigationStart)
@@ -167,59 +160,6 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filterForm = this.fb.group({
       ...createProxyFilterControls(this.defaultFilterValues),
     });
-  }
-
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    const host = this.elementRef.nativeElement;
-    const scrollContainer = host.closest('main') as HTMLElement | null;
-    const scroller = scrollContainer ?? undefined;
-
-    this.animationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.inventory-context',
-        {opacity: 0, y: 20},
-        {opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', clearProps: 'transform'},
-      );
-
-      gsap.utils.toArray<HTMLElement>('.inventory-toolbar, .inventory-card').forEach((card, index) => {
-        gsap.from(card, {
-          opacity: 0,
-          y: 28,
-          scale: 0.985,
-          duration: 0.7,
-          delay: index * 0.045,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: card,
-            scroller,
-            start: 'top 94%',
-            toggleActions: 'play none none reverse',
-          },
-        });
-      });
-
-      gsap.fromTo(
-        '.inventory-context__copy p',
-        {opacity: 0.38},
-        {
-          opacity: 1,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: '.inventory-context',
-            scroller,
-            start: 'top 96%',
-            end: 'bottom 74%',
-            scrub: 0.35,
-          },
-        },
-      );
-    }, host);
-
-    requestAnimationFrame(() => ScrollTrigger.refresh());
   }
 
   ngOnInit(): void {
@@ -331,7 +271,6 @@ export class ProxyListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.animationContext?.revert();
     this.proxyListSubscription?.unsubscribe();
     this.navigationSubscription?.unsubscribe();
     this.userSettingsSubscription?.unsubscribe();
