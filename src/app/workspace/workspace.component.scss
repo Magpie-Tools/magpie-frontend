@@ -98,11 +98,12 @@ dl { margin: 0; }
 .workspace-context__team { display: flex; align-items: center; gap: 1rem; }
 
 .avatar-stack { display: flex; padding-left: 0.55rem; }
+.avatar-stack .workspace-avatar { margin-left: -0.55rem; }
 .workspace-avatar {
   display: inline-flex;
   width: 2rem;
   height: 2rem;
-  margin-left: -0.55rem;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   border: 2px solid rgba(41, 40, 43, 0.98);

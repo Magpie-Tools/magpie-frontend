@@ -69,7 +69,7 @@
 }
 
 .workspace-page .identity-cell strong,
-.workspace-page .identity-cell span {
+.workspace-page .identity-cell > div > span {
   display: block;
   min-width: 0;
   overflow: hidden;
