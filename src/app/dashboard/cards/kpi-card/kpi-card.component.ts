@@ -40,6 +40,8 @@ export class KpiCardComponent implements OnChanges {
   sparklineOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    // Reveal the finished curve in CSS instead of growing it from the baseline.
+    animation: false as const,
     plugins: {
       legend: {
         display: false
