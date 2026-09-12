@@ -1,5 +1,5 @@
 <div class="checker-judges-page">
-  <form class="settings-stage" (ngSubmit)="onSubmit()">
+  <form class="settings-stage" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="settings-grid">
       <section class="settings-card settings-card--flow">
         <div class="card-heading">

@@ -1,6 +1,6 @@
 import {HlmInput} from '@spartan-ng/helm/input';
 import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/admin-settings-save-dock.component';
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
 
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {TooltipComponent} from '../../tooltip/tooltip.component';
@@ -22,17 +22,20 @@ import {gsap} from 'gsap';
 })
 export class CheckerJudgesComponent implements OnInit, AfterViewInit, OnDestroy {
   judgesForm: FormArray<FormGroup>;
+  form: FormGroup<{judges: FormArray<FormGroup>}>;
   private destroy$ = new Subject<void>();
   private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
+    private changeDetector: ChangeDetectorRef,
     private settingsService: SettingsService,
     private notification: NotificationService,
     readonly workspaces: WorkspaceService,
     private elementRef: ElementRef<HTMLElement>,
   ) {
     this.judgesForm = this.fb.array<FormGroup>([]);
+    this.form = this.fb.group({judges: this.judgesForm});
   }
 
   ngOnInit(): void {
@@ -156,6 +159,7 @@ export class CheckerJudgesComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     this.judgesForm.markAsPristine();
+    this.changeDetector.markForCheck();
   }
 
   private createJudgeGroup(url: string = '', regex: string = ''): FormGroup {
