@@ -2,8 +2,12 @@
   <section class="detail-stage">
     <header class="detail-context">
       <div class="detail-context__copy">
-        <a [routerLink]="returnLink()" class="back-button" [attr.aria-label]="returnLabel()">
-          <i class="pi pi-arrow-left" aria-hidden="true"></i>
+        <a
+          [routerLink]="returnLink()"
+          class="back-button"
+          [attr.aria-label]="returnLabel()"
+        >
+          <i class="icon icon-arrow-left" aria-hidden="true"></i>
         </a>
         <div>
           @if (detail(); as proxy) {
@@ -16,7 +20,7 @@
                 [title]="'Copy IP ' + proxy.ip"
               >
                 <span>{{ proxy.ip }}</span>
-                <i class="pi pi-copy" aria-hidden="true"></i>
+                <i class="icon icon-copy" aria-hidden="true"></i>
               </button>
               <span class="endpoint-separator" aria-hidden="true">:</span>
               <button
@@ -27,7 +31,7 @@
                 [title]="'Copy port ' + proxy.port"
               >
                 <span>{{ proxy.port }}</span>
-                <i class="pi pi-copy" aria-hidden="true"></i>
+                <i class="icon icon-copy" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
@@ -36,7 +40,7 @@
                 aria-label="Copy IP and port"
                 title="Copy IP:port"
               >
-                <i class="pi pi-copy" aria-hidden="true"></i>
+                <i class="icon icon-copy" aria-hidden="true"></i>
               </button>
             </h1>
           } @else {
@@ -52,7 +56,7 @@
             [ngClass]="{
               alive: overallAliveStatus === 'alive',
               dead: overallAliveStatus === 'dead',
-              unknown: overallAliveStatus === 'unknown'
+              unknown: overallAliveStatus === 'unknown',
             }"
             aria-hidden="true"
           ></span>
@@ -63,24 +67,58 @@
         </div>
 
         @if (detail(); as managed) {
-          <span class="managed-state-pill" [ngClass]="'managed-state-pill--' + (managed.state ?? 'active')">
-            <i class="pi pi-circle-fill" aria-hidden="true"></i>
-            {{ managed.state ?? 'active' }}
+          <span
+            class="managed-state-pill"
+            [ngClass]="'managed-state-pill--' + (managed.state ?? 'active')"
+          >
+            <i class="icon icon-circle" aria-hidden="true"></i>
+            {{ managed.state ?? "active" }}
           </span>
           @if (workspaces.canOperate()) {
-            @if ((managed.state ?? 'active') === 'active') {
-              <button type="button" class="action-button" [disabled]="changingLifecycle()" (click)="changeLifecycle('paused')">
-                <i class="pi" [ngClass]="changingLifecycle() ? 'pi-spin pi-spinner' : 'pi-pause'" aria-hidden="true"></i>
+            @if ((managed.state ?? "active") === "active") {
+              <button
+                type="button"
+                class="action-button"
+                [disabled]="changingLifecycle()"
+                (click)="changeLifecycle('paused')"
+              >
+                <i
+                  class="icon"
+                  [ngClass]="
+                    changingLifecycle()
+                      ? 'icon-spin icon-loader-circle'
+                      : 'icon-pause'
+                  "
+                  aria-hidden="true"
+                ></i>
                 Pause
               </button>
             } @else {
-              <button type="button" class="action-button action-button--primary" [disabled]="changingLifecycle()" (click)="changeLifecycle('active')">
-                <i class="pi" [ngClass]="changingLifecycle() ? 'pi-spin pi-spinner' : 'pi-play'" aria-hidden="true"></i>
+              <button
+                type="button"
+                class="action-button action-button--primary"
+                [disabled]="changingLifecycle()"
+                (click)="changeLifecycle('active')"
+              >
+                <i
+                  class="icon"
+                  [ngClass]="
+                    changingLifecycle()
+                      ? 'icon-spin icon-loader-circle'
+                      : 'icon-play'
+                  "
+                  aria-hidden="true"
+                ></i>
                 Activate
               </button>
-              @if (managed.state === 'paused') {
-                <button type="button" class="action-button action-button--warning" [disabled]="changingLifecycle()" (click)="changeLifecycle('archived')">
-                  <i class="pi pi-box" aria-hidden="true"></i>
+              @if (managed.state === "paused") {
+                <button
+                  type="button"
+                  class="action-button action-button--warning"
+                  [disabled]="changingLifecycle()"
+                  (click)="changeLifecycle('archived')"
+                >
+                  <i class="icon icon-archive" aria-hidden="true"></i>
                   Archive
                 </button>
               }
@@ -93,8 +131,12 @@
     <div class="route-utility-bar">
       @if (fullCredentialAddress) {
         <div class="endpoint-actions">
-          <button type="button" class="action-button" (click)="copyFullCredentialAddress()">
-            <i class="pi pi-key" aria-hidden="true"></i>
+          <button
+            type="button"
+            class="action-button"
+            (click)="copyFullCredentialAddress()"
+          >
+            <i class="icon icon-key" aria-hidden="true"></i>
             Copy with auth
           </button>
         </div>
@@ -103,10 +145,17 @@
       @if (externalLookupLinks.length) {
         <nav class="lookup-rail" aria-label="External IP intelligence">
           @for (link of externalLookupLinks; track link.url) {
-            <a class="external-link-chip" [href]="link.url" target="_blank" rel="noopener noreferrer">
-              @if (link.icon) { <img [src]="link.icon" alt="" /> }
+            <a
+              class="external-link-chip"
+              [href]="link.url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              @if (link.icon) {
+                <img [src]="link.icon" alt="" />
+              }
               {{ link.label }}
-              <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+              <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
             </a>
           }
         </nav>
@@ -114,45 +163,69 @@
     </div>
 
     <div class="detail-grid">
-      <section class="route-card route-dashboard" aria-labelledby="route-overview-title">
+      <section
+        class="route-card route-dashboard"
+        aria-labelledby="route-overview-title"
+      >
         @if (isLoadingDetail()) {
           <div class="card-loading"><app-loading></app-loading></div>
         } @else {
           <div class="overview-layout">
             <section class="route-facts" aria-labelledby="route-overview-title">
-              <h2 id="route-overview-title" class="visually-hidden">Route details</h2>
+              <h2 id="route-overview-title" class="visually-hidden">
+                Route details
+              </h2>
               <div class="section-divider" aria-hidden="true"></div>
 
               <div class="fact-list">
                 <div class="detail-item">
                   <span class="label">Country</span>
-                  <span class="value capitalize">{{ detail()?.country || 'Unknown' }}</span>
+                  <span class="value capitalize">{{
+                    detail()?.country || "Unknown"
+                  }}</span>
                 </div>
                 <div class="detail-item detail-item--right">
                   <span class="label">Estimated type</span>
-                  <span class="value capitalize">{{ detail()?.estimated_type || 'N/A' }}</span>
+                  <span class="value capitalize">{{
+                    detail()?.estimated_type || "N/A"
+                  }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Protocol</span>
-                  <span class="value capitalize">{{ latestStatistic?.protocol || 'Unknown' }}</span>
+                  <span class="value capitalize">{{
+                    latestStatistic?.protocol || "Unknown"
+                  }}</span>
                 </div>
                 <div class="detail-item detail-item--right">
                   <span class="label">Anonymity</span>
-                  <span class="value capitalize">{{ latestStatistic?.anonymity_level || 'Unknown' }}</span>
+                  <span class="value capitalize">{{
+                    latestStatistic?.anonymity_level || "Unknown"
+                  }}</span>
                 </div>
                 <div class="detail-item detail-item--wide">
                   <span class="label">Latest judge</span>
-                  <span class="value value--truncate" [title]="latestStatistic?.judge || 'Unknown'">
-                    {{ latestStatistic?.judge || 'Unknown' }}
+                  <span
+                    class="value value--truncate"
+                    [title]="latestStatistic?.judge || 'Unknown'"
+                  >
+                    {{ latestStatistic?.judge || "Unknown" }}
                   </span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Added</span>
-                  <span class="value">{{ detail()?.created_at ? (detail()?.created_at | date : 'mediumDate') : 'Unknown' }}</span>
+                  <span class="value">{{
+                    detail()?.created_at
+                      ? (detail()?.created_at | date: "mediumDate")
+                      : "Unknown"
+                  }}</span>
                 </div>
                 <div class="detail-item detail-item--right">
                   <span class="label">Last checked</span>
-                  <span class="value">{{ detail()?.latest_check ? (detail()?.latest_check | date : 'short') : 'Never' }}</span>
+                  <span class="value">{{
+                    detail()?.latest_check
+                      ? (detail()?.latest_check | date: "short")
+                      : "Never"
+                  }}</span>
                 </div>
               </div>
 
@@ -182,15 +255,30 @@
                   <span class="label">Authentication</span>
                   @if (authenticationCredentials; as credentials) {
                     <div class="auth-credentials">
-                      <button type="button" class="copy-value" (click)="copyUsername()" title="Copy username">
+                      <button
+                        type="button"
+                        class="copy-value"
+                        (click)="copyUsername()"
+                        title="Copy username"
+                      >
                         {{ credentials.username }}
                       </button>
                       <span class="value-separator">:</span>
-                      <button type="button" class="copy-value" (click)="copyPassword()" title="Copy password">
+                      <button
+                        type="button"
+                        class="copy-value"
+                        (click)="copyPassword()"
+                        title="Copy password"
+                      >
                         {{ credentials.password }}
                       </button>
-                      <button type="button" class="icon-button" (click)="copyAuthCredentials()" title="Copy credentials">
-                        <i class="pi pi-copy" aria-hidden="true"></i>
+                      <button
+                        type="button"
+                        class="icon-button"
+                        (click)="copyAuthCredentials()"
+                        title="Copy credentials"
+                      >
+                        <i class="icon icon-copy" aria-hidden="true"></i>
                       </button>
                     </div>
                   } @else {
@@ -200,7 +288,10 @@
               </div>
             </section>
 
-            <aside class="route-insights" aria-label="Proxy performance and reputation">
+            <aside
+              class="route-insights"
+              aria-label="Proxy performance and reputation"
+            >
               <section class="health-summary">
                 <div class="health-summary__heading">
                   <div>
@@ -210,8 +301,10 @@
                   <div class="health-summary__response">
                     <span>Latest</span>
                     <strong>
-                      {{ latestStatistic?.response_time ?? '—' }}
-                      @if (latestStatistic) { <small>ms</small> }
+                      {{ latestStatistic?.response_time ?? "—" }}
+                      @if (latestStatistic) {
+                        <small>ms</small>
+                      }
                     </strong>
                   </div>
                 </div>
@@ -220,7 +313,11 @@
                   @if (isLoadingStatistics()) {
                     <app-loading></app-loading>
                   } @else if (chartData()?.datasets?.[0]?.data?.length) {
-                    <p-chart type="line" [data]="chartData()" [options]="chartOptions()"></p-chart>
+                    <app-chart
+                      type="line"
+                      [data]="chartData()"
+                      [options]="chartOptions()"
+                    />
                   } @else {
                     <span>No response-time trend yet.</span>
                   }
@@ -232,18 +329,26 @@
                   <span>
                     <small>Reputation</small>
                     @if (reputationOverall; as overall) {
-                      <strong>{{ reputationScoreDisplay(overall) }}<em>/100</em></strong>
+                      <strong
+                        >{{ reputationScoreDisplay(overall)
+                        }}<em>/100</em></strong
+                      >
                     } @else {
                       <strong>—</strong>
                     }
                   </span>
                   @if (reputationOverall; as overall) {
                     <span [ngClass]="reputationBadgeClass(overall.label)">
-                      {{ (overall.label || 'Unknown') | titlecase }}
+                      {{ overall.label || "Unknown" | titlecase }}
                     </span>
                     @if (hasSignals(overall)) {
-                      <button type="button" class="icon-button" (click)="openSignalsDialog(overall)" title="View reputation signals">
-                        <i class="pi pi-sparkles" aria-hidden="true"></i>
+                      <button
+                        type="button"
+                        class="icon-button"
+                        (click)="openSignalsDialog(overall)"
+                        title="View reputation signals"
+                      >
+                        <i class="icon icon-sparkles" aria-hidden="true"></i>
                       </button>
                     }
                   }
@@ -251,7 +356,10 @@
 
                 @if (reputationProtocols.length > 0) {
                   <div class="protocol-list">
-                    @for (protocol of reputationProtocols; track protocol.kind) {
+                    @for (
+                      protocol of reputationProtocols;
+                      track protocol.kind
+                    ) {
                       <button
                         type="button"
                         class="protocol-row"
@@ -260,7 +368,10 @@
                       >
                         <span>{{ protocol.kind | uppercase }}</span>
                         <span class="reputation-meter">
-                          <span [ngClass]="progressFillClass(protocol.label)" [style.width.%]="reputationScorePercent(protocol)"></span>
+                          <span
+                            [ngClass]="progressFillClass(protocol.label)"
+                            [style.width.%]="reputationScorePercent(protocol)"
+                          ></span>
                         </span>
                         <strong>{{ reputationScoreDisplay(protocol) }}</strong>
                       </button>
@@ -278,7 +389,9 @@
       <section class="route-card history-card" aria-labelledby="history-title">
         <div class="history-card__heading">
           <div class="card-heading card-heading--compact">
-            <span class="card-icon"><i class="pi pi-history" aria-hidden="true"></i></span>
+            <span class="card-icon"
+              ><i class="icon icon-history" aria-hidden="true"></i
+            ></span>
             <div class="card-heading__copy">
               <span class="card-eyebrow">Judge activity</span>
               <h2 id="history-title">Check history</h2>
@@ -292,66 +405,87 @@
           @if (isLoadingStatistics()) {
             <div class="card-loading"><app-loading></app-loading></div>
           } @else {
-            <p-table [value]="statistics()" [tableStyleClass]="'proxy-stat-table'">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th>Checked at</th>
-                  <th>Status</th>
-                  <th>Response</th>
-                  <th>Attempt</th>
-                  <th>Protocol</th>
-                  <th>Anonymity</th>
-                  <th>Judge</th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-row>
-                <tr
-                  class="proxy-stat-row"
-                  role="button"
-                  tabindex="0"
-                  title="View judge response body"
-                  (click)="openStatisticResponse(row)"
-                  (keydown.enter)="openStatisticResponse(row)"
-                  (keydown.space)="openStatisticResponse(row); $event.preventDefault()"
-                >
-                  <td>{{ row.created_at | date : 'medium' }}</td>
-                  <td>
-                    <span class="table-status">
-                      <span class="status-dot status-dot--small" [ngClass]="row.alive ? 'alive' : 'dead'"></span>
-                      {{ row.alive ? 'Alive' : 'Dead' }}
-                    </span>
-                  </td>
-                  <td>{{ row.response_time }} ms</td>
-                  <td>{{ row.attempt + 1 }}</td>
-                  <td class="capitalize">{{ row.protocol || 'Unknown' }}</td>
-                  <td class="capitalize">{{ row.anonymity_level || 'Unknown' }}</td>
-                  <td class="judge-cell" [title]="row.judge || 'Unknown'">{{ row.judge || 'Unknown' }}</td>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="emptymessage">
-                <tr>
-                  <td colspan="7" class="empty-table">No check history recorded yet.</td>
-                </tr>
-              </ng-template>
-            </p-table>
+            <div class="data-table" [attr.aria-busy]="false">
+              <div hlmTableContainer class="table-scroll">
+                <table hlmTable class="proxy-stat-table">
+                  <thead hlmTHead>
+                    <tr hlmTr>
+                      <th hlmTh>Checked at</th>
+                      <th hlmTh>Status</th>
+                      <th hlmTh>Response</th>
+                      <th hlmTh>Attempt</th>
+                      <th hlmTh>Protocol</th>
+                      <th hlmTh>Anonymity</th>
+                      <th hlmTh>Judge</th>
+                    </tr>
+                  </thead>
+                  <tbody hlmTBody>
+                    @for (row of statistics(); track row.id ?? $index) {
+                      <tr
+                        hlmTr
+                        class="proxy-stat-row"
+                        role="button"
+                        tabindex="0"
+                        title="View judge response body"
+                        (click)="openStatisticResponse(row)"
+                        (keydown.enter)="openStatisticResponse(row)"
+                        (keydown.space)="
+                          openStatisticResponse(row); $event.preventDefault()
+                        "
+                      >
+                        <td hlmTd>{{ row.created_at | date: "medium" }}</td>
+                        <td hlmTd>
+                          <span class="table-status">
+                            <span
+                              class="status-dot status-dot--small"
+                              [ngClass]="row.alive ? 'alive' : 'dead'"
+                            ></span>
+                            {{ row.alive ? "Alive" : "Dead" }}
+                          </span>
+                        </td>
+                        <td hlmTd>{{ row.response_time }} ms</td>
+                        <td hlmTd>{{ row.attempt + 1 }}</td>
+                        <td hlmTd class="capitalize">
+                          {{ row.protocol || "Unknown" }}
+                        </td>
+                        <td hlmTd class="capitalize">
+                          {{ row.anonymity_level || "Unknown" }}
+                        </td>
+                        <td
+                          hlmTd
+                          class="judge-cell"
+                          [title]="row.judge || 'Unknown'"
+                        >
+                          {{ row.judge || "Unknown" }}
+                        </td>
+                      </tr>
+                    }
+                    @if (!false && statistics().length === 0) {
+                      <tr hlmTr>
+                        <td hlmTd colspan="7" class="empty-table">
+                          No check history recorded yet.
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
           }
         </div>
       </section>
     </div>
   </section>
 
-  <p-dialog
+  <app-dialog
     [header]="signalDialogTitle() || 'Signals'"
     [visible]="isSignalDialogVisible()"
     (visibleChange)="isSignalDialogVisible.set($event)"
-    [modal]="true"
-    [blockScroll]="true"
     [dismissableMask]="true"
     [closable]="true"
-    [style]="{ width: 'min(720px, 95vw)' }"
-    [contentStyle]="{ 'max-height': '72vh', 'overflow-y': 'auto' }"
     styleClass="signal-dialog"
     (onHide)="onSignalDialogHide()"
+    [panelStyle]="{ width: 'min(720px, 95vw)' }"
   >
     <ng-template #structuredList let-items let-level="level">
       @if (items?.length) {
@@ -359,16 +493,27 @@
           class="signal-structured-list"
           [ngClass]="{
             'signal-structured-list--nested': (level ?? 0) > 0,
-            'signal-structured-list--protocol': isProtocolList(items)
+            'signal-structured-list--protocol': isProtocolList(items),
           }"
         >
           @for (item of items; track item) {
-            <div class="structured-row" [ngClass]="{ 'structured-row--protocol': item.layout === 'protocol' }">
+            <div
+              class="structured-row"
+              [ngClass]="{
+                'structured-row--protocol': item.layout === 'protocol',
+              }"
+            >
               <div class="structured-row__label">{{ item.label }}</div>
               <div class="structured-row__value">
                 @if (item.children?.length) {
                   <ng-container
-                    *ngTemplateOutlet="structuredList; context: { $implicit: item.children, level: (level ?? 0) + 1 }"
+                    *ngTemplateOutlet="
+                      structuredList;
+                      context: {
+                        $implicit: item.children,
+                        level: (level ?? 0) + 1,
+                      }
+                    "
                   ></ng-container>
                 } @else {
                   {{ item.value }}
@@ -390,18 +535,31 @@
               [ngClass]="[
                 signalToneClass(signal.tone),
                 signal.isJson ? 'signal-dialog__value--json' : '',
-                signal.structuredItems?.length ? 'signal-dialog__value--structured' : '',
-                signal.rawKey === 'components' ? 'signal-dialog__value--protocols' : ''
+                signal.structuredItems?.length
+                  ? 'signal-dialog__value--structured'
+                  : '',
+                signal.rawKey === 'components'
+                  ? 'signal-dialog__value--protocols'
+                  : '',
               ]"
             >
               @if (signal.structuredItems?.length) {
-                <ng-container *ngTemplateOutlet="structuredList; context: { $implicit: signal.structuredItems, level: 0 }"></ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    structuredList;
+                    context: { $implicit: signal.structuredItems, level: 0 }
+                  "
+                ></ng-container>
               } @else if (signal.isJson) {
                 <pre class="signal-dialog__value-json">{{ signal.value }}</pre>
               } @else {
-                <span class="signal-dialog__value-text">{{ signal.value }}</span>
+                <span class="signal-dialog__value-text">{{
+                  signal.value
+                }}</span>
               }
-              <span class="signal-dialog__sentiment">{{ signalToneLabel(signal.tone) }}</span>
+              <span class="signal-dialog__sentiment">{{
+                signalToneLabel(signal.tone)
+              }}</span>
             </div>
           </div>
         }
@@ -409,57 +567,66 @@
     } @else {
       <div class="signal-dialog__empty">No signals available.</div>
     }
-  </p-dialog>
+  </app-dialog>
 
-  <p-dialog
+  <app-dialog
     header="Judge response"
     [visible]="isResponseBodyModalVisible()"
     (visibleChange)="isResponseBodyModalVisible.set($event)"
-    [modal]="true"
-    [blockScroll]="true"
     [dismissableMask]="true"
     [closable]="true"
-    [style]="{ width: 'min(680px, 95vw)' }"
     styleClass="stat-response-dialog"
     (onHide)="onResponseDialogHide()"
+    [panelStyle]="{ width: 'min(680px, 95vw)' }"
   >
     @if (selectedStatistic(); as stat) {
       <div class="stat-response-dialog__meta">
         <div class="meta-row">
           <span class="meta-label">Checked</span>
-          <span class="meta-value">{{ stat.created_at | date : 'medium' }}</span>
+          <span class="meta-value">{{ stat.created_at | date: "medium" }}</span>
         </div>
         <div class="meta-row">
           <span class="meta-label">Judge</span>
-          <span class="meta-value">{{ stat.judge || 'Unknown' }}</span>
+          <span class="meta-value">{{ stat.judge || "Unknown" }}</span>
         </div>
         @if (selectedRegex()) {
           <div class="meta-row">
             <span class="meta-label">Regex</span>
-            <span class="meta-value font-mono break-all">{{ selectedRegex() }}</span>
+            <span class="meta-value font-mono break-all">{{
+              selectedRegex()
+            }}</span>
           </div>
         }
         <div class="meta-row">
           <span class="meta-label">Protocol</span>
-          <span class="meta-value capitalize">{{ stat.protocol || 'Unknown' }}</span>
+          <span class="meta-value capitalize">{{
+            stat.protocol || "Unknown"
+          }}</span>
         </div>
         <div class="meta-row">
           <span class="meta-label">Status</span>
-          <span class="meta-value">{{ stat.alive ? 'Alive' : 'Dead' }}</span>
+          <span class="meta-value">{{ stat.alive ? "Alive" : "Dead" }}</span>
         </div>
       </div>
     }
 
     <div class="stat-response-dialog__content">
       @if (isLoadingResponseBody()) {
-        <div class="stat-response-dialog__loading"><app-loading></app-loading></div>
+        <div class="stat-response-dialog__loading">
+          <app-loading></app-loading>
+        </div>
       } @else if (responseBodyError()) {
         <div class="stat-response-dialog__error">{{ responseBodyError() }}</div>
       } @else if (selectedResponseBody()) {
-        <pre class="stat-response-dialog__body" [innerHTML]="highlightedResponseBody()"></pre>
+        <pre
+          class="stat-response-dialog__body"
+          [innerHTML]="highlightedResponseBody()"
+        ></pre>
       } @else {
-        <div class="stat-response-dialog__empty">No response body recorded for this check.</div>
+        <div class="stat-response-dialog__empty">
+          No response body recorded for this check.
+        </div>
       }
     </div>
-  </p-dialog>
+  </app-dialog>
 </main>

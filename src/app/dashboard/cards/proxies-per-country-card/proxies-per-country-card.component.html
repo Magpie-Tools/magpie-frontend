@@ -1,11 +1,15 @@
-<p-card [class]="styleClass">
-  <ng-template pTemplate="header">
+<section hlmCard [class]="styleClass">
+  <div hlmCardHeader>
     <div class="dashboard-card__header country-card__header">
       <div class="dashboard-card__heading">
-        <span class="dashboard-card__icon"><i class="pi pi-globe" aria-hidden="true"></i></span>
+        <span class="dashboard-card__icon"
+          ><i class="icon icon-globe" aria-hidden="true"></i
+        ></span>
         <div class="dashboard-card__copy">
           <h2 class="dashboard-card__title">{{ title }}</h2>
-          <span class="dashboard-card__subtitle">See where checked routes are concentrated.</span>
+          <span class="dashboard-card__subtitle"
+            >See where checked routes are concentrated.</span
+          >
         </div>
       </div>
       <div class="country-tabs" role="group" aria-label="Country view">
@@ -13,36 +17,44 @@
           class="dashboard-control"
           [class.is-active]="viewMode === 'map'"
           type="button"
-          (click)="setViewMode('map')">
+          (click)="setViewMode('map')"
+        >
           Map
         </button>
         <button
           class="dashboard-control"
           [class.is-active]="viewMode === 'countries'"
           type="button"
-          (click)="setViewMode('countries')">
+          (click)="setViewMode('countries')"
+        >
           List
         </button>
       </div>
     </div>
-  </ng-template>
+  </div>
 
   @if (countries.length) {
     <div class="dashboard-card__body country-card__body">
-      @if (viewMode === 'map') {
+      @if (viewMode === "map") {
         <div class="map-panel">
           <div class="map-frame">
-            <p-chart
+            <app-chart
               #mapChart
               [type]="mapChartType"
               [data]="mapData"
               [options]="mapOptions"
-              class="map-chart">
-            </p-chart>
+              class="map-chart"
+            />
           </div>
           <div class="map-caption">
-            <span><i class="pi pi-info-circle" aria-hidden="true"></i>Lighter regions contain more proxies.</span>
-            <span>{{ countries.length }} {{ countries.length === 1 ? 'region' : 'regions' }}</span>
+            <span
+              ><i class="icon icon-info" aria-hidden="true"></i>Lighter regions
+              contain more proxies.</span
+            >
+            <span
+              >{{ countries.length }}
+              {{ countries.length === 1 ? "region" : "regions" }}</span
+            >
           </div>
         </div>
       } @else {
@@ -50,7 +62,10 @@
           <ul class="country-list">
             @for (c of visibleCountries(); track c.name) {
               <li class="country-row">
-                <span class="country-row__progress" [style.width.%]="countryPercent(c)"></span>
+                <span
+                  class="country-row__progress"
+                  [style.width.%]="countryPercent(c)"
+                ></span>
                 <div class="country-row__content">
                   <div class="country-row__identity">
                     <span class="flag">{{ countryFlag(c) }}</span>
@@ -67,7 +82,11 @@
             }
           </ul>
           @if (hasMoreCountries()) {
-            <button type="button" class="dashboard-control country-more" (click)="showAllCountries = true">
+            <button
+              type="button"
+              class="dashboard-control country-more"
+              (click)="showAllCountries = true"
+            >
               View all countries
             </button>
           }
@@ -76,34 +95,41 @@
     </div>
   } @else {
     <div class="dashboard-empty">
-      <span class="dashboard-empty__icon"><i class="pi pi-globe" aria-hidden="true"></i></span>
-      <p>Country distribution will appear after checked routes include location data.</p>
+      <span class="dashboard-empty__icon"
+        ><i class="icon icon-globe" aria-hidden="true"></i
+      ></span>
+      <p>
+        Country distribution will appear after checked routes include location
+        data.
+      </p>
     </div>
   }
 
-  <p-dialog
+  <app-dialog
     header="All countries"
     styleClass="dashboard-country-dialog"
     [(visible)]="showAllCountries"
-    [modal]="true"
-    [draggable]="true"
     [dismissableMask]="true"
-    [style]="{ width: '32rem', maxWidth: 'calc(100vw - 2rem)' }"
-    [contentStyle]="{ padding: '0' }">
+    [panelStyle]="{ width: '32rem', maxWidth: 'calc(100vw - 2rem)' }"
+  >
     <div class="all-countries-list">
       <label class="country-search">
-        <i class="pi pi-search" aria-hidden="true"></i>
+        <i class="icon icon-search" aria-hidden="true"></i>
         <span class="sr-only">Search countries</span>
         <input
           type="search"
           [(ngModel)]="searchTerm"
           placeholder="Search countries"
-          aria-label="Search countries">
+          aria-label="Search countries"
+        />
       </label>
       <ul class="country-list">
         @for (c of filteredCountries(); track c.name) {
           <li class="country-row">
-            <span class="country-row__progress" [style.width.%]="countryPercent(c)"></span>
+            <span
+              class="country-row__progress"
+              [style.width.%]="countryPercent(c)"
+            ></span>
             <div class="country-row__content">
               <div class="country-row__identity">
                 <span class="flag">{{ countryFlag(c) }}</span>
@@ -120,5 +146,5 @@
         }
       </ul>
     </div>
-  </p-dialog>
-</p-card>
+  </app-dialog>
+</section>

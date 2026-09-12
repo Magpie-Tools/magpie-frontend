@@ -2,7 +2,9 @@
   <div class="notifications-stage">
     <header class="notifications-context">
       <div class="notifications-context__copy">
-        <span class="context-icon"><i class="pi pi-bell" aria-hidden="true"></i></span>
+        <span class="context-icon"
+          ><i class="icon icon-bell" aria-hidden="true"></i
+        ></span>
         <div>
           <h1>Release notes</h1>
           <p>See what changed in Magpie and review every published release.</p>
@@ -11,7 +13,10 @@
     </header>
 
     @if (status().loading) {
-      <section class="notification-card state-card" aria-label="Loading release notes">
+      <section
+        class="notification-card state-card"
+        aria-label="Loading release notes"
+      >
         <app-loading></app-loading>
         <div class="state-copy">
           <strong>Loading release notes</strong>
@@ -26,31 +31,42 @@
       />
     } @else {
       <div class="notifications-grid">
-        <section class="notification-card overview-card" aria-labelledby="overview-title">
+        <section
+          class="notification-card overview-card"
+          aria-labelledby="overview-title"
+        >
           <div class="card-heading">
-            <span class="card-icon"><i class="pi pi-inbox" aria-hidden="true"></i></span>
+            <span class="card-icon"
+              ><i class="icon icon-inbox" aria-hidden="true"></i
+            ></span>
             <div class="card-heading__copy">
               <h2 id="overview-title">What is new since your last visit?</h2>
-              <p>Magpie remembers the latest version reviewed in this browser.</p>
+              <p>
+                Magpie remembers the latest version reviewed in this browser.
+              </p>
             </div>
           </div>
 
           <div class="unread-summary">
             <strong class="unread-count">{{ newReleaseCount() }}</strong>
             <div>
-              <span>{{ newReleaseCount() === 1 ? 'unread release' : 'unread releases' }}</span>
-              <small>{{ hasNewReleases() ? 'Ready for review' : 'You are caught up' }}</small>
+              <span>{{
+                newReleaseCount() === 1 ? "unread release" : "unread releases"
+              }}</span>
+              <small>{{
+                hasNewReleases() ? "Ready for review" : "You are caught up"
+              }}</small>
             </div>
           </div>
 
           <dl class="version-pair">
             <div>
               <dt>Last viewed</dt>
-              <dd>{{ lastSeenTag() || 'No previous version' }}</dd>
+              <dd>{{ lastSeenTag() || "No previous version" }}</dd>
             </div>
             <div>
               <dt>Latest available</dt>
-              <dd>{{ latestTag() || 'No releases yet' }}</dd>
+              <dd>{{ latestTag() || "No releases yet" }}</dd>
             </div>
           </dl>
 
@@ -58,55 +74,73 @@
             type="button"
             class="button button--primary overview-action"
             [disabled]="!hasNewReleases()"
-            (click)="markAllSeen()">
-            <i class="pi pi-check" aria-hidden="true"></i>
+            (click)="markAllSeen()"
+          >
+            <i class="icon icon-check" aria-hidden="true"></i>
             Mark all as read
           </button>
         </section>
 
-        <section class="notification-card build-card" aria-labelledby="build-title">
+        <section
+          class="notification-card build-card"
+          aria-labelledby="build-title"
+        >
           <div class="card-heading">
-            <span class="card-icon"><i class="pi pi-box" aria-hidden="true"></i></span>
+            <span class="card-icon"
+              ><i class="icon icon-archive" aria-hidden="true"></i
+            ></span>
             <div class="card-heading__copy">
               <h2 id="build-title">Which backend build is running?</h2>
-              <p>Compare the installed build with the latest published version.</p>
+              <p>
+                Compare the installed build with the latest published version.
+              </p>
             </div>
           </div>
 
           <div class="build-visual" aria-hidden="true">
             <span class="build-orbit build-orbit--outer"></span>
             <span class="build-orbit build-orbit--inner"></span>
-            <span class="build-core"><i class="pi pi-server"></i></span>
+            <span class="build-core"><i class="icon icon-server"></i></span>
           </div>
 
           <div class="build-details">
             <span>Backend version</span>
             <strong>{{ buildVersionLabel() }}</strong>
             @if (buildTimestamp()) {
-              <small>Built {{ buildTimestamp() | date:'medium' }}</small>
+              <small>Built {{ buildTimestamp() | date: "medium" }}</small>
             } @else {
               <small>Build time unavailable</small>
             }
           </div>
         </section>
 
-        <section class="notification-card recent-card" aria-labelledby="recent-title">
+        <section
+          class="notification-card recent-card"
+          aria-labelledby="recent-title"
+        >
           <div class="section-heading">
             <div class="card-heading">
-              <span class="card-icon"><i class="pi pi-sparkles" aria-hidden="true"></i></span>
+              <span class="card-icon"
+                ><i class="icon icon-sparkles" aria-hidden="true"></i
+              ></span>
               <div class="card-heading__copy">
                 <h2 id="recent-title">New since you last checked</h2>
                 <p>Open a release for its complete changelog.</p>
               </div>
             </div>
-            <span class="section-count" [class.section-count--muted]="!hasNewReleases()">
+            <span
+              class="section-count"
+              [class.section-count--muted]="!hasNewReleases()"
+            >
               {{ newReleaseCount() }} new
             </span>
           </div>
 
           @if (!hasNewReleases()) {
             <div class="empty-state">
-              <span class="state-icon state-icon--success"><i class="pi pi-check" aria-hidden="true"></i></span>
+              <span class="state-icon state-icon--success"
+                ><i class="icon icon-check" aria-hidden="true"></i
+              ></span>
               <div class="state-copy">
                 <strong>You are up to date</strong>
                 <span>The next published release will appear here.</span>
@@ -126,15 +160,28 @@
                     type="button"
                     class="release-card__trigger"
                     (click)="openReleaseDialog(release)"
-                    [attr.aria-label]="'Open release notes for ' + (release.title || release.tagName)">
+                    [attr.aria-label]="
+                      'Open release notes for ' +
+                      (release.title || release.tagName)
+                    "
+                  >
                     <span class="release-card__copy">
-                      <strong>{{ release.title || 'Untitled release' }}</strong>
-                      <small>Published {{ release.publishedAt | date:'mediumDate' }}</small>
-                      <span>{{ release.body || 'No changelog text provided.' }}</span>
+                      <strong>{{ release.title || "Untitled release" }}</strong>
+                      <small
+                        >Published
+                        {{ release.publishedAt | date: "mediumDate" }}</small
+                      >
+                      <span>{{
+                        release.body || "No changelog text provided."
+                      }}</span>
                     </span>
-                    <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                    <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
                   </button>
-                  <a [href]="release.htmlUrl" target="_blank" rel="noopener noreferrer">
+                  <a
+                    [href]="release.htmlUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     View on GitHub
                   </a>
                 </article>
@@ -143,18 +190,27 @@
           }
         </section>
 
-        <section class="notification-card archive-card" aria-labelledby="archive-title">
+        <section
+          class="notification-card archive-card"
+          aria-labelledby="archive-title"
+        >
           <div class="archive-layout">
             <div class="archive-intro">
-              <span class="card-icon"><i class="pi pi-history" aria-hidden="true"></i></span>
+              <span class="card-icon"
+                ><i class="icon icon-history" aria-hidden="true"></i
+              ></span>
               <h2 id="archive-title">Release history</h2>
-              <p>Every published release, including updates already listed above.</p>
+              <p>
+                Every published release, including updates already listed above.
+              </p>
               <span class="archive-total">{{ archiveCountLabel() }}</span>
             </div>
 
             @if (!allReleases().length) {
               <div class="empty-state empty-state--archive">
-                <span class="state-icon"><i class="pi pi-inbox" aria-hidden="true"></i></span>
+                <span class="state-icon"
+                  ><i class="icon icon-inbox" aria-hidden="true"></i
+                ></span>
                 <div class="state-copy">
                   <strong>No releases yet</strong>
                   <span>Published releases will collect here.</span>
@@ -162,24 +218,38 @@
               </div>
             } @else {
               <ol class="archive-list">
-                @for (release of allReleases(); track release.id; let position = $index) {
+                @for (
+                  release of allReleases();
+                  track release.id;
+                  let position = $index
+                ) {
                   <li class="archive-row">
-                    <span class="archive-index" aria-hidden="true">{{ (position + 1).toString().padStart(2, '0') }}</span>
+                    <span class="archive-index" aria-hidden="true">{{
+                      (position + 1).toString().padStart(2, "0")
+                    }}</span>
                     <div class="archive-copy">
                       <div class="release-meta">
-                        <span class="release-tag release-tag--muted">{{ release.tagName }}</span>
+                        <span class="release-tag release-tag--muted">{{
+                          release.tagName
+                        }}</span>
                         @if (release.prerelease) {
                           <span class="release-flag">Prerelease</span>
                         }
-                        <span class="release-date">{{ release.publishedAt | date:'mediumDate' }}</span>
+                        <span class="release-date">{{
+                          release.publishedAt | date: "mediumDate"
+                        }}</span>
                       </div>
-                      <h3>{{ release.title || 'Untitled release' }}</h3>
+                      <h3>{{ release.title || "Untitled release" }}</h3>
                       <button
                         type="button"
                         class="archive-preview"
                         (click)="openReleaseDialog(release)"
-                        [attr.aria-label]="'Open release notes for ' + (release.title || release.tagName)">
-                        {{ release.body || 'No changelog text provided.' }}
+                        [attr.aria-label]="
+                          'Open release notes for ' +
+                          (release.title || release.tagName)
+                        "
+                      >
+                        {{ release.body || "No changelog text provided." }}
                       </button>
                     </div>
                     <a
@@ -187,8 +257,16 @@
                       [href]="release.htmlUrl"
                       target="_blank"
                       rel="noopener noreferrer"
-                      [attr.aria-label]="'View ' + (release.title || release.tagName) + ' on GitHub'">
-                      <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                      [attr.aria-label]="
+                        'View ' +
+                        (release.title || release.tagName) +
+                        ' on GitHub'
+                      "
+                    >
+                      <i
+                        class="icon icon-arrow-up-right"
+                        aria-hidden="true"
+                      ></i>
                     </a>
                   </li>
                 }
@@ -201,23 +279,25 @@
   </div>
 </main>
 
-<p-dialog
+<app-dialog
   [visible]="releaseDialogVisible()"
   (visibleChange)="onReleaseDialogVisibleChange($event)"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
   [dismissableMask]="true"
-  [breakpoints]="{ '1100px': '90vw', '720px': '96vw' }"
-  [style]="{ width: '52rem' }"
-  [appendTo]="'body'"
-  styleClass="release-dialog">
-  <ng-template pTemplate="header">
+  styleClass="release-dialog"
+  [panelStyle]="{ width: '52rem' }"
+>
+  <ng-template #dialogHeader>
     <div class="release-dialog__header">
-      <div class="release-dialog__eyebrow">{{ selectedRelease()?.tagName }}</div>
-      <div class="release-dialog__title">{{ selectedRelease()?.title || 'Untitled release' }}</div>
+      <div class="release-dialog__eyebrow">
+        {{ selectedRelease()?.tagName }}
+      </div>
+      <div class="release-dialog__title">
+        {{ selectedRelease()?.title || "Untitled release" }}
+      </div>
       @if (selectedRelease()?.publishedAt) {
-        <div class="release-dialog__meta">Published {{ selectedRelease()?.publishedAt | date:'medium' }}</div>
+        <div class="release-dialog__meta">
+          Published {{ selectedRelease()?.publishedAt | date: "medium" }}
+        </div>
       }
     </div>
   </ng-template>
@@ -232,13 +312,17 @@
           class="dialog-link"
           [href]="selectedRelease()?.htmlUrl"
           target="_blank"
-          rel="noopener noreferrer">
+          rel="noopener noreferrer"
+        >
           View on GitHub
-          <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+          <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
         </a>
       }
     </div>
 
-    <article class="release-dialog__markdown" [innerHTML]="selectedReleaseMarkdown()"></article>
+    <article
+      class="release-dialog__markdown"
+      [innerHTML]="selectedReleaseMarkdown()"
+    ></article>
   </div>
-</p-dialog>
+</app-dialog>

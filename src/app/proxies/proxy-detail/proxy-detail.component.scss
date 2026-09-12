@@ -1,8 +1,6 @@
 
 
-
 :host {
-
 
   display: block;
   color: #f7f5f7;
@@ -467,7 +465,7 @@ a {
   overflow: hidden;
   border-top: 1px solid rgba(255, 255, 255, 0.065);
 
-  p-chart {
+  app-chart {
     display: block;
     width: 100%;
     height: 8.5rem;
@@ -894,7 +892,7 @@ a {
   min-width: 56rem;
   border-collapse: collapse;
 
-  .p-datatable-thead > tr > th {
+  thead > tr > th {
     padding: 0.68rem 0.75rem;
     border: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.085);
@@ -906,11 +904,11 @@ a {
     text-transform: uppercase;
   }
 
-  .p-datatable-tbody > tr {
+  tbody > tr {
     background: transparent;
   }
 
-  .p-datatable-tbody > tr > td {
+  tbody > tr > td {
     padding: 0.68rem 0.75rem;
     border: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -919,7 +917,7 @@ a {
     font-size: 0.63rem;
   }
 
-  .p-datatable-tbody > tr.proxy-stat-row {
+  tbody > tr.proxy-stat-row {
     cursor: pointer;
 
     &:hover {

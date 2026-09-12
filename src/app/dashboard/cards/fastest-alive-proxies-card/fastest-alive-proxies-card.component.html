@@ -1,11 +1,18 @@
-<p-card [class]="cardStyleClass">
-  <ng-template pTemplate="header">
+<section hlmCard [class]="cardStyleClass">
+  <div hlmCardHeader>
     <div class="dashboard-card__header fastest-alive-card__header">
       <div class="dashboard-card__heading">
-        <span class="dashboard-card__icon"><i class="pi pi-gauge" aria-hidden="true"></i></span>
+        <span class="dashboard-card__icon"
+          ><i class="icon icon-gauge" aria-hidden="true"></i
+        ></span>
         <div class="dashboard-card__copy">
-          <h2 class="dashboard-card__title">How fast are the best available routes?</h2>
-          <span class="dashboard-card__subtitle">{{ titleSuffix }}. Position shows latency and country; shape shows reputation.</span>
+          <h2 class="dashboard-card__title">
+            How fast are the best available routes?
+          </h2>
+          <span class="dashboard-card__subtitle"
+            >{{ titleSuffix }}. Position shows latency and country; shape shows
+            reputation.</span
+          >
         </div>
       </div>
 
@@ -16,12 +23,16 @@
             class="dashboard-control sort-toggle"
             [attr.aria-label]="'Latency direction: ' + sortLabel"
             [title]="sortLabel"
-            (click)="toggleSortDirection()">
+            (click)="toggleSortDirection()"
+          >
             <i [class]="sortIcon" aria-hidden="true"></i>
             <span>{{ sortLabel }}</span>
           </button>
 
-          <div class="fastest-alive-card__shape-legend" aria-label="Reputation shape legend">
+          <div
+            class="fastest-alive-card__shape-legend"
+            aria-label="Reputation shape legend"
+          >
             @for (entry of reputationLegend; track entry.label) {
               <span class="shape-key">
                 <span [class]="entry.className"></span>
@@ -32,22 +43,28 @@
         </div>
       }
     </div>
-  </ng-template>
+  </div>
 
   @if (proxyCount > 0) {
     <div class="fastest-alive-card__body">
       <div class="fastest-alive-card__chart">
-        <p-chart type="scatter" [data]="chartData" [options]="chartOptions"></p-chart>
+        <app-chart type="scatter" [data]="chartData" [options]="chartOptions" />
       </div>
 
-      <aside class="fastest-alive-card__countries" aria-label="Country color legend">
+      <aside
+        class="fastest-alive-card__countries"
+        aria-label="Country color legend"
+      >
         <div class="country-legend__heading">
           <span>Country</span>
           <span>Routes</span>
         </div>
         @for (entry of countryLegend; track entry.country) {
           <div class="country-key">
-            <span class="country-key__swatch" [ngStyle]="{'background': entry.color}"></span>
+            <span
+              class="country-key__swatch"
+              [ngStyle]="{ background: entry.color }"
+            ></span>
             <span class="country-key__name">{{ entry.country }}</span>
             <span class="country-key__count">{{ entry.count | number }}</span>
           </div>
@@ -56,8 +73,10 @@
     </div>
   } @else {
     <div class="dashboard-empty fastest-alive-card__empty">
-      <span class="dashboard-empty__icon"><i class="pi pi-gauge" aria-hidden="true"></i></span>
+      <span class="dashboard-empty__icon"
+        ><i class="icon icon-gauge" aria-hidden="true"></i
+      ></span>
       <p>Latency distribution will appear after Magpie finds alive proxies.</p>
     </div>
   }
-</p-card>
+</section>

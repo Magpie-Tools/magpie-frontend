@@ -221,8 +221,8 @@
     color: rgba(239, 174, 174, 0.46);
   }
 
-  .bulk-action-dialog.p-dialog,
-  .bulk-action-dialog .p-dialog {
+  .bulk-action-dialog.app-dialog-panel,
+  .bulk-action-dialog .app-dialog-panel {
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 1.2rem;
@@ -231,13 +231,13 @@
     box-shadow: 0 32px 86px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
-  .bulk-action-dialog--danger.p-dialog,
-  .bulk-action-dialog--danger .p-dialog {
+  .bulk-action-dialog--danger.app-dialog-panel,
+  .bulk-action-dialog--danger .app-dialog-panel {
     border-color: rgba(248, 113, 113, 0.2);
     box-shadow: 0 32px 86px rgba(0, 0, 0, 0.64), inset 0 1px 0 rgba(255, 255, 255, 0.035);
   }
 
-  .bulk-action-dialog .p-dialog-header {
+  .bulk-action-dialog .app-dialog-header {
     padding: 1rem 1.15rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.09);
     background:
@@ -245,55 +245,51 @@
       rgba(12, 12, 14, 0.98);
   }
 
-  .bulk-action-dialog--danger .p-dialog-header {
+  .bulk-action-dialog--danger .app-dialog-header {
     border-bottom-color: rgba(248, 113, 113, 0.14);
     background:
       radial-gradient(circle at 10% 0%, rgba(185, 52, 52, 0.12), transparent 16rem),
       rgba(12, 12, 14, 0.98);
   }
 
-  .bulk-action-dialog .p-dialog-content {
+  .bulk-action-dialog .app-dialog-body {
     background: transparent;
     color: inherit;
   }
 
-  .bulk-action-dialog .p-dialog-footer {
+  .bulk-action-dialog .app-dialog-footer {
     padding: 0.78rem 1.15rem;
     border-top: 1px solid rgba(255, 255, 255, 0.09);
     background: rgba(11, 11, 13, 0.98);
   }
 
-  .bulk-action-dialog--danger .p-dialog-footer {
+  .bulk-action-dialog--danger .app-dialog-footer {
     border-top-color: rgba(248, 113, 113, 0.12);
   }
 
-  .bulk-action-dialog .p-dialog-close-button {
+  .bulk-action-dialog [data-slot="dialog-close"] {
     width: 2.15rem;
     height: 2.15rem;
     border-radius: 0.68rem;
     color: rgba(255, 255, 255, 0.42);
   }
 
-  .bulk-action-dialog .p-dialog-close-button:hover {
+  .bulk-action-dialog [data-slot="dialog-close"]:hover {
     background: rgba(255, 255, 255, 0.06);
     color: rgba(255, 255, 255, 0.86);
   }
 
-  .bulk-action-dialog--danger .p-dialog-close-button:hover {
+  .bulk-action-dialog--danger [data-slot="dialog-close"]:hover {
     background: rgba(127, 29, 29, 0.14);
     color: #fecaca;
   }
 
-  .bulk-action-dialog--danger .p-radiobutton-checked .p-radiobutton-box {
+  .bulk-action-dialog--danger :checked input[type="radio"] {
     border-color: #f87171;
     background: rgba(185, 28, 28, 0.72);
   }
 
-  .bulk-action-dialog--danger .p-radiobutton-checked .p-radiobutton-icon {
-    background: #fff1f2;
-  }
-
-  .bulk-action-dialog .dialog-button.p-button {
+  .bulk-action-dialog .dialog-button[hlmBtn] {
     min-height: 2.35rem;
     border-radius: 0.68rem;
     font-size: 0.65rem;
@@ -301,30 +297,30 @@
     box-shadow: none;
   }
 
-  .bulk-action-dialog .dialog-button--quiet.p-button {
+  .bulk-action-dialog .dialog-button--quiet[hlmBtn] {
     border-color: rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.035);
     color: rgba(255, 255, 255, 0.58);
   }
 
-  .bulk-action-dialog .dialog-button--primary.p-button {
+  .bulk-action-dialog .dialog-button--primary[hlmBtn] {
     border-color: var(--theme-primary-400);
     background: var(--theme-primary-500);
     color: #090b0a;
   }
 
-  .bulk-action-dialog .dialog-button--primary.p-button:hover:not(:disabled) {
+  .bulk-action-dialog .dialog-button--primary[hlmBtn]:hover:not(:disabled) {
     border-color: var(--theme-primary-300);
     background: var(--theme-primary-400);
   }
 
-  .bulk-action-dialog .dialog-button--danger.p-button {
+  .bulk-action-dialog .dialog-button--danger[hlmBtn] {
     border-color: rgba(239, 68, 68, 0.42);
     background: rgba(127, 29, 29, 0.52);
     color: #fecaca;
   }
 
-  .bulk-action-dialog .dialog-button--danger.p-button:hover:not(:disabled) {
+  .bulk-action-dialog .dialog-button--danger[hlmBtn]:hover:not(:disabled) {
     border-color: rgba(248, 113, 113, 0.62);
     background: rgba(153, 27, 27, 0.68);
     color: #fff1f2;
@@ -352,7 +348,7 @@
       width: 100%;
     }
 
-    .bulk-action-dialog .dialog-button.p-button {
+    .bulk-action-dialog .dialog-button[hlmBtn] {
       width: 100%;
     }
   }

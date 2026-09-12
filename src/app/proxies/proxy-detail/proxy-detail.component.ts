@@ -1,10 +1,10 @@
+import {HlmTableImports} from '@spartan-ng/helm/table';
+import {DialogComponent} from '../../shared/ui/dialog.component';
+import {ChartComponent} from '../../shared/ui/chart.component';
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal} from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {UIChart} from 'primeng/chart';
-import {TableModule} from 'primeng/table';
-import {ButtonModule} from 'primeng/button';
-import {DialogModule} from 'primeng/dialog';
+
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ProxyDetail} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
@@ -55,13 +55,10 @@ interface ReputationSignalStructuredItem {
 @Component({
   selector: 'app-proxy-detail',
   standalone: true,
-  imports: [
+  imports: [HlmTableImports, DialogComponent, ChartComponent,
     CommonModule,
     RouterLink,
-    UIChart,
-    TableModule,
-    ButtonModule,
-    DialogModule,
+
     LoadingComponent,
     DatePipe,
     NgClass,
@@ -437,7 +434,6 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
     return null;
   }
-
 
   get overallAlive(): boolean | null {
     const stats = this.statistics();

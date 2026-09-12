@@ -120,16 +120,16 @@
 .last-update strong { color: rgba(255, 255, 255, 0.72); font-weight: 570; text-align: right; }
 
 :host ::ng-deep {
-  .p-inputtext,
-  .p-select { width: 100%; min-height: 2.65rem; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 0.82rem; background: rgba(255, 255, 255, 0.035); color: rgba(255, 255, 255, 0.88); font-size: 0.76rem; box-shadow: none; }
-  .p-inputtext:hover,
-  .p-select:hover { border-color: rgba(255, 255, 255, 0.23); }
-  .p-inputtext:focus,
-  .p-select.p-focus { border-color: rgba(var(--theme-primary-300-rgb), 0.55); box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13); }
-  .p-select-label { display: flex; align-items: center; padding: 0.65rem 0.72rem; font-size: 0.7rem; }
-  .p-toggleswitch-slider { border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.1); }
-  .p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider { border-color: rgba(var(--theme-primary-300-rgb), 0.45); background: var(--theme-primary-700); }
-  .p-message { display: flex; margin-top: 0.75rem; border: 1px solid rgba(231, 184, 108, 0.25); border-radius: 0.75rem; background: rgba(121, 78, 16, 0.1); color: rgba(250, 219, 168, 0.82); font-size: 0.66rem; }
+  [hlmInput],
+  [data-slot="select-trigger"] { width: 100%; min-height: 2.65rem; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 0.82rem; background: rgba(255, 255, 255, 0.035); color: rgba(255, 255, 255, 0.88); font-size: 0.76rem; box-shadow: none; }
+  [hlmInput]:hover,
+  [data-slot="select-trigger"]:hover { border-color: rgba(255, 255, 255, 0.23); }
+  [hlmInput]:focus,
+  [data-slot="select-trigger"]:focus-within { border-color: rgba(var(--theme-primary-300-rgb), 0.55); box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13); }
+  [data-slot="select-trigger"] > span { display: flex; align-items: center; padding: 0.65rem 0.72rem; font-size: 0.7rem; }
+  brn-switch { border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.1); }
+  brn-switch[data-checked] brn-switch { border-color: rgba(var(--theme-primary-300-rgb), 0.45); background: var(--theme-primary-700); }
+  .ui-message { display: flex; margin-top: 0.75rem; border: 1px solid rgba(231, 184, 108, 0.25); border-radius: 0.75rem; background: rgba(121, 78, 16, 0.1); color: rgba(250, 219, 168, 0.82); font-size: 0.66rem; }
 }
 
 @container plugin-geolite (max-width: 940px) {

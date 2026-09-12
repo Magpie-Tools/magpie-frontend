@@ -42,9 +42,9 @@
 .fetch-mode__state { color: rgba(255, 255, 255, .46); font-size: .6rem; }
 
 :host ::ng-deep {
-  .p-toggleswitch { --p-toggleswitch-width: 2.25rem; --p-toggleswitch-height: 1.25rem; --p-toggleswitch-handle-size: .85rem; }
-  .p-toggleswitch-slider { border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .1); }
-  .p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider {
+  brn-switch { --p-toggleswitch-width: 2.25rem; --p-toggleswitch-height: 1.25rem; --p-toggleswitch-handle-size: .85rem; }
+  brn-switch { border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .1); }
+  brn-switch[data-checked] brn-switch {
     border-color: rgba(var(--theme-primary-300-rgb), .45);
     background: var(--theme-primary-700);
   }

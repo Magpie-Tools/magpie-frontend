@@ -1,3 +1,4 @@
+import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
 import {SourceFetchModeComponent} from '../source-fetch-mode/source-fetch-mode.component';
 import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
@@ -12,7 +13,7 @@ import {ClipboardService} from '../../services/clipboard.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {LoadingComponent} from '../../ui-elements/loading/loading.component';
 import {ProxyInfo} from '../../models/ProxyInfo';
-import {TableLazyLoadEvent} from 'primeng/table';
+
 import {ProxyListFilters} from '../../models/ProxyListFilters';
 import {ProxyFilterOptions} from '../../models/ProxyFilterOptions';
 import {ProxyFilterPanelComponent} from '../../shared/proxy-filter-panel/proxy-filter-panel.component';
@@ -342,7 +343,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     return 'reputation-badge reputation-badge--unknown';
   }
 
-  onProxyLazyLoad(event: TableLazyLoadEvent): void {
+  onProxyLazyLoad(event: TablePageEvent): void {
     const previousSortField = this.proxySortField();
     const previousSortOrder = this.proxySortOrder();
     const newPage = Math.floor((event.first ?? 0) / (event.rows ?? this.proxyPageSize())) + 1;
@@ -639,7 +640,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  private resolveProxySortField(sortField: TableLazyLoadEvent['sortField']): string | null {
+  private resolveProxySortField(sortField: TablePageEvent['sortField']): string | null {
     if (!sortField) {
       return this.proxySortField() ?? null;
     }

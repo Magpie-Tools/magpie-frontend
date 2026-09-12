@@ -1,7 +1,8 @@
+import {DialogComponent} from '../../../shared/ui/dialog.component';
 import {Component, EventEmitter, Output, computed, signal} from '@angular/core';
 
 import {ProcesingPopupComponent} from './procesing-popup/procesing-popup.component';
-import {DialogModule} from 'primeng/dialog';
+
 import {HttpService} from '../../../services/http.service';
 import {ClipboardService} from '../../../services/clipboard.service';
 import {NotificationService} from '../../../services/notification-service.service';
@@ -16,9 +17,9 @@ import {ImportDialogContentComponent} from '../../../shared/import-dialog-conten
 
 @Component({
     selector: 'app-add-proxies',
-  imports: [
+  imports: [DialogComponent,
     ProcesingPopupComponent,
-    DialogModule,
+
     ProxyTagSelectorComponent,
     ProxyTagManagerComponent,
     BulkActionDialogComponent,

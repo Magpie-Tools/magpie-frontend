@@ -7,8 +7,7 @@
   height: 24rem;
 }
 
-:host ::ng-deep .throughput-card__body p-chart,
-:host ::ng-deep .throughput-card__body .p-chart,
+:host ::ng-deep .throughput-card__body app-chart,
 :host ::ng-deep .throughput-card__body canvas {
   display: block;
   width: 100% !important;

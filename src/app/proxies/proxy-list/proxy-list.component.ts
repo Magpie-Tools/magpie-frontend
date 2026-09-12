@@ -1,3 +1,4 @@
+import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {readPageSize, writePageSize} from '../../shared/table-pagination';
 import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
 import {
@@ -14,7 +15,7 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular
 import {HttpService} from '../../services/http.service';
 import {ProxyInfo} from '../../models/ProxyInfo';
 import {SelectionModel} from '@angular/cdk/collections';
-import {TableLazyLoadEvent} from 'primeng/table'; // Keep this for onLazyLoad
+
 import {NotificationService} from '../../services/notification-service.service';
 import {Observable, Subscription} from 'rxjs';
 import {filter, finalize, takeUntil} from 'rxjs/operators';
@@ -22,8 +23,7 @@ import {ExportProxiesComponent} from './export-proxies/export-proxies.component'
 import {AddProxiesComponent} from './add-proxies/add-proxies.component';
 import {NavigationStart, Router} from '@angular/router';
 import {DeleteProxiesComponent} from './delete-proxies/delete-proxies.component';
-import {InputNumberModule} from 'primeng/inputnumber';
-import {MultiSelectModule} from 'primeng/multiselect';
+
 import {ProxyListFilters} from '../../models/ProxyListFilters';
 import {ProxyFilterOptions} from '../../models/ProxyFilterOptions';
 import {UserSettings} from '../../models/UserSettings';
@@ -68,8 +68,7 @@ import {InventoryPageShellComponent} from '../../shared/inventory-page-shell/inv
   imports: [
     ReactiveFormsModule,
     FormsModule,
-    InputNumberModule,
-    MultiSelectModule,
+
     AddProxiesComponent,
     ExportProxiesComponent,
     DeleteProxiesComponent,
@@ -210,7 +209,7 @@ export class ProxyListComponent implements OnInit, OnDestroy {
     this.getAndSetProxyList();
   }
 
-  getAndSetProxyList(event?: TableLazyLoadEvent) {
+  getAndSetProxyList(event?: TablePageEvent) {
     this.proxyListSubscription?.unsubscribe();
     this.isNavigatingAway = false;
     this.isLoading.set(true);
@@ -307,7 +306,7 @@ export class ProxyListComponent implements OnInit, OnDestroy {
     }
   }
 
-  onLazyLoad(event: TableLazyLoadEvent) {
+  onLazyLoad(event: TablePageEvent) {
     const previousSortField = this.sortField();
     const previousSortOrder = this.sortOrder();
 
@@ -513,9 +512,9 @@ export class ProxyListComponent implements OnInit, OnDestroy {
 
   filterToggleClass(): string {
     if (this.hasActiveFilters()) {
-      return 'p-button-outlined filter-toggle filter-toggle--active';
+      return 'ui-button-outlined filter-toggle filter-toggle--active';
     }
-    return 'p-button-outlined filter-toggle';
+    return 'ui-button-outlined filter-toggle';
   }
 
   private ensureFilterOptionsLoaded(): void {
@@ -566,7 +565,7 @@ export class ProxyListComponent implements OnInit, OnDestroy {
     return columns.includes('reputation');
   }
 
-  private resolveSortField(sortField: TableLazyLoadEvent['sortField']): string | null {
+  private resolveSortField(sortField: TablePageEvent['sortField']): string | null {
     if (!sortField) {
       return this.sortField() ?? null;
     }
@@ -980,7 +979,7 @@ export class ProxyListComponent implements OnInit, OnDestroy {
 
   private isTargetWithinProxyFilterOverlay(target: Node): boolean {
     const element = target instanceof Element ? target : target.parentElement;
-    return !!element?.closest('.proxy-filter-panel__overlay');
+    return !!element?.closest('.app-select-overlay');
   }
 
   private stopTriggerEvent(event?: Event | { originalEvent?: Event }): void {

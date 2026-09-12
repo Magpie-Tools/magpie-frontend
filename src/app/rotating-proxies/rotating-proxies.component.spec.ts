@@ -1,6 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {of} from 'rxjs';
-import {MessageService} from 'primeng/api';
 
 import {RotatingProxiesComponent} from './rotating-proxies.component';
 import {HttpService} from '../services/http.service';
@@ -56,7 +55,6 @@ describe('RotatingProxiesComponent', () => {
     await TestBed.configureTestingModule({
       imports: [RotatingProxiesComponent],
       providers: [
-        MessageService,
         NotificationService,
         {provide: HttpService, useValue: httpServiceMock},
         {provide: WorkspaceService, useValue: {canOperate: () => true}},
@@ -124,9 +122,9 @@ describe('RotatingProxiesComponent', () => {
   });
 
   it('keeps closed select labels readable beside their dropdown trigger', () => {
-    const select = fixture.nativeElement.querySelector('.p-select') as HTMLElement;
-    const label = select.querySelector('.p-select-label') as HTMLElement;
-    const trigger = select.querySelector('.p-select-dropdown') as HTMLElement;
+    const select = fixture.nativeElement.querySelector('hlm-select [data-slot="select-trigger"]') as HTMLElement;
+    const label = select.querySelector('span') as HTMLElement;
+    const trigger = select.querySelector('ng-icon') as HTMLElement;
     const selectStyle = getComputedStyle(select);
     const labelStyle = getComputedStyle(label);
     const triggerStyle = getComputedStyle(trigger);
@@ -139,10 +137,10 @@ describe('RotatingProxiesComponent', () => {
   });
 
   it('gives the closed reputation multiselect label the available field width', () => {
-    const multiselect = fixture.nativeElement.querySelector('.p-multiselect') as HTMLElement;
-    const labelContainer = multiselect.querySelector('.p-multiselect-label-container') as HTMLElement;
-    const label = multiselect.querySelector('.p-multiselect-label') as HTMLElement;
-    const trigger = multiselect.querySelector('.p-multiselect-dropdown') as HTMLElement;
+    const multiselect = fixture.nativeElement.querySelector('hlm-select-multiple [data-slot="select-trigger"]') as HTMLElement;
+    const labelContainer = multiselect.querySelector('span') as HTMLElement;
+    const label = multiselect.querySelector('span') as HTMLElement;
+    const trigger = multiselect.querySelector('ng-icon') as HTMLElement;
     multiselect.style.width = '320px';
 
     const containerStyle = getComputedStyle(labelContainer);

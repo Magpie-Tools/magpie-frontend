@@ -1,8 +1,7 @@
+import {HlmCardImports} from '@spartan-ng/helm/card';
+import {ChartComponent} from '../../../shared/ui/chart.component';
 import {DecimalPipe, NgStyle} from '@angular/common';
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {PrimeTemplate} from 'primeng/api';
-import {Card} from 'primeng/card';
-import {UIChart} from 'primeng/chart';
 
 export interface FastestAliveProxyCountryLegend {
   country: string;
@@ -15,7 +14,7 @@ export type FastestAliveSortDirection = 'fastest-right' | 'fastest-left';
 @Component({
   selector: 'app-fastest-alive-proxies-card',
   standalone: true,
-  imports: [Card, PrimeTemplate, UIChart, DecimalPipe, NgStyle],
+  imports: [HlmCardImports, ChartComponent, DecimalPipe, NgStyle],
   templateUrl: './fastest-alive-proxies-card.component.html',
   styleUrl: './fastest-alive-proxies-card.component.scss'
 })
@@ -48,7 +47,7 @@ export class FastestAliveProxiesCardComponent {
   }
 
   get sortIcon(): string {
-    return this.sortDirection === 'fastest-right' ? 'pi pi-arrow-down-right' : 'pi pi-arrow-down-left';
+    return this.sortDirection === 'fastest-right' ? 'icon icon-arrow-down-right' : 'icon icon-arrow-down-left';
   }
 
   toggleSortDirection(): void {

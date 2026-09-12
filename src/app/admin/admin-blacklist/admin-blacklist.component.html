@@ -1,7 +1,10 @@
-<app-admin-settings-shell class="admin-blacklist-page" [appRevealGroup]="revealSteps">
+<app-admin-settings-shell
+  class="admin-blacklist-page"
+  [appRevealGroup]="revealSteps"
+>
   <form [formGroup]="form" class="settings-stage" (ngSubmit)="onSubmit()">
     <app-admin-settings-header
-      icon="pi pi-ban"
+      icon="icon icon-ban"
       title="Global blacklist"
       description="Keep blocked networks and websites out of every workspace."
     ></app-admin-settings-header>
@@ -9,31 +12,61 @@
     <div class="settings-grid">
       <section class="settings-card settings-card--cadence">
         <div class="card-heading">
-          <span class="card-icon"><i class="pi pi-clock" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-clock" aria-hidden="true"></i
+          ></span>
           <div class="card-heading__copy">
             <h2>When should lists refresh?</h2>
-            <p>Set the interval between blacklist downloads and proxy purges.</p>
+            <p>
+              Set the interval between blacklist downloads and proxy purges.
+            </p>
           </div>
         </div>
 
-        <div class="cadence-summary"><span>Every</span><strong>{{ blacklistCadenceLabel }}</strong></div>
+        <div class="cadence-summary">
+          <span>Every</span><strong>{{ blacklistCadenceLabel }}</strong>
+        </div>
 
         <div class="timer-grid" formGroupName="blacklist_timer">
           <div class="timer-field">
             <label for="blacklist-days">Days</label>
-            <p-select inputId="blacklist-days" [options]="daysList" formControlName="days" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+            <app-select
+              inputId="blacklist-days"
+              [options]="daysList"
+              formControlName="days"
+              optionLabel="label"
+              optionValue="value"
+            ></app-select>
           </div>
           <div class="timer-field">
             <label for="blacklist-hours">Hours</label>
-            <p-select inputId="blacklist-hours" [options]="hoursList" formControlName="hours" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+            <app-select
+              inputId="blacklist-hours"
+              [options]="hoursList"
+              formControlName="hours"
+              optionLabel="label"
+              optionValue="value"
+            ></app-select>
           </div>
           <div class="timer-field">
             <label for="blacklist-minutes">Minutes</label>
-            <p-select inputId="blacklist-minutes" [options]="minutesList" formControlName="minutes" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+            <app-select
+              inputId="blacklist-minutes"
+              [options]="minutesList"
+              formControlName="minutes"
+              optionLabel="label"
+              optionValue="value"
+            ></app-select>
           </div>
           <div class="timer-field">
             <label for="blacklist-seconds">Seconds</label>
-            <p-select inputId="blacklist-seconds" [options]="secondsList" formControlName="seconds" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+            <app-select
+              inputId="blacklist-seconds"
+              [options]="secondsList"
+              formControlName="seconds"
+              optionLabel="label"
+              optionValue="value"
+            ></app-select>
           </div>
         </div>
       </section>
@@ -41,27 +74,44 @@
       <section class="settings-card settings-card--enforcement">
         <div class="enforcement-copy">
           <div class="card-heading">
-            <span class="card-icon"><i class="pi pi-shield" aria-hidden="true"></i></span>
+            <span class="card-icon"
+              ><i class="icon icon-shield" aria-hidden="true"></i
+            ></span>
             <div class="card-heading__copy">
               <h2>What happens after a match?</h2>
-              <p>A refresh checks every managed proxy and stops blocked hosts from entering the system again.</p>
+              <p>
+                A refresh checks every managed proxy and stops blocked hosts
+                from entering the system again.
+              </p>
             </div>
           </div>
 
           <div class="enforcement-path" aria-label="Blacklist enforcement path">
             <div class="enforcement-step">
-              <span class="enforcement-node"><i class="pi pi-download" aria-hidden="true"></i></span>
-              <div><strong>Download</strong><small>Fetch every source</small></div>
+              <span class="enforcement-node"
+                ><i class="icon icon-download" aria-hidden="true"></i
+              ></span>
+              <div>
+                <strong>Download</strong><small>Fetch every source</small>
+              </div>
             </div>
             <span class="enforcement-line" aria-hidden="true"></span>
             <div class="enforcement-step">
-              <span class="enforcement-node"><i class="pi pi-search" aria-hidden="true"></i></span>
-              <div><strong>Match</strong><small>Compare IPs and CIDRs</small></div>
+              <span class="enforcement-node"
+                ><i class="icon icon-search" aria-hidden="true"></i
+              ></span>
+              <div>
+                <strong>Match</strong><small>Compare IPs and CIDRs</small>
+              </div>
             </div>
             <span class="enforcement-line" aria-hidden="true"></span>
             <div class="enforcement-step">
-              <span class="enforcement-node enforcement-node--danger"><i class="pi pi-times" aria-hidden="true"></i></span>
-              <div><strong>Purge</strong><small>Remove matching proxies</small></div>
+              <span class="enforcement-node enforcement-node--danger"
+                ><i class="icon icon-x" aria-hidden="true"></i
+              ></span>
+              <div>
+                <strong>Purge</strong><small>Remove matching proxies</small>
+              </div>
             </div>
           </div>
         </div>
@@ -69,18 +119,23 @@
         <div class="enforcement-visual" aria-hidden="true">
           <span class="enforcement-orbit enforcement-orbit--outer"></span>
           <span class="enforcement-orbit enforcement-orbit--inner"></span>
-          <span class="enforcement-core"><i class="pi pi-ban"></i></span>
+          <span class="enforcement-core"><i class="icon icon-ban"></i></span>
         </div>
       </section>
 
       <section class="settings-card settings-card--sources">
         <div class="card-heading">
-          <span class="card-icon"><i class="pi pi-cloud-download" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-cloud-download" aria-hidden="true"></i
+          ></span>
           <div class="card-heading__copy">
             <h2>IP blacklist sources</h2>
             <p>Add plain-text feeds containing IPv4, IPv6, or CIDR entries.</p>
           </div>
-          <span class="card-count">{{ configuredSourceCount }} {{ configuredSourceCount === 1 ? 'source' : 'sources' }}</span>
+          <span class="card-count"
+            >{{ configuredSourceCount }}
+            {{ configuredSourceCount === 1 ? "source" : "sources" }}</span
+          >
         </div>
 
         <div formArrayName="blacklist_sources" class="entry-editor">
@@ -89,31 +144,57 @@
               <div class="entry-row" [attr.data-index]="i">
                 <span class="entry-index">{{ i + 1 }}</span>
                 <div class="field-group">
-                  <label class="field-label" for="blacklist-source-{{ i }}">Source URL</label>
-                  <input id="blacklist-source-{{ i }}" type="url" [formControlName]="i" pInputText placeholder="https://example.com/drop.txt" />
+                  <label class="field-label" for="blacklist-source-{{ i }}"
+                    >Source URL</label
+                  >
+                  <input
+                    id="blacklist-source-{{ i }}"
+                    type="url"
+                    [formControlName]="i"
+                    hlmInput
+                    placeholder="https://example.com/drop.txt"
+                  />
                 </div>
                 @if (sources.length > 1) {
-                  <button type="button" class="icon-button icon-button--remove" (click)="removeSource(i)" [attr.aria-label]="'Remove blacklist source ' + (i + 1)">
-                    <i class="pi pi-trash" aria-hidden="true"></i>
+                  <button
+                    type="button"
+                    class="icon-button icon-button--remove"
+                    (click)="removeSource(i)"
+                    [attr.aria-label]="'Remove blacklist source ' + (i + 1)"
+                  >
+                    <i class="icon icon-trash" aria-hidden="true"></i>
                   </button>
                 }
               </div>
             }
           </div>
 
-          <button type="button" class="add-button" (click)="addSource()"><i class="pi pi-plus" aria-hidden="true"></i>Add source</button>
-          <p class="entry-note">Provider hostnames are not resolved for IP matching. New feeds are scraped as soon as you save.</p>
+          <button type="button" class="add-button" (click)="addSource()">
+            <i class="icon icon-plus" aria-hidden="true"></i>Add source
+          </button>
+          <p class="entry-note">
+            Provider hostnames are not resolved for IP matching. New feeds are
+            scraped as soon as you save.
+          </p>
         </div>
       </section>
 
       <section class="settings-card settings-card--websites">
         <div class="card-heading">
-          <span class="card-icon"><i class="pi pi-globe" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-globe" aria-hidden="true"></i
+          ></span>
           <div class="card-heading__copy">
             <h2>Website blacklist</h2>
-            <p>Prevent specific hosts and their subdomains from receiving any request.</p>
+            <p>
+              Prevent specific hosts and their subdomains from receiving any
+              request.
+            </p>
           </div>
-          <span class="card-count">{{ blockedSiteCount }} {{ blockedSiteCount === 1 ? 'website' : 'websites' }}</span>
+          <span class="card-count"
+            >{{ blockedSiteCount }}
+            {{ blockedSiteCount === 1 ? "website" : "websites" }}</span
+          >
         </div>
 
         <div formArrayName="website_blacklist" class="entry-editor">
@@ -122,20 +203,38 @@
               <div class="entry-row" [attr.data-index]="i">
                 <span class="entry-index">{{ i + 1 }}</span>
                 <div class="field-group">
-                  <label class="field-label" for="blocked-site-{{ i }}">Website</label>
-                  <input id="blocked-site-{{ i }}" type="text" [formControlName]="i" pInputText placeholder="example.com or https://example.com" />
+                  <label class="field-label" for="blocked-site-{{ i }}"
+                    >Website</label
+                  >
+                  <input
+                    id="blocked-site-{{ i }}"
+                    type="text"
+                    [formControlName]="i"
+                    hlmInput
+                    placeholder="example.com or https://example.com"
+                  />
                 </div>
                 @if (blockedSites.length > 1) {
-                  <button type="button" class="icon-button icon-button--remove" (click)="removeBlockedSite(i)" [attr.aria-label]="'Remove blocked website ' + (i + 1)">
-                    <i class="pi pi-trash" aria-hidden="true"></i>
+                  <button
+                    type="button"
+                    class="icon-button icon-button--remove"
+                    (click)="removeBlockedSite(i)"
+                    [attr.aria-label]="'Remove blocked website ' + (i + 1)"
+                  >
+                    <i class="icon icon-trash" aria-hidden="true"></i>
                   </button>
                 }
               </div>
             }
           </div>
 
-          <button type="button" class="add-button" (click)="addBlockedSite()"><i class="pi pi-plus" aria-hidden="true"></i>Add website</button>
-          <p class="entry-note">Blocked hosts cannot act as judges, scrape sources, or blacklist feeds.</p>
+          <button type="button" class="add-button" (click)="addBlockedSite()">
+            <i class="icon icon-plus" aria-hidden="true"></i>Add website
+          </button>
+          <p class="entry-note">
+            Blocked hosts cannot act as judges, scrape sources, or blacklist
+            feeds.
+          </p>
         </div>
       </section>
     </div>

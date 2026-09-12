@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MessageService} from 'primeng/api';
+
 import {ActivatedRoute, convertToParamMap} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {of, throwError} from 'rxjs';
@@ -55,7 +55,6 @@ describe('ScrapeSourceDetailComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ScrapeSourceDetailComponent, RouterTestingModule],
       providers: [
-        MessageService,
         {provide: WorkspaceService, useValue: {canOperate: () => true}},
         {provide: SettingsService, useValue: {getUserSettings: () => undefined, userSettings$: of(undefined)}},
         {provide: HttpService, useValue: httpServiceStub},
@@ -83,12 +82,12 @@ describe('ScrapeSourceDetailComponent', () => {
 
   it('preserves the loaded mode after a failed settings update', async () => {
     httpServiceStub.updateScrapeSourceSettings.and.returnValue(throwError(() => new Error('unavailable')));
-    const toggle: HTMLInputElement = fixture.nativeElement.querySelector('app-source-fetch-mode input');
+    const toggle: HTMLElement = fixture.nativeElement.querySelector('app-source-fetch-mode [role="switch"]');
     toggle.click();
     fixture.detectChanges();
     await fixture.whenStable();
     expect(httpServiceStub.updateScrapeSourceSettings).toHaveBeenCalledWith(1, 'browser');
-    expect(toggle.checked).toBeFalse();
+    expect(toggle.getAttribute('aria-checked')).toBe('false');
     expect(component.detail()?.fetch_mode).toBe('http');
     expect(component.savingFetchMode()).toBeFalse();
   });

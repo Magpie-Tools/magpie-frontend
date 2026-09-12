@@ -1,14 +1,14 @@
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmCardImports} from '@spartan-ng/helm/card';
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {Card} from 'primeng/card';
-import {PrimeTemplate} from 'primeng/api';
-import {Button} from 'primeng/button';
+
 import {NgStyle, DatePipe} from '@angular/common';
 import {ProxyCheck} from '../../../models/ProxyCheck';
 
 @Component({
   selector: 'app-proxy-history-card',
   standalone: true,
-  imports: [Card, PrimeTemplate, Button, DatePipe, NgStyle],
+  imports: [HlmButton, HlmCardImports, DatePipe, NgStyle],
   templateUrl: './proxy-history-card.component.html',
   styleUrl: './proxy-history-card.component.scss'
 })
@@ -30,13 +30,13 @@ export class ProxyHistoryCardComponent {
   getStatusIcon(status: string): string {
     switch (status) {
       case 'working':
-        return 'pi pi-check-circle';
+        return 'icon icon-circle-check';
       case 'failed':
-        return 'pi pi-times-circle';
+        return 'icon icon-circle-x';
       case 'timeout':
-        return 'pi pi-clock';
+        return 'icon icon-clock';
       default:
-        return 'pi pi-question';
+        return 'icon icon-circle-help';
     }
   }
 

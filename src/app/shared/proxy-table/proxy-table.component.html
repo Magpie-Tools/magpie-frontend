@@ -1,31 +1,446 @@
-<p-table
-  #tableRoot
-  [value]="proxies"
-  [paginator]="true"
-  [rows]="pageSize"
-  [first]="(page - 1) * pageSize"
-  [totalRecords]="totalRecords"
-  [lazy]="true"
-  (onLazyLoad)="lazyLoad.emit($event)"
-  [rowsPerPageOptions]="rowsPerPageOptions"
-  [selection]="selectionEnabled ? selection : []"
-  (selectionChange)="onSelectionChange($event)"
-  dataKey="id"
-  class="p-datatable-gridlines p-datatable-sm"
-  [sortField]="sortable ? sortField : undefined"
-  [sortOrder]="sortable ? (sortOrder ?? 0) : 0"
-  (onSort)="onSort($event)"
-  [loading]="loading"
-  [showLoader]="hasLoaded"
-  [rowTrackBy]="trackByProxy"
-  [scrollable]="virtualScroll"
-  [scrollHeight]="virtualScroll ? (scrollHeight ?? '60vh') : undefined"
-  [virtualScroll]="virtualScroll"
-  [virtualScrollItemSize]="virtualScroll ? virtualScrollItemSize : undefined"
->
-  <ng-template pTemplate="paginatorright">
+<div #tableRoot class="data-table" [attr.aria-busy]="loading">
+  @if (loading) {
+    <div role="status" class="table-loading">Loading proxies…</div>
+  }
+  <div
+    hlmTableContainer [attr.inert]="loading ? '' : null"
+    class="table-scroll"
+    [style.max-height]="virtualScroll ? (scrollHeight ?? '60vh') : null"
+  >
+    <table hlmTable>
+      <thead hlmTHead>
+        <tr hlmTr>
+          @if (selectionEnabled) {
+            <th hlmTh style="width: 3rem">
+              <hlm-checkbox
+                aria-label="Select all proxies on this page"
+                [ngModel]="isAllSelected"
+                [indeterminate]="isSomeSelected()"
+                (checkedChange)="onMasterToggle()"
+              />
+            </th>
+          }
+
+          @for (column of visibleColumns; track trackByColumn($index, column)) {
+            @if (sortable && column.sortField) {
+              <th
+                hlmTh
+                [attr.aria-sort]="
+                  sortField === column.sortField
+                    ? sortOrder === 1
+                      ? 'ascending'
+                      : 'descending'
+                    : 'none'
+                "
+                [hlmTooltip]="column.tooltip ?? ''"
+              >
+                <button
+                  type="button"
+                  class="table-sort"
+                  (click)="sortColumn(column.sortField!)"
+                >
+                  {{ column.label }}
+                  <span aria-hidden="true">{{
+                    sortField === column.sortField
+                      ? sortOrder === 1
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
+            } @else {
+              <th hlmTh [hlmTooltip]="column.tooltip ?? ''">
+                {{ column.label }}
+              </th>
+            }
+          }
+        </tr>
+      </thead>
+      <tbody hlmTBody>
+        @if (loading) {
+          @if (!hasLoaded) {
+            @for (_ of skeletonRows; track $index) {
+              <tr hlmTr class="proxy-skeleton-row">
+                @if (selectionEnabled) {
+                  <td hlmTd>
+                    <hlm-skeleton
+                      [style.width]="'1.25rem'"
+                      [style.height]="'1.25rem'"
+                      [style.border-radius]="'50%'"
+                    />
+                  </td>
+                }
+
+                @for (
+                  column of visibleColumns;
+                  track trackByColumn($index, column)
+                ) {
+                  <td hlmTd>
+                    @if (column.id === "alive") {
+                      <hlm-skeleton
+                        [style.width]="'0.9rem'"
+                        [style.height]="'0.9rem'"
+                        [style.border-radius]="'50%'"
+                      />
+                    } @else if (column.id === "reputation") {
+                      <div class="skeleton-badge">
+                        <hlm-skeleton
+                          [style.width]="'3.5rem'"
+                          [style.height]="'0.75rem'"
+                        />
+                        <hlm-skeleton
+                          [style.width]="'1.5rem'"
+                          [style.height]="'0.75rem'"
+                        />
+                      </div>
+                    } @else if (column.id === "check_now") {
+                      <hlm-skeleton
+                        [style.width]="'4.75rem'"
+                        [style.height]="'1.5rem'"
+                      />
+                    } @else if (column.id === "actions") {
+                      <hlm-skeleton
+                        [style.width]="'4.5rem'"
+                        [style.height]="'1.5rem'"
+                      />
+                    } @else {
+                      <hlm-skeleton
+                        [style.width]="skeletonWidth(column)"
+                        [style.height]="'0.75rem'"
+                      />
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          }
+        }
+        @for (proxy of proxies; track proxy.id) {
+          <tr
+            hlmTr
+            [attr.data-state]="
+              selectionModel?.isSelected(proxy) ? 'selected' : null
+            "
+            (click)="selectionEnabled ? onToggleSelection(proxy) : null"
+          >
+            @if (selectionEnabled) {
+              <td hlmTd (click)="$event.stopPropagation()">
+                <hlm-checkbox
+                  [aria-label]="'Select proxy ' + formatProxyAddress(proxy)"
+                  [ngModel]="selectionModel?.isSelected(proxy)"
+                  (checkedChange)="onToggleSelection(proxy)"
+                />
+              </td>
+            }
+
+            @for (
+              column of visibleColumns;
+              track trackByColumn($index, column)
+            ) {
+              @switch (column.id) {
+                @case ("alive") {
+                  <td hlmTd>
+                    @if (managedState(proxy) === "active") {
+                      <div
+                        class="status-dot"
+                        [ngClass]="proxy.alive ? 'alive' : 'dead'"
+                      ></div>
+                    } @else {
+                      <span
+                        class="lifecycle-state"
+                        [ngClass]="'lifecycle-state--' + managedState(proxy)"
+                        [hlmTooltip]="
+                          proxy.pause_reason
+                            ? 'Reason: ' + proxy.pause_reason
+                            : managedState(proxy)
+                        "
+                        >{{ managedState(proxy) }}</span
+                      >
+                    }
+                  </td>
+                }
+                @case ("health_overall") {
+                  <td hlmTd class="text-center health-td">
+                    <app-health-bar-cell
+                      [aliveCount]="proxy.health?.overall ?? 0"
+                      [deadCount]="healthDeadPercent(proxy.health?.overall)"
+                      [unknownCount]="0"
+                      [showUnknown]="false"
+                      [total]="100"
+                      [hasData]="hasHealthValue(proxy.health?.overall)"
+                      valueSuffix="%"
+                      [valueDecimals]="1"
+                    ></app-health-bar-cell>
+                  </td>
+                }
+                @case ("health_http") {
+                  <td hlmTd class="text-center health-td">
+                    <app-health-bar-cell
+                      [aliveCount]="proxy.health?.http ?? 0"
+                      [deadCount]="healthDeadPercent(proxy.health?.http)"
+                      [unknownCount]="0"
+                      [showUnknown]="false"
+                      [total]="100"
+                      [hasData]="hasHealthValue(proxy.health?.http)"
+                      valueSuffix="%"
+                      [valueDecimals]="1"
+                    ></app-health-bar-cell>
+                  </td>
+                }
+                @case ("health_https") {
+                  <td hlmTd class="text-center health-td">
+                    <app-health-bar-cell
+                      [aliveCount]="proxy.health?.https ?? 0"
+                      [deadCount]="healthDeadPercent(proxy.health?.https)"
+                      [unknownCount]="0"
+                      [showUnknown]="false"
+                      [total]="100"
+                      [hasData]="hasHealthValue(proxy.health?.https)"
+                      valueSuffix="%"
+                      [valueDecimals]="1"
+                    ></app-health-bar-cell>
+                  </td>
+                }
+                @case ("health_socks4") {
+                  <td hlmTd class="text-center health-td">
+                    <app-health-bar-cell
+                      [aliveCount]="proxy.health?.socks4 ?? 0"
+                      [deadCount]="healthDeadPercent(proxy.health?.socks4)"
+                      [unknownCount]="0"
+                      [showUnknown]="false"
+                      [total]="100"
+                      [hasData]="hasHealthValue(proxy.health?.socks4)"
+                      valueSuffix="%"
+                      [valueDecimals]="1"
+                    ></app-health-bar-cell>
+                  </td>
+                }
+                @case ("health_socks5") {
+                  <td hlmTd class="text-center health-td">
+                    <app-health-bar-cell
+                      [aliveCount]="proxy.health?.socks5 ?? 0"
+                      [deadCount]="healthDeadPercent(proxy.health?.socks5)"
+                      [unknownCount]="0"
+                      [showUnknown]="false"
+                      [total]="100"
+                      [hasData]="hasHealthValue(proxy.health?.socks5)"
+                      valueSuffix="%"
+                      [valueDecimals]="1"
+                    ></app-health-bar-cell>
+                  </td>
+                }
+                @case ("ip") {
+                  <td hlmTd class="copy-cell">
+                    <button
+                      type="button"
+                      class="copy-value"
+                      [class.copy-value--copied]="isCopied(proxy, 'ip')"
+                      [hlmTooltip]="
+                        isCopied(proxy, 'ip') ? 'Copied' : 'Click to copy'
+                      "
+                      (click)="copyProxyValue($event, proxy, 'ip')"
+                    >
+                      <span class="copy-value__text">{{ proxy.ip }}</span>
+                      <i
+                        class="icon"
+                        [ngClass]="
+                          isCopied(proxy, 'ip') ? 'icon-check' : 'icon-copy'
+                        "
+                        aria-hidden="true"
+                      ></i>
+                    </button>
+                  </td>
+                }
+                @case ("ip_port") {
+                  <td hlmTd class="copy-cell">
+                    <button
+                      type="button"
+                      class="copy-value"
+                      [class.copy-value--copied]="isCopied(proxy, 'ip_port')"
+                      [hlmTooltip]="
+                        isCopied(proxy, 'ip_port') ? 'Copied' : 'Click to copy'
+                      "
+                      (click)="copyProxyValue($event, proxy, 'ip_port')"
+                    >
+                      <span class="copy-value__text">{{
+                        formatProxyAddress(proxy)
+                      }}</span>
+                      <i
+                        class="icon"
+                        [ngClass]="
+                          isCopied(proxy, 'ip_port')
+                            ? 'icon-check'
+                            : 'icon-copy'
+                        "
+                        aria-hidden="true"
+                      ></i>
+                    </button>
+                  </td>
+                }
+                @case ("port") {
+                  <td hlmTd class="copy-cell">
+                    <button
+                      type="button"
+                      class="copy-value"
+                      [class.copy-value--copied]="isCopied(proxy, 'port')"
+                      [hlmTooltip]="
+                        isCopied(proxy, 'port') ? 'Copied' : 'Click to copy'
+                      "
+                      (click)="copyProxyValue($event, proxy, 'port')"
+                    >
+                      <span class="copy-value__text">{{ proxy.port }}</span>
+                      <i
+                        class="icon"
+                        [ngClass]="
+                          isCopied(proxy, 'port') ? 'icon-check' : 'icon-copy'
+                        "
+                        aria-hidden="true"
+                      ></i>
+                    </button>
+                  </td>
+                }
+                @case ("response_time") {
+                  <td hlmTd>{{ proxy.response_time }} ms</td>
+                }
+                @case ("estimated_type") {
+                  <td hlmTd>{{ proxy.estimated_type }}</td>
+                }
+                @case ("country") {
+                  <td hlmTd>{{ proxy.country }}</td>
+                }
+                @case ("tags") {
+                  <td
+                    hlmTd
+                    class="proxy-tags-cell"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <app-proxy-tag-selector
+                      [availableTags]="availableTags"
+                      [selectedTags]="proxy.tags ?? []"
+                      [saving]="isSavingProxyTags(proxy.id)"
+                      [disabled]="!tagEditingEnabled"
+                      [compact]="true"
+                      (selectionChange)="onTagSelectionChange(proxy, $event)"
+                      (manageTags)="manageTags.emit()"
+                    ></app-proxy-tag-selector>
+                  </td>
+                }
+                @case ("reputation") {
+                  <td hlmTd class="reputation-cell">
+                    @if (proxy.__meta?.hasReputation) {
+                      <span [ngClass]="proxy.__meta?.reputationBadgeClass">
+                        <span>{{ proxy.__meta?.reputationLabel }}</span>
+                        <span class="reputation-badge__score">{{
+                          proxy.__meta?.reputationScore
+                        }}</span>
+                      </span>
+                    } @else {
+                      {{ emptyReputationLabel }}
+                    }
+                  </td>
+                }
+                @case ("latest_check") {
+                  <td hlmTd class="w-[170px]">
+                    {{ proxy.__meta?.latestCheckLabel ?? "—" }}
+                  </td>
+                }
+                @case ("check_now") {
+                  <td hlmTd>
+                    <button
+                      type="button"
+                      class="proxy-check-button"
+                      [disabled]="isCheckingProxy(proxy.id)"
+                      (click)="onCheckNow($event, proxy)"
+                    >
+                      <i
+                        class="icon"
+                        [ngClass]="
+                          isCheckingProxy(proxy.id)
+                            ? 'icon-spin icon-loader-circle'
+                            : 'icon-bolt'
+                        "
+                        aria-hidden="true"
+                      ></i>
+                      <span>Check</span>
+                    </button>
+                  </td>
+                }
+                @case ("actions") {
+                  <td hlmTd class="proxy-actions-cell">
+                    @if (lifecycleEnabled) {
+                      <button
+                        type="button"
+                        class="proxy-lifecycle-button"
+                        [disabled]="isChangingLifecycle(proxy.id)"
+                        (click)="
+                          onLifecycleChange(
+                            $event,
+                            proxy,
+                            managedState(proxy) === 'active'
+                              ? 'paused'
+                              : 'active'
+                          )
+                        "
+                      >
+                        <i
+                          class="icon"
+                          [ngClass]="
+                            isChangingLifecycle(proxy.id)
+                              ? 'icon-spin icon-loader-circle'
+                              : lifecycleIcon(proxy)
+                          "
+                        ></i>
+                        <span>{{ lifecycleLabel(proxy) }}</span>
+                      </button>
+                      @if (managedState(proxy) === "paused") {
+                        <button
+                          type="button"
+                          class="proxy-archive-button"
+                          title="Archive route"
+                          [disabled]="isChangingLifecycle(proxy.id)"
+                          (click)="onLifecycleChange($event, proxy, 'archived')"
+                        >
+                          <i class="icon icon-archive"></i>
+                        </button>
+                      }
+                    }
+                    <button
+                      type="button"
+                      class="proxy-details-button"
+                      (click)="onViewProxy($event, proxy)"
+                    >
+                      <i class="icon icon-external-link" aria-hidden="true"></i>
+                      <span>Details</span>
+                    </button>
+                  </td>
+                }
+              }
+            }
+          </tr>
+        }
+        @if (!loading && proxies.length === 0) {
+          <tr hlmTr>
+            <td hlmTd [attr.colspan]="columnCount">No proxies found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <app-pagination
+    [first]="(page - 1) * pageSize"
+    [totalRecords]="totalRecords"
+    (pageChange)="lazyLoad.emit($event)"
+    [rows]="pageSize"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+    [disabled]="loading"
+    [sortField]="sortField"
+    [sortOrder]="sortOrder"
+  >
     <form class="proxy-page-jump" (submit)="onPageJumpSubmit($event)">
-      <label class="proxy-page-jump__label" [attr.for]="pageJumpInputId">Page</label>
+      <label class="proxy-page-jump__label" [attr.for]="pageJumpInputId"
+        >Page</label
+      >
       <input
         class="proxy-page-jump__input"
         type="number"
@@ -38,7 +453,9 @@
         [(ngModel)]="pageJumpValue"
         [attr.aria-describedby]="pageJumpTotalId"
       />
-      <span class="proxy-page-jump__total" [id]="pageJumpTotalId">of {{ totalPages }}</span>
+      <span class="proxy-page-jump__total" [id]="pageJumpTotalId"
+        >of {{ totalPages }}</span
+      >
       <button
         type="submit"
         class="proxy-page-jump__submit"
@@ -51,317 +468,11 @@
         class="proxy-page-jump__scroll-toggle"
         [attr.aria-label]="pageScrollTargetLabel"
         [attr.aria-pressed]="pageScrollTarget === 'top'"
-        [pTooltip]="pageScrollTargetLabel"
-        tooltipPosition="top"
+        [hlmTooltip]="pageScrollTargetLabel"
         (click)="togglePageScrollTarget()"
       >
-        <i class="pi" [ngClass]="pageScrollTargetIcon" aria-hidden="true"></i>
+        <i class="icon" [ngClass]="pageScrollTargetIcon" aria-hidden="true"></i>
       </button>
     </form>
-  </ng-template>
-
-  <ng-template pTemplate="header">
-    <tr>
-      @if (selectionEnabled) {
-        <th style="width: 3rem">
-          <p-checkbox
-            [binary]="true"
-            (onChange)="onMasterToggle()"
-            [ngModel]="isAllSelected"
-            [indeterminate]="isSomeSelected()"
-          ></p-checkbox>
-        </th>
-      }
-
-      @for (column of visibleColumns; track trackByColumn($index, column)) {
-        @if (sortable && column.sortField) {
-          <th
-            [pSortableColumn]="column.sortField"
-            [pTooltip]="column.tooltip ?? undefined"
-            [tooltipDisabled]="!column.tooltip"
-            tooltipPosition="top"
-          >
-            {{ column.label }} <p-sortIcon [field]="column.sortField"></p-sortIcon>
-          </th>
-        } @else {
-          <th
-            [pTooltip]="column.tooltip ?? undefined"
-            [tooltipDisabled]="!column.tooltip"
-            tooltipPosition="top"
-          >
-            {{ column.label }}
-          </th>
-        }
-      }
-    </tr>
-  </ng-template>
-
-  <ng-template pTemplate="loadingbody">
-    @if (!hasLoaded) {
-      @for (_ of skeletonRows; track $index) {
-        <tr class="proxy-skeleton-row">
-          @if (selectionEnabled) {
-            <td>
-              <p-skeleton width="1.25rem" height="1.25rem" shape="circle"></p-skeleton>
-            </td>
-          }
-
-          @for (column of visibleColumns; track trackByColumn($index, column)) {
-            <td>
-              @if (column.id === 'alive') {
-                <p-skeleton width="0.9rem" height="0.9rem" shape="circle"></p-skeleton>
-              } @else if (column.id === 'reputation') {
-                <div class="skeleton-badge">
-                  <p-skeleton width="3.5rem" height="0.75rem"></p-skeleton>
-                  <p-skeleton width="1.5rem" height="0.75rem"></p-skeleton>
-                </div>
-              } @else if (column.id === 'check_now') {
-                <p-skeleton width="4.75rem" height="1.5rem"></p-skeleton>
-              } @else if (column.id === 'actions') {
-                <p-skeleton width="4.5rem" height="1.5rem"></p-skeleton>
-              } @else {
-                <p-skeleton [width]="skeletonWidth(column)" height="0.75rem"></p-skeleton>
-              }
-            </td>
-          }
-        </tr>
-      }
-    }
-  </ng-template>
-
-  <ng-template pTemplate="body" let-proxy>
-    <tr (click)="selectionEnabled ? onToggleSelection(proxy) : null" [pSelectableRow]="selectionEnabled ? proxy : undefined">
-      @if (selectionEnabled) {
-        <td (click)="$event.stopPropagation()">
-          <p-checkbox
-            [binary]="true"
-            (onChange)="onToggleSelection(proxy)"
-            [ngModel]="selectionModel?.isSelected(proxy)"
-          ></p-checkbox>
-        </td>
-      }
-
-      @for (column of visibleColumns; track trackByColumn($index, column)) {
-        @switch (column.id) {
-          @case ('alive') {
-            <td>
-              @if (managedState(proxy) === 'active') {
-                <div class="status-dot" [ngClass]="proxy.alive ? 'alive' : 'dead'"></div>
-              } @else {
-                <span
-                  class="lifecycle-state"
-                  [ngClass]="'lifecycle-state--' + managedState(proxy)"
-                  [pTooltip]="proxy.pause_reason ? ('Reason: ' + proxy.pause_reason) : managedState(proxy)"
-                  tooltipPosition="top"
-                >{{ managedState(proxy) }}</span>
-              }
-            </td>
-          }
-          @case ('health_overall') {
-            <td class="text-center health-td">
-              <app-health-bar-cell
-                [aliveCount]="proxy.health?.overall ?? 0"
-                [deadCount]="healthDeadPercent(proxy.health?.overall)"
-                [unknownCount]="0"
-                [showUnknown]="false"
-                [total]="100"
-                [hasData]="hasHealthValue(proxy.health?.overall)"
-                valueSuffix="%"
-                [valueDecimals]="1"
-              ></app-health-bar-cell>
-            </td>
-          }
-          @case ('health_http') {
-            <td class="text-center health-td">
-              <app-health-bar-cell
-                [aliveCount]="proxy.health?.http ?? 0"
-                [deadCount]="healthDeadPercent(proxy.health?.http)"
-                [unknownCount]="0"
-                [showUnknown]="false"
-                [total]="100"
-                [hasData]="hasHealthValue(proxy.health?.http)"
-                valueSuffix="%"
-                [valueDecimals]="1"
-              ></app-health-bar-cell>
-            </td>
-          }
-          @case ('health_https') {
-            <td class="text-center health-td">
-              <app-health-bar-cell
-                [aliveCount]="proxy.health?.https ?? 0"
-                [deadCount]="healthDeadPercent(proxy.health?.https)"
-                [unknownCount]="0"
-                [showUnknown]="false"
-                [total]="100"
-                [hasData]="hasHealthValue(proxy.health?.https)"
-                valueSuffix="%"
-                [valueDecimals]="1"
-              ></app-health-bar-cell>
-            </td>
-          }
-          @case ('health_socks4') {
-            <td class="text-center health-td">
-              <app-health-bar-cell
-                [aliveCount]="proxy.health?.socks4 ?? 0"
-                [deadCount]="healthDeadPercent(proxy.health?.socks4)"
-                [unknownCount]="0"
-                [showUnknown]="false"
-                [total]="100"
-                [hasData]="hasHealthValue(proxy.health?.socks4)"
-                valueSuffix="%"
-                [valueDecimals]="1"
-              ></app-health-bar-cell>
-            </td>
-          }
-          @case ('health_socks5') {
-            <td class="text-center health-td">
-              <app-health-bar-cell
-                [aliveCount]="proxy.health?.socks5 ?? 0"
-                [deadCount]="healthDeadPercent(proxy.health?.socks5)"
-                [unknownCount]="0"
-                [showUnknown]="false"
-                [total]="100"
-                [hasData]="hasHealthValue(proxy.health?.socks5)"
-                valueSuffix="%"
-                [valueDecimals]="1"
-              ></app-health-bar-cell>
-            </td>
-          }
-          @case ('ip') {
-            <td class="copy-cell">
-              <button
-                type="button"
-                class="copy-value"
-                [class.copy-value--copied]="isCopied(proxy, 'ip')"
-                [pTooltip]="isCopied(proxy, 'ip') ? 'Copied' : 'Click to copy'"
-                tooltipPosition="top"
-                (click)="copyProxyValue($event, proxy, 'ip')"
-              >
-                <span class="copy-value__text">{{ proxy.ip }}</span>
-                <i class="pi" [ngClass]="isCopied(proxy, 'ip') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
-              </button>
-            </td>
-          }
-          @case ('ip_port') {
-            <td class="copy-cell">
-              <button
-                type="button"
-                class="copy-value"
-                [class.copy-value--copied]="isCopied(proxy, 'ip_port')"
-                [pTooltip]="isCopied(proxy, 'ip_port') ? 'Copied' : 'Click to copy'"
-                tooltipPosition="top"
-                (click)="copyProxyValue($event, proxy, 'ip_port')"
-              >
-                <span class="copy-value__text">{{ formatProxyAddress(proxy) }}</span>
-                <i class="pi" [ngClass]="isCopied(proxy, 'ip_port') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
-              </button>
-            </td>
-          }
-          @case ('port') {
-            <td class="copy-cell">
-              <button
-                type="button"
-                class="copy-value"
-                [class.copy-value--copied]="isCopied(proxy, 'port')"
-                [pTooltip]="isCopied(proxy, 'port') ? 'Copied' : 'Click to copy'"
-                tooltipPosition="top"
-                (click)="copyProxyValue($event, proxy, 'port')"
-              >
-                <span class="copy-value__text">{{ proxy.port }}</span>
-                <i class="pi" [ngClass]="isCopied(proxy, 'port') ? 'pi-check' : 'pi-copy'" aria-hidden="true"></i>
-              </button>
-            </td>
-          }
-          @case ('response_time') {
-            <td>{{ proxy.response_time }} ms</td>
-          }
-          @case ('estimated_type') {
-            <td>{{ proxy.estimated_type }}</td>
-          }
-          @case ('country') {
-            <td>{{ proxy.country }}</td>
-          }
-          @case ('tags') {
-            <td class="proxy-tags-cell" (click)="$event.stopPropagation()">
-              <app-proxy-tag-selector
-                [availableTags]="availableTags"
-                [selectedTags]="proxy.tags ?? []"
-                [saving]="isSavingProxyTags(proxy.id)"
-                [disabled]="!tagEditingEnabled"
-                [compact]="true"
-                (selectionChange)="onTagSelectionChange(proxy, $event)"
-                (manageTags)="manageTags.emit()"
-              ></app-proxy-tag-selector>
-            </td>
-          }
-          @case ('reputation') {
-            <td class="reputation-cell">
-              @if (proxy.__meta?.hasReputation) {
-                <span [ngClass]="proxy.__meta?.reputationBadgeClass">
-                  <span>{{ proxy.__meta?.reputationLabel }}</span>
-                  <span class="reputation-badge__score">{{ proxy.__meta?.reputationScore }}</span>
-                </span>
-              } @else {
-                {{ emptyReputationLabel }}
-              }
-            </td>
-          }
-          @case ('latest_check') {
-            <td class="w-[170px]">
-              {{ proxy.__meta?.latestCheckLabel ?? '—' }}
-            </td>
-          }
-          @case ('check_now') {
-            <td>
-              <button
-                type="button"
-                class="proxy-check-button"
-                [disabled]="isCheckingProxy(proxy.id)"
-                (click)="onCheckNow($event, proxy)"
-              >
-                <i class="pi" [ngClass]="isCheckingProxy(proxy.id) ? 'pi-spin pi-spinner' : 'pi-bolt'" aria-hidden="true"></i>
-                <span>Check</span>
-              </button>
-            </td>
-          }
-          @case ('actions') {
-            <td class="proxy-actions-cell">
-              @if (lifecycleEnabled) {
-                <button
-                  type="button"
-                  class="proxy-lifecycle-button"
-                  [disabled]="isChangingLifecycle(proxy.id)"
-                  (click)="onLifecycleChange($event, proxy, managedState(proxy) === 'active' ? 'paused' : 'active')"
-                >
-                  <i class="pi" [ngClass]="isChangingLifecycle(proxy.id) ? 'pi-spin pi-spinner' : lifecycleIcon(proxy)"></i>
-                  <span>{{ lifecycleLabel(proxy) }}</span>
-                </button>
-                @if (managedState(proxy) === 'paused') {
-                  <button
-                    type="button"
-                    class="proxy-archive-button"
-                    title="Archive route"
-                    [disabled]="isChangingLifecycle(proxy.id)"
-                    (click)="onLifecycleChange($event, proxy, 'archived')"
-                  >
-                    <i class="pi pi-box"></i>
-                  </button>
-                }
-              }
-              <button type="button" class="proxy-details-button" (click)="onViewProxy($event, proxy)">
-                <i class="pi pi-external-link" aria-hidden="true"></i>
-                <span>Details</span>
-              </button>
-            </td>
-          }
-        }
-      }
-    </tr>
-  </ng-template>
-
-  <ng-template pTemplate="emptyMessage">
-    <tr>
-      <td [attr.colspan]="columnCount">No proxies found.</td>
-    </tr>
-  </ng-template>
-</p-table>
+  </app-pagination>
+</div>

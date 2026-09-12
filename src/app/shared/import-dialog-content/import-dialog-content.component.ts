@@ -1,11 +1,11 @@
+import {HlmButton} from '@spartan-ng/helm/button';
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {ButtonModule} from 'primeng/button';
 
 @Component({
   selector: 'app-import-dialog-content',
   standalone: true,
-  imports: [FormsModule, ButtonModule],
+  imports: [HlmButton, FormsModule],
   templateUrl: './import-dialog-content.component.html',
   styleUrl: './import-dialog-content.component.scss',
 })

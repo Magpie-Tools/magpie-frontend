@@ -3,16 +3,18 @@
   (visibleChange)="dialogVisible.set($event)"
   dialogClass="scrape-source-add-dialog"
   triggerLabel="Add Sources"
-  triggerIcon="pi pi-plus"
+  triggerIcon="icon icon-plus"
   headingEyebrow="Expand the queue"
   headingTitle="Add scrape sources"
-  headingIcon="pi pi-plus"
+  headingIcon="icon icon-plus"
   headingTooltip="A scrape source is a webpage that publishes proxy data. Add one URL per line, paste from your clipboard, or import a text file."
   footerNote="Sources join the scraper queue after validation."
   actionLabel="Add sources to queue"
-  actionIcon="pi pi-arrow-right"
+  actionIcon="icon icon-arrow-right"
   actionIconPos="right"
-  [actionDisabled]="!file() && !scrapeSourceTextarea() && !clipboardScrapeSources()"
+  [actionDisabled]="
+    !file() && !scrapeSourceTextarea() && !clipboardScrapeSources()
+  "
   (openRequested)="openDialog()"
   (cancelRequested)="closeDialog()"
   (actionRequested)="submitScrapeSources()"
@@ -34,25 +36,42 @@
     (fileSelected)="onFileSelected($event)"
     (fileClearRequested)="onFileClear()"
   >
-    <app-source-fetch-mode import-prefix
+    <app-source-fetch-mode
+      import-prefix
       inputId="import-source-javascript"
       [enabled]="requiresJavaScript()"
       (enabledChange)="requiresJavaScript.set($event)"
     />
     <ng-container import-summary>
-      <div class="import-summary__visual"><span><i class="pi pi-globe" aria-hidden="true"></i></span></div>
+      <div class="import-summary__visual">
+        <span><i class="icon icon-globe" aria-hidden="true"></i></span>
+      </div>
       @if (getSourcesCount() > 0) {
         <div class="import-summary__count">{{ getSourcesCount() }}</div>
         <div class="import-summary__label">Sources ready</div>
         <dl class="import-summary__stats">
-          <div><dt>Unique</dt><dd>{{ getUniqueSourcesCount() }}</dd></div>
-          <div><dt>Entered</dt><dd>{{ textAreaSourcesCount() }}</dd></div>
-          <div><dt>Clipboard</dt><dd>{{ clipboardSourcesCount() }}</dd></div>
-          <div><dt>File</dt><dd>{{ fileSourcesCount() }}</dd></div>
+          <div>
+            <dt>Unique</dt>
+            <dd>{{ getUniqueSourcesCount() }}</dd>
+          </div>
+          <div>
+            <dt>Entered</dt>
+            <dd>{{ textAreaSourcesCount() }}</dd>
+          </div>
+          <div>
+            <dt>Clipboard</dt>
+            <dd>{{ clipboardSourcesCount() }}</dd>
+          </div>
+          <div>
+            <dt>File</dt>
+            <dd>{{ fileSourcesCount() }}</dd>
+          </div>
         </dl>
       } @else {
         <strong>No sources yet</strong>
-        <p>Your import summary will appear here as soon as you add source URLs.</p>
+        <p>
+          Your import summary will appear here as soon as you add source URLs.
+        </p>
       }
     </ng-container>
   </app-import-dialog-content>

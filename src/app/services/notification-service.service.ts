@@ -1,21 +1,10 @@
-// src/app/services/notification.service.ts
-import { Injectable } from '@angular/core';
-import { MessageService } from 'primeng/api';
+import {Injectable} from '@angular/core';
+import {toast} from '@spartan-ng/brain/sonner';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class NotificationService {
-  constructor(private messageService: MessageService) {}
-
-  showError(detail: string, summary = 'Error') {
-    this.messageService.add({ severity: 'error', summary, detail, life: 6000 });
-  }
-  showSuccess(detail: string, summary = 'Success') {
-    this.messageService.add({ severity: 'success', summary, detail, life: 4000 });
-  }
-  showInfo(detail: string, summary = 'Info') {
-    this.messageService.add({ severity: 'info', summary, detail, life: 4000 });
-  }
-  showWarn(detail: string, summary = 'Warning') {
-    this.messageService.add({ severity: 'warn', summary, detail, life: 5000 });
-  }
+  showError(detail: string, summary = 'Error'): void { toast.error(summary, {description: detail, duration: 6000}); }
+  showSuccess(detail: string, summary = 'Success'): void { toast.success(summary, {description: detail, duration: 4000}); }
+  showInfo(detail: string, summary = 'Info'): void { toast.info(summary, {description: detail, duration: 4000}); }
+  showWarn(detail: string, summary = 'Warning'): void { toast.warning(summary, {description: detail, duration: 5000}); }
 }

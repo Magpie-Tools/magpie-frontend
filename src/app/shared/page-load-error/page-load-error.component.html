@@ -1,11 +1,13 @@
 <div class="page-load-error" role="alert">
-  <span class="page-load-error__icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
+  <span class="page-load-error__icon"
+    ><i class="icon icon-triangle-alert" aria-hidden="true"></i
+  ></span>
   <div>
     <h2>{{ title }}</h2>
     <p>{{ message }}</p>
   </div>
   <button type="button" class="retry-button" (click)="retry.emit()">
-    <i class="pi pi-refresh" aria-hidden="true"></i>
+    <i class="icon icon-refresh-cw" aria-hidden="true"></i>
     Try again
   </button>
 </div>

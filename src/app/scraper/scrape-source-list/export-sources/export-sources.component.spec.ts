@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MessageService} from 'primeng/api';
+
 import {of, throwError} from 'rxjs';
 import {ExportSourcesComponent} from './export-sources.component';
 import {HttpService} from '../../../services/http.service';
@@ -25,7 +25,6 @@ describe('ExportSourcesComponent', () => {
       providers: [
         {provide: HttpService, useValue: {exportScrapeSources: exportScrapeSourcesSpy}},
         {provide: NotificationService, useValue: {showError: showErrorSpy}},
-        MessageService,
       ]
     }).compileComponents();
 

@@ -178,8 +178,8 @@
   text-align: center;
 }
 
-::ng-deep .proxy-upload-details-dialog.p-dialog,
-::ng-deep .proxy-upload-details-dialog .p-dialog {
+::ng-deep .proxy-upload-details-dialog.app-dialog-panel,
+::ng-deep .proxy-upload-details-dialog .app-dialog-panel {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 1.2rem;
@@ -188,7 +188,7 @@
   box-shadow: 0 32px 86px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-::ng-deep .proxy-upload-details-dialog .p-dialog-header {
+::ng-deep .proxy-upload-details-dialog .app-dialog-header {
   padding: 1rem 1.15rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
   background:
@@ -196,19 +196,19 @@
     rgba(12, 12, 14, 0.98);
 }
 
-::ng-deep .proxy-upload-details-dialog .p-dialog-content {
+::ng-deep .proxy-upload-details-dialog .app-dialog-body {
   background: transparent;
   color: inherit;
 }
 
-::ng-deep .proxy-upload-details-dialog .p-dialog-close-button {
+::ng-deep .proxy-upload-details-dialog [data-slot="dialog-close"] {
   width: 2.15rem;
   height: 2.15rem;
   border-radius: 0.68rem;
   color: rgba(255, 255, 255, 0.42);
 }
 
-::ng-deep .proxy-upload-details-dialog .p-dialog-close-button:hover {
+::ng-deep .proxy-upload-details-dialog [data-slot="dialog-close"]:hover {
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.86);
 }

@@ -4,33 +4,52 @@
   </div>
 } @else {
   <app-auth title="Login">
-    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="flex flex-col gap-4">
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="onLogin()"
+      class="flex flex-col gap-4"
+    >
       <!-- Email -->
       <div class="flex flex-col gap-1">
         <label for="email">Email</label>
-        <input id="email" type="email" pInputText formControlName="email" />
+        <input id="email" type="email" hlmInput formControlName="email" />
       </div>
 
       <!-- Password -->
       <div class="flex flex-col gap-1">
         <label for="password">Password</label>
-        <input id="password" type="password" pInputText formControlName="password" />
+        <input
+          id="password"
+          type="password"
+          hlmInput
+          formControlName="password"
+        />
       </div>
 
       <!-- Remember login -->
       <div class="auth-options-row">
         <div class="flex items-center gap-2">
-          <p-checkbox inputId="remember" [(ngModel)]="rememberPass" [ngModelOptions]="{standalone: true}" [binary]="true"></p-checkbox>
+          <hlm-checkbox
+            inputId="remember"
+            [(ngModel)]="rememberPass"
+            [ngModelOptions]="{ standalone: true }"
+          />
           <label for="remember">Remember login</label>
         </div>
-        <a routerLink="/forgot-password" class="auth-inline-link">Forgot password?</a>
+        <a routerLink="/forgot-password" class="auth-inline-link"
+          >Forgot password?</a
+        >
       </div>
 
-      <p-button type="submit" label="Login" styleClass="w-full"></p-button>
+      <button type="submit" class="w-full" hlmBtn variant="default">
+        Login
+      </button>
 
       <p class="switch-link text-center mt-2">
         Don't have an account?
-        <a routerLink="/register" class="text-blue-500 hover:underline">Register</a>
+        <a routerLink="/register" class="text-blue-500 hover:underline"
+          >Register</a
+        >
       </p>
     </form>
   </app-auth>

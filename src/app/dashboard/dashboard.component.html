@@ -2,7 +2,9 @@
   <section class="dashboard-stage">
     <header class="dashboard-context">
       <div class="dashboard-context__identity">
-        <span class="dashboard-context__icon"><i class="pi pi-chart-line" aria-hidden="true"></i></span>
+        <span class="dashboard-context__icon"
+          ><i class="icon icon-chart-no-axes-combined" aria-hidden="true"></i
+        ></span>
         <div class="dashboard-context__copy">
           <h1>Dashboard</h1>
         </div>
@@ -10,39 +12,52 @@
     </header>
 
     @if (dashboardInfo().loading && !dashboardInfo().loaded) {
-      <div class="dashboard-grid dashboard-skeleton" aria-label="Loading dashboard">
+      <div
+        class="dashboard-grid dashboard-skeleton"
+        aria-label="Loading dashboard"
+      >
         @for (card of kpiSkeletons; track $index) {
-          <section class="dashboard-skeleton-card dashboard-skeleton-card--metric">
+          <section
+            class="dashboard-skeleton-card dashboard-skeleton-card--metric"
+          >
             <div class="skeleton-line">
-              <p-skeleton width="2.4rem" height="2.4rem" borderRadius="0.75rem"></p-skeleton>
-              <p-skeleton width="7rem" height="0.75rem"></p-skeleton>
+              <hlm-skeleton
+                [style.width]="'2.4rem'"
+                [style.height]="'2.4rem'"
+                [style.border-radius]="'0.75rem'"
+              />
+              <hlm-skeleton [style.width]="'7rem'" [style.height]="'0.75rem'" />
             </div>
-            <p-skeleton width="8rem" height="2.2rem"></p-skeleton>
-            <p-skeleton width="100%" height="3.6rem"></p-skeleton>
+            <hlm-skeleton [style.width]="'8rem'" [style.height]="'2.2rem'" />
+            <hlm-skeleton [style.width]="'100%'" [style.height]="'3.6rem'" />
           </section>
         }
 
         <section class="dashboard-skeleton-card dashboard-skeleton-card--wide">
-          <p-skeleton width="12rem" height="1rem"></p-skeleton>
-          <p-skeleton width="100%" height="22rem"></p-skeleton>
+          <hlm-skeleton [style.width]="'12rem'" [style.height]="'1rem'" />
+          <hlm-skeleton [style.width]="'100%'" [style.height]="'22rem'" />
         </section>
-        <section class="dashboard-skeleton-card dashboard-skeleton-card--narrow">
-          <p-skeleton width="9rem" height="1rem"></p-skeleton>
+        <section
+          class="dashboard-skeleton-card dashboard-skeleton-card--narrow"
+        >
+          <hlm-skeleton [style.width]="'9rem'" [style.height]="'1rem'" />
           <div class="dashboard-skeleton-list">
             @for (row of historySkeletons; track $index) {
-              <p-skeleton width="100%" height="2.6rem"></p-skeleton>
+              <hlm-skeleton [style.width]="'100%'" [style.height]="'2.6rem'" />
             }
           </div>
         </section>
-        <section class="dashboard-skeleton-card dashboard-skeleton-card--country">
-          <p-skeleton width="11rem" height="1rem"></p-skeleton>
-          <p-skeleton width="100%" height="19rem"></p-skeleton>
+        <section
+          class="dashboard-skeleton-card dashboard-skeleton-card--country"
+        >
+          <hlm-skeleton [style.width]="'11rem'" [style.height]="'1rem'" />
+          <hlm-skeleton [style.width]="'100%'" [style.height]="'19rem'" />
         </section>
         <section class="dashboard-skeleton-card dashboard-skeleton-card--judge">
-          <p-skeleton width="10rem" height="1rem"></p-skeleton>
+          <hlm-skeleton [style.width]="'10rem'" [style.height]="'1rem'" />
           <div class="dashboard-skeleton-list">
             @for (row of countrySkeletons; track $index) {
-              <p-skeleton width="100%" height="2rem"></p-skeleton>
+              <hlm-skeleton [style.width]="'100%'" [style.height]="'2rem'" />
             }
           </div>
         </section>
@@ -51,8 +66,16 @@
 
     @if (dashboardInfo().error) {
       <app-page-load-error
-        [title]="dashboardInfo().backendUnavailable ? 'Backend unavailable' : 'Dashboard could not be loaded'"
-        [message]="dashboardInfo().backendUnavailable ? 'Dashboard data cannot load while the API is unreachable.' : dashboardInfo().error || ''"
+        [title]="
+          dashboardInfo().backendUnavailable
+            ? 'Backend unavailable'
+            : 'Dashboard could not be loaded'
+        "
+        [message]="
+          dashboardInfo().backendUnavailable
+            ? 'Dashboard data cannot load while the API is unreachable.'
+            : dashboardInfo().error || ''
+        "
         (retry)="retryDashboardLoad()"
       />
     }
@@ -62,52 +85,59 @@
         <app-kpi-card
           class="dashboard-grid__kpi"
           title="Alive proxies"
-          icon="pi pi-bolt"
+          icon="icon icon-bolt"
           [value]="conversionRate().value"
           [displayValue]="conversionRate().value | number"
-          [chartValues]="conversionRate().history">
+          [chartValues]="conversionRate().history"
+        >
         </app-kpi-card>
 
         <app-kpi-card
           class="dashboard-grid__kpi"
           title="Total proxies"
-          icon="pi pi-server"
+          icon="icon icon-server"
           [value]="avgOrderValue().value"
           [displayValue]="avgOrderValue().value | number"
-          [chartValues]="avgOrderValue().history">
+          [chartValues]="avgOrderValue().history"
+        >
         </app-kpi-card>
 
         <app-kpi-card
           class="dashboard-grid__kpi"
           title="Scraped proxies"
-          icon="pi pi-download"
+          icon="icon icon-download"
           [value]="orderQuantity().value"
           [displayValue]="orderQuantity().value | number"
-          [chartValues]="orderQuantity().history">
+          [chartValues]="orderQuantity().history"
+        >
         </app-kpi-card>
 
         <app-proxies-per-hour-card
           class="dashboard-grid__throughput"
           [title]="proxiesPerHourTitle"
           [chartData]="proxiesLineData()"
-          [chartOptions]="proxiesLineOptions()">
+          [chartOptions]="proxiesLineOptions()"
+        >
         </app-proxies-per-hour-card>
 
         <app-proxy-history-card
           class="dashboard-grid__history"
           [history]="proxyHistory()"
           [refreshing]="proxyHistoryRefreshing()"
-          (refresh)="onProxyHistoryRefresh()">
+          (refresh)="onProxyHistoryRefresh()"
+        >
         </app-proxy-history-card>
 
         <app-proxies-per-country-card
           class="dashboard-grid__countries"
-          [countries]="majorCountries()">
+          [countries]="majorCountries()"
+        >
         </app-proxies-per-country-card>
 
         <app-judge-by-percentage-card
           class="dashboard-grid__judges"
-          [data]="judgeTrafficData()">
+          [data]="judgeTrafficData()"
+        >
         </app-judge-by-percentage-card>
 
         <app-fastest-alive-proxies-card
@@ -117,14 +147,16 @@
           [proxyCount]="fastestAliveProxyCount()"
           [countryLegend]="fastestAliveCountryLegend()"
           [sortDirection]="fastestAliveSortDirection()"
-          (sortDirectionChange)="onFastestAliveSortDirectionChange($event)">
+          (sortDirectionChange)="onFastestAliveSortDirectionChange($event)"
+        >
         </app-fastest-alive-proxies-card>
 
         <app-proxy-reputation-card
           class="dashboard-grid__reputation"
           [breakdown]="reputationBreakdown()"
           [chartData]="reputationChartData()"
-          [chartOptions]="reputationChartOptions()">
+          [chartOptions]="reputationChartOptions()"
+        >
         </app-proxy-reputation-card>
       </div>
     }

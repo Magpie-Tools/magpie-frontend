@@ -1,10 +1,10 @@
+import {HlmButton} from '@spartan-ng/helm/button';
 import {Component, Input, ViewEncapsulation} from '@angular/core';
-import {ButtonModule} from 'primeng/button';
 
 @Component({
   selector: 'app-admin-settings-save-dock',
   standalone: true,
-  imports: [ButtonModule],
+  imports: [HlmButton],
   styleUrl: './admin-settings-save-dock.component.scss',
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -23,13 +23,7 @@ import {ButtonModule} from 'primeng/button';
       </div>
       <div class="save-actions">
         <ng-content select="[settings-save-action]"></ng-content>
-        <p-button
-          type="submit"
-          [label]="saveLabel"
-          icon="pi pi-check"
-          [disabled]="readOnly || !dirty || invalid"
-          styleClass="save-button"
-        ></p-button>
+        <button type="submit" [disabled]="readOnly || !dirty || invalid" class="save-button" hlmBtn variant="default"><i class="icon icon-check" aria-hidden="true"></i>{{ saveLabel }}</button>
       </div>
     </footer>
   `,

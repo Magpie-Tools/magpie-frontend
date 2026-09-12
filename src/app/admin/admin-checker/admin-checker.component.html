@@ -1,46 +1,80 @@
-<app-admin-settings-shell class="admin-checker-page" [appRevealGroup]="revealSteps">
-  <form [formGroup]="settingsForm" class="settings-stage" (ngSubmit)="onSubmit()">
+<app-admin-settings-shell
+  class="admin-checker-page"
+  [appRevealGroup]="revealSteps"
+>
+  <form
+    [formGroup]="settingsForm"
+    class="settings-stage"
+    (ngSubmit)="onSubmit()"
+  >
     <app-admin-settings-header
-      icon="pi pi-sliders-h"
+      icon="icon icon-sliders-horizontal"
       title="Global checker"
       description="Set the baseline used for proxy checks across every workspace."
     ></app-admin-settings-header>
 
-    <p-tabs value="0" class="settings-tabs">
-      <p-tablist aria-label="Global checker sections">
-        <p-tab value="0"><i class="pi pi-gauge" aria-hidden="true"></i>Common</p-tab>
-        <p-tab value="1"><i class="pi pi-check-circle" aria-hidden="true"></i>Judges</p-tab>
-        <p-tab value="2"><i class="pi pi-map-marker" aria-hidden="true"></i>IP lookup</p-tab>
-      </p-tablist>
+    <hlm-tabs tab="0" class="settings-tabs">
+      <hlm-tabs-list aria-label="Global checker sections">
+        <button hlmTabsTrigger="0" type="button">
+          <i class="icon icon-gauge" aria-hidden="true"></i>Common
+        </button>
+        <button hlmTabsTrigger="1" type="button">
+          <i class="icon icon-circle-check" aria-hidden="true"></i>Judges
+        </button>
+        <button hlmTabsTrigger="2" type="button">
+          <i class="icon icon-map-pin" aria-hidden="true"></i>IP lookup
+        </button>
+      </hlm-tabs-list>
 
-      <p-tabpanels>
-        <p-tabpanel value="0">
+      <div>
+        <section hlmTabsContent="0">
           <div class="settings-grid settings-grid--common">
             <section class="settings-card settings-card--protocols">
               <div class="card-heading">
-                <span class="card-icon"><i class="pi pi-compass" aria-hidden="true"></i></span>
+                <span class="card-icon"
+                  ><i class="icon icon-compass" aria-hidden="true"></i
+                ></span>
                 <div class="card-heading__copy">
                   <h2>What should Magpie test?</h2>
-                  <p>Choose every proxy type included in a global checker pass.</p>
+                  <p>
+                    Choose every proxy type included in a global checker pass.
+                  </p>
                 </div>
-                <span class="card-count">{{ selectedProtocolCount }} active</span>
+                <span class="card-count"
+                  >{{ selectedProtocolCount }} active</span
+                >
               </div>
 
-              <div class="protocol-accordion" formGroupName="protocols" role="group" aria-label="Proxy protocols">
+              <div
+                class="protocol-accordion"
+                formGroupName="protocols"
+                role="group"
+                aria-label="Proxy protocols"
+              >
                 @for (protocol of protocolOptions; track protocol.control) {
                   <button
                     type="button"
                     class="protocol-choice"
-                    [class.is-active]="settingsForm.get('protocols.' + protocol.control)?.value"
-                    [attr.aria-pressed]="!!settingsForm.get('protocols.' + protocol.control)?.value"
+                    [class.is-active]="
+                      settingsForm.get('protocols.' + protocol.control)?.value
+                    "
+                    [attr.aria-pressed]="
+                      !!settingsForm.get('protocols.' + protocol.control)?.value
+                    "
                     (click)="toggleProtocol(protocol.control)"
                   >
-                    <span class="protocol-choice__icon"><i [class]="protocol.icon" aria-hidden="true"></i></span>
+                    <span class="protocol-choice__icon"
+                      ><i [class]="protocol.icon" aria-hidden="true"></i
+                    ></span>
                     <span class="protocol-choice__copy">
                       <strong>{{ protocol.label }}</strong>
                       <small>{{ protocol.description }}</small>
                     </span>
-                    <span class="protocol-choice__state">{{ settingsForm.get('protocols.' + protocol.control)?.value ? 'On' : 'Off' }}</span>
+                    <span class="protocol-choice__state">{{
+                      settingsForm.get("protocols." + protocol.control)?.value
+                        ? "On"
+                        : "Off"
+                    }}</span>
                   </button>
                 }
               </div>
@@ -48,36 +82,66 @@
 
             <section class="settings-card settings-card--cadence">
               <div class="card-heading">
-                <span class="card-icon"><i class="pi pi-clock" aria-hidden="true"></i></span>
+                <span class="card-icon"
+                  ><i class="icon icon-clock" aria-hidden="true"></i
+                ></span>
                 <div class="card-heading__copy">
                   <h2>When should checks repeat?</h2>
                   <p>Set the target time between global validation passes.</p>
                 </div>
               </div>
-              <div class="cadence-summary"><span>Every</span><strong>{{ checkerCadenceLabel }}</strong></div>
+              <div class="cadence-summary">
+                <span>Every</span><strong>{{ checkerCadenceLabel }}</strong>
+              </div>
               <div class="timer-grid" formGroupName="checker_timer">
                 <div class="timer-field">
                   <label for="checker-days">Days</label>
-                  <p-select inputId="checker-days" [options]="daysList" formControlName="days" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                  <app-select
+                    inputId="checker-days"
+                    [options]="daysList"
+                    formControlName="days"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></app-select>
                 </div>
                 <div class="timer-field">
                   <label for="checker-hours">Hours</label>
-                  <p-select inputId="checker-hours" [options]="hoursList" formControlName="hours" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                  <app-select
+                    inputId="checker-hours"
+                    [options]="hoursList"
+                    formControlName="hours"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></app-select>
                 </div>
                 <div class="timer-field">
                   <label for="checker-minutes">Minutes</label>
-                  <p-select inputId="checker-minutes" [options]="minutesList" formControlName="minutes" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                  <app-select
+                    inputId="checker-minutes"
+                    [options]="minutesList"
+                    formControlName="minutes"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></app-select>
                 </div>
                 <div class="timer-field">
                   <label for="checker-seconds">Seconds</label>
-                  <p-select inputId="checker-seconds" [options]="secondsList" formControlName="seconds" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+                  <app-select
+                    inputId="checker-seconds"
+                    [options]="secondsList"
+                    formControlName="seconds"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></app-select>
                 </div>
               </div>
             </section>
 
             <section class="settings-card settings-card--performance">
               <div class="card-heading">
-                <span class="card-icon"><i class="pi pi-bolt" aria-hidden="true"></i></span>
+                <span class="card-icon"
+                  ><i class="icon icon-bolt" aria-hidden="true"></i
+                ></span>
                 <div class="card-heading__copy">
                   <h2>How hard should it work?</h2>
                   <p>Balance concurrency, patience, and retry depth.</p>
@@ -85,160 +149,411 @@
               </div>
               <div class="performance-fields">
                 <div class="field-group field-group--wide">
-                  <label class="field-label" [for]="settingsForm.get('dynamic_threads')?.value ? 'max_threads' : 'threads'">
-                    {{ settingsForm.get('dynamic_threads')?.value ? 'Maximum threads' : 'Threads' }}
-                    <app-tooltip [text]="'The number of proxy checks Magpie can run at once.'"></app-tooltip>
+                  <label
+                    class="field-label"
+                    [for]="
+                      settingsForm.get('dynamic_threads')?.value
+                        ? 'max_threads'
+                        : 'threads'
+                    "
+                  >
+                    {{
+                      settingsForm.get("dynamic_threads")?.value
+                        ? "Maximum threads"
+                        : "Threads"
+                    }}
+                    <app-tooltip
+                      [text]="'The number of proxy checks Magpie can run at once.'"
+                    ></app-tooltip>
                   </label>
                   <div class="input-with-unit">
-                    @if (settingsForm.get('dynamic_threads')?.value) {
-                      <input id="max_threads" formControlName="max_threads" type="number" pInputText inputmode="numeric" min="1" />
+                    @if (settingsForm.get("dynamic_threads")?.value) {
+                      <input
+                        id="max_threads"
+                        formControlName="max_threads"
+                        type="number"
+                        hlmInput
+                        inputmode="numeric"
+                        min="1"
+                      />
                     } @else {
-                      <input id="threads" formControlName="threads" type="number" pInputText inputmode="numeric" min="1" />
+                      <input
+                        id="threads"
+                        formControlName="threads"
+                        type="number"
+                        hlmInput
+                        inputmode="numeric"
+                        min="1"
+                      />
                     }
                     <span>concurrent</span>
                   </div>
                 </div>
                 <div class="field-group">
                   <label class="field-label" for="retries">Retries</label>
-                  <div class="input-with-unit"><input id="retries" formControlName="retries" type="number" pInputText inputmode="numeric" min="0" /><span>after failure</span></div>
+                  <div class="input-with-unit">
+                    <input
+                      id="retries"
+                      formControlName="retries"
+                      type="number"
+                      hlmInput
+                      inputmode="numeric"
+                      min="0"
+                    /><span>after failure</span>
+                  </div>
                 </div>
                 <div class="field-group">
                   <label class="field-label" for="timeout">Timeout</label>
-                  <div class="input-with-unit"><input id="timeout" formControlName="timeout" type="number" pInputText inputmode="numeric" min="1" /><span>milliseconds</span></div>
+                  <div class="input-with-unit">
+                    <input
+                      id="timeout"
+                      formControlName="timeout"
+                      type="number"
+                      hlmInput
+                      inputmode="numeric"
+                      min="1"
+                    /><span>milliseconds</span>
+                  </div>
                 </div>
               </div>
               <div class="performance-summary">
                 <strong>{{ threadLimit }}</strong>
-                <p><span>thread ceiling</span><small>Up to {{ checkerAttemptWindow }} of configured wait per proxy.</small></p>
+                <p>
+                  <span>thread ceiling</span
+                  ><small
+                    >Up to {{ checkerAttemptWindow }} of configured wait per
+                    proxy.</small
+                  >
+                </p>
               </div>
             </section>
 
             <section class="settings-card settings-card--automation">
               <div class="card-heading">
-                <span class="card-icon"><i class="pi pi-sparkles" aria-hidden="true"></i></span>
+                <span class="card-icon"
+                  ><i class="icon icon-sparkles" aria-hidden="true"></i
+                ></span>
                 <div class="card-heading__copy">
                   <h2>Let Magpie adapt</h2>
-                  <p>Choose which automatic behaviors run around every check.</p>
+                  <p>
+                    Choose which automatic behaviors run around every check.
+                  </p>
                 </div>
               </div>
               <div class="decision-list">
-                <div class="decision-row" [class.is-active]="settingsForm.get('dynamic_threads')?.value">
-                  <span class="decision-row__icon"><i class="pi pi-chart-line" aria-hidden="true"></i></span>
+                <div
+                  class="decision-row"
+                  [class.is-active]="settingsForm.get('dynamic_threads')?.value"
+                >
+                  <span class="decision-row__icon"
+                    ><i
+                      class="icon icon-chart-no-axes-combined"
+                      aria-hidden="true"
+                    ></i
+                  ></span>
                   <div class="decision-row__copy">
-                    <strong>Dynamic threads</strong><p>Adjust concurrency to stay close to the checker cadence.</p>
-                    <span>{{ settingsForm.get('dynamic_threads')?.value ? 'Adapts up to ' + threadLimit + ' threads' : 'Uses a fixed thread count' }}</span>
+                    <strong>Dynamic threads</strong>
+                    <p>
+                      Adjust concurrency to stay close to the checker cadence.
+                    </p>
+                    <span>{{
+                      settingsForm.get("dynamic_threads")?.value
+                        ? "Adapts up to " + threadLimit + " threads"
+                        : "Uses a fixed thread count"
+                    }}</span>
                   </div>
-                  <app-checkbox label="Enabled" formControlName="dynamic_threads"></app-checkbox>
+                  <app-checkbox
+                    label="Enabled"
+                    formControlName="dynamic_threads"
+                  ></app-checkbox>
                 </div>
-                <div class="decision-row" [class.is-active]="settingsForm.get('use_https_for_socks')?.value">
-                  <span class="decision-row__icon"><i class="pi pi-lock" aria-hidden="true"></i></span>
+                <div
+                  class="decision-row"
+                  [class.is-active]="
+                    settingsForm.get('use_https_for_socks')?.value
+                  "
+                >
+                  <span class="decision-row__icon"
+                    ><i class="icon icon-lock" aria-hidden="true"></i
+                  ></span>
                   <div class="decision-row__copy">
-                    <strong>HTTPS judges for SOCKS</strong><p>Route SOCKS4 and SOCKS5 checks through secure judges.</p>
-                    <span>{{ settingsForm.get('use_https_for_socks')?.value ? 'Secure judge routing' : 'Standard judge routing' }}</span>
+                    <strong>HTTPS judges for SOCKS</strong>
+                    <p>Route SOCKS4 and SOCKS5 checks through secure judges.</p>
+                    <span>{{
+                      settingsForm.get("use_https_for_socks")?.value
+                        ? "Secure judge routing"
+                        : "Standard judge routing"
+                    }}</span>
                   </div>
-                  <app-checkbox label="Enabled" formControlName="use_https_for_socks"></app-checkbox>
+                  <app-checkbox
+                    label="Enabled"
+                    formControlName="use_https_for_socks"
+                  ></app-checkbox>
                 </div>
-                <div class="decision-row" [class.is-active]="settingsForm.get('save_responses')?.value">
-                  <span class="decision-row__icon"><i class="pi pi-save" aria-hidden="true"></i></span>
+                <div
+                  class="decision-row"
+                  [class.is-active]="settingsForm.get('save_responses')?.value"
+                >
+                  <span class="decision-row__icon"
+                    ><i class="icon icon-save" aria-hidden="true"></i
+                  ></span>
                   <div class="decision-row__copy">
-                    <strong>Save request responses</strong><p>Keep response bodies available for inspection and debugging.</p>
-                    <span>{{ settingsForm.get('save_responses')?.value ? 'Responses retained' : 'Responses discarded' }}</span>
+                    <strong>Save request responses</strong>
+                    <p>
+                      Keep response bodies available for inspection and
+                      debugging.
+                    </p>
+                    <span>{{
+                      settingsForm.get("save_responses")?.value
+                        ? "Responses retained"
+                        : "Responses discarded"
+                    }}</span>
                   </div>
-                  <app-checkbox label="Enabled" formControlName="save_responses"></app-checkbox>
+                  <app-checkbox
+                    label="Enabled"
+                    formControlName="save_responses"
+                  ></app-checkbox>
                 </div>
               </div>
             </section>
           </div>
-        </p-tabpanel>
+        </section>
 
-        <p-tabpanel value="1">
+        <section hlmTabsContent="1">
           <div class="settings-grid settings-grid--judges">
             <section class="settings-card settings-card--judge-performance">
               <div class="card-heading">
-                <span class="card-icon"><i class="pi pi-gauge" aria-hidden="true"></i></span>
-                <div class="card-heading__copy"><h2>How should judges respond?</h2><p>Set the concurrency and patience used to validate judge endpoints.</p></div>
+                <span class="card-icon"
+                  ><i class="icon icon-gauge" aria-hidden="true"></i
+                ></span>
+                <div class="card-heading__copy">
+                  <h2>How should judges respond?</h2>
+                  <p>
+                    Set the concurrency and patience used to validate judge
+                    endpoints.
+                  </p>
+                </div>
               </div>
               <div class="stacked-fields">
                 <div class="field-group">
-                  <label class="field-label" for="judges_threads">Judge threads</label>
-                  <div class="input-with-unit"><input id="judges_threads" formControlName="judges_threads" type="number" pInputText inputmode="numeric" min="1" /><span>concurrent</span></div>
+                  <label class="field-label" for="judges_threads"
+                    >Judge threads</label
+                  >
+                  <div class="input-with-unit">
+                    <input
+                      id="judges_threads"
+                      formControlName="judges_threads"
+                      type="number"
+                      hlmInput
+                      inputmode="numeric"
+                      min="1"
+                    /><span>concurrent</span>
+                  </div>
                 </div>
                 <div class="field-group">
-                  <label class="field-label" for="judges_timeout">Judge timeout</label>
-                  <div class="input-with-unit"><input id="judges_timeout" formControlName="judges_timeout" type="number" pInputText inputmode="numeric" min="1" /><span>milliseconds</span></div>
+                  <label class="field-label" for="judges_timeout"
+                    >Judge timeout</label
+                  >
+                  <div class="input-with-unit">
+                    <input
+                      id="judges_timeout"
+                      formControlName="judges_timeout"
+                      type="number"
+                      hlmInput
+                      inputmode="numeric"
+                      min="1"
+                    /><span>milliseconds</span>
+                  </div>
                 </div>
               </div>
             </section>
 
             <section class="settings-card settings-card--judge-cadence">
               <div class="card-heading">
-                <span class="card-icon"><i class="pi pi-sync" aria-hidden="true"></i></span>
-                <div class="card-heading__copy"><h2>When should judges refresh?</h2><p>Control how often Magpie revalidates the shared judge pool.</p></div>
+                <span class="card-icon"
+                  ><i class="icon icon-refresh-cw" aria-hidden="true"></i
+                ></span>
+                <div class="card-heading__copy">
+                  <h2>When should judges refresh?</h2>
+                  <p>
+                    Control how often Magpie revalidates the shared judge pool.
+                  </p>
+                </div>
               </div>
-              <div class="cadence-summary cadence-summary--inline"><span>Refresh every</span><strong>{{ judgeCadenceLabel }}</strong></div>
+              <div class="cadence-summary cadence-summary--inline">
+                <span>Refresh every</span
+                ><strong>{{ judgeCadenceLabel }}</strong>
+              </div>
               <div class="timer-grid" formGroupName="judge_timer">
-                <div class="timer-field"><label for="judge-days">Days</label><p-select inputId="judge-days" [options]="daysList" formControlName="days" optionLabel="label" optionValue="value" appendTo="body"></p-select></div>
-                <div class="timer-field"><label for="judge-hours">Hours</label><p-select inputId="judge-hours" [options]="hoursList" formControlName="hours" optionLabel="label" optionValue="value" appendTo="body"></p-select></div>
-                <div class="timer-field"><label for="judge-minutes">Minutes</label><p-select inputId="judge-minutes" [options]="minutesList" formControlName="minutes" optionLabel="label" optionValue="value" appendTo="body"></p-select></div>
-                <div class="timer-field"><label for="judge-seconds">Seconds</label><p-select inputId="judge-seconds" [options]="secondsList" formControlName="seconds" optionLabel="label" optionValue="value" appendTo="body"></p-select></div>
+                <div class="timer-field">
+                  <label for="judge-days">Days</label
+                  ><app-select
+                    inputId="judge-days"
+                    [options]="daysList"
+                    formControlName="days"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></app-select>
+                </div>
+                <div class="timer-field">
+                  <label for="judge-hours">Hours</label
+                  ><app-select
+                    inputId="judge-hours"
+                    [options]="hoursList"
+                    formControlName="hours"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></app-select>
+                </div>
+                <div class="timer-field">
+                  <label for="judge-minutes">Minutes</label
+                  ><app-select
+                    inputId="judge-minutes"
+                    [options]="minutesList"
+                    formControlName="minutes"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></app-select>
+                </div>
+                <div class="timer-field">
+                  <label for="judge-seconds">Seconds</label
+                  ><app-select
+                    inputId="judge-seconds"
+                    [options]="secondsList"
+                    formControlName="seconds"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></app-select>
+                </div>
               </div>
             </section>
 
             <section class="settings-card settings-card--judge-list">
               <div class="card-heading">
-                <span class="card-icon"><i class="pi pi-verified" aria-hidden="true"></i></span>
-                <div class="card-heading__copy"><h2>Default judges</h2><p>These endpoints become the starting judge list for every new account.</p></div>
+                <span class="card-icon"
+                  ><i class="icon icon-badge-check" aria-hidden="true"></i
+                ></span>
+                <div class="card-heading__copy">
+                  <h2>Default judges</h2>
+                  <p>
+                    These endpoints become the starting judge list for every new
+                    account.
+                  </p>
+                </div>
                 <span class="card-count">{{ judges.length }} endpoints</span>
               </div>
               <div formArrayName="judges" class="judge-list">
                 @for (judge of judges.controls; track judge; let i = $index) {
                   <div [formGroupName]="i" class="judge-row">
                     <span class="judge-index">{{ i + 1 }}</span>
-                    <div class="field-group"><label class="field-label" for="judge-url-{{ i }}">Judge URL</label><input id="judge-url-{{ i }}" formControlName="url" type="url" pInputText placeholder="https://judge.example.com" /></div>
                     <div class="field-group">
-                      <label class="field-label" for="judge-regex-{{ i }}">Response regex <app-tooltip [text]="'Use default for Magpie\'s built-in response matching, or provide a custom regular expression.'"></app-tooltip></label>
-                      <input id="judge-regex-{{ i }}" formControlName="regex" type="text" pInputText placeholder="default" />
+                      <label class="field-label" for="judge-url-{{ i }}"
+                        >Judge URL</label
+                      ><input
+                        id="judge-url-{{ i }}"
+                        formControlName="url"
+                        type="url"
+                        hlmInput
+                        placeholder="https://judge.example.com"
+                      />
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label" for="judge-regex-{{ i }}"
+                        >Response regex
+                        <app-tooltip
+                          [text]="'Use default for Magpie\'s built-in response matching, or provide a custom regular expression.'"
+                        ></app-tooltip
+                      ></label>
+                      <input
+                        id="judge-regex-{{ i }}"
+                        formControlName="regex"
+                        type="text"
+                        hlmInput
+                        placeholder="default"
+                      />
                     </div>
                     @if (judges.length > 1) {
-                      <button type="button" class="icon-button icon-button--remove" (click)="removeJudge(i)" [attr.aria-label]="'Remove judge ' + (i + 1)"><i class="pi pi-trash" aria-hidden="true"></i></button>
+                      <button
+                        type="button"
+                        class="icon-button icon-button--remove"
+                        (click)="removeJudge(i)"
+                        [attr.aria-label]="'Remove judge ' + (i + 1)"
+                      >
+                        <i class="icon icon-trash" aria-hidden="true"></i>
+                      </button>
                     }
                   </div>
                 }
               </div>
-              <button type="button" class="add-button" (click)="addJudge()"><i class="pi pi-plus" aria-hidden="true"></i>Add judge</button>
+              <button type="button" class="add-button" (click)="addJudge()">
+                <i class="icon icon-plus" aria-hidden="true"></i>Add judge
+              </button>
             </section>
           </div>
-        </p-tabpanel>
+        </section>
 
-        <p-tabpanel value="2">
+        <section hlmTabsContent="2">
           <div class="settings-grid settings-grid--ip">
             <section class="settings-card settings-card--ip">
               <div class="ip-visual" aria-hidden="true">
                 <span class="ip-visual__orbit ip-visual__orbit--outer"></span>
                 <span class="ip-visual__orbit ip-visual__orbit--inner"></span>
-                <span class="ip-visual__core"><i class="pi pi-map-marker"></i></span>
+                <span class="ip-visual__core"
+                  ><i class="icon icon-map-pin"></i
+                ></span>
               </div>
               <div class="ip-content">
                 <div class="card-heading">
-                  <span class="card-icon"><i class="pi pi-map" aria-hidden="true"></i></span>
-                  <div class="card-heading__copy"><h2>Where is this checker?</h2><p>Magpie calls this endpoint at startup to learn the host’s public IP.</p></div>
+                  <span class="card-icon"
+                    ><i class="icon icon-map" aria-hidden="true"></i
+                  ></span>
+                  <div class="card-heading__copy">
+                    <h2>Where is this checker?</h2>
+                    <p>
+                      Magpie calls this endpoint at startup to learn the host’s
+                      public IP.
+                    </p>
+                  </div>
                 </div>
                 <div class="field-group ip-field">
-                  <label class="field-label" for="iplookup">IP lookup URL <app-tooltip [text]="'The response should contain the checker host\'s public IP address.'"></app-tooltip></label>
-                  <input id="iplookup" formControlName="iplookup" type="url" pInputText placeholder="https://ident.me" />
-                  <p class="field-hint">Use a stable endpoint that returns one plain-text IP address.</p>
+                  <label class="field-label" for="iplookup"
+                    >IP lookup URL
+                    <app-tooltip
+                      [text]="'The response should contain the checker host\'s public IP address.'"
+                    ></app-tooltip
+                  ></label>
+                  <input
+                    id="iplookup"
+                    formControlName="iplookup"
+                    type="url"
+                    hlmInput
+                    placeholder="https://ident.me"
+                  />
+                  <p class="field-hint">
+                    Use a stable endpoint that returns one plain-text IP
+                    address.
+                  </p>
                 </div>
                 <div class="ip-path">
-                  <span><i class="pi pi-server" aria-hidden="true"></i>Checker host</span><i class="pi pi-arrow-right" aria-hidden="true"></i>
-                  <span><i class="pi pi-globe" aria-hidden="true"></i>Lookup endpoint</span><i class="pi pi-arrow-right" aria-hidden="true"></i>
-                  <span><i class="pi pi-check" aria-hidden="true"></i>Public IP</span>
+                  <span
+                    ><i class="icon icon-server" aria-hidden="true"></i>Checker
+                    host</span
+                  ><i class="icon icon-arrow-right" aria-hidden="true"></i>
+                  <span
+                    ><i class="icon icon-globe" aria-hidden="true"></i>Lookup
+                    endpoint</span
+                  ><i class="icon icon-arrow-right" aria-hidden="true"></i>
+                  <span
+                    ><i class="icon icon-check" aria-hidden="true"></i>Public
+                    IP</span
+                  >
                 </div>
               </div>
             </section>
           </div>
-        </p-tabpanel>
-      </p-tabpanels>
-    </p-tabs>
+        </section>
+      </div>
+    </hlm-tabs>
 
     <app-admin-settings-save-dock
       [dirty]="settingsForm.dirty"
@@ -246,17 +561,24 @@
       dirtyDescription="Save when the checker baseline looks right."
       pristineTitle="Global settings are up to date"
     >
-      <p-button
+      <button
         settings-save-action
         type="button"
-        label="Requeue all proxies"
-        icon="pi pi-refresh"
-        (onClick)="confirmRequeueAllProxies()"
-        [loading]="isRequeueing"
-        styleClass="requeue-button"
-      ></p-button>
+        class="requeue-button"
+        (click)="confirmRequeueAllProxies()"
+        hlmBtn
+        [disabled]="isRequeueing"
+        variant="default"
+      >
+        @if (isRequeueing) {
+          <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
+        } @else {
+          <i class="icon icon-refresh-cw" aria-hidden="true"></i>
+        }
+        Requeue all proxies
+      </button>
     </app-admin-settings-save-dock>
   </form>
 
-  <p-confirmDialog [style]="{width: 'min(450px, calc(100vw - 2rem))'}" [baseZIndex]="10000" rejectButtonStyleClass="p-button-outlined"></p-confirmDialog>
+  <app-confirm-dialog />
 </app-admin-settings-shell>

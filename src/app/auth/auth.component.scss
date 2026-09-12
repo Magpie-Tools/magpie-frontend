@@ -45,24 +45,24 @@
     text-align: center;
   }
 
-  .p-inputtext {
+  [hlmInput] {
     width: 100%;
     border-radius: 6px;
     background-color: #222;
     color: #fff;
   }
 
-  .p-password,
-  .p-password input {
+  app-password,
+  app-password input {
     width: 100%;
   }
 
-  .p-password input {
+  app-password input {
     background-color: #222;
     color: #fff;
   }
 
-  .p-button {
+  [hlmBtn] {
     width: 100%;
     height: 3rem;
     margin-top: 20px;
@@ -71,7 +71,7 @@
     background: var(--theme-primary-500);
   }
 
-  .p-button:hover {
+  [hlmBtn]:hover {
     background: var(--theme-primary-600);
   }
 
@@ -108,13 +108,13 @@
     position: relative;
   }
 
-  input.auth-input-action__field.p-inputtext {
+  input.auth-input-action__field[hlmInput] {
     width: 100%;
     height: 3rem;
     padding-right: 6.25rem;
   }
 
-  .auth-input-action__button.p-button {
+  .auth-input-action__button[hlmBtn] {
     position: absolute;
     z-index: 1;
     top: 50%;

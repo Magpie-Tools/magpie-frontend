@@ -43,7 +43,7 @@ export function scrollTableToPageTarget(root: HTMLElement | undefined, target: P
     return;
   }
 
-  const innerScroller = root.querySelector<HTMLElement>('.p-datatable-wrapper');
+  const innerScroller = root.querySelector<HTMLElement>('.table-scroll');
   if (innerScroller && innerScroller.scrollHeight > innerScroller.clientHeight) {
     innerScroller.scrollTo({
       top: target === 'top' ? 0 : innerScroller.scrollHeight,

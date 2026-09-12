@@ -1,7 +1,8 @@
+import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
 import {CommonModule, DatePipe, TitleCasePipe} from '@angular/common';
 import {Component, OnInit, signal} from '@angular/core';
 import {Router} from '@angular/router';
-import {SkeletonModule} from 'primeng/skeleton';
+
 import {finalize, map, switchMap} from 'rxjs/operators';
 import {WorkspaceInvitation, WorkspaceInvitationAcceptance} from '../models/Workspace';
 import {NotificationService} from '../services/notification-service.service';
@@ -12,7 +13,7 @@ import {RevealGroupDirective, RevealStep} from '../shared/reveal-group.directive
 @Component({
   selector: 'app-workspace-invitations',
   standalone: true,
-  imports: [RevealGroupDirective, CommonModule, DatePipe, TitleCasePipe, SkeletonModule],
+  imports: [HlmSkeleton, RevealGroupDirective, CommonModule, DatePipe, TitleCasePipe],
   templateUrl: './workspace-invitations.component.html',
   styleUrl: './workspace-invitations.component.scss',
 })

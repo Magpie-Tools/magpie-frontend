@@ -171,7 +171,7 @@
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 
-  .pi {
+  .icon {
     font-size: 0.7rem;
     color: rgba(148, 163, 184, 0.85);
     opacity: 0;
@@ -184,7 +184,7 @@
     background: rgba(148, 163, 184, 0.1);
     color: rgba(226, 232, 240, 0.9);
 
-    .pi {
+    .icon {
       color: rgba(148, 163, 184, 0.85);
       opacity: 1;
     }
@@ -201,7 +201,7 @@
     background: rgba(var(--proxy-accent-rgb), 0.2);
     color: #bbf7d0;
 
-    .pi {
+    .icon {
       color: rgba(var(--proxy-accent-rgb), 1);
       opacity: 1;
     }
@@ -299,7 +299,7 @@
   line-height: 1;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 
-  .pi {
+  .icon {
     font-size: 0.72rem;
   }
 
@@ -389,46 +389,42 @@
   }
 }
 
-:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+:host ::ng-deep .data-table tbody > tr > td {
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-:host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-highlight):hover > td {
+:host ::ng-deep .data-table tbody > tr:not([data-state="selected"]):hover > td {
   background: rgba(148, 163, 184, 0.06);
 }
 
-:host ::ng-deep .p-datatable {
+:host ::ng-deep .data-table {
   border-radius: 0.5rem;
   overflow: hidden;
 }
 
-:host ::ng-deep .p-datatable .p-datatable-wrapper {
+:host ::ng-deep .data-table .table-scroll {
   border-radius: 0.5rem;
   overflow: hidden;
 }
 
-:host ::ng-deep .p-datatable .p-datatable-table {
+:host ::ng-deep .data-table table {
   border-collapse: separate;
   border-spacing: 0;
   border-radius: 0.5rem;
 }
 
-:host ::ng-deep .p-paginator .p-paginator-content {
-  row-gap: 0.5rem;
-}
-
-:host ::ng-deep .p-datatable .p-datatable-thead > tr > th:first-child {
+:host ::ng-deep .data-table thead > tr > th:first-child {
   border-top-left-radius: 0.5rem;
 }
 
-:host ::ng-deep .p-datatable .p-datatable-thead > tr > th:last-child {
+:host ::ng-deep .data-table thead > tr > th:last-child {
   border-top-right-radius: 0.5rem;
 }
 
-:host ::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td:first-child {
+:host ::ng-deep .data-table tbody > tr:last-child > td:first-child {
   border-bottom-left-radius: 0.5rem;
 }
 
-:host ::ng-deep .p-datatable .p-datatable-tbody > tr:last-child > td:last-child {
+:host ::ng-deep .data-table tbody > tr:last-child > td:last-child {
   border-bottom-right-radius: 0.5rem;
 }

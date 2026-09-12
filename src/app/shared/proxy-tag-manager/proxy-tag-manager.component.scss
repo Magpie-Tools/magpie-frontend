@@ -360,8 +360,8 @@
   p { margin: 0; color: rgba(255, 255, 255, 0.34); font-size: 0.59rem; }
 }
 
-::ng-deep .proxy-tag-manager-dialog.p-dialog,
-::ng-deep .proxy-tag-manager-dialog .p-dialog {
+::ng-deep .proxy-tag-manager-dialog.app-dialog-panel,
+::ng-deep .proxy-tag-manager-dialog .app-dialog-panel {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 1.2rem;
@@ -370,7 +370,7 @@
   box-shadow: 0 32px 86px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-::ng-deep .proxy-tag-manager-dialog .p-dialog-header {
+::ng-deep .proxy-tag-manager-dialog .app-dialog-header {
   padding: 1rem 1.15rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
   background:
@@ -378,24 +378,24 @@
     rgba(12, 12, 14, 0.98);
 }
 
-::ng-deep .proxy-tag-manager-dialog .p-dialog-content {
+::ng-deep .proxy-tag-manager-dialog .app-dialog-body {
   background: transparent;
   color: inherit;
 }
 
-::ng-deep .proxy-tag-manager-dialog .p-dialog-close-button {
+::ng-deep .proxy-tag-manager-dialog [data-slot="dialog-close"] {
   width: 2.15rem;
   height: 2.15rem;
   border-radius: 0.68rem;
   color: rgba(255, 255, 255, 0.42);
 }
 
-::ng-deep .proxy-tag-manager-dialog .p-dialog-close-button:hover {
+::ng-deep .proxy-tag-manager-dialog [data-slot="dialog-close"]:hover {
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.86);
 }
 
-::ng-deep .proxy-tag-manager-dialog .tag-button.p-button {
+::ng-deep .proxy-tag-manager-dialog .tag-button[hlmBtn] {
   min-height: 2.45rem;
   border-radius: 0.68rem;
   font-size: 0.62rem;
@@ -403,13 +403,13 @@
   box-shadow: none;
 }
 
-::ng-deep .proxy-tag-manager-dialog .tag-button--quiet.p-button {
+::ng-deep .proxy-tag-manager-dialog .tag-button--quiet[hlmBtn] {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.03);
   color: rgba(255, 255, 255, 0.52);
 }
 
-::ng-deep .proxy-tag-manager-dialog .tag-button--primary.p-button {
+::ng-deep .proxy-tag-manager-dialog .tag-button--primary[hlmBtn] {
   border-color: var(--theme-primary-400);
   background: var(--theme-primary-500);
   color: #090b0a;

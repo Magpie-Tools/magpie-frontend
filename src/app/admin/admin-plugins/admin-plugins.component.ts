@@ -1,3 +1,5 @@
+import {HlmSwitch} from '@spartan-ng/helm/switch';
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {Component, computed, OnDestroy, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
@@ -6,18 +8,16 @@ import {GlobalSettings} from '../../models/GlobalSettings';
 import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
 import {NotificationService} from '../../services/notification-service.service';
-import {ToggleSwitchChangeEvent, ToggleSwitchModule} from 'primeng/toggleswitch';
-import {TooltipModule} from 'primeng/tooltip';
+
 import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-admin-plugins',
   standalone: true,
-  imports: [
+  imports: [HlmSwitch, HlmTooltip,
     RouterLink,
     FormsModule,
-    ToggleSwitchModule,
-    TooltipModule,
+
     RevealGroupDirective
   ],
   templateUrl: './admin-plugins.component.html',
@@ -35,7 +35,7 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
       provider: 'MaxMind',
       logo: 'https://media.licdn.com/dms/image/v2/C560BAQHAOUxYoh2u1Q/company-logo_200_200/company-logo_200_200/0/1671072899861/maxmind_logo?e=2147483647&v=beta&t=WWP-k6AqK1YM0ePQFUi28aEUGjpcuLPSsdKdCSS1940',
       route: '/plugins/geolite',
-      icon: 'pi pi-map-marker',
+      icon: 'icon icon-map-pin',
       description: 'Enrich every proxy with country, city, and network data from MaxMind.',
       capabilities: ['Location data', 'Scheduled updates', 'Local database']
     },
@@ -45,7 +45,7 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
       provider: 'AbuseIPDB',
       logo: 'https://www.abuseipdb.com/favicon.ico',
       route: '/plugins/abuseipdb',
-      icon: 'pi pi-shield',
+      icon: 'icon icon-shield',
       description: 'Add community abuse intelligence to proxy reputation scoring.',
       capabilities: ['IP reputation', 'Quota tracking', 'Age policy']
     }
@@ -134,7 +134,7 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  togglePlugin(pluginId: string, event: ToggleSwitchChangeEvent): void {
+  togglePlugin(pluginId: string, event: boolean): void {
     if (this.isPluginTogglePending(pluginId) || !this.settings()) {
       return;
     }
@@ -144,7 +144,7 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
     }
 
     const previousSettings = this.settings();
-    const nextEnabled = event.checked;
+    const nextEnabled = event;
     this.setPluginEnabled(pluginId, nextEnabled);
     this.setPluginPending(pluginId, true);
 

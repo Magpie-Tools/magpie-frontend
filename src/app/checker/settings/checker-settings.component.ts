@@ -1,11 +1,11 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmBadge} from '@spartan-ng/helm/badge';
+import {SelectComponent} from '../../shared/ui/select.component';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CheckboxComponent} from '../../checkbox/checkbox.component';
-import {InputText} from 'primeng/inputtext';
-import {Button} from 'primeng/button';
-import {Select} from 'primeng/select';
-import {Chip} from 'primeng/chip';
-import {PrimeTemplate} from 'primeng/api';
+
 import {SettingsService} from '../../services/settings.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {UserSettings} from '../../models/UserSettings';
@@ -21,7 +21,7 @@ gsap.registerPlugin(ScrollTrigger);
 @Component({
   selector: 'app-checker-settings',
   standalone: true,
-  imports: [ReactiveFormsModule, CheckboxComponent, InputText, Button, Select, Chip, PrimeTemplate, TooltipComponent],
+  imports: [HlmButton, HlmInput, HlmBadge, SelectComponent, ReactiveFormsModule, CheckboxComponent, TooltipComponent],
   templateUrl: './checker-settings.component.html',
   styleUrls: ['./checker-settings.component.scss']
 })
@@ -31,25 +31,25 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
     {
       label: 'HTTP',
       control: 'HTTPProtocol',
-      icon: 'pi pi-globe',
+      icon: 'icon icon-globe',
       description: 'Standard web proxies',
     },
     {
       label: 'HTTPS',
       control: 'HTTPSProtocol',
-      icon: 'pi pi-lock',
+      icon: 'icon icon-lock',
       description: 'Encrypted web traffic',
     },
     {
       label: 'SOCKS4',
       control: 'SOCKS4Protocol',
-      icon: 'pi pi-sitemap',
+      icon: 'icon icon-network',
       description: 'IPv4 socket routing',
     },
     {
       label: 'SOCKS5',
       control: 'SOCKS5Protocol',
-      icon: 'pi pi-shield',
+      icon: 'icon icon-shield',
       description: 'Modern socket routing',
     },
   ];
@@ -65,6 +65,7 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
 
   constructor(
     private fb: FormBuilder,
+    private changeDetector: ChangeDetectorRef,
     private settingsService: SettingsService,
     private notification: NotificationService,
     private elementRef: ElementRef<HTMLElement>,
@@ -206,6 +207,7 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
     });
 
     this.settingsForm.markAsPristine();
+    this.changeDetector.markForCheck();
   }
 
   onSubmit(): void {

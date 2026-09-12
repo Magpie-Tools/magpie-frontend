@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MessageService} from 'primeng/api';
+
 import {of} from 'rxjs';
 import {CheckerSettingsComponent} from './checker-settings.component';
 import {SettingsService} from '../../services/settings.service';
@@ -44,7 +44,6 @@ describe('CheckerSettingsComponent', () => {
       providers: [
         { provide: SettingsService, useClass: SettingsServiceStub },
         { provide: WorkspaceService, useValue: {canOperate: () => true} },
-        MessageService,
       ]
     }).compileComponents();
 

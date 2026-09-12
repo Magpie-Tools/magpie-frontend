@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MessageService} from 'primeng/api';
+
 import {of} from 'rxjs';
 import {DeleteSourcesComponent} from './delete-sources.component';
 import {HttpService} from '../../../services/http.service';
@@ -18,7 +18,6 @@ describe('DeleteSourcesComponent', () => {
       providers: [
         {provide: HttpService, useValue: {deleteScrapingSource: deleteScrapingSourceSpy}},
         {provide: NotificationService, useValue: {showError: jasmine.createSpy('showError'), showInfo: jasmine.createSpy('showInfo'), showSuccess: jasmine.createSpy('showSuccess')}},
-        MessageService,
       ]
     }).compileComponents();
 

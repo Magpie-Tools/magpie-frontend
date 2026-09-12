@@ -3,22 +3,26 @@
   (visibleChange)="dialogVisible = $event"
   dialogClass="export-sources-dialog"
   triggerLabel="Export"
-  triggerIcon="pi pi-upload"
-  triggerStyleClass="p-button-primary"
+  triggerIcon="icon icon-upload"
+  triggerStyleClass="ui-button-primary"
   [triggerDisabled]="!hasAnySources()"
   headingEyebrow="Download sources"
   headingTitle="Export scrape sources"
-  headingIcon="pi pi-upload"
+  headingIcon="icon icon-upload"
   headingTooltip="Export scrape sources with an optional filter and a custom output format."
-  introIcon="pi pi-file-export"
+  introIcon="icon icon-file-output"
   introTitle="Build an export file"
   introDescription="Choose the source scope and define the fields written to each line."
   [selectedCount]="selectedSources.length"
   footerNote="The export downloads as a plain-text file."
   actionLabel="Export file"
-  actionIcon="pi pi-download"
+  actionIcon="icon icon-download"
   [cancelDisabled]="isExporting"
-  [actionDisabled]="isExporting || exportForm.invalid || (exportOption === 'selected' && !canExportSelected())"
+  [actionDisabled]="
+    isExporting ||
+    exportForm.invalid ||
+    (exportOption === 'selected' && !canExportSelected())
+  "
   [actionLoading]="isExporting"
   (openRequested)="openDialog()"
   (cancelRequested)="closeDialog()"
@@ -29,7 +33,10 @@
     <div class="section-heading">
       <div>
         <h3 id="export-source-scope-title">Choose the scope</h3>
-        <p>Export the current selection or every source available to this workspace.</p>
+        <p>
+          Export the current selection or every source available to this
+          workspace.
+        </p>
       </div>
     </div>
     <app-bulk-scope-selector
@@ -50,12 +57,18 @@
       <div class="section-heading section-heading--split">
         <div>
           <h3>Limit the export</h3>
-          <p>Enable filters if the chosen scope still contains sources you do not need.</p>
+          <p>
+            Enable filters if the chosen scope still contains sources you do not
+            need.
+          </p>
         </div>
-        <app-checkbox label="Enable filters" formControlName="filter"></app-checkbox>
+        <app-checkbox
+          label="Enable filters"
+          formControlName="filter"
+        ></app-checkbox>
       </div>
 
-      @if (exportForm.get('filter')?.value) {
+      @if (exportForm.get("filter")?.value) {
         <app-scrape-source-filter-panel
           class="export-filter-panel"
           [form]="exportForm"
@@ -64,7 +77,10 @@
           (clear)="clearExportFilters()"
         ></app-scrape-source-filter-panel>
       } @else {
-        <div class="filter-disabled-copy"><i class="pi pi-filter-slash" aria-hidden="true"></i> No additional filters will be applied.</div>
+        <div class="filter-disabled-copy">
+          <i class="icon icon-filter-x" aria-hidden="true"></i> No additional
+          filters will be applied.
+        </div>
       }
     </section>
 

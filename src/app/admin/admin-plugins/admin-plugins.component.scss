@@ -317,9 +317,8 @@
 }
 
 :host ::ng-deep {
-  .p-toggleswitch-slider { border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.1); }
-  .p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider { border-color: rgba(var(--theme-primary-300-rgb), 0.45); background: var(--theme-primary-700); }
-  .p-toggleswitch:not(.p-disabled):has(.p-toggleswitch-input:focus-visible) .p-toggleswitch-slider { outline: 2px solid var(--theme-primary-300); outline-offset: 0.18rem; }
+  brn-switch { border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.1); }
+  brn-switch[data-checked] brn-switch { border-color: rgba(var(--theme-primary-300-rgb), 0.45); background: var(--theme-primary-700); }
 }
 
 @container admin-plugins (max-width: 760px) {

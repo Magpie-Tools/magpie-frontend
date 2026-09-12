@@ -32,8 +32,7 @@
   padding: 0.35rem;
 }
 
-:host ::ng-deep .fastest-alive-card__chart p-chart,
-:host ::ng-deep .fastest-alive-card__chart .p-chart,
+:host ::ng-deep .fastest-alive-card__chart app-chart,
 :host ::ng-deep .fastest-alive-card__chart canvas {
   display: block;
   width: 100% !important;

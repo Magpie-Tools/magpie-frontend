@@ -1,17 +1,24 @@
-<p-card [class]="styleClass">
-  <ng-template pTemplate="header">
+<section hlmCard [class]="styleClass">
+  <div hlmCardHeader>
     <div class="dashboard-card__header">
       <div class="dashboard-card__heading">
-        <span class="dashboard-card__icon"><i class="pi pi-wave-pulse" aria-hidden="true"></i></span>
+        <span class="dashboard-card__icon"
+          ><i class="icon icon-activity" aria-hidden="true"></i
+        ></span>
         <div class="dashboard-card__copy">
           <h2 class="dashboard-card__title">{{ title }}</h2>
-          <span class="dashboard-card__subtitle">Compare inventory growth, losses, and the configured route limit.</span>
+          <span class="dashboard-card__subtitle"
+            >Compare inventory growth, losses, and the configured route
+            limit.</span
+          >
         </div>
       </div>
-      <span class="chart-state"><span aria-hidden="true"></span>7-day window</span>
+      <span class="chart-state"
+        ><span aria-hidden="true"></span>7-day window</span
+      >
     </div>
-  </ng-template>
-  <div class="dashboard-card__body throughput-card__body">
-    <p-chart [type]="chartType" [data]="chartData" [options]="chartOptions"></p-chart>
   </div>
-</p-card>
+  <div class="dashboard-card__body throughput-card__body">
+    <app-chart [type]="chartType" [data]="chartData" [options]="chartOptions" />
+  </div>
+</section>

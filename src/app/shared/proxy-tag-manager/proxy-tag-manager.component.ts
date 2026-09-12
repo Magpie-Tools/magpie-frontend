@@ -1,7 +1,8 @@
+import {HlmButton} from '@spartan-ng/helm/button';
+import {DialogComponent} from '../ui/dialog.component';
 import {Component, EventEmitter, Input, Output, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {ButtonModule} from 'primeng/button';
-import {DialogModule} from 'primeng/dialog';
+
 import {finalize} from 'rxjs/operators';
 import {ProxyTag} from '../../models/ProxyTag';
 import {NotificationService} from '../../services/notification-service.service';
@@ -11,14 +12,14 @@ import {animateDialogSections} from '../dialog-motion';
 @Component({
   selector: 'app-proxy-tag-manager',
   standalone: true,
-  imports: [FormsModule, ButtonModule, DialogModule],
+  imports: [HlmButton, DialogComponent, FormsModule],
   templateUrl: './proxy-tag-manager.component.html',
   styleUrl: './proxy-tag-manager.component.scss',
 })
 export class ProxyTagManagerComponent {
   @Input() showTrigger = true;
   @Input() triggerLabel = 'Manage tags';
-  @Input() triggerStyleClass = 'p-button-outlined';
+  @Input() triggerStyleClass = 'ui-button-outlined';
 
   @Output() tagsChanged = new EventEmitter<void>();
 

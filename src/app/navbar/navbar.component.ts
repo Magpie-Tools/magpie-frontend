@@ -1,23 +1,23 @@
+import {HlmPopoverImports} from '@spartan-ng/helm/popover';
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {UserService} from "../services/authorization/user.service";
-import {Popover} from 'primeng/popover';
-import {MenuItem} from 'primeng/api';
+
 import {ThemeService} from '../services/theme.service';
 import {gsap} from 'gsap';
 
 @Component({
   selector: 'app-navbar',
-  imports: [
+  imports: [HlmPopoverImports,
     RouterLink,
     RouterLinkActive,
-    Popover,
+
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
-  menuItems: MenuItem[] = [];
+  menuItems: NavigationItem[] = [];
   private adminRefreshTimer?: ReturnType<typeof setTimeout>;
   private motionContext?: gsap.Context;
 
@@ -26,57 +26,57 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
               protected themeService: ThemeService,) {}
 
   ngOnInit() {
-    this.updateMenuItems();
+    this.updateNavigationItems();
 
-    this.adminRefreshTimer = setTimeout(() => this.updateMenuItems(), 1000);
+    this.adminRefreshTimer = setTimeout(() => this.updateNavigationItems(), 1000);
   }
 
-  updateMenuItems(): void {
+  updateNavigationItems(): void {
     this.menuItems = [
       {
         label: 'Checker',
-        icon: 'pi pi-wrench',
+        icon: 'icon icon-wrench',
         styleClass: 'menu-title',
         hasExpandable: true,
         expanded: true,
         items: [
           {
             label: 'Settings',
-            icon: 'pi pi-cog',
+            icon: 'icon icon-settings',
             routerLink: '/checker/settings',
           },
           {
             label: 'Judges',
-            icon: 'pi pi-address-book',
+            icon: 'icon icon-contact-round',
             routerLink: '/checker/judges'
           }
         ]
       },
       {
         label: 'Admin',
-        icon: 'pi pi-shield',
+        icon: 'icon icon-shield',
         styleClass: 'menu-title',
         hasExpandable: true,
         visible: UserService.isAdmin(),
         items: [
           {
             label: 'Global Checker',
-            icon: 'pi pi-sliders-h',
+            icon: 'icon icon-sliders-horizontal',
             routerLink: '/global/checker'
           },
           {
             label: 'Global Scraper',
-            icon: 'pi pi-cloud-download',
+            icon: 'icon icon-cloud-download',
             routerLink: '/global/scraper'
           },
           {
             label: 'Global Blacklist',
-            icon: 'pi pi-ban',
+            icon: 'icon icon-ban',
             routerLink: '/global/blacklist'
           },
           {
             label: 'Plugins',
-            icon: 'pi pi-box',
+            icon: 'icon icon-archive',
             routerLink: '/plugins'
           }
         ]
@@ -121,3 +121,5 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
     return start + 'green.svg';
   }
 }
+
+interface NavigationItem { label: string; icon: string; styleClass?: string; hasExpandable?: boolean; expanded?: boolean; visible?: boolean; routerLink?: string; items?: NavigationItem[]; }

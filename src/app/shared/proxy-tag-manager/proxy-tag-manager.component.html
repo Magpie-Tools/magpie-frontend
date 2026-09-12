@@ -1,31 +1,28 @@
 @if (showTrigger) {
-  <p-button
+  <button
     type="button"
-    [label]="triggerLabel"
-    icon="pi pi-tags"
-    [styleClass]="triggerStyleClass"
-    (onClick)="open()"
-  ></p-button>
+    [class]="triggerStyleClass"
+    (click)="open()"
+    hlmBtn
+    variant="default"
+  >
+    <i class="icon icon-tags" aria-hidden="true"></i>{{ triggerLabel }}
+  </button>
 }
 
-<p-dialog
+<app-dialog
   [visible]="visible()"
   (visibleChange)="setVisible($event)"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
   [dismissableMask]="true"
-  [appendTo]="'body'"
-  [baseZIndex]="1500"
-  [breakpoints]="{'640px': '95vw'}"
-  [style]="{width: '40rem'}"
-  [contentStyle]="{padding: '0'}"
   styleClass="proxy-tag-manager-dialog"
   (onShow)="animateDialog()"
+  [panelStyle]="{ width: '40rem' }"
 >
-  <ng-template pTemplate="header">
+  <ng-template #dialogHeader>
     <div class="proxy-dialog-heading">
-      <span class="proxy-dialog-heading__icon"><i class="pi pi-tags" aria-hidden="true"></i></span>
+      <span class="proxy-dialog-heading__icon"
+        ><i class="icon icon-tags" aria-hidden="true"></i
+      ></span>
       <div class="proxy-dialog-heading__copy">
         <span>Workspace labels</span>
         <strong>Manage proxy tags</strong>
@@ -35,12 +32,19 @@
 
   <div class="tag-manager">
     <section class="tag-manager__intro">
-      <span class="tag-manager__intro-icon"><i class="pi pi-palette" aria-hidden="true"></i></span>
+      <span class="tag-manager__intro-icon"
+        ><i class="icon icon-palette" aria-hidden="true"></i
+      ></span>
       <div>
         <h3>Keep route groups easy to scan</h3>
-        <p>Use short labels. Names, colors, and assignments belong to the active workspace.</p>
+        <p>
+          Use short labels. Names, colors, and assignments belong to the active
+          workspace.
+        </p>
       </div>
-      <span class="tag-manager__count">{{ tagService.tags().length }} tags</span>
+      <span class="tag-manager__count"
+        >{{ tagService.tags().length }} tags</span
+      >
     </section>
 
     <section class="tag-manager__editor" aria-label="Tag editor">
@@ -72,16 +76,32 @@
       </div>
       <div class="tag-manager__editor-actions">
         @if (editingTagId()) {
-          <p-button label="Cancel" styleClass="tag-button tag-button--quiet" [disabled]="saving()" (onClick)="cancelEdit()"></p-button>
+          <button
+            [disabled]="saving()"
+            class="tag-button tag-button--quiet"
+            (click)="cancelEdit()"
+            hlmBtn
+            type="button"
+            variant="ghost"
+          >
+            Cancel
+          </button>
         }
-        <p-button
-          [label]="editingTagId() ? 'Save changes' : 'Create tag'"
-          icon="pi pi-check"
-          styleClass="tag-button tag-button--primary"
-          [loading]="saving()"
-          [disabled]="saving() || !tagName().trim()"
-          (onClick)="save()"
-        ></p-button>
+        <button
+          class="tag-button tag-button--primary"
+          (click)="save()"
+          hlmBtn
+          type="button"
+          [disabled]="saving() || !tagName().trim() || saving()"
+          variant="default"
+        >
+          @if (saving()) {
+            <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
+          } @else {
+            <i class="icon icon-check" aria-hidden="true"></i>
+          }
+          {{ editingTagId() ? "Save changes" : "Create tag" }}
+        </button>
       </div>
     </section>
 
@@ -95,10 +115,12 @@
       </div>
 
       @if (tagService.loading()) {
-        <div class="tag-manager__empty"><i class="pi pi-spin pi-spinner"></i> Loading tags</div>
+        <div class="tag-manager__empty">
+          <i class="icon icon-spin icon-loader-circle"></i> Loading tags
+        </div>
       } @else if (tagService.tags().length === 0) {
         <div class="tag-manager__empty">
-          <span><i class="pi pi-tag" aria-hidden="true"></i></span>
+          <span><i class="icon icon-tag" aria-hidden="true"></i></span>
           <strong>No tags yet</strong>
           <p>Create the first workspace label above.</p>
         </div>
@@ -107,7 +129,11 @@
           @for (tag of tagService.tags(); track tag.id) {
             <div class="tag-manager__row">
               <div class="tag-manager__identity">
-                <span class="tag-manager__swatch" [style.background-color]="tag.color" aria-hidden="true"></span>
+                <span
+                  class="tag-manager__swatch"
+                  [style.background-color]="tag.color"
+                  aria-hidden="true"
+                ></span>
                 <div>
                   <div class="tag-manager__name">{{ tag.name }}</div>
                   <div class="tag-manager__hex">{{ tag.color }}</div>
@@ -117,13 +143,41 @@
               @if (deletingTagId() === tag.id) {
                 <div class="tag-manager__delete-confirm">
                   <span>Remove from every proxy?</span>
-                  <button type="button" class="tag-manager__cancel-delete" [disabled]="saving()" (click)="cancelDelete()">Cancel</button>
-                  <button type="button" class="tag-manager__confirm-delete" [disabled]="saving()" (click)="confirmDelete(tag)">Delete</button>
+                  <button
+                    type="button"
+                    class="tag-manager__cancel-delete"
+                    [disabled]="saving()"
+                    (click)="cancelDelete()"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    class="tag-manager__confirm-delete"
+                    [disabled]="saving()"
+                    (click)="confirmDelete(tag)"
+                  >
+                    Delete
+                  </button>
                 </div>
               } @else {
                 <div class="tag-manager__row-actions">
-                  <button type="button" aria-label="Edit tag" [disabled]="saving()" (click)="edit(tag)"><i class="pi pi-pencil"></i></button>
-                  <button type="button" aria-label="Delete tag" [disabled]="saving()" (click)="requestDelete(tag)"><i class="pi pi-trash"></i></button>
+                  <button
+                    type="button"
+                    aria-label="Edit tag"
+                    [disabled]="saving()"
+                    (click)="edit(tag)"
+                  >
+                    <i class="icon icon-pencil"></i>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Delete tag"
+                    [disabled]="saving()"
+                    (click)="requestDelete(tag)"
+                  >
+                    <i class="icon icon-trash"></i>
+                  </button>
                 </div>
               }
             </div>
@@ -132,4 +186,4 @@
       }
     </section>
   </div>
-</p-dialog>
+</app-dialog>

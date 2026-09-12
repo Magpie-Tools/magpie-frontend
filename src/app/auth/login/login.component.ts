@@ -1,12 +1,11 @@
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
 import {getHttpErrorMessage} from '../../shared/http-error';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, model, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
 
 import { User } from '../../models/UserModel';
 import { HttpService } from '../../services/http.service';
@@ -21,13 +20,11 @@ import {AuthComponent} from '../auth.component';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
+  imports: [HlmButton, HlmInput, HlmCheckbox,
     ReactiveFormsModule,
     FormsModule,
     RouterLink,
-    InputTextModule,
-    ButtonModule,
-    CheckboxModule,
+
     LoadingComponent,
     AuthComponent,
   ],

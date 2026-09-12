@@ -1,11 +1,10 @@
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmInput} from '@spartan-ng/helm/input';
 import {getHttpErrorMessage} from '../../shared/http-error';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
 
 import { HttpService } from '../../services/http.service';
 import { NotificationService } from '../../services/notification-service.service';
@@ -14,11 +13,10 @@ import {AuthComponent} from '../auth.component';
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [
+  imports: [HlmButton, HlmInput,
     ReactiveFormsModule,
     RouterLink,
-    InputTextModule,
-    ButtonModule,
+
     AuthComponent,
   ],
   templateUrl: './forgot-password.component.html'

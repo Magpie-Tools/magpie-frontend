@@ -2,17 +2,25 @@
   <main class="settings-stage">
     <header class="admin-context">
       <div class="admin-context__copy">
-        <span class="context-icon"><i class="pi pi-th-large" aria-hidden="true"></i></span>
+        <span class="context-icon"
+          ><i class="icon icon-layout-grid" aria-hidden="true"></i
+        ></span>
         <div>
           <h1>Plugins</h1>
-          <p>Add trusted data sources to proxy enrichment and reputation scoring.</p>
+          <p>
+            Add trusted data sources to proxy enrichment and reputation scoring.
+          </p>
         </div>
       </div>
 
       <div class="plugin-summary" aria-label="Plugin summary">
-        <span><strong>{{ enabledPluginCount }}</strong> enabled</span>
+        <span
+          ><strong>{{ enabledPluginCount }}</strong> enabled</span
+        >
         <span class="summary-divider" aria-hidden="true"></span>
-        <span><strong>{{ configuredPluginCount }}</strong> configured</span>
+        <span
+          ><strong>{{ configuredPluginCount }}</strong> configured</span
+        >
       </div>
     </header>
 
@@ -22,15 +30,23 @@
           class="plugin-card"
           [class.is-disabled]="!isPluginEnabled(plugin.id)"
           [class.needs-attention]="isPluginIncomplete(plugin.id)"
-          [pTooltip]="getPluginIncompleteReason(plugin.id) ?? undefined"
-          tooltipPosition="top">
+          [hlmTooltip]="getPluginIncompleteReason(plugin.id) ?? ''"
+        >
           <div class="plugin-card__topline">
             <span class="plugin-logo-shell">
-              <img [src]="plugin.logo" [alt]="plugin.provider + ' logo'" class="plugin-logo"/>
+              <img
+                [src]="plugin.logo"
+                [alt]="plugin.provider + ' logo'"
+                class="plugin-logo"
+              />
             </span>
 
             <div class="plugin-state">
-              <span class="state-dot" [class.is-live]="isPluginEnabled(plugin.id)" aria-hidden="true"></span>
+              <span
+                class="state-dot"
+                [class.is-live]="isPluginEnabled(plugin.id)"
+                aria-hidden="true"
+              ></span>
               @if (isPluginTogglePending(plugin.id)) {
                 Updating
               } @else if (isPluginEnabled(plugin.id)) {
@@ -49,45 +65,66 @@
 
           <div class="capability-list" aria-label="Plugin capabilities">
             @for (capability of plugin.capabilities; track capability) {
-              <span><i class="pi pi-check" aria-hidden="true"></i>{{ capability }}</span>
+              <span
+                ><i class="icon icon-check" aria-hidden="true"></i
+                >{{ capability }}</span
+              >
             }
           </div>
 
           @if (getPluginIncompleteReason(plugin.id); as incompleteReason) {
             <div class="attention-note">
-              <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+              <i class="icon icon-circle-alert" aria-hidden="true"></i>
               <span>{{ incompleteReason }}</span>
             </div>
           } @else {
             <div class="configuration-state">
-              <i [class]="isPluginConfigured(plugin.id) ? 'pi pi-lock' : 'pi pi-key'" aria-hidden="true"></i>
-              {{ isPluginConfigured(plugin.id) ? 'Credentials configured' : 'Credentials not configured' }}
+              <i
+                [class]="
+                  isPluginConfigured(plugin.id)
+                    ? 'icon icon-lock'
+                    : 'icon icon-key'
+                "
+                aria-hidden="true"
+              ></i>
+              {{
+                isPluginConfigured(plugin.id)
+                  ? "Credentials configured"
+                  : "Credentials not configured"
+              }}
             </div>
           }
 
           <footer class="plugin-card__footer">
-            <a class="configure-link" [routerLink]="plugin.route" [attr.aria-label]="'Configure ' + plugin.name">
+            <a
+              class="configure-link"
+              [routerLink]="plugin.route"
+              [attr.aria-label]="'Configure ' + plugin.name"
+            >
               Configure plugin
-              <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+              <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
             </a>
 
             <label class="plugin-toggle-label" [for]="plugin.id + '-enabled'">
               <span>Use plugin</span>
-              <p-toggleswitch
+              <hlm-switch
                 [inputId]="plugin.id + '-enabled'"
-                styleClass="plugin-switch-control"
                 [ngModel]="isPluginEnabled(plugin.id)"
-                [ngModelOptions]="{standalone: true}"
+                [ngModelOptions]="{ standalone: true }"
                 [disabled]="!settings() || isPluginTogglePending(plugin.id)"
-                [ariaLabel]="'Toggle ' + plugin.name"
-                (onChange)="togglePlugin(plugin.id, $event)">
-              </p-toggleswitch>
+                [aria-label]="'Toggle ' + plugin.name"
+                class="plugin-switch-control"
+                (checkedChange)="togglePlugin(plugin.id, $event)"
+              />
             </label>
           </footer>
         </article>
       }
     </section>
 
-    <p class="instant-note"><i class="pi pi-bolt" aria-hidden="true"></i>Plugin switches apply immediately. Open a plugin to manage its credentials and operating policy.</p>
+    <p class="instant-note">
+      <i class="icon icon-bolt" aria-hidden="true"></i>Plugin switches apply
+      immediately. Open a plugin to manage its credentials and operating policy.
+    </p>
   </main>
 </div>

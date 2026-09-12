@@ -54,7 +54,7 @@ app-admin-settings-save-dock {
     gap: 0.6rem;
   }
 
-  .save-button.p-button {
+  .save-button[hlmBtn] {
     border-color: rgba(var(--theme-primary-300-rgb), 0.44);
     background: linear-gradient(135deg, var(--theme-primary-600), var(--theme-primary-800));
     color: #fff;
@@ -67,7 +67,7 @@ app-admin-settings-save-dock {
     }
   }
 
-  .save-button.p-button {
+  .save-button[hlmBtn] {
     min-height: 2.7rem;
     padding: 0.72rem 1rem;
     border-radius: 0.8rem;
@@ -80,7 +80,7 @@ app-admin-settings-save-dock {
 @container (max-width: 560px) {
   app-admin-settings-save-dock {
     .save-dock { align-items: stretch; flex-direction: column; }
-    .save-actions, .save-actions > *, .save-button.p-button { width: 100%; justify-content: center; }
+    .save-actions, .save-actions > *, .save-button[hlmBtn] { width: 100%; justify-content: center; }
   }
 }
 
@@ -88,17 +88,17 @@ app-admin-settings-save-dock {
   app-admin-settings-shell app-admin-settings-save-dock {
     .save-dock { align-items: stretch; flex-direction: column; }
     .save-actions { width: auto; justify-content: flex-end; }
-    .save-actions > *, .save-button.p-button { width: auto; }
+    .save-actions > *, .save-button[hlmBtn] { width: auto; }
   }
 }
 
 @container (max-width: 520px) {
   app-admin-settings-shell app-admin-settings-save-dock {
     .save-actions { width: 100%; flex-direction: column; }
-    .save-actions > *, .save-button.p-button { width: 100%; justify-content: center; }
+    .save-actions > *, .save-button[hlmBtn] { width: 100%; justify-content: center; }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  app-admin-settings-save-dock .save-button.p-button { transition: none; }
+  app-admin-settings-save-dock .save-button[hlmBtn] { transition: none; }
 }

@@ -1,4 +1,4 @@
-.p-select-overlay {
+.app-select-overlay {
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-radius: 0.9rem !important;
   background: rgba(12, 12, 14, 0.98) !important;
@@ -6,25 +6,25 @@
   backdrop-filter: blur(16px);
 }
 
-.p-select-overlay .p-select-option {
+.app-select-overlay hlm-select-item {
   margin: 0.25rem;
   border-radius: 0.65rem;
   color: rgba(255, 255, 255, 0.72);
   font-size: 0.8rem;
 }
 
-.p-select-overlay .p-select-option.p-select-option-selected {
+.app-select-overlay hlm-select-item[data-selected] {
   background: rgba(var(--theme-primary-500-rgb), 0.2);
   color: var(--theme-primary-200);
 }
 
-.p-select-overlay .transport-option {
+.app-select-overlay .transport-option {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.p-select-overlay .transport-chip {
+.app-select-overlay .transport-chip {
   padding: 0.12rem 0.42rem;
   border: 1px solid rgba(var(--theme-primary-300-rgb), 0.25);
   border-radius: 999px;
@@ -126,7 +126,7 @@
     flex-direction: column;
   }
 
-  .checker-settings-page .settings-stage .save-settings-button.p-button {
+  .checker-settings-page .settings-stage .save-settings-button[hlmBtn] {
     width: 100%;
     justify-content: center;
   }

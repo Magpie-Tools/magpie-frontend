@@ -1,21 +1,31 @@
-<div class="filter-panel" [ngClass]="{'filter-panel--floating': floating}">
+<div class="filter-panel" [ngClass]="{ 'filter-panel--floating': floating }">
   @if (showHeader) {
     <div class="filter-panel__header">
       <div>
         <div class="filter-panel__title">Filters</div>
-        <div class="filter-panel__subtitle">Narrow sources by protocol and source proxy counts.</div>
+        <div class="filter-panel__subtitle">
+          Narrow sources by protocol and source proxy counts.
+        </div>
       </div>
       <div class="filter-panel__actions">
-        <p-button
-          label="Clear"
-          styleClass="p-button-text p-button-sm"
-          (onClick)="clear.emit()"
-        ></p-button>
-        <p-button
-          label="Apply"
-          styleClass="p-button-success p-button-sm"
-          (onClick)="apply.emit()"
-        ></p-button>
+        <button
+          class="ui-button-text ui-button-sm"
+          (click)="clear.emit()"
+          hlmBtn
+          type="button"
+          variant="ghost"
+        >
+          Clear
+        </button>
+        <button
+          class="ui-button-success ui-button-sm"
+          (click)="apply.emit()"
+          hlmBtn
+          type="button"
+          variant="default"
+        >
+          Apply
+        </button>
       </div>
     </div>
 
@@ -27,22 +37,24 @@
       <div class="filter-section__title">Protocol</div>
       <div class="filter-protocol-stack">
         <div class="filter-checkbox-row">
-          <p-checkbox
+          <hlm-checkbox
             inputId="sourceFilterHttp"
             formControlName="http"
-            [binary]="true"
             class="filter-checkbox"
-          ></p-checkbox>
-          <label for="sourceFilterHttp" class="filter-checkbox-label">HTTP</label>
+          />
+          <label for="sourceFilterHttp" class="filter-checkbox-label"
+            >HTTP</label
+          >
         </div>
         <div class="filter-checkbox-row">
-          <p-checkbox
+          <hlm-checkbox
             inputId="sourceFilterHttps"
             formControlName="https"
-            [binary]="true"
             class="filter-checkbox"
-          ></p-checkbox>
-          <label for="sourceFilterHttps" class="filter-checkbox-label">HTTPS</label>
+          />
+          <label for="sourceFilterHttps" class="filter-checkbox-label"
+            >HTTPS</label
+          >
         </div>
       </div>
     </div>
@@ -53,49 +65,47 @@
       <div class="filter-section__title">Source Counts</div>
       <div class="filter-count-stack">
         <div class="filter-count-row">
-          <label for="sourceFilterProxyCount" class="filter-count-label">Proxy Count</label>
-          <p-select
-            id="sourceFilterProxyCountOperator"
+          <label for="sourceFilterProxyCount" class="filter-count-label"
+            >Proxy Count</label
+          >
+          <app-select
             formControlName="proxyCountOperator"
             [options]="countOperatorOptions"
             optionLabel="label"
             optionValue="value"
             class="filter-operator-select"
-            panelStyleClass="scrape-source-filter-panel__overlay bg-gray-800 text-white"
-            [appendTo]="'body'"
-          ></p-select>
-          <p-inputNumber
+            inputId="sourceFilterProxyCountOperator"
+          ></app-select>
+          <input
+            hlmInput
+            type="number"
             id="sourceFilterProxyCount"
             formControlName="proxyCount"
-            mode="decimal"
-            [showButtons]="true"
             [min]="0"
-            class="filter-count-input"
-            inputStyleClass="w-full bg-gray-800 text-white border-gray-700 theme-focus"
-          ></p-inputNumber>
+            class="filter-count-input w-full bg-gray-800 text-white border-gray-700 theme-focus"
+          />
         </div>
 
         <div class="filter-count-row">
-          <label for="sourceFilterAliveCount" class="filter-count-label">Alive Proxy Count</label>
-          <p-select
-            id="sourceFilterAliveCountOperator"
+          <label for="sourceFilterAliveCount" class="filter-count-label"
+            >Alive Proxy Count</label
+          >
+          <app-select
             formControlName="aliveCountOperator"
             [options]="countOperatorOptions"
             optionLabel="label"
             optionValue="value"
             class="filter-operator-select"
-            panelStyleClass="scrape-source-filter-panel__overlay bg-gray-800 text-white"
-            [appendTo]="'body'"
-          ></p-select>
-          <p-inputNumber
+            inputId="sourceFilterAliveCountOperator"
+          ></app-select>
+          <input
+            hlmInput
+            type="number"
             id="sourceFilterAliveCount"
             formControlName="aliveCount"
-            mode="decimal"
-            [showButtons]="true"
             [min]="0"
-            class="filter-count-input"
-            inputStyleClass="w-full bg-gray-800 text-white border-gray-700 theme-focus"
-          ></p-inputNumber>
+            class="filter-count-input w-full bg-gray-800 text-white border-gray-700 theme-focus"
+          />
         </div>
       </div>
     </div>

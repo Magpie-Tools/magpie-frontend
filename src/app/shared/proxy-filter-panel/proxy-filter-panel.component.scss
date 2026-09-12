@@ -260,54 +260,54 @@
     align-items: center;
   }
 
-  .filter-checkbox .p-checkbox {
+  .filter-checkbox hlm-checkbox {
     display: inline-flex;
     align-items: center;
     width: 0.95rem;
     height: 0.95rem;
   }
 
-  .filter-checkbox .p-checkbox-box {
+  .filter-checkbox brn-checkbox {
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
-  .filter-checkbox .p-checkbox-box {
+  .filter-checkbox brn-checkbox {
     width: 0.95rem;
     height: 0.95rem;
     border-radius: 0.25rem;
     border-color: rgba(148, 163, 184, 0.4);
   }
 
-  .filter-checkbox .p-checkbox-icon {
+  .filter-checkbox brn-checkbox ng-icon {
     font-size: 0.6rem;
   }
 
-  .filter-panel__actions .p-button {
+  .filter-panel__actions [hlmBtn] {
     padding: 0.35rem 0.7rem;
     font-size: 0.75rem;
   }
 
-  .filter-panel__actions .p-button.p-button-success {
+  .filter-panel__actions [hlmBtn].ui-button-success {
     background: var(--theme-primary-500);
     border-color: var(--theme-primary-500);
     color: var(--theme-primary-contrast);
   }
 
-  .filter-panel__actions .p-button.p-button-success:hover {
+  .filter-panel__actions [hlmBtn].ui-button-success:hover {
     background: var(--theme-primary-600);
     border-color: var(--theme-primary-600);
   }
 
-  .filter-panel__actions .p-button.p-button-success:active {
+  .filter-panel__actions [hlmBtn].ui-button-success:active {
     background: var(--theme-primary-700);
     border-color: var(--theme-primary-700);
   }
 
-  .p-inputtext,
-  .p-select,
-  .p-multiselect {
+  [hlmInput],
+  [data-slot="select-trigger"],
+  [data-slot="select-trigger"] {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(148, 163, 184, 0.25);
     color: #e2e8f0;
@@ -315,23 +315,22 @@
     min-height: 2.25rem;
   }
 
-  .p-inputtext:focus,
-  .p-select.p-focus,
-  .p-multiselect.p-focus,
-  .p-inputnumber:focus-within {
+  [hlmInput]:focus,
+  [data-slot="select-trigger"]:focus-within,
+  input[type="number"]:focus-within {
     border-color: #1cbb57;
     box-shadow: 0 0 0 2px rgba(28, 187, 87, 0.18);
   }
 
-  .p-select-label,
-  .p-multiselect-label,
-  .p-inputtext {
+  [data-slot="select-trigger"] > span,
+  [data-slot="select-trigger"] > span,
+  [hlmInput] {
     padding: 0.35rem 0.6rem;
     font-size: 0.82rem;
   }
 
-  .p-select-label,
-  .p-multiselect-label {
+  [data-slot="select-trigger"] > span,
+  [data-slot="select-trigger"] > span {
     display: flex;
     align-items: center;
     min-height: 2.25rem;
@@ -340,8 +339,8 @@
     padding-bottom: 0;
   }
 
-  .p-inputtext,
-  .p-inputnumber .p-inputtext {
+  [hlmInput],
+  input[type="number"] [hlmInput] {
     min-height: 2.25rem;
     height: 2.25rem;
     line-height: calc(2.25rem - 2px);
@@ -349,28 +348,13 @@
     padding-bottom: 0;
   }
 
-  .p-inputnumber .p-inputtext {
+  input[type="number"] [hlmInput] {
     padding-right: 0.6rem;
   }
 
-  .p-inputnumber {
+  input[type="number"] {
     border-radius: 0.5rem;
     overflow: hidden;
-  }
-
-  .p-multiselect-token {
-    border-radius: 999px;
-    padding: 0.1rem 0.45rem;
-    font-size: 0.68rem;
-    font-weight: 600;
-    border: 1px solid rgba(148, 163, 184, 0.35);
-    background: rgba(148, 163, 184, 0.16);
-    color: rgba(226, 232, 240, 0.9);
-  }
-
-  .p-inputnumber-button {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(148, 163, 184, 0.25);
   }
 }
 

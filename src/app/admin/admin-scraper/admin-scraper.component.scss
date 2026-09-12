@@ -90,7 +90,7 @@
     box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13);
   }
 
-  p-inputnumber { flex: 1 1 auto; min-width: 0; }
+  input[type="number"] { flex: 1 1 auto; min-width: 0; }
   > span { flex: 0 0 auto; padding: 0 0.75rem; color: rgba(255, 255, 255, 0.37); font-size: 0.62rem; }
 }
 
@@ -357,7 +357,7 @@
   .timer-grid { grid-template-columns: minmax(0, 1fr); }
   .field-group--wide { grid-column: auto; }
   .decision-row { grid-template-columns: auto minmax(0, 1fr); }
-  .decision-row p-checkbox { grid-column: 2; justify-self: start; }
+  .decision-row hlm-checkbox { grid-column: 2; justify-self: start; }
   .process-rail > i { display: none; }
   .scrape-site-row { grid-template-columns: minmax(0, 1fr) auto; }
   .source-index { display: none; }

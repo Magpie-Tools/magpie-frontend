@@ -3,7 +3,9 @@
 <div class="import-dialog-grid">
   <section class="import-source" aria-labelledby="import-input-title">
     <div class="section-heading">
-      <span class="section-icon"><i class="pi pi-align-left" aria-hidden="true"></i></span>
+      <span class="section-icon"
+        ><i class="icon icon-align-left" aria-hidden="true"></i
+      ></span>
       <div>
         <h3 id="import-input-title">{{ inputTitle }}</h3>
         <p>{{ inputDescription }}</p>
@@ -12,34 +14,55 @@
 
     <div class="source-actions">
       <div class="source-action">
-        <p-button
+        <button
           type="button"
-          label="Paste from clipboard"
-          icon="pi pi-clipboard"
-          styleClass="source-button"
           [disabled]="clipboardPresent"
-          (onClick)="pasteRequested.emit()"
-        ></p-button>
+          class="source-button"
+          (click)="pasteRequested.emit()"
+          hlmBtn
+          variant="default"
+        >
+          <i class="icon icon-clipboard" aria-hidden="true"></i>Paste from
+          clipboard
+        </button>
         @if (clipboardPresent) {
-          <button type="button" class="source-clear" aria-label="Clear clipboard data" (click)="clipboardClearRequested.emit()">
-            <i class="pi pi-times" aria-hidden="true"></i>
+          <button
+            type="button"
+            class="source-clear"
+            aria-label="Clear clipboard data"
+            (click)="clipboardClearRequested.emit()"
+          >
+            <i class="icon icon-x" aria-hidden="true"></i>
           </button>
         }
       </div>
 
       <div class="source-action">
-        <p-button
+        <button
           type="button"
-          label="Import from file"
-          icon="pi pi-file-import"
-          styleClass="source-button"
           [disabled]="filePresent"
-          (onClick)="fileInput.click()"
-        ></p-button>
-        <input type="file" #fileInput [accept]="fileAccept" (change)="fileSelected.emit($event)">
+          class="source-button"
+          (click)="fileInput.click()"
+          hlmBtn
+          variant="default"
+        >
+          <i class="icon icon-file-input" aria-hidden="true"></i>Import from
+          file
+        </button>
+        <input
+          type="file"
+          #fileInput
+          [accept]="fileAccept"
+          (change)="fileSelected.emit($event)"
+        />
         @if (filePresent) {
-          <button type="button" class="source-clear" aria-label="Clear imported file" (click)="fileClearRequested.emit()">
-            <i class="pi pi-times" aria-hidden="true"></i>
+          <button
+            type="button"
+            class="source-clear"
+            aria-label="Clear imported file"
+            (click)="fileClearRequested.emit()"
+          >
+            <i class="icon icon-x" aria-hidden="true"></i>
           </button>
         }
       </div>

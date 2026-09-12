@@ -1,7 +1,7 @@
+import {HlmButton} from '@spartan-ng/helm/button';
 import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {ButtonModule} from 'primeng/button';
 
 export interface ColumnPickerItem {
   id: string;
@@ -13,7 +13,7 @@ export interface ColumnPickerItem {
 @Component({
   selector: 'app-column-picker-panel',
   standalone: true,
-  imports: [FormsModule, ButtonModule, DragDropModule],
+  imports: [HlmButton, FormsModule, DragDropModule],
   templateUrl: './column-picker-panel.component.html',
   styleUrl: './column-picker-panel.component.scss'
 })

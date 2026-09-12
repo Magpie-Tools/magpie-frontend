@@ -11,40 +11,46 @@
     <app-star-background></app-star-background>
 
     <div class="popup-status-icon">
-      @if (status === 'processing') {
-        <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-      } @else if (status === 'success') {
-        <i class="pi pi-check" aria-hidden="true"></i>
+      @if (status === "processing") {
+        <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
+      } @else if (status === "success") {
+        <i class="icon icon-check" aria-hidden="true"></i>
       } @else {
-        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <i class="icon icon-triangle-alert" aria-hidden="true"></i>
       }
     </div>
 
-    @if (status === 'processing') {
+    @if (status === "processing") {
       <span class="popup-eyebrow">Adding routes</span>
       <h2>Processing your import</h2>
-      <div [@textAnimation]="textState" class="message">{{ currentMessage }}</div>
+      <div [@textAnimation]="textState" class="message">
+        {{ currentMessage }}
+      </div>
       <div class="progress-track" aria-hidden="true"><span></span></div>
     }
 
-    @if (status === 'success') {
+    @if (status === "success") {
       <span class="popup-eyebrow">Import complete</span>
       <h2>{{ count }} {{ item }} added</h2>
       <p>The new routes are queued and ready for checking.</p>
     }
 
-    @if (status === 'error') {
+    @if (status === "error") {
       <span class="popup-eyebrow">Import stopped</span>
       <h2>Could not add {{ item }}</h2>
       <p>Review the error notification, then update the input and try again.</p>
     }
 
-    @if (status !== 'processing') {
+    @if (status !== "processing") {
       <div class="action-buttons">
-        @if (status === 'success' && showDetailsButton) {
-          <button class="details-button" type="button" (click)="onDetails()">View details</button>
+        @if (status === "success" && showDetailsButton) {
+          <button class="details-button" type="button" (click)="onDetails()">
+            View details
+          </button>
         }
-        <button class="close-button" type="button" (click)="onClose()">Close</button>
+        <button class="close-button" type="button" (click)="onClose()">
+          Close
+        </button>
       </div>
     }
   </section>

@@ -8,24 +8,24 @@
     margin-top: 1.2rem;
   }
 
-  .inventory-table .p-datatable {
+  .inventory-table .data-table {
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 0.95rem;
     background: rgba(3, 3, 5, 0.24);
   }
 
-  .inventory-table .p-datatable-table-container,
-  .inventory-table .p-datatable-wrapper {
+  .inventory-table .table-scroll,
+  .inventory-table .table-scroll {
     overflow-x: auto;
     border-radius: 0;
   }
 
-  .inventory-table .p-datatable-table {
+  .inventory-table table {
     border-radius: 0;
   }
 
-  .inventory-table .p-datatable-thead > tr > th {
+  .inventory-table thead > tr > th {
     padding: 0.72rem 0.78rem;
     border-color: rgba(255, 255, 255, 0.09);
     background: rgba(255, 255, 255, 0.035);
@@ -35,19 +35,19 @@
     white-space: nowrap;
   }
 
-  .inventory-table .p-datatable-thead > tr > th:hover,
-  .inventory-table .p-datatable-thead > tr > th.p-datatable-column-sorted {
+  .inventory-table thead > tr > th:hover,
+  .inventory-table thead > tr > th:is([aria-sort="ascending"], [aria-sort="descending"]) {
     color: var(--theme-primary-200);
   }
 
-  .inventory-table .p-datatable-sort-icon {
+  .inventory-table .table-sort span {
     width: 0.62rem;
     height: 0.62rem;
     margin-inline-start: 0.16rem;
     opacity: 0.72;
   }
 
-  .inventory-table .p-datatable-tbody > tr > td {
+  .inventory-table tbody > tr > td {
     padding: 0.68rem 0.78rem;
     border-color: rgba(255, 255, 255, 0.065);
     background: rgba(7, 7, 9, 0.64);
@@ -55,16 +55,16 @@
     font-size: 0.68rem;
   }
 
-  .inventory-table .p-datatable-tbody > tr:not(.p-highlight):hover > td {
+  .inventory-table tbody > tr:not([data-state="selected"]):hover > td {
     background: rgba(var(--theme-primary-500-rgb), 0.045);
   }
 
-  .inventory-table .p-datatable-tbody > tr.p-highlight > td {
+  .inventory-table tbody > tr[data-state="selected"] > td {
     background: rgba(var(--theme-primary-500-rgb), 0.085);
     color: rgba(255, 255, 255, 0.82);
   }
 
-  .inventory-table .p-paginator {
+  .inventory-table .table-pagination {
     gap: 0.22rem;
     padding: 0.62rem 0.72rem;
     border: 0;
@@ -75,35 +75,19 @@
     font-size: 0.65rem;
   }
 
-  .inventory-table .p-paginator-page,
-  .inventory-table .p-paginator-first,
-  .inventory-table .p-paginator-prev,
-  .inventory-table .p-paginator-next,
-  .inventory-table .p-paginator-last {
-    min-width: 2rem;
-    height: 2rem;
-    border-radius: 0.55rem;
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  .inventory-table .p-paginator-page.p-paginator-page-selected {
-    background: rgba(var(--theme-primary-500-rgb), 0.14);
-    color: var(--theme-primary-200);
-  }
-
-  .inventory-table .p-select {
+  .inventory-table [data-slot="select-trigger"] {
     min-height: 2rem;
     border-color: rgba(255, 255, 255, 0.1);
     border-radius: 0.58rem;
     background: rgba(255, 255, 255, 0.035);
   }
 
-  .inventory-table .p-checkbox-box {
+  .inventory-table brn-checkbox {
     border-color: rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.035);
   }
 
-  .inventory-table .p-checkbox-checked .p-checkbox-box {
+  .inventory-table [data-checked] brn-checkbox {
     border-color: var(--theme-primary-400);
     background: var(--theme-primary-600);
   }

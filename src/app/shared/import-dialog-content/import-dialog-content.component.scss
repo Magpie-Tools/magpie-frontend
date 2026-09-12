@@ -77,7 +77,7 @@ input[type="file"] {
   min-width: 0;
   gap: 0.35rem;
 
-  p-button {
+  button[hlmBtn] {
     min-width: 0;
     flex: 1;
   }
@@ -241,7 +241,7 @@ input[type="file"] {
     dd { color: rgba(255, 255, 255, 0.76); font-weight: 600; }
   }
 
-  .source-button.p-button {
+  .source-button[hlmBtn] {
     width: 100%;
     min-height: 2.5rem;
     justify-content: flex-start;
@@ -253,7 +253,7 @@ input[type="file"] {
     box-shadow: none;
   }
 
-  .source-button.p-button:hover:not(:disabled) {
+  .source-button[hlmBtn]:hover:not(:disabled) {
     border-color: rgba(var(--theme-primary-300-rgb), 0.28);
     background: rgba(var(--theme-primary-500-rgb), 0.07);
     color: rgba(255, 255, 255, 0.9);

@@ -2,8 +2,12 @@
   <section class="detail-stage">
     <header class="detail-context">
       <div class="detail-context__copy">
-        <a routerLink="/scraper" class="back-button" aria-label="Back to scrape sources">
-          <i class="pi pi-arrow-left" aria-hidden="true"></i>
+        <a
+          routerLink="/scraper"
+          class="back-button"
+          aria-label="Back to scrape sources"
+        >
+          <i class="icon icon-arrow-left" aria-hidden="true"></i>
         </a>
 
         <div class="source-identity">
@@ -25,18 +29,22 @@
                 title="Copy source URL"
                 aria-label="Copy source URL"
               >
-                <i class="pi pi-copy" aria-hidden="true"></i>
+                <i class="icon icon-copy" aria-hidden="true"></i>
               </button>
             </div>
           } @else {
-            <h1>{{ isLoading() ? 'Loading source' : 'Source unavailable' }}</h1>
+            <h1>{{ isLoading() ? "Loading source" : "Source unavailable" }}</h1>
           }
         </div>
       </div>
 
       <div class="detail-context__actions">
         <div class="context-state" [ngClass]="healthPillClass">
-          <span class="status-dot" [ngClass]="healthDotClass" aria-hidden="true"></span>
+          <span
+            class="status-dot"
+            [ngClass]="healthDotClass"
+            aria-hidden="true"
+          ></span>
           <span>
             <small>Source health</small>
             <strong>{{ healthLabel }}</strong>
@@ -46,19 +54,28 @@
     </header>
 
     <div class="detail-grid">
-      <section class="detail-card source-overview" aria-labelledby="source-overview-title">
+      <section
+        class="detail-card source-overview"
+        aria-labelledby="source-overview-title"
+      >
         @if (isLoading()) {
           <div class="card-loading"><app-loading></app-loading></div>
         } @else {
           <div class="card-heading">
-            <span class="card-icon"><i class="pi pi-globe" aria-hidden="true"></i></span>
+            <span class="card-icon"
+              ><i class="icon icon-globe" aria-hidden="true"></i
+            ></span>
             <div class="card-heading__copy">
               <h1 id="source-overview-title">Source overview</h1>
-              <p>Collection totals and the most recent scraper activity for this URL.</p>
+              <p>
+                Collection totals and the most recent scraper activity for this
+                URL.
+              </p>
             </div>
           </div>
 
-          <app-source-fetch-mode class="source-fetch-settings"
+          <app-source-fetch-mode
+            class="source-fetch-settings"
             inputId="source-javascript"
             [enabled]="detail()?.fetch_mode === 'browser'"
             [disabled]="!workspaces.canOperate()"
@@ -72,7 +89,9 @@
             </div>
             <div class="detail-item detail-item--right">
               <span class="label">Alive ratio</span>
-              <strong class="value value--metric">{{ aliveRatioDisplay }}</strong>
+              <strong class="value value--metric">{{
+                aliveRatioDisplay
+              }}</strong>
             </div>
             <div class="detail-item">
               <span class="label">Average reputation</span>
@@ -91,31 +110,53 @@
             <div class="detail-item">
               <span class="label">Last proxy added</span>
               <span class="value">
-                {{ detail()?.last_proxy_added_at ? (detail()?.last_proxy_added_at | date : 'short') : 'Never' }}
+                {{
+                  detail()?.last_proxy_added_at
+                    ? (detail()?.last_proxy_added_at | date: "short")
+                    : "Never"
+                }}
               </span>
             </div>
             <div class="detail-item detail-item--right">
               <span class="label">Last proxy check</span>
               <span class="value">
-                {{ detail()?.last_checked_at ? (detail()?.last_checked_at | date : 'short') : 'Never' }}
+                {{
+                  detail()?.last_checked_at
+                    ? (detail()?.last_checked_at | date: "short")
+                    : "Never"
+                }}
               </span>
             </div>
             <div class="detail-item">
               <span class="label">Last scrape</span>
-              <span class="value">{{ detail()?.last_scraped_at ? (detail()?.last_scraped_at | date : 'short') : 'Never' }}</span>
+              <span class="value">{{
+                detail()?.last_scraped_at
+                  ? (detail()?.last_scraped_at | date: "short")
+                  : "Never"
+              }}</span>
             </div>
             <div class="detail-item detail-item--right">
               <span class="label">Scrape result</span>
-              <app-source-scrape-status class="source-scrape-status" role="status" [status]="detail()?.last_scrape_status" />
+              <app-source-scrape-status
+                class="source-scrape-status"
+                role="status"
+                [status]="detail()?.last_scrape_status"
+              />
             </div>
           </div>
           @if (detail()?.last_scrape_error) {
-            <p class="scrape-error"><i class="pi pi-info-circle" aria-hidden="true"></i><span>{{ detail()?.last_scrape_error }}</span></p>
+            <p class="scrape-error">
+              <i class="icon icon-info" aria-hidden="true"></i
+              ><span>{{ detail()?.last_scrape_error }}</span>
+            </p>
           }
         }
       </section>
 
-      <aside class="detail-card source-insights" aria-label="Source health and reputation">
+      <aside
+        class="detail-card source-insights"
+        aria-label="Source health and reputation"
+      >
         <section class="health-summary" aria-labelledby="health-summary-title">
           <div class="insight-heading">
             <div>
@@ -159,7 +200,10 @@
           </div>
         </section>
 
-        <section class="reputation-summary" aria-labelledby="reputation-summary-title">
+        <section
+          class="reputation-summary"
+          aria-labelledby="reputation-summary-title"
+        >
           <div class="reputation-summary__heading">
             <span>
               <small id="reputation-summary-title">Reputation</small>
@@ -182,28 +226,40 @@
               <div class="reputation-row">
                 <span>Good</span>
                 <span class="reputation-meter">
-                  <span class="progress-bar__fill--good" [style.width.%]="reputationPercent('good')"></span>
+                  <span
+                    class="progress-bar__fill--good"
+                    [style.width.%]="reputationPercent('good')"
+                  ></span>
                 </span>
                 <strong>{{ reputationBreakdown.good }}</strong>
               </div>
               <div class="reputation-row">
                 <span>Neutral</span>
                 <span class="reputation-meter">
-                  <span class="progress-bar__fill--neutral" [style.width.%]="reputationPercent('neutral')"></span>
+                  <span
+                    class="progress-bar__fill--neutral"
+                    [style.width.%]="reputationPercent('neutral')"
+                  ></span>
                 </span>
                 <strong>{{ reputationBreakdown.neutral }}</strong>
               </div>
               <div class="reputation-row">
                 <span>Poor</span>
                 <span class="reputation-meter">
-                  <span class="progress-bar__fill--poor" [style.width.%]="reputationPercent('poor')"></span>
+                  <span
+                    class="progress-bar__fill--poor"
+                    [style.width.%]="reputationPercent('poor')"
+                  ></span>
                 </span>
                 <strong>{{ reputationBreakdown.poor }}</strong>
               </div>
               <div class="reputation-row">
                 <span>Unknown</span>
                 <span class="reputation-meter">
-                  <span class="progress-bar__fill--unknown" [style.width.%]="reputationPercent('unknown')"></span>
+                  <span
+                    class="progress-bar__fill--unknown"
+                    [style.width.%]="reputationPercent('unknown')"
+                  ></span>
                 </span>
                 <strong>{{ reputationBreakdown.unknown }}</strong>
               </div>
@@ -212,14 +268,22 @@
         </section>
       </aside>
 
-      <section class="detail-card proxy-registry" aria-labelledby="proxy-registry-title">
+      <section
+        class="detail-card proxy-registry"
+        aria-labelledby="proxy-registry-title"
+      >
         <div class="actions-wrapper">
           <div class="registry-heading">
             <div class="card-heading">
-              <span class="card-icon"><i class="pi pi-list" aria-hidden="true"></i></span>
+              <span class="card-icon"
+                ><i class="icon icon-list" aria-hidden="true"></i
+              ></span>
               <div class="card-heading__copy">
                 <h2 id="proxy-registry-title">Proxies from this source</h2>
-                <p>Inspect routes, change visible columns, or narrow this source's results.</p>
+                <p>
+                  Inspect routes, change visible columns, or narrow this
+                  source's results.
+                </p>
               </div>
             </div>
 
@@ -235,7 +299,7 @@
 
           <div class="registry-tools" aria-label="Proxy registry tools">
             <div class="search-bar">
-              <i class="pi pi-search" aria-hidden="true"></i>
+              <i class="icon icon-search" aria-hidden="true"></i>
               <input
                 #proxySearchInput
                 type="search"
@@ -252,7 +316,7 @@
                   aria-label="Clear proxy search"
                   (click)="onProxySearchTermChange('')"
                 >
-                  <i class="pi pi-times" aria-hidden="true"></i>
+                  <i class="icon icon-x" aria-hidden="true"></i>
                 </button>
               }
               <span class="search-scope">This source only</span>
@@ -260,8 +324,12 @@
 
             <div class="tool-actions">
               @if (workspaces.canOperate()) {
-                <button type="button" class="tool-button" (click)="sourceTagManager.open()">
-                  <i class="pi pi-tags" aria-hidden="true"></i>
+                <button
+                  type="button"
+                  class="tool-button"
+                  (click)="sourceTagManager.open()"
+                >
+                  <i class="icon icon-tags" aria-hidden="true"></i>
                   Manage tags
                 </button>
               }
@@ -272,12 +340,17 @@
                 (tagsChanged)="onTagCatalogChanged()"
               ></app-proxy-tag-manager>
 
-              <button type="button" class="tool-button" [disabled]="proxyLoading()" (click)="refreshProxyList()">
+              <button
+                type="button"
+                class="tool-button"
+                [disabled]="proxyLoading()"
+                (click)="refreshProxyList()"
+              >
                 <i
-                  class="pi"
-                  [class.pi-spin]="proxyLoading()"
-                  [class.pi-spinner]="proxyLoading()"
-                  [class.pi-refresh]="!proxyLoading()"
+                  class="icon"
+                  [class.icon-spin]="proxyLoading()"
+                  [class.icon-loader-circle]="proxyLoading()"
+                  [class.icon-refresh-cw]="!proxyLoading()"
                   aria-hidden="true"
                 ></i>
                 Refresh
@@ -291,7 +364,7 @@
                   [attr.aria-expanded]="filterPanelOpen()"
                   (click)="toggleFilterPanel($event)"
                 >
-                  <i class="pi pi-filter" aria-hidden="true"></i>
+                  <i class="icon icon-filter" aria-hidden="true"></i>
                   {{ filterButtonLabel() }}
                 </button>
               </div>
@@ -305,7 +378,7 @@
                   [attr.aria-expanded]="columnPanelOpen()"
                   (click)="openColumnPanel($event)"
                 >
-                  <i class="pi pi-table" aria-hidden="true"></i>
+                  <i class="icon icon-table" aria-hidden="true"></i>
                   Columns
                 </button>
               </div>

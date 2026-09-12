@@ -92,16 +92,15 @@
 .error-note span { color: rgba(254, 202, 202, 0.7); font-size: 0.62rem; line-height: 1.45; }
 
 :host ::ng-deep {
-  .p-inputtext,
-  .p-inputnumber,
-  .p-inputnumber-input { width: 100%; min-height: 2.65rem; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 0.82rem; background: rgba(255, 255, 255, 0.035); color: rgba(255, 255, 255, 0.88); font-size: 0.76rem; box-shadow: none; }
-  .p-inputtext:hover,
-  .p-inputnumber-input:hover { border-color: rgba(255, 255, 255, 0.23); }
-  .p-inputtext:focus,
-  .p-inputnumber-input:focus { border-color: rgba(var(--theme-primary-300-rgb), 0.55); box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13); }
-  .p-inputnumber-button { width: 2.25rem; border-color: rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.04); color: rgba(255, 255, 255, 0.6); }
-  .p-toggleswitch-slider { border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.1); }
-  .p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider { border-color: rgba(var(--theme-primary-300-rgb), 0.45); background: var(--theme-primary-700); }
+  [hlmInput],
+  input[type="number"],
+  input[type="number"] { width: 100%; min-height: 2.65rem; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 0.82rem; background: rgba(255, 255, 255, 0.035); color: rgba(255, 255, 255, 0.88); font-size: 0.76rem; box-shadow: none; }
+  [hlmInput]:hover,
+  input[type="number"]:hover { border-color: rgba(255, 255, 255, 0.23); }
+  [hlmInput]:focus,
+  input[type="number"]:focus { border-color: rgba(var(--theme-primary-300-rgb), 0.55); box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13); }
+  brn-switch { border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.1); }
+  brn-switch[data-checked] brn-switch { border-color: rgba(var(--theme-primary-300-rgb), 0.45); background: var(--theme-primary-700); }
 }
 
 @container plugin-abuseipdb (max-width: 940px) {
@@ -117,7 +116,7 @@
   .card-heading--with-badge { grid-template-columns: auto minmax(0, 1fr); }
   .quota-badge { grid-column: 2; width: fit-content; }
   .age-policy { grid-template-columns: auto minmax(0, 1fr); }
-  .age-policy p-inputnumber { grid-column: 2; }
+  .age-policy input[type="number"] { grid-column: 2; }
 }
 
 @container plugin-abuseipdb (max-width: 480px) {

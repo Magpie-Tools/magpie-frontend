@@ -1,10 +1,10 @@
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import { Component, Input } from '@angular/core';
-import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-tooltip',
   standalone: true,
-  imports: [TooltipModule],
+  imports: [HlmTooltip],
   templateUrl: './tooltip.component.html',
   styleUrl: './tooltip.component.scss'
 })

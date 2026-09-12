@@ -5,8 +5,9 @@ manager.
 
 Current stack:
 
-- Angular `21.1`
-- PrimeNG `21`
+- Angular `21.2`
+- [Spartan UI](https://spartan.ng/) `1.4.1`, with local Helm components
+- Lucide icons and Chart.js
 - Tailwind CSS `4`
 - npm-based workflow
 
@@ -43,6 +44,33 @@ For a non-interactive test run:
 
 ```bash
 npm test -- --watch=false --browsers=ChromeHeadless
+```
+
+## UI components
+
+Spartan 1.4.1 supports Angular 21 and 22. This application remains on Angular 21.
+Helm components live in `src/app/ui`, generated with the `vega` style in
+`components.json`. Import them through `@spartan-ng/helm/<component>`.
+Spartan's Brain package provides interaction and accessibility behavior.
+
+To add a component:
+
+```bash
+npx ng generate @spartan-ng/cli:ui <component>
+```
+
+Application components in `src/app/shared/ui` handle option objects and Angular
+forms, dialog content, pagination, passwords, and Chart.js canvas lifecycle.
+Tables use semantic HTML with Spartan directives. Proxy sorting and pagination
+continue to request pages from the backend; scrape-source sorting remains within
+the current page. Chart.js also retains the geographic chart controllers.
+
+Theme variables in `src/styles.css` apply to controls and overlays, including the
+four account color themes. When adding a Lucide icon class such as `icon-plus`,
+regenerate the subset of icon masks used by the application:
+
+```bash
+node scripts/update-icons.mjs
 ```
 
 ## Container image

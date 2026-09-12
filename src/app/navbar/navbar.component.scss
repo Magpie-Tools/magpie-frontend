@@ -383,7 +383,7 @@
   color: #e19a9a;
 }
 
-:host ::ng-deep .navbar-account-popover.p-popover {
+:host ::ng-deep .navbar-account-popoverhlm-popover-content {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 0.95rem;
@@ -393,7 +393,7 @@
   backdrop-filter: blur(20px);
 }
 
-:host ::ng-deep .navbar-account-popover .p-popover-content {
+:host ::ng-deep .navbar-account-popover hlm-popover-content {
   padding: 0.42rem;
 }
 

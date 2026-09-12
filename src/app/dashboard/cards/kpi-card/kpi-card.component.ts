@@ -1,19 +1,20 @@
+import {HlmCardImports} from '@spartan-ng/helm/card';
+import {HlmBadge} from '@spartan-ng/helm/badge';
+import {ChartComponent} from '../../../shared/ui/chart.component';
 import {Component, Inject, Input, LOCALE_ID, OnChanges, SimpleChanges} from '@angular/core';
-import {Card} from 'primeng/card';
-import {Chip} from 'primeng/chip';
+
 import {NgClass} from '@angular/common';
-import {UIChart} from 'primeng/chart';
 
 @Component({
   selector: 'app-kpi-card',
   standalone: true,
-  imports: [Card, Chip, NgClass, UIChart],
+  imports: [HlmCardImports, HlmBadge, ChartComponent, NgClass],
   templateUrl: './kpi-card.component.html',
   styleUrl: './kpi-card.component.scss'
 })
 export class KpiCardComponent implements OnChanges {
   @Input() title = '';
-  @Input() icon = 'pi pi-chart-line';
+  @Input() icon = 'icon icon-chart-no-axes-combined';
   @Input() value: number | string = 0;
   @Input() change?: number | null;
   @Input() styleClass = 'dashboard-card metric-card';
@@ -91,7 +92,7 @@ export class KpiCardComponent implements OnChanges {
   }
 
   getChangeIcon(change: number): string {
-    return change > 0 ? 'pi-arrow-up' : change == 0 ? 'pi-arrows-v' : 'pi-arrow-down';
+    return change > 0 ? 'icon-arrow-up' : change == 0 ? 'icon-move-vertical' : 'icon-arrow-down';
   }
 
   formatChange(change: number): string {

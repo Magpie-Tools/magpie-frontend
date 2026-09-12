@@ -1,3 +1,5 @@
+import {HlmInput} from '@spartan-ng/helm/input';
+import {SelectComponent} from '../../shared/ui/select.component';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {SettingsService} from '../../services/settings.service';
@@ -5,9 +7,6 @@ import {GlobalSettings} from '../../models/GlobalSettings';
 import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
 
-import {SelectModule} from 'primeng/select';
-import {InputTextModule} from 'primeng/inputtext';
-import {ButtonModule} from 'primeng/button';
 import {NotificationService} from '../../services/notification-service.service';
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
 import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
@@ -18,11 +17,9 @@ import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/
 @Component({
   selector: 'app-admin-blacklist',
   standalone: true,
-  imports: [
+  imports: [HlmInput, SelectComponent,
     ReactiveFormsModule,
-    InputTextModule,
-    ButtonModule,
-    SelectModule,
+
     RevealGroupDirective,
     AdminSettingsShellComponent,
     AdminSettingsHeaderComponent,

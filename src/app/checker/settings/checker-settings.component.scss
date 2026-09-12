@@ -633,7 +633,7 @@
 }
 
 :host ::ng-deep {
-  .p-select {
+  [data-slot="select-trigger"] {
     display: flex;
     width: 100%;
     min-height: 3rem;
@@ -646,19 +646,19 @@
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
 
     &:hover,
-    &.p-focus {
+    &:focus-within {
       border-color: rgba(var(--theme-primary-300-rgb), 0.56) !important;
       box-shadow: 0 0 0 0.2rem rgba(var(--theme-primary-500-rgb), 0.12) !important;
     }
 
-    .p-select-label {
+    [data-slot="select-trigger"] > span {
       display: flex;
       align-items: center;
       color: rgba(255, 255, 255, 0.88);
       font-size: 0.84rem;
     }
 
-    .p-select-dropdown {
+    [data-slot="select-trigger"] > ng-icon {
       color: rgba(255, 255, 255, 0.55);
     }
   }
@@ -721,7 +721,7 @@
     }
   }
 
-  .save-settings-button.p-button {
+  .save-settings-button[hlmBtn] {
     min-height: 2.9rem;
     padding: 0.78rem 1.2rem;
     border: 1px solid rgba(var(--theme-primary-200-rgb), 0.58);

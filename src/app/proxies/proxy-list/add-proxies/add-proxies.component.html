@@ -3,14 +3,14 @@
   (visibleChange)="dialogVisible.set($event)"
   dialogClass="proxy-add-dialog"
   triggerLabel="Add Proxies"
-  triggerIcon="pi pi-plus"
+  triggerIcon="icon icon-plus"
   headingEyebrow="Import routes"
   headingTitle="Add proxies"
-  headingIcon="pi pi-plus"
+  headingIcon="icon icon-plus"
   [headingTooltip]="'Hostname: gateway.provider.example:8080\nIPv4: 192.0.2.1:8080\nIPv6: [2001:db8::1]:8080\nAuth: user:pass@host:port\nAuth: host:port:user:pass'"
   footerNote="Imports are queued for checking after validation."
   actionLabel="Add proxies to queue"
-  actionIcon="pi pi-arrow-right"
+  actionIcon="icon icon-arrow-right"
   actionIconPos="right"
   [actionDisabled]="!file() && !proxyTextarea() && !clipboardProxies()"
   (openRequested)="openDialog()"
@@ -33,12 +33,21 @@
     (fileSelected)="onFileSelected($event)"
     (fileClearRequested)="onFileClear()"
   >
-    <section import-prefix class="import-tags" aria-labelledby="import-tags-title">
+    <section
+      import-prefix
+      class="import-tags"
+      aria-labelledby="import-tags-title"
+    >
       <div class="import-tags__copy">
-        <span class="section-icon"><i class="pi pi-tags" aria-hidden="true"></i></span>
+        <span class="section-icon"
+          ><i class="icon icon-tags" aria-hidden="true"></i
+        ></span>
         <div>
           <h3 id="import-tags-title">Apply tags on import</h3>
-          <p>Selected tags are added without replacing tags on routes you already own.</p>
+          <p>
+            Selected tags are added without replacing tags on routes you already
+            own.
+          </p>
         </div>
       </div>
       <app-proxy-tag-selector
@@ -57,18 +66,33 @@
     </section>
 
     <ng-container import-summary>
-      <div class="import-summary__visual"><span><i class="pi pi-server" aria-hidden="true"></i></span></div>
+      <div class="import-summary__visual">
+        <span><i class="icon icon-server" aria-hidden="true"></i></span>
+      </div>
       @if (getProxiesWithoutAuthCount() + getProxiesWithAuthCount() > 0) {
-        <div class="import-summary__count">{{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}</div>
+        <div class="import-summary__count">
+          {{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}
+        </div>
         <div class="import-summary__label">Routes ready</div>
         <dl class="import-summary__stats">
-          <div><dt>Unique</dt><dd>{{ getUniqueProxiesCount() }}</dd></div>
-          <div><dt>With authentication</dt><dd>{{ getProxiesWithAuthCount() }}</dd></div>
-          <div><dt>Without authentication</dt><dd>{{ getProxiesWithoutAuthCount() }}</dd></div>
+          <div>
+            <dt>Unique</dt>
+            <dd>{{ getUniqueProxiesCount() }}</dd>
+          </div>
+          <div>
+            <dt>With authentication</dt>
+            <dd>{{ getProxiesWithAuthCount() }}</dd>
+          </div>
+          <div>
+            <dt>Without authentication</dt>
+            <dd>{{ getProxiesWithoutAuthCount() }}</dd>
+          </div>
         </dl>
       } @else {
         <strong>No routes yet</strong>
-        <p>Your import summary will appear here as soon as you add proxy data.</p>
+        <p>
+          Your import summary will appear here as soon as you add proxy data.
+        </p>
       }
     </ng-container>
   </app-import-dialog-content>
@@ -87,24 +111,19 @@
   ></app-procesing-popup>
 }
 
-<p-dialog
+<app-dialog
   [visible]="detailsVisible()"
   (visibleChange)="detailsVisible.set($event)"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
   [dismissableMask]="true"
-  [baseZIndex]="1300"
-  [appendTo]="'body'"
-  [breakpoints]="{ '640px': '95vw' }"
-  [style]="{ width: '34rem' }"
-  [contentStyle]="{ padding: '0' }"
   styleClass="proxy-upload-details-dialog"
   (onShow)="animateDialog('proxy-upload-details-dialog')"
+  [panelStyle]="{ width: '34rem' }"
 >
-  <ng-template pTemplate="header">
+  <ng-template #dialogHeader>
     <div class="proxy-dialog-heading">
-      <span class="proxy-dialog-heading__icon"><i class="pi pi-chart-bar" aria-hidden="true"></i></span>
+      <span class="proxy-dialog-heading__icon"
+        ><i class="icon icon-chart-no-axes-column" aria-hidden="true"></i
+      ></span>
       <div class="proxy-dialog-heading__copy">
         <span>Import report</span>
         <strong>Upload details</strong>
@@ -116,19 +135,53 @@
     @if (uploadDetails()) {
       <div class="upload-details__summary">
         <span>{{ addedProxyCount() }}</span>
-        <div><strong>Routes added</strong><small>Processed in {{ formatDuration(uploadDetails()?.processingMs) }}</small></div>
+        <div>
+          <strong>Routes added</strong
+          ><small
+            >Processed in
+            {{ formatDuration(uploadDetails()?.processingMs) }}</small
+          >
+        </div>
       </div>
       <dl class="upload-details__grid">
-        <div><dt>Total entries</dt><dd>{{ uploadDetails()?.submittedCount }}</dd></div>
-        <div><dt>Parsed valid</dt><dd>{{ uploadDetails()?.parsedCount }}</dd></div>
-        <div><dt>Blacklisted</dt><dd>{{ uploadDetails()?.blacklistedCount }}</dd></div>
-        <div><dt>Invalid address</dt><dd>{{ uploadDetails()?.invalidAddressCount ?? uploadDetails()?.invalidIpCount }}</dd></div>
-        <div><dt>Invalid port</dt><dd>{{ uploadDetails()?.invalidPortCount }}</dd></div>
-        <div><dt>Invalid format</dt><dd>{{ uploadDetails()?.invalidFormatCount }}</dd></div>
+        <div>
+          <dt>Total entries</dt>
+          <dd>{{ uploadDetails()?.submittedCount }}</dd>
+        </div>
+        <div>
+          <dt>Parsed valid</dt>
+          <dd>{{ uploadDetails()?.parsedCount }}</dd>
+        </div>
+        <div>
+          <dt>Blacklisted</dt>
+          <dd>{{ uploadDetails()?.blacklistedCount }}</dd>
+        </div>
+        <div>
+          <dt>Invalid address</dt>
+          <dd>
+            {{
+              uploadDetails()?.invalidAddressCount ??
+                uploadDetails()?.invalidIpCount
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Invalid port</dt>
+          <dd>{{ uploadDetails()?.invalidPortCount }}</dd>
+        </div>
+        <div>
+          <dt>Invalid format</dt>
+          <dd>{{ uploadDetails()?.invalidFormatCount }}</dd>
+        </div>
       </dl>
-      <p class="upload-details__note"><i class="pi pi-info-circle" aria-hidden="true"></i> Blank lines and whitespace are excluded from these counts.</p>
+      <p class="upload-details__note">
+        <i class="icon icon-info" aria-hidden="true"></i> Blank lines and
+        whitespace are excluded from these counts.
+      </p>
     } @else {
-      <div class="upload-details__empty">No details are available for this upload.</div>
+      <div class="upload-details__empty">
+        No details are available for this upload.
+      </div>
     }
   </div>
-</p-dialog>
+</app-dialog>

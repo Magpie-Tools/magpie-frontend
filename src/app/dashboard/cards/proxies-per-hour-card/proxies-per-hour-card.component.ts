@@ -1,12 +1,11 @@
+import {HlmCardImports} from '@spartan-ng/helm/card';
+import {ChartComponent} from '../../../shared/ui/chart.component';
 import {Component, Input} from '@angular/core';
-import {Card} from 'primeng/card';
-import {PrimeTemplate} from 'primeng/api';
-import {UIChart} from 'primeng/chart';
 
 @Component({
   selector: 'app-proxies-per-hour-card',
   standalone: true,
-  imports: [Card, PrimeTemplate, UIChart],
+  imports: [HlmCardImports, ChartComponent],
   templateUrl: './proxies-per-hour-card.component.html',
   styleUrl: './proxies-per-hour-card.component.scss'
 })

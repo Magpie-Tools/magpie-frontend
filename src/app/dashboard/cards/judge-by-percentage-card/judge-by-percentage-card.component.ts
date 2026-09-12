@@ -1,18 +1,17 @@
+import {HlmCardImports} from '@spartan-ng/helm/card';
 import {Component, computed, Input} from '@angular/core';
-import {Card} from 'primeng/card';
+
 import {DecimalPipe, NgStyle} from '@angular/common';
-import {PrimeTemplate} from 'primeng/api';
 
 type TrafficMap = Record<string, number>;
 
 @Component({
   selector: 'app-judge-by-percentage-card',
-  imports: [
-    Card,
+  imports: [HlmCardImports,
+
     NgStyle,
     DecimalPipe,
-    PrimeTemplate
-  ],
+    ],
   templateUrl: './judge-by-percentage-card.component.html',
   styleUrl: './judge-by-percentage-card.component.scss'
 })

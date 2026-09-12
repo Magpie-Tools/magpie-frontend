@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MessageService} from 'primeng/api';
+
 import {BehaviorSubject, of} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ProxyListComponent} from './proxy-list.component';
@@ -40,7 +40,6 @@ describe('ProxyListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ProxyListComponent, RouterTestingModule],
       providers: [
-        MessageService,
         {provide: HttpService, useValue: httpServiceStub},
         {provide: SettingsService, useValue: settingsServiceStub},
         {provide: UserService, useValue: userServiceStub},
@@ -68,7 +67,7 @@ describe('ProxyListComponent', () => {
   it('keeps the filter panel open when clicking an appended filter select overlay', () => {
     const overlay = document.createElement('div');
     const option = document.createElement('button');
-    overlay.className = 'proxy-filter-panel__overlay';
+    overlay.className = 'app-select-overlay';
     overlay.appendChild(option);
     document.body.appendChild(overlay);
     component.filterPanelOpen.set(true);

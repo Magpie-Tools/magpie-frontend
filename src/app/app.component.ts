@@ -1,8 +1,9 @@
+import {HlmToaster} from '@spartan-ng/helm/sonner';
 import {Component, inject} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './navbar/navbar.component';
 import { UserService } from './services/authorization/user.service';
-import {Toast} from 'primeng/toast';
+
 import {LayoutService} from './services/layout.service';
 import {TopbarComponent} from './navbar/topbar/topbar.component';
 import {LoadingComponent} from './ui-elements/loading/loading.component';
@@ -10,7 +11,7 @@ import {LoadingComponent} from './ui-elements/loading/loading.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, Toast, TopbarComponent, LoadingComponent],
+  imports: [HlmToaster, RouterOutlet, NavbarComponent, TopbarComponent, LoadingComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

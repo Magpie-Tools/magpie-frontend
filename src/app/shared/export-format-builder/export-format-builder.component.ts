@@ -1,11 +1,11 @@
+import {HlmInput} from '@spartan-ng/helm/input';
 import {Component, Input} from '@angular/core';
 import {FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {InputTextModule} from 'primeng/inputtext';
 
 @Component({
   selector: 'app-export-format-builder',
   standalone: true,
-  imports: [ReactiveFormsModule, InputTextModule],
+  imports: [HlmInput, ReactiveFormsModule],
   templateUrl: './export-format-builder.component.html',
   styleUrl: './export-format-builder.component.scss',
 })

@@ -1,11 +1,13 @@
+import {BrnPopover} from '@spartan-ng/brain/popover';
+import {HlmPopoverImports} from '@spartan-ng/helm/popover';
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {Popover} from 'primeng/popover';
+
 import {ProxyTag} from '../../models/ProxyTag';
 
 @Component({
   selector: 'app-proxy-tag-selector',
   standalone: true,
-  imports: [Popover],
+  imports: [HlmPopoverImports],
   templateUrl: './proxy-tag-selector.component.html',
   styleUrl: './proxy-tag-selector.component.scss',
 })
@@ -25,13 +27,13 @@ export class ProxyTagSelectorComponent {
   readonly inputPrefix = `proxy-tag-selector-${ProxyTagSelectorComponent.nextId++}`;
   draftTagIds: number[] = [];
 
-  open(event: Event, popover: Popover): void {
+  open(event: Event): void {
     event.stopPropagation();
     if (this.disabled || this.saving) {
       return;
     }
     this.draftTagIds = this.displayTags().map(tag => tag.id);
-    popover.toggle(event);
+
   }
 
   displayTags(): ProxyTag[] {
@@ -70,13 +72,13 @@ export class ProxyTagSelectorComponent {
     this.draftTagIds = [];
   }
 
-  apply(popover: Popover): void {
+  apply(popover: BrnPopover): void {
     this.selectionChange.emit([...this.draftTagIds]);
-    popover.hide();
+    popover.close();
   }
 
-  openManager(popover: Popover): void {
-    popover.hide();
+  openManager(popover: BrnPopover): void {
+    popover.close();
     this.manageTags.emit();
   }
 }

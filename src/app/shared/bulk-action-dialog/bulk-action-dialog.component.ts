@@ -1,6 +1,7 @@
+import {HlmButton} from '@spartan-ng/helm/button';
+import {DialogComponent} from '../ui/dialog.component';
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {ButtonModule} from 'primeng/button';
-import {DialogModule} from 'primeng/dialog';
+
 import {TooltipComponent} from '../../tooltip/tooltip.component';
 import {animateDialogSections} from '../dialog-motion';
 
@@ -9,7 +10,7 @@ export type BulkDialogTone = 'default' | 'danger';
 @Component({
   selector: 'app-bulk-action-dialog',
   standalone: true,
-  imports: [ButtonModule, DialogModule, TooltipComponent],
+  imports: [HlmButton, DialogComponent, TooltipComponent],
   templateUrl: './bulk-action-dialog.component.html',
   styleUrl: './bulk-action-dialog.component.scss',
 })

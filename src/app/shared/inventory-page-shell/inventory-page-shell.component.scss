@@ -227,7 +227,7 @@ p { margin: 0; }
 
   .toolbar-action { display: block; }
 
-  .toolbar-action .p-button {
+  .toolbar-action [hlmBtn] {
     min-height: 2.45rem;
     padding: 0.55rem 0.75rem;
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -239,7 +239,7 @@ p { margin: 0; }
     font-weight: 580;
     transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 
-    .p-button-icon {
+    .icon {
       color: rgba(255, 255, 255, 0.44);
       font-size: 0.67rem;
     }
@@ -251,17 +251,17 @@ p { margin: 0; }
       color: #fff;
       transform: translateY(-1px);
 
-      .p-button-icon { color: var(--theme-primary-200); }
+      .icon { color: var(--theme-primary-200); }
     }
   }
 
-  .toolbar-action--add .p-button {
+  .toolbar-action--add [hlmBtn] {
     border-color: rgba(var(--theme-primary-200-rgb), 0.58);
     background: var(--theme-primary-300);
     color: #0a0d0c;
     box-shadow: 0 10px 22px rgba(var(--theme-primary-500-rgb), 0.2);
 
-    .p-button-icon { color: #0a0d0c; }
+    .icon { color: #0a0d0c; }
 
     &:hover:not(:disabled),
     &:focus-visible {
@@ -270,16 +270,16 @@ p { margin: 0; }
       color: #090b0a;
       box-shadow: 0 13px 26px rgba(var(--theme-primary-500-rgb), 0.3);
 
-      .p-button-icon { color: #090b0a; }
+      .icon { color: #090b0a; }
     }
   }
 
-  .toolbar-action--delete .p-button {
+  .toolbar-action--delete [hlmBtn] {
     border-color: rgba(248, 113, 113, 0.25);
     background: rgba(127, 29, 29, 0.12);
     color: rgba(239, 174, 174, 0.78);
 
-    .p-button-icon { color: rgba(239, 174, 174, 0.7); }
+    .icon { color: rgba(239, 174, 174, 0.7); }
 
     &:hover:not(:disabled),
     &:focus-visible {
@@ -287,7 +287,7 @@ p { margin: 0; }
       background: rgba(127, 29, 29, 0.22);
       color: #f5b5b5;
 
-      .p-button-icon { color: #f5b5b5; }
+      .icon { color: #f5b5b5; }
     }
   }
 }
@@ -307,7 +307,7 @@ p { margin: 0; }
   background: rgba(255, 255, 255, 0.025);
   transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 
-  > .pi-search {
+  > .icon-search {
     color: rgba(255, 255, 255, 0.36);
     font-size: 0.72rem;
   }
@@ -489,7 +489,7 @@ p { margin: 0; }
     .toolbar-actions > *,
     .tool-button,
     .toolbar-actions > div > .tool-button,
-    .toolbar-action .p-button { width: 100%; }
+    .toolbar-action [hlmBtn] { width: 100%; }
   }
 
   .empty-inventory__actions {
@@ -501,7 +501,7 @@ p { margin: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .inventory-initial-loading .pi-spin { animation: none; }
+  .inventory-initial-loading .icon-spin { animation: none; }
 
   ::ng-deep .tool-button,
   .button { transition: none; }

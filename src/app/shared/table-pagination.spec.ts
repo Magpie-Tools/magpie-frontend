@@ -30,7 +30,7 @@ describe('table pagination', () => {
     const parent = document.createElement('div');
     const root = document.createElement('div');
     const inner = document.createElement('div');
-    inner.className = 'p-datatable-wrapper';
+    inner.className = 'table-scroll';
     root.append(inner);
     parent.append(root);
     document.body.append(parent);

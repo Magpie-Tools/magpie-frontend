@@ -1,79 +1,105 @@
 <div class="flex items-center">
-  <p-button
+  <button
     type="button"
-    [label]="triggerLabel"
-    [icon]="triggerIcon"
-    [styleClass]="triggerStyleClass"
     [disabled]="triggerDisabled"
-    (onClick)="openRequested.emit()"
-  ></p-button>
+    [class]="triggerStyleClass"
+    (click)="openRequested.emit()"
+    hlmBtn
+    variant="default"
+  >
+    <i [class]="triggerIcon" aria-hidden="true"></i>{{ triggerLabel }}
+  </button>
 </div>
 
-<p-dialog
+<app-dialog
   [visible]="visible"
   (visibleChange)="visibleChange.emit($event)"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
   [dismissableMask]="true"
-  [appendTo]="'body'"
-  [breakpoints]="{ '960px': '92vw', '640px': '96vw' }"
-  [style]="{ width }"
-  [contentStyle]="{ padding: '0' }"
   [styleClass]="styleClass"
   (onShow)="onShow()"
   (onHide)="hidden.emit()"
+  [panelStyle]="{ width }"
 >
-  <ng-template pTemplate="header">
-    <div class="bulk-dialog-heading" [class.bulk-dialog-heading--danger]="tone === 'danger'">
-      <span class="bulk-dialog-heading__icon"><i [class]="headingIcon" aria-hidden="true"></i></span>
+  <ng-template #dialogHeader>
+    <div
+      class="bulk-dialog-heading"
+      [class.bulk-dialog-heading--danger]="tone === 'danger'"
+    >
+      <span class="bulk-dialog-heading__icon"
+        ><i [class]="headingIcon" aria-hidden="true"></i
+      ></span>
       <div class="bulk-dialog-heading__copy">
         <span>{{ headingEyebrow }}</span>
         <strong>{{ headingTitle }}</strong>
       </div>
       @if (headingTooltip) {
-        <app-tooltip class="bulk-dialog-heading__tooltip" [text]="headingTooltip"></app-tooltip>
+        <app-tooltip
+          class="bulk-dialog-heading__tooltip"
+          [text]="headingTooltip"
+        ></app-tooltip>
       }
     </div>
   </ng-template>
 
   <div class="bulk-dialog-body">
     @if (introTitle) {
-      <section class="bulk-dialog-intro" [class.bulk-dialog-intro--danger]="tone === 'danger'">
-        <span class="bulk-dialog-intro__icon"><i [class]="introIcon" aria-hidden="true"></i></span>
+      <section
+        class="bulk-dialog-intro"
+        [class.bulk-dialog-intro--danger]="tone === 'danger'"
+      >
+        <span class="bulk-dialog-intro__icon"
+          ><i [class]="introIcon" aria-hidden="true"></i
+        ></span>
         <div>
           <h3>{{ introTitle }}</h3>
           <p>{{ introDescription }}</p>
         </div>
-        <span class="bulk-dialog-intro__state">{{ selectedCount }} selected</span>
+        <span class="bulk-dialog-intro__state"
+          >{{ selectedCount }} selected</span
+        >
       </section>
     }
 
     <ng-content></ng-content>
   </div>
 
-  <ng-template pTemplate="footer">
+  <ng-template #dialogFooter>
     <div class="bulk-dialog-footer">
       <span>{{ footerNote }}</span>
       <div>
-        <p-button
+        <button
           type="button"
-          label="Cancel"
-          styleClass="dialog-button dialog-button--quiet"
           [disabled]="cancelDisabled"
-          (onClick)="cancelRequested.emit()"
-        ></p-button>
-        <p-button
+          class="dialog-button dialog-button--quiet"
+          (click)="cancelRequested.emit()"
+          hlmBtn
+          variant="ghost"
+        >
+          Cancel
+        </button>
+        <button
           type="button"
-          [label]="actionLabel"
-          [icon]="actionIcon"
-          [iconPos]="actionIconPos"
-          [styleClass]="'dialog-button dialog-button--' + (tone === 'danger' ? 'danger' : 'primary')"
-          [disabled]="actionDisabled"
-          [loading]="actionLoading"
-          (onClick)="actionRequested.emit()"
-        ></p-button>
+          [class]="
+            'dialog-button dialog-button--' +
+            (tone === 'danger' ? 'danger' : 'primary')
+          "
+          (click)="actionRequested.emit()"
+          hlmBtn
+          [disabled]="actionDisabled || actionLoading"
+          variant="default"
+        >
+          @if (actionLoading) {
+            <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
+          } @else {
+            <i
+              [class]="actionIcon"
+              [style.order]="actionIconPos === 'right' ? 1 : 0"
+              aria-hidden="true"
+            ></i>
+          }
+          {{ actionLabel }}
+        </button>
       </div>
     </div>
   </ng-template>
-</p-dialog>
+</app-dialog>

@@ -24,9 +24,9 @@ describe('ProxyHistoryCardComponent', () => {
 
   it('emits refresh event when the refresh button is clicked', () => {
     const refreshSpy = spyOn(component.refresh, 'emit');
-    const button = fixture.debugElement.query(By.css('p-button'));
+    const button = fixture.debugElement.query(By.css('button[hlmBtn]'));
 
-    button.triggerEventHandler('onClick', new MouseEvent('click'));
+    button.triggerEventHandler('click', new MouseEvent('click'));
 
     expect(refreshSpy).toHaveBeenCalled();
   });

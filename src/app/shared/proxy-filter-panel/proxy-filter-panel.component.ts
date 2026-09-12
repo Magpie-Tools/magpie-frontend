@@ -1,10 +1,10 @@
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
+import {SelectComponent} from '../ui/select.component';
 import {Component, EventEmitter, Input, Output, signal} from '@angular/core';
 import {FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {ButtonModule} from 'primeng/button';
-import {CheckboxModule} from 'primeng/checkbox';
-import {InputNumberModule} from 'primeng/inputnumber';
-import {Select} from 'primeng/select';
-import {MultiSelectModule} from 'primeng/multiselect';
+
 import {NgClass} from '@angular/common';
 import {ProxyFilterOption} from '../proxy-filters';
 import {ProxyTag} from '../../models/ProxyTag';
@@ -12,14 +12,10 @@ import {ProxyTag} from '../../models/ProxyTag';
 @Component({
   selector: 'app-proxy-filter-panel',
   standalone: true,
-  imports: [
+  imports: [HlmButton, HlmInput, HlmCheckbox, SelectComponent,
     ReactiveFormsModule,
     FormsModule,
-    ButtonModule,
-    CheckboxModule,
-    InputNumberModule,
-    Select,
-    MultiSelectModule,
+
     NgClass,
   ],
   templateUrl: './proxy-filter-panel.component.html',

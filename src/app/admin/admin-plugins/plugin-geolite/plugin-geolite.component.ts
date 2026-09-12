@@ -1,15 +1,13 @@
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
+import {HlmSwitch} from '@spartan-ng/helm/switch';
+import {SelectComponent} from '../../../shared/ui/select.component';
 import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
-
-import {CheckboxModule} from 'primeng/checkbox';
-import {InputTextModule} from 'primeng/inputtext';
-import {SelectModule} from 'primeng/select';
-import {Message} from 'primeng/message';
-import {ToggleSwitchModule} from 'primeng/toggleswitch';
 
 import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
@@ -20,15 +18,11 @@ import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.dir
 @Component({
   selector: 'app-plugin-geolite',
   standalone: true,
-  imports: [
+  imports: [HlmInput, HlmCheckbox, HlmSwitch, SelectComponent,
     AdminSettingsSaveDockComponent,
     RouterLink,
     ReactiveFormsModule,
-    CheckboxModule,
-    InputTextModule,
-    SelectModule,
-    Message,
-    ToggleSwitchModule,
+
     RevealGroupDirective
   ],
   templateUrl: './plugin-geolite.component.html',

@@ -1,48 +1,69 @@
-<p-card [class]="styleClass">
-  <ng-template pTemplate="header">
+<section hlmCard [class]="styleClass">
+  <div hlmCardHeader>
     <div class="dashboard-card__header">
       <div class="dashboard-card__heading">
-        <span class="dashboard-card__icon"><i class="pi pi-history" aria-hidden="true"></i></span>
+        <span class="dashboard-card__icon"
+          ><i class="icon icon-history" aria-hidden="true"></i
+        ></span>
         <div class="dashboard-card__copy">
           <h2 class="dashboard-card__title">{{ title }}</h2>
-          <span class="dashboard-card__subtitle">Latest checks across your routes.</span>
+          <span class="dashboard-card__subtitle"
+            >Latest checks across your routes.</span
+          >
         </div>
       </div>
-      <p-button
-        icon="pi pi-refresh"
-        styleClass="dashboard-control history-refresh"
-        ariaLabel="Refresh proxy history"
-        [loading]="refreshing"
+      <button
+        class="dashboard-control history-refresh"
+        (click)="onRefreshClick()"
+        aria-label="Refresh proxy history"
+        hlmBtn
+        type="button"
         [disabled]="refreshing"
-        (onClick)="onRefreshClick()">
-      </p-button>
+        variant="default"
+      >
+        @if (refreshing) {
+          <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
+        } @else {
+          <i class="icon icon-refresh-cw" aria-hidden="true"></i>
+        }
+      </button>
     </div>
-  </ng-template>
+  </div>
 
   @if (history.length) {
     <div class="history-list">
       @for (check of history; track check.id) {
         <article class="history-row">
-          <span class="history-row__status" [ngStyle]="{ color: getStatusColor(check.status) }">
+          <span
+            class="history-row__status"
+            [ngStyle]="{ color: getStatusColor(check.status) }"
+          >
             <i [class]="getStatusIcon(check.status)" aria-hidden="true"></i>
           </span>
           <div class="history-row__route">
             <strong>{{ check.ip }}</strong>
             <span>
               @if (check.date; as date) {
-                {{ date | date:'MMM dd, yyyy' }}
+                {{ date | date: "MMM dd, yyyy" }}
               }
               {{ check.time }}
             </span>
           </div>
-          <span class="history-row__latency">{{ formatLatency(check.latency) }}</span>
+          <span class="history-row__latency">{{
+            formatLatency(check.latency)
+          }}</span>
         </article>
       }
     </div>
   } @else {
     <div class="dashboard-empty history-empty">
-      <span class="dashboard-empty__icon"><i class="pi pi-database" aria-hidden="true"></i></span>
-      <p>No proxy checks yet. Refresh after the checker processes its first routes.</p>
+      <span class="dashboard-empty__icon"
+        ><i class="icon icon-database" aria-hidden="true"></i
+      ></span>
+      <p>
+        No proxy checks yet. Refresh after the checker processes its first
+        routes.
+      </p>
     </div>
   }
-</p-card>
+</section>

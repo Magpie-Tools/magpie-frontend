@@ -1,10 +1,10 @@
+import {HlmCardImports} from '@spartan-ng/helm/card';
+import {DialogComponent} from '../../../shared/ui/dialog.component';
+import {ChartComponent} from '../../../shared/ui/chart.component';
 import {AfterViewInit, Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
 import {DecimalPipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {Card} from 'primeng/card';
-import {PrimeTemplate} from 'primeng/api';
-import {UIChart} from 'primeng/chart';
-import {Dialog} from 'primeng/dialog';
+
 import Chart from 'chart.js/auto';
 import {ChartData, ChartOptions, ChartType, Tooltip, TooltipItem, TooltipPositionerFunction, TooltipPositionerMap} from 'chart.js';
 import {ChoroplethController, GeoFeature, ColorScale, ProjectionScale} from 'chartjs-chart-geo';
@@ -206,7 +206,7 @@ const COUNTRY_CODE_OVERRIDES: Record<string, string> = {
 @Component({
   selector: 'app-proxies-per-country-card',
   standalone: true,
-  imports: [Card, PrimeTemplate, UIChart, Dialog, FormsModule],
+  imports: [HlmCardImports, DialogComponent, ChartComponent, FormsModule],
   providers: [DecimalPipe],
   templateUrl: './proxies-per-country-card.component.html',
   styleUrl: './proxies-per-country-card.component.scss'
@@ -228,7 +228,7 @@ export class ProxiesPerCountryCardComponent implements OnChanges, AfterViewInit 
   private refreshQueued = false;
   private readonly decimalPipe: DecimalPipe;
 
-  @ViewChild('mapChart') mapChart?: UIChart;
+  @ViewChild('mapChart') mapChart?: ChartComponent;
 
   constructor(decimalPipe: DecimalPipe) {
     this.decimalPipe = decimalPipe;

@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MessageService} from 'primeng/api';
+
 import {of, throwError} from 'rxjs';
 import {ExportProxiesComponent} from './export-proxies.component';
 import {SettingsService} from '../../../services/settings.service';
@@ -27,7 +27,6 @@ describe('ExportProxiesComponent', () => {
         {provide: SettingsService, useValue: {getUserSettings: () => ({})}},
         {provide: HttpService, useValue: {exportProxies: exportProxiesSpy}},
         {provide: NotificationService, useValue: {showError: showErrorSpy}},
-        MessageService,
       ]
     }).compileComponents();
 

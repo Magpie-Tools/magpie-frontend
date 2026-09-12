@@ -1,14 +1,14 @@
+import {HlmSwitch} from '@spartan-ng/helm/switch';
 import {afterNextRender, Component, effect, inject, Injector, input, output, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {ToggleSwitch, ToggleSwitchModule} from 'primeng/toggleswitch';
 
 @Component({
   selector: 'app-source-fetch-mode',
-  imports: [FormsModule, ToggleSwitchModule],
+  imports: [HlmSwitch, FormsModule],
   template: `
     <div class="fetch-mode" [attr.aria-busy]="saving()">
       <label class="fetch-mode__copy" [for]="inputId()">
-        <span class="fetch-mode__icon"><i class="pi pi-code" aria-hidden="true"></i></span>
+        <span class="fetch-mode__icon"><i class="icon icon-code" aria-hidden="true"></i></span>
         <span>
           <strong>Requires JavaScript</strong>
           <small>{{ enabled() ? 'Browser rendering for pages that load proxies with JavaScript.' : 'HTTP fetching for static pages and raw proxy lists. Uses fewer resources.' }}</small>
@@ -17,9 +17,7 @@ import {ToggleSwitch, ToggleSwitchModule} from 'primeng/toggleswitch';
       </label>
       <div class="fetch-mode__control">
         <span class="fetch-mode__state" aria-live="polite">{{ saving() ? 'Saving…' : enabled() ? 'On' : 'Off' }}</span>
-        <p-toggleswitch #toggle [inputId]="inputId()" [ngModel]="enabled()"
-          [disabled]="disabled() || saving()" ariaLabel="Requires JavaScript"
-          (ngModelChange)="changeMode($event, toggle)" />
+        <hlm-switch #toggle [inputId]="inputId()" [ngModel]="enabled()" [disabled]="disabled() || saving()" (ngModelChange)="changeMode($event, toggle)" aria-label="Requires JavaScript" />
       </div>
     </div>
   `,
@@ -33,14 +31,14 @@ export class SourceFetchModeComponent {
   readonly hint = input('');
   readonly enabledChange = output<boolean>();
 
-  private readonly toggle = viewChild(ToggleSwitch);
+  private readonly toggle = viewChild(HlmSwitch);
   private readonly injector = inject(Injector);
 
   constructor() {
     effect(() => this.toggle()?.writeValue(this.enabled()));
   }
 
-  changeMode(enabled: boolean, toggle: ToggleSwitch): void {
+  changeMode(enabled: boolean, toggle: HlmSwitch): void {
     this.enabledChange.emit(enabled);
     // Keep the switch on the persisted value while a settings request is pending.
     afterNextRender(() => toggle.writeValue(this.enabled()), {injector: this.injector});

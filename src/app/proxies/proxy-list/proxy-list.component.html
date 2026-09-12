@@ -1,5 +1,5 @@
 <app-inventory-page-shell
-  pageIcon="pi pi-server"
+  pageIcon="icon icon-server"
   pageTitle="Managed proxies"
   pageDescription="Search, inspect, tag, and control every proxy route in the current workspace."
   toolbarTitle="Find the routes you need"
@@ -8,7 +8,7 @@
   [searchTerm]="searchTerm()"
   searchPlaceholder="Search host, port, country, status, reputation, or tag"
   searchAriaLabel="Search proxies"
-  resultIcon="pi pi-th-large"
+  resultIcon="icon icon-layout-grid"
   resultTitle="Proxy routes"
   resultDescription="Sort columns, copy addresses, edit tags, and open a route for its full check history."
   [selectedCount]="selectedProxies().length"
@@ -32,8 +32,19 @@
       (tagsChanged)="onTagCatalogChanged()"
     ></app-proxy-tag-manager>
 
-    <button type="button" class="tool-button" [disabled]="isLoading()" (click)="refreshList()">
-      <i class="pi" [class.pi-spin]="isLoading()" [class.pi-spinner]="isLoading()" [class.pi-refresh]="!isLoading()" aria-hidden="true"></i>
+    <button
+      type="button"
+      class="tool-button"
+      [disabled]="isLoading()"
+      (click)="refreshList()"
+    >
+      <i
+        class="icon"
+        [class.icon-spin]="isLoading()"
+        [class.icon-loader-circle]="isLoading()"
+        [class.icon-refresh-cw]="!isLoading()"
+        aria-hidden="true"
+      ></i>
       Refresh
     </button>
 
@@ -45,7 +56,7 @@
         [attr.aria-expanded]="filterPanelOpen()"
         (click)="toggleFilterPanel($event)"
       >
-        <i class="pi pi-filter" aria-hidden="true"></i>
+        <i class="icon icon-filter" aria-hidden="true"></i>
         {{ filterButtonLabel() }}
       </button>
     </div>
@@ -59,7 +70,7 @@
         [attr.aria-expanded]="columnPanelOpen()"
         (click)="openColumnPanel($event)"
       >
-        <i class="pi pi-table" aria-hidden="true"></i>
+        <i class="icon icon-table" aria-hidden="true"></i>
         Columns
       </button>
     </div>

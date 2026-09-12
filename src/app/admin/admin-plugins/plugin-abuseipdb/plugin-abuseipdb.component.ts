@@ -1,13 +1,11 @@
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmSwitch} from '@spartan-ng/helm/switch';
 import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Subject, interval} from 'rxjs';
 import {filter, startWith, takeUntil} from 'rxjs/operators';
-
-import {InputTextModule} from 'primeng/inputtext';
-import {InputNumberModule} from 'primeng/inputnumber';
-import {ToggleSwitchModule} from 'primeng/toggleswitch';
 
 import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
@@ -17,13 +15,11 @@ import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.dir
 @Component({
   selector: 'app-plugin-abuseipdb',
   standalone: true,
-  imports: [
+  imports: [HlmInput, HlmSwitch,
     AdminSettingsSaveDockComponent,
     RouterLink,
     ReactiveFormsModule,
-    InputTextModule,
-    InputNumberModule,
-    ToggleSwitchModule,
+
     RevealGroupDirective
   ],
   templateUrl: './plugin-abuseipdb.component.html',

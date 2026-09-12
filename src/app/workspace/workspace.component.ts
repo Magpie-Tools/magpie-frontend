@@ -1,9 +1,10 @@
+import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
+import {DialogComponent} from '../shared/ui/dialog.component';
 import {CommonModule, DatePipe, DecimalPipe, TitleCasePipe} from '@angular/common';
 import {Component, OnInit, computed, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {DialogModule} from 'primeng/dialog';
-import {SkeletonModule} from 'primeng/skeleton';
-import {TooltipModule} from 'primeng/tooltip';
+
 import {finalize, switchMap} from 'rxjs/operators';
 import {
   WorkspaceInvitation,
@@ -28,16 +29,14 @@ interface OwnershipChange {
 @Component({
   selector: 'app-workspace',
   standalone: true,
-  imports: [
+  imports: [HlmSkeleton, HlmTooltip, DialogComponent,
     RevealGroupDirective,
     CommonModule,
     FormsModule,
     DatePipe,
     DecimalPipe,
     TitleCasePipe,
-    DialogModule,
-    SkeletonModule,
-    TooltipModule,
+
   ],
   templateUrl: './workspace.component.html',
   styleUrl: './workspace.component.scss',
@@ -476,9 +475,9 @@ export class WorkspaceComponent implements OnInit {
 
   notificationIcon(status: WorkspaceInvitation['notification_status']): string {
     switch (status) {
-      case 'queued': return 'pi-send';
-      case 'failed': return 'pi-exclamation-circle';
-      default: return 'pi-minus-circle';
+      case 'queued': return 'icon-send';
+      case 'failed': return 'icon-circle-alert';
+      default: return 'icon-circle-minus';
     }
   }
 

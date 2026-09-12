@@ -1,11 +1,13 @@
 @switch (UserService.authState()) {
-  @case ('authenticated') {
-    <div class="h-screen overflow-hidden flex"
-         [class.sidebar-collapsed]="!layout.sidebarOpen()">
-
+  @case ("authenticated") {
+    <div
+      class="h-screen overflow-hidden flex"
+      [class.sidebar-collapsed]="!layout.sidebarOpen()"
+    >
       <app-navbar
         class="h-full overflow-hidden transition-[width,transform] duration-200 ease-in-out shrink-0"
-        [style.width.px]="layout.sidebarOpen() ? 240 : 0">
+        [style.width.px]="layout.sidebarOpen() ? 240 : 0"
+      >
       </app-navbar>
 
       @if (layout.sidebarOpen()) {
@@ -26,7 +28,7 @@
       </div>
     </div>
   }
-  @case ('checking') {
+  @case ("checking") {
     <div class="app-loading-screen">
       <app-loading></app-loading>
     </div>
@@ -36,4 +38,4 @@
   }
 }
 
-<p-toast></p-toast>
+<hlm-toaster theme="dark" [closeButton]="true" />

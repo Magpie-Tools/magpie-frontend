@@ -4,12 +4,15 @@
       <h3>Table Columns</h3>
       <p>Choose what is shown. Drag visible items to reorder.</p>
     </div>
-    <p-button
-      label="Reset"
-      icon="pi pi-refresh"
-      styleClass="p-button-text p-button-sm"
-      (onClick)="resetColumns()"
-    ></p-button>
+    <button
+      class="ui-button-text ui-button-sm"
+      (click)="resetColumns()"
+      hlmBtn
+      type="button"
+      variant="ghost"
+    >
+      <i class="icon icon-refresh-cw" aria-hidden="true"></i>Reset
+    </button>
   </div>
 
   <div class="column-picker__toolbar">
@@ -22,21 +25,28 @@
       aria-label="Find columns"
     />
     @if (columnSearchActive()) {
-      <span class="column-picker__search-hint">Reordering is disabled while filtering.</span>
+      <span class="column-picker__search-hint"
+        >Reordering is disabled while filtering.</span
+      >
     }
   </div>
 
   <div class="column-picker__content">
     <div class="column-picker__section">
       <div class="column-picker__section-header">
-        <div class="column-picker__title">Visible ({{ visibleColumnCount() }})</div>
-        <p-button
-          label="Hide all"
-          icon="pi pi-eye-slash"
-          styleClass="p-button-text p-button-sm"
+        <div class="column-picker__title">
+          Visible ({{ visibleColumnCount() }})
+        </div>
+        <button
           [disabled]="visibleColumnCount() <= 1"
-          (onClick)="hideAllColumns()"
-        ></p-button>
+          class="ui-button-text ui-button-sm"
+          (click)="hideAllColumns()"
+          hlmBtn
+          type="button"
+          variant="ghost"
+        >
+          <i class="icon icon-eye-off" aria-hidden="true"></i>Hide all
+        </button>
       </div>
       <div
         class="column-picker__list"
@@ -57,7 +67,7 @@
             >
               <div class="column-picker__row-main">
                 <span class="column-picker__drag-handle" cdkDragHandle>
-                  <i class="pi pi-bars" aria-hidden="true"></i>
+                  <i class="icon icon-menu" aria-hidden="true"></i>
                 </span>
                 <div class="column-picker__label-wrap">
                   <span class="column-picker__label">{{ column.label }}</span>
@@ -65,17 +75,23 @@
                     <span class="column-picker__required">Pinned</span>
                   }
                   @if (column.example) {
-                    <span class="column-picker__example">{{ column.example }}</span>
+                    <span class="column-picker__example">{{
+                      column.example
+                    }}</span>
                   }
                 </div>
               </div>
               <div class="column-picker__controls">
-                <p-button
-                  icon="pi pi-eye-slash"
-                  styleClass="p-button-text p-button-sm"
+                <button
                   [disabled]="visibleColumnCount() <= 1 || column.required"
-                  (onClick)="hideColumn(column.id)"
-                ></p-button>
+                  class="ui-button-text ui-button-sm"
+                  (click)="hideColumn(column.id)"
+                  hlmBtn
+                  type="button"
+                  variant="ghost"
+                >
+                  <i class="icon icon-eye-off" aria-hidden="true"></i>
+                </button>
               </div>
             </div>
           }
@@ -85,19 +101,28 @@
 
     <div class="column-picker__section">
       <div class="column-picker__section-header">
-        <div class="column-picker__title">Hidden ({{ hiddenColumnCount() }})</div>
-        <p-button
-          label="Show all"
-          icon="pi pi-eye"
-          styleClass="p-button-text p-button-sm"
+        <div class="column-picker__title">
+          Hidden ({{ hiddenColumnCount() }})
+        </div>
+        <button
           [disabled]="hiddenColumnCount() === 0"
-          (onClick)="showAllColumns()"
-        ></p-button>
+          class="ui-button-text ui-button-sm"
+          (click)="showAllColumns()"
+          hlmBtn
+          type="button"
+          variant="ghost"
+        >
+          <i class="icon icon-eye" aria-hidden="true"></i>Show all
+        </button>
       </div>
       <div class="column-picker__list">
         @if (hiddenColumnsFiltered().length === 0) {
           <div class="column-picker__empty">
-            {{ hiddenColumnCount() === 0 ? 'No hidden columns.' : 'No matching hidden columns.' }}
+            {{
+              hiddenColumnCount() === 0
+                ? "No hidden columns."
+                : "No matching hidden columns."
+            }}
           </div>
         } @else {
           @for (column of hiddenColumnsFiltered(); track column.id) {
@@ -105,14 +130,20 @@
               <div class="column-picker__label-wrap">
                 <span class="column-picker__label">{{ column.label }}</span>
                 @if (column.example) {
-                  <span class="column-picker__example">{{ column.example }}</span>
+                  <span class="column-picker__example">{{
+                    column.example
+                  }}</span>
                 }
               </div>
-              <p-button
-                icon="pi pi-eye"
-                styleClass="p-button-text p-button-sm"
-                (onClick)="showColumn(column.id)"
-              ></p-button>
+              <button
+                class="ui-button-text ui-button-sm"
+                (click)="showColumn(column.id)"
+                hlmBtn
+                type="button"
+                variant="ghost"
+              >
+                <i class="icon icon-eye" aria-hidden="true"></i>
+              </button>
             </div>
           }
         }
@@ -121,16 +152,28 @@
   </div>
 
   <div class="column-picker__footer">
-    <p-button
-      label="Cancel"
-      styleClass="p-button-text"
-      (onClick)="cancel.emit()"
-    ></p-button>
-    <p-button
-      label="Save"
-      icon="pi pi-check"
-      [loading]="saving"
-      (onClick)="saveChanges()"
-    ></p-button>
+    <button
+      class="ui-button-text"
+      (click)="cancel.emit()"
+      hlmBtn
+      type="button"
+      variant="ghost"
+    >
+      Cancel
+    </button>
+    <button
+      (click)="saveChanges()"
+      hlmBtn
+      type="button"
+      [disabled]="saving"
+      variant="default"
+    >
+      @if (saving) {
+        <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
+      } @else {
+        <i class="icon icon-check" aria-hidden="true"></i>
+      }
+      Save
+    </button>
   </div>
 </div>

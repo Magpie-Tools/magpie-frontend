@@ -10,20 +10,33 @@
 
   <div class="nav-scroll">
     <section class="nav-section" aria-labelledby="core-navigation">
-      <a class="navbar-item" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <span class="navbar-item__icon"><i class="pi pi-chart-line" aria-hidden="true"></i></span>
+      <a
+        class="navbar-item"
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="navbar-item__icon"
+          ><i class="icon icon-chart-no-axes-combined" aria-hidden="true"></i
+        ></span>
         <span>Dashboard</span>
       </a>
       <a class="navbar-item" routerLink="/proxies" routerLinkActive="active">
-        <span class="navbar-item__icon"><i class="pi pi-server" aria-hidden="true"></i></span>
+        <span class="navbar-item__icon"
+          ><i class="icon icon-server" aria-hidden="true"></i
+        ></span>
         <span>Proxies</span>
       </a>
       <a class="navbar-item" routerLink="/scraper" routerLinkActive="active">
-        <span class="navbar-item__icon"><i class="pi pi-download" aria-hidden="true"></i></span>
+        <span class="navbar-item__icon"
+          ><i class="icon icon-download" aria-hidden="true"></i
+        ></span>
         <span>Scraping</span>
       </a>
       <a class="navbar-item" routerLink="/rotating" routerLinkActive="active">
-        <span class="navbar-item__icon"><i class="pi pi-sync" aria-hidden="true"></i></span>
+        <span class="navbar-item__icon"
+          ><i class="icon icon-refresh-cw" aria-hidden="true"></i
+        ></span>
         <span>Rotating proxies</span>
       </a>
     </section>
@@ -33,18 +46,27 @@
         <details class="nav-cluster" [open]="group.expanded === true">
           <summary>
             <span class="nav-cluster__identity">
-              <span class="navbar-item__icon"><i [class]="group.icon" aria-hidden="true"></i></span>
+              <span class="navbar-item__icon"
+                ><i [class]="group.icon" aria-hidden="true"></i
+              ></span>
               <span>{{ group.label }}</span>
             </span>
-            <i class="pi pi-chevron-down nav-cluster__chevron" aria-hidden="true"></i>
+            <i
+              class="icon icon-chevron-down nav-cluster__chevron"
+              aria-hidden="true"
+            ></i>
           </summary>
 
           <div class="nav-cluster__items">
             @for (item of group.items; track item.label) {
-              <a class="navbar-item navbar-item--nested"
-                 [routerLink]="item.routerLink"
-                 routerLinkActive="active">
-                <span class="navbar-item__icon"><i [class]="item.icon" aria-hidden="true"></i></span>
+              <a
+                class="navbar-item navbar-item--nested"
+                [routerLink]="item.routerLink"
+                routerLinkActive="active"
+              >
+                <span class="navbar-item__icon"
+                  ><i [class]="item.icon" aria-hidden="true"></i
+                ></span>
                 <span>{{ item.label }}</span>
               </a>
             }
@@ -53,40 +75,71 @@
       }
     }
 
-    <section class="nav-section nav-section--workspace" aria-labelledby="workspace-navigation">
-
+    <section
+      class="nav-section nav-section--workspace"
+      aria-labelledby="workspace-navigation"
+    >
       <a class="navbar-item" routerLink="/workspace" routerLinkActive="active">
-        <span class="navbar-item__icon"><i class="pi pi-building" aria-hidden="true"></i></span>
+        <span class="navbar-item__icon"
+          ><i class="icon icon-building" aria-hidden="true"></i
+        ></span>
         <span>Workspace</span>
       </a>
-      <a class="navbar-item" routerLink="/notifications" routerLinkActive="active">
-        <span class="navbar-item__icon"><i class="pi pi-bell" aria-hidden="true"></i></span>
+      <a
+        class="navbar-item"
+        routerLink="/notifications"
+        routerLinkActive="active"
+      >
+        <span class="navbar-item__icon"
+          ><i class="icon icon-bell" aria-hidden="true"></i
+        ></span>
         <span>Notifications</span>
       </a>
     </section>
   </div>
 
-  <div class="account-section">
-    <button type="button" class="account-trigger" (click)="accountPopover.toggle($event)" aria-label="Open account menu">
-      <span class="account-trigger__avatar"><i class="pi pi-user" aria-hidden="true"></i></span>
+  <hlm-popover class="account-section" #accountPopover="brnPopover">
+    <button
+      type="button"
+      class="account-trigger"
+      hlmPopoverTrigger
+      aria-label="Open account menu"
+    >
+      <span class="account-trigger__avatar"
+        ><i class="icon icon-user" aria-hidden="true"></i
+      ></span>
       <span class="account-trigger__copy">
         <strong>Account</strong>
         <small>Settings and security</small>
       </span>
-      <i class="pi pi-ellipsis-h account-trigger__more" aria-hidden="true"></i>
+      <i
+        class="icon icon-ellipsis account-trigger__more"
+        aria-hidden="true"
+      ></i>
     </button>
 
-    <p-popover #accountPopover styleClass="navbar-account-popover">
+    <hlm-popover-content *hlmPopoverPortal class="navbar-account-popover">
       <div class="account-menu">
-        <a class="account-menu__item" routerLink="/account" (click)="accountPopover.hide()">
-          <i class="pi pi-cog" aria-hidden="true"></i>
-          <span><strong>Account settings</strong><small>Theme, password, and security</small></span>
+        <a
+          class="account-menu__item"
+          routerLink="/account"
+          (click)="accountPopover.close()"
+        >
+          <i class="icon icon-settings" aria-hidden="true"></i>
+          <span
+            ><strong>Account settings</strong
+            ><small>Theme, password, and security</small></span
+          >
         </a>
-        <button type="button" class="account-menu__item account-menu__item--danger" (click)="user.logoutAndRedirect()">
-          <i class="pi pi-sign-out" aria-hidden="true"></i>
+        <button
+          type="button"
+          class="account-menu__item account-menu__item--danger"
+          (click)="user.logoutAndRedirect()"
+        >
+          <i class="icon icon-log-out" aria-hidden="true"></i>
           <span><strong>Sign out</strong><small>End this session</small></span>
         </button>
       </div>
-    </p-popover>
-  </div>
+    </hlm-popover-content>
+  </hlm-popover>
 </nav>

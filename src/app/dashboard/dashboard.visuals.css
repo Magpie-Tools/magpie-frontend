@@ -1,4 +1,4 @@
-.dashboard-card.p-card {
+.dashboard-card[hlmCard] {
   height: 100%;
   overflow: hidden;
   border: 1px solid rgba(239, 229, 237, 0.15);
@@ -11,23 +11,17 @@
   transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
 }
 
-.dashboard-card.p-card:hover,
-.dashboard-card.p-card:focus-within {
+.dashboard-card[hlmCard]:hover,
+.dashboard-card[hlmCard]:focus-within {
   border-color: rgba(226, 196, 218, 0.27);
   box-shadow: 0 28px 55px rgba(3, 3, 5, 0.28), 0 0 2.5rem rgba(var(--theme-primary-500-rgb), 0.06);
   transform: translateY(-2px);
 }
 
-.dashboard-card.p-card .p-card-header {
+.dashboard-card[hlmCard] [hlmCardHeader] {
   padding: 0;
   border: 0;
   background: transparent;
-}
-
-.dashboard-card.p-card .p-card-body,
-.dashboard-card.p-card .p-card-content {
-  height: 100%;
-  padding: 0;
 }
 
 .dashboard-card__header {
@@ -160,7 +154,7 @@
   max-width: 100%;
 }
 
-.dashboard-country-dialog.p-dialog {
+.dashboard-country-dialog.app-dialog-panel {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 1.15rem;
@@ -169,26 +163,26 @@
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.58);
 }
 
-.dashboard-country-dialog.p-dialog .p-dialog-header {
+.dashboard-country-dialog.app-dialog-panel .app-dialog-header {
   padding: 1.05rem 1.15rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
   background: linear-gradient(135deg, rgba(var(--theme-primary-500-rgb), 0.09), rgba(16, 16, 18, 0.98));
   color: rgba(255, 255, 255, 0.94);
 }
 
-.dashboard-country-dialog.p-dialog .p-dialog-title {
+.dashboard-country-dialog.app-dialog-panel [hlmDialogTitle] {
   font-size: 0.86rem;
   font-weight: 590;
   letter-spacing: -0.02em;
 }
 
-.dashboard-country-dialog.p-dialog .p-dialog-content {
+.dashboard-country-dialog.app-dialog-panel .app-dialog-body {
   background: #101012;
   color: rgba(255, 255, 255, 0.82);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dashboard-card.p-card,
+  .dashboard-card[hlmCard],
   .dashboard-control {
     transition: none;
   }

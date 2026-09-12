@@ -1,23 +1,35 @@
-<p-card [class]="styleClass">
-  <div class="metric-card__topline">
-    <div class="metric-card__heading">
-      <span class="dashboard-card__icon"><i [class]="icon" aria-hidden="true"></i></span>
-      <span>{{ title }}</span>
+<section hlmCard [class]="styleClass">
+  <div class="dashboard-card__body">
+    <div class="metric-card__topline">
+      <div class="metric-card__heading">
+        <span class="dashboard-card__icon"
+          ><i [class]="icon" aria-hidden="true"></i
+        ></span>
+        <span>{{ title }}</span>
+      </div>
+      <span
+        hlmBadge
+        class="metric-card__trend"
+        [ngClass]="getChipClass(resolvedChange)"
+      >
+        <i
+          class="icon"
+          [ngClass]="getChangeIcon(resolvedChange)"
+          aria-hidden="true"
+        ></i>
+        {{ formatChange(resolvedChange) }}
+      </span>
     </div>
-    <p-chip class="metric-card__trend" [ngClass]="getChipClass(resolvedChange)">
-      <i class="pi" [ngClass]="getChangeIcon(resolvedChange)" aria-hidden="true"></i>
-      {{ formatChange(resolvedChange) }}
-    </p-chip>
-  </div>
 
-  <strong class="metric-card__value">{{ displayValue ?? value }}</strong>
+    <strong class="metric-card__value">{{ displayValue ?? value }}</strong>
 
-  <div class="metric-card__visual">
-    <p-chart
-      type="line"
-      [data]="sparklineData"
-      [options]="sparklineOptions"
-      [ngClass]="getChangeColorClass(resolvedChange)">
-    </p-chart>
+    <div class="metric-card__visual">
+      <app-chart
+        type="line"
+        [data]="sparklineData"
+        [options]="sparklineOptions"
+        [ngClass]="getChangeColorClass(resolvedChange)"
+      />
+    </div>
   </div>
-</p-card>
+</section>

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {of} from 'rxjs';
 import {HttpService} from '../../services/http.service';
-import { MessageService } from 'primeng/api';
+
 import { AddScrapeSourceComponent } from './add-scrape-source.component';
 
 describe('AddScrapeSourceComponent', () => {
@@ -13,7 +13,7 @@ describe('AddScrapeSourceComponent', () => {
     upload = jasmine.createSpy('uploadScrapeSources').and.returnValue(of({sourceCount: 1}));
     await TestBed.configureTestingModule({
       imports: [AddScrapeSourceComponent],
-      providers: [MessageService, {provide: HttpService, useValue: {uploadScrapeSources: upload}}]
+      providers: [ {provide: HttpService, useValue: {uploadScrapeSources: upload}}]
     })
     .compileComponents();
 

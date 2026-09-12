@@ -1,10 +1,14 @@
-<p-card [class]="cardStyleClass">
-  <ng-template pTemplate="header">
+<section hlmCard [class]="cardStyleClass">
+  <div hlmCardHeader>
     <div class="dashboard-card__header">
       <div class="dashboard-card__heading">
-        <span class="dashboard-card__icon"><i class="pi pi-shield" aria-hidden="true"></i></span>
+        <span class="dashboard-card__icon"
+          ><i class="icon icon-shield" aria-hidden="true"></i
+        ></span>
         <div class="dashboard-card__copy">
-          <h2 class="dashboard-card__title">How healthy is route reputation?</h2>
+          <h2 class="dashboard-card__title">
+            How healthy is route reputation?
+          </h2>
           <span class="dashboard-card__subtitle">
             @if (total > 0) {
               {{ total | number }} scored proxies split by reputation.
@@ -15,15 +19,17 @@
         </div>
       </div>
     </div>
-  </ng-template>
+  </div>
 
   <div class="reputation-card__body">
     <div class="reputation-card__chart">
       @if (total > 0) {
-        <p-chart type="bar" [data]="chartData" [options]="chartOptions"></p-chart>
+        <app-chart type="bar" [data]="chartData" [options]="chartOptions" />
       } @else {
         <div class="dashboard-empty reputation-card__empty">
-          <span class="dashboard-empty__icon"><i class="pi pi-shield" aria-hidden="true"></i></span>
+          <span class="dashboard-empty__icon"
+            ><i class="icon icon-shield" aria-hidden="true"></i
+          ></span>
           <p>Reputation groups will appear after proxies collect scores.</p>
         </div>
       }
@@ -36,14 +42,17 @@
       </div>
       @for (entry of entries; track entry.key) {
         <div class="reputation-card__legend">
-          <span class="legend-swatch" [ngStyle]="{'background': entry.color}"></span>
+          <span
+            class="legend-swatch"
+            [ngStyle]="{ background: entry.color }"
+          ></span>
           <div class="legend-text">
             <span class="legend-label">{{ entry.title }}</span>
             <span class="legend-value">{{ entry.value | number }} proxies</span>
           </div>
-          <strong>{{ entry.percentage | number:'1.1-1' }}%</strong>
+          <strong>{{ entry.percentage | number: "1.1-1" }}%</strong>
         </div>
       }
     </div>
   </div>
-</p-card>
+</section>

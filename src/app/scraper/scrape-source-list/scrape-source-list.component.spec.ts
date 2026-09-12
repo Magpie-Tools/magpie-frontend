@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MessageService} from 'primeng/api';
+
 import {RouterTestingModule} from '@angular/router/testing';
 import {BehaviorSubject, of, Subject, throwError} from 'rxjs';
 import {ScrapeSourceListComponent} from './scrape-source-list.component';
@@ -41,7 +41,6 @@ describe('ScrapeSourceListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ScrapeSourceListComponent, RouterTestingModule],
       providers: [
-        MessageService,
         {provide: HttpService, useValue: httpServiceStub},
         {provide: SettingsService, useValue: settingsServiceStub},
         {provide: UserService, useValue: userServiceStub},

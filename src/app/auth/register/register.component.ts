@@ -1,11 +1,10 @@
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmInput} from '@spartan-ng/helm/input';
 import {getHttpErrorMessage} from '../../shared/http-error';
 import { Component } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
 
 import { HttpService } from '../../services/http.service';
 import { User } from '../../models/UserModel';
@@ -20,11 +19,10 @@ import {AuthComponent} from '../auth.component';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [
+  imports: [HlmButton, HlmInput,
     ReactiveFormsModule,
     RouterLink,
-    InputTextModule,
-    ButtonModule,
+
     AuthComponent,
   ],
   templateUrl: './register.component.html'

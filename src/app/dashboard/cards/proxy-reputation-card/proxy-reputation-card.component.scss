@@ -21,8 +21,7 @@
   background: rgba(255, 255, 255, 0.012);
 }
 
-:host ::ng-deep .reputation-card__chart p-chart,
-:host ::ng-deep .reputation-card__chart .p-chart,
+:host ::ng-deep .reputation-card__chart app-chart,
 :host ::ng-deep .reputation-card__chart canvas {
   display: block;
   width: 100% !important;

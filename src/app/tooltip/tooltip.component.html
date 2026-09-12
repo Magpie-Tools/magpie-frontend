@@ -1,1 +1,8 @@
-<i class="pi pi-info-circle info-icon" pTooltip="{{ text }}" tooltipPosition="top"></i>
+<button
+  type="button"
+  class="info-icon"
+  [hlmTooltip]="text"
+  aria-label="More information"
+>
+  <i class="icon icon-info" aria-hidden="true"></i>
+</button>

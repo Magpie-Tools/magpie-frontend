@@ -2,16 +2,23 @@
   <section class="account-stage">
     <header class="account-context">
       <div class="account-context__copy">
-        <span class="context-icon"><i class="pi pi-user" aria-hidden="true"></i></span>
+        <span class="context-icon"
+          ><i class="icon icon-user" aria-hidden="true"></i
+        ></span>
         <div>
           <span class="context-eyebrow">Personal settings</span>
           <h1>Your account</h1>
-          <p>Choose how Magpie looks, update your password, and manage the account itself.</p>
+          <p>
+            Choose how Magpie looks, update your password, and manage the
+            account itself.
+          </p>
         </div>
       </div>
 
       <div class="account-state">
-        <span class="account-state__mark"><i class="pi pi-shield" aria-hidden="true"></i></span>
+        <span class="account-state__mark"
+          ><i class="icon icon-shield" aria-hidden="true"></i
+        ></span>
         <span>
           <small>Credential protection</small>
           <strong>Active</strong>
@@ -20,12 +27,20 @@
     </header>
 
     <div class="account-grid">
-      <section class="account-card appearance-card" aria-labelledby="appearance-title">
+      <section
+        class="account-card appearance-card"
+        aria-labelledby="appearance-title"
+      >
         <div class="card-heading">
-          <span class="card-icon"><i class="pi pi-palette" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-palette" aria-hidden="true"></i
+          ></span>
           <div class="card-heading__copy">
             <h2 id="appearance-title">Which color feels right?</h2>
-            <p>The accent follows you across settings, controls, charts, and status highlights.</p>
+            <p>
+              The accent follows you across settings, controls, charts, and
+              status highlights.
+            </p>
           </div>
           <span class="card-state">{{ labelFor(currentTheme()) }}</span>
         </div>
@@ -39,44 +54,65 @@
               (click)="setTheme(theme)"
               [attr.aria-pressed]="currentTheme() === theme"
             >
-              <span class="theme-choice__swatch" [style.--swatch-color]="colorFor(theme)"></span>
+              <span
+                class="theme-choice__swatch"
+                [style.--swatch-color]="colorFor(theme)"
+              ></span>
               <span class="theme-choice__copy">
                 <strong>{{ labelFor(theme) }}</strong>
-                <small>{{ currentTheme() === theme ? 'In use' : 'Preview' }}</small>
+                <small>{{
+                  currentTheme() === theme ? "In use" : "Preview"
+                }}</small>
               </span>
-              <i class="pi pi-check" aria-hidden="true"></i>
+              <i class="icon icon-check" aria-hidden="true"></i>
             </button>
           }
         </div>
 
         <div class="appearance-note">
-          <i class="pi pi-desktop" aria-hidden="true"></i>
-          <span>Your choice is saved in this browser and takes effect immediately.</span>
+          <i class="icon icon-monitor" aria-hidden="true"></i>
+          <span
+            >Your choice is saved in this browser and takes effect
+            immediately.</span
+          >
         </div>
       </section>
 
-      <section class="account-card password-card" aria-labelledby="password-title">
+      <section
+        class="account-card password-card"
+        aria-labelledby="password-title"
+      >
         <div class="card-heading">
-          <span class="card-icon"><i class="pi pi-key" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-key" aria-hidden="true"></i
+          ></span>
           <div class="card-heading__copy">
             <h2 id="password-title">Change your password</h2>
-            <p>Confirm the current password, then choose a replacement that meets the policy.</p>
+            <p>
+              Confirm the current password, then choose a replacement that meets
+              the policy.
+            </p>
           </div>
         </div>
 
-        <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()" class="password-form">
+        <form
+          [formGroup]="passwordForm"
+          (ngSubmit)="onSubmit()"
+          class="password-form"
+        >
           <div class="field field--current">
             <label for="oldPassword">Current password</label>
-            <p-password
+            <app-password
               inputId="oldPassword"
               formControlName="oldPassword"
-              [feedback]="false"
-              [toggleMask]="true"
               autocomplete="current-password"
               placeholder="Enter current password"
               class="password-input"
-            ></p-password>
-            @if (passwordForm.get('oldPassword')?.hasError('required') && passwordForm.get('oldPassword')?.touched) {
+            />
+            @if (
+              passwordForm.get("oldPassword")?.hasError("required") &&
+              passwordForm.get("oldPassword")?.touched
+            ) {
               <small class="field-error">Current password is required.</small>
             }
           </div>
@@ -84,32 +120,34 @@
           <div class="new-password-fields">
             <div class="field">
               <label for="newPassword">New password</label>
-              <p-password
+              <app-password
                 inputId="newPassword"
                 formControlName="newPassword"
-                [feedback]="false"
-                [toggleMask]="true"
                 autocomplete="new-password"
                 placeholder="Choose a new password"
                 class="password-input"
-              ></p-password>
-              @if (passwordForm.get('newPassword')?.hasError('required') && passwordForm.get('newPassword')?.touched) {
+              />
+              @if (
+                passwordForm.get("newPassword")?.hasError("required") &&
+                passwordForm.get("newPassword")?.touched
+              ) {
                 <small class="field-error">New password is required.</small>
               }
             </div>
 
             <div class="field">
               <label for="newPasswordCheck">Repeat new password</label>
-              <p-password
+              <app-password
                 inputId="newPasswordCheck"
                 formControlName="newPasswordCheck"
-                [feedback]="false"
-                [toggleMask]="true"
                 autocomplete="new-password"
                 placeholder="Repeat the new password"
                 class="password-input"
-              ></p-password>
-              @if (passwordForm.hasError('passwordsMismatch') && passwordForm.get('newPasswordCheck')?.touched) {
+              />
+              @if (
+                passwordForm.hasError("passwordsMismatch") &&
+                passwordForm.get("newPasswordCheck")?.touched
+              ) {
                 <small class="field-error">Passwords do not match.</small>
               }
             </div>
@@ -118,12 +156,29 @@
           <div class="password-feedback" aria-live="polite">
             <div class="password-feedback__heading">
               <span>New password checklist</span>
-              <strong>{{ metPasswordRequirementCount }} of {{ passwordRequirements.length }}</strong>
+              <strong
+                >{{ metPasswordRequirementCount }} of
+                {{ passwordRequirements.length }}</strong
+              >
             </div>
             <div class="requirement-rail">
-              @for (requirement of passwordRequirements; track requirement; let index = $index) {
-                <span class="requirement" [class.is-met]="passwordRequirementMet(index)">
-                  <i [class]="passwordRequirementMet(index) ? 'pi pi-check' : 'pi pi-circle'" aria-hidden="true"></i>
+              @for (
+                requirement of passwordRequirements;
+                track requirement;
+                let index = $index
+              ) {
+                <span
+                  class="requirement"
+                  [class.is-met]="passwordRequirementMet(index)"
+                >
+                  <i
+                    [class]="
+                      passwordRequirementMet(index)
+                        ? 'icon icon-check'
+                        : 'icon icon-circle'
+                    "
+                    aria-hidden="true"
+                  ></i>
                   {{ requirement }}
                 </span>
               }
@@ -132,11 +187,24 @@
 
           <div class="form-action">
             <div class="form-state">
-              <span [class.is-ready]="passwordForm.valid" aria-hidden="true"></span>
-              <p>{{ passwordForm.valid ? 'Ready to save' : 'Complete every field to continue' }}</p>
+              <span
+                [class.is-ready]="passwordForm.valid"
+                aria-hidden="true"
+              ></span>
+              <p>
+                {{
+                  passwordForm.valid
+                    ? "Ready to save"
+                    : "Complete every field to continue"
+                }}
+              </p>
             </div>
-            <button type="submit" class="button button--primary" [disabled]="passwordForm.invalid">
-              <i class="pi pi-check" aria-hidden="true"></i>
+            <button
+              type="submit"
+              class="button button--primary"
+              [disabled]="passwordForm.invalid"
+            >
+              <i class="icon icon-check" aria-hidden="true"></i>
               Save password
             </button>
           </div>
@@ -145,29 +213,47 @@
 
       <section class="account-card danger-card" aria-labelledby="danger-title">
         <div class="card-heading">
-          <span class="card-icon card-icon--danger"><i class="pi pi-trash" aria-hidden="true"></i></span>
+          <span class="card-icon card-icon--danger"
+            ><i class="icon icon-trash" aria-hidden="true"></i
+          ></span>
           <div class="card-heading__copy">
             <h2 id="danger-title">Delete your account</h2>
-            <p>Permanently remove your login and personal account data from this Magpie instance.</p>
+            <p>
+              Permanently remove your login and personal account data from this
+              Magpie instance.
+            </p>
           </div>
         </div>
 
         <div class="danger-boundary" aria-hidden="true">
-          <span><i class="pi pi-user"></i></span>
-          <i class="pi pi-arrow-right"></i>
-          <span class="danger-boundary__end"><i class="pi pi-times"></i></span>
+          <span><i class="icon icon-user"></i></span>
+          <i class="icon icon-arrow-right"></i>
+          <span class="danger-boundary__end"><i class="icon icon-x"></i></span>
         </div>
 
         <ul class="consequence-list">
-          <li><i class="pi pi-times" aria-hidden="true"></i><span>You will lose access to this account immediately.</span></li>
-          <li><i class="pi pi-times" aria-hidden="true"></i><span>Magpie cannot restore the account after deletion.</span></li>
-          <li><i class="pi pi-info-circle" aria-hidden="true"></i><span>Transfer ownership of shared workspaces first.</span></li>
+          <li>
+            <i class="icon icon-x" aria-hidden="true"></i
+            ><span>You will lose access to this account immediately.</span>
+          </li>
+          <li>
+            <i class="icon icon-x" aria-hidden="true"></i
+            ><span>Magpie cannot restore the account after deletion.</span>
+          </li>
+          <li>
+            <i class="icon icon-info" aria-hidden="true"></i
+            ><span>Transfer ownership of shared workspaces first.</span>
+          </li>
         </ul>
 
         <div class="danger-action">
           <span>This cannot be undone.</span>
-          <button type="button" class="button button--danger" (click)="openDeleteDialog()">
-            <i class="pi pi-trash" aria-hidden="true"></i>
+          <button
+            type="button"
+            class="button button--danger"
+            (click)="openDeleteDialog()"
+          >
+            <i class="icon icon-trash" aria-hidden="true"></i>
             Delete account
           </button>
         </div>
@@ -176,22 +262,19 @@
   </section>
 </main>
 
-<p-dialog
+<app-dialog
   [visible]="deleteDialogVisible"
   (visibleChange)="deleteDialogVisible = $event"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
   [dismissableMask]="true"
-  [breakpoints]="{ '960px': '90vw', '640px': '95vw' }"
-  [style]="{ width: '32rem' }"
-  [appendTo]="'body'"
   styleClass="account-danger-dialog"
   (onHide)="onDeleteDialogHide()"
+  [panelStyle]="{ width: '32rem' }"
 >
-  <ng-template pTemplate="header">
+  <ng-template #dialogHeader>
     <div class="dialog-heading">
-      <span class="dialog-icon"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i></span>
+      <span class="dialog-icon"
+        ><i class="icon icon-triangle-alert" aria-hidden="true"></i
+      ></span>
       <div>
         <span>Permanent action</span>
         <strong>Confirm account deletion</strong>
@@ -199,41 +282,59 @@
     </div>
   </ng-template>
 
-  <form [formGroup]="deleteAccountForm" (ngSubmit)="onDeleteAccount()" class="delete-form">
-    <p class="dialog-copy">Enter your password to confirm. Magpie will delete the account and sign you out.</p>
+  <form
+    [formGroup]="deleteAccountForm"
+    (ngSubmit)="onDeleteAccount()"
+    class="delete-form"
+  >
+    <p class="dialog-copy">
+      Enter your password to confirm. Magpie will delete the account and sign
+      you out.
+    </p>
 
     <div class="field">
       <label for="deletePassword">Current password</label>
-      <p-password
+      <app-password
         inputId="deletePassword"
         formControlName="password"
-        [feedback]="false"
-        [toggleMask]="true"
         autocomplete="current-password"
         placeholder="Enter current password"
         class="password-input password-input--danger"
-      ></p-password>
-      @if (deleteAccountForm.get('password')?.hasError('required') && deleteAccountForm.get('password')?.touched) {
+      />
+      @if (
+        deleteAccountForm.get("password")?.hasError("required") &&
+        deleteAccountForm.get("password")?.touched
+      ) {
         <small class="field-error">Password is required.</small>
       }
     </div>
 
     <div class="dialog-warning">
-      <i class="pi pi-lock" aria-hidden="true"></i>
+      <i class="icon icon-lock" aria-hidden="true"></i>
       <span>There is no recovery period after deletion.</span>
     </div>
 
     <div class="dialog-actions">
-      <button type="button" class="button button--quiet" (click)="closeDeleteDialog()">Cancel</button>
-      <button type="submit" class="button button--danger" [disabled]="deleteAccountForm.invalid || deletingAccount">
+      <button
+        type="button"
+        class="button button--quiet"
+        (click)="closeDeleteDialog()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="button button--danger"
+        [disabled]="deleteAccountForm.invalid || deletingAccount"
+      >
         @if (deletingAccount) {
-          <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+          <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
           Deleting account
         } @else {
-          <i class="pi pi-trash" aria-hidden="true"></i>
+          <i class="icon icon-trash" aria-hidden="true"></i>
           Delete account
         }
       </button>
     </div>
   </form>
-</p-dialog>
+</app-dialog>

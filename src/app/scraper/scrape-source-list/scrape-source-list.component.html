@@ -1,5 +1,5 @@
 <app-inventory-page-shell
-  pageIcon="pi pi-globe"
+  pageIcon="icon icon-globe"
   pageTitle="Scrape sources"
   pageDescription="Manage the websites Magpie scans for fresh proxy routes."
   toolbarTitle="Find a scrape source"
@@ -8,7 +8,7 @@
   [searchTerm]="searchTerm"
   searchPlaceholder="Search source URLs"
   searchAriaLabel="Search scrape sources"
-  resultIcon="pi pi-list"
+  resultIcon="icon icon-list"
   resultTitle="Source registry"
   resultDescription="Review yield and health, run a scrape, check robots.txt, or open a source for more detail."
   [selectedCount]="selectedScrapeSources.length"
@@ -25,8 +25,19 @@
   (clearFilters)="clearFilters()"
 >
   <ng-container inventory-actions>
-    <button type="button" class="tool-button" [disabled]="loading()" (click)="refreshList()">
-      <i class="pi" [class.pi-spin]="loading()" [class.pi-spinner]="loading()" [class.pi-refresh]="!loading()" aria-hidden="true"></i>
+    <button
+      type="button"
+      class="tool-button"
+      [disabled]="loading()"
+      (click)="refreshList()"
+    >
+      <i
+        class="icon"
+        [class.icon-spin]="loading()"
+        [class.icon-loader-circle]="loading()"
+        [class.icon-refresh-cw]="!loading()"
+        aria-hidden="true"
+      ></i>
       Refresh
     </button>
 
@@ -38,7 +49,7 @@
         [attr.aria-expanded]="filterPanelOpen"
         (click)="toggleFilterPanel($event)"
       >
-        <i class="pi pi-filter" aria-hidden="true"></i>
+        <i class="icon icon-filter" aria-hidden="true"></i>
         {{ filterButtonLabel() }}
       </button>
     </div>
@@ -52,7 +63,7 @@
         [attr.aria-expanded]="columnPanelOpen"
         (click)="openColumnPanel($event)"
       >
-        <i class="pi pi-table" aria-hidden="true"></i>
+        <i class="icon icon-table" aria-hidden="true"></i>
         Columns
       </button>
     </div>
@@ -106,28 +117,312 @@
     }
   </ng-container>
 
-  <p-table
+  <div
     inventory-table
     #scrapeSourceTableRoot
-    [value]="scrapeSources()"
-    [loading]="loading()"
-    [paginator]="true"
-    [rows]="pageSize"
-    [first]="page * pageSize"
-    [totalRecords]="totalItems()"
-    [lazy]="true"
-    (onLazyLoad)="onLazyLoad($event)"
-    [rowsPerPageOptions]="rowsPerPageOptions"
-    dataKey="id"
-    [selection]="selection.selected"
-    [(selection)]="selectedScrapeSources"
-    class="scrape-source-table p-datatable-gridlines p-datatable-sm"
-    [rowHover]="true"
-    [showLoader]="hasLoaded()"
+    class="data-table scrape-source-table"
+    [attr.aria-busy]="loading()"
   >
-    <ng-template pTemplate="paginatorright">
+    @if (loading()) {
+      <div role="status" class="table-loading">Loading sources…</div>
+    }
+    <div hlmTableContainer [attr.inert]="loading() ? '' : null" class="table-scroll">
+      <table hlmTable>
+        <thead hlmTHead>
+          <tr hlmTr>
+            <th hlmTh style="width: 3rem">
+              <hlm-checkbox
+                aria-label="Select all sources on this page"
+                [ngModel]="isAllSelected()"
+                [disabled]="scrapeSources().length === 0"
+                [indeterminate]="isSomeSelected()"
+                (checkedChange)="masterToggle()"
+              />
+            </th>
+            @for (
+              column of tableColumns();
+              track trackByColumn($index, column)
+            ) {
+              @if (column.sortField) {
+                <th
+                  hlmTh
+                  [attr.aria-sort]="
+                    sortField === column.sortField
+                      ? sortOrder === 1
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
+                  "
+                  class="text-center"
+                  [ngClass]="[
+                    'column-' + column.id,
+                    column.id === 'url' ? 'url-cell' : '',
+                  ]"
+                >
+                  <button
+                    type="button"
+                    class="table-sort"
+                    (click)="sortColumn(column.sortField!)"
+                  >
+                    {{ column.label }}
+                    <span aria-hidden="true">{{
+                      sortField === column.sortField
+                        ? sortOrder === 1
+                          ? "↑"
+                          : "↓"
+                        : "↕"
+                    }}</span>
+                  </button>
+                </th>
+              } @else {
+                <th
+                  hlmTh
+                  class="text-center"
+                  [ngClass]="[
+                    'column-' + column.id,
+                    column.id === 'url' ? 'url-cell' : '',
+                  ]"
+                >
+                  {{ column.label }}
+                </th>
+              }
+            }
+          </tr>
+        </thead>
+        <tbody hlmTBody>
+          @if (loading()) {
+            @if (!hasLoaded()) {
+              @for (row of skeletonRows; track $index) {
+                <tr hlmTr class="scrape-skeleton-row">
+                  <td hlmTd>
+                    <hlm-skeleton
+                      [style.width]="'1.25rem'"
+                      [style.height]="'1.25rem'"
+                      [style.border-radius]="'50%'"
+                    />
+                  </td>
+                  @for (
+                    column of tableColumns();
+                    track trackByColumn($index, column)
+                  ) {
+                    @if (column.id === "url") {
+                      <td hlmTd>
+                        <hlm-skeleton
+                          [style.width]="'100%'"
+                          [style.height]="'0.85rem'"
+                        />
+                      </td>
+                    } @else if (
+                      column.id === "proxy_count" || column.id === "alive_count"
+                    ) {
+                      <td hlmTd class="text-center">
+                        <hlm-skeleton
+                          class="inline-block"
+                          [style.width]="'3rem'"
+                          [style.height]="'0.85rem'"
+                        />
+                      </td>
+                    } @else if (column.id === "health") {
+                      <td hlmTd class="text-center">
+                        <div class="health-skeleton">
+                          <hlm-skeleton
+                            class="inline-block"
+                            [style.width]="'7rem'"
+                            [style.height]="'1.35rem'"
+                          />
+                          <hlm-skeleton
+                            class="inline-block"
+                            [style.width]="'4.5rem'"
+                            [style.height]="'0.6rem'"
+                          />
+                        </div>
+                      </td>
+                    } @else if (column.id === "robots_check") {
+                      <td hlmTd class="text-center">
+                        <hlm-skeleton
+                          class="inline-block"
+                          [style.width]="'7.5rem'"
+                          [style.height]="'1.5rem'"
+                        />
+                      </td>
+                    } @else {
+                      <td hlmTd class="text-center">
+                        <hlm-skeleton
+                          class="inline-block"
+                          [style.width]="'4.5rem'"
+                          [style.height]="'1.5rem'"
+                        />
+                      </td>
+                    }
+                  }
+                </tr>
+              }
+            }
+          }
+          @for (source of scrapeSources(); track source.id) {
+            <tr
+              hlmTr
+              [attr.data-state]="
+                selection.isSelected(source) ? 'selected' : null
+              "
+              (click)="toggleSelection(source)"
+            >
+              <td hlmTd (click)="$event.stopPropagation()">
+                <hlm-checkbox
+                  [aria-label]="'Select source ' + source.url"
+                  [ngModel]="selection.isSelected(source)"
+                  (checkedChange)="toggleSelection(source)"
+                />
+              </td>
+              @for (
+                column of tableColumns();
+                track trackByColumn($index, column)
+              ) {
+                @switch (column.id) {
+                  @case ("url") {
+                    <td hlmTd class="url-cell column-url">
+                      <a
+                        [href]="source.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="scrape-url"
+                        [title]="source.url"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <span class="scrape-url-start">{{
+                          source.urlHead
+                        }}</span
+                        ><span class="scrape-url-end">{{
+                          source.urlTail
+                        }}</span>
+                      </a>
+                      <div
+                        class="source-scrape-summary"
+                        [title]="source.last_scrape_error || ''"
+                      >
+                        <span class="source-fetch-label">{{
+                          source.fetch_mode === "browser"
+                            ? "JavaScript"
+                            : "HTTP"
+                        }}</span>
+                        <app-source-scrape-status
+                          [status]="source.last_scrape_status"
+                        />
+                      </div>
+                    </td>
+                  }
+                  @case ("proxy_count") {
+                    <td hlmTd class="text-center column-proxy_count">
+                      {{ source.proxy_count | number }}
+                    </td>
+                  }
+                  @case ("alive_count") {
+                    <td hlmTd class="text-center column-alive_count">
+                      {{ source.alive_count | number }}
+                    </td>
+                  }
+                  @case ("health") {
+                    <td hlmTd class="text-center health-td column-health">
+                      <app-health-bar-cell
+                        [aliveCount]="source.alive_count"
+                        [deadCount]="source.dead_count"
+                        [unknownCount]="source.unknown_count"
+                        [total]="source.proxy_count"
+                      ></app-health-bar-cell>
+                    </td>
+                  }
+                  @case ("robots_check") {
+                    <td hlmTd class="text-center column-robots_check">
+                      <button
+                        size="sm"
+                        class="ui-button-outlined ui-button-secondary"
+                        (click)="checkRobots(source, $event)"
+                        hlmBtn
+                        type="button"
+                        [disabled]="isCheckingRobots(source.id)"
+                        variant="outline"
+                      >
+                        @if (isCheckingRobots(source.id)) {
+                          <i
+                            class="icon icon-loader-circle icon-spin"
+                            aria-hidden="true"
+                          ></i>
+                        } @else {
+                          <i class="icon icon-shield" aria-hidden="true"></i>
+                        }
+                        Check robots.txt
+                      </button>
+                    </td>
+                  }
+                  @case ("scrape_now") {
+                    <td
+                      hlmTd
+                      class="text-center column-scrape_now"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <button
+                        size="sm"
+                        class="ui-button-outlined"
+                        (click)="scrapeSourceNow(source, $event)"
+                        hlmBtn
+                        type="button"
+                        [disabled]="isScrapingSource(source.id)"
+                        variant="outline"
+                      >
+                        @if (isScrapingSource(source.id)) {
+                          <i
+                            class="icon icon-loader-circle icon-spin"
+                            aria-hidden="true"
+                          ></i>
+                        } @else {
+                          <i class="icon icon-bolt" aria-hidden="true"></i>
+                        }
+                        Scrape
+                      </button>
+                    </td>
+                  }
+                  @case ("actions") {
+                    <td
+                      hlmTd
+                      class="text-center column-actions"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <button
+                        class="ui-button-text ui-button-sm"
+                        (click)="onViewSource($event, source)"
+                        hlmBtn
+                        type="button"
+                        variant="ghost"
+                      >
+                        <i
+                          class="icon icon-external-link"
+                          aria-hidden="true"
+                        ></i
+                        >Details
+                      </button>
+                    </td>
+                  }
+                }
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination
+      [first]="page * pageSize"
+      [totalRecords]="totalItems()"
+      (pageChange)="onLazyLoad($event)"
+      [rows]="pageSize"
+      [rowsPerPageOptions]="rowsPerPageOptions"
+      [disabled]="loading()"
+      [sortField]="sortField"
+      [sortOrder]="sortOrder"
+    >
       <form class="scrape-page-jump" (submit)="onPageJumpSubmit($event)">
-        <label class="scrape-page-jump__label" [attr.for]="pageJumpInputId">Page</label>
+        <label class="scrape-page-jump__label" [attr.for]="pageJumpInputId"
+          >Page</label
+        >
         <input
           class="scrape-page-jump__input"
           type="number"
@@ -140,157 +435,31 @@
           [(ngModel)]="pageJumpValue"
           [attr.aria-describedby]="pageJumpTotalId"
         />
-        <span class="scrape-page-jump__total" [id]="pageJumpTotalId">of {{ totalPages }}</span>
-        <button type="submit" class="scrape-page-jump__submit" [disabled]="loading() || totalPages <= 1">Go</button>
+        <span class="scrape-page-jump__total" [id]="pageJumpTotalId"
+          >of {{ totalPages }}</span
+        >
+        <button
+          type="submit"
+          class="scrape-page-jump__submit"
+          [disabled]="loading() || totalPages <= 1"
+        >
+          Go
+        </button>
         <button
           type="button"
           class="scrape-page-jump__scroll-toggle"
           [attr.aria-label]="pageScrollTargetLabel"
           [attr.aria-pressed]="pageScrollTarget === 'top'"
-          [pTooltip]="pageScrollTargetLabel"
-          tooltipPosition="top"
+          [hlmTooltip]="pageScrollTargetLabel"
           (click)="togglePageScrollTarget()"
         >
-          <i class="pi" [ngClass]="pageScrollTargetIcon" aria-hidden="true"></i>
+          <i
+            class="icon"
+            [ngClass]="pageScrollTargetIcon"
+            aria-hidden="true"
+          ></i>
         </button>
       </form>
-    </ng-template>
-
-    <ng-template pTemplate="header">
-      <tr>
-        <th style="width: 3rem">
-          <p-checkbox
-            [binary]="true"
-            (onChange)="masterToggle()"
-            [ngModel]="isAllSelected()"
-            [disabled]="scrapeSources().length === 0"
-            [indeterminate]="isSomeSelected()"
-          ></p-checkbox>
-        </th>
-        @for (column of tableColumns(); track trackByColumn($index, column)) {
-          @if (column.sortField) {
-            <th
-              [pSortableColumn]="column.sortField"
-              class="text-center"
-              [ngClass]="['column-' + column.id, column.id === 'url' ? 'url-cell' : '']"
-            >
-              {{ column.label }} <p-sortIcon [field]="column.sortField"></p-sortIcon>
-            </th>
-          } @else {
-            <th class="text-center" [ngClass]="['column-' + column.id, column.id === 'url' ? 'url-cell' : '']">
-              {{ column.label }}
-            </th>
-          }
-        }
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="loadingbody">
-      @if (!hasLoaded()) {
-        @for (row of skeletonRows; track $index) {
-          <tr class="scrape-skeleton-row">
-            <td><p-skeleton width="1.25rem" height="1.25rem" shape="circle"></p-skeleton></td>
-            @for (column of tableColumns(); track trackByColumn($index, column)) {
-              @if (column.id === 'url') {
-                <td><p-skeleton width="100%" height="0.85rem"></p-skeleton></td>
-              } @else if (column.id === 'proxy_count' || column.id === 'alive_count') {
-                <td class="text-center"><p-skeleton width="3rem" height="0.85rem" class="inline-block"></p-skeleton></td>
-              } @else if (column.id === 'health') {
-                <td class="text-center">
-                  <div class="health-skeleton">
-                    <p-skeleton width="7rem" height="1.35rem" class="inline-block"></p-skeleton>
-                    <p-skeleton width="4.5rem" height="0.6rem" class="inline-block"></p-skeleton>
-                  </div>
-                </td>
-              } @else if (column.id === 'robots_check') {
-                <td class="text-center"><p-skeleton width="7.5rem" height="1.5rem" class="inline-block"></p-skeleton></td>
-              } @else {
-                <td class="text-center"><p-skeleton width="4.5rem" height="1.5rem" class="inline-block"></p-skeleton></td>
-              }
-            }
-          </tr>
-        }
-      }
-    </ng-template>
-
-    <ng-template pTemplate="body" let-source>
-      <tr (click)="toggleSelection(source)" [pSelectableRow]="source">
-        <td (click)="$event.stopPropagation()">
-          <p-checkbox [binary]="true" (onChange)="toggleSelection(source)" [ngModel]="selection.isSelected(source)"></p-checkbox>
-        </td>
-        @for (column of tableColumns(); track trackByColumn($index, column)) {
-          @switch (column.id) {
-            @case ('url') {
-              <td class="url-cell column-url">
-                <a
-                  [href]="source.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="scrape-url"
-                  [title]="source.url"
-                  (click)="$event.stopPropagation()"
-                >
-                  <span class="scrape-url-start">{{ source.urlHead }}</span><span class="scrape-url-end">{{ source.urlTail }}</span>
-                </a>
-                <div class="source-scrape-summary" [title]="source.last_scrape_error || ''">
-                  <span class="source-fetch-label">{{ source.fetch_mode === 'browser' ? 'JavaScript' : 'HTTP' }}</span>
-                  <app-source-scrape-status [status]="source.last_scrape_status" />
-                </div>
-              </td>
-            }
-            @case ('proxy_count') {
-              <td class="text-center column-proxy_count">{{ source.proxy_count | number }}</td>
-            }
-            @case ('alive_count') {
-              <td class="text-center column-alive_count">{{ source.alive_count | number }}</td>
-            }
-            @case ('health') {
-              <td class="text-center health-td column-health">
-                <app-health-bar-cell
-                  [aliveCount]="source.alive_count"
-                  [deadCount]="source.dead_count"
-                  [unknownCount]="source.unknown_count ?? null"
-                  [total]="source.proxy_count"
-                ></app-health-bar-cell>
-              </td>
-            }
-            @case ('robots_check') {
-              <td class="text-center column-robots_check">
-                <p-button
-                  label="Check robots.txt"
-                  icon="pi pi-shield"
-                  size="small"
-                  [loading]="isCheckingRobots(source.id)"
-                  styleClass="p-button-outlined p-button-secondary"
-                  (onClick)="checkRobots(source, $event)"
-                ></p-button>
-              </td>
-            }
-            @case ('scrape_now') {
-              <td class="text-center column-scrape_now" (click)="$event.stopPropagation()">
-                <p-button
-                  label="Scrape"
-                  icon="pi pi-bolt"
-                  size="small"
-                  styleClass="p-button-outlined"
-                  [loading]="isScrapingSource(source.id)"
-                  (onClick)="scrapeSourceNow(source, $event)"
-                ></p-button>
-              </td>
-            }
-            @case ('actions') {
-              <td class="text-center column-actions" (click)="$event.stopPropagation()">
-                <p-button
-                  label="Details"
-                  icon="pi pi-external-link"
-                  styleClass="p-button-text p-button-sm"
-                  (onClick)="onViewSource($event, source)"
-                ></p-button>
-              </td>
-            }
-          }
-        }
-      </tr>
-    </ng-template>
-  </p-table>
+    </app-pagination>
+  </div>
 </app-inventory-page-shell>

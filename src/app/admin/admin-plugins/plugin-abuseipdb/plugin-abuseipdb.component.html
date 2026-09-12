@@ -2,74 +2,139 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="settings-stage">
     <header class="admin-context">
       <div class="admin-context__copy">
-        <a routerLink="/plugins" class="back-link" aria-label="Back to plugins"><i class="pi pi-arrow-left" aria-hidden="true"></i></a>
-        <span class="plugin-mark"><img src="https://www.abuseipdb.com/favicon.ico" alt="AbuseIPDB logo"/></span>
+        <a routerLink="/plugins" class="back-link" aria-label="Back to plugins"
+          ><i class="icon icon-arrow-left" aria-hidden="true"></i
+        ></a>
+        <span class="plugin-mark"
+          ><img
+            src="https://www.abuseipdb.com/favicon.ico"
+            alt="AbuseIPDB logo"
+        /></span>
         <div>
           <span class="context-eyebrow">Reputation intelligence</span>
           <h1>AbuseIPDB</h1>
-          <p>Use community abuse reports to strengthen every proxy reputation score.</p>
+          <p>
+            Use community abuse reports to strengthen every proxy reputation
+            score.
+          </p>
         </div>
       </div>
 
       <label class="master-toggle" for="abuseipdb-enabled">
-        <span><strong>{{ pluginEnabled() ? 'Enabled' : 'Disabled' }}</strong><small>Abuse intelligence</small></span>
-        <p-toggleswitch inputId="abuseipdb-enabled" formControlName="enabled" ariaLabel="Toggle AbuseIPDB plugin"></p-toggleswitch>
+        <span
+          ><strong>{{ pluginEnabled() ? "Enabled" : "Disabled" }}</strong
+          ><small>Abuse intelligence</small></span
+        >
+        <hlm-switch
+          inputId="abuseipdb-enabled"
+          formControlName="enabled"
+          aria-label="Toggle AbuseIPDB plugin"
+        />
       </label>
     </header>
 
     <div class="settings-grid" [class.plugin-disabled]="!pluginEnabled()">
       <section class="settings-card settings-card--access">
         <div class="card-heading">
-          <span class="card-icon"><i class="pi pi-key" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-key" aria-hidden="true"></i
+          ></span>
           <div>
             <h2>How should Magpie query AbuseIPDB?</h2>
-            <p>Connect the v2 API and define how far back reports should influence a proxy.</p>
+            <p>
+              Connect the v2 API and define how far back reports should
+              influence a proxy.
+            </p>
           </div>
         </div>
 
         <div class="field-group">
           <label for="abuseipdb-api-key">AbuseIPDB API key</label>
-          <input id="abuseipdb-api-key" type="text" pInputText formControlName="api_key" autocomplete="off" placeholder="Enter your API key"/>
+          <input
+            id="abuseipdb-api-key"
+            type="text"
+            hlmInput
+            formControlName="api_key"
+            autocomplete="off"
+            placeholder="Enter your API key"
+          />
           <small>The key is used only for IP check requests.</small>
         </div>
 
         <div class="age-policy">
-          <span class="age-policy__icon"><i class="pi pi-history" aria-hidden="true"></i></span>
-          <div class="age-policy__copy"><strong>Report max age</strong><small>Ignore reports older than this window.</small></div>
-          <p-inputNumber inputId="abuseipdb-max-age" formControlName="max_age_in_days" [min]="1" [max]="365" [showButtons]="true" suffix=" days"></p-inputNumber>
+          <span class="age-policy__icon"
+            ><i class="icon icon-history" aria-hidden="true"></i
+          ></span>
+          <div class="age-policy__copy">
+            <strong>Report max age</strong
+            ><small>Ignore reports older than this window.</small>
+          </div>
+          <input
+            hlmInput
+            type="number"
+            formControlName="max_age_in_days"
+            [min]="1"
+            [max]="365"
+            id="abuseipdb-max-age"
+          />
         </div>
       </section>
 
       <section class="settings-card settings-card--quota">
         <div class="card-heading card-heading--with-badge">
-          <span class="card-icon"><i class="pi pi-chart-bar" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-chart-no-axes-column" aria-hidden="true"></i
+          ></span>
           <div>
             <h2>How much daily capacity remains?</h2>
-            <p>Magpie reads rate-limit headers and spreads checks across the reset window.</p>
+            <p>
+              Magpie reads rate-limit headers and spreads checks across the
+              reset window.
+            </p>
           </div>
           <span class="quota-badge">{{ quotaDisplay() }}</span>
         </div>
 
-        <div class="quota-visual" [attr.aria-label]="quotaUsagePercent() + '% of daily quota used'">
-          <div class="quota-scale"><span [style.width.%]="quotaUsagePercent()"></span></div>
-          <div class="quota-legend"><span>{{ quotaUsagePercent() }}% used</span><strong>{{ quotaRemaining() ?? 'Unknown' }} remaining</strong></div>
+        <div
+          class="quota-visual"
+          [attr.aria-label]="quotaUsagePercent() + '% of daily quota used'"
+        >
+          <div class="quota-scale">
+            <span [style.width.%]="quotaUsagePercent()"></span>
+          </div>
+          <div class="quota-legend">
+            <span>{{ quotaUsagePercent() }}% used</span
+            ><strong>{{ quotaRemaining() ?? "Unknown" }} remaining</strong>
+          </div>
         </div>
 
         <div class="meta-grid">
           <div class="meta-card">
-            <span class="meta-icon"><i class="pi pi-clock" aria-hidden="true"></i></span>
-            <div><small>Quota resets</small><strong>{{ quotaResetLabel() }}</strong></div>
+            <span class="meta-icon"
+              ><i class="icon icon-clock" aria-hidden="true"></i
+            ></span>
+            <div>
+              <small>Quota resets</small
+              ><strong>{{ quotaResetLabel() }}</strong>
+            </div>
           </div>
           <div class="meta-card">
-            <span class="meta-icon"><i class="pi pi-verified" aria-hidden="true"></i></span>
-            <div><small>Last API check</small><strong>{{ lastCheckedLabel() }}</strong></div>
+            <span class="meta-icon"
+              ><i class="icon icon-badge-check" aria-hidden="true"></i
+            ></span>
+            <div>
+              <small>Last API check</small
+              ><strong>{{ lastCheckedLabel() }}</strong>
+            </div>
           </div>
         </div>
 
         @if (lastError()) {
           <div class="error-note" role="alert">
-            <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-            <div><strong>Latest check failed</strong><span>{{ lastError() }}</span></div>
+            <i class="icon icon-triangle-alert" aria-hidden="true"></i>
+            <div>
+              <strong>Latest check failed</strong><span>{{ lastError() }}</span>
+            </div>
           </div>
         }
       </section>

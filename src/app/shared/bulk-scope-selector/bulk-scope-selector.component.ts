@@ -1,13 +1,12 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {RadioButtonModule} from 'primeng/radiobutton';
 
 export type BulkActionScope = 'all' | 'selected';
 
 @Component({
   selector: 'app-bulk-scope-selector',
   standalone: true,
-  imports: [FormsModule, RadioButtonModule],
+  imports: [FormsModule],
   templateUrl: './bulk-scope-selector.component.html',
   styleUrl: './bulk-scope-selector.component.scss',
 })

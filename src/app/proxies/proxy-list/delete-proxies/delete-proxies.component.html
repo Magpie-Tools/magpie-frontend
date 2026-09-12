@@ -3,23 +3,25 @@
   (visibleChange)="dialogVisible = $event"
   dialogClass="delete-proxies-dialog"
   triggerLabel="Delete"
-  triggerIcon="pi pi-trash"
-  triggerStyleClass="p-button-danger"
+  triggerIcon="icon icon-trash"
+  triggerStyleClass="ui-button-danger"
   [triggerDisabled]="!hasAnyProxies()"
   headingEyebrow="Permanent action"
   headingTitle="Delete proxies"
-  headingIcon="pi pi-exclamation-triangle"
+  headingIcon="icon icon-triangle-alert"
   headingTooltip="Delete proxies in bulk with optional filters and status selections. This action cannot be undone."
   tone="danger"
-  introIcon="pi pi-lock"
+  introIcon="icon icon-lock"
   introTitle="Deleted routes cannot be restored"
   introDescription="Review the scope before continuing. Filters apply only when they are enabled below."
   [selectedCount]="selectedProxies.length"
   footerNote="This action cannot be undone."
   actionLabel="Delete proxies"
-  actionIcon="pi pi-trash"
+  actionIcon="icon icon-trash"
   [cancelDisabled]="isDeleting"
-  [actionDisabled]="isDeleting || (deleteOption === 'selected' && !canDeleteSelected())"
+  [actionDisabled]="
+    isDeleting || (deleteOption === 'selected' && !canDeleteSelected())
+  "
   [actionLoading]="isDeleting"
   (openRequested)="openDialog()"
   (cancelRequested)="closeDialog()"
@@ -30,7 +32,10 @@
     <div class="section-heading">
       <div>
         <h3 id="delete-scope-title">Choose the scope</h3>
-        <p>Delete the highlighted routes or every route that matches the optional filters.</p>
+        <p>
+          Delete the highlighted routes or every route that matches the optional
+          filters.
+        </p>
       </div>
     </div>
     <app-bulk-scope-selector
@@ -52,12 +57,18 @@
       <div class="section-heading section-heading--split">
         <div>
           <h3>Limit the deletion</h3>
-          <p>Enable filters to narrow the chosen scope before proxies are removed.</p>
+          <p>
+            Enable filters to narrow the chosen scope before proxies are
+            removed.
+          </p>
         </div>
-        <app-checkbox label="Enable filters" formControlName="filter"></app-checkbox>
+        <app-checkbox
+          label="Enable filters"
+          formControlName="filter"
+        ></app-checkbox>
       </div>
 
-      @if (deleteForm.get('filter')?.value) {
+      @if (deleteForm.get("filter")?.value) {
         <app-proxy-filter-panel
           class="delete-filter-panel"
           [form]="deleteForm"
@@ -72,7 +83,10 @@
           (clear)="clearDeleteFilters()"
         ></app-proxy-filter-panel>
       } @else {
-        <div class="filter-disabled-copy"><i class="pi pi-filter-slash" aria-hidden="true"></i> No additional filters will be applied.</div>
+        <div class="filter-disabled-copy">
+          <i class="icon icon-filter-x" aria-hidden="true"></i> No additional
+          filters will be applied.
+        </div>
       }
     </section>
   </div>

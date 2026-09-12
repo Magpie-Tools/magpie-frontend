@@ -1,19 +1,17 @@
+import {ConfirmationService} from '../../shared/ui/confirmation.service';
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
+import {HlmTabsImports} from '@spartan-ng/helm/tabs';
+import {SelectComponent} from '../../shared/ui/select.component';
+import {ConfirmDialogComponent} from '../../shared/ui/confirm-dialog.component';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingsService} from '../../services/settings.service';
 import {Subject} from 'rxjs';
 import {filter, take, takeUntil} from 'rxjs/operators';
 
-import {TabsModule} from 'primeng/tabs';
-import {SelectModule} from 'primeng/select';
-import {InputNumberModule} from 'primeng/inputnumber';
-import {ButtonModule} from 'primeng/button';
-import {DividerModule} from 'primeng/divider';
-import {TooltipModule} from 'primeng/tooltip';
-import {CheckboxModule} from 'primeng/checkbox';
-import {InputTextModule} from 'primeng/inputtext';
-import {ConfirmDialogModule} from 'primeng/confirmdialog';
-import {ConfirmationService} from 'primeng/api';
 import {NotificationService} from '../../services/notification-service.service';
 import {GlobalSettings} from '../../models/GlobalSettings';
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
@@ -25,17 +23,9 @@ import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/
 @Component({
   selector: 'app-admin-scraper',
   standalone: true,
-  imports: [
+  imports: [HlmButton, HlmInput, HlmCheckbox, HlmTooltip, HlmTabsImports, SelectComponent, ConfirmDialogComponent,
     ReactiveFormsModule,
-    TabsModule,
-    SelectModule,
-    InputNumberModule,
-    ButtonModule,
-    DividerModule,
-    TooltipModule,
-    CheckboxModule,
-    InputTextModule,
-    ConfirmDialogModule,
+
     RevealGroupDirective,
     AdminSettingsShellComponent,
     AdminSettingsHeaderComponent,
@@ -300,9 +290,6 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
     this.confirmationService.confirm({
       message: 'Requeue every currently queued scrape source using the latest scraper cadence?',
       header: 'Confirm Requeue',
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonStyleClass: 'p-button-danger',
-      rejectButtonStyleClass: 'p-button-outlined',
       acceptLabel: 'Requeue',
       accept: () => this.requeueAllScrapeSources()
     });

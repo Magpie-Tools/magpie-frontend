@@ -3,60 +3,99 @@
     <div class="settings-grid">
       <section class="settings-card settings-card--flow">
         <div class="card-heading">
-          <span class="card-icon"><i class="pi pi-verified" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-badge-check" aria-hidden="true"></i
+          ></span>
           <div class="card-heading__copy">
             <h1>How does a judge verify a proxy?</h1>
-            <p>Magpie sends a request through the proxy, then checks the judge response for the expected evidence.</p>
+            <p>
+              Magpie sends a request through the proxy, then checks the judge
+              response for the expected evidence.
+            </p>
           </div>
         </div>
 
         <div class="judge-flow" aria-label="Judge verification flow">
           <div class="flow-step">
-            <span class="flow-node"><i class="pi pi-server" aria-hidden="true"></i></span>
+            <span class="flow-node"
+              ><i class="icon icon-server" aria-hidden="true"></i
+            ></span>
             <div><strong>Proxy</strong><small>Routes the request</small></div>
           </div>
           <span class="flow-line" aria-hidden="true"></span>
           <div class="flow-step">
-            <span class="flow-node"><i class="pi pi-globe" aria-hidden="true"></i></span>
-            <div><strong>Judge</strong><small>Returns connection data</small></div>
+            <span class="flow-node"
+              ><i class="icon icon-globe" aria-hidden="true"></i
+            ></span>
+            <div>
+              <strong>Judge</strong><small>Returns connection data</small>
+            </div>
           </div>
           <span class="flow-line" aria-hidden="true"></span>
           <div class="flow-step">
-            <span class="flow-node flow-node--active"><i class="pi pi-check" aria-hidden="true"></i></span>
-            <div><strong>Verify</strong><small>Matches headers or regex</small></div>
+            <span class="flow-node flow-node--active"
+              ><i class="icon icon-check" aria-hidden="true"></i
+            ></span>
+            <div>
+              <strong>Verify</strong><small>Matches headers or regex</small>
+            </div>
           </div>
         </div>
 
         <div class="judge-orbit" aria-hidden="true">
           <span class="judge-orbit__ring judge-orbit__ring--outer"></span>
           <span class="judge-orbit__ring judge-orbit__ring--inner"></span>
-          <span class="judge-orbit__core"><i class="pi pi-verified"></i></span>
+          <span class="judge-orbit__core"
+            ><i class="icon icon-badge-check"></i
+          ></span>
         </div>
 
         <div class="flow-summary">
-          <div><strong>{{ configuredJudgeCount }}</strong><span>configured</span></div>
-          <div><strong>{{ defaultRegexCount }}</strong><span>default matching</span></div>
+          <div>
+            <strong>{{ configuredJudgeCount }}</strong
+            ><span>configured</span>
+          </div>
+          <div>
+            <strong>{{ defaultRegexCount }}</strong
+            ><span>default matching</span>
+          </div>
         </div>
 
         <div class="validation-note">
-          <i class="pi pi-info-circle" aria-hidden="true"></i>
-          <p><strong>Default matching</strong> inspects returned headers for anonymity. Use a custom regex only when a judge returns a specific payload.</p>
+          <i class="icon icon-info" aria-hidden="true"></i>
+          <p>
+            <strong>Default matching</strong> inspects returned headers for
+            anonymity. Use a custom regex only when a judge returns a specific
+            payload.
+          </p>
         </div>
       </section>
 
       <section class="settings-card settings-card--editor">
         <div class="editor-heading">
           <div class="card-heading">
-            <span class="card-icon"><i class="pi pi-link" aria-hidden="true"></i></span>
+            <span class="card-icon"
+              ><i class="icon icon-link" aria-hidden="true"></i
+            ></span>
             <div class="card-heading__copy">
               <h2>Judge endpoints</h2>
-              <p>Add every endpoint the checker may call during a proxy test.</p>
+              <p>
+                Add every endpoint the checker may call during a proxy test.
+              </p>
             </div>
-            <span class="card-count">{{ configuredJudgeCount }} {{ configuredJudgeCount === 1 ? 'judge' : 'judges' }}</span>
+            <span class="card-count"
+              >{{ configuredJudgeCount }}
+              {{ configuredJudgeCount === 1 ? "judge" : "judges" }}</span
+            >
           </div>
 
-          <button type="button" class="add-button" [disabled]="!workspaces.canOperate()" (click)="addJudge()">
-            <i class="pi pi-plus" aria-hidden="true"></i>
+          <button
+            type="button"
+            class="add-button"
+            [disabled]="!workspaces.canOperate()"
+            (click)="addJudge()"
+          >
+            <i class="icon icon-plus" aria-hidden="true"></i>
             Add judge
           </button>
         </div>
@@ -68,16 +107,20 @@
 
               <div class="judge-fields">
                 <div class="field-group field-group--url">
-                  <label class="field-label" for="judge-url-{{ i }}">Judge URL</label>
+                  <label class="field-label" for="judge-url-{{ i }}"
+                    >Judge URL</label
+                  >
                   <input
                     id="judge-url-{{ i }}"
                     formControlName="url"
                     type="url"
-                    pInputText
+                    hlmInput
                     placeholder="https://example.com/judge"
                     [readOnly]="!workspaces.canOperate()"
                   />
-                  <p class="field-hint">The endpoint should return headers or connection data.</p>
+                  <p class="field-hint">
+                    The endpoint should return headers or connection data.
+                  </p>
                 </div>
 
                 <div class="field-group field-group--regex">
@@ -91,17 +134,22 @@
                     id="judge-regex-{{ i }}"
                     formControlName="regex"
                     type="text"
-                    pInputText
+                    hlmInput
                     placeholder="default"
                     [readOnly]="!workspaces.canOperate()"
                   />
-                  <p class="field-hint">Use <code>default</code> unless this judge needs a content match.</p>
+                  <p class="field-hint">
+                    Use <code>default</code> unless this judge needs a content
+                    match.
+                  </p>
                 </div>
               </div>
 
               <div class="judge-state">
                 <span [class.is-default]="usesDefaultRegex(judge)">
-                  {{ usesDefaultRegex(judge) ? 'Header match' : 'Custom match' }}
+                  {{
+                    usesDefaultRegex(judge) ? "Header match" : "Custom match"
+                  }}
                 </span>
               </div>
 
@@ -112,7 +160,7 @@
                 (click)="removeJudge(i)"
                 [attr.aria-label]="'Remove judge ' + (i + 1)"
               >
-                <i class="pi pi-trash" aria-hidden="true"></i>
+                <i class="icon icon-trash" aria-hidden="true"></i>
               </button>
             </article>
           }

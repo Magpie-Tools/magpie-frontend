@@ -3,17 +3,16 @@
   height: 100%;
 }
 
-:host ::ng-deep .history-card .p-card-body,
-:host ::ng-deep .history-card .p-card-content {
+:host ::ng-deep .history-card .dashboard-card__body {
   height: 100%;
 }
 
-:host ::ng-deep .history-card .p-card-content {
+:host ::ng-deep .history-card .dashboard-card__body {
   display: flex;
   flex-direction: column;
 }
 
-:host ::ng-deep .history-refresh.p-button {
+:host ::ng-deep .history-refresh[hlmBtn] {
   width: 2.1rem;
   padding: 0;
 }

@@ -1,3 +1,9 @@
+import {TablePageEvent} from '../ui/pagination.component';
+import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
+import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
+import {HlmTableImports} from '@spartan-ng/helm/table';
+import {PaginationComponent} from '../ui/pagination.component';
 import {PageScrollTarget, readPageScrollTarget, writePageScrollTarget, scrollTableToPageTarget} from '../table-pagination';
 import {
   ChangeDetectionStrategy,
@@ -15,10 +21,7 @@ import {
 } from '@angular/core';
 import {NgClass} from '@angular/common';
 import {SelectionModel} from '@angular/cdk/collections';
-import {Table, TableLazyLoadEvent, TableModule} from 'primeng/table';
-import {SkeletonModule} from 'primeng/skeleton';
-import {Tooltip} from 'primeng/tooltip';
-import {CheckboxModule} from 'primeng/checkbox';
+
 import {FormsModule} from '@angular/forms';
 import {ProxyInfo} from '../../models/ProxyInfo';
 import {ProxyReputation} from '../../models/ProxyReputation';
@@ -49,13 +52,10 @@ type ProxyRow = ProxyInfo & { __meta?: ProxyRowMeta };
 @Component({
   selector: 'app-proxy-table',
   standalone: true,
-  imports: [
+  imports: [HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
     NgClass,
     FormsModule,
-    TableModule,
-    CheckboxModule,
-    SkeletonModule,
-    Tooltip,
+
     HealthBarCellComponent,
     ProxyTagSelectorComponent,
   ],
@@ -64,7 +64,6 @@ type ProxyRow = ProxyInfo & { __meta?: ProxyRowMeta };
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
-  @ViewChild('tableRoot') private table?: Table;
   @ViewChild('tableRoot', { read: ElementRef }) private tableRoot?: ElementRef<HTMLElement>;
 
   private _proxies: ProxyRow[] = [];
@@ -120,7 +119,7 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input() scrollHeight: string | null = null;
   @Input() pageScrollTargetStorageKey: string | null = null;
 
-  @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
+  @Output() lazyLoad = new EventEmitter<TablePageEvent>();
   @Output() selectionChange = new EventEmitter<ProxyInfo[]>();
   @Output() toggleSelection = new EventEmitter<ProxyInfo>();
   @Output() masterToggle = new EventEmitter<void>();
@@ -170,13 +169,6 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
       this.decorateProxies();
     }
 
-    if (
-      (changes['sortField'] || changes['sortOrder']) &&
-      this.sortable &&
-      (!this.sortField || !this.sortOrder)
-    ) {
-      this.resetPrimeNgSortVisualState();
-    }
   }
 
   ngOnDestroy(): void {
@@ -206,7 +198,7 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get pageScrollTargetIcon(): string {
-    return this.pageScrollTarget === 'top' ? 'pi-arrow-up' : 'pi-arrow-down';
+    return this.pageScrollTarget === 'top' ? 'icon-arrow-up' : 'icon-arrow-down';
   }
 
   get pageScrollTargetLabel(): string {
@@ -246,6 +238,10 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
     this.toggleSelection.emit(proxy);
+  }
+
+  sortColumn(field: string): void {
+    this.onSort({field, order: this.sortField === field && this.sortOrder === 1 ? -1 : 1});
   }
 
   onSort(event: { field: string; order: number }): void {
@@ -308,7 +304,7 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   lifecycleIcon(proxy: ProxyInfo): string {
-    return this.managedState(proxy) === 'active' ? 'pi-pause' : 'pi-play';
+    return this.managedState(proxy) === 'active' ? 'icon-pause' : 'icon-play';
   }
 
   onLifecycleChange(event: Event, proxy: ProxyInfo, state: ManagedProxyState): void {
@@ -494,19 +490,6 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
 
     this.pendingPageScroll = false;
     setTimeout(() => this.scrollToPageTarget(), 0);
-  }
-
-  private resetPrimeNgSortVisualState(): void {
-    setTimeout(() => {
-      if (!this.table || (this.sortField && this.sortOrder)) {
-        return;
-      }
-
-      this.table._sortField = null;
-      this.table._sortOrder = 0;
-      this.table.tableService.onSort(null);
-      this.cdr.markForCheck();
-    }, 0);
   }
 
   private getStoredPageScrollTarget(): PageScrollTarget | null {

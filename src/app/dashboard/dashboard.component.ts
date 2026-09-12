@@ -1,3 +1,4 @@
+import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
 import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
 import {Component, ElementRef, Inject, LOCALE_ID, OnDestroy, OnInit, signal} from '@angular/core';
 import {DecimalPipe} from '@angular/common';
@@ -24,7 +25,7 @@ import {
   ReputationBreakdown,
 } from '../services/graphql.service';
 import {ProxyReputationCardComponent} from './cards/proxy-reputation-card/proxy-reputation-card.component';
-import {SkeletonModule} from 'primeng/skeleton';
+
 import {
   FastestAliveProxiesCardComponent,
   FastestAliveProxyCountryLegend
@@ -67,7 +68,7 @@ const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirecti
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  imports: [
+  imports: [HlmSkeleton,
     PageLoadErrorComponent,
     DecimalPipe,
     KpiCardComponent,
@@ -77,8 +78,7 @@ const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirecti
     JudgeByPercentageCardComponent,
     ProxyReputationCardComponent,
     FastestAliveProxiesCardComponent,
-    SkeletonModule
-  ],
+    ],
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy {

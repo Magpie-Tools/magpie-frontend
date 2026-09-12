@@ -2,86 +2,169 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="settings-stage">
     <header class="admin-context">
       <div class="admin-context__copy">
-        <a routerLink="/plugins" class="back-link" aria-label="Back to plugins"><i class="pi pi-arrow-left" aria-hidden="true"></i></a>
+        <a routerLink="/plugins" class="back-link" aria-label="Back to plugins"
+          ><i class="icon icon-arrow-left" aria-hidden="true"></i
+        ></a>
         <span class="plugin-mark plugin-mark--maxmind">
-          <img src="https://media.licdn.com/dms/image/v2/C560BAQHAOUxYoh2u1Q/company-logo_200_200/company-logo_200_200/0/1671072899861/maxmind_logo?e=2147483647&amp;v=beta&amp;t=WWP-k6AqK1YM0ePQFUi28aEUGjpcuLPSsdKdCSS1940" alt="MaxMind logo"/>
+          <img
+            src="https://media.licdn.com/dms/image/v2/C560BAQHAOUxYoh2u1Q/company-logo_200_200/company-logo_200_200/0/1671072899861/maxmind_logo?e=2147483647&amp;v=beta&amp;t=WWP-k6AqK1YM0ePQFUi28aEUGjpcuLPSsdKdCSS1940"
+            alt="MaxMind logo"
+          />
         </span>
         <div>
           <span class="context-eyebrow">MaxMind enrichment</span>
           <h1>GeoLite</h1>
-          <p>Attach location and network intelligence to every checked proxy.</p>
+          <p>
+            Attach location and network intelligence to every checked proxy.
+          </p>
         </div>
       </div>
 
       <label class="master-toggle" for="geolite-enabled">
-        <span><strong>{{ pluginEnabled() ? 'Enabled' : 'Disabled' }}</strong><small>GeoLite enrichment</small></span>
-        <p-toggleswitch inputId="geolite-enabled" formControlName="enabled" ariaLabel="Toggle GeoLite plugin"></p-toggleswitch>
+        <span
+          ><strong>{{ pluginEnabled() ? "Enabled" : "Disabled" }}</strong
+          ><small>GeoLite enrichment</small></span
+        >
+        <hlm-switch
+          inputId="geolite-enabled"
+          formControlName="enabled"
+          aria-label="Toggle GeoLite plugin"
+        />
       </label>
     </header>
 
     <div class="settings-grid" [class.plugin-disabled]="!pluginEnabled()">
       <section class="settings-card settings-card--access">
         <div class="card-heading">
-          <span class="card-icon"><i class="pi pi-key" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-key" aria-hidden="true"></i
+          ></span>
           <div>
             <h2>How should Magpie access GeoLite?</h2>
-            <p>Use the license key from your MaxMind account to download GeoLite2 databases.</p>
+            <p>
+              Use the license key from your MaxMind account to download GeoLite2
+              databases.
+            </p>
           </div>
         </div>
 
         <div class="credential-state">
-          <span class="credential-state__icon"><i class="pi pi-lock" aria-hidden="true"></i></span>
-          <div><strong>Stored securely</strong><small>The key is only sent to MaxMind during database updates.</small></div>
+          <span class="credential-state__icon"
+            ><i class="icon icon-lock" aria-hidden="true"></i
+          ></span>
+          <div>
+            <strong>Stored securely</strong
+            ><small
+              >The key is only sent to MaxMind during database updates.</small
+            >
+          </div>
         </div>
 
         <div class="field-group">
           <label for="geolite-api-key">MaxMind license key</label>
-          <input id="geolite-api-key" type="text" pInputText formControlName="api_key" autocomplete="off" placeholder="Enter your license key"/>
+          <input
+            id="geolite-api-key"
+            type="text"
+            hlmInput
+            formControlName="api_key"
+            autocomplete="off"
+            placeholder="Enter your license key"
+          />
           <small>Create or rotate keys from your MaxMind account portal.</small>
         </div>
       </section>
 
       <section class="settings-card settings-card--updates">
         <div class="card-heading card-heading--with-badge">
-          <span class="card-icon"><i class="pi pi-sync" aria-hidden="true"></i></span>
+          <span class="card-icon"
+            ><i class="icon icon-refresh-cw" aria-hidden="true"></i
+          ></span>
           <div>
             <h2>When should location data refresh?</h2>
-            <p>Keep the local database current without requiring manual downloads.</p>
+            <p>
+              Keep the local database current without requiring manual
+              downloads.
+            </p>
           </div>
           <span class="cadence-badge">Every {{ updateCadenceLabel }}</span>
         </div>
 
         <label class="decision-row" for="geolite-auto-update">
-          <span class="decision-icon"><i class="pi pi-refresh" aria-hidden="true"></i></span>
-          <span class="decision-copy"><strong>Automatic updates</strong><small>Download a fresh database on the cadence below.</small></span>
-          <p-checkbox inputId="geolite-auto-update" formControlName="auto_update" [binary]="true"></p-checkbox>
+          <span class="decision-icon"
+            ><i class="icon icon-refresh-cw" aria-hidden="true"></i
+          ></span>
+          <span class="decision-copy"
+            ><strong>Automatic updates</strong
+            ><small
+              >Download a fresh database on the cadence below.</small
+            ></span
+          >
+          <hlm-checkbox
+            inputId="geolite-auto-update"
+            formControlName="auto_update"
+          />
         </label>
 
         @if (form.getRawValue().update_timer.days == 0) {
-          <p-message severity="warn">GeoLite publishes database updates no more than once a day.</p-message>
+          <div role="status" class="ui-message">
+            GeoLite publishes database updates no more than once a day.
+          </div>
         }
 
-        <div class="timer-grid" formGroupName="update_timer" [class.is-disabled]="!pluginEnabled() || !form.get('auto_update')?.value">
+        <div
+          class="timer-grid"
+          formGroupName="update_timer"
+          [class.is-disabled]="
+            !pluginEnabled() || !form.get('auto_update')?.value
+          "
+        >
           <div class="timer-field">
             <label for="geolite-days">Days</label>
-            <p-select inputId="geolite-days" formControlName="days" [options]="daysList" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+            <app-select
+              inputId="geolite-days"
+              formControlName="days"
+              [options]="daysList"
+              optionLabel="label"
+              optionValue="value"
+            ></app-select>
           </div>
           <div class="timer-field">
             <label for="geolite-hours">Hours</label>
-            <p-select inputId="geolite-hours" formControlName="hours" [options]="hoursList" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+            <app-select
+              inputId="geolite-hours"
+              formControlName="hours"
+              [options]="hoursList"
+              optionLabel="label"
+              optionValue="value"
+            ></app-select>
           </div>
           <div class="timer-field">
             <label for="geolite-minutes">Minutes</label>
-            <p-select inputId="geolite-minutes" formControlName="minutes" [options]="minutesList" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+            <app-select
+              inputId="geolite-minutes"
+              formControlName="minutes"
+              [options]="minutesList"
+              optionLabel="label"
+              optionValue="value"
+            ></app-select>
           </div>
           <div class="timer-field">
             <label for="geolite-seconds">Seconds</label>
-            <p-select inputId="geolite-seconds" formControlName="seconds" [options]="secondsList" optionLabel="label" optionValue="value" appendTo="body"></p-select>
+            <app-select
+              inputId="geolite-seconds"
+              formControlName="seconds"
+              [options]="secondsList"
+              optionLabel="label"
+              optionValue="value"
+            ></app-select>
           </div>
         </div>
 
         <div class="last-update">
-          <span><i class="pi pi-check-circle" aria-hidden="true"></i>Last successful update</span>
+          <span
+            ><i class="icon icon-circle-check" aria-hidden="true"></i>Last
+            successful update</span
+          >
           <strong>{{ lastUpdatedLabel }}</strong>
         </div>
       </section>

@@ -684,12 +684,12 @@ p {
     display: block;
     width: 100%;
 
-    .p-password,
-    .p-inputtext {
+    app-password,
+    [hlmInput] {
       width: 100%;
     }
 
-    .p-inputtext {
+    [hlmInput] {
       min-height: 2.7rem;
       padding: 0.62rem 2.55rem 0.62rem 0.72rem;
       border: 1px solid rgba(255, 255, 255, 0.13);
@@ -717,12 +717,12 @@ p {
       }
     }
 
-    .p-password-toggle-mask-icon {
+    app-password button {
       color: rgba(255, 255, 255, 0.42);
     }
   }
 
-  .password-input--danger .p-inputtext:focus {
+  .password-input--danger [hlmInput]:focus {
     border-color: rgba(248, 113, 113, 0.55);
     background: rgba(127, 29, 29, 0.08);
     box-shadow: 0 0 0 0.18rem rgba(239, 68, 68, 0.1);

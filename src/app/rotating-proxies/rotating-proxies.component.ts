@@ -1,14 +1,14 @@
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
+import {SelectComponent} from '../shared/ui/select.component';
+import {DialogComponent} from '../shared/ui/dialog.component';
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {forkJoin, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {ButtonModule} from 'primeng/button';
-import {InputTextModule} from 'primeng/inputtext';
-import {SelectModule} from 'primeng/select';
-import {DialogModule} from 'primeng/dialog';
-import {MultiSelectModule} from 'primeng/multiselect';
-import {TooltipModule} from 'primeng/tooltip';
 
 import {environment} from '../../environments/environment';
 
@@ -18,7 +18,7 @@ import {NotificationService} from '../services/notification-service.service';
 import {CreateRotatingProxy, RotatingProxy, RotatingProxyInstance} from '../models/RotatingProxy';
 import {UserSettings} from '../models/UserSettings';
 import {TooltipComponent} from '../tooltip/tooltip.component';
-import {SkeletonModule} from 'primeng/skeleton';
+
 import {formatHostPort} from '../shared/proxy-address';
 import {WorkspaceService} from '../services/workspace.service';
 import {gsap} from 'gsap';
@@ -35,18 +35,14 @@ type RotatorInstanceOption = {
 @Component({
   selector: 'app-rotating-proxies',
   standalone: true,
-  imports: [
+  imports: [HlmButton, HlmInput, HlmSkeleton, HlmTooltip, SelectComponent, DialogComponent,
     CommonModule,
     ReactiveFormsModule,
-    ButtonModule,
-    InputTextModule,
-    SelectModule,
-    MultiSelectModule,
+
     DatePipe,
-    DialogModule,
+
     TooltipComponent,
-    TooltipModule,
-    SkeletonModule,
+
   ],
   templateUrl: './rotating-proxies.component.html',
   styleUrl: './rotating-proxies.component.scss'

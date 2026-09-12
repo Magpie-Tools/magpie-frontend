@@ -1,3 +1,10 @@
+import {TablePageEvent} from '../../shared/ui/pagination.component';
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
+import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
+import {HlmTableImports} from '@spartan-ng/helm/table';
+import {PaginationComponent} from '../../shared/ui/pagination.component';
 import {PageScrollTarget, readPageSize, writePageSize, readPageScrollTarget, writePageScrollTarget, scrollTableToPageTarget} from '../../shared/table-pagination';
 import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
 import {
@@ -21,12 +28,8 @@ import {ExportSourcesComponent} from './export-sources/export-sources.component'
 import {DeleteSourcesComponent} from './delete-sources/delete-sources.component';
 import {ScrapeSourceFilterPanelComponent} from './scrape-source-filter-panel/scrape-source-filter-panel.component';
 
-// PrimeNG imports
-import {TableLazyLoadEvent, TableModule} from 'primeng/table';
-import {ButtonModule} from 'primeng/button';
-import {CheckboxModule} from 'primeng/checkbox';
-import {SkeletonModule} from 'primeng/skeleton';
-import {Tooltip} from 'primeng/tooltip';
+// Table pagination
+
 import {NotificationService} from '../../services/notification-service.service';
 import {SettingsService} from '../../services/settings.service';
 import {UserSettings} from '../../models/UserSettings';
@@ -70,15 +73,11 @@ type ScrapeSourceAppliedFilters = {
 
 @Component({
   selector: 'app-scrape-source-list',
-  imports: [
+  imports: [HlmButton, HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
     CommonModule,
     SourceScrapeStatusComponent,
     FormsModule,
-    TableModule,
-    ButtonModule,
-    CheckboxModule,
-    SkeletonModule,
-    Tooltip,
+
     AddScrapeSourceComponent,
     ExportSourcesComponent,
     DeleteSourcesComponent,
@@ -105,7 +104,7 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   scrapeSources = signal<ScrapeSourceView[]>([]);
   selection = new SelectionModel<ScrapeSourceView>(true, []);
   selectedScrapeSources: ScrapeSourceView[] = [];
-  page = 0; // PrimeNG uses 0-based pagination
+  page = 0; // Tables use 0-based pagination
   pageJumpValue = 1;
   pageScrollTarget: PageScrollTarget = 'top';
   pageSize = 40;
@@ -300,7 +299,11 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     });
   }
 
-  onLazyLoad(event: TableLazyLoadEvent) {
+  sortColumn(field: string): void {
+    this.onLazyLoad({first: this.page * this.pageSize, rows: this.pageSize, sortField: field, sortOrder: this.sortField === field && this.sortOrder === 1 ? -1 : 1});
+  }
+
+  onLazyLoad(event: TablePageEvent) {
     const requestedRows = event.rows ?? this.pageSize;
     const newPageSize = Number.isFinite(requestedRows) && requestedRows > 0 ? requestedRows : this.pageSize;
     const newPage = Math.floor((event.first ?? 0) / newPageSize);
@@ -341,7 +344,7 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   }
 
   get pageScrollTargetIcon(): string {
-    return this.pageScrollTarget === 'top' ? 'pi-arrow-up' : 'pi-arrow-down';
+    return this.pageScrollTarget === 'top' ? 'icon-arrow-up' : 'icon-arrow-down';
   }
 
   get pageScrollTargetLabel(): string {
@@ -490,8 +493,8 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
 
   filterToggleClass(): string {
     return this.hasActiveFilters()
-      ? 'p-button-outlined filter-toggle filter-toggle--active'
-      : 'p-button-outlined filter-toggle';
+      ? 'ui-button-outlined filter-toggle filter-toggle--active'
+      : 'ui-button-outlined filter-toggle';
   }
 
   onColumnEditorDragStart(): void {
@@ -902,7 +905,7 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
 
   private isTargetWithinScrapeSourceFilterOverlay(target: Node): boolean {
     const element = target instanceof Element ? target : target.parentElement;
-    return !!element?.closest('.scrape-source-filter-panel__overlay');
+    return !!element?.closest('.app-select-overlay');
   }
 
   private stopTriggerEvent(event?: Event | { originalEvent?: Event }): void {

@@ -1,8 +1,8 @@
+import {HlmCardImports} from '@spartan-ng/helm/card';
+import {ChartComponent} from '../../../shared/ui/chart.component';
 import {Component, Input} from '@angular/core';
-import {Card} from 'primeng/card';
-import {PrimeTemplate} from 'primeng/api';
+
 import {DecimalPipe, NgStyle} from '@angular/common';
-import {UIChart} from 'primeng/chart';
 
 interface ReputationBreakdown {
   good: number;
@@ -14,7 +14,7 @@ interface ReputationBreakdown {
 @Component({
   selector: 'app-proxy-reputation-card',
   standalone: true,
-  imports: [Card, PrimeTemplate, UIChart, NgStyle, DecimalPipe],
+  imports: [HlmCardImports, ChartComponent, NgStyle, DecimalPipe],
   templateUrl: './proxy-reputation-card.component.html',
   styleUrl: './proxy-reputation-card.component.scss'
 })

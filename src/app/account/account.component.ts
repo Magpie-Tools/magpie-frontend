@@ -1,3 +1,5 @@
+import {DialogComponent} from '../shared/ui/dialog.component';
+import {PasswordComponent} from '../shared/ui/password.component';
 import { AfterViewInit, Component, ElementRef, OnDestroy, Signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 
@@ -7,10 +9,10 @@ import {ChangePassword} from '../models/ChangePassword';
 import {NotificationService} from '../services/notification-service.service';
 
 import {ThemeService, ThemeName} from '../services/theme.service';
-import {Password} from 'primeng/password';
+
 import {DeleteAccount} from '../models/DeleteAccount';
 import {UserService} from '../services/authorization/user.service';
-import {DialogModule} from 'primeng/dialog';
+
 import { passwordMinLength, passwordPolicyMessages, passwordPolicyValidators } from '../auth/password-policy';
 import {gsap} from 'gsap';
 import {ScrollTrigger} from 'gsap/ScrollTrigger';
@@ -19,10 +21,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 @Component({
     selector: 'app-account',
-  imports: [
+  imports: [DialogComponent, PasswordComponent,
     ReactiveFormsModule,
-    Password,
-    DialogModule,
+
   ],
     templateUrl: './account.component.html',
     styleUrls: ['./account.component.scss']

@@ -1,18 +1,20 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ConfirmationService} from '../../shared/ui/confirmation.service';
+import {HlmButton} from '@spartan-ng/helm/button';
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmTabsImports} from '@spartan-ng/helm/tabs';
+import {SelectComponent} from '../../shared/ui/select.component';
+import {ConfirmDialogComponent} from '../../shared/ui/confirm-dialog.component';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {CheckboxComponent} from "../../checkbox/checkbox.component";
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {SettingsService} from '../../services/settings.service';
 import {take, takeUntil} from 'rxjs/operators';
-import {Button} from 'primeng/button';
-import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
-import {Select} from 'primeng/select';
-import {InputText} from 'primeng/inputtext';
+
 import {NotificationService} from '../../services/notification-service.service';
 import {Subject} from 'rxjs';
-import {ConfirmDialogModule} from 'primeng/confirmdialog';
-import {ConfirmationService} from 'primeng/api';
+
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
 import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
 import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
@@ -22,20 +24,12 @@ import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/
 @Component({
   selector: 'app-admin-checker',
   standalone: true,
-  imports: [
+  imports: [HlmButton, HlmInput, HlmTabsImports, SelectComponent, ConfirmDialogComponent,
     CheckboxComponent,
     FormsModule,
     ReactiveFormsModule,
     TooltipComponent,
-    Button,
-    TabPanel,
-    Select,
-    Tabs,
-    InputText,
-    ConfirmDialogModule,
-    TabList,
-    Tab,
-    TabPanels,
+
     RevealGroupDirective,
     AdminSettingsShellComponent,
     AdminSettingsHeaderComponent,
@@ -48,10 +42,10 @@ import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/
 export class AdminCheckerComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
   readonly protocolOptions = [
-    {label: 'HTTP', control: 'http', icon: 'pi pi-globe', description: 'Standard web traffic'},
-    {label: 'HTTPS', control: 'https', icon: 'pi pi-lock', description: 'Encrypted web traffic'},
-    {label: 'SOCKS4', control: 'socks4', icon: 'pi pi-sitemap', description: 'IPv4 socket routing'},
-    {label: 'SOCKS5', control: 'socks5', icon: 'pi pi-shield', description: 'Modern socket routing'},
+    {label: 'HTTP', control: 'http', icon: 'icon icon-globe', description: 'Standard web traffic'},
+    {label: 'HTTPS', control: 'https', icon: 'icon icon-lock', description: 'Encrypted web traffic'},
+    {label: 'SOCKS4', control: 'socks4', icon: 'icon icon-network', description: 'IPv4 socket routing'},
+    {label: 'SOCKS5', control: 'socks5', icon: 'icon icon-shield', description: 'Modern socket routing'},
   ];
   readonly daysList = dayOptions;
   readonly hoursList = hourOptions;
@@ -67,6 +61,7 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
+    private changeDetector: ChangeDetectorRef,
     private settingsService: SettingsService,
     private notification: NotificationService,
     private confirmationService: ConfirmationService
@@ -113,7 +108,6 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
 
   private createDefaultForm(): FormGroup {
     return this.fb.group({
@@ -180,6 +174,8 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
       use_https_for_socks: checkerSettings.use_https_for_socks
     });
 
+    this.changeDetector.markForCheck();
+
     // Update judge timer if exists
     if (checkerSettings.judge_timer) {
       this.settingsForm.patchValue({
@@ -226,6 +222,7 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     });
 
     blacklistArray.markAsPristine();
+    this.changeDetector.markForCheck();
   }
 
   private updateJudgesArray(judges: any[]): void {
@@ -341,9 +338,6 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     this.confirmationService.confirm({
       message: 'Requeue every currently queued proxy using the latest checker cadence?',
       header: 'Confirm Requeue',
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonStyleClass: 'p-button-danger',
-      rejectButtonStyleClass: 'p-button-outlined',
       acceptLabel: 'Requeue',
       accept: () => this.requeueAllProxies()
     });

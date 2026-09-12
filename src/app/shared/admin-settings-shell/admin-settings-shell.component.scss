@@ -166,11 +166,11 @@ app-admin-settings-shell {
     align-self: center;
   }
 
-  .p-tabs {
+  hlm-tabs {
     background: transparent;
   }
 
-  .p-tablist {
+  hlm-tabs-list {
     display: inline-flex;
     width: fit-content;
     padding: 0.28rem;
@@ -179,13 +179,7 @@ app-admin-settings-shell {
     background: rgba(8, 8, 10, 0.62);
   }
 
-  .p-tablist-tab-list {
-    gap: 0.15rem;
-    border: 0;
-    background: transparent;
-  }
-
-  .p-tab {
+  [hlmTabsTrigger] {
     display: inline-flex;
     gap: 0.45rem;
     padding: 0.62rem 0.9rem;
@@ -196,29 +190,25 @@ app-admin-settings-shell {
     font-weight: 550;
     transition: color 0.2s ease, background-color 0.2s ease;
 
-    &.p-tab-active {
+    &[data-state="active"] {
       background: rgba(255, 255, 255, 0.085);
       color: rgba(255, 255, 255, 0.94);
     }
 
-    &:not(.p-tab-active):hover {
+    &:not([data-state="active"]):hover {
       background: rgba(255, 255, 255, 0.04);
       color: rgba(255, 255, 255, 0.72);
     }
   }
 
-  .p-tablist-active-bar {
-    display: none;
-  }
-
-  .p-tabpanels {
+  [hlmTabsContent] {
     padding: 0;
     background: transparent;
   }
 
-  .p-inputtext,
-  .p-select,
-  .p-inputnumber-input {
+  [hlmInput],
+  [data-slot="select-trigger"],
+  input[type="number"] {
     width: 100%;
     min-height: 2.65rem;
     border: 1px solid rgba(255, 255, 255, 0.13);
@@ -233,47 +223,47 @@ app-admin-settings-shell {
     }
 
     &:focus,
-    &.p-focus {
+    &:focus-within {
       border-color: rgba(var(--theme-primary-300-rgb), 0.55);
       box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13);
     }
   }
 
-  .p-inputnumber {
+  input[type="number"] {
     display: flex;
     width: 100%;
   }
 
-  .number-with-unit .p-inputnumber-input {
+  .number-with-unit input[type="number"] {
     border: 0;
     background: transparent;
     box-shadow: none;
   }
 
-  .p-select-label {
+  [data-slot="select-trigger"] > span {
     display: flex;
     align-items: center;
     padding: 0.65rem 0.72rem;
     font-size: 0.7rem;
   }
 
-  .p-inputtext:disabled,
-  .p-inputnumber-input:disabled {
+  [hlmInput]:disabled,
+  input[type="number"]:disabled {
     opacity: 0.42;
   }
 
-  .p-checkbox-box {
+  brn-checkbox {
     border-color: rgba(255, 255, 255, 0.18);
     border-radius: 0.38rem;
     background: rgba(255, 255, 255, 0.04);
   }
 
-  .p-checkbox-checked .p-checkbox-box {
+  [data-checked] brn-checkbox {
     border-color: rgba(var(--theme-primary-300-rgb), 0.5);
     background: var(--theme-primary-600);
   }
 
-  .requeue-button.p-button {
+  .requeue-button[hlmBtn] {
     min-height: 2.7rem;
     padding: 0.72rem 1rem;
     border-radius: 0.8rem;
@@ -282,7 +272,7 @@ app-admin-settings-shell {
     transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .requeue-button.p-button {
+  .requeue-button[hlmBtn] {
     border-color: rgba(248, 113, 113, 0.24);
     background: rgba(127, 29, 29, 0.12);
     color: #f2b0b0;
@@ -327,7 +317,7 @@ app-admin-settings-shell {
       grid-column: 2;
     }
 
-    .requeue-button.p-button {
+    .requeue-button[hlmBtn] {
       width: 100%;
       justify-content: center;
     }
@@ -336,7 +326,7 @@ app-admin-settings-shell {
 
 @media (prefers-reduced-motion: reduce) {
   app-admin-settings-shell .settings-card,
-  app-admin-settings-shell .requeue-button.p-button {
+  app-admin-settings-shell .requeue-button[hlmBtn] {
     transition: none;
   }
 }
