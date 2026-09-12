@@ -17,6 +17,11 @@
 
 @variant dark (.dark &);
 
+/* Keep titles centered beside their icon when the description is omitted. */
+.card-heading:has(> .card-icon):not(:has(p)) > :is(.card-icon, div, h1, h2, h3) {
+  align-self: center;
+}
+
 :root {
   color-scheme: dark;
 

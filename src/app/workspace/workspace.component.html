@@ -180,10 +180,7 @@
             <span class="card-icon"
               ><i class="icon icon-sparkles" aria-hidden="true"></i
             ></span>
-            <div>
-              <h2 id="plan-title">What does this plan include?</h2>
-              <p>Limits that shape checking, retention, and team access.</p>
-            </div>
+            <h2 id="plan-title">What does this plan include?</h2>
             <span class="plan-state"
               ><strong>{{ workspace.subscription.plan_code }}</strong
               ><small>{{
@@ -432,10 +429,6 @@
             ></span>
             <div>
               <h2 id="access-title">Who can use this workspace?</h2>
-              <p>
-                Members enter after accepting an invitation. Role changes apply
-                when saved.
-              </p>
             </div>
             <span class="section-count"
               >{{ members().length }}
@@ -517,7 +510,6 @@
           <div class="subsection-heading">
             <div>
               <h3>Members</h3>
-              <p>Owners control roles, billing access, and membership.</p>
             </div>
             @if (showMemberSearch()) {
               <label class="search-field"
@@ -700,19 +692,10 @@
             </div>
           }
 
-          <p class="section-note">
-            Removing a member revokes access only. Routes and capacity do not
-            change.
-          </p>
-
           @if (workspaces.canAdminister()) {
             <div class="subsection-heading pending-heading">
               <div>
                 <h3>Pending invitations</h3>
-                <p>
-                  Edit access without renewing the expiry. Notification emails
-                  cannot be resent.
-                </p>
               </div>
               <span class="section-count"
                 >{{ invitations().length }} pending</span
