@@ -37,7 +37,9 @@
               ></span>
               <div class="card-heading__copy">
                 <h2 id="inventory-tools-title">{{ toolbarTitle }}</h2>
-                <p>{{ toolbarDescription }}</p>
+                @if (toolbarDescription) {
+                  <p>{{ toolbarDescription }}</p>
+                }
               </div>
             </div>
 
@@ -81,7 +83,9 @@
             ></span>
             <div class="card-heading__copy">
               <h2 id="inventory-list-title">{{ resultTitle }}</h2>
-              <p>{{ resultDescription }}</p>
+              @if (resultDescription) {
+                <p>{{ resultDescription }}</p>
+              }
             </div>
           </div>
 
