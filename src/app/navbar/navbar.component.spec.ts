@@ -24,7 +24,7 @@ describe('NavbarComponent', () => {
       imports: [NavbarComponent],
       providers: [
         provideRouter([]),
-        { provide: UserService, useValue: {logoutAndRedirect: logout} },
+        { provide: UserService, useValue: {logoutAndRedirect: logout, email: () => 'member@example.test'} },
         { provide: BreakpointObserver, useValue: {observe: () => mobile} },
       ]
     })
@@ -50,11 +50,28 @@ describe('NavbarComponent', () => {
     const menu = await openMenu();
     expect(menu).not.toBeNull();
     expect(Array.from(menu.querySelectorAll('[role="menuitem"]'), item => item.textContent!.trim()))
-      .toEqual(['Account', 'Workspace', 'Notifications', 'Sign out']);
+      .toEqual(['Account', 'Workspace', 'Releases', 'Sign out']);
     const trigger = fixture.debugElement.query(By.directive(HlmDropdownMenuTrigger)).injector.get(HlmDropdownMenuTrigger);
     expect(trigger.side()).toBe('right');
     expect(trigger.align()).toBe('end');
     expect(fixture.nativeElement.querySelector('.account-trigger').getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('marks only the current account menu destination as active as navigation changes', async () => {
+    const router = TestBed.inject(Router);
+    router.resetConfig([{path: '**', children: []}]);
+    await router.navigateByUrl('/notifications');
+    const menu = await openMenu();
+
+    for (const path of ['/notifications', '/account', '/workspace', '/proxies']) {
+      await router.navigateByUrl(path);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const active = menu.querySelectorAll('.account-menu__item--active');
+      expect(active.length).toBe(path === '/proxies' ? 0 : 1);
+      expect(menu.querySelector('[aria-current="page"]')?.getAttribute('href') ?? null)
+        .toBe(path === '/proxies' ? null : path);
+    }
   });
 
   it('positions the menu above the trigger on narrow screens', () => {

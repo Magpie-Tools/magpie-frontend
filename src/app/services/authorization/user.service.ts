@@ -16,6 +16,7 @@ export class UserService {
   private static readonly _authState = signal<AuthState>('checking');
   private static role = 'user';
   private static roleSubject = new BehaviorSubject<string | undefined>(undefined);
+  readonly email = signal('');
   public readonly role$ = UserService.roleSubject.asObservable();
 
   constructor(
@@ -47,14 +48,19 @@ export class UserService {
     if (UserService.authState() !== 'authenticated') {
       UserService.setAuthState('checking');
     }
-    this.http.getUserRole().subscribe({
+    const sessionToken = getAuthToken();
+    this.http.getUserProfile().subscribe({
       next: res => {
+        if (getAuthToken() !== sessionToken) return;
+        this.email.set(res.email);
         UserService.setAuthState('authenticated');
-        UserService.setRole(res);
+        UserService.setRole(res.role);
       },
       error: err => {
+        if (getAuthToken() !== sessionToken) return;
+        this.email.set('');
         if (err.status && err.status !== 401 && err.status !== 403) {
-          this.notification.showError("Error while getting user role! " + err.error.message)
+          this.notification.showError("Error while loading account! " + err.error.message)
         }
         if (err.status === 401 || err.status === 403) {
           this.logoutAndRedirect();
@@ -94,6 +100,7 @@ export class UserService {
   }
 
   public logout() {
+    this.email.set('');
     clearAuthToken();
     AuthInterceptor.setToken('');
     this.workspaces.reset();

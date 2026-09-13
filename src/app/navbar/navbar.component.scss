@@ -353,7 +353,13 @@
   gap: 0.12rem;
 
   strong { font-size: 0.8rem; font-weight: 590; }
-  small { color: rgba(255, 255, 255, 0.48); font-size: 0.68rem; }
+  small {
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 0.68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .account-menu [hlmDropdownMenuSeparator],
@@ -385,15 +391,27 @@
   > i { flex: 0 0 auto; font-size: 1rem; }
 
   &:hover,
-  &:focus {
+  &:focus-visible {
     background: rgba(255, 255, 255, 0.075);
     color: #fff;
   }
 }
 
+.account-menu__item--active {
+  background: rgba(var(--theme-primary-500-rgb), 0.16);
+  color: var(--theme-primary-200);
+  font-weight: 590;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(var(--theme-primary-500-rgb), 0.24);
+    color: var(--theme-primary-200);
+  }
+}
+
 .account-menu__item--danger {
   &:hover,
-  &:focus {
+  &:focus-visible {
     background: rgba(248, 113, 113, 0.1);
     color: #f0aaaa;
   }

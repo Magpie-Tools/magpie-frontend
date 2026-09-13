@@ -85,16 +85,6 @@
         ></span>
         <span>Workspace</span>
       </a>
-      <a
-        class="navbar-item"
-        routerLink="/notifications"
-        routerLinkActive="active"
-      >
-        <span class="navbar-item__icon"
-          ><i class="icon icon-bell" aria-hidden="true"></i
-        ></span>
-        <span>Notifications</span>
-      </a>
     </section>
   </div>
 
@@ -112,7 +102,7 @@
       ></span>
       <span class="account-trigger__copy">
         <strong>Account</strong>
-        <small>Settings and security</small>
+        <small [title]="user.email()">{{ user.email() }}</small>
       </span>
       <ng-icon
         name="lucideChevronsUpDown"
@@ -129,7 +119,7 @@
           </span>
           <div class="account-menu__copy">
             <strong>Account</strong>
-            <small>Settings and security</small>
+            <small [title]="user.email()">{{ user.email() }}</small>
           </div>
         </div>
         <hlm-dropdown-menu-separator />
@@ -137,17 +127,31 @@
           hlmDropdownMenuItem
           class="account-menu__item"
           routerLink="/account"
+          routerLinkActive="account-menu__item--active"
+          ariaCurrentWhenActive="page"
         >
           <i class="icon icon-badge-check" aria-hidden="true"></i>
           Account
         </a>
-        <a hlmDropdownMenuItem class="account-menu__item" routerLink="/workspace">
+        <a
+          hlmDropdownMenuItem
+          class="account-menu__item"
+          routerLink="/workspace"
+          routerLinkActive="account-menu__item--active"
+          ariaCurrentWhenActive="page"
+        >
           <i class="icon icon-building" aria-hidden="true"></i>
           Workspace
         </a>
-        <a hlmDropdownMenuItem class="account-menu__item" routerLink="/notifications">
-          <i class="icon icon-bell" aria-hidden="true"></i>
-          Notifications
+        <a
+          hlmDropdownMenuItem
+          class="account-menu__item"
+          routerLink="/notifications"
+          routerLinkActive="account-menu__item--active"
+          ariaCurrentWhenActive="page"
+        >
+          <i class="icon icon-tag" aria-hidden="true"></i>
+          Releases
         </a>
         <hlm-dropdown-menu-separator />
         <button

@@ -306,6 +306,10 @@ export class HttpService {
     return this.http.post(this.apiUrl + "/user/settings", payload)
   }
 
+  getUserProfile() {
+    return this.http.get<{email: string; role: string}>(this.apiUrl + '/user/profile');
+  }
+
   getUserRole() {
     return this.http.get<string>(this.apiUrl + '/user/role');
   }

@@ -11,7 +11,7 @@ describe('UserService', () => {
   let service: UserService;
   let navigate: jasmine.Spy;
   let resetWorkspaces: jasmine.Spy;
-  let getUserRole: jasmine.Spy;
+  let getUserProfile: jasmine.Spy;
 
   beforeEach(() => {
     window.localStorage.removeItem('magpie-jwt');
@@ -21,12 +21,12 @@ describe('UserService', () => {
     spyOn(UserService, 'setRole');
     navigate = jasmine.createSpy('navigate');
     resetWorkspaces = jasmine.createSpy('reset');
-    getUserRole = jasmine.createSpy('getUserRole').and.returnValue(of('user'));
+    getUserProfile = jasmine.createSpy('getUserProfile').and.returnValue(of({email: 'member@example.test', role: 'user'}));
 
     TestBed.configureTestingModule({
       providers: [
         UserService,
-        {provide: HttpService, useValue: {getUserRole}},
+        {provide: HttpService, useValue: {getUserProfile}},
         {provide: Router, useValue: {navigate}},
         {provide: NotificationService, useValue: {}},
         {provide: WorkspaceService, useValue: {reset: resetWorkspaces}},
@@ -50,7 +50,9 @@ describe('UserService', () => {
     window.localStorage.setItem('magpie-workspace-id', '41');
     UserService.setLoggedIn(true);
 
+    service.email.set('member@example.test');
     service.logoutAndRedirect();
+    expect(service.email()).toBe('');
 
     expect(resetWorkspaces).toHaveBeenCalledTimes(1);
     expect(window.localStorage.getItem('magpie-jwt')).toBeNull();
@@ -64,8 +66,8 @@ describe('UserService', () => {
 
     service = TestBed.inject(UserService);
 
-    expect(service).toBeTruthy();
-    expect(getUserRole).toHaveBeenCalledTimes(1);
+    expect(service.email()).toBe('member@example.test');
+    expect(getUserProfile).toHaveBeenCalledTimes(1);
     expect(UserService.authState()).toBe('authenticated');
   });
 });
