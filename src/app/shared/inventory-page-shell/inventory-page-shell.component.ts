@@ -13,6 +13,7 @@ export class InventoryPageShellComponent implements OnChanges {
   @Input() pageTitle = '';
   @Input() pageDescription = '';
   @Input() toolbarTitle = '';
+  @Input() combinedCard = false;
   @Input() toolbarDescription = '';
   @Input() toolbarAriaLabel = '';
   @Input() searchTerm = '';
@@ -20,6 +21,7 @@ export class InventoryPageShellComponent implements OnChanges {
   @Input() searchAriaLabel = '';
   @Input() resultIcon = '';
   @Input() resultTitle = '';
+  @Input() showResultHeading = true;
   @Input() resultDescription = '';
   @Input() selectedCount = 0;
   @Input() totalItems = 0;

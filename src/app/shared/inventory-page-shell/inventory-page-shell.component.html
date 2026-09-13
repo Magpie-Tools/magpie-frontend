@@ -2,7 +2,7 @@
   class="inventory-page"
   [class.inventory-page--loading]="!initialLoadComplete"
   [attr.aria-busy]="loading"
-  appRevealGroup=".inventory-context, .inventory-toolbar, .inventory-card"
+  [appRevealGroup]="combinedCard ? '.inventory-context, .inventory-grid' : '.inventory-context, .inventory-toolbar, .inventory-card'"
   [revealReady]="initialLoadComplete"
 >
   @if (!initialLoadComplete) {
@@ -24,7 +24,7 @@
       </div>
     </header>
 
-    <div class="inventory-grid">
+    <div class="inventory-grid" [class.inventory-grid--combined]="combinedCard">
       <div class="actions-wrapper">
         <section
           class="inventory-toolbar"
@@ -75,35 +75,41 @@
         <ng-content select="[inventory-overlays]"></ng-content>
       </div>
 
-      <section class="inventory-card" aria-labelledby="inventory-list-title">
-        <div class="inventory-card__heading">
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i [class]="resultIcon" aria-hidden="true"></i
-            ></span>
-            <div class="card-heading__copy">
-              <h2 id="inventory-list-title">{{ resultTitle }}</h2>
-              @if (resultDescription) {
-                <p>{{ resultDescription }}</p>
+      <section
+        class="inventory-card"
+        [attr.aria-labelledby]="showResultHeading ? 'inventory-list-title' : null"
+        [attr.aria-label]="showResultHeading ? null : resultTitle"
+      >
+        @if (showResultHeading) {
+          <div class="inventory-card__heading">
+            <div class="card-heading">
+              <span class="card-icon"
+                ><i [class]="resultIcon" aria-hidden="true"></i
+              ></span>
+              <div class="card-heading__copy">
+                <h2 id="inventory-list-title">{{ resultTitle }}</h2>
+                @if (resultDescription) {
+                  <p>{{ resultDescription }}</p>
+                }
+              </div>
+            </div>
+
+            <div
+              class="inventory-state"
+              [class.inventory-state--selected]="selectedCount > 0"
+              aria-live="polite"
+            >
+              <span aria-hidden="true"></span>
+              @if (selectedCount > 0) {
+                {{ selectedCount }} selected
+              } @else if (hasLoaded) {
+                {{ totalItems.toLocaleString() }} total
+              } @else {
+                {{ loadingLabel }}
               }
             </div>
           </div>
-
-          <div
-            class="inventory-state"
-            [class.inventory-state--selected]="selectedCount > 0"
-            aria-live="polite"
-          >
-            <span aria-hidden="true"></span>
-            @if (selectedCount > 0) {
-              {{ selectedCount }} selected
-            } @else if (hasLoaded) {
-              {{ totalItems.toLocaleString() }} total
-            } @else {
-              {{ loadingLabel }}
-            }
-          </div>
-        </div>
+        }
 
         @if (isEmpty) {
           <div class="empty-inventory">
