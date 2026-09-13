@@ -66,6 +66,9 @@
       ],
       "@spartan-ng/helm/native-select": [
         "./src/app/ui/native-select/src/index.ts"
+      ],
+      "@spartan-ng/helm/dropdown-menu": [
+        "./src/app/ui/dropdown-menu/src/index.ts"
       ]
     }
   },

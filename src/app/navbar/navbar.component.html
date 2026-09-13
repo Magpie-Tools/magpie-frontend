@@ -98,48 +98,68 @@
     </section>
   </div>
 
-  <hlm-popover class="account-section" #accountPopover="brnPopover">
+  <div class="account-section">
     <button
       type="button"
       class="account-trigger"
-      hlmPopoverTrigger
+      [hlmDropdownMenuTrigger]="accountMenu"
+      [side]="isMobile() ? 'top' : 'right'"
+      [align]="isMobile() ? 'start' : 'end'"
       aria-label="Open account menu"
     >
-      <span class="account-trigger__avatar"
+      <span class="account-avatar"
         ><i class="icon icon-user" aria-hidden="true"></i
       ></span>
       <span class="account-trigger__copy">
         <strong>Account</strong>
         <small>Settings and security</small>
       </span>
-      <i
-        class="icon icon-ellipsis account-trigger__more"
+      <ng-icon
+        name="lucideChevronsUpDown"
+        class="account-trigger__more"
         aria-hidden="true"
-      ></i>
+      ></ng-icon>
     </button>
 
-    <hlm-popover-content *hlmPopoverPortal class="navbar-account-popover">
-      <div class="account-menu">
+    <ng-template #accountMenu>
+      <hlm-dropdown-menu class="account-menu" aria-label="Account menu">
+        <div class="account-menu__identity">
+          <span class="account-avatar" aria-hidden="true">
+            <i class="icon icon-user"></i>
+          </span>
+          <div class="account-menu__copy">
+            <strong>Account</strong>
+            <small>Settings and security</small>
+          </div>
+        </div>
+        <hlm-dropdown-menu-separator />
         <a
+          hlmDropdownMenuItem
           class="account-menu__item"
           routerLink="/account"
-          (click)="accountPopover.close()"
         >
-          <i class="icon icon-settings" aria-hidden="true"></i>
-          <span
-            ><strong>Account settings</strong
-            ><small>Theme, password, and security</small></span
-          >
+          <i class="icon icon-badge-check" aria-hidden="true"></i>
+          Account
         </a>
+        <a hlmDropdownMenuItem class="account-menu__item" routerLink="/workspace">
+          <i class="icon icon-building" aria-hidden="true"></i>
+          Workspace
+        </a>
+        <a hlmDropdownMenuItem class="account-menu__item" routerLink="/notifications">
+          <i class="icon icon-bell" aria-hidden="true"></i>
+          Notifications
+        </a>
+        <hlm-dropdown-menu-separator />
         <button
+          hlmDropdownMenuItem
           type="button"
           class="account-menu__item account-menu__item--danger"
-          (click)="user.logoutAndRedirect()"
+          (triggered)="user.logoutAndRedirect()"
         >
           <i class="icon icon-log-out" aria-hidden="true"></i>
-          <span><strong>Sign out</strong><small>End this session</small></span>
+          Sign out
         </button>
-      </div>
-    </hlm-popover-content>
-  </hlm-popover>
+      </hlm-dropdown-menu>
+    </ng-template>
+  </div>
 </nav>

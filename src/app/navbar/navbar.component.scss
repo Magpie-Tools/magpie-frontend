@@ -283,17 +283,19 @@
   cursor: pointer;
   transition: border-color 0.22s ease, background-color 0.22s ease, transform 0.22s ease;
 
-  &:hover {
+  &:hover,
+  &[aria-expanded="true"] {
     border-color: rgba(var(--theme-primary-300-rgb), 0.23);
     background: rgba(var(--theme-primary-500-rgb), 0.07);
     transform: translateY(-1px);
   }
 }
 
-.account-trigger__avatar {
+.account-avatar {
   display: grid;
-  width: 2.05rem;
-  height: 2.05rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
   place-items: center;
   border: 1px solid rgba(var(--theme-primary-300-rgb), 0.23);
   border-radius: 50%;
@@ -321,85 +323,80 @@
 }
 
 .account-trigger__more {
-  color: rgba(255, 255, 255, 0.28);
-  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
 }
 
 .account-menu {
-  display: grid;
-  width: 15rem;
-  gap: 0.28rem;
+  width: min(17rem, calc(100vw - 1.5rem));
+  padding: 0.3rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.9rem;
+  background: #19191c;
+  color: rgba(255, 255, 255, 0.86);
+  font-family: "Geist Variable", "Outfit Variable", sans-serif;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.4), inset 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.account-menu__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.55rem;
+}
+
+.account-menu__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.12rem;
+
+  strong { font-size: 0.8rem; font-weight: 590; }
+  small { color: rgba(255, 255, 255, 0.48); font-size: 0.68rem; }
+}
+
+.account-menu [hlmDropdownMenuSeparator],
+.account-menu hlm-dropdown-menu-separator {
+  height: 1px;
+  margin: 0.3rem -0.3rem;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .account-menu__item {
-  display: grid;
+  display: flex;
   width: 100%;
-  grid-template-columns: 1.8rem minmax(0, 1fr);
+  min-height: 2.4rem;
   align-items: center;
-  gap: 0.58rem;
-  padding: 0.62rem;
-  border: 1px solid transparent;
-  border-radius: 0.7rem;
+  gap: 0.65rem;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  border-radius: 0.55rem;
   background: transparent;
-  color: rgba(255, 255, 255, 0.72);
+  color: inherit;
   font: inherit;
+  font-size: 0.76rem;
+  font-weight: 450;
   text-align: left;
   text-decoration: none;
   cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+  transition: color 0.15s ease, background-color 0.15s ease;
 
-  > i {
-    color: var(--theme-primary-200);
-    font-size: 0.73rem;
-    text-align: center;
-  }
+  > i { flex: 0 0 auto; font-size: 1rem; }
 
-  > span {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    gap: 0.13rem;
-  }
-
-  strong {
-    color: inherit;
-    font-size: 0.68rem;
-    font-weight: 580;
-  }
-
-  small {
-    color: rgba(255, 255, 255, 0.34);
-    font-size: 0.54rem;
-  }
-
-  &:hover {
-    border-color: rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.045);
+  &:hover,
+  &:focus {
+    background: rgba(255, 255, 255, 0.075);
     color: #fff;
   }
 }
 
-.account-menu__item--danger > i {
-  color: #e19a9a;
-}
-
-:host ::ng-deep .navbar-account-popoverhlm-popover-content {
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 0.95rem;
-  background: rgba(15, 15, 17, 0.98);
-  color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, 0.48), inset 0 1px rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-}
-
-:host ::ng-deep .navbar-account-popover hlm-popover-content {
-  padding: 0.42rem;
-}
-
-:host ::ng-deep .navbar-account-popover::before,
-:host ::ng-deep .navbar-account-popover::after {
-  border-top-color: rgba(15, 15, 17, 0.98);
+.account-menu__item--danger {
+  &:hover,
+  &:focus {
+    background: rgba(248, 113, 113, 0.1);
+    color: #f0aaaa;
+  }
 }
 
 .navbar-brand:focus-visible,

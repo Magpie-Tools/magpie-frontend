@@ -1,5 +1,10 @@
-import {HlmPopoverImports} from '@spartan-ng/helm/popover';
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {HlmDropdownMenuImports} from '@spartan-ng/helm/dropdown-menu';
+import {AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit} from '@angular/core';
+import {BreakpointObserver} from '@angular/cdk/layout';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {map} from 'rxjs/operators';
+import {NgIcon, provideIcons} from '@ng-icons/core';
+import {lucideChevronsUpDown} from '@ng-icons/lucide';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {UserService} from "../services/authorization/user.service";
 
@@ -8,15 +13,20 @@ import {gsap} from 'gsap';
 
 @Component({
   selector: 'app-navbar',
-  imports: [HlmPopoverImports,
+  imports: [HlmDropdownMenuImports, NgIcon,
     RouterLink,
     RouterLinkActive,
 
   ],
+  providers: [provideIcons({lucideChevronsUpDown})],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
+  protected readonly isMobile = toSignal(
+    inject(BreakpointObserver).observe('(max-width: 768px)').pipe(map(result => result.matches)),
+    {initialValue: false},
+  );
   menuItems: NavigationItem[] = [];
   private adminRefreshTimer?: ReturnType<typeof setTimeout>;
   private motionContext?: gsap.Context;
