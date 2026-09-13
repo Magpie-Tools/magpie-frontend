@@ -76,6 +76,18 @@ describe('Proxy table actions menu', () => {
     expect(lifecycle).toHaveBeenCalledWith({proxy: jasmine.objectContaining({id: 1}), state: 'paused'});
   });
 
+  it('renders and dispatches inline actions when the optional column is selected', () => {
+    fixture.componentRef.setInput('columns', ['actions_buttons']);
+    fixture.componentRef.setInput('proxies', [{...proxy, state: 'paused'}]);
+    const lifecycle = spyOn(fixture.componentInstance.lifecycleChange, 'emit');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.proxy-actions-trigger')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.proxy-lifecycle-button').textContent).toContain('Activate');
+    expect(fixture.nativeElement.querySelector('.proxy-details-button')).not.toBeNull();
+    fixture.nativeElement.querySelector('.proxy-archive-button').click();
+    expect(lifecycle).toHaveBeenCalledWith({proxy: jasmine.objectContaining({id: 1}), state: 'archived'});
+  });
+
   it('disables lifecycle actions while a change is pending', async () => {
     fixture.componentRef.setInput('lifecycleChangingIds', {1: true});
     await openMenu();

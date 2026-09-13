@@ -115,7 +115,7 @@
                         [style.width]="'4.75rem'"
                         [style.height]="'1.5rem'"
                       />
-                    } @else if (column.id === "actions") {
+                    } @else if (column.id === "actions" || column.id === "actions_buttons") {
                       <hlm-skeleton
                         [style.width]="'4.5rem'"
                         [style.height]="'1.5rem'"
@@ -379,6 +379,55 @@
                         aria-hidden="true"
                       ></i>
                       <span>Check</span>
+                    </button>
+                  </td>
+                }
+                @case ("actions_buttons") {
+                  <td hlmTd class="proxy-actions-cell">
+                    @if (lifecycleEnabled) {
+                      <button
+                        type="button"
+                        class="proxy-lifecycle-button"
+                        [disabled]="isChangingLifecycle(proxy.id)"
+                        (click)="
+                          onLifecycleChange(
+                            $event,
+                            proxy,
+                            managedState(proxy) === 'active'
+                              ? 'paused'
+                              : 'active'
+                          )
+                        "
+                      >
+                        <i
+                          class="icon"
+                          [ngClass]="
+                            isChangingLifecycle(proxy.id)
+                              ? 'icon-spin icon-loader-circle'
+                              : lifecycleIcon(proxy)
+                          "
+                        ></i>
+                        <span>{{ lifecycleLabel(proxy) }}</span>
+                      </button>
+                      @if (managedState(proxy) === "paused") {
+                        <button
+                          type="button"
+                          class="proxy-archive-button"
+                          title="Archive route"
+                          [disabled]="isChangingLifecycle(proxy.id)"
+                          (click)="onLifecycleChange($event, proxy, 'archived')"
+                        >
+                          <i class="icon icon-archive"></i>
+                        </button>
+                      }
+                    }
+                    <button
+                      type="button"
+                      class="proxy-details-button"
+                      (click)="onViewProxy($event, proxy)"
+                    >
+                      <i class="icon icon-external-link" aria-hidden="true"></i>
+                      <span>Details</span>
                     </button>
                   </td>
                 }

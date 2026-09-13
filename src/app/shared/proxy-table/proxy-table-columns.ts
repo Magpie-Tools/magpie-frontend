@@ -15,7 +15,8 @@ export type ProxyTableColumnId =
   | 'reputation'
   | 'latest_check'
   | 'check_now'
-  | 'actions';
+  | 'actions'
+  | 'actions_buttons';
 
 export interface ProxyTableColumnDefinition {
   id: ProxyTableColumnId;
@@ -149,8 +150,15 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
   {
     id: 'actions',
     label: 'Actions',
-    example: 'Details',
-    skeletonWidth: '4.5rem',
+    example: '…',
+    skeletonWidth: '2rem',
+  },
+  {
+    id: 'actions_buttons',
+    label: 'Actions (buttons)',
+    tooltip: 'Show inline Pause, Activate, Archive, and Details buttons',
+    example: 'Pause · Details',
+    skeletonWidth: '8rem',
   },
 ];
 
