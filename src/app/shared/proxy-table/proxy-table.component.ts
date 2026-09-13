@@ -2,6 +2,7 @@ import {TablePageEvent} from '../ui/pagination.component';
 import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
 import {HlmTooltip} from '@spartan-ng/helm/tooltip';
+import {HlmDropdownMenuImports} from '@spartan-ng/helm/dropdown-menu';
 import {HlmTableImports} from '@spartan-ng/helm/table';
 import {PaginationComponent} from '../ui/pagination.component';
 import {PageScrollTarget, readPageScrollTarget, writePageScrollTarget, scrollTableToPageTarget} from '../table-pagination';
@@ -52,7 +53,7 @@ type ProxyRow = ProxyInfo & { __meta?: ProxyRowMeta };
 @Component({
   selector: 'app-proxy-table',
   standalone: true,
-  imports: [HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
+  imports: [HlmDropdownMenuImports, HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
     NgClass,
     FormsModule,
 
@@ -109,6 +110,7 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input() savingTagProxyIds: Record<number, boolean> = {};
   @Input() availableTags: readonly ProxyTag[] = [];
   @Input() tagEditingEnabled = true;
+  @Input() checkEnabled = false;
   @Input() lifecycleEnabled = false;
   @Input() lifecycleChangingIds: Record<number, boolean> = {};
 
@@ -307,8 +309,8 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
     return this.managedState(proxy) === 'active' ? 'icon-pause' : 'icon-play';
   }
 
-  onLifecycleChange(event: Event, proxy: ProxyInfo, state: ManagedProxyState): void {
-    event.stopPropagation();
+  onLifecycleChange(event: Event | undefined, proxy: ProxyInfo, state: ManagedProxyState): void {
+    event?.stopPropagation();
     if (!this.lifecycleEnabled || this.isChangingLifecycle(proxy.id)) {
       return;
     }
@@ -360,8 +362,8 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
     return this.copiedValueKey === this.getCopyValueKey(proxy, field);
   }
 
-  async copyProxyValue(event: MouseEvent, proxy: ProxyInfo, field: 'ip' | 'ip_port' | 'port'): Promise<void> {
-    event.stopPropagation();
+  async copyProxyValue(event: MouseEvent | undefined, proxy: ProxyInfo, field: 'ip' | 'ip_port' | 'port'): Promise<void> {
+    event?.stopPropagation();
     const value = this.resolveCopyValue(proxy, field);
     if (!value) {
       return;
