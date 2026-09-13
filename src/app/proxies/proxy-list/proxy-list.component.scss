@@ -6,16 +6,18 @@
   .inventory-table {
     display: block;
     margin-top: 1.2rem;
+    font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
   }
 
   .inventory-table .data-table {
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.95rem;
-    background: rgba(3, 3, 5, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.085);
+    border-radius: 0.82rem;
+    background:
+      radial-gradient(circle at 4% 0%, rgba(var(--theme-primary-500-rgb), 0.065), transparent 14rem),
+      rgba(8, 8, 10, 0.91);
   }
 
-  .inventory-table .table-scroll,
   .inventory-table .table-scroll {
     overflow-x: auto;
     border-radius: 0;
@@ -23,15 +25,19 @@
 
   .inventory-table table {
     border-radius: 0;
+    border-collapse: collapse;
   }
 
   .inventory-table thead > tr > th {
-    padding: 0.72rem 0.78rem;
-    border-color: rgba(255, 255, 255, 0.09);
-    background: rgba(255, 255, 255, 0.035);
-    color: rgba(255, 255, 255, 0.48);
-    font-size: 0.61rem;
-    font-weight: 570;
+    padding: 0.68rem 0.75rem;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.085);
+    background: rgba(255, 255, 255, 0.022);
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 0.55rem;
+    font-weight: 640;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     white-space: nowrap;
   }
 
@@ -40,23 +46,39 @@
     color: var(--theme-primary-200);
   }
 
-  .inventory-table .table-sort span {
-    width: 0.62rem;
-    height: 0.62rem;
-    margin-inline-start: 0.16rem;
+  .inventory-table .table-sort {
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+  }
+
+  .inventory-table .table-sort__icon {
+    width: 0.75rem;
+    height: 0.75rem;
     opacity: 0.72;
   }
 
+  .inventory-table thead > tr,
+  .inventory-table tbody > tr {
+    border: 0;
+    background: transparent;
+  }
+
   .inventory-table tbody > tr > td {
-    padding: 0.68rem 0.78rem;
-    border-color: rgba(255, 255, 255, 0.065);
-    background: rgba(7, 7, 9, 0.64);
+    padding: 0.68rem 0.75rem;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: transparent;
     color: rgba(255, 255, 255, 0.68);
-    font-size: 0.68rem;
+    font-size: 0.63rem;
   }
 
   .inventory-table tbody > tr:not([data-state="selected"]):hover > td {
-    background: rgba(var(--theme-primary-500-rgb), 0.045);
+    background: rgba(var(--theme-primary-500-rgb), 0.05);
+  }
+
+  .inventory-table tbody > tr:last-child > td {
+    border-bottom: 0;
   }
 
   .inventory-table tbody > tr[data-state="selected"] > td {
@@ -70,7 +92,7 @@
     border: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 0;
-    background: rgba(255, 255, 255, 0.025);
+    background: rgba(255, 255, 255, 0.022);
     color: rgba(255, 255, 255, 0.5);
     font-size: 0.65rem;
   }
@@ -96,12 +118,80 @@
   .inventory-table .proxy-check-button,
   .inventory-table .proxy-lifecycle-button,
   .inventory-table .proxy-archive-button {
-    min-height: 1.9rem;
-    border-radius: 0.55rem;
-    font-size: 0.64rem;
+    min-height: 1.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 0.56rem;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.61rem;
+    font-weight: 590;
+  }
+
+  .inventory-table .proxy-check-button {
+    border-color: rgba(var(--theme-primary-300-rgb), 0.32);
+    background: rgba(var(--theme-primary-500-rgb), 0.22);
+    color: #fff;
+  }
+
+  .inventory-table .proxy-archive-button {
+    border-color: rgba(245, 158, 11, 0.28);
+    color: #fcdba0;
+  }
+
+  .inventory-table :is(.proxy-details-button, .proxy-check-button, .proxy-lifecycle-button, .proxy-archive-button):is(:hover, :focus-visible):not(:disabled) {
+    border-color: rgba(var(--theme-primary-300-rgb), 0.34);
+    background: rgba(var(--theme-primary-500-rgb), 0.08);
+    color: #fff;
+  }
+
+  .inventory-table .status-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    animation: none;
+
+    &.alive {
+      background: #25cf7a;
+      box-shadow: 0 0 0.7rem rgba(37, 207, 122, 0.5);
+
+      &::after { display: none; }
+    }
+
+    &.dead { background: #f06d76; }
+  }
+
+  .inventory-table .reputation-badge,
+  .inventory-table .lifecycle-state {
+    gap: 0.3rem;
+    padding: 0.28rem 0.52rem;
+    font-size: 0.52rem;
+    font-weight: 650;
+    letter-spacing: 0.07em;
+  }
+
+  .inventory-table .reputation-badge__score {
+    font-size: inherit;
+  }
+
+  .inventory-table .proxy-page-jump {
+    flex-wrap: wrap;
+    font-size: 0.65rem;
+  }
+
+  .inventory-table .proxy-page-jump__input {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.56rem;
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .inventory-table .proxy-page-jump__submit {
+    border-color: rgba(var(--theme-primary-300-rgb), 0.32);
+    border-radius: 0.56rem;
+    background: rgba(var(--theme-primary-500-rgb), 0.22);
+    color: #fff;
+    font-size: 0.61rem;
   }
 
   .inventory-table .copy-value {
-    font-size: 0.68rem;
+    font-size: 0.63rem;
   }
 }

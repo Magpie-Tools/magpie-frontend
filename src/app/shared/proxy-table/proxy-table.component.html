@@ -5,6 +5,9 @@
   <div
     hlmTableContainer [attr.inert]="loading ? '' : null"
     class="table-scroll"
+    tabindex="0"
+    role="region"
+    aria-label="Proxy table, scroll horizontally to view more columns"
     [style.max-height]="virtualScroll ? (scrollHeight ?? '60vh') : null"
   >
     <table hlmTable>
@@ -40,13 +43,26 @@
                   (click)="sortColumn(column.sortField!)"
                 >
                   {{ column.label }}
-                  <span aria-hidden="true">{{
-                    sortField === column.sortField
-                      ? sortOrder === 1
-                        ? "↑"
-                        : "↓"
-                      : "↕"
-                  }}</span>
+                  <svg
+                    class="table-sort__icon"
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    @if (sortField === column.sortField) {
+                      @if (sortOrder === 1) {
+                        <path d="M12 19V5m-5 5 5-5 5 5" />
+                      } @else {
+                        <path d="M12 5v14m-5-5 5 5 5-5" />
+                      }
+                    } @else {
+                      <path d="M8 20V4m-4 4 4-4 4 4m4-4v16m-4-4 4 4 4-4" />
+                    }
+                  </svg>
                 </button>
               </th>
             } @else {

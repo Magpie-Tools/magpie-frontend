@@ -1,5 +1,7 @@
 :host {
   display: block;
+  min-width: 0;
+  max-width: 100%;
   --proxy-accent: #22c55e;
   --proxy-accent-rgb: 34, 197, 94;
   --proxy-dead: #f87171;
@@ -404,7 +406,21 @@
 
 :host ::ng-deep .data-table .table-scroll {
   border-radius: 0.5rem;
-  overflow: hidden;
+  overflow: auto;
+  scrollbar-width: auto;
+  scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+}
+
+.table-sort__icon {
+  display: block;
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: 0 0 auto;
 }
 
 :host ::ng-deep .data-table table {
