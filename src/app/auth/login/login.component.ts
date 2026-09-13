@@ -46,6 +46,7 @@ export class LoginComponent implements OnDestroy {
     private route: ActivatedRoute,
     private notification: NotificationService,
     private workspaces: WorkspaceService,
+    private userService: UserService,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -84,6 +85,7 @@ export class LoginComponent implements OnDestroy {
         this.workspaces.reset();
         UserService.setLoggedIn(true);
         UserService.setRole(response.role);
+        this.userService.getAndSetRole();
         const returnUrl = typeof window !== 'undefined'
           ? window.sessionStorage.getItem('magpie-return-url')
           : null;

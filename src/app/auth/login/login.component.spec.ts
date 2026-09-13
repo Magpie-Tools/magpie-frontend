@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { LoginComponent } from './login.component';
 import { HttpService } from '../../services/http.service';
@@ -16,13 +16,17 @@ describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
   let loginUserSpy: jasmine.Spy;
+  let getUserProfileSpy: jasmine.Spy;
   let showErrorSpy: jasmine.Spy;
   let resetWorkspacesSpy: jasmine.Spy;
 
   beforeEach(async () => {
+    window.localStorage.removeItem('magpie-jwt');
+    window.sessionStorage.removeItem('magpie-jwt');
     UserService.setLoggedIn(false);
     spyOn(UserService, 'setRole');
     loginUserSpy = jasmine.createSpy('loginUser');
+    getUserProfileSpy = jasmine.createSpy('getUserProfile').and.returnValue(of({email: 'member@example.test', role: 'user'}));
     showErrorSpy = jasmine.createSpy('showError');
     resetWorkspacesSpy = jasmine.createSpy('reset');
 
@@ -33,6 +37,7 @@ describe('LoginComponent', () => {
           provide: HttpService,
           useValue: {
             loginUser: loginUserSpy,
+            getUserProfile: getUserProfileSpy,
           },
         },
         {
@@ -75,6 +80,24 @@ describe('LoginComponent', () => {
     window.localStorage.removeItem('magpie-jwt');
     window.sessionStorage.removeItem('magpie-jwt');
     window.sessionStorage.removeItem('magpie-return-url');
+  });
+
+  it('loads the email after a fresh login without recreating the user service', () => {
+    const profile = new Subject<{email: string; role: string}>();
+    getUserProfileSpy.and.returnValue(profile);
+    const userService = TestBed.inject(UserService);
+    expect(userService.email()).toBe('');
+    expect(getUserProfileSpy).not.toHaveBeenCalled();
+    loginUserSpy.and.returnValue(of({token: 'fresh-token', role: 'user'}));
+    component.loginForm.setValue({email: 'member@example.test', password: 'password123'});
+
+    component.onLogin();
+
+    expect(getUserProfileSpy).toHaveBeenCalledTimes(1);
+    profile.next({email: 'member@example.test', role: 'user'});
+    profile.complete();
+    expect(userService.email()).toBe('member@example.test');
+    expect(UserService.authState()).toBe('authenticated');
   });
 
   it('should reset workspace state before entering the new account', () => {
@@ -138,5 +161,6 @@ describe('LoginComponent', () => {
     component.onLogin();
 
     expect(showErrorSpy).toHaveBeenCalledWith('Login failed: Unable to reach the server');
+    expect(getUserProfileSpy).not.toHaveBeenCalled();
   });
 });
