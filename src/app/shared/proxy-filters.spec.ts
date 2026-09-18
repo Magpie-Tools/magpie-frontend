@@ -3,12 +3,41 @@ import {
   activeProxyFilterCount,
   buildBulkProxyFilters,
   createProxyFilterControls,
+  syncFilterFormWithApplied,
   buildFiltersFromFormValue,
   buildProxyListFilterPayload,
   createDefaultProxyFilterValues,
 } from './proxy-filters';
 
 describe('proxy-filters', () => {
+  for (const state of ['active', 'paused', 'archived'] as const) {
+    it(`combines ${state} lifecycle filtering with alive status and restores the form`, () => {
+      const values = {...createDefaultProxyFilterValues(), states: [state], proxyStatus: 'alive' as const};
+      const filters = buildFiltersFromFormValue(values);
+      expect(buildProxyListFilterPayload(filters)).toEqual({states: [state], status: 'alive'});
+      expect(activeProxyFilterCount(filters)).toBe(2);
+      const form = new FormBuilder().group(createProxyFilterControls(createDefaultProxyFilterValues()));
+      syncFilterFormWithApplied(form, filters);
+      expect(form.getRawValue()).toEqual(values);
+      expect(buildBulkProxyFilters(values, true).states).toEqual([state]);
+      expect(buildBulkProxyFilters(values, false).states).toEqual([]);
+    });
+  }
+
+  it('keeps multiple lifecycle states as one filter and removes duplicates', () => {
+    const values = {...createDefaultProxyFilterValues(), states: ['paused', 'archived', 'paused'] as const};
+    const filters = buildFiltersFromFormValue({...values, states: [...values.states]});
+    expect(buildProxyListFilterPayload(filters)).toEqual({states: ['paused', 'archived']});
+    expect(activeProxyFilterCount(filters)).toBe(1);
+    expect(buildBulkProxyFilters({...values, states: [...values.states]}, true).states).toEqual(['paused', 'archived']);
+  });
+
+  it('leaves all lifecycle states visible by default', () => {
+    const filters = buildFiltersFromFormValue(createDefaultProxyFilterValues());
+    expect(buildProxyListFilterPayload(filters)).toBeUndefined();
+    expect(activeProxyFilterCount(filters)).toBe(0);
+  });
+
   it('builds health filter values into applied filters and payload', () => {
     const formValue = {
       ...createDefaultProxyFilterValues(),

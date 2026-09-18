@@ -2,6 +2,7 @@ import { FormGroup } from '@angular/forms';
 import { ProxyFilterOptions } from '../models/ProxyFilterOptions';
 import { ProxyListFilters } from '../models/ProxyListFilters';
 import {normalizeNumber} from './number-utils';
+import {ManagedProxyState} from '../models/Workspace';
 import {ProxyTag} from '../models/ProxyTag';
 
 export {normalizeNumber} from './number-utils';
@@ -12,6 +13,7 @@ export type ProxyFilterOption = {
 };
 
 export type ProxyListFilterFormValues = {
+  states: ManagedProxyState[];
   proxyStatus: 'all' | 'alive' | 'dead';
   http: boolean;
   https: boolean;
@@ -32,6 +34,7 @@ export type ProxyListFilterFormValues = {
 };
 
 export type ProxyListAppliedFilters = {
+  states: ManagedProxyState[];
   status: 'all' | 'alive' | 'dead';
   protocols: string[];
   minHealthOverall: number;
@@ -48,6 +51,18 @@ export type ProxyListAppliedFilters = {
   tagIds: number[];
 };
 
+export const PROXY_STATE_OPTIONS: ProxyFilterOption[] = [
+  { label: 'Active', value: 'active' },
+  { label: 'Paused', value: 'paused' },
+  { label: 'Archived', value: 'archived' },
+];
+
+export function normalizeProxyStateFilter(value: unknown): ManagedProxyState[] {
+  const values = Array.isArray(value) ? value : [value];
+  return [...new Set(values.filter((state): state is ManagedProxyState =>
+    state === 'active' || state === 'paused' || state === 'archived'))];
+}
+
 export const PROXY_STATUS_OPTIONS: ProxyFilterOption[] = [
   { label: 'All Proxies', value: 'all' },
   { label: 'Only Alive Proxies', value: 'alive' },
@@ -63,6 +78,7 @@ export const PROXY_REPUTATION_OPTIONS: ProxyFilterOption[] = [
 
 export function createDefaultProxyFilterValues(): ProxyListFilterFormValues {
   return {
+    states: [],
     proxyStatus: 'all',
     http: false,
     https: false,
@@ -85,6 +101,7 @@ export function createDefaultProxyFilterValues(): ProxyListFilterFormValues {
 
 export function createDefaultProxyListAppliedFilters(): ProxyListAppliedFilters {
   return {
+    states: [],
     status: 'all',
     protocols: [],
     minHealthOverall: 0,
@@ -104,6 +121,9 @@ export function createDefaultProxyListAppliedFilters(): ProxyListAppliedFilters 
 
 export function activeProxyFilterCount(filters: ProxyListAppliedFilters): number {
   let count = 0;
+  if (normalizeProxyStateFilter(filters.states).length > 0) {
+    count += 1;
+  }
   if (filters.status !== 'all') {
     count += 1;
   }
@@ -182,6 +202,7 @@ export function buildFilterOptionList(values: string[]): ProxyFilterOption[] {
 
 export function syncFilterFormWithApplied(form: FormGroup, filters: ProxyListAppliedFilters): void {
   form.patchValue({
+    states: normalizeProxyStateFilter(filters.states),
     proxyStatus: filters.status,
     http: filters.protocols.includes('http'),
     https: filters.protocols.includes('https'),
@@ -218,6 +239,7 @@ export function buildFiltersFromFormValue(formValue: ProxyListFilterFormValues):
   }
 
   return {
+    states: normalizeProxyStateFilter(formValue.states),
     status: formValue.proxyStatus ?? 'all',
     protocols,
     minHealthOverall: normalizePercentage(formValue.minHealthOverall),
@@ -237,6 +259,10 @@ export function buildFiltersFromFormValue(formValue: ProxyListFilterFormValues):
 
 export function buildProxyListFilterPayload(filters: ProxyListAppliedFilters): ProxyListFilters | undefined {
   const payload: ProxyListFilters = {};
+  const states = normalizeProxyStateFilter(filters.states);
+  if (states.length > 0) {
+    payload.states = states;
+  }
 
   if (filters.status !== 'all') {
     payload.status = filters.status;
@@ -326,6 +352,7 @@ export function buildBulkProxyFilters(formValue: ProxyListFilterFormValues, filt
   const reputationSelection = filtersEnabled ? normalizeSelection(formValue.reputationLabels) : [];
   return {
     filter: filtersEnabled,
+    states: filtersEnabled ? normalizeProxyStateFilter(formValue.states) : [],
     http: filtersEnabled ? Boolean(formValue.http) : false,
     https: filtersEnabled ? Boolean(formValue.https) : false,
     socks4: filtersEnabled ? Boolean(formValue.socks4) : false,

@@ -148,6 +148,20 @@
             ></app-select>
           </div>
         </div>
+        <div>
+          <label for="filterState" class="filter-label">Lifecycle state</label>
+          <app-select
+            formControlName="states"
+            [multiple]="true"
+            [showClear]="true"
+            placeholder="All states"
+            [options]="proxyStateOptions"
+            optionLabel="label"
+            optionValue="value"
+            class="w-full"
+            inputId="filterState"
+          ></app-select>
+        </div>
       </div>
 
       <div class="filter-column filter-column--right">

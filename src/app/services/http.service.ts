@@ -422,6 +422,12 @@ export class HttpService {
       return params;
     }
 
+    if (filters.states?.length) {
+      filters.states.forEach(state => {
+        params = params.append('state', state);
+      });
+    }
+
     if (filters.status) {
       params = params.set('status', filters.status);
     }

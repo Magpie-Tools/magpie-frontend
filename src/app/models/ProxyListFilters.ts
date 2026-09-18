@@ -1,4 +1,7 @@
+import {ManagedProxyState} from './Workspace';
+
 export interface ProxyListFilters {
+  states?: ManagedProxyState[];
   status?: 'alive' | 'dead';
   protocols?: string[];
   minHealthOverall?: number;

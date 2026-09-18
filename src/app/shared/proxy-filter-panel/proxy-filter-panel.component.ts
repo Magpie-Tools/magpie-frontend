@@ -6,7 +6,7 @@ import {Component, EventEmitter, Input, Output, signal} from '@angular/core';
 import {FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import {NgClass} from '@angular/common';
-import {ProxyFilterOption} from '../proxy-filters';
+import {PROXY_STATE_OPTIONS, ProxyFilterOption} from '../proxy-filters';
 import {ProxyTag} from '../../models/ProxyTag';
 
 @Component({
@@ -22,6 +22,7 @@ import {ProxyTag} from '../../models/ProxyTag';
   styleUrl: './proxy-filter-panel.component.scss',
 })
 export class ProxyFilterPanelComponent {
+  readonly proxyStateOptions = PROXY_STATE_OPTIONS;
   @Input({required: true}) form!: FormGroup;
   @Input() countryOptions: ProxyFilterOption[] = [];
   @Input() typeOptions: ProxyFilterOption[] = [];

@@ -51,6 +51,7 @@ import {
   createProxyFilterControls,
   createDefaultProxyListAppliedFilters,
   normalizeIdSelection,
+  normalizeProxyStateFilter,
   normalizeNumber,
   normalizePercentage,
   normalizeSelection,
@@ -631,6 +632,9 @@ export class ProxyListComponent implements OnInit, OnDestroy {
         proxy.state = state;
         proxy.pause_reason = state === 'paused' ? 'manual' : '';
         this.dataSource.set([...this.dataSource()]);
+        if (this.appliedFilters().states.length > 0) {
+          this.getAndSetProxyList();
+        }
         this.workspaces.refresh().subscribe();
         this.notification.showSuccess(
           state === 'active' ? 'Proxy route activated' : state === 'paused' ? 'Proxy route paused' : 'Proxy route archived',
@@ -938,6 +942,7 @@ export class ProxyListComponent implements OnInit, OnDestroy {
     const tagIdsRaw = Array.isArray(value['tagIds']) ? value['tagIds'] : [];
 
     return {
+      states: normalizeProxyStateFilter(value['states'] ?? value['state']),
       status,
       protocols: filteredProtocols,
       minHealthOverall: normalizePercentage(value['minHealthOverall'] as number | string | null | undefined),

@@ -7,6 +7,7 @@ import {HttpService} from '../../services/http.service';
 import {SettingsService} from '../../services/settings.service';
 import {UserService} from '../../services/authorization/user.service';
 import {ProxyInfo} from '../../models/ProxyInfo';
+import {WorkspaceService} from '../../services/workspace.service';
 
 describe('ProxyListComponent', () => {
   let component: ProxyListComponent;
@@ -17,6 +18,7 @@ describe('ProxyListComponent', () => {
     getProxyTags: jasmine.Spy;
     replaceProxyTags: jasmine.Spy;
     requeueProxy: jasmine.Spy;
+    updateManagedProxyLifecycle: jasmine.Spy;
   };
 
   beforeEach(async () => {
@@ -25,6 +27,7 @@ describe('ProxyListComponent', () => {
       getProxyFilterOptions: jasmine.createSpy('getProxyFilterOptions').and.returnValue(of({countries: [], types: [], anonymityLevels: [], tags: []})),
       getProxyTags: jasmine.createSpy('getProxyTags').and.returnValue(of([])),
       replaceProxyTags: jasmine.createSpy('replaceProxyTags').and.returnValue(of([])),
+      updateManagedProxyLifecycle: jasmine.createSpy('updateManagedProxyLifecycle').and.returnValue(of({})),
       requeueProxy: jasmine.createSpy('requeueProxy').and.returnValue(of({message: 'Proxy queued successfully', proxy_id: 1})),
     };
     const settingsServiceStub = {
@@ -50,6 +53,53 @@ describe('ProxyListComponent', () => {
     fixture = TestBed.createComponent(ProxyListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('applies lifecycle filters from page one and clears them', () => {
+    component.page.set(3);
+    component.filterForm.patchValue({states: ['paused', 'archived']});
+    component.applyFilters();
+    expect(component.page()).toBe(1);
+    expect(httpServiceStub.getProxyPage).toHaveBeenCalledWith(1, jasmine.objectContaining({
+      filters: {states: ['paused', 'archived']},
+    }));
+    component.clearFilters();
+    expect(component.filterForm.get('states')?.value).toEqual([]);
+    expect(component.appliedFilters().states).toEqual([]);
+    expect(httpServiceStub.getProxyPage).toHaveBeenCalledWith(1, jasmine.objectContaining({
+      filters: undefined,
+    }));
+  });
+
+  it('reloads a filtered list after a route changes lifecycle state', () => {
+    const workspaces = TestBed.inject(WorkspaceService);
+    spyOn(workspaces, 'canOperate').and.returnValue(true);
+    spyOn(workspaces, 'refresh').and.returnValue(of([]));
+    component.filterForm.patchValue({states: ['paused', 'archived']});
+    component.applyFilters();
+    httpServiceStub.getProxyPage.calls.reset();
+    component.onLifecycleChange({proxy: {id: 42, state: 'paused'} as ProxyInfo, state: 'archived'});
+    expect(httpServiceStub.updateManagedProxyLifecycle).toHaveBeenCalledWith(42, 'archived');
+    expect(httpServiceStub.getProxyPage).toHaveBeenCalledWith(1, jasmine.objectContaining({filters: {states: ['paused', 'archived']}}));
+  });
+
+  it('shows the lifecycle selector in the filter panel', () => {
+    component.toggleFilterPanel();
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('label[for="filterState"]')?.textContent).toContain('Lifecycle state');
+    const lifecycle = element.querySelector('.filter-column--left app-select[formControlName="states"]');
+    const type = element.querySelector('app-select[formControlName="types"]');
+    expect(lifecycle).not.toBeNull();
+    expect(type!.compareDocumentPosition(lifecycle!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('restores saved lifecycle filters and defaults older saved filters to all states', () => {
+    const normalize = (component as any).normalizeStoredFilters.bind(component);
+    expect(normalize({states: ['paused', 'archived']}).states).toEqual(['paused', 'archived']);
+    expect(normalize({state: 'archived'}).states).toEqual(['archived']);
+    expect(normalize({status: 'alive'}).states).toEqual([]);
+    expect(normalize({state: 'invalid'}).states).toEqual([]);
   });
 
   it('should create', () => {

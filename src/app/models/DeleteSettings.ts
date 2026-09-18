@@ -1,3 +1,5 @@
+import {ManagedProxyState} from './Workspace';
+
 export interface DeleteSettings {
   proxies: number[];
   filter: boolean;
@@ -15,6 +17,7 @@ export interface DeleteSettings {
   countries: string[];
   types: string[];
   anonymityLevels: string[];
+  states?: ManagedProxyState[];
   proxyStatus: 'all' | 'alive' | 'dead';
   reputationLabels: string[];
   tagIds: number[];
