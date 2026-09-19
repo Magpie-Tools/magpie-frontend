@@ -54,6 +54,63 @@ describe('ScrapeSourceListComponent', () => {
     await fixture.whenStable();
   });
 
+  async function showSourceActions(admin = false, respectRobots = false): Promise<HTMLButtonElement[]> {
+    component.isAdmin = admin;
+    component.respectRobotsEnabled = respectRobots;
+    component.displayedColumns = ['url', 'actions', 'actions_buttons'];
+    component.scrapeSources.set([{
+      id: 7, url: 'https://source.example/list', urlHead: 'https://source.example/', urlTail: 'list',
+      proxy_count: 12, alive_count: 8, dead_count: 4, unknown_count: 0,
+    }]);
+    component.totalItems.set(1);
+    component.hasLoaded.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.nativeElement.querySelector('.source-actions-trigger').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    return Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+  }
+
+  it('opens row actions without selecting the source and keeps inline Details available', async () => {
+    const view = spyOn(component, 'onViewSource');
+    const items = await showSourceActions();
+    expect(component.selection.selected).toEqual([]);
+    expect(items.map(item => item.textContent?.trim())).toEqual(['View details', 'Copy URL']);
+    items[0].click();
+    expect(view).toHaveBeenCalledWith({}, component.scrapeSources()[0]);
+    const inline = fixture.nativeElement.querySelector('.column-actions_buttons button') as HTMLButtonElement;
+    expect(inline.textContent).toContain('Details');
+    inline.click();
+    expect(view).toHaveBeenCalledTimes(2);
+  });
+
+  it('copies the source URL from the actions menu', async () => {
+    const copy = spyOn(component.clipboardService, 'copyText').and.resolveTo(true);
+    const items = await showSourceActions();
+    items.find(item => item.textContent?.trim() === 'Copy URL')!.click();
+    expect(copy).toHaveBeenCalledWith('https://source.example/list');
+  });
+
+  it('exposes enabled scrape and robots actions using the existing handlers', async () => {
+    const scrape = spyOn(component, 'scrapeSourceNow');
+    let items = await showSourceActions(true, true);
+    items.find(item => item.textContent?.trim() === 'Scrape now')!.click();
+    expect(scrape).toHaveBeenCalledWith(component.scrapeSources()[0]);
+    const robots = spyOn(component, 'checkRobots');
+    items = await showSourceActions(true, true);
+    items.find(item => item.textContent?.trim() === 'Check robots.txt')!.click();
+    expect(robots).toHaveBeenCalledWith(component.scrapeSources()[0]);
+  });
+
+  it('disables pending actions in the menu', async () => {
+    component.scrapingSources[7] = true;
+    component.checkingRobots[7] = true;
+    const items = await showSourceActions(true, true);
+    expect(items.find(item => item.textContent?.includes('Scrape queued'))!.disabled).toBeTrue();
+    expect(items.find(item => item.textContent?.includes('Checking robots.txt'))!.disabled).toBeTrue();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });

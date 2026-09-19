@@ -162,13 +162,26 @@
                     (click)="sortColumn(column.sortField!)"
                   >
                     {{ column.label }}
-                    <span aria-hidden="true">{{
-                      sortField === column.sortField
-                        ? sortOrder === 1
-                          ? "↑"
-                          : "↓"
-                        : "↕"
-                    }}</span>
+                    <svg
+                      class="table-sort__icon"
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      @if (sortField === column.sortField) {
+                        @if (sortOrder === 1) {
+                          <path d="M12 19V5m-5 5 5-5 5 5" />
+                        } @else {
+                          <path d="M12 5v14m-5-5 5 5 5-5" />
+                        }
+                      } @else {
+                        <path d="M8 20V4m-4 4 4-4 4 4m4-4v16m-4-4 4 4 4-4" />
+                      }
+                    </svg>
                   </button>
                 </th>
               } @else {
@@ -246,7 +259,7 @@
                       <td hlmTd class="text-center">
                         <hlm-skeleton
                           class="inline-block"
-                          [style.width]="'4.5rem'"
+                          [style.width]="column.skeletonWidth || '4.5rem'"
                           [style.height]="'1.5rem'"
                         />
                       </td>
@@ -379,9 +392,54 @@
                     </td>
                   }
                   @case ("actions") {
+                    <td hlmTd class="text-center column-actions" (click)="$event.stopPropagation()">
+                      <button
+                        type="button"
+                        class="source-actions-trigger"
+                        [hlmDropdownMenuTrigger]="actionsMenu"
+                        align="end"
+                        [attr.aria-label]="'Actions for source ' + source.url"
+                      >
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+                          <circle cx="5" cy="12" r="1.8" />
+                          <circle cx="12" cy="12" r="1.8" />
+                          <circle cx="19" cy="12" r="1.8" />
+                        </svg>
+                      </button>
+                      <ng-template #actionsMenu>
+                        <hlm-dropdown-menu class="source-actions-menu">
+                          <hlm-dropdown-menu-label>Actions</hlm-dropdown-menu-label>
+                          <button hlmDropdownMenuItem (triggered)="onViewSource({}, source)">
+                            View details
+                          </button>
+                          <button hlmDropdownMenuItem (triggered)="clipboardService.copyText(source.url)">
+                            Copy URL
+                          </button>
+                          @if (isAdmin || respectRobotsEnabled) {
+                            <hlm-dropdown-menu-separator />
+                          }
+                          @if (isAdmin) {
+                            <button hlmDropdownMenuItem
+                              [disabled]="isScrapingSource(source.id)"
+                              (triggered)="scrapeSourceNow(source)">
+                              {{ isScrapingSource(source.id) ? 'Scrape queued…' : 'Scrape now' }}
+                            </button>
+                          }
+                          @if (respectRobotsEnabled) {
+                            <button hlmDropdownMenuItem
+                              [disabled]="isCheckingRobots(source.id)"
+                              (triggered)="checkRobots(source)">
+                              {{ isCheckingRobots(source.id) ? 'Checking robots.txt…' : 'Check robots.txt' }}
+                            </button>
+                          }
+                        </hlm-dropdown-menu>
+                      </ng-template>
+                    </td>
+                  }
+                  @case ("actions_buttons") {
                     <td
                       hlmTd
-                      class="text-center column-actions"
+                      class="text-center column-actions_buttons"
                       (click)="$event.stopPropagation()"
                     >
                       <button

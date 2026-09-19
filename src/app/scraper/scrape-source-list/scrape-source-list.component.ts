@@ -1,3 +1,5 @@
+import {HlmDropdownMenuImports} from '@spartan-ng/helm/dropdown-menu';
+import {ClipboardService} from '../../services/clipboard.service';
 import {HlmPopoverImports} from '@spartan-ng/helm/popover';
 import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {HlmButton} from '@spartan-ng/helm/button';
@@ -74,7 +76,7 @@ type ScrapeSourceAppliedFilters = {
 @Component({
   selector: 'app-scrape-source-list',
   imports: [
-    HlmPopoverImports,HlmButton, HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
+    HlmDropdownMenuImports, HlmPopoverImports,HlmButton, HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
     CommonModule,
     SourceScrapeStatusComponent,
     FormsModule,
@@ -140,6 +142,7 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   constructor(
     private http: HttpService,
     private router: Router,
+    readonly clipboardService: ClipboardService,
     private notification: NotificationService,
     private settingsService: SettingsService,
     private userService: UserService,

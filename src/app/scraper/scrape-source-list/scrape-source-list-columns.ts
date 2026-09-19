@@ -5,7 +5,8 @@ export type ScrapeSourceListColumnId =
   | 'health'
   | 'robots_check'
   | 'scrape_now'
-  | 'actions';
+  | 'actions'
+  | 'actions_buttons';
 
 export interface ScrapeSourceListColumnDefinition {
   id: ScrapeSourceListColumnId;
@@ -59,7 +60,13 @@ export const SCRAPE_SOURCE_LIST_COLUMN_DEFINITIONS: readonly ScrapeSourceListCol
   {
     id: 'actions',
     label: 'Actions',
-    example: 'Open',
+    example: '…',
+    skeletonWidth: '2rem',
+  },
+  {
+    id: 'actions_buttons',
+    label: 'Actions (buttons)',
+    example: 'Details',
     skeletonWidth: '4.5rem',
   },
 ];
@@ -68,7 +75,6 @@ export const DEFAULT_SCRAPE_SOURCE_LIST_COLUMNS: readonly ScrapeSourceListColumn
   'url',
   'proxy_count',
   'health',
-  'robots_check',
   'actions',
 ];
 
