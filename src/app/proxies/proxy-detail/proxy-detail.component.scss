@@ -554,6 +554,17 @@ a {
   color: rgba(255, 255, 255, 0.84);
   font-family: "Geist Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 0.64rem;
+
+  .copy-value__text {
+    filter: blur(4px);
+  }
+
+  .copy-value:hover .copy-value__text,
+  .copy-value:focus-visible .copy-value__text,
+  &:has(.copy-value--all:hover) .copy-value__text,
+  &:has(.copy-value--all:focus-visible) .copy-value__text {
+    filter: none;
+  }
 }
 
 .copy-value {
