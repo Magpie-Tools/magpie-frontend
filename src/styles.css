@@ -476,10 +476,10 @@ body { color: var(--foreground); font-family: 'Geist Variable', sans-serif; }
 .ui-button-outlined { border: 1px solid var(--border); }
 .ui-button-danger { color: var(--destructive); }
 .scope-radio { width: 1rem; height: 1rem; accent-color: var(--primary); }
-.app-dialog-panel { width: 36rem; max-width: calc(100vw - 2rem) !important; max-height: calc(100dvh - 2rem); overflow: auto; border: 1px solid var(--border); border-radius: 1rem; background: var(--popover); color: var(--foreground); padding: 0; box-shadow: 0 24px 90px #0009; }
-.app-dialog-header { padding: 1.2rem 3rem 1.2rem 1.3rem; border-bottom: 1px solid var(--border); }
-.app-dialog-body { padding: 1.3rem; }
-.app-dialog-footer { padding: 1rem 1.3rem; border-top: 1px solid var(--border); }
+.app-dialog-panel { width: 36rem; max-width: calc(100vw - 2rem) !important; max-height: calc(100dvh - 2rem); overflow: hidden; border: 1px solid var(--border); border-radius: 1rem; background: var(--popover); color: var(--foreground); padding: 0; box-shadow: 0 24px 90px #0009; }
+.app-dialog-header { flex-shrink: 0; padding: 1.2rem 3rem 1.2rem 1.3rem; border-bottom: 1px solid var(--border); }
+.app-dialog-body { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 1.3rem; }
+.app-dialog-footer { flex-shrink: 0; padding: 1rem 1.3rem; border-top: 1px solid var(--border); }
 .app-select-overlay [hidden] { display: none !important; }
 .table-scroll { overflow: auto; }
 .data-table { width: 100%; min-width: 0; position: relative; }
@@ -495,7 +495,8 @@ app-select [data-slot="select-trigger"] > ng-icon { flex-shrink: 0; }
 .dashboard-card[hlmCard], .metric-card[hlmCard] { padding-block: 0; gap: 0; }
 .field-error { color: var(--destructive); font-size: .8rem; }
 
-[data-slot="dialog-content"].app-dialog-panel { overflow: auto; gap: 0; }
+/* Keep actions visible while long forms and filter lists scroll inside the body. */
+[data-slot="dialog-content"].app-dialog-panel { display: flex; flex-direction: column; overflow: hidden; gap: 0; }
 
 /* Shared table refresh indicator. Absolute positioning keeps rows in place. */
 .table-progress {

@@ -41,6 +41,7 @@ describe('Spartan dialog integration', () => {
     (
       dialog.querySelector('[data-slot="dialog-close"]') as HTMLButtonElement
     ).click();
+    await fixture.whenStable();
     await new Promise(resolve => setTimeout(resolve, 150));
     await fixture.whenStable();
     expect(fixture.componentInstance.visible()).toBeFalse();
