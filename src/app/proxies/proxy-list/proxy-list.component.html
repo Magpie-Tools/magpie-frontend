@@ -2,7 +2,6 @@
   pageIcon="icon icon-server"
   pageTitle="Managed proxies"
   pageDescription="Search, inspect, tag, and control every proxy route in the current workspace."
-  toolbarTitle="Search proxies"
   [combinedCard]="true"
   toolbarAriaLabel="Proxy tools"
   [searchTerm]="searchTerm()"
@@ -112,17 +111,19 @@
     ></app-export-proxies>
 
     @if (workspaces.canOperate()) {
-      <app-delete-proxies
-        class="toolbar-action toolbar-action--delete"
-        [allProxies]="dataSource()"
-        [selectedProxies]="selectedProxies()"
-        (proxiesDeleted)="onProxiesDeleted()"
-      ></app-delete-proxies>
+      <div class="proxy-mutation-actions">
+        <app-delete-proxies
+          class="toolbar-action toolbar-action--delete"
+          [allProxies]="dataSource()"
+          [selectedProxies]="selectedProxies()"
+          (proxiesDeleted)="onProxiesDeleted()"
+        ></app-delete-proxies>
 
-      <app-add-proxies
-        class="toolbar-action toolbar-action--add"
-        (proxiesAdded)="onProxiesAdded()"
-      ></app-add-proxies>
+        <app-add-proxies
+          class="toolbar-action toolbar-action--add"
+          (proxiesAdded)="onProxiesAdded()"
+        ></app-add-proxies>
+      </div>
     }
   </ng-container>
 

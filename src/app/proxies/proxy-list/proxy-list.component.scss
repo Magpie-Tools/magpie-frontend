@@ -2,6 +2,15 @@
   display: block;
 }
 
+.proxy-mutation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.48rem;
+  margin-inline-start: auto;
+  grid-column: 1 / -1;
+}
+
 :host ::ng-deep {
   .inventory-table {
     display: block;

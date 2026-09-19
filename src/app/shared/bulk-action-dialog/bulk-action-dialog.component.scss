@@ -69,17 +69,6 @@
   .bulk-dialog-body {
     display: grid;
     gap: 0.8rem;
-    padding: 1.1rem;
-    background:
-      radial-gradient(circle at 82% 0%, rgba(var(--theme-primary-500-rgb), 0.09), transparent 22rem),
-      #09090b;
-    color: rgba(255, 255, 255, 0.78);
-  }
-
-  .bulk-action-dialog--danger .bulk-dialog-body {
-    background:
-      radial-gradient(circle at 82% 0%, rgba(185, 52, 52, 0.1), transparent 22rem),
-      #09090b;
   }
 
   .bulk-dialog-intro,

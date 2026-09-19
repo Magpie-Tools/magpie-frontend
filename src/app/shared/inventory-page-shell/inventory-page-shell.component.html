@@ -28,22 +28,25 @@
       <div class="actions-wrapper">
         <section
           class="inventory-toolbar"
-          aria-labelledby="inventory-tools-title"
+          [attr.aria-labelledby]="toolbarTitle ? 'inventory-tools-title' : null"
+          [attr.aria-label]="toolbarTitle ? null : toolbarAriaLabel"
         >
           <div class="inventory-toolbar__topline">
-            <div class="card-heading">
-              <span class="card-icon"
-                ><i class="icon icon-sliders-horizontal" aria-hidden="true"></i
-              ></span>
-              <div class="card-heading__copy">
-                <h2 id="inventory-tools-title">{{ toolbarTitle }}</h2>
-                @if (toolbarDescription) {
-                  <p>{{ toolbarDescription }}</p>
-                }
+            @if (toolbarTitle) {
+              <div class="card-heading">
+                <span class="card-icon"
+                  ><i class="icon icon-sliders-horizontal" aria-hidden="true"></i
+                ></span>
+                <div class="card-heading__copy">
+                  <h2 id="inventory-tools-title">{{ toolbarTitle }}</h2>
+                  @if (toolbarDescription) {
+                    <p>{{ toolbarDescription }}</p>
+                  }
+                </div>
               </div>
-            </div>
+            }
 
-            <div class="toolbar-actions" [attr.aria-label]="toolbarAriaLabel">
+            <div class="toolbar-actions" [class.toolbar-actions--full-width]="!toolbarTitle" [attr.aria-label]="toolbarAriaLabel">
               <ng-content select="[inventory-actions]"></ng-content>
             </div>
           </div>

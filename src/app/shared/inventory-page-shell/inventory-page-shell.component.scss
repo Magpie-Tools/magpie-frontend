@@ -196,6 +196,12 @@ p { margin: 0; }
   gap: 0.48rem;
 }
 
+.toolbar-actions--full-width {
+  width: 100%;
+  flex: 1 1 auto;
+  justify-content: flex-start;
+}
+
 ::ng-deep {
   .tool-button,
   .button {

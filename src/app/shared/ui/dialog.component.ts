@@ -7,6 +7,7 @@ import {
   TemplateRef,
 } from '@angular/core';
 import { NgStyle, NgTemplateOutlet } from '@angular/common';
+import { AutoFocusTarget } from '@angular/cdk/dialog';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 
 @Component({
@@ -17,6 +18,7 @@ import { HlmDialogImports } from '@spartan-ng/helm/dialog';
       [state]="visible ? 'open' : 'closed'"
       [closeOnOutsidePointerEvents]="dismissableMask && closable"
       [disableClose]="!closable"
+      [autoFocus]="autoFocus"
       (stateChanged)="stateChanged($event)"
       (closed)="onHide.emit()"
     >
@@ -48,6 +50,7 @@ import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 export class DialogComponent {
   @Input() visible = false;
   @Input() header = '';
+  @Input() autoFocus: AutoFocusTarget | string | boolean = 'first-tabbable';
   @Input() closable = true;
   @Input() dismissableMask = false;
   @Input() styleClass = '';

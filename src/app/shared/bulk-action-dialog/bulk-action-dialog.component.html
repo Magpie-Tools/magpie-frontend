@@ -13,6 +13,7 @@
 
 <app-dialog
   [visible]="visible"
+  autoFocus="first-heading"
   (visibleChange)="visibleChange.emit($event)"
   [dismissableMask]="true"
   [styleClass]="styleClass"
