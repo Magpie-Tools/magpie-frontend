@@ -61,6 +61,39 @@ describe('ProxyDetailComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('shows an empty latest-check summary before any results exist', () => {
+    const summary = fixture.debugElement.query(By.css('.check-summary')).nativeElement as HTMLElement;
+    expect(summary.textContent).toContain('Not checked');
+    expect(summary.textContent).toContain('No check results yet');
+  });
+
+  it('shows the latest check result even when another protocol is alive', () => {
+    const latest: ProxyStatistic = {
+      id: 12,
+      attempt: 1,
+      protocol: 'https',
+      judge: 'https://judge.example.com',
+      anonymity_level: 'unknown',
+      response_time: 7500,
+      alive: false,
+      created_at: '2026-09-19T14:00:00Z',
+    };
+    component.detail.update(detail => detail ? {...detail, latest_statistic: latest} : detail);
+    component.statistics.set([
+      latest,
+      {...latest, id: 11, protocol: 'socks5', alive: true, created_at: '2026-09-19T13:00:00Z'},
+    ]);
+    fixture.detectChanges();
+
+    expect(component.overallAlive).toBeTrue();
+    const summary = fixture.debugElement.query(By.css('.check-summary')).nativeElement as HTMLElement;
+    expect(summary.textContent).toContain('Dead');
+    expect(summary.querySelector('.status-dot.dead')).not.toBeNull();
+    const protocol = fixture.debugElement.queryAll(By.css('.detail-item'))
+      .find(item => item.nativeElement.textContent.includes('Check protocol'));
+    expect(protocol?.nativeElement.textContent).toContain('HTTPS');
+  });
+
   it('should truncate the latest judge and expose the full value in the title', () => {
     const longJudge = 'https://judge.example.com/some/really/long/path/that/should/not/wrap/in/the/card';
     const statistic: ProxyStatistic = {

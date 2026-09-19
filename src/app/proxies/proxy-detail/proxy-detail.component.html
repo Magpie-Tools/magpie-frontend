@@ -50,22 +50,6 @@
       </div>
 
       <div class="detail-context__actions">
-        <div class="context-state">
-          <span
-            class="status-dot"
-            [ngClass]="{
-              alive: overallAliveStatus === 'alive',
-              dead: overallAliveStatus === 'dead',
-              unknown: overallAliveStatus === 'unknown',
-            }"
-            aria-hidden="true"
-          ></span>
-          <span>
-            <small>Latest check</small>
-            <strong>{{ overallAliveLabel }}</strong>
-          </span>
-        </div>
-
         @if (detail(); as managed) {
           <span
             class="managed-state-pill"
@@ -172,44 +156,41 @@
         } @else {
           <div class="overview-layout">
             <section class="route-facts" aria-labelledby="route-overview-title">
-              <h2 id="route-overview-title" class="visually-hidden">
-                Route details
-              </h2>
-              <div class="section-divider" aria-hidden="true"></div>
+              <h2 id="route-overview-title" class="overview-title">Overview</h2>
+
+              @let latest = latestStatistic;
+              <div class="check-summary">
+                <div class="check-summary__result">
+                  <span
+                    class="status-dot"
+                    [ngClass]="latest ? (latest.alive ? 'alive' : 'dead') : 'unknown'"
+                    aria-hidden="true"
+                  ></span>
+                  <strong>{{ latest ? (latest.alive ? "Alive" : "Dead") : "Not checked" }}</strong>
+                </div>
+                <span class="check-summary__time">{{
+                  latest?.created_at
+                    ? (latest?.created_at | date: "medium")
+                    : "No check results yet"
+                }}</span>
+              </div>
 
               <div class="fact-list">
                 <div class="detail-item">
                   <span class="label">Country</span>
-                  <span class="value capitalize">{{
-                    detail()?.country || "Unknown"
-                  }}</span>
-                </div>
-                <div class="detail-item detail-item--right">
-                  <span class="label">Estimated type</span>
-                  <span class="value capitalize">{{
-                    detail()?.estimated_type || "N/A"
-                  }}</span>
+                  <span class="value capitalize">{{ detail()?.country || "Unknown" }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="label">Protocol</span>
-                  <span class="value capitalize">{{
-                    latestStatistic?.protocol || "Unknown"
-                  }}</span>
+                  <span class="label">Check protocol</span>
+                  <span class="value">{{ latest?.protocol || "Unknown" | uppercase }}</span>
                 </div>
-                <div class="detail-item detail-item--right">
+                <div class="detail-item">
+                  <span class="label">Estimated type</span>
+                  <span class="value capitalize">{{ detail()?.estimated_type || "Unknown" }}</span>
+                </div>
+                <div class="detail-item">
                   <span class="label">Anonymity</span>
-                  <span class="value capitalize">{{
-                    latestStatistic?.anonymity_level || "Unknown"
-                  }}</span>
-                </div>
-                <div class="detail-item detail-item--wide">
-                  <span class="label">Latest judge</span>
-                  <span
-                    class="value value--truncate"
-                    [title]="latestStatistic?.judge || 'Unknown'"
-                  >
-                    {{ latestStatistic?.judge || "Unknown" }}
-                  </span>
+                  <span class="value capitalize">{{ latestStatistic?.anonymity_level || "Unknown" }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Added</span>
@@ -219,38 +200,18 @@
                       : "Unknown"
                   }}</span>
                 </div>
-                <div class="detail-item detail-item--right">
-                  <span class="label">Last checked</span>
-                  <span class="value">{{
-                    detail()?.latest_check
-                      ? (detail()?.latest_check | date: "short")
-                      : "Never"
-                  }}</span>
+                <div class="detail-item">
+                  <span class="label">Latest judge</span>
+                  <span
+                    class="value value--truncate"
+                    [title]="latestStatistic?.judge || 'Unknown'"
+                  >
+                    {{ latestStatistic?.judge || "Unknown" }}
+                  </span>
                 </div>
               </div>
 
               <div class="access-summary">
-                <div class="compact-field compact-field--tags">
-                  <span class="label">Tags</span>
-                  <div class="value">
-                    <app-proxy-tag-selector
-                      [availableTags]="tagService.tags()"
-                      [selectedTags]="detail()?.tags ?? []"
-                      [saving]="savingTags()"
-                      [disabled]="!workspaces.canOperate()"
-                      [compact]="false"
-                      [maxVisibleTags]="5"
-                      (selectionChange)="updateTags($event)"
-                      (manageTags)="detailTagManager.open()"
-                    ></app-proxy-tag-selector>
-                    <app-proxy-tag-manager
-                      #detailTagManager
-                      [showTrigger]="false"
-                      (tagsChanged)="onTagCatalogChanged()"
-                    ></app-proxy-tag-manager>
-                  </div>
-                </div>
-
                 <div class="compact-field">
                   <span class="label">Authentication</span>
                   @if (authenticationCredentials; as credentials) {
@@ -285,6 +246,27 @@
                     <span class="value">{{ authenticationDisplay }}</span>
                   }
                 </div>
+
+                <div class="compact-field compact-field--tags">
+                  <span class="label">Tags</span>
+                  <div class="value">
+                    <app-proxy-tag-selector
+                      [availableTags]="tagService.tags()"
+                      [selectedTags]="detail()?.tags ?? []"
+                      [saving]="savingTags()"
+                      [disabled]="!workspaces.canOperate()"
+                      [compact]="false"
+                      [maxVisibleTags]="5"
+                      (selectionChange)="updateTags($event)"
+                      (manageTags)="detailTagManager.open()"
+                    ></app-proxy-tag-selector>
+                    <app-proxy-tag-manager
+                      #detailTagManager
+                      [showTrigger]="false"
+                      (tagsChanged)="onTagCatalogChanged()"
+                    ></app-proxy-tag-manager>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -295,7 +277,6 @@
               <section class="health-summary">
                 <div class="health-summary__heading">
                   <div>
-                    <span class="card-eyebrow">Performance</span>
                     <h2>Response time</h2>
                   </div>
                   <div class="health-summary__response">
@@ -326,8 +307,8 @@
 
               <section class="reputation-summary">
                 <div class="reputation-summary__heading">
-                  <span>
-                    <small>Reputation</small>
+                  <div class="reputation-summary__score">
+                    <h2>Reputation</h2>
                     @if (reputationOverall; as overall) {
                       <strong
                         >{{ reputationScoreDisplay(overall)
@@ -336,7 +317,7 @@
                     } @else {
                       <strong>—</strong>
                     }
-                  </span>
+                  </div>
                   @if (reputationOverall; as overall) {
                     <span [ngClass]="reputationBadgeClass(overall.label)">
                       {{ overall.label || "Unknown" | titlecase }}

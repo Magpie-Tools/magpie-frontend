@@ -1498,16 +1498,24 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       scales: {
         x: {
+          border: { display: false },
           ticks: {
-            color: palette.muted
+            color: palette.muted,
+            maxTicksLimit: 3,
+            maxRotation: 0,
+            minRotation: 0,
+            font: { size: 10 }
           },
           grid: {
-            color: palette.gridLight
+            display: false
           }
         },
         y: {
+          border: { display: false },
           ticks: {
             color: palette.muted,
+            maxTicksLimit: 4,
+            font: { size: 10 },
             callback: (value: number | string) => `${value} ms`
           },
           grid: {

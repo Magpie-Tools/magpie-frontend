@@ -171,34 +171,6 @@ a {
   text-transform: uppercase;
 }
 
-.context-state {
-  display: inline-flex;
-  min-width: 9rem;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.58rem;
-  padding: 0.42rem 0.64rem;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 0.7rem;
-  background: rgba(8, 8, 10, 0.22);
-
-  > span:last-child {
-    display: flex;
-    flex-direction: column;
-  }
-
-  small {
-    color: rgba(255, 255, 255, 0.38);
-    font-size: 0.52rem;
-  }
-
-  strong {
-    color: rgba(255, 255, 255, 0.84);
-    font-size: 0.65rem;
-    font-weight: 590;
-  }
-}
-
 .detail-context__actions {
   display: flex;
   flex: 0 0 auto;
@@ -253,7 +225,7 @@ a {
 
 .route-facts {
   min-width: 0;
-  grid-column: span 7;
+  grid-column: span 6;
   padding: clamp(1.1rem, 2vw, 1.6rem);
 }
 
@@ -405,7 +377,7 @@ a {
 
 .route-insights {
   min-width: 0;
-  grid-column: span 5;
+  grid-column: span 6;
   border-left: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(255, 255, 255, 0.012);
 }
@@ -460,15 +432,14 @@ a {
   min-width: 0;
   align-items: center;
   justify-content: center;
-  min-height: 8.5rem;
+  min-height: 7.5rem;
   margin-top: 0.85rem;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.065);
 
   app-chart {
     display: block;
     width: 100%;
-    height: 8.5rem;
+    height: 7.5rem;
   }
 
   > span {
@@ -477,46 +448,54 @@ a {
   }
 }
 
-.section-divider {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+.overview-title {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.95rem;
+  font-weight: 590;
+  letter-spacing: -0.025em;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.check-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem 1rem;
+  padding: 1.15rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  &__result {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+
+    strong {
+      color: #fff;
+      font-size: 1.35rem;
+      font-weight: 560;
+      letter-spacing: -0.035em;
+    }
+  }
+
+  &__time {
+    margin-left: auto;
+    text-align: right;
+    color: var(--detail-muted);
+    font-size: 0.62rem;
+  }
 }
 
 .fact-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-flow: dense;
-  margin-top: 0.25rem;
+  gap: 0.9rem 1rem;
+  padding: 1rem 0;
 }
 
 .detail-item {
   display: flex;
   min-width: 0;
-  min-height: 3.75rem;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.24rem;
-  padding: 0.7rem 0.2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.065);
-
-  &:not(.detail-item--right):not(.detail-item--wide) {
-    padding-right: 1rem;
-  }
-
-  &--right {
-    padding-left: 1rem;
-    border-left: 1px solid rgba(255, 255, 255, 0.065);
-  }
+  gap: 0.3rem;
 
   &--wide {
     grid-column: 1 / -1;
@@ -524,7 +503,7 @@ a {
 }
 
 .label {
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.52rem;
   font-weight: 620;
   letter-spacing: 0.09em;
@@ -548,26 +527,18 @@ a {
 .access-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-flow: dense;
   gap: 1rem;
   padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .compact-field {
   display: flex;
   min-width: 0;
-  min-height: 3rem;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: column;
   gap: 0.3rem;
   padding: 0;
-
-  &--tags {
-    order: 2;
-    grid-column: 1 / -1;
-    padding-top: 0.9rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.065);
-  }
 
   .value {
     min-height: 1.6rem;
@@ -675,15 +646,18 @@ a {
   align-items: center;
   gap: 0.55rem;
 
-  > span:first-child {
+  .reputation-summary__score {
     display: flex;
     min-width: 0;
     flex-direction: column;
   }
 
-  small {
-    color: rgba(255, 255, 255, 0.38);
-    font-size: 0.52rem;
+  h2 {
+    margin-bottom: 0.4rem;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.95rem;
+    font-weight: 590;
+    letter-spacing: -0.025em;
   }
 
   strong {
@@ -1015,13 +989,8 @@ a {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .detail-item,
-  .detail-item:not(.detail-item--right):not(.detail-item--wide),
-  .detail-item--right {
+  .detail-item {
     grid-column: 1 / -1;
-    padding-right: 0.2rem;
-    padding-left: 0.2rem;
-    border-left: 0;
   }
 
   .compact-field--tags {
