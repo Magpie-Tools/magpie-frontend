@@ -219,27 +219,35 @@
                       <button
                         type="button"
                         class="copy-value"
-                        (click)="copyUsername()"
-                        title="Copy username"
+                        [class.copy-value--copied]="copiedAuthField() === 'username'"
+                        (click)="copyAuthValue('username')"
+                        [hlmTooltip]="copiedAuthField() === 'username' ? 'Copied' : 'Click to copy'"
+                        aria-label="Copy username"
                       >
-                        {{ credentials.username }}
+                        <span class="copy-value__text">{{ credentials.username }}</span>
+                        <i class="icon" [ngClass]="copiedAuthField() === 'username' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
                       </button>
                       <span class="value-separator">:</span>
                       <button
                         type="button"
                         class="copy-value"
-                        (click)="copyPassword()"
-                        title="Copy password"
+                        [class.copy-value--copied]="copiedAuthField() === 'password'"
+                        (click)="copyAuthValue('password')"
+                        [hlmTooltip]="copiedAuthField() === 'password' ? 'Copied' : 'Click to copy'"
+                        aria-label="Copy password"
                       >
-                        {{ credentials.password }}
+                        <span class="copy-value__text">{{ credentials.password }}</span>
+                        <i class="icon" [ngClass]="copiedAuthField() === 'password' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
                       </button>
                       <button
                         type="button"
-                        class="icon-button"
-                        (click)="copyAuthCredentials()"
-                        title="Copy credentials"
+                        class="copy-value copy-value--all"
+                        [class.copy-value--copied]="copiedAuthField() === 'combined'"
+                        (click)="copyAuthValue('combined')"
+                        [hlmTooltip]="copiedAuthField() === 'combined' ? 'Copied' : 'Click to copy'"
+                        aria-label="Copy credentials"
                       >
-                        <i class="icon icon-copy" aria-hidden="true"></i>
+                        <i class="icon" [ngClass]="copiedAuthField() === 'combined' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
                       </button>
                     </div>
                   } @else {

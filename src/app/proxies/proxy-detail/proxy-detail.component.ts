@@ -1,3 +1,4 @@
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {HlmTableImports} from '@spartan-ng/helm/table';
 import {DialogComponent} from '../../shared/ui/dialog.component';
 import {ChartComponent} from '../../shared/ui/chart.component';
@@ -55,7 +56,7 @@ interface ReputationSignalStructuredItem {
 @Component({
   selector: 'app-proxy-detail',
   standalone: true,
-  imports: [HlmTableImports, DialogComponent, ChartComponent,
+  imports: [HlmTooltip, HlmTableImports, DialogComponent, ChartComponent,
     CommonModule,
     RouterLink,
 
@@ -86,6 +87,9 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   isSignalDialogVisible = signal(false);
   signalDialogTitle = signal('');
   signalDialogEntries = signal<ReputationSignalEntry[]>([]);
+  copiedAuthField = signal<'username' | 'password' | 'combined' | null>(null);
+  private copyFeedbackTimeout?: ReturnType<typeof setTimeout>;
+
   savingTags = signal(false);
   changingLifecycle = signal(false);
 
@@ -193,6 +197,7 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    clearTimeout(this.copyFeedbackTimeout);
     this.responseBodySubscription?.unsubscribe();
     this.subscriptions.unsubscribe();
     this.animationContext?.revert();
@@ -296,28 +301,23 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     this.copyToClipboard(value, 'Proxy address copied');
   }
 
-  copyUsername(): void {
-    const username = this.authenticationCredentials?.username;
-    if (!username) {
+  async copyAuthValue(field: 'username' | 'password' | 'combined'): Promise<void> {
+    const value = this.authenticationCredentials?.[field];
+    if (!value) {
       return;
     }
-    this.copyToClipboard(username, 'Username copied');
-  }
 
-  copyPassword(): void {
-    const password = this.authenticationCredentials?.password;
-    if (!password) {
-      return;
+    this.copiedAuthField.set(field);
+    clearTimeout(this.copyFeedbackTimeout);
+    this.copyFeedbackTimeout = setTimeout(() => this.copiedAuthField.set(null), 1400);
+    const copied = await this.clipboardService.copyText(value);
+    if (!copied) {
+      if (this.copiedAuthField() === field) {
+        clearTimeout(this.copyFeedbackTimeout);
+        this.copiedAuthField.set(null);
+      }
+      this.notification.showError('Failed to access clipboard');
     }
-    this.copyToClipboard(password, 'Password copied');
-  }
-
-  copyAuthCredentials(): void {
-    const combined = this.authenticationCredentials?.combined;
-    if (!combined) {
-      return;
-    }
-    this.copyToClipboard(combined, 'Credentials copied');
   }
 
   copyFullCredentialAddress(): void {

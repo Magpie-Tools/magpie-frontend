@@ -148,4 +148,29 @@ describe('ProxyDetailComponent', () => {
     expect(component.fullAddress).toBe('[2001:db8::1]:8080');
     expect(component.externalLookupLinks.length).toBeGreaterThan(0);
   });
+  it('keeps auth controls compact on one row with both values visible', () => {
+    component.detail.update(detail => detail ? {
+      ...detail,
+      has_auth: true,
+      username: 'user',
+      password: 'a-long-proxy-password-that-must-not-squeeze-out-the-username',
+    } : detail);
+    fixture.detectChanges();
+
+    const auth = fixture.nativeElement.querySelector('.auth-credentials') as HTMLElement;
+    auth.style.width = '160px';
+    const values = Array.from(auth.querySelectorAll<HTMLElement>('.copy-value__text'));
+    expect(values.length).toBe(2);
+    for (const value of values) {
+      expect(value.getBoundingClientRect().width).toBeGreaterThan(20);
+    }
+    const buttons = Array.from(auth.querySelectorAll<HTMLButtonElement>('button'));
+    const bounds = buttons.map(button => button.getBoundingClientRect());
+    for (const bound of bounds) {
+      expect(bound.top).toBeCloseTo(bounds[0].top, 0);
+      expect(bound.right).toBeLessThanOrEqual(auth.getBoundingClientRect().right);
+    }
+    expect(bounds[2].width).toBeLessThan(32);
+  });
+
 });
