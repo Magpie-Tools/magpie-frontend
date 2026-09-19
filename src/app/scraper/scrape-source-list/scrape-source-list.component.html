@@ -2,7 +2,6 @@
   pageIcon="icon icon-globe"
   pageTitle="Scrape sources"
   pageDescription="Manage the websites Magpie scans for fresh proxy routes."
-  toolbarTitle="Find a scrape source"
   [combinedCard]="true"
   toolbarAriaLabel="Scrape source tools"
   [searchTerm]="searchTerm"
@@ -99,17 +98,19 @@
     ></app-export-sources>
 
     @if (workspaces.canOperate()) {
-      <app-delete-sources
-        class="toolbar-action toolbar-action--delete"
-        [allSources]="scrapeSources()"
-        [selectedSources]="selectedScrapeSources"
-        (sourcesDeleted)="onScrapeSourcesDeleted()"
-      ></app-delete-sources>
+      <div class="source-mutation-actions">
+        <app-delete-sources
+          class="toolbar-action toolbar-action--delete"
+          [allSources]="scrapeSources()"
+          [selectedSources]="selectedScrapeSources"
+          (sourcesDeleted)="onScrapeSourcesDeleted()"
+        ></app-delete-sources>
 
-      <app-add-scrape-source
-        class="toolbar-action toolbar-action--add"
-        (scrapeSourcesAdded)="onScrapeSourcesAdded()"
-      ></app-add-scrape-source>
+        <app-add-scrape-source
+          class="toolbar-action toolbar-action--add"
+          (scrapeSourcesAdded)="onScrapeSourcesAdded()"
+        ></app-add-scrape-source>
+      </div>
     }
   </ng-container>
 

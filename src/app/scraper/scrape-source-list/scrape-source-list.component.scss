@@ -2,6 +2,15 @@
   display: block;
 }
 
+.source-mutation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.48rem;
+  margin-inline-start: auto;
+  grid-column: 1 / -1;
+}
+
 .url-cell {
   min-width: 0;
   overflow: hidden;
