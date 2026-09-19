@@ -1,6 +1,6 @@
 <div #tableRoot class="data-table" [class.data-table--refreshing]="loading && hasLoaded" [attr.aria-busy]="loading">
   @if (loading) {
-    <div role="status" class="proxy-table-loading">
+    <div role="status" class="table-progress">
       <span class="sr-only">Loading proxies…</span>
     </div>
   }

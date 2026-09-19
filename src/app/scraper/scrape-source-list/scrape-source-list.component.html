@@ -117,10 +117,13 @@
     inventory-table
     #scrapeSourceTableRoot
     class="data-table scrape-source-table"
+    [class.data-table--refreshing]="loading() && hasLoaded()"
     [attr.aria-busy]="loading()"
   >
     @if (loading()) {
-      <div role="status" class="table-loading">Loading sources…</div>
+      <div role="status" class="table-progress">
+        <span class="sr-only">Loading sources…</span>
+      </div>
     }
     <div hlmTableContainer [attr.inert]="loading() ? '' : null" class="table-scroll">
       <table hlmTable>

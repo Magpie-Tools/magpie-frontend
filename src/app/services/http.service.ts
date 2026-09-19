@@ -344,7 +344,7 @@ export class HttpService {
     return this.http.get<number>(this.apiUrl + '/getScrapingSourcesCount', { params });
   }
 
-  getScrapingSourcePage(pageNumber: number, options?: { rows?: number; search?: string; filters?: ScrapeSourceListFilters }) {
+  getScrapingSourcePage(pageNumber: number, options?: { rows?: number; search?: string; filters?: ScrapeSourceListFilters; sortField?: string | null; sortOrder?: number | null }) {
     let params = new HttpParams();
     if (options?.rows && options.rows > 0) {
       params = params.set('pageSize', options.rows.toString());
@@ -353,6 +353,11 @@ export class HttpService {
       params = params.set('search', options.search.trim());
     }
     params = this.appendScrapeSourceFilterParams(params, options?.filters);
+
+    if (options?.sortField && options.sortOrder) {
+      params = params.set('sortField', options.sortField);
+      params = params.set('sortOrder', options.sortOrder > 0 ? 'asc' : 'desc');
+    }
 
     return this.http.get<ScrapeSourceInfo[]>(this.apiUrl + '/getScrapingSourcesPage/' + pageNumber, { params });
   }

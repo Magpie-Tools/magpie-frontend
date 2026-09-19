@@ -11,54 +11,6 @@
   --proxy-dead: #f87171;
 }
 
-.data-table {
-  position: relative;
-}
-
-.proxy-table-loading {
-  position: absolute;
-  inset: 0 0 auto;
-  z-index: 2;
-  height: 1px;
-  overflow: hidden;
-  pointer-events: none;
-  background: rgba(var(--theme-primary-500-rgb), 0.15);
-
-  &::after {
-    content: '';
-    display: block;
-    width: 35%;
-    height: 100%;
-    border-radius: 999px;
-    background: var(--theme-primary-400);
-    animation: proxy-table-progress 1.4s ease-in-out infinite;
-  }
-}
-
-.data-table tbody {
-  transition: opacity 150ms ease;
-}
-
-.data-table--refreshing tbody {
-  opacity: 0.55;
-}
-
-@keyframes proxy-table-progress {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(286%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .proxy-table-loading::after {
-    width: 100%;
-    animation: none;
-  }
-
-  .data-table tbody {
-    transition: none;
-  }
-}
-
 .proxy-tags-cell {
   min-width: 11rem;
   max-width: 20rem;

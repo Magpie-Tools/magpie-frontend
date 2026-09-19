@@ -496,3 +496,33 @@ app-select [data-slot="select-trigger"] > ng-icon { flex-shrink: 0; }
 .field-error { color: var(--destructive); font-size: .8rem; }
 
 [data-slot="dialog-content"].app-dialog-panel { overflow: auto; gap: 0; }
+
+/* Shared table refresh indicator. Absolute positioning keeps rows in place. */
+.table-progress {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgba(var(--theme-primary-500-rgb), 0.15);
+}
+.table-progress::after {
+  content: '';
+  display: block;
+  width: 35%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--theme-primary-400);
+  animation: table-progress 1.4s ease-in-out infinite;
+}
+.data-table tbody { transition: opacity 150ms ease; }
+.data-table--refreshing tbody { opacity: 0.55; }
+@keyframes table-progress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(286%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .table-progress::after { width: 100%; animation: none; }
+  .data-table tbody { transition: none; }
+}

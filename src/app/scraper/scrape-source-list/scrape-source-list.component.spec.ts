@@ -204,4 +204,54 @@ describe('ScrapeSourceListComponent', () => {
     await fixture.whenStable();
     expect(component.loading()).toBeFalse();
   });
+  it('fetches sorting from page one, keeps rows while loading, and preserves the server order', async () => {
+    const http = TestBed.inject(HttpService);
+    const request = new Subject<any[]>();
+    const getPage = http.getScrapingSourcePage as jasmine.Spy;
+    getPage.calls.reset();
+    getPage.and.returnValue(request);
+    component.page = 3;
+    component.searchTerm = 'example';
+    const sources = [
+      {id: 2, url: 'https://b.example', proxy_count: 2, alive_count: 1, dead_count: 1, unknown_count: 0},
+      {id: 1, url: 'https://a.example', proxy_count: 2, alive_count: 1, dead_count: 1, unknown_count: 0},
+    ];
+    component.scrapeSources.set(sources.map(source => (component as any).buildViewSource(source)));
+    component.sortColumn('alive_count');
+
+    expect(component.page).toBe(0);
+    expect(component.pageJumpValue).toBe(1);
+    expect(getPage).toHaveBeenCalledOnceWith(1, jasmine.objectContaining({search: 'example', sortField: 'alive_count', sortOrder: 1}));
+    expect(component.loading()).toBeTrue();
+    expect(component.scrapeSources().map(source => source.id)).toEqual([2, 1]);
+    request.next(sources);
+    request.complete();
+    await fixture.whenStable();
+    expect(component.loading()).toBeFalse();
+    expect(component.scrapeSources().map(source => source.id)).toEqual([2, 1]);
+
+    getPage.and.returnValue(of([]));
+    component.sortColumn('alive_count');
+    expect(getPage).toHaveBeenCalledWith(1, jasmine.objectContaining({sortField: 'alive_count', sortOrder: -1}));
+    await fixture.whenStable();
+    component.onLazyLoad({first: component.pageSize, rows: component.pageSize, sortField: 'alive_count', sortOrder: -1});
+    expect(getPage).toHaveBeenCalledWith(2, jasmine.objectContaining({sortField: 'alive_count', sortOrder: -1}));
+    await fixture.whenStable();
+
+    component.sortColumn('alive_count');
+    expect(component.page).toBe(0);
+    expect(component.sortField).toBeNull();
+    expect(component.sortOrder).toBeNull();
+    expect(getPage.calls.mostRecent().args).toEqual([1, jasmine.objectContaining({sortField: null, sortOrder: null})]);
+    await fixture.whenStable();
+
+    component.sortColumn('alive_count');
+    expect(component.sortOrder).toBe(1);
+    await fixture.whenStable();
+    component.sortColumn('url');
+    expect(component.sortField).toBe('url');
+    expect(component.sortOrder).toBe(1);
+    await fixture.whenStable();
+  });
+
 });

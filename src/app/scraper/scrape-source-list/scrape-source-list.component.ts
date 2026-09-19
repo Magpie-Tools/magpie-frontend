@@ -225,15 +225,13 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
       rows: this.pageSize,
       search: trimmedSearch.length > 0 ? trimmedSearch : undefined,
       filters: this.buildFilterPayload(this.appliedFilters),
+      sortField: this.sortField,
+      sortOrder: this.sortOrder,
     }).pipe(
       observeOn(asapScheduler),
       map(res => {
         const sources = Array.isArray(res) ? res : [];
-        return this.applySort(
-          sources.map(source => this.buildViewSource(source)),
-          this.sortField,
-          this.sortOrder
-        );
+        return sources.map(source => this.buildViewSource(source));
       }),
       finalize(() => {
         queueMicrotask(() => {
@@ -275,7 +273,13 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   }
 
   sortColumn(field: string): void {
-    this.onLazyLoad({first: this.page * this.pageSize, rows: this.pageSize, sortField: field, sortOrder: this.sortField === field && this.sortOrder === 1 ? -1 : 1});
+    const order = this.sortField !== field ? 1 : this.sortOrder === 1 ? -1 : 0;
+    this.onLazyLoad({
+      first: this.page * this.pageSize,
+      rows: this.pageSize,
+      sortField: field,
+      sortOrder: order,
+    });
   }
 
   onLazyLoad(event: TablePageEvent) {
@@ -287,10 +291,10 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
 
     const sortChanged = nextSortField !== this.sortField || nextSortOrder !== this.sortOrder;
     const pageSizeChanged = newPageSize !== this.pageSize;
-    const shouldFetch = newPage !== this.page || pageSizeChanged;
+    const shouldFetch = sortChanged || newPage !== this.page || pageSizeChanged;
 
-    this.page = newPage;
-    this.pageJumpValue = newPage + 1;
+    this.page = sortChanged ? 0 : newPage;
+    this.pageJumpValue = this.page + 1;
     this.pageSize = newPageSize;
     this.sortField = nextSortField;
     this.sortOrder = nextSortOrder;
@@ -299,13 +303,8 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
       this.persistPageSize(newPageSize);
     }
 
-    if (sortChanged) {
-      this.scrapeSources.set(this.applySort([...this.scrapeSources()], this.sortField, this.sortOrder));
-      this.syncSelectionWithData();
-    }
-
     if (shouldFetch) {
-      this.pendingPageScroll = true;
+      this.pendingPageScroll = !sortChanged;
       this.getAndSetScrapeSourcesList();
     }
   }
@@ -720,69 +719,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
       return 0;
     }
     return Math.max(0, Math.floor(parsed));
-  }
-
-  private applySort(
-    sources: ScrapeSourceView[],
-    field: string | null,
-    order: number | null,
-  ): ScrapeSourceView[] {
-    if (!field || !order || sources.length < 2) {
-      return sources;
-    }
-
-    const direction = order > 0 ? 1 : -1;
-    return [...sources].sort((left, right) => this.compareSources(left, right, field, direction));
-  }
-
-  private compareSources(
-    left: ScrapeSourceView,
-    right: ScrapeSourceView,
-    field: string,
-    direction: number,
-  ): number {
-    const leftValue = this.getSortableValue(left, field);
-    const rightValue = this.getSortableValue(right, field);
-
-    if (typeof leftValue === 'number' && typeof rightValue === 'number') {
-      if (leftValue === rightValue) {
-        return left.url.localeCompare(right.url);
-      }
-      return (leftValue - rightValue) * direction;
-    }
-
-    const comparison = String(leftValue).localeCompare(String(rightValue), undefined, {
-      numeric: true,
-      sensitivity: 'base',
-    });
-    if (comparison === 0) {
-      return left.url.localeCompare(right.url) * direction;
-    }
-    return comparison * direction;
-  }
-
-  private getSortableValue(source: ScrapeSourceView, field: string): number | string {
-    switch (field) {
-      case 'proxy_count':
-        return source.proxy_count ?? 0;
-      case 'alive_count':
-        return source.alive_count ?? 0;
-      case 'health':
-        return this.calculateHealthScore(source);
-      case 'url':
-      default:
-        return source.url ?? '';
-    }
-  }
-
-  private calculateHealthScore(source: ScrapeSourceView): number {
-    const total = source.proxy_count ?? 0;
-    if (total <= 0) {
-      return -1;
-    }
-
-    const alive = source.alive_count ?? 0;
-    return alive / total;
   }
 
   private resolveSortField(field: string | string[] | undefined | null): string | null {
