@@ -41,32 +41,56 @@
       Refresh
     </button>
 
-    <div #filterToggleAnchor>
+    <hlm-popover align="end" sideOffset="8"
+      [state]="filterPanelOpen ? 'open' : 'closed'"
+      (stateChanged)="onFilterPopoverStateChanged($event)">
       <button
         type="button"
         class="tool-button"
         [class.is-active]="hasActiveFilters()"
-        [attr.aria-expanded]="filterPanelOpen"
-        (click)="toggleFilterPanel($event)"
+        hlmPopoverTrigger
       >
         <i class="icon icon-filter" aria-hidden="true"></i>
         {{ filterButtonLabel() }}
       </button>
-    </div>
+      <hlm-popover-content *hlmPopoverPortal
+        class="w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
+        aria-label="Filters">
+        <app-scrape-source-filter-panel
+          [form]="filterForm"
+          [floating]="true"
+          (clear)="clearFilters()"
+          (apply)="applyFilters()"
+        ></app-scrape-source-filter-panel>
+      </hlm-popover-content>
+    </hlm-popover>
 
-    <div #columnToggleAnchor>
+    <hlm-popover align="end" sideOffset="8"
+      [state]="columnPanelOpen ? 'open' : 'closed'"
+      (stateChanged)="onColumnPopoverStateChanged($event)">
       <button
         type="button"
         class="tool-button"
         [class.is-active]="columnPanelOpen"
         [disabled]="isSavingColumnPreferences()"
-        [attr.aria-expanded]="columnPanelOpen"
-        (click)="openColumnPanel($event)"
+        hlmPopoverTrigger
       >
         <i class="icon icon-table" aria-hidden="true"></i>
         Columns
       </button>
-    </div>
+      <hlm-popover-content *hlmPopoverPortal
+        class="w-[min(760px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
+        aria-label="Columns">
+        <app-column-picker-panel
+          [columns]="columnPickerColumns"
+          [selectedColumnIds]="displayedColumns"
+          [defaultColumnIds]="defaultScrapeSourceColumns"
+          [saving]="isSavingColumnPreferences()"
+          (cancel)="closeColumnPanel()"
+          (save)="saveColumnPreferences($event)"
+        ></app-column-picker-panel>
+      </hlm-popover-content>
+    </hlm-popover>
 
     <app-export-sources
       class="toolbar-action toolbar-action--export"
@@ -86,34 +110,6 @@
         class="toolbar-action toolbar-action--add"
         (scrapeSourcesAdded)="onScrapeSourcesAdded()"
       ></app-add-scrape-source>
-    }
-  </ng-container>
-
-  <ng-container inventory-overlays>
-    @if (filterPanelOpen) {
-      <div #filterPanelRef>
-        <app-scrape-source-filter-panel
-          [form]="filterForm"
-          [floating]="true"
-          (clear)="clearFilters()"
-          (apply)="applyFilters()"
-        ></app-scrape-source-filter-panel>
-      </div>
-    }
-
-    @if (columnPanelOpen) {
-      <app-column-picker-panel
-        #columnPanelRef
-        class="column-panel"
-        [columns]="columnPickerColumns"
-        [selectedColumnIds]="displayedColumns"
-        [defaultColumnIds]="defaultScrapeSourceColumns"
-        [saving]="isSavingColumnPreferences()"
-        (cancel)="closeColumnPanel()"
-        (save)="saveColumnPreferences($event)"
-        (dragStarted)="onColumnEditorDragStart()"
-        (dragEnded)="onColumnEditorDragEnd()"
-      ></app-column-picker-panel>
     }
   </ng-container>
 

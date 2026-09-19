@@ -378,13 +378,6 @@ p { margin: 0; }
   white-space: nowrap;
 }
 
-::ng-deep .column-panel {
-  position: absolute;
-  z-index: 14;
-  top: calc(100% + 0.55rem);
-  right: 0;
-}
-
 .inventory-card {
   overflow: hidden;
 }
@@ -488,7 +481,6 @@ p { margin: 0; }
   .inventory-card__heading { flex-direction: column; }
   .search-bar { grid-template-columns: auto minmax(0, 1fr) auto; }
   .search-scope { display: none; }
-  ::ng-deep .column-panel { right: auto; left: 0; }
 }
 
 @container inventory-page (max-width: 520px) {

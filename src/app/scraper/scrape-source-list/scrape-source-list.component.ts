@@ -1,3 +1,4 @@
+import {HlmPopoverImports} from '@spartan-ng/helm/popover';
 import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {HlmButton} from '@spartan-ng/helm/button';
 import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
@@ -10,7 +11,6 @@ import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape
 import {
   Component,
   ElementRef,
-  HostListener,
   OnDestroy,
   OnInit,
   signal,
@@ -73,7 +73,8 @@ type ScrapeSourceAppliedFilters = {
 
 @Component({
   selector: 'app-scrape-source-list',
-  imports: [HlmButton, HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
+  imports: [
+    HlmPopoverImports,HlmButton, HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
     CommonModule,
     SourceScrapeStatusComponent,
     FormsModule,
@@ -95,10 +96,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   private readonly pageScrollTargetStorageKey = 'magpie-scrape-source-list-page-scroll-target';
   private readonly pageSizeStorageKey = 'magpie-scrape-source-list-page-size';
 
-  @ViewChild('filterToggleAnchor') private filterToggleAnchor?: ElementRef<HTMLElement>;
-  @ViewChild('filterPanelRef') private filterPanelRef?: ElementRef<HTMLElement>;
-  @ViewChild('columnToggleAnchor') private columnToggleAnchor?: ElementRef<HTMLElement>;
-  @ViewChild('columnPanelRef', { read: ElementRef }) private columnPanelRef?: ElementRef<HTMLElement>;
   @ViewChild('scrapeSourceTableRoot', { read: ElementRef }) private scrapeSourceTableRoot?: ElementRef<HTMLElement>;
 
   scrapeSources = signal<ScrapeSourceView[]>([]);
@@ -136,7 +133,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   private scrapeSourceListSubscription?: Subscription;
   private scrapeSourceListRequestId = 0;
   private destroyed = false;
-  private suppressOutsideCloseUntil = 0;
   private searchDebounceHandle?: ReturnType<typeof setTimeout>;
   private readonly defaultFilterValues: ScrapeSourceFilterFormValues = this.createDefaultFilterValues();
   private pendingPageScroll = false;
@@ -202,30 +198,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
     if (this.searchDebounceHandle) {
       clearTimeout(this.searchDebounceHandle);
-    }
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (Date.now() < this.suppressOutsideCloseUntil) {
-      return;
-    }
-
-    const target = event.target as Node | null;
-    if (!target) {
-      return;
-    }
-
-    if (
-      this.filterPanelOpen &&
-      !this.isTargetWithin(target, this.filterToggleAnchor, this.filterPanelRef) &&
-      !this.isTargetWithinScrapeSourceFilterOverlay(target)
-    ) {
-      this.filterPanelOpen = false;
-    }
-
-    if (this.columnPanelOpen && !this.isTargetWithin(target, this.columnToggleAnchor, this.columnPanelRef)) {
-      this.columnPanelOpen = false;
     }
   }
 
@@ -442,13 +414,11 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     this.refreshList();
   }
 
-  openColumnPanel(event?: Event | { originalEvent?: Event }): void {
-    this.stopTriggerEvent(event);
+  openColumnPanel(): void {
     if (this.columnPanelOpen) {
       this.columnPanelOpen = false;
       return;
     }
-    this.suppressOutsideCloseUntil = Date.now() + 180;
     this.filterPanelOpen = false;
     this.columnPanelOpen = true;
   }
@@ -457,12 +427,22 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     this.columnPanelOpen = false;
   }
 
-  toggleFilterPanel(event?: Event | { originalEvent?: Event }): void {
-    this.stopTriggerEvent(event);
+  onFilterPopoverStateChanged(state: string): void {
+    if ((state === 'open') !== this.filterPanelOpen) {
+      this.toggleFilterPanel();
+    }
+  }
+
+  onColumnPopoverStateChanged(state: string): void {
+    if ((state === 'open') !== this.columnPanelOpen) {
+      this.openColumnPanel();
+    }
+  }
+
+  toggleFilterPanel(): void {
     const nextState = !this.filterPanelOpen;
     if (nextState) {
       this.syncFilterFormWithApplied();
-      this.suppressOutsideCloseUntil = Date.now() + 180;
       this.columnPanelOpen = false;
     }
     this.filterPanelOpen = nextState;
@@ -495,14 +475,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     return this.hasActiveFilters()
       ? 'ui-button-outlined filter-toggle filter-toggle--active'
       : 'ui-button-outlined filter-toggle';
-  }
-
-  onColumnEditorDragStart(): void {
-    this.suppressOutsideCloseUntil = Date.now() + 60_000;
-  }
-
-  onColumnEditorDragEnd(): void {
-    this.suppressOutsideCloseUntil = Date.now() + 240;
   }
 
   saveColumnPreferences(nextColumns: string[]): void {
@@ -893,26 +865,4 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     return this.scrapeSourceColumnDefinitions.filter(column => column.id !== 'scrape_now');
   }
 
-  private isTargetWithin(target: Node, ...elements: Array<ElementRef<HTMLElement> | undefined>): boolean {
-    for (const elementRef of elements) {
-      const element = elementRef?.nativeElement;
-      if (element && element.contains(target)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private isTargetWithinScrapeSourceFilterOverlay(target: Node): boolean {
-    const element = target instanceof Element ? target : target.parentElement;
-    return !!element?.closest('.app-select-overlay');
-  }
-
-  private stopTriggerEvent(event?: Event | { originalEvent?: Event }): void {
-    if (!event) {
-      return;
-    }
-    const domEvent = (event as { originalEvent?: Event }).originalEvent ?? (event as Event);
-    domEvent?.stopPropagation?.();
-  }
 }

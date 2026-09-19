@@ -83,10 +83,11 @@ describe('ProxyListComponent', () => {
     expect(httpServiceStub.getProxyPage).toHaveBeenCalledWith(1, jasmine.objectContaining({filters: {states: ['paused', 'archived']}}));
   });
 
-  it('shows the lifecycle selector in the filter panel', () => {
+  it('shows the lifecycle selector in the filter panel', async () => {
     component.toggleFilterPanel();
     fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+    const element = document.querySelector('hlm-popover-content')!;
     expect(element.querySelector('label[for="filterState"]')?.textContent).toContain('Lifecycle state');
     const lifecycle = element.querySelector('.filter-column--left app-select[formControlName="states"]');
     const type = element.querySelector('app-select[formControlName="types"]');
@@ -114,25 +115,46 @@ describe('ProxyListComponent', () => {
     expect(element.querySelector('.inventory-card')).not.toBeNull();
   });
 
-  it('keeps the filter panel open when clicking an appended filter select overlay', () => {
-    const overlay = document.createElement('div');
-    const option = document.createElement('button');
-    overlay.className = 'app-select-overlay';
-    overlay.appendChild(option);
-    document.body.appendChild(overlay);
-    component.filterPanelOpen.set(true);
+  async function openFilters(): Promise<HTMLButtonElement> {
+    const trigger = fixture.nativeElement.querySelector('button[hlmPopoverTrigger]') as HTMLButtonElement;
+    trigger.focus();
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    return trigger;
+  }
 
-    option.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-
+  it('opens on click and closes on Escape, restoring focus to the trigger', async () => {
+    const trigger = await openFilters();
     expect(component.filterPanelOpen()).toBeTrue();
-    overlay.remove();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    document.querySelector('hlm-popover-content')!.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+    await fixture.whenStable();
+    expect(component.filterPanelOpen()).toBeFalse();
+    // Focus returns after the popover's exit animation removes its content.
+    await new Promise(resolve => setTimeout(resolve, 250));
+    expect(document.activeElement).toBe(trigger);
   });
 
-  it('closes the filter panel when clicking outside the panel and filter overlays', () => {
-    component.filterPanelOpen.set(true);
+  it('keeps filters open while selecting a nested dropdown option', async () => {
+    await openFilters();
+    component.filterForm.patchValue({states: []});
+    fixture.detectChanges();
+    const select = document.querySelector('app-select[formControlName="states"] button') as HTMLButtonElement;
+    select.click();
+    await fixture.whenStable();
+    const option = document.querySelector('.app-select-overlay [role="option"]') as HTMLElement;
+    expect(option).not.toBeNull();
+    option.click();
+    await fixture.whenStable();
+    expect(component.filterPanelOpen()).toBeTrue();
+    expect(component.filterForm.get('states')?.value.length).toBe(1);
+  });
 
+  it('closes filters when clicking outside the popover', async () => {
+    await openFilters();
     document.body.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-
+    await fixture.whenStable();
     expect(component.filterPanelOpen()).toBeFalse();
   });
 

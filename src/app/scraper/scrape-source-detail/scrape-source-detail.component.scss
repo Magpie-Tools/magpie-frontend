@@ -733,12 +733,6 @@ input {
   white-space: nowrap;
 }
 
-.column-panel {
-  position: absolute;
-  z-index: 14;
-  top: calc(100% + 0.55rem);
-  right: 0;
-}
 
 @container source-detail (max-width: 1040px) {
   .detail-context { align-items: flex-start; }
@@ -801,13 +795,10 @@ input {
     grid-auto-flow: dense;
 
     > div,
+    > hlm-popover,
     .tool-button { width: 100%; }
   }
 
-  .column-panel {
-    right: auto;
-    left: 0;
-  }
 }
 
 @container source-detail (max-width: 500px) {

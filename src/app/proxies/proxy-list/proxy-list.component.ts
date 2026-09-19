@@ -1,13 +1,11 @@
+import {HlmPopoverImports} from '@spartan-ng/helm/popover';
 import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {readPageSize, writePageSize} from '../../shared/table-pagination';
 import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
 import {
   Component,
-  ElementRef,
-  HostListener,
   OnDestroy,
   OnInit,
-  ViewChild,
   computed,
   signal
 } from '@angular/core';
@@ -67,6 +65,7 @@ import {InventoryPageShellComponent} from '../../shared/inventory-page-shell/inv
   selector: 'app-proxy-list',
   standalone: true,
   imports: [
+    HlmPopoverImports,
     ReactiveFormsModule,
     FormsModule,
 
@@ -83,10 +82,6 @@ import {InventoryPageShellComponent} from '../../shared/inventory-page-shell/inv
   styleUrls: ['./proxy-list.component.scss']
 })
 export class ProxyListComponent implements OnInit, OnDestroy {
-  @ViewChild('filterToggleAnchor') private filterToggleAnchor?: ElementRef<HTMLElement>;
-  @ViewChild('filterPanelRef') private filterPanelRef?: ElementRef<HTMLElement>;
-  @ViewChild('columnToggleAnchor') private columnToggleAnchor?: ElementRef<HTMLElement>;
-  @ViewChild('columnPanelRef', { read: ElementRef }) private columnPanelRef?: ElementRef<HTMLElement>;
 
   dataSource = signal<ProxyInfo[]>([]);
   selection = new SelectionModel<ProxyInfo>(true, []);
@@ -138,7 +133,6 @@ export class ProxyListComponent implements OnInit, OnDestroy {
   private navigationSubscription?: Subscription;
   private userSettingsSubscription?: Subscription;
   private roleSubscription?: Subscription;
-  private suppressOutsideCloseUntil = 0;
 
   constructor(
     private http: HttpService,
@@ -280,33 +274,6 @@ export class ProxyListComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (Date.now() < this.suppressOutsideCloseUntil) {
-      return;
-    }
-
-    const target = event.target as Node | null;
-    if (!target) {
-      return;
-    }
-
-    if (
-      this.filterPanelOpen() &&
-      !this.isTargetWithin(target, this.filterToggleAnchor, this.filterPanelRef) &&
-      !this.isTargetWithinProxyFilterOverlay(target)
-    ) {
-      this.filterPanelOpen.set(false);
-    }
-
-    if (
-      this.columnPanelOpen() &&
-      !this.isTargetWithin(target, this.columnToggleAnchor, this.columnPanelRef)
-    ) {
-      this.columnPanelOpen.set(false);
-    }
-  }
-
   onLazyLoad(event: TablePageEvent) {
     const previousSortField = this.sortField();
     const previousSortOrder = this.sortOrder();
@@ -412,39 +379,39 @@ export class ProxyListComponent implements OnInit, OnDestroy {
     this.getAndSetProxyList();
   }
 
-  toggleFilterPanel(event?: Event | { originalEvent?: Event }): void {
-    this.stopTriggerEvent(event);
+  onFilterPopoverStateChanged(state: string): void {
+    if ((state === 'open') !== this.filterPanelOpen()) {
+      this.toggleFilterPanel();
+    }
+  }
+
+  onColumnPopoverStateChanged(state: string): void {
+    if ((state === 'open') !== this.columnPanelOpen()) {
+      this.openColumnPanel();
+    }
+  }
+
+  toggleFilterPanel(): void {
     const nextState = !this.filterPanelOpen();
     if (nextState) {
       this.syncFilterFormWithApplied();
       this.ensureFilterOptionsLoaded();
-      this.suppressOutsideCloseUntil = Date.now() + 180;
       this.columnPanelOpen.set(false);
     }
     this.filterPanelOpen.set(nextState);
   }
 
-  openColumnPanel(event?: Event | { originalEvent?: Event }): void {
-    this.stopTriggerEvent(event);
+  openColumnPanel(): void {
     if (this.columnPanelOpen()) {
       this.columnPanelOpen.set(false);
       return;
     }
-    this.suppressOutsideCloseUntil = Date.now() + 180;
     this.filterPanelOpen.set(false);
     this.columnPanelOpen.set(true);
   }
 
   closeColumnPanel(): void {
     this.columnPanelOpen.set(false);
-  }
-
-  onColumnEditorDragStart(): void {
-    this.suppressOutsideCloseUntil = Date.now() + 60_000;
-  }
-
-  onColumnEditorDragEnd(): void {
-    this.suppressOutsideCloseUntil = Date.now() + 240;
   }
 
   saveColumnPreferences(nextColumns: string[]): void {
@@ -972,26 +939,4 @@ export class ProxyListComponent implements OnInit, OnDestroy {
     return PROXY_TABLE_COLUMN_DEFINITIONS.filter(column => column.id !== 'check_now');
   }
 
-  private isTargetWithin(target: Node, ...elements: Array<ElementRef<HTMLElement> | undefined>): boolean {
-    for (const elementRef of elements) {
-      const element = elementRef?.nativeElement;
-      if (element && element.contains(target)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private isTargetWithinProxyFilterOverlay(target: Node): boolean {
-    const element = target instanceof Element ? target : target.parentElement;
-    return !!element?.closest('.app-select-overlay');
-  }
-
-  private stopTriggerEvent(event?: Event | { originalEvent?: Event }): void {
-    if (!event) {
-      return;
-    }
-    const domEvent = (event as { originalEvent?: Event }).originalEvent ?? (event as Event);
-    domEvent?.stopPropagation?.();
-  }
 }

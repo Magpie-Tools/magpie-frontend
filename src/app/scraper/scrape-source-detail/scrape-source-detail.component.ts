@@ -1,8 +1,9 @@
+import {HlmPopoverImports} from '@spartan-ng/helm/popover';
 import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
 import {SourceFetchModeComponent} from '../source-fetch-mode/source-fetch-mode.component';
 import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
-import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, signal} from '@angular/core';
+import {Component, OnDestroy, OnInit, signal} from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -53,6 +54,7 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
   selector: 'app-scrape-source-detail',
   standalone: true,
   imports: [
+    HlmPopoverImports,
     CommonModule,
     SourceScrapeStatusComponent,
     SourceFetchModeComponent,
@@ -69,10 +71,6 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
   styleUrl: './scrape-source-detail.component.scss'
 })
 export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
-  @ViewChild('filterToggleAnchor') private filterToggleAnchor?: ElementRef<HTMLElement>;
-  @ViewChild('filterPanelRef') private filterPanelRef?: ElementRef<HTMLElement>;
-  @ViewChild('columnToggleAnchor') private columnToggleAnchor?: ElementRef<HTMLElement>;
-  @ViewChild('columnPanelRef', { read: ElementRef }) private columnPanelRef?: ElementRef<HTMLElement>;
 
   savingFetchMode = signal(false);
   sourceId = signal<number | undefined>(undefined);
@@ -105,7 +103,6 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   readonly proxyTableColumnDefinitions = PROXY_TABLE_COLUMN_DEFINITIONS.filter(column => column.id !== 'check_now');
   private readonly defaultFilterValues: ProxyListFilterFormValues = createDefaultProxyFilterValues();
   readonly proxySkeletonRows = Array.from({ length: 6 });
-  private suppressOutsideCloseUntil = 0;
 
   private proxySearchDebounce?: ReturnType<typeof setTimeout>;
 
@@ -171,32 +168,6 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
       this.proxySearchDebounce = undefined;
     }
     this.subscriptions.unsubscribe();
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (Date.now() < this.suppressOutsideCloseUntil) {
-      return;
-    }
-
-    const target = event.target as Node | null;
-    if (!target) {
-      return;
-    }
-
-    if (
-      this.filterPanelOpen() &&
-      !this.isTargetWithin(target, this.filterToggleAnchor, this.filterPanelRef)
-    ) {
-      this.filterPanelOpen.set(false);
-    }
-
-    if (
-      this.columnPanelOpen() &&
-      !this.isTargetWithin(target, this.columnToggleAnchor, this.columnPanelRef)
-    ) {
-      this.columnPanelOpen.set(false);
-    }
   }
 
   get totalProxies(): number {
@@ -398,37 +369,39 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     this.loadProxyList();
   }
 
-  toggleFilterPanel(event?: Event | { originalEvent?: Event }): void {
-    this.stopTriggerEvent(event);
+  onFilterPopoverStateChanged(state: string): void {
+    if ((state === 'open') !== this.filterPanelOpen()) {
+      this.toggleFilterPanel();
+    }
+  }
+
+  onColumnPopoverStateChanged(state: string): void {
+    if ((state === 'open') !== this.columnPanelOpen()) {
+      this.openColumnPanel();
+    }
+  }
+
+  toggleFilterPanel(): void {
     const nextState = !this.filterPanelOpen();
     if (nextState) {
       this.syncFilterFormWithApplied();
       this.ensureFilterOptionsLoaded();
-      this.suppressOutsideCloseUntil = Date.now() + 180;
+      this.columnPanelOpen.set(false);
     }
     this.filterPanelOpen.set(nextState);
   }
 
-  openColumnPanel(event?: Event | { originalEvent?: Event }): void {
-    this.stopTriggerEvent(event);
+  openColumnPanel(): void {
     if (this.columnPanelOpen()) {
       this.columnPanelOpen.set(false);
       return;
     }
-    this.suppressOutsideCloseUntil = Date.now() + 180;
+    this.filterPanelOpen.set(false);
     this.columnPanelOpen.set(true);
   }
 
   closeColumnPanel(): void {
     this.columnPanelOpen.set(false);
-  }
-
-  onColumnEditorDragStart(): void {
-    this.suppressOutsideCloseUntil = Date.now() + 60_000;
-  }
-
-  onColumnEditorDragEnd(): void {
-    this.suppressOutsideCloseUntil = Date.now() + 240;
   }
 
   saveColumnPreferences(nextColumns: string[]): void {
@@ -651,24 +624,6 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   private syncColumnsFromSettings(settings: UserSettings | undefined): void {
     const normalized = normalizeProxyTableColumns(settings?.scrape_source_proxy_columns ?? DEFAULT_PROXY_TABLE_COLUMNS);
     this.displayedColumns.set(normalized.filter(column => column !== 'check_now'));
-  }
-
-  private isTargetWithin(target: Node, ...elements: Array<ElementRef<HTMLElement> | undefined>): boolean {
-    for (const elementRef of elements) {
-      const element = elementRef?.nativeElement;
-      if (element && element.contains(target)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private stopTriggerEvent(event?: Event | { originalEvent?: Event }): void {
-    if (!event) {
-      return;
-    }
-    const domEvent = (event as { originalEvent?: Event }).originalEvent ?? (event as Event);
-    domEvent?.stopPropagation?.();
   }
 
 }
