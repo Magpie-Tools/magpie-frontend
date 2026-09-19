@@ -148,6 +148,23 @@ describe('ProxyDetailComponent', () => {
     expect(component.fullAddress).toBe('[2001:db8::1]:8080');
     expect(component.externalLookupLinks.length).toBeGreaterThan(0);
   });
+  it('formats authenticated endpoints with escaped credentials before the host', () => {
+    component.detail.update(detail => detail ? {
+      ...detail, has_auth: true, username: 'user', password: 'pass',
+    } : detail);
+    expect(component.fullCredentialAddress).toBe('user:pass@127.0.0.1:8080');
+
+    component.detail.update(detail => detail ? {
+      ...detail, ip: 'gateway.provider.example', username: 'user@example', password: 'p:a/s?#%',
+    } : detail);
+    expect(component.fullCredentialAddress)
+      .toBe('user%40example:p%3Aa%2Fs%3F%23%25@gateway.provider.example:8080');
+
+    component.detail.update(detail => detail ? {...detail, ip: '2001:db8::1'} : detail);
+    expect(component.fullCredentialAddress)
+      .toBe('user%40example:p%3Aa%2Fs%3F%23%25@[2001:db8::1]:8080');
+  });
+
   it('keeps auth controls compact on one row with both values visible', () => {
     component.detail.update(detail => detail ? {
       ...detail,

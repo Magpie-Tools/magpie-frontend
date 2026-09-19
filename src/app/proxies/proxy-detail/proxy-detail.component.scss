@@ -95,7 +95,8 @@ a {
   }
 
   &:hover,
-  &:focus-visible {
+  &:focus-visible,
+  &.endpoint-copy--copied {
     border-color: rgba(var(--theme-primary-300-rgb), 0.5);
     background: rgba(var(--theme-primary-500-rgb), 0.16);
     color: #fff;

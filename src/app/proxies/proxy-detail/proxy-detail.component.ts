@@ -35,6 +35,8 @@ interface ThemePalette {
   gridLight: string;
 }
 
+type CopyField = 'ip' | 'port' | 'address' | 'username' | 'password' | 'combined' | 'credentialAddress';
+
 type SignalTone = 'positive' | 'neutral' | 'negative';
 
 interface ReputationSignalEntry {
@@ -87,7 +89,7 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   isSignalDialogVisible = signal(false);
   signalDialogTitle = signal('');
   signalDialogEntries = signal<ReputationSignalEntry[]>([]);
-  copiedAuthField = signal<'username' | 'password' | 'combined' | null>(null);
+  copiedField = signal<CopyField | null>(null);
   private copyFeedbackTimeout?: ReturnType<typeof setTimeout>;
 
   savingTags = signal(false);
@@ -282,7 +284,7 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!value) {
       return;
     }
-    this.copyToClipboard(value, 'Proxy host copied');
+    void this.copyValueWithFeedback(value, 'ip');
   }
 
   copyPort(): void {
@@ -290,7 +292,7 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     if (value === undefined || value === null) {
       return;
     }
-    this.copyToClipboard(`${value}`, 'Port copied');
+    void this.copyValueWithFeedback(`${value}`, 'port');
   }
 
   copyFullAddress(): void {
@@ -298,7 +300,7 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!value) {
       return;
     }
-    this.copyToClipboard(value, 'Proxy address copied');
+    void this.copyValueWithFeedback(value, 'address');
   }
 
   async copyAuthValue(field: 'username' | 'password' | 'combined'): Promise<void> {
@@ -307,14 +309,18 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.copiedAuthField.set(field);
+    await this.copyValueWithFeedback(value, field);
+  }
+
+  private async copyValueWithFeedback(value: string, field: CopyField): Promise<void> {
+    this.copiedField.set(field);
     clearTimeout(this.copyFeedbackTimeout);
-    this.copyFeedbackTimeout = setTimeout(() => this.copiedAuthField.set(null), 1400);
+    this.copyFeedbackTimeout = setTimeout(() => this.copiedField.set(null), 1400);
     const copied = await this.clipboardService.copyText(value);
     if (!copied) {
-      if (this.copiedAuthField() === field) {
+      if (this.copiedField() === field) {
         clearTimeout(this.copyFeedbackTimeout);
-        this.copiedAuthField.set(null);
+        this.copiedField.set(null);
       }
       this.notification.showError('Failed to access clipboard');
     }
@@ -325,7 +331,7 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!value) {
       return;
     }
-    this.copyToClipboard(value, 'Proxy endpoint copied');
+    void this.copyValueWithFeedback(value, 'credentialAddress');
   }
 
   changeLifecycle(state: ManagedProxyState): void {
@@ -351,16 +357,6 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
         this.notification.showError('Could not change proxy lifecycle: ' + message);
       },
     }).add(() => this.changingLifecycle.set(false));
-  }
-
-  private copyToClipboard(value: string, successMessage: string): void {
-    this.clipboardService.copyText(value).then(copied => {
-      if (copied) {
-        this.notification.showSuccess(successMessage);
-        return;
-      }
-      this.notification.showError('Failed to access clipboard');
-    });
   }
 
   get authenticationDisplay(): string {
@@ -418,7 +414,7 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       return '';
     }
 
-    return `${formatHostPort(ip, port)}:${credentials.username}:${credentials.password}`;
+    return `${encodeURIComponent(credentials.username)}:${encodeURIComponent(credentials.password)}@${formatHostPort(ip, port)}`;
   }
 
   get latestStatistic(): ProxyStatistic | null {
