@@ -1,6 +1,8 @@
-<div #tableRoot class="data-table" [attr.aria-busy]="loading">
+<div #tableRoot class="data-table" [class.data-table--refreshing]="loading && hasLoaded" [attr.aria-busy]="loading">
   @if (loading) {
-    <div role="status" class="table-loading">Loading proxies…</div>
+    <div role="status" class="proxy-table-loading">
+      <span class="sr-only">Loading proxies…</span>
+    </div>
   }
   <div
     hlmTableContainer [attr.inert]="loading ? '' : null"
