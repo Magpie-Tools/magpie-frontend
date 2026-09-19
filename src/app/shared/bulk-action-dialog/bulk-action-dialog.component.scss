@@ -21,8 +21,8 @@
   color: var(--theme-primary-200);
 }
 
-.bulk-dialog-heading--danger .bulk-dialog-heading__icon,
-.bulk-dialog-intro--danger .bulk-dialog-intro__icon {
+// Keep the destructive cue local to the warning icon and final action.
+.bulk-dialog-heading--danger .bulk-dialog-heading__icon {
   border-color: rgba(248, 113, 113, 0.28);
   background: rgba(127, 29, 29, 0.13);
   color: #f4a7a7;
@@ -55,10 +55,6 @@
     font-weight: 590;
     letter-spacing: -0.025em;
   }
-}
-
-.bulk-dialog-heading--danger .bulk-dialog-heading__copy > span {
-  color: rgba(239, 156, 156, 0.64);
 }
 
 .bulk-dialog-heading__tooltip {
@@ -106,14 +102,6 @@
     }
   }
 
-  .bulk-dialog-intro--danger {
-    border-color: rgba(248, 113, 113, 0.2);
-    background: linear-gradient(115deg, rgba(127, 29, 29, 0.11), rgba(255, 255, 255, 0.018));
-
-    h3 { color: rgba(255, 224, 224, 0.9); }
-    p { color: rgba(240, 188, 188, 0.48); }
-  }
-
   .bulk-dialog-intro__icon {
     width: 2.2rem;
     height: 2.2rem;
@@ -129,12 +117,6 @@
     color: rgba(255, 255, 255, 0.42);
     font-size: 0.58rem;
     white-space: nowrap;
-  }
-
-  .bulk-dialog-intro--danger .bulk-dialog-intro__state {
-    border-color: rgba(248, 113, 113, 0.16);
-    background: rgba(127, 29, 29, 0.1);
-    color: rgba(239, 174, 174, 0.58);
   }
 
   .dialog-section {
@@ -206,10 +188,6 @@
     }
   }
 
-  .bulk-action-dialog--danger .bulk-dialog-footer > span {
-    color: rgba(239, 174, 174, 0.46);
-  }
-
   .bulk-action-dialog.app-dialog-panel,
   .bulk-action-dialog .app-dialog-panel {
     overflow: hidden;
@@ -220,24 +198,11 @@
     box-shadow: 0 32px 86px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
-  .bulk-action-dialog--danger.app-dialog-panel,
-  .bulk-action-dialog--danger .app-dialog-panel {
-    border-color: rgba(248, 113, 113, 0.2);
-    box-shadow: 0 32px 86px rgba(0, 0, 0, 0.64), inset 0 1px 0 rgba(255, 255, 255, 0.035);
-  }
-
   .bulk-action-dialog .app-dialog-header {
     padding: 1rem 1.15rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.09);
     background:
       radial-gradient(circle at 10% 0%, rgba(var(--theme-primary-500-rgb), 0.1), transparent 16rem),
-      rgba(12, 12, 14, 0.98);
-  }
-
-  .bulk-action-dialog--danger .app-dialog-header {
-    border-bottom-color: rgba(248, 113, 113, 0.14);
-    background:
-      radial-gradient(circle at 10% 0%, rgba(185, 52, 52, 0.12), transparent 16rem),
       rgba(12, 12, 14, 0.98);
   }
 
@@ -252,10 +217,6 @@
     background: rgba(11, 11, 13, 0.98);
   }
 
-  .bulk-action-dialog--danger .app-dialog-footer {
-    border-top-color: rgba(248, 113, 113, 0.12);
-  }
-
   .bulk-action-dialog [data-slot="dialog-close"] {
     width: 2.15rem;
     height: 2.15rem;
@@ -266,16 +227,6 @@
   .bulk-action-dialog [data-slot="dialog-close"]:hover {
     background: rgba(255, 255, 255, 0.06);
     color: rgba(255, 255, 255, 0.86);
-  }
-
-  .bulk-action-dialog--danger [data-slot="dialog-close"]:hover {
-    background: rgba(127, 29, 29, 0.14);
-    color: #fecaca;
-  }
-
-  .bulk-action-dialog--danger :checked input[type="radio"] {
-    border-color: #f87171;
-    background: rgba(185, 28, 28, 0.72);
   }
 
   .bulk-action-dialog .dialog-button[hlmBtn] {
