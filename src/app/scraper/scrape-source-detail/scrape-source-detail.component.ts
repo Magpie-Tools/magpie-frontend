@@ -1,3 +1,5 @@
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
+import {InventoryPageShellComponent} from '../../shared/inventory-page-shell/inventory-page-shell.component';
 import {HlmPopoverImports} from '@spartan-ng/helm/popover';
 import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
@@ -54,7 +56,9 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
   selector: 'app-scrape-source-detail',
   standalone: true,
   imports: [
+    InventoryPageShellComponent,
     HlmPopoverImports,
+    HlmTooltip,
     CommonModule,
     SourceScrapeStatusComponent,
     SourceFetchModeComponent,
@@ -71,6 +75,9 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
   styleUrl: './scrape-source-detail.component.scss'
 })
 export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
+
+  urlCopied = signal(false);
+  private copyFeedbackTimeout?: ReturnType<typeof setTimeout>;
 
   savingFetchMode = signal(false);
   sourceId = signal<number | undefined>(undefined);
@@ -163,6 +170,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    clearTimeout(this.copyFeedbackTimeout);
     if (this.proxySearchDebounce) {
       clearTimeout(this.proxySearchDebounce);
       this.proxySearchDebounce = undefined;
@@ -492,12 +500,28 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     this.loadProxyList();
   }
 
-  copyUrl(): void {
+  prepareUrlScroll(link: HTMLElement): void {
+    const text = link.querySelector<HTMLElement>('.source-title__text');
+    const overflow = Math.max(0, (text?.scrollWidth ?? 0) - link.clientWidth);
+    link.style.setProperty('--url-scroll-distance', `${-overflow}px`);
+    link.style.setProperty('--url-scroll-duration', `${overflow / 40 + 2}s`);
+    link.classList.toggle('source-title--overflowing', overflow > 0);
+  }
+
+  async copyUrl(): Promise<void> {
     const value = this.detail()?.url?.trim();
     if (!value) {
       return;
     }
-    this.copyToClipboard(value, 'URL copied');
+    this.urlCopied.set(true);
+    clearTimeout(this.copyFeedbackTimeout);
+    this.copyFeedbackTimeout = setTimeout(() => this.urlCopied.set(false), 1400);
+    const copied = await this.clipboardService.copyText(value);
+    if (!copied) {
+      clearTimeout(this.copyFeedbackTimeout);
+      this.urlCopied.set(false);
+      this.notification.showError('Failed to access clipboard');
+    }
   }
 
   setRequiresJavaScript(enabled: boolean): void {
@@ -587,16 +611,6 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   private buildFiltersFromForm(): ProxyListAppliedFilters {
     const formValue = this.filterForm.getRawValue() as ProxyListFilterFormValues;
     return buildFiltersFromFormValue(formValue);
-  }
-
-  private copyToClipboard(value: string, successMessage: string): void {
-    this.clipboardService.copyText(value).then(copied => {
-      if (copied) {
-        this.notification.showSuccess(successMessage);
-        return;
-      }
-      this.notification.showError('Failed to access clipboard');
-    });
   }
 
   private buildFilterPayload(filters: ProxyListAppliedFilters): ProxyListFilters | undefined {

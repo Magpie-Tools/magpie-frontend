@@ -105,6 +105,21 @@ describe('ScrapeSourceDetailComponent', () => {
     expect(fixture.nativeElement.querySelector('.scrape-error').textContent).toContain('HTTP 503');
   });
 
+  it('uses the same typography and height for all proxy toolbar buttons', () => {
+    const toolbar: HTMLElement = fixture.nativeElement.querySelector('.toolbar-actions');
+    const tagButton = toolbar.querySelector('app-proxy-tag-manager > button') as HTMLButtonElement;
+    const reference = getComputedStyle(tagButton);
+    const buttons = Array.from(toolbar.querySelectorAll<HTMLButtonElement>('.tool-button'));
+
+    expect(buttons.length).toBe(3);
+    for (const button of buttons) {
+      const style = getComputedStyle(button);
+      expect(style.fontSize).withContext(button.textContent?.trim() ?? '').toBe(reference.fontSize);
+      expect(style.fontWeight).toBe(reference.fontWeight);
+      expect(button.getBoundingClientRect().height).toBeCloseTo(tagButton.getBoundingClientRect().height, 1);
+    }
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });

@@ -1,4 +1,7 @@
-<main
+<div
+  [attr.role]="embedded ? 'region' : 'main'"
+  [attr.aria-label]="embedded ? pageTitle : null"
+  [class.inventory-page--embedded]="embedded"
   class="inventory-page"
   [class.inventory-page--loading]="!initialLoadComplete"
   [attr.aria-busy]="loading"
@@ -12,17 +15,23 @@
     </div>
   }
   <section class="inventory-stage">
-    <header class="inventory-context">
-      <div class="inventory-context__copy">
-        <span class="context-icon"
-          ><i [class]="pageIcon" aria-hidden="true"></i
-        ></span>
-        <div>
-          <h1>{{ pageTitle }}</h1>
-          <p>{{ pageDescription }}</p>
+    @if (showPageHeading) {
+      <header class="inventory-context">
+        <div class="inventory-context__copy">
+          <span class="context-icon"
+            ><i [class]="pageIcon" aria-hidden="true"></i
+          ></span>
+          <div>
+            @if (embedded) {
+              <h2>{{ pageTitle }}</h2>
+            } @else {
+              <h1>{{ pageTitle }}</h1>
+            }
+            <p>{{ pageDescription }}</p>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    }
 
     <div class="inventory-grid" [class.inventory-grid--combined]="combinedCard">
       <div class="actions-wrapper">
@@ -71,7 +80,7 @@
                 <i class="icon icon-x" aria-hidden="true"></i>
               </button>
             }
-            <span class="search-scope">Searches all pages</span>
+            <span class="search-scope">{{ searchScope }}</span>
           </div>
         </section>
 
@@ -152,4 +161,4 @@
       </section>
     </div>
   </section>
-</main>
+</div>

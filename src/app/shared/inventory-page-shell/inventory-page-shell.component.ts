@@ -9,6 +9,9 @@ import {RevealGroupDirective} from '../reveal-group.directive';
   styleUrl: './inventory-page-shell.component.scss',
 })
 export class InventoryPageShellComponent implements OnChanges {
+  @Input() embedded = false;
+  @Input() showPageHeading = true;
+  @Input() searchScope = 'Searches all pages';
   @Input() pageIcon = '';
   @Input() pageTitle = '';
   @Input() pageDescription = '';

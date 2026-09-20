@@ -1,0 +1,55 @@
+.endpoint-copy-target,
+.endpoint-copy-all {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.24);
+  background: rgba(var(--theme-primary-500-rgb), 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+
+  i {
+    color: rgba(255, 255, 255, 0.36);
+    font-size: 0.58rem;
+    transition: color 160ms ease;
+  }
+
+  &:hover,
+  &:focus-visible,
+  &.endpoint-copy--copied {
+    border-color: rgba(var(--theme-primary-300-rgb), 0.5);
+    background: rgba(var(--theme-primary-500-rgb), 0.16);
+    color: #fff;
+    outline: 0;
+
+    i { color: var(--theme-primary-100); }
+  }
+}
+
+.endpoint-copy-target {
+  min-width: 0;
+  gap: 0.45rem;
+  padding: 0.32rem 0.58rem;
+  overflow: hidden;
+  border-radius: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.endpoint-copy-all {
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: 0.65rem;
+}
+

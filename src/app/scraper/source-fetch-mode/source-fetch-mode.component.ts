@@ -17,7 +17,7 @@ import {FormsModule} from '@angular/forms';
       </label>
       <div class="fetch-mode__control">
         <span class="fetch-mode__state" aria-live="polite">{{ saving() ? 'Saving…' : enabled() ? 'On' : 'Off' }}</span>
-        <hlm-switch #toggle [inputId]="inputId()" [ngModel]="enabled()" [disabled]="disabled() || saving()" (ngModelChange)="changeMode($event, toggle)" aria-label="Requires JavaScript" />
+        <hlm-switch #toggle class="cursor-pointer" [inputId]="inputId()" [ngModel]="enabled()" [disabled]="disabled() || saving()" (ngModelChange)="changeMode($event, toggle)" aria-label="Requires JavaScript" />
       </div>
     </div>
   `,

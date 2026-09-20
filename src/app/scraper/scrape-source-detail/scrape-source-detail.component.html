@@ -12,412 +12,314 @@
 
         <div class="source-identity">
           @if (detail()?.url; as sourceUrl) {
-            <div class="source-title-row">
+            <h1 class="source-title-row">
               <a
+                #sourceTitle
                 class="source-title"
+                (mouseenter)="prepareUrlScroll(sourceTitle)"
+                (focus)="prepareUrlScroll(sourceTitle)"
                 [href]="sourceUrl"
                 target="_blank"
                 rel="noopener noreferrer"
                 [title]="sourceUrl"
               >
-                {{ sourceUrl }}
+                <span class="source-title__text">{{ sourceUrl }}</span>
               </a>
               <button
                 type="button"
-                class="copy-source-button"
+                class="endpoint-copy-all"
+                [class.endpoint-copy--copied]="urlCopied()"
                 (click)="copyUrl()"
-                title="Copy source URL"
+                [hlmTooltip]="urlCopied() ? 'Copied' : 'Click to copy'"
                 aria-label="Copy source URL"
               >
-                <i class="icon icon-copy" aria-hidden="true"></i>
+                <i class="icon" [ngClass]="urlCopied() ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
               </button>
-            </div>
+            </h1>
           } @else {
             <h1>{{ isLoading() ? "Loading source" : "Source unavailable" }}</h1>
           }
         </div>
       </div>
-
-      <div class="detail-context__actions">
-        <div class="context-state" [ngClass]="healthPillClass">
-          <span
-            class="status-dot"
-            [ngClass]="healthDotClass"
-            aria-hidden="true"
-          ></span>
-          <span>
-            <small>Source health</small>
-            <strong>{{ healthLabel }}</strong>
-          </span>
-        </div>
-      </div>
     </header>
 
     <div class="detail-grid">
-      <section
-        class="detail-card source-overview"
-        aria-labelledby="source-overview-title"
-      >
+      <section class="detail-card source-dashboard" aria-label="Source overview" [attr.aria-busy]="isLoading()">
         @if (isLoading()) {
           <div class="card-loading"><app-loading></app-loading></div>
         } @else {
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i class="icon icon-globe" aria-hidden="true"></i
-            ></span>
-            <div class="card-heading__copy">
-              <h1 id="source-overview-title">Source overview</h1>
-              <p>
-                Collection totals and the most recent scraper activity for this
-                URL.
-              </p>
-            </div>
-          </div>
+          <div class="overview-layout">
+            <section class="source-overview" aria-labelledby="source-overview-title">
+              <h2 id="source-overview-title" class="overview-title">Overview</h2>
+              <div class="check-summary">
+                <div class="check-summary__result">
+                  <app-source-scrape-status class="source-scrape-status" role="status"
+                    [status]="detail()?.last_scrape_status" />
+                </div>
+                <span class="check-summary__time">{{ detail()?.last_scraped_at
+                  ? (detail()?.last_scraped_at | date: "medium") : "Not scraped yet" }}</span>
+              </div>
+              @if (detail()?.last_scrape_error) {
+                <p class="scrape-error">
+                  <i class="icon icon-info" aria-hidden="true"></i>
+                  <span>{{ detail()?.last_scrape_error }}</span>
+                </p>
+              }
+              <div class="fact-list">
+                <div class="detail-item">
+                  <span class="label">Linked proxies</span>
+                  <span class="value">{{ totalProxies | number }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Proxies in latest scrape</span>
+                  <span class="value">{{ detail()?.last_scrape_proxy_count != null
+                    ? (detail()?.last_scrape_proxy_count | number) : "Not recorded" }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Source added</span>
+                  <span class="value">{{ detail()?.added_at ? (detail()?.added_at | date: "mediumDate") : "Unknown" }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Last proxy added</span>
+                  <span class="value">{{ detail()?.last_proxy_added_at
+                    ? (detail()?.last_proxy_added_at | date: "medium") : "Never" }}</span>
+                </div>
+              </div>
+              <app-source-fetch-mode class="source-fetch-settings" inputId="source-javascript"
+                [enabled]="detail()?.fetch_mode === 'browser'"
+                [disabled]="!workspaces.canOperate()" [saving]="savingFetchMode()"
+                (enabledChange)="setRequiresJavaScript($event)" />
+            </section>
 
-          <app-source-fetch-mode
-            class="source-fetch-settings"
-            inputId="source-javascript"
-            [enabled]="detail()?.fetch_mode === 'browser'"
-            [disabled]="!workspaces.canOperate()"
-            [saving]="savingFetchMode()"
-            (enabledChange)="setRequiresJavaScript($event)"
-          />
-          <div class="fact-list">
-            <div class="detail-item">
-              <span class="label">Proxy count</span>
-              <strong class="value value--metric">{{ totalProxies }}</strong>
-            </div>
-            <div class="detail-item detail-item--right">
-              <span class="label">Alive ratio</span>
-              <strong class="value value--metric">{{
-                aliveRatioDisplay
-              }}</strong>
-            </div>
-            <div class="detail-item">
-              <span class="label">Average reputation</span>
-              <span class="value">
-                @if (averageReputationScore !== null) {
-                  {{ averageReputationDisplay }}/100
+            <aside
+              class="source-insights"
+              aria-label="Source health and reputation"
+            >
+              <section class="health-summary" aria-labelledby="health-summary-title">
+                <div class="insight-heading">
+                  <div>
+                    <h2 id="health-summary-title">Proxy health</h2>
+                    <p class="insight-caption">{{ totalProxies | number }} linked proxies</p>
+                  </div>
+                  <strong class="insight-score">{{ aliveRatioDisplay }}</strong>
+                </div>
+
+                <div class="health-metrics">
+                  <div class="health-metric health-metric--alive">
+                    <span>Alive</span>
+                    <strong>{{ aliveCount }}</strong>
+                  </div>
+                  <div class="health-metric health-metric--dead">
+                    <span>Dead</span>
+                    <strong>{{ deadCount }}</strong>
+                  </div>
+                  <div class="health-metric health-metric--unknown">
+                    <span>Unknown</span>
+                    <strong>{{ unknownCount }}</strong>
+                  </div>
+                </div>
+
+                <div class="health-bar" role="img" [attr.aria-label]="aliveCount + ' alive, ' + deadCount + ' dead, ' + unknownCount + ' unknown'">
+                  <span
+                    class="health-bar__segment health-bar__segment--alive"
+                    [style.width.%]="healthPercent(aliveCount)"
+                    [attr.title]="aliveCount + ' alive'"
+                  ></span>
+                  <span
+                    class="health-bar__segment health-bar__segment--dead"
+                    [style.width.%]="healthPercent(deadCount)"
+                    [attr.title]="deadCount + ' dead'"
+                  ></span>
+                  <span
+                    class="health-bar__segment health-bar__segment--unknown"
+                    [style.width.%]="healthPercent(unknownCount)"
+                    [attr.title]="unknownCount + ' unknown'"
+                  ></span>
+                </div>
+              </section>
+
+              <section
+                class="reputation-summary"
+                aria-labelledby="reputation-summary-title"
+              >
+                <div class="reputation-summary__heading">
+                  <span>
+                    <h2 id="reputation-summary-title" class="overview-title">Average reputation</h2>
+                    @if (averageReputationScore !== null) {
+                      <strong>{{ averageReputationDisplay }}<em>/100</em></strong>
+                    } @else {
+                      <strong>—</strong>
+                    }
+                  </span>
+
+                  <span [ngClass]="reputationBadgeClass(averageReputationLabel)">
+                    {{ averageReputationLabel | titlecase }}
+                  </span>
+                </div>
+
+                @if (totalProxies === 0) {
+                  <p>No proxies are linked to this source yet.</p>
                 } @else {
-                  N/A
+                  <div class="reputation-list">
+                    <div class="reputation-row">
+                      <span>Good</span>
+                      <span class="reputation-meter">
+                        <span
+                          class="progress-bar__fill--good"
+                          [style.width.%]="reputationPercent('good')"
+                        ></span>
+                      </span>
+                      <strong>{{ reputationBreakdown.good }}</strong>
+                    </div>
+                    <div class="reputation-row">
+                      <span>Neutral</span>
+                      <span class="reputation-meter">
+                        <span
+                          class="progress-bar__fill--neutral"
+                          [style.width.%]="reputationPercent('neutral')"
+                        ></span>
+                      </span>
+                      <strong>{{ reputationBreakdown.neutral }}</strong>
+                    </div>
+                    <div class="reputation-row">
+                      <span>Poor</span>
+                      <span class="reputation-meter">
+                        <span
+                          class="progress-bar__fill--poor"
+                          [style.width.%]="reputationPercent('poor')"
+                        ></span>
+                      </span>
+                      <strong>{{ reputationBreakdown.poor }}</strong>
+                    </div>
+                    <div class="reputation-row">
+                      <span>Unknown</span>
+                      <span class="reputation-meter">
+                        <span
+                          class="progress-bar__fill--unknown"
+                          [style.width.%]="reputationPercent('unknown')"
+                        ></span>
+                      </span>
+                      <strong>{{ reputationBreakdown.unknown }}</strong>
+                    </div>
+                  </div>
                 }
-              </span>
-            </div>
-            <div class="detail-item detail-item--right">
-              <span class="label">Unknown status</span>
-              <span class="value">{{ unknownCount }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">Last proxy added</span>
-              <span class="value">
-                {{
-                  detail()?.last_proxy_added_at
-                    ? (detail()?.last_proxy_added_at | date: "short")
-                    : "Never"
-                }}
-              </span>
-            </div>
-            <div class="detail-item detail-item--right">
-              <span class="label">Last proxy check</span>
-              <span class="value">
-                {{
-                  detail()?.last_checked_at
-                    ? (detail()?.last_checked_at | date: "short")
-                    : "Never"
-                }}
-              </span>
-            </div>
-            <div class="detail-item">
-              <span class="label">Last scrape</span>
-              <span class="value">{{
-                detail()?.last_scraped_at
-                  ? (detail()?.last_scraped_at | date: "short")
-                  : "Never"
-              }}</span>
-            </div>
-            <div class="detail-item detail-item--right">
-              <span class="label">Scrape result</span>
-              <app-source-scrape-status
-                class="source-scrape-status"
-                role="status"
-                [status]="detail()?.last_scrape_status"
-              />
-            </div>
+              </section>
+            </aside>
           </div>
-          @if (detail()?.last_scrape_error) {
-            <p class="scrape-error">
-              <i class="icon icon-info" aria-hidden="true"></i
-              ><span>{{ detail()?.last_scrape_error }}</span>
-            </p>
-          }
         }
       </section>
 
-      <aside
-        class="detail-card source-insights"
-        aria-label="Source health and reputation"
+      <app-inventory-page-shell
+        class="proxy-registry"
+        [embedded]="true"
+        [showPageHeading]="false"
+        pageIcon="icon icon-server"
+        pageTitle="Proxies from this source"
+        [combinedCard]="true"
+        toolbarAriaLabel="Proxy tools"
+        [searchTerm]="proxySearchTerm()"
+        searchPlaceholder="Search host, port, country, status, reputation, or tag"
+        searchAriaLabel="Search proxies"
+        searchScope="This source only"
+        resultTitle="Proxy routes"
+        [showResultHeading]="false"
+        [totalItems]="proxyTotal()"
+        [hasLoaded]="proxyHasLoaded()"
+        [loading]="proxyLoading()"
+        loadingLabel="Loading routes"
+        [activeFilters]="hasActiveFilters()"
+        emptyTitle="No proxy routes yet"
+        filteredEmptyTitle="No matching proxy routes"
+        emptyDescription="No proxies are linked to this source yet."
+        (searchTermChange)="onProxySearchTermChange($event)"
+        (clearSearch)="onProxySearchTermChange('')"
+        (clearFilters)="clearFilters()"
       >
-        <section class="health-summary" aria-labelledby="health-summary-title">
-          <div class="insight-heading">
-            <div>
-              <span class="card-eyebrow">Proxy health</span>
-              <h2 id="health-summary-title">Current status</h2>
-            </div>
-            <strong class="insight-score">{{ aliveRatioDisplay }}</strong>
-          </div>
+        <ng-container inventory-actions>
+          <app-proxy-tag-manager
+            #sourceTagManager
+            class="toolbar-action toolbar-action--tags"
+            [showTrigger]="workspaces.canOperate()"
+            (tagsChanged)="onTagCatalogChanged()"
+          ></app-proxy-tag-manager>
 
-          <div class="health-metrics">
-            <div class="health-metric health-metric--alive">
-              <span>Alive</span>
-              <strong>{{ aliveCount }}</strong>
-            </div>
-            <div class="health-metric health-metric--dead">
-              <span>Dead</span>
-              <strong>{{ deadCount }}</strong>
-            </div>
-            <div class="health-metric health-metric--unknown">
-              <span>Unknown</span>
-              <strong>{{ unknownCount }}</strong>
-            </div>
-          </div>
+          <button
+            type="button"
+            class="tool-button"
+            [disabled]="proxyLoading()"
+            (click)="refreshProxyList()"
+          >
+            <i
+              class="icon"
+              [class.icon-spin]="proxyLoading()"
+              [class.icon-loader-circle]="proxyLoading()"
+              [class.icon-refresh-cw]="!proxyLoading()"
+              aria-hidden="true"
+            ></i>
+            Refresh
+          </button>
 
-          <div class="health-bar" aria-label="Proxy status distribution">
-            <span
-              class="health-bar__segment health-bar__segment--alive"
-              [style.width.%]="healthPercent(aliveCount)"
-              [attr.title]="aliveCount + ' alive'"
-            ></span>
-            <span
-              class="health-bar__segment health-bar__segment--dead"
-              [style.width.%]="healthPercent(deadCount)"
-              [attr.title]="deadCount + ' dead'"
-            ></span>
-            <span
-              class="health-bar__segment health-bar__segment--unknown"
-              [style.width.%]="healthPercent(unknownCount)"
-              [attr.title]="unknownCount + ' unknown'"
-            ></span>
-          </div>
-        </section>
+          <hlm-popover align="end" sideOffset="8"
+            [state]="filterPanelOpen() ? 'open' : 'closed'"
+            (stateChanged)="onFilterPopoverStateChanged($event)">
+            <button
+              type="button"
+              class="tool-button"
+              [class.is-active]="hasActiveFilters()"
+              hlmPopoverTrigger
+            >
+              <i class="icon icon-filter" aria-hidden="true"></i>
+              {{ filterButtonLabel() }}
+            </button>
+            <hlm-popover-content *hlmPopoverPortal
+              class="w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
+              aria-label="Filters">
+              <app-proxy-filter-panel
+                [form]="filterForm"
+                [countryOptions]="countryOptions()"
+                [typeOptions]="typeOptions()"
+                [anonymityOptions]="anonymityOptions()"
+                [proxyStatusOptions]="proxyStatusOptions"
+                [proxyReputationOptions]="proxyReputationOptions"
+                [tagOptions]="tagService.tags()"
+                [floating]="true"
+                (clear)="clearFilters()"
+                (apply)="applyFilters()"
+              ></app-proxy-filter-panel>
+            </hlm-popover-content>
+          </hlm-popover>
 
-        <section
-          class="reputation-summary"
-          aria-labelledby="reputation-summary-title"
-        >
-          <div class="reputation-summary__heading">
-            <span>
-              <small id="reputation-summary-title">Reputation</small>
-              @if (averageReputationScore !== null) {
-                <strong>{{ averageReputationDisplay }}<em>/100</em></strong>
-              } @else {
-                <strong>—</strong>
-              }
-            </span>
-
-            <span [ngClass]="reputationBadgeClass(averageReputationLabel)">
-              {{ averageReputationLabel | titlecase }}
-            </span>
-          </div>
-
-          @if (totalProxies === 0) {
-            <p>No proxies are linked to this source yet.</p>
-          } @else {
-            <div class="reputation-list">
-              <div class="reputation-row">
-                <span>Good</span>
-                <span class="reputation-meter">
-                  <span
-                    class="progress-bar__fill--good"
-                    [style.width.%]="reputationPercent('good')"
-                  ></span>
-                </span>
-                <strong>{{ reputationBreakdown.good }}</strong>
-              </div>
-              <div class="reputation-row">
-                <span>Neutral</span>
-                <span class="reputation-meter">
-                  <span
-                    class="progress-bar__fill--neutral"
-                    [style.width.%]="reputationPercent('neutral')"
-                  ></span>
-                </span>
-                <strong>{{ reputationBreakdown.neutral }}</strong>
-              </div>
-              <div class="reputation-row">
-                <span>Poor</span>
-                <span class="reputation-meter">
-                  <span
-                    class="progress-bar__fill--poor"
-                    [style.width.%]="reputationPercent('poor')"
-                  ></span>
-                </span>
-                <strong>{{ reputationBreakdown.poor }}</strong>
-              </div>
-              <div class="reputation-row">
-                <span>Unknown</span>
-                <span class="reputation-meter">
-                  <span
-                    class="progress-bar__fill--unknown"
-                    [style.width.%]="reputationPercent('unknown')"
-                  ></span>
-                </span>
-                <strong>{{ reputationBreakdown.unknown }}</strong>
-              </div>
-            </div>
-          }
-        </section>
-      </aside>
-
-      <section
-        class="detail-card proxy-registry"
-        aria-labelledby="proxy-registry-title"
-      >
-        <div class="actions-wrapper">
-          <div class="registry-heading">
-            <div class="card-heading">
-              <span class="card-icon"
-                ><i class="icon icon-list" aria-hidden="true"></i
-              ></span>
-              <div class="card-heading__copy">
-                <h2 id="proxy-registry-title">Proxies from this source</h2>
-                <p>
-                  Inspect routes, change visible columns, or narrow this
-                  source's results.
-                </p>
-              </div>
-            </div>
-
-            <div class="registry-state" aria-live="polite">
-              <span aria-hidden="true"></span>
-              @if (proxyHasLoaded()) {
-                {{ proxyTotal() | number }} total
-              } @else {
-                Loading proxies
-              }
-            </div>
-          </div>
-
-          <div class="registry-tools" aria-label="Proxy registry tools">
-            <div class="search-bar">
-              <i class="icon icon-search" aria-hidden="true"></i>
-              <input
-                #proxySearchInput
-                type="search"
-                class="proxy-search-input"
-                placeholder="Search proxies"
-                [value]="proxySearchTerm()"
-                (input)="onProxySearchTermChange(proxySearchInput.value)"
-                aria-label="Search proxies"
-              />
-              @if (proxySearchTerm()) {
-                <button
-                  type="button"
-                  class="search-clear"
-                  aria-label="Clear proxy search"
-                  (click)="onProxySearchTermChange('')"
-                >
-                  <i class="icon icon-x" aria-hidden="true"></i>
-                </button>
-              }
-              <span class="search-scope">This source only</span>
-            </div>
-
-            <div class="tool-actions">
-              @if (workspaces.canOperate()) {
-                <button
-                  type="button"
-                  class="tool-button"
-                  (click)="sourceTagManager.open()"
-                >
-                  <i class="icon icon-tags" aria-hidden="true"></i>
-                  Manage tags
-                </button>
-              }
-
-              <app-proxy-tag-manager
-                #sourceTagManager
-                [showTrigger]="false"
-                (tagsChanged)="onTagCatalogChanged()"
-              ></app-proxy-tag-manager>
-
-              <button
-                type="button"
-                class="tool-button"
-                [disabled]="proxyLoading()"
-                (click)="refreshProxyList()"
-              >
-                <i
-                  class="icon"
-                  [class.icon-spin]="proxyLoading()"
-                  [class.icon-loader-circle]="proxyLoading()"
-                  [class.icon-refresh-cw]="!proxyLoading()"
-                  aria-hidden="true"
-                ></i>
-                Refresh
-              </button>
-
-              <hlm-popover align="end" sideOffset="8"
-                [state]="filterPanelOpen() ? 'open' : 'closed'"
-                (stateChanged)="onFilterPopoverStateChanged($event)">
-                <button
-                  type="button"
-                  class="tool-button"
-                  [class.is-active]="hasActiveFilters()"
-                  hlmPopoverTrigger
-                >
-                  <i class="icon icon-filter" aria-hidden="true"></i>
-                  {{ filterButtonLabel() }}
-                </button>
-                <hlm-popover-content *hlmPopoverPortal
-                  class="w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
-                  aria-label="Filters">
-                  <app-proxy-filter-panel
-                    [form]="filterForm"
-                    [countryOptions]="countryOptions()"
-                    [typeOptions]="typeOptions()"
-                    [anonymityOptions]="anonymityOptions()"
-                    [proxyStatusOptions]="proxyStatusOptions"
-                    [proxyReputationOptions]="proxyReputationOptions"
-                    [tagOptions]="tagService.tags()"
-                    [floating]="true"
-                    (clear)="clearFilters()"
-                    (apply)="applyFilters()"
-                  ></app-proxy-filter-panel>
-                </hlm-popover-content>
-              </hlm-popover>
-
-              <hlm-popover align="end" sideOffset="8"
-                [state]="columnPanelOpen() ? 'open' : 'closed'"
-                (stateChanged)="onColumnPopoverStateChanged($event)">
-                <button
-                  type="button"
-                  class="tool-button"
-                  [class.is-active]="columnPanelOpen()"
-                  [disabled]="isSavingColumnPreferences()"
-                  hlmPopoverTrigger
-                >
-                  <i class="icon icon-table" aria-hidden="true"></i>
-                  Columns
-                </button>
-                <hlm-popover-content *hlmPopoverPortal
-                  class="w-[min(760px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
-                  aria-label="Columns">
-                  <app-column-picker-panel
-                    [columns]="proxyTableColumnDefinitions"
-                    [selectedColumnIds]="displayedColumns()"
-                    [defaultColumnIds]="defaultProxyTableColumns"
-                    [saving]="isSavingColumnPreferences()"
-                    (cancel)="closeColumnPanel()"
-                    (save)="saveColumnPreferences($event)"
-                  ></app-column-picker-panel>
-                </hlm-popover-content>
-              </hlm-popover>
-            </div>
-          </div>
-
-        </div>
+          <hlm-popover align="end" sideOffset="8"
+            [state]="columnPanelOpen() ? 'open' : 'closed'"
+            (stateChanged)="onColumnPopoverStateChanged($event)">
+            <button
+              type="button"
+              class="tool-button"
+              [class.is-active]="columnPanelOpen()"
+              [disabled]="isSavingColumnPreferences()"
+              hlmPopoverTrigger
+            >
+              <i class="icon icon-table" aria-hidden="true"></i>
+              Columns
+            </button>
+            <hlm-popover-content *hlmPopoverPortal
+              class="w-[min(760px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
+              aria-label="Columns">
+              <app-column-picker-panel
+                [columns]="proxyTableColumnDefinitions"
+                [selectedColumnIds]="displayedColumns()"
+                [defaultColumnIds]="defaultProxyTableColumns"
+                [saving]="isSavingColumnPreferences()"
+                (cancel)="closeColumnPanel()"
+                (save)="saveColumnPreferences($event)"
+              ></app-column-picker-panel>
+            </hlm-popover-content>
+          </hlm-popover>
+        </ng-container>
 
         <app-proxy-table
+          inventory-table
+          class="inventory-table"
           [proxies]="proxies()"
           [loading]="proxyLoading()"
           [hasLoaded]="proxyHasLoaded()"
@@ -434,15 +336,13 @@
           [availableTags]="tagService.tags()"
           [tagEditingEnabled]="workspaces.canOperate()"
           [savingTagProxyIds]="savingTagProxyIds()"
-          [emptyReputationLabel]="'N/A'"
-          [missingReputationScoreLabel]="'N/A'"
           (lazyLoad)="onProxyLazyLoad($event)"
           (sort)="onProxySort($event)"
           (viewProxy)="onViewProxy($event)"
           (tagSelectionChange)="onTagSelectionChange($event)"
           (manageTags)="sourceTagManager.open()"
         ></app-proxy-table>
-      </section>
+      </app-inventory-page-shell>
     </div>
   </section>
 </main>
