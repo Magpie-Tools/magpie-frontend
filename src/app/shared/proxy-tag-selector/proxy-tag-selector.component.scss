@@ -82,13 +82,16 @@
   font-size: 0.7rem;
 }
 
-::ng-deep .proxy-tag-popover hlm-popover-content {
+.proxy-tag-popover {
+  width: min(20rem, calc(100vw - 2rem));
   padding: 0;
 }
 
 .proxy-tag-menu {
-  width: min(20rem, calc(100vw - 2rem));
+  min-width: 0;
+  width: 100%;
   color: #e5e7eb;
+  white-space: normal;
 }
 
 .proxy-tag-menu__header,
@@ -102,6 +105,10 @@
 
 .proxy-tag-menu__header {
   border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+
+  > div {
+    min-width: 0;
+  }
 }
 
 .proxy-tag-menu__title {
@@ -138,6 +145,11 @@
   input {
     accent-color: var(--theme-primary-500, #22c55e);
   }
+
+  > span:last-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
 }
 
 .proxy-tag-menu__color {
@@ -158,6 +170,7 @@
 }
 
 .proxy-tag-menu__footer {
+  flex-wrap: wrap;
   border-top: 1px solid rgba(148, 163, 184, 0.14);
 }
 
