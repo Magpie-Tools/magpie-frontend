@@ -33,33 +33,19 @@
           [hlmTooltip]="getPluginIncompleteReason(plugin.id) ?? ''"
         >
           <div class="plugin-card__topline">
-            <span class="plugin-logo-shell">
-              <img
-                [src]="plugin.logo"
-                [alt]="plugin.provider + ' logo'"
-                class="plugin-logo"
-              />
-            </span>
-
-            <div class="plugin-state">
-              <span
-                class="state-dot"
-                [class.is-live]="isPluginEnabled(plugin.id)"
-                aria-hidden="true"
-              ></span>
-              @if (isPluginTogglePending(plugin.id)) {
-                Updating
-              } @else if (isPluginEnabled(plugin.id)) {
-                Enabled
-              } @else {
-                Disabled
-              }
+            <div class="plugin-card__identity">
+              <span class="plugin-logo-shell">
+                <img
+                  [src]="plugin.logo"
+                  [alt]="plugin.name + ' logo'"
+                  class="plugin-logo"
+                />
+              </span>
+              <h2 class="plugin-card__title">{{ plugin.name }}</h2>
             </div>
           </div>
 
           <div class="plugin-card__copy">
-            <span class="provider-label">{{ plugin.provider }}</span>
-            <h2>{{ plugin.name }}</h2>
             <p>{{ plugin.description }}</p>
           </div>
 

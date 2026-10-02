@@ -32,7 +32,6 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
     {
       id: 'geolite',
       name: 'GeoLite',
-      provider: 'MaxMind',
       logo: 'https://media.licdn.com/dms/image/v2/C560BAQHAOUxYoh2u1Q/company-logo_200_200/company-logo_200_200/0/1671072899861/maxmind_logo?e=2147483647&v=beta&t=WWP-k6AqK1YM0ePQFUi28aEUGjpcuLPSsdKdCSS1940',
       route: '/plugins/geolite',
       icon: 'icon icon-map-pin',
@@ -42,7 +41,6 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
     {
       id: 'abuseipdb',
       name: 'AbuseIPDB',
-      provider: 'AbuseIPDB',
       logo: 'https://www.abuseipdb.com/favicon.ico',
       route: '/plugins/abuseipdb',
       icon: 'icon icon-shield',
