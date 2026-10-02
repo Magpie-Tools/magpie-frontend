@@ -1,11 +1,11 @@
 <div class="column-picker">
   <div class="column-picker__header">
-    <div class="column-picker__header-copy">
-      <h3>Table Columns</h3>
-      <p>Choose what is shown. Drag visible items to reorder.</p>
+    <div class="column-picker__header-copy" hlmPopoverHeader>
+      <h3 hlmPopoverTitle>Table columns</h3>
+      <p hlmPopoverDescription>Choose which columns appear and arrange their order.</p>
     </div>
     <button
-      class="ui-button-text ui-button-sm"
+      size="sm"
       (click)="resetColumns()"
       hlmBtn
       type="button"
@@ -16,30 +16,35 @@
   </div>
 
   <div class="column-picker__toolbar">
-    <input
-      type="search"
-      class="column-picker__search"
-      placeholder="Find columns"
-      [ngModel]="search()"
-      (ngModelChange)="onSearchChange($event)"
-      aria-label="Find columns"
-    />
+    <div class="column-picker__search-shell">
+      <i class="icon icon-search" aria-hidden="true"></i>
+      <input
+        hlmInput
+        type="search"
+        class="column-picker__search"
+        placeholder="Find columns"
+        [ngModel]="search()"
+        (ngModelChange)="onSearchChange($event)"
+        aria-label="Find columns"
+      />
+    </div>
     @if (columnSearchActive()) {
       <span class="column-picker__search-hint"
-        >Reordering is disabled while filtering.</span
+        >Clear the search to drag columns.</span
       >
     }
   </div>
 
-  <div class="column-picker__content">
-    <div class="column-picker__section">
+  <div class="column-picker__content" cdkDropListGroup>
+    <section class="column-picker__section" aria-label="Visible columns">
       <div class="column-picker__section-header">
         <div class="column-picker__title">
-          Visible ({{ visibleColumnCount() }})
+          <h4>Visible</h4>
+          <span hlmBadge variant="secondary">{{ visibleColumnCount() }}</span>
         </div>
         <button
           [disabled]="visibleColumnCount() <= 1"
-          class="ui-button-text ui-button-sm"
+          size="sm"
           (click)="hideAllColumns()"
           hlmBtn
           type="button"
@@ -52,7 +57,7 @@
         class="column-picker__list"
         cdkDropList
         [cdkDropListData]="visibleColumnsFiltered()"
-        (cdkDropListDropped)="onColumnDrop($event)"
+        (cdkDropListDropped)="onColumnDrop($event, 'visible')"
       >
         @if (visibleColumnsFiltered().length === 0) {
           <div class="column-picker__empty">No matching visible columns.</div>
@@ -61,19 +66,23 @@
             <div
               class="column-picker__row"
               cdkDrag
+              [cdkDragData]="column"
               [cdkDragDisabled]="columnSearchActive()"
               (cdkDragStarted)="onDragStart()"
               (cdkDragEnded)="onDragEnd()"
             >
               <div class="column-picker__row-main">
-                <span class="column-picker__drag-handle" cdkDragHandle>
+                <span class="column-picker__drag-handle" cdkDragHandle
+                  [title]="column.required ? 'Drag to reorder' : 'Drag to reorder or hide'">
                   <i class="icon icon-menu" aria-hidden="true"></i>
                 </span>
                 <div class="column-picker__label-wrap">
-                  <span class="column-picker__label">{{ column.label }}</span>
-                  @if (column.required) {
-                    <span class="column-picker__required">Pinned</span>
-                  }
+                  <div class="column-picker__label-line">
+                    <span class="column-picker__label">{{ column.label }}</span>
+                    @if (column.required) {
+                      <span hlmBadge variant="outline" class="column-picker__required">Required</span>
+                    }
+                  </div>
                   @if (column.example) {
                     <span class="column-picker__example">{{
                       column.example
@@ -84,7 +93,9 @@
               <div class="column-picker__controls">
                 <button
                   [disabled]="visibleColumnCount() <= 1 || column.required"
-                  class="ui-button-text ui-button-sm"
+                  [attr.aria-label]="'Hide ' + column.label"
+                  [attr.title]="column.required ? 'This column must stay visible' : 'Hide ' + column.label"
+                  size="icon-sm"
                   (click)="hideColumn(column.id)"
                   hlmBtn
                   type="button"
@@ -97,16 +108,17 @@
           }
         }
       </div>
-    </div>
+    </section>
 
-    <div class="column-picker__section">
+    <section class="column-picker__section" aria-label="Hidden columns">
       <div class="column-picker__section-header">
         <div class="column-picker__title">
-          Hidden ({{ hiddenColumnCount() }})
+          <h4>Hidden</h4>
+          <span hlmBadge variant="secondary">{{ hiddenColumnCount() }}</span>
         </div>
         <button
           [disabled]="hiddenColumnCount() === 0"
-          class="ui-button-text ui-button-sm"
+          size="sm"
           (click)="showAllColumns()"
           hlmBtn
           type="button"
@@ -115,28 +127,49 @@
           <i class="icon icon-eye" aria-hidden="true"></i>Show all
         </button>
       </div>
-      <div class="column-picker__list">
+      <div
+        class="column-picker__list"
+        cdkDropList
+        [cdkDropListData]="hiddenColumnsFiltered()"
+        [cdkDropListSortingDisabled]="true"
+        [cdkDropListEnterPredicate]="canDropInHidden"
+        (cdkDropListDropped)="onColumnDrop($event, 'hidden')"
+      >
         @if (hiddenColumnsFiltered().length === 0) {
           <div class="column-picker__empty">
             {{
               hiddenColumnCount() === 0
-                ? "No hidden columns."
+                ? "Drop columns here to hide them."
                 : "No matching hidden columns."
             }}
           </div>
         } @else {
           @for (column of hiddenColumnsFiltered(); track column.id) {
-            <div class="column-picker__row">
-              <div class="column-picker__label-wrap">
-                <span class="column-picker__label">{{ column.label }}</span>
-                @if (column.example) {
-                  <span class="column-picker__example">{{
-                    column.example
-                  }}</span>
-                }
+            <div
+              class="column-picker__row"
+              cdkDrag
+              [cdkDragData]="column"
+              [cdkDragDisabled]="columnSearchActive()"
+              (cdkDragStarted)="onDragStart()"
+              (cdkDragEnded)="onDragEnd()"
+            >
+              <div class="column-picker__row-main">
+                <span class="column-picker__drag-handle" cdkDragHandle title="Drag to show">
+                  <i class="icon icon-menu" aria-hidden="true"></i>
+                </span>
+                <div class="column-picker__label-wrap">
+                  <span class="column-picker__label">{{ column.label }}</span>
+                  @if (column.example) {
+                    <span class="column-picker__example">{{
+                      column.example
+                    }}</span>
+                  }
+                </div>
               </div>
               <button
-                class="ui-button-text ui-button-sm"
+                size="icon-sm"
+                [attr.aria-label]="'Show ' + column.label"
+                [attr.title]="'Show ' + column.label"
                 (click)="showColumn(column.id)"
                 hlmBtn
                 type="button"
@@ -148,32 +181,36 @@
           }
         }
       </div>
-    </div>
+    </section>
   </div>
 
   <div class="column-picker__footer">
-    <button
-      class="ui-button-text"
-      (click)="cancel.emit()"
-      hlmBtn
-      type="button"
-      variant="ghost"
-    >
-      Cancel
-    </button>
-    <button
-      (click)="saveChanges()"
-      hlmBtn
-      type="button"
-      [disabled]="saving"
-      variant="default"
-    >
-      @if (saving) {
-        <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
-      } @else {
-        <i class="icon icon-check" aria-hidden="true"></i>
-      }
-      Save
-    </button>
+    <span class="column-picker__footer-hint">Drag to reorder or move between lists.</span>
+    <div class="column-picker__footer-actions">
+      <button
+        size="sm"
+        (click)="cancel.emit()"
+        hlmBtn
+        type="button"
+        variant="ghost"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="saveChanges()"
+        hlmBtn
+        type="button"
+        [disabled]="saving"
+        size="sm"
+        variant="default"
+      >
+        @if (saving) {
+          <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
+        } @else {
+          <i class="icon icon-check" aria-hidden="true"></i>
+        }
+        {{ saving ? "Saving…" : "Save changes" }}
+      </button>
+    </div>
   </div>
 </div>

@@ -1,5 +1,8 @@
 import {HlmButton} from '@spartan-ng/helm/button';
-import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
+import {HlmBadge} from '@spartan-ng/helm/badge';
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmPopoverDescription, HlmPopoverHeader, HlmPopoverTitle} from '@spartan-ng/helm/popover';
+import {CdkDrag, CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 
@@ -13,7 +16,7 @@ export interface ColumnPickerItem {
 @Component({
   selector: 'app-column-picker-panel',
   standalone: true,
-  imports: [HlmButton, FormsModule, DragDropModule],
+  imports: [HlmButton, HlmBadge, HlmInput, HlmPopoverHeader, HlmPopoverTitle, HlmPopoverDescription, FormsModule, DragDropModule],
   templateUrl: './column-picker-panel.component.html',
   styleUrl: './column-picker-panel.component.scss'
 })
@@ -61,11 +64,27 @@ export class ColumnPickerPanelComponent implements OnChanges {
     this.editorColumns.set(this.ensureVisibleColumn(normalizedDefaults));
   }
 
-  onColumnDrop(event: CdkDragDrop<ColumnPickerItem[]>): void {
-    if (this.columnSearchActive()) {
+  readonly canDropInHidden = (drag: CdkDrag<ColumnPickerItem>): boolean =>
+    this.canHideColumn(drag.data.id);
+
+  onColumnDrop(event: CdkDragDrop<ColumnPickerItem[], ColumnPickerItem[], ColumnPickerItem>, target: 'visible' | 'hidden'): void {
+    if (this.columnSearchActive() || !event.isPointerOverContainer) {
       return;
     }
-    if (event.previousIndex === event.currentIndex) {
+
+    if (event.previousContainer !== event.container) {
+      const id = event.item.data.id;
+      if (target === 'hidden') {
+        this.hideColumn(id);
+      } else if (this.columnById.has(id) && !this.editorColumns().includes(id)) {
+        const columns = [...this.editorColumns()];
+        columns.splice(event.currentIndex, 0, id);
+        this.editorColumns.set(columns);
+      }
+      return;
+    }
+
+    if (target === 'hidden' || event.previousIndex === event.currentIndex) {
       return;
     }
 
@@ -75,14 +94,10 @@ export class ColumnPickerPanelComponent implements OnChanges {
   }
 
   hideColumn(id: string): void {
-    if (this.columnById.get(id)?.required) {
+    if (!this.canHideColumn(id)) {
       return;
     }
-    const current = this.editorColumns();
-    if (current.length <= 1) {
-      return;
-    }
-    this.editorColumns.set(current.filter(columnId => columnId !== id));
+    this.editorColumns.update(current => current.filter(columnId => columnId !== id));
   }
 
   showColumn(id: string): void {
@@ -141,6 +156,12 @@ export class ColumnPickerPanelComponent implements OnChanges {
 
   hiddenColumnCount(): number {
     return this.columns.length - this.editorColumns().length;
+  }
+
+  private canHideColumn(id: string): boolean {
+    return this.editorColumns().includes(id)
+      && !this.columnById.get(id)?.required
+      && this.visibleColumnCount() > 1;
   }
 
   private visibleColumns(): ColumnPickerItem[] {
