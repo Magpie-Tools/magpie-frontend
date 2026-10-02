@@ -28,27 +28,11 @@
 
     @if (workspaces.canOperate()) {
       <form
-        class="composer-card"
+        class="composer-form"
         [formGroup]="createForm"
         (ngSubmit)="createRotator()"
-        aria-labelledby="composer-title"
+        aria-label="Create rotator"
       >
-        <div class="section-heading">
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i class="icon icon-signpost" aria-hidden="true"></i
-            ></span>
-            <div class="card-heading__copy">
-              <h2 id="composer-title">Compose a listener route</h2>
-              <p>Choose where clients connect and which proxies can answer.</p>
-            </div>
-          </div>
-          <span class="availability-pill">
-            <span aria-hidden="true"></span>
-            {{ availablePortCount() }} ports available
-          </span>
-        </div>
-
         @if (noProtocolsAvailable()) {
           <div class="form-alert" role="alert">
             <i class="icon icon-circle-alert" aria-hidden="true"></i>
@@ -464,11 +448,7 @@
             ><i class="icon icon-network" aria-hidden="true"></i
           ></span>
           <div class="card-heading__copy">
-            <h2 id="fleet-title">Managed endpoints</h2>
-            <p>
-              Inspect listener routes, request an immediate rotation, or remove
-              an endpoint.
-            </p>
+            <h2 id="fleet-title">Your rotating proxies</h2>
           </div>
         </div>
         <div class="fleet-actions">
@@ -685,17 +665,19 @@
             ) + " listener"
           : "Rotator"
       }}</span>
-      <strong>{{ selectedRotator()?.name || "Connection details" }}</strong>
-      @if (selectedRotator()) {
-        <small
-          >{{
-            selectedRotator()?.instance_name ||
-              selectedRotator()?.instance_id ||
-              "Unknown instance"
-          }}
-          · {{ selectedRotator()?.instance_region || "Unknown region" }}</small
-        >
-      }
+      <div class="rotator-dialog__title-row">
+        <strong>{{ selectedRotator()?.name || "Connection details" }}</strong>
+        @if (selectedRotator()) {
+          <small
+            >{{
+              selectedRotator()?.instance_name ||
+                selectedRotator()?.instance_id ||
+                "Unknown instance"
+            }}
+            · {{ selectedRotator()?.instance_region || "Unknown region" }}</small
+          >
+        }
+      </div>
     </div>
   </ng-template>
 
@@ -707,8 +689,7 @@
             ><i class="icon icon-link" aria-hidden="true"></i
           ></span>
           <div>
-            <strong>Connect to this listener</strong
-            ><span>Click either value to copy it.</span>
+            <strong>Connect to this listener</strong>
           </div>
         </div>
 

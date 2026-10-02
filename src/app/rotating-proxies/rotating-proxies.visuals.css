@@ -158,16 +158,27 @@
   text-transform: uppercase;
 }
 
+.rotator-dialog__title-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 0.75rem;
+  row-gap: 0.15rem;
+}
+
 .rotator-dialog__header strong {
   color: rgba(255, 255, 255, 0.95);
   font-size: 1.04rem;
   font-weight: 580;
   letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
 }
 
 .rotator-dialog__header small {
   color: rgba(255, 255, 255, 0.4);
   font-size: 0.62rem;
+  overflow-wrap: anywhere;
 }
 
 .details-dialog {
@@ -300,6 +311,10 @@
   padding: 0.9rem;
 }
 
+.detail-card__heading {
+  margin-bottom: 0.25rem;
+}
+
 .detail-card dl {
   margin: 0.75rem 0 0;
 }
@@ -310,6 +325,9 @@
   align-items: start;
   gap: 0.5rem;
   padding: 0.48rem 0;
+}
+
+.detail-card dl > div + div {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
 

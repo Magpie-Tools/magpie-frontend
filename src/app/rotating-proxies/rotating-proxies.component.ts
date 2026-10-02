@@ -96,10 +96,6 @@ export class RotatingProxiesComponent implements OnInit, AfterViewInit, OnDestro
   readonly totalMatchingProxies = computed(() =>
     this.rotatingProxies().reduce((total, proxy) => total + Math.max(0, proxy.alive_proxy_count ?? 0), 0)
   );
-  readonly availablePortCount = computed(() =>
-    this.instanceOptions().reduce((total, instance) => total + Math.max(0, instance.freePorts), 0)
-  );
-
   private readonly loopbackHost = '127.0.0.1';
   private readonly defaultRotatorHost = this.resolveDefaultHost();
   rotatorHost = signal(this.loopbackHost);
@@ -151,7 +147,7 @@ export class RotatingProxiesComponent implements OnInit, AfterViewInit, OnDestro
 
     this.shellAnimationContext = gsap.context(() => {
       gsap.fromTo(
-        '.rotating-context, .composer-card',
+        '.rotating-context, .composer-form',
         {opacity: 0, y: 24, scale: 0.99},
         {opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.07, ease: 'power3.out', clearProps: 'transform'},
       );
