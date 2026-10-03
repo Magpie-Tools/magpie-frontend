@@ -166,46 +166,6 @@ app-admin-settings-shell {
     align-self: center;
   }
 
-  hlm-tabs {
-    background: transparent;
-  }
-
-  hlm-tabs-list {
-    display: inline-flex;
-    width: fit-content;
-    padding: 0.28rem;
-    border: 1px solid rgba(255, 255, 255, 0.11);
-    border-radius: 0.9rem;
-    background: rgba(8, 8, 10, 0.62);
-  }
-
-  [hlmTabsTrigger] {
-    display: inline-flex;
-    gap: 0.45rem;
-    padding: 0.62rem 0.9rem;
-    border: 0;
-    border-radius: 0.68rem;
-    color: rgba(255, 255, 255, 0.48);
-    font-size: 0.7rem;
-    font-weight: 550;
-    transition: color 0.2s ease, background-color 0.2s ease;
-
-    &[data-state="active"] {
-      background: rgba(255, 255, 255, 0.085);
-      color: rgba(255, 255, 255, 0.94);
-    }
-
-    &:not([data-state="active"]):hover {
-      background: rgba(255, 255, 255, 0.04);
-      color: rgba(255, 255, 255, 0.72);
-    }
-  }
-
-  [hlmTabsContent] {
-    padding: 0;
-    background: transparent;
-  }
-
   [hlmInput],
   [data-slot="select-trigger"],
   input[type="number"] {

@@ -56,30 +56,27 @@
           @if (workspaces.canAdminister()) {
             <button type="button" class="button button--primary"
               [attr.aria-expanded]="inviteExpanded() && activeSection() === 'members'"
-              [attr.aria-controls]="inviteExpanded() ? 'workspace-invite-form' : 'workspace-members'" (click)="openInvitation()">
+              [attr.aria-controls]="inviteExpanded() ? 'workspace-invite-form' : 'brn-tabs-content-workspace-members'" (click)="openInvitation()">
               <i class="icon icon-user-plus" aria-hidden="true"></i>Invite member
             </button>
           }
         </div>
       </header>
 
-      <nav class="workspace-nav" aria-label="Workspace sections">
-        @for (section of sections; track section.id) {
-          <button type="button" [id]="'workspace-nav-' + section.id"
-            [class.is-active]="activeSection() === section.id"
-            [attr.aria-current]="activeSection() === section.id ? 'page' : null"
-            [attr.aria-controls]="'workspace-' + section.id"
-            (click)="activeSection.set(section.id)">
-            {{ section.label }}
-            @if (section.id === 'members' && !loadingMembers() && !membersError()) {
-              <span class="nav-count">{{ members().length }}</span>
-            }
-          </button>
-        }
-      </nav>
-
-      <section id="workspace-overview" class="workspace-grid workspace-panel"
-        aria-labelledby="workspace-nav-overview" [hidden]="activeSection() !== 'overview'">
+      <hlm-tabs class="settings-section-tabs workspace-tabs" [tab]="'workspace-' + activeSection()"
+        (tabActivated)="selectSection($event)">
+        <hlm-tabs-list aria-label="Workspace sections">
+          @for (section of sections; track section.id) {
+            <button type="button" [hlmTabsTrigger]="'workspace-' + section.id">
+              <i [class]="'icon ' + section.icon" aria-hidden="true"></i>{{ section.label }}
+              @if (section.id === 'members' && !loadingMembers() && !membersError()) {
+                <span class="tab-member-count">{{ members().length }}</span>
+              }
+            </button>
+          }
+        </hlm-tabs-list>
+        <div class="workspace-tab-panels">
+      <section hlmTabsContent="workspace-overview" class="workspace-grid workspace-panel">
         <section
           class="workspace-card capacity-card"
           aria-labelledby="capacity-title"
@@ -286,8 +283,7 @@
           </button>
         </section>
       </section>
-      <section id="workspace-members" class="workspace-grid workspace-panel"
-        aria-labelledby="workspace-nav-members" [hidden]="activeSection() !== 'members'">
+      <section hlmTabsContent="workspace-members" class="workspace-grid workspace-panel">
         <section
           class="workspace-card access-card"
           aria-labelledby="access-title"
@@ -757,8 +753,7 @@
           }
         </section>
       </section>
-      <section id="workspace-settings" class="workspace-grid workspace-panel"
-        aria-labelledby="workspace-nav-settings" [hidden]="activeSection() !== 'settings'">
+      <section hlmTabsContent="workspace-settings" class="workspace-grid workspace-panel">
         <section
           class="workspace-card identity-card"
           aria-labelledby="details-title"
@@ -891,6 +886,8 @@
         </section>
 
       </section>
+        </div>
+      </hlm-tabs>
     </div>
   } @else {
     <section class="page-error">

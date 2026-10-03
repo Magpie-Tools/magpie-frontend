@@ -1,4 +1,5 @@
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
+import {HlmTabs, HlmTabsList, HlmTabsTrigger, HlmTabsContent} from '@spartan-ng/helm/tabs';
 import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {DialogComponent} from '../shared/ui/dialog.component';
 import {CommonModule, DatePipe, DecimalPipe, TitleCasePipe} from '@angular/common';
@@ -31,7 +32,7 @@ interface OwnershipChange {
 @Component({
   selector: 'app-workspace',
   standalone: true,
-  imports: [HlmSkeleton, HlmTooltip, DialogComponent,
+  imports: [HlmSkeleton, HlmTooltip, HlmTabs, HlmTabsList, HlmTabsTrigger, HlmTabsContent, DialogComponent,
     RevealGroupDirective,
     CommonModule,
     FormsModule,
@@ -59,10 +60,10 @@ export class WorkspaceComponent implements OnInit {
   readonly savingInvitationIds = signal<Record<number, boolean>>({});
   readonly activeSection = signal<WorkspaceSection>('overview');
   readonly inviteExpanded = signal(false);
-  readonly sections: readonly {id: WorkspaceSection; label: string}[] = [
-    {id: 'overview', label: 'Overview'},
-    {id: 'members', label: 'Members'},
-    {id: 'settings', label: 'Settings'},
+  readonly sections: readonly {id: WorkspaceSection; label: string; icon: string}[] = [
+    {id: 'overview', label: 'Overview', icon: 'icon-layout-grid'},
+    {id: 'members', label: 'Members', icon: 'icon-users'},
+    {id: 'settings', label: 'Settings', icon: 'icon-settings'},
   ];
   readonly createExpanded = signal(false);
   readonly memberSearch = signal('');
@@ -357,6 +358,13 @@ export class WorkspaceComponent implements OnInit {
       },
       error: error => this.invitationsError.set(this.errorMessage(error)),
     });
+  }
+
+  selectSection(tab: string): void {
+    const section = this.sections.find(candidate => 'workspace-' + candidate.id === tab);
+    if (section) {
+      this.activeSection.set(section.id);
+    }
   }
 
   openInvitation(): void {

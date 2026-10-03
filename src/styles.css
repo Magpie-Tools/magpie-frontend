@@ -8,6 +8,7 @@
 @import "@fontsource-variable/outfit";
 @import "./app/checker/settings/checker-settings.visuals.css";
 @import "./app/workspace/workspace.visuals.css";
+@import "./app/shared/settings-section-tabs.css";
 @import "./app/notifications/notifications.visuals.css";
 @import "./app/rotating-proxies/rotating-proxies.visuals.css";
 @import "./app/account/account.visuals.css";

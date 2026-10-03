@@ -1,0 +1,47 @@
+.settings-section-tabs {
+  background: transparent;
+  font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.settings-section-tabs [data-slot="tabs-list"] {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.28rem;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 0.9rem;
+  background: rgba(8, 8, 10, 0.62);
+}
+
+.settings-section-tabs [data-slot="tabs-trigger"] {
+  display: inline-flex;
+  gap: 0.45rem;
+  padding: 0.62rem 0.9rem;
+  border: 0;
+  border-radius: 0.68rem;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.7rem;
+  font-weight: 550;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.settings-section-tabs [data-slot="tabs-trigger"][data-state="active"] {
+  background: rgba(255, 255, 255, 0.085);
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.settings-section-tabs [data-slot="tabs-trigger"]:not([data-state="active"]):hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.settings-section-tabs [data-slot="tabs-content"] {
+  padding: 0;
+  background: transparent;
+}
+
+@media (max-width: 360px) {
+  .settings-section-tabs [data-slot="tabs-trigger"] {
+    padding-inline: 0.5rem;
+  }
+}

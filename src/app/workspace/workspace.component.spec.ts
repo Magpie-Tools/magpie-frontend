@@ -208,10 +208,30 @@ describe('WorkspaceComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.plan-accordions details[open]').length).toBe(0);
   });
 
+  it('keeps the workspace tab strip at the compact global-tab height', () => {
+    const list = fixture.nativeElement.querySelector('[role="tablist"]') as HTMLElement;
+    const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    expect(list.getBoundingClientRect().height).toBeGreaterThan(0);
+    expect(list.getBoundingClientRect().height).toBeLessThanOrEqual(2.25 * rootFontSize + 0.5);
+  });
+
+  it('supports keyboard selection and links each tab to its panel', async () => {
+    const overview = fixture.nativeElement.querySelector('#brn-tabs-label-workspace-overview') as HTMLButtonElement;
+    overview.focus();
+    overview.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight', keyCode: 39, bubbles: true}));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const members = fixture.nativeElement.querySelector('#brn-tabs-label-workspace-members') as HTMLButtonElement;
+    expect(members.getAttribute('aria-selected')).toBe('true');
+    expect(members.getAttribute('aria-controls')).toBe(panel('members').id);
+    expect(panel('members').hidden).toBeFalse();
+    expect(panel('overview').hidden).toBeTrue();
+  });
+
   it('preserves unsaved member access when navigating between sections', () => {
     showMembers();
     component.setMemberRole(operator, 'viewer');
-    fixture.nativeElement.querySelector('#workspace-nav-overview').click();
+    fixture.nativeElement.querySelector('#brn-tabs-label-workspace-overview').click();
     fixture.detectChanges();
     expect(panel('members').hidden).toBeTrue();
     showMembers();
@@ -234,7 +254,7 @@ describe('WorkspaceComponent', () => {
   });
 
   it('keeps rename and creation available in Settings for administrators', () => {
-    fixture.nativeElement.querySelector('#workspace-nav-settings').click();
+    fixture.nativeElement.querySelector('#brn-tabs-label-workspace-settings').click();
     fixture.detectChanges();
     expect(panel('settings').hidden).toBeFalse();
     expect(fixture.nativeElement.querySelector('#workspace-name')).not.toBeNull();
@@ -244,11 +264,11 @@ describe('WorkspaceComponent', () => {
   });
 
   function panel(section: string): HTMLElement {
-    return fixture.nativeElement.querySelector('#workspace-' + section);
+    return fixture.nativeElement.querySelector('#brn-tabs-content-workspace-' + section);
   }
 
   function showMembers(): void {
-    fixture.nativeElement.querySelector('#workspace-nav-members').click();
+    fixture.nativeElement.querySelector('#brn-tabs-label-workspace-members').click();
     fixture.detectChanges();
   }
 
