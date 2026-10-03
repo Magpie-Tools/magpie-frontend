@@ -48,6 +48,7 @@ import {filter, finalize} from 'rxjs/operators';
 import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
+import {SourceAutoTagsComponent} from '../source-auto-tags/source-auto-tags.component';
 
 type HealthTone = 'healthy' | 'mixed' | 'unhealthy' | 'empty';
 type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
@@ -62,6 +63,7 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
     CommonModule,
     SourceScrapeStatusComponent,
     SourceFetchModeComponent,
+    SourceAutoTagsComponent,
     RouterLink,
     DatePipe,
     NgClass,
@@ -80,6 +82,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   private copyFeedbackTimeout?: ReturnType<typeof setTimeout>;
 
   savingFetchMode = signal(false);
+  savingAutoTags = signal(false);
   sourceId = signal<number | undefined>(undefined);
   detail = signal<ScrapeSourceDetail | null>(null);
   isLoading = signal(true);
@@ -526,7 +529,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
 
   setRequiresJavaScript(enabled: boolean): void {
     const sourceId = this.sourceId();
-    if (!sourceId || this.savingFetchMode() || !this.workspaces.canOperate()) return;
+    if (!sourceId || this.savingFetchMode() || this.savingAutoTags() || !this.workspaces.canOperate()) return;
     this.savingFetchMode.set(true);
     this.subscriptions.add(this.http.updateScrapeSourceSettings(sourceId, enabled ? 'browser' : 'http').subscribe({
       next: () => { this.savingFetchMode.set(false); this.loadScrapeSourceDetail(sourceId); },
@@ -534,6 +537,24 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
         this.savingFetchMode.set(false);
         this.notification.showError('Could not save source settings: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'));
       }
+    }));
+  }
+
+  automaticTagIds(): number[] {
+    return (this.detail()?.auto_tags ?? []).map(tag => tag.id);
+  }
+
+  setAutomaticTagIds(tagIds: number[]): void {
+    const sourceId = this.sourceId();
+    if (!sourceId || this.savingAutoTags() || this.savingFetchMode() || !this.workspaces.canOperate()) return;
+    this.savingAutoTags.set(true);
+    this.subscriptions.add(this.http.updateScrapeSourceAutoTags(sourceId, tagIds).pipe(
+      finalize(() => this.savingAutoTags.set(false)),
+    ).subscribe({
+      next: () => this.loadScrapeSourceDetail(sourceId),
+      error: err => this.notification.showError(
+        'Could not save automatic tags: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'),
+      ),
     }));
   }
 

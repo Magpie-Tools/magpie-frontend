@@ -10,6 +10,8 @@ import {
 } from '../../proxies/proxy-list/add-proxies/procesing-popup/procesing-popup.component';
 import {BulkActionDialogComponent} from '../../shared/bulk-action-dialog/bulk-action-dialog.component';
 import {ImportDialogContentComponent} from '../../shared/import-dialog-content/import-dialog-content.component';
+import {SourceAutoTagsComponent} from '../source-auto-tags/source-auto-tags.component';
+import {ProxyTagService} from '../../services/proxy-tag.service';
 
 @Component({
   selector: 'app-add-scrape-source',
@@ -18,6 +20,7 @@ import {ImportDialogContentComponent} from '../../shared/import-dialog-content/i
     BulkActionDialogComponent,
     ImportDialogContentComponent,
     SourceFetchModeComponent,
+    SourceAutoTagsComponent,
 ],
   templateUrl: './add-scrape-source.component.html',
 })
@@ -28,6 +31,7 @@ export class AddScrapeSourceComponent {
   @Output() scrapeSourcesAdded = new EventEmitter<void>();
 
   readonly requiresJavaScript = signal(false);
+  readonly selectedAutoTagIds = signal<number[]>([]);
   readonly file = signal<File | undefined>(undefined);
   readonly scrapeSourceTextarea = signal<string>("");
   readonly clipboardScrapeSources = signal<string>("");
@@ -56,7 +60,8 @@ export class AddScrapeSourceComponent {
   constructor(
     private service: HttpService,
     private clipboardService: ClipboardService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    readonly tagService: ProxyTagService,
   ) { }
 
   async pasteFromClipboard(): Promise<void> {
@@ -91,6 +96,9 @@ export class AddScrapeSourceComponent {
 
   openDialog(): void {
     this.dialogVisible.set(true);
+    this.tagService.load().subscribe({
+      error: err => this.notification.showError('Could not load proxy tags: ' + this.getUploadErrorMessage(err)),
+    });
   }
 
   closeDialog(): void {
@@ -164,6 +172,9 @@ export class AddScrapeSourceComponent {
 
       const formData = new FormData();
       formData.append('fetch_mode', this.requiresJavaScript() ? 'browser' : 'http');
+      for (const id of this.selectedAutoTagIds()) {
+        formData.append('auto_tag_ids', id.toString());
+      }
 
       const file = this.file();
       if (file) {
@@ -223,6 +234,7 @@ export class AddScrapeSourceComponent {
 
   private resetFormState(): void {
     this.requiresJavaScript.set(false);
+    this.selectedAutoTagIds.set([]);
     this.scrapeSourceTextarea.set("");
     this.addTextAreaSources();
     this.clearClipboardSources();

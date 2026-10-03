@@ -1,3 +1,5 @@
+import {ProxyTag} from './ProxyTag';
+
 export interface ScrapeSourceReputationBreakdown {
   good: number;
   neutral: number;
@@ -6,6 +8,7 @@ export interface ScrapeSourceReputationBreakdown {
 }
 
 export interface ScrapeSourceDetail {
+  auto_tags?: ProxyTag[];
   fetch_mode?: 'http' | 'browser';
   last_scraped_at?: string | null;
   last_scrape_status?: string;

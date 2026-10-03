@@ -87,8 +87,14 @@
               </div>
               <app-source-fetch-mode class="source-fetch-settings" inputId="source-javascript"
                 [enabled]="detail()?.fetch_mode === 'browser'"
-                [disabled]="!workspaces.canOperate()" [saving]="savingFetchMode()"
+                [disabled]="!workspaces.canOperate() || savingAutoTags()" [saving]="savingFetchMode()"
                 (enabledChange)="setRequiresJavaScript($event)" />
+              <app-source-auto-tags class="source-tag-settings"
+                [tagIds]="automaticTagIds()"
+                [disabled]="!workspaces.canOperate() || savingFetchMode()"
+                [saving]="savingAutoTags()"
+                (tagIdsChange)="setAutomaticTagIds($event)"
+                (catalogChanged)="onTagCatalogChanged()" />
             </section>
 
             <aside

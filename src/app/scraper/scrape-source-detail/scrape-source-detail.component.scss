@@ -530,6 +530,7 @@ input {
 .overview-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .insight-caption { margin-top: .3rem; color: var(--detail-muted); font-size: .65rem; }
 .source-fetch-settings { display: block; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, .08); }
+.source-tag-settings { margin-top: .75rem; }
 @container source-detail (max-width: 1040px) {
   .overview-layout { grid-template-columns: 1fr; }
 }

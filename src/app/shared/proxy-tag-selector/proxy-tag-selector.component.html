@@ -6,7 +6,7 @@
     [class.proxy-tag-selector--empty]="displayTags().length === 0"
     [disabled]="disabled || saving"
     [attr.aria-label]="
-      displayTags().length ? 'Edit proxy tags' : 'Add proxy tags'
+      purpose === 'source' ? 'Edit automatic source tags' : (displayTags().length ? 'Edit proxy tags' : 'Add proxy tags')
     "
     hlmPopoverTrigger
     (click)="open($event)"
@@ -38,9 +38,9 @@
     <div class="proxy-tag-menu" (click)="$event.stopPropagation()">
       <div class="proxy-tag-menu__header">
         <div>
-          <div class="proxy-tag-menu__title">Proxy tags</div>
+          <div class="proxy-tag-menu__title">{{ purpose === 'source' ? 'Automatic tags' : 'Proxy tags' }}</div>
           <div class="proxy-tag-menu__subtitle">
-            A proxy can use several tags.
+            {{ purpose === 'source' ? 'Add missing tags to future scraped proxies.' : 'A proxy can use several tags.' }}
           </div>
         </div>
         @if (draftTagIds.length > 0) {
@@ -58,7 +58,7 @@
         @if (availableTags.length === 0) {
           <div class="proxy-tag-menu__empty">
             <i class="icon icon-tags" aria-hidden="true"></i>
-            <span>Create a tag to classify this proxy.</span>
+            <span>{{ purpose === 'source' ? 'Create a tag to use for future scrapes.' : 'Create a tag to classify this proxy.' }}</span>
           </div>
         } @else {
           @for (tag of availableTags; track tag.id) {

@@ -330,6 +330,10 @@ export class HttpService {
     return this.http.patch<{fetch_mode: 'http' | 'browser'}>(`${this.apiUrl}/scrapingSources/${sourceId}`, {fetch_mode: fetchMode});
   }
 
+  updateScrapeSourceAutoTags(sourceId: number, tagIds: readonly number[]) {
+    return this.http.patch<{auto_tag_ids: number[]}>(`${this.apiUrl}/scrapingSources/${sourceId}`, {auto_tag_ids: tagIds});
+  }
+
   uploadScrapeSources(formData: FormData) {
     return this.http.post<{sourceCount: number}>(this.apiUrl + '/scrapingSources', formData);
   }

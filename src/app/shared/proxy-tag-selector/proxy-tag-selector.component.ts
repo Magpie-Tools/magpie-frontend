@@ -20,6 +20,7 @@ export class ProxyTagSelectorComponent {
   @Input() saving = false;
   @Input() compact = true;
   @Input() maxVisibleTags = 2;
+  @Input() purpose: 'proxy' | 'source' = 'proxy';
 
   @Output() selectionChange = new EventEmitter<number[]>();
   @Output() manageTags = new EventEmitter<void>();

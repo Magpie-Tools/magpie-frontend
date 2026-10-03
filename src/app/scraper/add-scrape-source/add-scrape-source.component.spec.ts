@@ -13,7 +13,7 @@ describe('AddScrapeSourceComponent', () => {
     upload = jasmine.createSpy('uploadScrapeSources').and.returnValue(of({sourceCount: 1}));
     await TestBed.configureTestingModule({
       imports: [AddScrapeSourceComponent],
-      providers: [ {provide: HttpService, useValue: {uploadScrapeSources: upload}}]
+      providers: [ {provide: HttpService, useValue: {uploadScrapeSources: upload, getProxyTags: () => of([])}}]
     })
     .compileComponents();
 
@@ -34,5 +34,20 @@ describe('AddScrapeSourceComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('submits automatic tags for the source import and clears the selection after success', () => {
+    component.scrapeSourceTextarea.set('https://example.com/one\nhttps://example.com/two');
+    component.selectedAutoTagIds.set([3, 7]);
+    component.submitScrapeSources();
+    const form = upload.calls.mostRecent().args[0] as FormData;
+    expect(form.getAll('auto_tag_ids')).toEqual(['3', '7']);
+    expect(component.selectedAutoTagIds()).toEqual([]);
+  });
+
+  it('resets automatic tags when the import dialog is cancelled', () => {
+    component.selectedAutoTagIds.set([3]);
+    component.closeDialog();
+    expect(component.selectedAutoTagIds()).toEqual([]);
   });
 });

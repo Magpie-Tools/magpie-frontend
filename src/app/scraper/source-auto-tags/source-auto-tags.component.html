@@ -1,0 +1,23 @@
+<section class="source-auto-tags" aria-label="Automatic source tags" [attr.aria-busy]="saving">
+  <div class="source-auto-tags__copy">
+    <span class="source-auto-tags__icon"><i class="icon icon-tags" aria-hidden="true"></i></span>
+    <span>
+      <strong>Automatic tags</strong>
+      <small>Future scrapes add these tags. Existing proxy tags stay.</small>
+    </span>
+  </div>
+  <div class="source-auto-tags__control">
+    <app-proxy-tag-selector
+      purpose="source"
+      [availableTags]="tagService.tags()"
+      [selectedTags]="selectedTags()"
+      [disabled]="disabled || tagService.loading()"
+      [saving]="saving"
+      [compact]="true"
+      [maxVisibleTags]="2"
+      (selectionChange)="tagIdsChange.emit($event)"
+      (manageTags)="tagManager.open()"
+    />
+  </div>
+  <app-proxy-tag-manager #tagManager [showTrigger]="false" (tagsChanged)="onCatalogChanged()" />
+</section>

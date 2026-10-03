@@ -41,6 +41,12 @@
       [enabled]="requiresJavaScript()"
       (enabledChange)="requiresJavaScript.set($event)"
     />
+    <app-source-auto-tags
+      import-prefix
+      [forImport]="true"
+      [tagIds]="selectedAutoTagIds()"
+      (tagIdsChange)="selectedAutoTagIds.set($event)"
+    />
     <ng-container import-summary>
       <div class="import-summary__visual">
         <span><i class="icon icon-globe" aria-hidden="true"></i></span>

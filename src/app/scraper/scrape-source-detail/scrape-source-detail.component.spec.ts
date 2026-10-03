@@ -20,6 +20,7 @@ describe('ScrapeSourceDetailComponent', () => {
     getProxyTags: jasmine.Spy;
     replaceProxyTags: jasmine.Spy;
     updateScrapeSourceSettings: jasmine.Spy;
+    updateScrapeSourceAutoTags: jasmine.Spy;
   };
 
   beforeEach(async () => {
@@ -45,6 +46,7 @@ describe('ScrapeSourceDetailComponent', () => {
 
     httpServiceStub = {
       updateScrapeSourceSettings: jasmine.createSpy('updateScrapeSourceSettings').and.returnValue(of({fetch_mode: 'browser'})),
+      updateScrapeSourceAutoTags: jasmine.createSpy('updateScrapeSourceAutoTags').and.returnValue(of({auto_tag_ids: [3]})),
       getScrapeSourceDetail: jasmine.createSpy('getScrapeSourceDetail').and.returnValue(of(detail)),
       getScrapeSourceProxyPage: jasmine.createSpy('getScrapeSourceProxyPage').and.returnValue(of({ proxies: [], total: 0 })),
       getProxyFilterOptions: jasmine.createSpy('getProxyFilterOptions').and.returnValue(of({countries: [], types: [], anonymityLevels: [], tags: []})),
@@ -96,6 +98,30 @@ describe('ScrapeSourceDetailComponent', () => {
     spyOn(TestBed.inject(WorkspaceService), 'canOperate').and.returnValue(false);
     component.setRequiresJavaScript(true);
     expect(httpServiceStub.updateScrapeSourceSettings).not.toHaveBeenCalled();
+  });
+
+  it('saves and clears automatic source tags without changing proxy assignments', () => {
+    component.setAutomaticTagIds([3, 7]);
+    expect(httpServiceStub.updateScrapeSourceAutoTags).toHaveBeenCalledWith(1, [3, 7]);
+    component.setAutomaticTagIds([]);
+    expect(httpServiceStub.updateScrapeSourceAutoTags).toHaveBeenCalledWith(1, []);
+    expect(httpServiceStub.replaceProxyTags).not.toHaveBeenCalled();
+    expect(component.savingAutoTags()).toBeFalse();
+  });
+
+  it('keeps the loaded automatic tags if saving fails', () => {
+    const tag = {id: 3, name: 'Trusted', color: '#22C55E'};
+    component.detail.update(detail => detail ? {...detail, auto_tags: [tag]} : null);
+    httpServiceStub.updateScrapeSourceAutoTags.and.returnValue(throwError(() => new Error('unavailable')));
+    component.setAutomaticTagIds([]);
+    expect(component.detail()?.auto_tags).toEqual([tag]);
+    expect(component.savingAutoTags()).toBeFalse();
+  });
+
+  it('does not allow viewers to change automatic tags', () => {
+    spyOn(TestBed.inject(WorkspaceService), 'canOperate').and.returnValue(false);
+    component.setAutomaticTagIds([3]);
+    expect(httpServiceStub.updateScrapeSourceAutoTags).not.toHaveBeenCalled();
   });
 
   it('shows scraping errors independently of proxy health', () => {
