@@ -1,3 +1,5 @@
+export type FailureAction = 'pause' | 'delete';
+
 export interface UserSettings {
   http_protocol:     boolean
   https_protocol:    boolean
@@ -9,6 +11,7 @@ export interface UserSettings {
   transport_protocol: string
   auto_remove_failing_proxies: boolean
   auto_remove_failure_threshold: number
+  failure_action: FailureAction
 
   judges: Array<{
     url: string

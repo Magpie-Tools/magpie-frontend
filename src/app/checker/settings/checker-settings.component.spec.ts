@@ -18,6 +18,7 @@ class SettingsServiceStub {
     transport_protocol: 'tcp',
     auto_remove_failing_proxies: false,
     auto_remove_failure_threshold: 3,
+    failure_action: 'pause',
     judges: [{ url: 'https://example.com', regex: 'default' }],
     scraping_sources: []
   };
@@ -57,6 +58,8 @@ describe('CheckerSettingsComponent', () => {
     expect(component.settingsForm.value.HTTPProtocol).toBeTrue();
     expect(component.settingsForm.value.AutoRemoveFailingProxies).toBeFalse();
     expect(component.settingsForm.getRawValue().AutoRemoveFailureThreshold).toBe(3);
+    expect(component.settingsForm.getRawValue().FailureAction).toBe('pause');
+    expect(component.settingsForm.get('FailureAction')?.disabled).toBeTrue();
   });
 
   it('starts with the settings grid instead of a hero', () => {
@@ -76,6 +79,50 @@ describe('CheckerSettingsComponent', () => {
     component.onSubmit();
 
     expect(service.lastPayload.AutoRemoveFailureThreshold).toBe(1);
+  });
+
+  it('saves Delete and explains its workspace deletion semantics', () => {
+    const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
+    component.settingsForm.patchValue({AutoRemoveFailingProxies: true, FailureAction: 'delete'});
+    fixture.detectChanges();
+
+    expect(component.settingsForm.get('FailureAction')?.enabled).toBeTrue();
+    const hint = (fixture.nativeElement as HTMLElement).querySelector('.failure-action-field')?.textContent;
+    expect(hint).toContain('permanently removes');
+    expect(hint).toContain('Later scraping or import can add it again');
+    expect(hint).toContain('already-paused proxies untouched');
+
+    component.onSubmit();
+
+    expect(service.lastPayload.FailureAction).toBe('delete');
+    expect(service.lastPayload.AutoRemoveFailingProxies).toBeTrue();
+  });
+
+  it('retains the selected action while automatic handling is disabled', () => {
+    const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
+    component.settingsForm.patchValue({AutoRemoveFailingProxies: true, FailureAction: 'delete'});
+    component.settingsForm.get('AutoRemoveFailingProxies')?.setValue(false);
+
+    expect(component.settingsForm.get('FailureAction')?.disabled).toBeTrue();
+    expect(component.settingsForm.get('AutoRemoveFailureThreshold')?.disabled).toBeTrue();
+
+    component.onSubmit();
+
+    expect(service.lastPayload.FailureAction).toBe('delete');
+    expect(service.lastPayload.AutoRemoveFailingProxies).toBeFalse();
+  });
+
+  it('prevents a viewer from changing the failure action or saving settings', () => {
+    const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
+    const workspaces = TestBed.inject(WorkspaceService);
+    spyOn(workspaces, 'canOperate').and.returnValue(false);
+    component.settingsForm.get('AutoRemoveFailingProxies')?.setValue(true);
+
+    expect(component.settingsForm.get('FailureAction')?.disabled).toBeTrue();
+
+    component.onSubmit();
+
+    expect(service.lastPayload).toBeUndefined();
   });
 
   it('toggles protocol choices through the card controls', () => {

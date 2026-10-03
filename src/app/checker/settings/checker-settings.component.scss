@@ -500,6 +500,10 @@
   min-height: 9rem;
 }
 
+.failure-action-field {
+  margin-top: 1rem;
+}
+
 .cleanup-threshold {
   position: relative;
   z-index: 1;
@@ -554,7 +558,7 @@
 
 .failure-path__start,
 .failure-path__failure,
-.failure-path__pause {
+.failure-path__action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -572,7 +576,7 @@
   border-color: rgba(220, 163, 174, 0.3);
 }
 
-.failure-path__pause {
+.failure-path__action {
   color: var(--theme-primary-200);
   border-color: rgba(var(--theme-primary-300-rgb), 0.35);
 }

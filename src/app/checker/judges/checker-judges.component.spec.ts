@@ -20,6 +20,7 @@ class SettingsServiceStub {
     transport_protocol: 'tcp',
     auto_remove_failing_proxies: false,
     auto_remove_failure_threshold: 3,
+    failure_action: 'pause',
     judges: [{ url: 'https://example.com', regex: 'default' }],
     scraping_sources: []
   };

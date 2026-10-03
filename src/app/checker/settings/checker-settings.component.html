@@ -206,7 +206,7 @@
               ><i class="icon icon-filter" aria-hidden="true"></i
             ></span>
             <div class="card-heading__copy">
-              <h2>Pause persistently failing proxies</h2>
+              <h2>Handle persistently failing proxies</h2>
             </div>
           </div>
 
@@ -217,18 +217,17 @@
             "
           >
             <div class="decision-row__icon">
-              <i class="icon icon-pause" aria-hidden="true"></i>
+              <i [class]="deleteOnFailure ? 'icon icon-trash' : 'icon icon-pause'" aria-hidden="true"></i>
             </div>
             <div class="decision-row__copy">
-              <strong>Automatic pause</strong>
+              <strong>Automatic failure action</strong>
               <p>
-                A successful check resets the failure streak. A paused proxy
-                stays in your managed list.
+                A successful check resets the failure streak.
               </p>
               <span>
                 {{
                   settingsForm.get("AutoRemoveFailingProxies")?.value
-                    ? "Failure tracking active"
+                    ? "Automatic action enabled"
                     : "No automatic action"
                 }}
               </span>
@@ -237,6 +236,27 @@
               label="Enabled"
               formControlName="AutoRemoveFailingProxies"
             ></app-checkbox>
+          </div>
+
+          <div class="field-group failure-action-field">
+            <label class="field-label" for="failure-action">At the failure threshold</label>
+            <app-select
+              inputId="failure-action"
+              [options]="failureActionOptions"
+              formControlName="FailureAction"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+            ></app-select>
+            <p class="field-hint">
+              @if (deleteOnFailure) {
+                Delete permanently removes the proxy and its tag assignments from
+                this workspace. Later scraping or import can add it again.
+              } @else {
+                Pause keeps the proxy in your managed list so you can resume it.
+              }
+              Changing this choice leaves already-paused proxies untouched.
+            </p>
           </div>
         </div>
 
@@ -278,12 +298,13 @@
               ><i class="icon icon-x"></i
             ></span>
             <span class="failure-path__line"></span>
-            <span class="failure-path__pause"
-              ><i class="icon icon-pause"></i
+            <span class="failure-path__action"
+              ><i [class]="deleteOnFailure ? 'icon icon-trash' : 'icon icon-pause'"></i
             ></span>
           </div>
           <p class="field-hint">
-            The proxy pauses when its streak reaches {{ cleanupThreshold }}.
+            {{ deleteOnFailure ? 'The proxy is deleted' : 'The proxy pauses' }}
+            after {{ cleanupThreshold }} consecutive failed checks.
           </p>
         </div>
       </section>

@@ -213,6 +213,11 @@ export class SettingsService {
         formData.auto_remove_failure_threshold ??
         current?.auto_remove_failure_threshold ??
         3,
+      failure_action:
+        formData.FailureAction ??
+        formData.failure_action ??
+        current?.failure_action ??
+        'pause',
       judges: formData.judges ?? current?.judges ?? [],
       scraping_sources: formData.scraping_sources ?? current?.scraping_sources ?? [],
       proxy_list_columns: normalizeProxyTableColumns(

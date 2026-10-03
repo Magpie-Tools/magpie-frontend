@@ -58,6 +58,10 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
     { label: 'QUIC', value: 'quic' },
     { label: 'HTTP/3', value: 'http3' },
   ];
+  readonly failureActionOptions = [
+    {label: 'Pause', value: 'pause'},
+    {label: 'Delete', value: 'delete'},
+  ];
   readonly transportProtocolTooltip =
     'TCP uses standard HTTP over TCP. QUIC and HTTP/3 both use HTTP/3 over QUIC; QUIC enables HTTP/3 datagrams (unreliable messages), HTTP/3 uses streams only.';
   private destroy$ = new Subject<void>();
@@ -154,6 +158,10 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
     return Math.min(Math.max(Math.round(Number.isFinite(threshold) ? threshold : 1), 1), 255);
   }
 
+  get deleteOnFailure(): boolean {
+    return this.settingsForm.get('FailureAction')?.value === 'delete';
+  }
+
   toggleProtocol(controlName: string): void {
     if (!this.workspaces.canOperate()) {
       return;
@@ -180,6 +188,7 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
       TransportProtocol: ['tcp'],
       AutoRemoveFailingProxies: [false],
       AutoRemoveFailureThreshold: [3, [Validators.min(1), Validators.max(255)]],
+      FailureAction: ['pause'],
     });
   }
 
@@ -204,6 +213,7 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
       TransportProtocol: selectedTransport,
       AutoRemoveFailingProxies: settings.auto_remove_failing_proxies,
       AutoRemoveFailureThreshold: settings.auto_remove_failure_threshold,
+      FailureAction: settings.failure_action === 'delete' ? 'delete' : 'pause',
     });
 
     this.settingsForm.markAsPristine();
@@ -240,16 +250,19 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
   private configureAutoRemoveThresholdToggle(): void {
     const autoRemoveControl = this.settingsForm.get('AutoRemoveFailingProxies');
     const thresholdControl = this.settingsForm.get('AutoRemoveFailureThreshold');
+    const actionControl = this.settingsForm.get('FailureAction');
 
-    if (!autoRemoveControl || !thresholdControl) {
+    if (!autoRemoveControl || !thresholdControl || !actionControl) {
       return;
     }
 
     const syncThresholdState = (isEnabled: boolean): void => {
-      if (isEnabled) {
+      if (isEnabled && this.workspaces.canOperate()) {
         thresholdControl.enable({emitEvent: false});
+        actionControl.enable({emitEvent: false});
       } else {
         thresholdControl.disable({emitEvent: false});
+        actionControl.disable({emitEvent: false});
       }
     };
 
