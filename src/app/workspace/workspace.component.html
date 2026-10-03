@@ -52,29 +52,34 @@
           </div>
         </div>
 
-        <div class="workspace-context__team">
-          @if (members().length > 0) {
-            <div class="avatar-stack" aria-label="Workspace members">
-              @for (member of members().slice(0, 4); track member.user_id) {
-                <span class="workspace-avatar" [attr.title]="member.email">{{
-                  member.email.slice(0, 1).toUpperCase()
-                }}</span>
-              }
-              @if (members().length > 4) {
-                <span class="workspace-avatar workspace-avatar--count"
-                  >+{{ members().length - 4 }}</span
-                >
-              }
-            </div>
+        <div class="workspace-context__actions">
+          @if (workspaces.canAdminister()) {
+            <button type="button" class="button button--primary"
+              [attr.aria-expanded]="inviteExpanded() && activeSection() === 'members'"
+              [attr.aria-controls]="inviteExpanded() ? 'workspace-invite-form' : 'workspace-members'" (click)="openInvitation()">
+              <i class="icon icon-user-plus" aria-hidden="true"></i>Invite member
+            </button>
           }
-          <div class="access-state">
-            <span aria-hidden="true"></span
-            >{{ workspace.subscription.status | titlecase }}
-          </div>
         </div>
       </header>
 
-      <div class="workspace-grid">
+      <nav class="workspace-nav" aria-label="Workspace sections">
+        @for (section of sections; track section.id) {
+          <button type="button" [id]="'workspace-nav-' + section.id"
+            [class.is-active]="activeSection() === section.id"
+            [attr.aria-current]="activeSection() === section.id ? 'page' : null"
+            [attr.aria-controls]="'workspace-' + section.id"
+            (click)="activeSection.set(section.id)">
+            {{ section.label }}
+            @if (section.id === 'members' && !loadingMembers() && !membersError()) {
+              <span class="nav-count">{{ members().length }}</span>
+            }
+          </button>
+        }
+      </nav>
+
+      <section id="workspace-overview" class="workspace-grid workspace-panel"
+        aria-labelledby="workspace-nav-overview" [hidden]="activeSection() !== 'overview'">
         <section
           class="workspace-card capacity-card"
           aria-labelledby="capacity-title"
@@ -154,18 +159,6 @@
                 {{ overflowStoredRoutes() | number }}
               </dd>
             </div>
-            <div>
-              <dt>Included</dt>
-              <dd class="metric-value">
-                {{ workspace.capacity.included_routes | number }}
-              </dd>
-            </div>
-            <div>
-              <dt>Additional</dt>
-              <dd class="metric-value">
-                {{ workspace.capacity.additional_routes | number }}
-              </dd>
-            </div>
           </dl>
 
           <p class="card-note">
@@ -179,17 +172,20 @@
             <span class="card-icon"
               ><i class="icon icon-sparkles" aria-hidden="true"></i
             ></span>
-            <h2 id="plan-title">Plan details</h2>
-            <span class="plan-state"
-              ><strong>{{ workspace.subscription.plan_code }}</strong
-              ><small>{{
-                workspace.subscription.status | titlecase
-              }}</small></span
-            >
+            <h2 id="plan-title">Plan</h2>
           </div>
 
+          <div class="plan-summary">
+            <strong>{{ workspace.subscription.plan_code | titlecase }}</strong>
+            <span>{{ workspace.subscription.status | titlecase }} subscription</span>
+          </div>
+          <dl class="plan-highlights">
+            <div><dt>Included routes</dt><dd>{{ workspace.capacity.included_routes | number }}</dd></div>
+            <div><dt>Additional routes</dt><dd>{{ workspace.capacity.additional_routes | number }}</dd></div>
+            <div><dt>Included operators</dt><dd>{{ workspace.subscription.included_operators | number }}</dd></div>
+          </dl>
           <div class="plan-accordions">
-            <details open>
+            <details>
               <summary>
                 <span
                   ><i class="icon icon-database" aria-hidden="true"></i>Capacity
@@ -205,15 +201,9 @@
                   <dt>Overage routes</dt>
                   <dd>{{ workspace.capacity.overage_routes | number }}</dd>
                 </div>
-                <div>
-                  <dt>Included operators</dt>
-                  <dd>
-                    {{ workspace.subscription.included_operators | number }}
-                  </dd>
-                </div>
               </dl>
             </details>
-            <details open>
+            <details>
               <summary>
                 <span
                   ><i class="icon icon-clock" aria-hidden="true"></i>Data and
@@ -279,145 +269,25 @@
           </div>
         </section>
 
-        <section
-          class="workspace-card identity-card"
-          aria-labelledby="details-title"
-        >
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i class="icon icon-pencil" aria-hidden="true"></i
-            ></span>
-            <div>
-              <h2 id="details-title">Workspace details</h2>
-              <p>
-                The name appears in navigation, invitations, and account
-                records.
-              </p>
-            </div>
+        <section class="workspace-card team-summary" aria-labelledby="team-summary-title">
+          <div>
+            <h2 id="team-summary-title">Workspace members</h2>
+            <p>
+              @if (loadingMembers()) { Loading members… }
+              @else if (membersError()) { Members could not be loaded. }
+              @else { {{ members().length }} {{ members().length === 1 ? 'member' : 'members' }} }
+              @if (workspaces.canAdminister() && invitations().length > 0) {
+                <span aria-hidden="true"> · </span>{{ invitations().length }} pending
+              }
+            </p>
           </div>
-
-          <div class="identity-form">
-            <label class="field-label" for="workspace-name"
-              >Workspace name</label
-            >
-            @if (workspaces.canAdminister()) {
-              <div class="inline-form">
-                <input
-                  id="workspace-name"
-                  class="text-input"
-                  type="text"
-                  maxlength="120"
-                  [(ngModel)]="workspaceName"
-                  [disabled]="savingWorkspace()"
-                />
-                @if (
-                  workspaceName.trim() &&
-                  workspaceName.trim() !== workspace.name
-                ) {
-                  <button
-                    type="button"
-                    class="button button--primary"
-                    [disabled]="savingWorkspace()"
-                    (click)="renameWorkspace()"
-                  >
-                    @if (savingWorkspace()) {
-                      <i
-                        class="icon icon-spin icon-loader-circle"
-                        aria-hidden="true"
-                      ></i>
-                    }
-                    Save name
-                  </button>
-                }
-              </div>
-            } @else {
-              <div class="read-only-value">{{ workspace.name }}</div>
-            }
-          </div>
-
-          <dl class="workspace-facts">
-            <div>
-              <dt>Type</dt>
-              <dd>{{ workspace.personal ? "Personal" : "Shared" }}</dd>
-            </div>
-            <div>
-              <dt>Your role</dt>
-              <dd>{{ workspace.role | titlecase }}</dd>
-            </div>
-            <div>
-              <dt>Created</dt>
-              <dd>{{ workspace.created_at | date: "mediumDate" }}</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section
-          class="workspace-card create-card"
-          aria-labelledby="create-title"
-        >
-          <button
-            type="button"
-            class="disclosure"
-            [attr.aria-expanded]="createExpanded()"
-            aria-controls="create-workspace-form"
-            (click)="createExpanded.set(!createExpanded())"
-          >
-            <span class="card-icon"
-              ><i class="icon icon-plus" aria-hidden="true"></i
-            ></span>
-            <span class="disclosure__copy"
-              ><strong id="create-title">Create another workspace</strong
-              ><small
-                >Start a separate boundary for routes, settings, members, and
-                capacity.</small
-              ></span
-            >
-            <i
-              class="icon disclosure__chevron"
-              [class.icon-chevron-down]="!createExpanded()"
-              [class.icon-chevron-up]="createExpanded()"
-              aria-hidden="true"
-            ></i>
+          <button type="button" class="button button--quiet" (click)="activeSection.set('members')">
+            View members<i class="icon icon-arrow-right" aria-hidden="true"></i>
           </button>
-          @if (createExpanded()) {
-            <div id="create-workspace-form" class="create-form">
-              <label class="field-label" for="new-workspace-name"
-                >New workspace name</label
-              >
-              <div class="inline-form">
-                <input
-                  id="new-workspace-name"
-                  class="text-input"
-                  type="text"
-                  maxlength="120"
-                  placeholder="Production"
-                  [(ngModel)]="newWorkspaceName"
-                />
-                <button
-                  type="button"
-                  class="button button--primary"
-                  [disabled]="creatingWorkspace() || !newWorkspaceName.trim()"
-                  (click)="createWorkspace()"
-                >
-                  @if (creatingWorkspace()) {
-                    <i
-                      class="icon icon-spin icon-loader-circle"
-                      aria-hidden="true"
-                    ></i>
-                  }
-                  Create workspace
-                </button>
-              </div>
-            </div>
-          } @else {
-            <div class="boundary-visual" aria-hidden="true">
-              <span><i class="icon icon-archive"></i></span
-              ><i class="icon icon-arrow-right"></i
-              ><span><i class="icon icon-archive"></i></span>
-            </div>
-          }
         </section>
-
+      </section>
+      <section id="workspace-members" class="workspace-grid workspace-panel"
+        aria-labelledby="workspace-nav-members" [hidden]="activeSection() !== 'members'">
         <section
           class="workspace-card access-card"
           aria-labelledby="access-title"
@@ -427,7 +297,7 @@
               ><i class="icon icon-users" aria-hidden="true"></i
             ></span>
             <div>
-              <h2 id="access-title">Workspace access</h2>
+              <h2 id="access-title">Members</h2>
             </div>
             <span class="section-count"
               >{{ members().length }}
@@ -435,8 +305,8 @@
             >
           </div>
 
-          @if (workspaces.canAdminister()) {
-            <form class="invite-form" (ngSubmit)="sendInvitation()">
+          @if (workspaces.canAdminister() && inviteExpanded()) {
+            <form id="workspace-invite-form" class="invite-form" (ngSubmit)="sendInvitation()">
               <div class="form-heading">
                 <span class="invite-icon"
                   ><i class="icon icon-user-plus" aria-hidden="true"></i
@@ -444,8 +314,7 @@
                 <div>
                   <strong>Invite a member</strong
                   ><span
-                    >Existing Magpie accounts only. Invitations expire
-                    automatically.</span
+                    >Use an existing Magpie account.</span
                   >
                 </div>
               </div>
@@ -459,6 +328,8 @@
                     autocomplete="off"
                     placeholder="member@example.com"
                     [(ngModel)]="inviteEmail"
+                    required
+                    [disabled]="sendingInvitation()"
                 /></label>
                 <label
                   ><span>Role</span
@@ -466,6 +337,7 @@
                     class="select-input"
                     name="inviteRole"
                     [(ngModel)]="inviteRole"
+                    [disabled]="sendingInvitation()"
                   >
                     @for (role of invitationRoleOptions(); track role) {
                       <option [ngValue]="role">{{ role | titlecase }}</option>
@@ -478,6 +350,7 @@
                       type="checkbox"
                       name="inviteBillingAdmin"
                       [(ngModel)]="inviteBillingAdmin"
+                      [disabled]="sendingInvitation()"
                     /><span>Billing access</span></label
                   >
                 }
@@ -495,6 +368,8 @@
                   Send invitation
                 </button>
               </div>
+              <button type="button" class="button button--quiet invite-cancel"
+                [disabled]="sendingInvitation()" (click)="inviteExpanded.set(false)">Cancel</button>
               @if (inviteError()) {
                 <p class="form-error" role="alert">
                   <span class="error-icon"
@@ -506,11 +381,8 @@
             </form>
           }
 
-          <div class="subsection-heading">
-            <div>
-              <h3>Members</h3>
-            </div>
-            @if (showMemberSearch()) {
+          @if (showMemberSearch()) {
+            <div class="subsection-heading">
               <label class="search-field"
                 ><i class="icon icon-search" aria-hidden="true"></i
                 ><span class="sr-only">Search members</span
@@ -520,8 +392,8 @@
                   [ngModel]="memberSearch()"
                   (ngModelChange)="memberSearch.set($event)"
               /></label>
-            }
-          </div>
+            </div>
+          }
 
           @if (membersError()) {
             <div class="inline-error" role="alert">
@@ -584,11 +456,7 @@
                       }}</span>
                       <div>
                         <strong>{{ member.email }}</strong
-                        ><span>{{
-                          member.role === "owner"
-                            ? "Workspace owner"
-                            : "User account"
-                        }}</span>
+                        >
                       </div>
                     </div>
                     <div class="control-cell" data-label="Role">
@@ -828,7 +696,7 @@
                           }}</span>
                         }
                       </div>
-                      <span class="plain-value" data-label="Expires">{{
+                      <span class="plain-value joined-value" data-label="Expires">{{
                         invitation.expires_at | date: "mediumDate"
                       }}</span>
                       <span
@@ -888,7 +756,141 @@
             }
           }
         </section>
-      </div>
+      </section>
+      <section id="workspace-settings" class="workspace-grid workspace-panel"
+        aria-labelledby="workspace-nav-settings" [hidden]="activeSection() !== 'settings'">
+        <section
+          class="workspace-card identity-card"
+          aria-labelledby="details-title"
+        >
+          <div class="card-heading">
+            <span class="card-icon"
+              ><i class="icon icon-pencil" aria-hidden="true"></i
+            ></span>
+            <div>
+              <h2 id="details-title">Workspace details</h2>
+              <p>
+                Shown in navigation and invitations.
+              </p>
+            </div>
+          </div>
+
+          <div class="identity-form">
+            <label class="field-label" for="workspace-name"
+              >Workspace name</label
+            >
+            @if (workspaces.canAdminister()) {
+              <div class="inline-form">
+                <input
+                  id="workspace-name"
+                  class="text-input"
+                  type="text"
+                  maxlength="120"
+                  [(ngModel)]="workspaceName"
+                  [disabled]="savingWorkspace()"
+                />
+                @if (
+                  workspaceName.trim() &&
+                  workspaceName.trim() !== workspace.name
+                ) {
+                  <button
+                    type="button"
+                    class="button button--primary"
+                    [disabled]="savingWorkspace()"
+                    (click)="renameWorkspace()"
+                  >
+                    @if (savingWorkspace()) {
+                      <i
+                        class="icon icon-spin icon-loader-circle"
+                        aria-hidden="true"
+                      ></i>
+                    }
+                    Save name
+                  </button>
+                }
+              </div>
+            } @else {
+              <div class="read-only-value">{{ workspace.name }}</div>
+            }
+          </div>
+
+          <dl class="workspace-facts">
+            <div>
+              <dt>Type</dt>
+              <dd>{{ workspace.personal ? "Personal" : "Shared" }}</dd>
+            </div>
+            <div>
+              <dt>Your role</dt>
+              <dd>{{ workspace.role | titlecase }}</dd>
+            </div>
+            <div>
+              <dt>Created</dt>
+              <dd>{{ workspace.created_at | date: "mediumDate" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section
+          class="workspace-card create-card"
+          aria-labelledby="create-title"
+        >
+          <button
+            type="button"
+            class="disclosure"
+            [attr.aria-expanded]="createExpanded()"
+            aria-controls="create-workspace-form"
+            (click)="createExpanded.set(!createExpanded())"
+          >
+            <span class="card-icon"
+              ><i class="icon icon-plus" aria-hidden="true"></i
+            ></span>
+            <span class="disclosure__copy"
+              ><strong id="create-title">Create another workspace</strong
+              ><small
+                >Keep another team or project separate.</small
+              ></span
+            >
+            <i
+              class="icon disclosure__chevron"
+              [class.icon-chevron-down]="!createExpanded()"
+              [class.icon-chevron-up]="createExpanded()"
+              aria-hidden="true"
+            ></i>
+          </button>
+          @if (createExpanded()) {
+            <div id="create-workspace-form" class="create-form">
+              <label class="field-label" for="new-workspace-name"
+                >New workspace name</label
+              >
+              <div class="inline-form">
+                <input
+                  id="new-workspace-name"
+                  class="text-input"
+                  type="text"
+                  maxlength="120"
+                  placeholder="Production"
+                  [(ngModel)]="newWorkspaceName"
+                />
+                <button
+                  type="button"
+                  class="button button--primary"
+                  [disabled]="creatingWorkspace() || !newWorkspaceName.trim()"
+                  (click)="createWorkspace()"
+                >
+                  @if (creatingWorkspace()) {
+                    <i
+                      class="icon icon-spin icon-loader-circle"
+                      aria-hidden="true"
+                    ></i>
+                  }
+                  Create workspace
+                </button>
+              </div>
+            </div>
+          }
+        </section>
+
+      </section>
     </div>
   } @else {
     <section class="page-error">

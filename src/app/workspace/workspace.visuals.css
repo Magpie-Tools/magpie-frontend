@@ -27,7 +27,7 @@
   padding: 0.35rem 0.7rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.36);
-  font-size: 0.59rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -77,22 +77,24 @@
   white-space: nowrap;
 }
 
+.workspace-page .identity-cell > div { min-width: 0; }
+
 .workspace-page .identity-cell strong {
   color: rgba(255, 255, 255, 0.84);
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 570;
 }
 
 .workspace-page .identity-cell > div > span {
   margin-top: 0.2rem;
   color: rgba(255, 255, 255, 0.36);
-  font-size: 0.59rem;
+  font-size: 0.8rem;
 }
 
 .workspace-page .plain-value,
 .workspace-page .notification-state {
   color: rgba(255, 255, 255, 0.61);
-  font-size: 0.66rem;
+  font-size: 0.8rem;
 }
 
 .workspace-page .notification-state {

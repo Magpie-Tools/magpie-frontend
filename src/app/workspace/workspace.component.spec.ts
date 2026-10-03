@@ -115,9 +115,11 @@ describe('WorkspaceComponent', () => {
   });
 
   it('shows member Save only after access changes', () => {
+    showMembers();
     expect(memberSaveButtons().length).toBe(0);
 
     component.setMemberRole(operator, 'viewer');
+    fixture.changeDetectorRef.markForCheck();
     fixture.detectChanges();
 
     expect(memberSaveButtons().length).toBe(1);
@@ -129,6 +131,7 @@ describe('WorkspaceComponent', () => {
   });
 
   it('keeps the sole owner removal disabled with the transfer tooltip', () => {
+    showMembers();
     expect(component.canRemoveMember(owner)).toBeFalse();
     expect(component.memberRemovalReason(owner)).toBe('Transfer ownership first');
 
@@ -138,6 +141,7 @@ describe('WorkspaceComponent', () => {
   });
 
   it('renders plain member values for a read-only workspace role', () => {
+    showMembers();
     isOwner.set(false);
     canAdminister.set(false);
     fixture.detectChanges();
@@ -177,6 +181,7 @@ describe('WorkspaceComponent', () => {
     expect(component.invitations()).toEqual([response.invitation]);
 
     http.createWorkspaceInvitation.and.returnValue(throwError(() => ({error: {error: 'No Magpie account exists for that email address'}})));
+    component.openInvitation();
     component.inviteEmail = 'missing@example.test';
     component.sendInvitation();
     fixture.detectChanges();
@@ -194,6 +199,58 @@ describe('WorkspaceComponent', () => {
     })));
     expect(component.showMemberSearch()).toBeTrue();
   });
+
+  it('starts with capacity and keeps administration in separate sections', () => {
+    expect(panel('overview').hidden).toBeFalse();
+    expect(panel('members').hidden).toBeTrue();
+    expect(panel('settings').hidden).toBeTrue();
+    expect(fixture.nativeElement.querySelector('.invite-form')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.plan-accordions details[open]').length).toBe(0);
+  });
+
+  it('preserves unsaved member access when navigating between sections', () => {
+    showMembers();
+    component.setMemberRole(operator, 'viewer');
+    fixture.nativeElement.querySelector('#workspace-nav-overview').click();
+    fixture.detectChanges();
+    expect(panel('members').hidden).toBeTrue();
+    showMembers();
+    expect(component.memberEdits[operator.user_id].role).toBe('viewer');
+    expect(memberSaveButtons().length).toBe(1);
+  });
+
+  it('opens invitations from the header and allows cancelling without sending', () => {
+    fixture.nativeElement.querySelector('.workspace-context__actions button').click();
+    fixture.detectChanges();
+    expect(panel('members').hidden).toBeFalse();
+    expect(fixture.nativeElement.querySelector('.invite-form')).not.toBeNull();
+    component.inviteEmail = 'draft@example.test';
+    fixture.nativeElement.querySelector('.invite-cancel').click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.invite-form')).toBeNull();
+    expect(http.createWorkspaceInvitation).not.toHaveBeenCalled();
+    component.openInvitation();
+    expect(component.inviteEmail).toBe('draft@example.test');
+  });
+
+  it('keeps rename and creation available in Settings for administrators', () => {
+    fixture.nativeElement.querySelector('#workspace-nav-settings').click();
+    fixture.detectChanges();
+    expect(panel('settings').hidden).toBeFalse();
+    expect(fixture.nativeElement.querySelector('#workspace-name')).not.toBeNull();
+    fixture.nativeElement.querySelector('.create-card .disclosure').click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('#new-workspace-name')).not.toBeNull();
+  });
+
+  function panel(section: string): HTMLElement {
+    return fixture.nativeElement.querySelector('#workspace-' + section);
+  }
+
+  function showMembers(): void {
+    fixture.nativeElement.querySelector('#workspace-nav-members').click();
+    fixture.detectChanges();
+  }
 
   function memberSaveButtons(): HTMLButtonElement[] {
     const buttons = fixture.nativeElement.querySelectorAll('.member-list .button--compact') as NodeListOf<HTMLButtonElement>;

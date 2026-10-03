@@ -19,6 +19,8 @@ import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
 import {RevealGroupDirective, RevealStep} from '../shared/reveal-group.directive';
 
+type WorkspaceSection = 'overview' | 'members' | 'settings';
+
 type InvitationRole = WorkspaceInvitation['role'];
 
 interface OwnershipChange {
@@ -55,6 +57,13 @@ export class WorkspaceComponent implements OnInit {
   readonly sendingInvitation = signal(false);
   readonly savingMemberIds = signal<Record<number, boolean>>({});
   readonly savingInvitationIds = signal<Record<number, boolean>>({});
+  readonly activeSection = signal<WorkspaceSection>('overview');
+  readonly inviteExpanded = signal(false);
+  readonly sections: readonly {id: WorkspaceSection; label: string}[] = [
+    {id: 'overview', label: 'Overview'},
+    {id: 'members', label: 'Members'},
+    {id: 'settings', label: 'Settings'},
+  ];
   readonly createExpanded = signal(false);
   readonly memberSearch = signal('');
   readonly removalTarget = signal<WorkspaceMember | null>(null);
@@ -350,6 +359,11 @@ export class WorkspaceComponent implements OnInit {
     });
   }
 
+  openInvitation(): void {
+    this.activeSection.set('members');
+    this.inviteExpanded.set(true);
+  }
+
   sendInvitation(): void {
     const current = this.workspaces.current();
     const email = this.inviteEmail.trim();
@@ -368,6 +382,7 @@ export class WorkspaceComponent implements OnInit {
       next: response => {
         this.invitations.update(invitations => this.sortInvitations([...invitations, response.invitation]));
         this.invitationEdits[response.invitation.id] = this.invitationDraft(response.invitation);
+        this.inviteExpanded.set(false);
         this.inviteEmail = '';
         this.inviteRole = 'operator';
         this.inviteBillingAdmin = false;
