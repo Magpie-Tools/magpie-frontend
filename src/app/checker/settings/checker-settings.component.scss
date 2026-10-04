@@ -501,7 +501,23 @@
 }
 
 .failure-action-field {
-  margin-top: 1rem;
+  margin-top: 0.65rem;
+}
+
+.failure-action-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.7rem;
+
+  .field-label {
+    font-size: 0.68rem;
+  }
+
+  app-select {
+    width: 7rem;
+    max-width: 100%;
+  }
 }
 
 .cleanup-threshold {
@@ -665,6 +681,14 @@
     [data-slot="select-trigger"] > ng-icon {
       color: rgba(255, 255, 255, 0.55);
     }
+  }
+
+  .failure-action-control [data-slot="select-trigger"] {
+    min-height: 2rem;
+    height: 2rem;
+    padding: 0 0.6rem;
+    border-radius: 0.6rem;
+    font-size: 0.75rem;
   }
 
   .transport-option {

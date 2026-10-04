@@ -288,13 +288,18 @@
               <p>
                 A successful check resets the failure streak.
               </p>
-              <span>
-                {{
-                  settingsForm.get("AutoRemoveFailingProxies")?.value
-                    ? "Automatic action enabled"
-                    : "No automatic action"
-                }}
-              </span>
+              <div class="field-group failure-action-field">
+                <div class="failure-action-control">
+                  <label class="field-label" for="failure-action">At threshold</label>
+                  <app-select
+                    inputId="failure-action"
+                    [options]="failureActionOptions"
+                    formControlName="FailureAction"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></app-select>
+                </div>
+              </div>
             </div>
             <app-checkbox
               label="Enabled"
@@ -302,26 +307,6 @@
             ></app-checkbox>
           </div>
 
-          <div class="field-group failure-action-field">
-            <label class="field-label" for="failure-action">At the failure threshold</label>
-            <app-select
-              inputId="failure-action"
-              [options]="failureActionOptions"
-              formControlName="FailureAction"
-              optionLabel="label"
-              optionValue="value"
-              class="w-full"
-            ></app-select>
-            <p class="field-hint">
-              @if (deleteOnFailure) {
-                Delete permanently removes the proxy and its tag assignments from
-                this workspace. Later scraping or import can add it again.
-              } @else {
-                Pause keeps the proxy in your managed list so you can resume it.
-              }
-              Changing this choice leaves already-paused proxies untouched.
-            </p>
-          </div>
         </div>
 
         <div

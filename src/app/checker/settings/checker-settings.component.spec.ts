@@ -117,16 +117,12 @@ describe('CheckerSettingsComponent', () => {
     expect(service.lastPayload.AutoRemoveFailureThreshold).toBe(1);
   });
 
-  it('saves Delete and explains its workspace deletion semantics', () => {
+  it('enables and saves Delete when automatic handling is enabled', () => {
     const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
     component.settingsForm.patchValue({AutoRemoveFailingProxies: true, FailureAction: 'delete'});
     fixture.detectChanges();
 
     expect(component.settingsForm.get('FailureAction')?.enabled).toBeTrue();
-    const hint = (fixture.nativeElement as HTMLElement).querySelector('.failure-action-field')?.textContent;
-    expect(hint).toContain('permanently removes');
-    expect(hint).toContain('Later scraping or import can add it again');
-    expect(hint).toContain('already-paused proxies untouched');
 
     component.onSubmit();
 
