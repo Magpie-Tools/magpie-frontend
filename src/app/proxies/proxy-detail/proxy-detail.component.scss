@@ -959,3 +959,10 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+.history-settings-note {
+  display: block;
+  color: var(--detail-muted);
+  font-size: 0.7rem;
+  text-transform: none;
+}

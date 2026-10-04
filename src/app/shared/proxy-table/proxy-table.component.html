@@ -162,7 +162,9 @@
                     @if (managedState(proxy) === "active") {
                       <div
                         class="status-dot"
-                        [ngClass]="proxy.alive ? 'alive' : 'dead'"
+                        [ngClass]="proxy.health_known === false ? 'unknown' : proxy.alive ? 'alive' : 'dead'"
+                        [attr.aria-label]="proxy.health_known === false ? 'Unknown' : proxy.alive ? 'Alive' : 'Dead'"
+                        [hlmTooltip]="proxy.health_known === false ? 'Unknown' : proxy.alive ? 'Alive' : 'Dead'"
                       ></div>
                     } @else {
                       <span

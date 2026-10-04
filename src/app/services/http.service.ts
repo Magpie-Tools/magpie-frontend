@@ -302,7 +302,7 @@ export class HttpService {
     return this.http.get<UserSettings>(this.apiUrl + '/user/settings');
   }
 
-  saveUserSettings(payload: UserSettings) {
+  saveUserSettings(payload: Partial<UserSettings>) {
     return this.http.post(this.apiUrl + "/user/settings", payload)
   }
 

@@ -423,7 +423,7 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       return detail.latest_statistic;
     }
 
-    const stats = this.statistics();
+    const stats = this.statistics().filter(stat => stat.current !== false);
     if (stats.length > 0) {
       return stats[0];
     }
@@ -432,7 +432,9 @@ export class ProxyDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get overallAlive(): boolean | null {
-    const stats = this.statistics();
+    const detail = this.detail();
+    if (detail && 'alive' in detail) { return detail.alive ?? null; }
+    const stats = this.statistics().filter(stat => stat.current !== false);
     if (stats.length > 0) {
       const latestByProtocol = new Map<string, ProxyStatistic>();
       for (const stat of stats) {

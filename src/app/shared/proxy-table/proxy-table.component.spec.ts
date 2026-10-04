@@ -95,4 +95,12 @@ describe('Proxy table actions menu', () => {
       expect(item(label).disabled).toBeTrue();
     }
   });
+  it('shows unknown rather than dead before current configuration evidence exists', () => {
+    fixture.componentRef.setInput('columns', ['alive']);
+    fixture.componentRef.setInput('proxies', [{...proxy, alive: false, health_known: false}]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.status-dot.unknown')?.getAttribute('aria-label')).toBe('Unknown');
+    expect(fixture.nativeElement.querySelector('.status-dot.dead')).toBeNull();
+  });
+
 });

@@ -1,6 +1,12 @@
+export type CheckerProtocol = 'http' | 'https' | 'socks4' | 'socks5';
+export interface CheckerProfileSettings { protocols: CheckerProtocol[]; transport: string; timeout: number; retries: number; }
+export interface TagCheckerRule { tag_id: number; mode: 'replace' | 'add' | 'remove'; protocols: CheckerProtocol[]; transport?: string; timeout?: number; retries?: number; }
+export interface CheckerSettings { defaults: CheckerProfileSettings; rules: TagCheckerRule[]; }
+
 export type FailureAction = 'pause' | 'delete';
 
 export interface UserSettings {
+  checker_settings?: CheckerSettings;
   http_protocol:     boolean
   https_protocol:    boolean
   socks4_protocol:   boolean

@@ -19,6 +19,7 @@ export interface ProxyInfo {
   "country": string;
   "anonymity_level": string;
   "alive": boolean;
+  "health_known"?: boolean;
   "health"?: ProxyHealthSummary | null;
   "latest_check": Date;
   "reputation"?: ProxyReputationSummary | null;

@@ -1,4 +1,4 @@
-import {of} from 'rxjs';
+import {of, Subject} from 'rxjs';
 import {SettingsService} from './settings.service';
 import {HttpService} from './http.service';
 import {UserService} from './authorization/user.service';
@@ -49,8 +49,43 @@ describe('SettingsService failure action', () => {
         service.saveScrapeSourceListColumns(['url', 'proxy_count']).subscribe();
       }
 
-      expect(http.saveUserSettings).toHaveBeenCalledWith(jasmine.objectContaining({failure_action: 'delete'}));
+      expect(http.saveUserSettings.calls.mostRecent().args[0].failure_action).toBeUndefined();
       expect(service.getUserSettings()?.failure_action).toBe('delete');
     });
   }
+  it('keeps the last saved settings when saving fails', () => {
+    const saved = service.getUserSettings();
+    const response = new Subject<any>();
+    http.saveUserSettings.and.returnValue(response);
+    service.saveUserSettings({Retries: 0}).subscribe({error: () => {}});
+    expect(service.getUserSettings()).toBe(saved);
+    response.error(new Error('offline'));
+    expect(service.getUserSettings()).toBe(saved);
+  });
+
+  it('omits cached checker profiles when saving unrelated preferences', () => {
+    const current = service.getUserSettings()!;
+    current.checker_settings = {
+      defaults: {protocols: ['http', 'https', 'socks4', 'socks5'], transport: 'tcp', timeout: 2000, retries: 0},
+      rules: [{tag_id: 9, mode: 'remove', protocols: ['http']}],
+    };
+    service.saveProxyListColumns(['ip_port']).subscribe();
+    expect(http.saveUserSettings.calls.mostRecent().args[0]).toEqual({proxy_list_columns: ['ip_port', 'tags']});
+    expect(service.getUserSettings()?.checker_settings).toEqual(current.checker_settings);
+  });
+
+  it('sends only judges when saving judges with a stale deleted-tag profile', () => {
+    service.getUserSettings()!.checker_settings = {
+      defaults: {protocols: ['http'], transport: 'tcp', timeout: 1000, retries: 0},
+      rules: [{tag_id: 9, mode: 'remove', protocols: ['http']}],
+    };
+    service.saveUserSettings({judges: []}).subscribe();
+    expect(http.saveUserSettings.calls.mostRecent().args[0]).toEqual({judges: []});
+  });
+
+  it('sends checker profiles when explicitly saving them', () => {
+    const profiles: UserSettings['checker_settings'] = {defaults: {protocols: ['http'], transport: 'tcp', timeout: 1000, retries: 0}, rules: []};
+    service.saveUserSettings({checker_settings: profiles}).subscribe();
+    expect(http.saveUserSettings.calls.mostRecent().args[0]).toEqual({checker_settings: profiles});
+  });
 });

@@ -18,6 +18,7 @@ export class CheckboxComponent implements ControlValueAccessor  {
   @Input() label: string = '';
 
   value: boolean = false;
+  disabled = false;
   onChange = (_value: boolean) => {};
   onTouched = () => {};
 
@@ -35,7 +36,10 @@ export class CheckboxComponent implements ControlValueAccessor  {
     this.onTouched = fn;
   }
 
+  setDisabledState(disabled: boolean): void { this.disabled = disabled; }
+
   toggleCheckbox(): void {
+    if (this.disabled) { return; }
     this.value = !this.value;
     this.onChange(this.value);
     this.onTouched();

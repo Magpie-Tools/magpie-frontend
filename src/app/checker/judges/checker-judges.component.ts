@@ -121,18 +121,7 @@ export class CheckerJudgesComponent implements OnInit, AfterViewInit, OnDestroy 
     if (!this.workspaces.canOperate()) {
       return;
     }
-    const current = this.settingsService.getUserSettings();
-    const payload = {
-      HTTPProtocol: current?.http_protocol ?? false,
-      HTTPSProtocol: current?.https_protocol ?? true,
-      SOCKS4Protocol: current?.socks4_protocol ?? false,
-      SOCKS5Protocol: current?.socks5_protocol ?? false,
-      Timeout: current?.timeout ?? 7500,
-      Retries: current?.retries ?? 2,
-      UseHttpsForSocks: current?.UseHttpsForSocks ?? true,
-      TransportProtocol: current?.transport_protocol ?? 'tcp',
-      judges: this.judgesForm.value
-    };
+    const payload = {judges: this.judgesForm.value};
 
     this.settingsService.saveUserSettings(payload).subscribe({
       next: (resp) => {

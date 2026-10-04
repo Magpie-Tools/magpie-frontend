@@ -1,6 +1,9 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {of} from 'rxjs';
+import {of, Subject} from 'rxjs';
+import {signal} from '@angular/core';
+import {ProxyTagService} from '../../services/proxy-tag.service';
+import {NotificationService} from '../../services/notification-service.service';
 import {CheckerSettingsComponent} from './checker-settings.component';
 import {SettingsService} from '../../services/settings.service';
 import {UserSettings} from '../../models/UserSettings';
@@ -24,14 +27,15 @@ class SettingsServiceStub {
   };
   userSettings$ = of(this.settings);
   lastPayload: any;
+  response?: Subject<any>;
 
-  getUserSettings(): UserSettings {
+  getUserSettings(): UserSettings | undefined {
     return this.settings;
   }
 
   saveUserSettings(payload: any) {
     this.lastPayload = payload;
-    return of({ message: 'saved' });
+    return this.response ?? of({ message: 'saved' });
   }
 }
 
@@ -45,6 +49,8 @@ describe('CheckerSettingsComponent', () => {
       providers: [
         { provide: SettingsService, useClass: SettingsServiceStub },
         { provide: WorkspaceService, useValue: {canOperate: () => true} },
+        { provide: ProxyTagService, useValue: {loading: signal(false), tags: signal([{id: 1, name: 'One', color: '#22C55E'}, {id: 2, name: 'Two', color: '#22C55E'}]), load: () => of([])} },
+        { provide: NotificationService, useValue: {showError: jasmine.createSpy(), showSuccess: jasmine.createSpy()} },
       ]
     }).compileComponents();
 
@@ -62,11 +68,41 @@ describe('CheckerSettingsComponent', () => {
     expect(component.settingsForm.get('FailureAction')?.disabled).toBeTrue();
   });
 
-  it('starts with the settings grid instead of a hero', () => {
+  it('renders safely and blocks saving until asynchronous settings arrive', () => {
+    fixture.destroy();
+    const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
+    const stored = service.getUserSettings()!;
+    const updates = new Subject<UserSettings>();
+    service.userSettings$ = updates;
+    const getSettings = spyOn(service, 'getUserSettings').and.returnValue(undefined);
+    fixture = TestBed.createComponent(CheckerSettingsComponent);
+    component = fixture.componentInstance;
+
+    expect(() => fixture.detectChanges()).not.toThrow();
+    expect(component.settingsForm).toBeTruthy();
+    expect(component.settingsLoaded).toBeFalse();
+    expect((fixture.nativeElement.querySelector('fieldset') as HTMLFieldSetElement).disabled).toBeTrue();
+    component.onSubmit();
+    expect(service.lastPayload).toBeUndefined();
+
+    getSettings.and.returnValue(stored);
+    updates.next(stored);
+    fixture.detectChanges();
+    expect(component.settingsLoaded).toBeTrue();
+    expect(component.settingsForm.get('HTTPProtocol')?.value).toBeTrue();
+    expect((fixture.nativeElement.querySelector('fieldset') as HTMLFieldSetElement).disabled).toBeFalse();
+  });
+
+  it('keeps the original grouped cards instead of individual protocol forms', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.querySelector('.settings-hero')).toBeNull();
     expect(element.querySelector('.settings-stage > .settings-grid')).not.toBeNull();
+    expect(element.querySelector('.settings-card--protocols')).not.toBeNull();
+    expect(element.querySelectorAll('input[formControlName=Timeout]').length).toBe(1);
+    expect(element.querySelectorAll('input[formControlName=Retries]').length).toBe(1);
+    expect(element.querySelectorAll('app-select[formControlName=TransportProtocol]').length).toBe(1);
+    expect(element.querySelector('.rule-priority')).toBeNull();
   });
 
   it('normalizes auto-remove threshold before saving', () => {
@@ -141,4 +177,118 @@ describe('CheckerSettingsComponent', () => {
     expect(component.totalAttempts).toBe(3);
     expect(component.configuredAttemptWindow).toBe('23 sec');
   });
+  it('retains drafts when switching profiles and saves all profiles in priority order', () => {
+    component.settingsForm.patchValue({SOCKS5Protocol: true, Timeout: 4000});
+    component.selectedProfile.setValue(1);
+    component.addRule();
+    component.profileForm.patchValue({HTTPProtocol: true, Timeout: 2000, Retries: 0});
+    component.selectedProfile.setValue(2);
+    component.addRule();
+    component.selectedRule?.get('Mode')?.setValue('remove');
+    component.profileForm.get('SOCKS5Protocol')?.setValue(true);
+    component.onPriorityStateChanged('open');
+    component.movePriority(1, -1);
+    component.applyPriority();
+    component.selectedProfile.setValue(1);
+    expect(component.profileForm.get('Timeout')?.value).toBe(2000);
+    component.selectedProfile.setValue(0);
+    expect(component.settingsForm.get('Timeout')?.value).toBe(4000);
+    component.onSubmit();
+    const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
+    expect(service.lastPayload.checker_settings.rules).toEqual([
+      {tag_id: 2, mode: 'remove', protocols: ['socks5']},
+      {tag_id: 1, mode: 'add', protocols: ['http'], timeout: 2000, retries: 0},
+    ]);
+    expect(service.lastPayload.SOCKS5Protocol).toBeTrue();
+  });
+
+  it('inherits fields independently and preserves an explicit zero retries', () => {
+    component.selectedProfile.setValue(1);
+    component.addRule();
+    component.profileForm.patchValue({HTTPProtocol: true, Timeout: 1200, Retries: 0});
+    component.setInherited('Timeout', true);
+    expect(component.serializeProfiles().rules[0]).toEqual({tag_id: 1, mode: 'add', protocols: ['http'], retries: 0});
+    component.setInherited('Retries', true);
+    expect(component.serializeProfiles().rules[0]).toEqual({tag_id: 1, mode: 'add', protocols: ['http']});
+  });
+
+  it('keeps drafts and their priority after a failed save', () => {
+    const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
+    service.response = new Subject();
+    component.selectedProfile.setValue(1);
+    component.addRule();
+    component.profileForm.patchValue({HTTPProtocol: true, Timeout: 1000});
+    const draft = component.serializeProfiles();
+    component.onSubmit();
+    fixture.detectChanges();
+    expect(component.saving).toBeTrue();
+    expect(fixture.nativeElement.querySelector('fieldset').disabled).toBeTrue();
+    service.response.error({error: {error: 'Save failed'}});
+    expect(component.saving).toBeFalse();
+    expect(component.settingsForm.dirty).toBeTrue();
+    expect(component.serializeProfiles()).toEqual(draft);
+  });
+
+  it('removes a deleted tag rule without dropping edits to other profiles', () => {
+    component.settingsForm.patchValue({Timeout: 1234});
+    component.selectedProfile.setValue(1);
+    component.addRule();
+    const tags = TestBed.inject(ProxyTagService);
+    (tags.tags as any).set([{id: 2, name: 'Two', color: '#22C55E'}]);
+    component.onTagsChanged();
+    expect(component.rules.length).toBe(0);
+    expect(component.selectedProfile.value).toBe(0);
+    expect(component.settingsForm.get('Timeout')?.value).toBe(1234);
+  });
+
+  it('keeps canceled priority changes out of the saved order', () => {
+    component.selectedProfile.setValue(1); component.addRule();
+    component.selectedProfile.setValue(2); component.addRule();
+    const before = component.serializeProfiles();
+    component.onPriorityStateChanged('open');
+    component.movePriority(0, 1);
+    component.onPriorityStateChanged('closed');
+    expect(component.serializeProfiles()).toEqual(before);
+    component.onPriorityStateChanged('open');
+    expect(component.priorityDraft()).toEqual([1, 2]);
+  });
+  it('applies drag order while preserving profile drafts', () => {
+    component.selectedProfile.setValue(1); component.addRule();
+    component.profileForm.patchValue({Timeout: 1400, Retries: 0});
+    component.selectedProfile.setValue(2); component.addRule();
+    component.onPriorityStateChanged('open');
+    component.dropPriority({previousIndex: 0, currentIndex: 1, isPointerOverContainer: true} as any);
+    expect(component.serializeProfiles().rules.map(rule => rule.tag_id)).toEqual([1, 2]);
+    component.applyPriority();
+    expect(component.serializeProfiles().rules.map(rule => rule.tag_id)).toEqual([2, 1]);
+    component.selectedProfile.setValue(1);
+    expect(component.profileForm.get('Timeout')?.value).toBe(1400);
+    expect(component.profileForm.get('Retries')?.value).toBe(0);
+    expect(component.settingsForm.dirty).toBeTrue();
+  });
+  it('allows tags to override shared settings without changing protocol selection', () => {
+    component.selectedProfile.setValue(1); component.addRule();
+    component.profileForm.patchValue({Timeout: 1600, TransportProtocol: 'tcp'});
+    expect(component.serializeProfiles().rules[0]).toEqual({tag_id: 1, mode: 'add', protocols: [], transport: 'tcp', timeout: 1600});
+  });
+  it('enables loaded settings when workspace permissions arrive later', () => {
+    fixture.destroy();
+    const permission = signal(false);
+    const workspaces = TestBed.inject(WorkspaceService);
+    spyOn(workspaces, 'canOperate').and.callFake(permission);
+    fixture = TestBed.createComponent(CheckerSettingsComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    expect(component.settingsForm.get('Timeout')?.disabled).toBeTrue();
+    permission.set(true);
+    fixture.detectChanges();
+    expect(component.settingsForm.get('Timeout')?.enabled).toBeTrue();
+    expect(component.settingsForm.get('Retries')?.enabled).toBeTrue();
+    expect(component.settingsForm.get('TransportProtocol')?.enabled).toBeTrue();
+    expect(component.settingsForm.get('FailureAction')?.disabled).toBeTrue();
+    permission.set(false);
+    fixture.detectChanges();
+    expect(component.settingsForm.disabled).toBeTrue();
+  });
+
 });

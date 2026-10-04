@@ -186,7 +186,7 @@
                 </div>
                 <div class="detail-item">
                   <span class="label">Check protocol</span>
-                  <span class="value">{{ latest?.protocol || "Unknown" | uppercase }}</span>
+                  <span class="value">{{ latest?.protocol || "Unknown" | uppercase }}@if (latest?.transport) { / {{ latest?.transport | uppercase }} }</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Estimated type</span>
@@ -436,8 +436,9 @@
                         </td>
                         <td hlmTd>{{ row.response_time }} ms</td>
                         <td hlmTd>{{ row.attempt + 1 }}</td>
-                        <td hlmTd class="capitalize">
-                          {{ row.protocol || "Unknown" }}
+                        <td hlmTd class="capitalize" [title]="row.timeout ? row.timeout + ' ms timeout, ' + (row.retries ?? 0) + ' retries' : 'Legacy check without settings attribution'">
+                          {{ row.protocol || "Unknown" }}@if (row.transport) { / {{ row.transport | uppercase }} }
+                          @if (row.current === false) {<small class="history-settings-note">{{ row.config_key ? 'Previous settings' : 'Legacy settings' }}</small>}
                         </td>
                         <td hlmTd class="capitalize">
                           {{ row.anonymity_level || "Unknown" }}

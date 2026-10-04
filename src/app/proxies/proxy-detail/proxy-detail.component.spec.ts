@@ -190,4 +190,13 @@ describe('ProxyDetailComponent', () => {
     expect(bounds[2].width).toBeLessThan(32);
   });
 
+  it('uses current workspace health even when obsolete history contains successes', () => {
+    component.detail.update(detail => detail ? {...detail, alive: null} : detail);
+    component.statistics.set([{id: 99, alive: true, protocol: 'http', attempt: 0, response_time: 1, judge: 'old', anonymity_level: 'elite', created_at: new Date().toISOString(), current: false}]);
+    expect(component.overallAlive).toBeNull();
+    expect(component.latestStatistic).toBeNull();
+    component.detail.update(detail => detail ? {...detail, alive: false} : detail);
+    expect(component.overallAlive).toBeFalse();
+  });
+
 });

@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { filter, map, tap } from 'rxjs/operators';
 import { GlobalSettings } from '../models/GlobalSettings';
 import { HttpService } from './http.service';
 import {UserSettings} from '../models/UserSettings';
 import {UserService} from './authorization/user.service';
 import {NotificationService} from './notification-service.service';
-import {DEFAULT_PROXY_TABLE_COLUMNS, normalizeProxyTableColumns} from '../shared/proxy-table/proxy-table-columns';
+import {normalizeProxyTableColumns} from '../shared/proxy-table/proxy-table-columns';
 import {
-  DEFAULT_SCRAPE_SOURCE_LIST_COLUMNS,
   normalizeScrapeSourceListColumns
 } from '../scraper/scrape-source-list/scrape-source-list-columns';
 
@@ -111,134 +110,55 @@ export class SettingsService {
   }
 
   saveUserSettings(formData: any): Observable<any> {
-    const payload = this.transformUserSettings(formData);
-    this.userSettings = payload;
-    this.userSettingsSubject.next(this.userSettings);
-    return this.http.saveUserSettings(payload);
+    const payload = this.buildUserSettingsPayload(formData);
+    return this.http.saveUserSettings(payload).pipe(tap(() => {
+      // Merge only committed fields into the latest local snapshot.
+      if (this.userSettings) {
+        this.userSettings = {...this.userSettings, ...payload};
+        this.userSettingsSubject.next(this.userSettings);
+      }
+    }));
   }
 
   saveProxyListColumns(columns: string[]): Observable<any> {
-    const normalizedColumns = normalizeProxyTableColumns(columns);
-    const source$ = this.userSettings
-      ? of(this.userSettings)
-      : this.http.getUserSettings().pipe(
-          tap(settings => {
-            this.userSettings = settings;
-            this.userSettingsSubject.next(settings);
-          })
-        );
-
-    return source$.pipe(
-      map(current => this.buildUserSettingsPayload(current, { proxy_list_columns: normalizedColumns })),
-      switchMap(payload => this.http.saveUserSettings(payload).pipe(
-        tap(() => {
-          this.userSettings = payload;
-          this.userSettingsSubject.next(this.userSettings);
-        })
-      ))
-    );
+    return this.saveUserSettings({proxy_list_columns: normalizeProxyTableColumns(columns)});
   }
 
   saveScrapeSourceProxyColumns(columns: string[]): Observable<any> {
-    const normalizedColumns = normalizeProxyTableColumns(columns);
-    const source$ = this.userSettings
-      ? of(this.userSettings)
-      : this.http.getUserSettings().pipe(
-          tap(settings => {
-            this.userSettings = settings;
-            this.userSettingsSubject.next(settings);
-          })
-        );
-
-    return source$.pipe(
-      map(current => this.buildUserSettingsPayload(current, { scrape_source_proxy_columns: normalizedColumns })),
-      switchMap(payload => this.http.saveUserSettings(payload).pipe(
-        tap(() => {
-          this.userSettings = payload;
-          this.userSettingsSubject.next(this.userSettings);
-        })
-      ))
-    );
+    return this.saveUserSettings({scrape_source_proxy_columns: normalizeProxyTableColumns(columns)});
   }
 
   saveScrapeSourceListColumns(columns: string[]): Observable<any> {
-    const normalizedColumns = normalizeScrapeSourceListColumns(columns);
-    const source$ = this.userSettings
-      ? of(this.userSettings)
-      : this.http.getUserSettings().pipe(
-          tap(settings => {
-            this.userSettings = settings;
-            this.userSettingsSubject.next(settings);
-          })
-        );
-
-    return source$.pipe(
-      map(current => this.buildUserSettingsPayload(current, { scrape_source_list_columns: normalizedColumns })),
-      switchMap(payload => this.http.saveUserSettings(payload).pipe(
-        tap(() => {
-          this.userSettings = payload;
-          this.userSettingsSubject.next(this.userSettings);
-        })
-      ))
-    );
+    return this.saveUserSettings({scrape_source_list_columns: normalizeScrapeSourceListColumns(columns)});
   }
 
-  private transformUserSettings(formData: any): UserSettings {
-    return this.buildUserSettingsPayload(this.userSettings, formData);
-  }
-
-  private buildUserSettingsPayload(current: UserSettings | undefined, formData: any): UserSettings {
-    const transportProtocol =
-      formData.TransportProtocol ??
-      formData.transport_protocol ??
-      current?.transport_protocol ??
-      'tcp';
-
-    return {
-      http_protocol: formData.HTTPProtocol ?? formData.http_protocol ?? current?.http_protocol ?? false,
-      https_protocol: formData.HTTPSProtocol ?? formData.https_protocol ?? current?.https_protocol ?? true,
-      socks4_protocol: formData.SOCKS4Protocol ?? formData.socks4_protocol ?? current?.socks4_protocol ?? false,
-      socks5_protocol: formData.SOCKS5Protocol ?? formData.socks5_protocol ?? current?.socks5_protocol ?? false,
-      timeout: formData.Timeout ?? formData.timeout ?? current?.timeout ?? 7500,
-      retries: formData.Retries ?? formData.retries ?? current?.retries ?? 2,
-      UseHttpsForSocks: formData.UseHttpsForSocks ?? formData.use_https_for_socks ?? current?.UseHttpsForSocks ?? true,
-      transport_protocol: transportProtocol,
-      auto_remove_failing_proxies:
-        formData.AutoRemoveFailingProxies ??
-        formData.auto_remove_failing_proxies ??
-        current?.auto_remove_failing_proxies ??
-        false,
-      auto_remove_failure_threshold:
-        formData.AutoRemoveFailureThreshold ??
-        formData.auto_remove_failure_threshold ??
-        current?.auto_remove_failure_threshold ??
-        3,
-      failure_action:
-        formData.FailureAction ??
-        formData.failure_action ??
-        current?.failure_action ??
-        'pause',
-      judges: formData.judges ?? current?.judges ?? [],
-      scraping_sources: formData.scraping_sources ?? current?.scraping_sources ?? [],
-      proxy_list_columns: normalizeProxyTableColumns(
-        formData.proxy_list_columns ??
-        formData.ProxyListColumns ??
-        current?.proxy_list_columns ??
-        DEFAULT_PROXY_TABLE_COLUMNS
-      ),
-      scrape_source_proxy_columns: normalizeProxyTableColumns(
-        formData.scrape_source_proxy_columns ??
-        formData.ScrapeSourceProxyColumns ??
-        current?.scrape_source_proxy_columns ??
-        DEFAULT_PROXY_TABLE_COLUMNS
-      ),
-      scrape_source_list_columns: normalizeScrapeSourceListColumns(
-        formData.scrape_source_list_columns ??
-        formData.ScrapeSourceListColumns ??
-        current?.scrape_source_list_columns ??
-        DEFAULT_SCRAPE_SOURCE_LIST_COLUMNS
-      ),
+  private buildUserSettingsPayload(formData: any): Partial<UserSettings> {
+    const fields: Record<string, string[]> = {
+      checker_settings: ['checker_settings'],
+      http_protocol: ['HTTPProtocol', 'http_protocol'],
+      https_protocol: ['HTTPSProtocol', 'https_protocol'],
+      socks4_protocol: ['SOCKS4Protocol', 'socks4_protocol'],
+      socks5_protocol: ['SOCKS5Protocol', 'socks5_protocol'],
+      timeout: ['Timeout', 'timeout'], retries: ['Retries', 'retries'],
+      UseHttpsForSocks: ['UseHttpsForSocks', 'use_https_for_socks'],
+      transport_protocol: ['TransportProtocol', 'transport_protocol'],
+      auto_remove_failing_proxies: ['AutoRemoveFailingProxies', 'auto_remove_failing_proxies'],
+      auto_remove_failure_threshold: ['AutoRemoveFailureThreshold', 'auto_remove_failure_threshold'],
+      failure_action: ['FailureAction', 'failure_action'],
+      judges: ['judges'], scraping_sources: ['scraping_sources'],
+      proxy_list_columns: ['proxy_list_columns', 'ProxyListColumns'],
+      scrape_source_proxy_columns: ['scrape_source_proxy_columns', 'ScrapeSourceProxyColumns'],
+      scrape_source_list_columns: ['scrape_source_list_columns', 'ScrapeSourceListColumns'],
     };
+    const payload: Record<string, any> = {};
+    for (const [field, aliases] of Object.entries(fields)) {
+      const alias = aliases.find(key => formData[key] !== undefined && formData[key] !== null);
+      if (alias) { payload[field] = formData[alias]; }
+    }
+    if (payload['proxy_list_columns']) { payload['proxy_list_columns'] = normalizeProxyTableColumns(payload['proxy_list_columns']); }
+    if (payload['scrape_source_proxy_columns']) { payload['scrape_source_proxy_columns'] = normalizeProxyTableColumns(payload['scrape_source_proxy_columns']); }
+    if (payload['scrape_source_list_columns']) { payload['scrape_source_list_columns'] = normalizeScrapeSourceListColumns(payload['scrape_source_list_columns']); }
+    return payload;
   }
 
   private loadUserSettings(): void {

@@ -5,6 +5,7 @@ import {ManagedProxyState} from './Workspace';
 
 export interface ProxyDetail {
   id: number;
+  alive?: boolean | null;
   ip: string;
   port: number;
   username: string;

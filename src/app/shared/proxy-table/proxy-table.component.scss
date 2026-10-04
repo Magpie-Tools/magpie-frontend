@@ -479,3 +479,5 @@
 .proxy-actions-menu {
   min-width: 12rem;
 }
+
+.status-dot.unknown { background: var(--muted-foreground); opacity: .55; }
