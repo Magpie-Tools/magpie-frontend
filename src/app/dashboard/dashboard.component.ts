@@ -31,6 +31,8 @@ import {
   FastestAliveProxyCountryLegend
 } from './cards/fastest-alive-proxies-card/fastest-alive-proxies-card.component';
 import {formatHostPort} from '../shared/proxy-address';
+import {buildInventoryChart, buildLatencyChart, buildReputationChart, REPUTATION_COLORS} from './dashboard-charts';
+import type {DashboardChartDefinition} from '../shared/ui/dashboard-chart.component';
 import {gsap} from 'gsap';
 import {ScrollTrigger} from 'gsap/ScrollTrigger';
 
@@ -88,9 +90,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   avgOrderValue = signal<SparklineMetric>({ value: 0, history: [] });
   orderQuantity = signal<SparklineMetric>({ value: 0, history: [] });
 
-  proxiesLineData = signal<any>({});
-  proxiesLineOptions = signal<any>({});
-  private proxiesLineDiff = { gained: [] as number[], lost: [] as number[] };
+  inventoryChart = signal<DashboardChartDefinition>({marks: [], scales: {x: null, y: null}});
+  inventoryLimit = signal<number | null>(null);
 
   majorCountries = signal<Array<{ name: string; value: number; color?: string; percentage: string }>>([]);
 
@@ -108,14 +109,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   fastestAliveProxies = signal<FastestAliveProxy[]>([]);
   fastestAliveProxyCount = signal(0);
-  fastestAliveScatterData = signal<any>({});
-  fastestAliveScatterOptions = signal<any>({});
+  latencyChart = signal<DashboardChartDefinition>({marks: [], scales: {x: null, y: null}});
   fastestAliveCountryLegend = signal<FastestAliveProxyCountryLegend[]>([]);
   fastestAliveSortDirection = signal<FastestAliveSortDirection>(this.loadFastestAliveSortDirection());
 
   reputationBreakdown = signal<ReputationBreakdown>({ good: 0, neutral: 0, poor: 0, unknown: 0 });
-  reputationChartData = signal<any>({});
-  reputationChartOptions = signal<any>({});
+  reputationChart = signal<DashboardChartDefinition>({marks: [], scales: {x: null, y: null}});
 
   readonly proxiesPerHourTitle: string;
   private readonly localeId: string;
@@ -513,30 +512,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.fastestAliveCountryLegend.set(countryLegend);
 
-    if (!points.length) {
-      this.fastestAliveScatterData.set({ datasets: [] });
-      this.fastestAliveScatterOptions.set(this.createFastestAliveScatterOptions([]));
-      return;
-    }
-
-    this.fastestAliveScatterData.set({
-      datasets: [
-        {
-          label: 'Alive proxies',
-          data: points,
-          parsing: false,
-          backgroundColor: points.map((point) => this.resolveCountryColor(point.country)),
-          borderColor: '#0f172a',
-          borderWidth: 1.5,
-          pointRadius: 6,
-          pointHoverRadius: 8,
-          hitRadius: 14,
-          pointStyle: points.map((point) => this.resolveReputationPointStyle(point.reputation))
-        }
-      ]
-    });
-
-    this.fastestAliveScatterOptions.set(this.createFastestAliveScatterOptions(countryOrder.map((entry) => entry.country)));
+    this.latencyChart.set(buildLatencyChart(
+      points,
+      countryLegend.map(entry => entry.country),
+      countryLegend.map(entry => entry.color),
+      value => this.numberFormatter.format(value),
+    ));
   }
 
   onFastestAliveSortDirectionChange(direction: FastestAliveSortDirection): void {
@@ -560,95 +541,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return latencySort || b.count - a.count || a.country.localeCompare(b.country);
   }
 
-  private createFastestAliveScatterOptions(countries: string[]): Record<string, unknown> {
-    const countryCount = Math.max(countries.length, 1);
-
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 550 },
-      layout: {
-        padding: { left: 8, right: 16, top: 10, bottom: 4 }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#111827',
-          titleColor: '#f9fafb',
-          bodyColor: '#e5e7eb',
-          borderColor: '#1f2937',
-          borderWidth: 1,
-          padding: 12,
-          callbacks: {
-            title: (items: any[]) => {
-              const raw = items?.[0]?.raw;
-              return raw?.proxy ? `#${raw.rank} ${raw.proxy}` : 'Alive proxy';
-            },
-            label: (context: any) => {
-              const raw = context?.raw ?? {};
-              const label = this.formatReputationLabel(raw.reputation);
-              return [
-                `Latency: ${this.formatChartValue(raw.y ?? 0)} ms`,
-                `Country: ${raw.country ?? 'Unknown'}`,
-                `Reputation: ${label}, score ${Number(raw.reputationScore ?? 0).toFixed(1)}`
-              ];
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          min: 0.5,
-          max: countryCount + 0.5,
-          title: {
-            display: true,
-            text: 'Country',
-            color: '#94a3b8'
-          },
-          ticks: {
-            color: '#9ca3af',
-            maxRotation: 35,
-            minRotation: countries.length > 10 ? 35 : 0,
-            precision: 0,
-            stepSize: 1,
-            callback: (value: string | number) => {
-              const index = Number(value);
-              if (!Number.isInteger(index) || index < 1 || index > countries.length) {
-                return '';
-              }
-              return this.truncateAxisLabel(countries[index - 1]);
-            }
-          },
-          grid: {
-            color: '#2f333a'
-          },
-          border: {
-            color: '#374151'
-          }
-        },
-        y: {
-          min: 0,
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: 'Response time (ms)',
-            color: '#94a3b8'
-          },
-          ticks: {
-            color: '#9ca3af',
-            callback: (value: string | number) => `${this.formatChartValue(value)} ms`
-          },
-          grid: {
-            color: '#2f333a'
-          },
-          border: {
-            color: '#374151'
-          }
-        }
-      }
-    };
-  }
-
   private median(values: number[]): number {
     if (!values.length) {
       return 0;
@@ -668,13 +560,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       hash = ((hash * 31) + seed.charCodeAt(index)) >>> 0;
     }
     return ((hash % 1000) / 1000 - 0.5) * 0.62;
-  }
-
-  private truncateAxisLabel(label: string): string {
-    if (label.length <= 12) {
-      return label;
-    }
-    return `${label.slice(0, 11)}...`;
   }
 
   private loadFastestAliveSortDirection(): FastestAliveSortDirection {
@@ -721,33 +606,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return 'bad';
     }
     return 'unknown';
-  }
-
-  private formatReputationLabel(label: string | undefined | null): string {
-    const normalized = this.normalizeReputationLabel(label);
-    if (normalized === 'bad') {
-      return 'Bad';
-    }
-    if (normalized === 'good') {
-      return 'Good';
-    }
-    if (normalized === 'neutral') {
-      return 'Neutral';
-    }
-    return 'Unknown';
-  }
-
-  private resolveReputationPointStyle(label: string): string {
-    switch (this.normalizeReputationLabel(label)) {
-      case 'good':
-        return 'circle';
-      case 'neutral':
-        return 'triangle';
-      case 'bad':
-        return 'rectRot';
-      default:
-        return 'rect';
-    }
   }
 
   private resolveCountryColor(country: string): string {
@@ -832,145 +690,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const values = [breakdown.good, breakdown.neutral, breakdown.poor, breakdown.unknown];
     const labels = ['Good', 'Neutral', 'Poor', 'Unknown'];
-    const accentColors = ['#22c55e', '#f97316', '#ef4444', '#94a3b8'];
-    const stemColors = [
-      'rgba(34, 197, 94, 0.35)',
-      'rgba(249, 115, 22, 0.35)',
-      'rgba(239, 68, 68, 0.35)',
-      'rgba(148, 163, 184, 0.35)'
-    ];
-
-    const lollipopPoints = labels.map((label, index) => ({
-      x: values[index],
-      y: label
-    }));
-
-    this.reputationChartData.set({
-      labels,
-      datasets: [
-        {
-          type: 'bar',
-          data: values,
-          backgroundColor: stemColors,
-          borderColor: accentColors,
-          borderWidth: 1.25,
-          borderRadius: 999,
-          borderSkipped: false,
-          barThickness: 8,
-          maxBarThickness: 12,
-          minBarLength: 2,
-          hoverBackgroundColor: stemColors,
-          hoverBorderColor: accentColors
-        },
-        {
-          type: 'scatter',
-          data: lollipopPoints,
-          backgroundColor: accentColors,
-          borderColor: '#0f172a',
-          borderWidth: 2,
-          pointRadius: 9,
-          pointHoverRadius: 11,
-          hitRadius: 24,
-          clip: false
-        }
-      ]
-    });
-
-    const total = values.reduce((sum, value) => sum + value, 0);
-
-    this.reputationChartOptions.set({
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 650 },
-      indexAxis: 'y',
-      layout: {
-        padding: { left: 8, right: 16, top: 8, bottom: 8 }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#111827',
-          titleColor: '#f9fafb',
-          bodyColor: '#e5e7eb',
-          borderColor: '#1f2937',
-          borderWidth: 1,
-          padding: 12,
-          callbacks: {
-            label: (context: any) => {
-              const label = context?.label ?? '';
-              const rawValue = context?.raw;
-              const parsedValue = context?.parsed;
-
-              let value = 0;
-              if (typeof rawValue === 'number') {
-                value = rawValue;
-              } else if (rawValue && typeof rawValue.x === 'number') {
-                value = rawValue.x;
-              } else if (typeof parsedValue === 'number') {
-                value = parsedValue;
-              } else if (parsedValue && typeof parsedValue.x === 'number') {
-                value = parsedValue.x;
-              } else if (parsedValue && typeof parsedValue.r === 'number') {
-                value = parsedValue.r;
-              }
-
-              const chartData = context?.chart?.data;
-              const datasetIndex = typeof context?.datasetIndex === 'number' ? context.datasetIndex : 0;
-              const dataset = chartData?.datasets?.[datasetIndex];
-              const dataPoints = Array.isArray(dataset?.data) ? dataset.data : [];
-
-              const datasetTotal = dataPoints.reduce((sum: number, entry: unknown) => {
-                return typeof entry === 'number' ? sum + entry : sum;
-              }, 0);
-
-              const effectiveTotal = datasetTotal > 0 ? datasetTotal : total;
-              const share = effectiveTotal > 0 ? ((value / effectiveTotal) * 100).toFixed(1) : '0.0';
-              const formatted = this.numberFormatter.format(value);
-              return `${label}: ${formatted} (${share}%)`;
-            }
-          }
-        }
-      },
-      elements: {
-        bar: {
-          borderRadius: 999,
-          borderSkipped: false
-        }
-      },
-      scales: {
-        x: {
-          beginAtZero: true,
-          grid: {
-            color: '#1f2937'
-          },
-          ticks: {
-            color: '#d1d5db',
-            callback: (value: string | number) => {
-              if (typeof value === 'number') {
-                return this.numberFormatter.format(value);
-              }
-              const parsed = Number(value);
-              return Number.isNaN(parsed) ? value : this.numberFormatter.format(parsed);
-            }
-          },
-          border: {
-            color: '#1f2937'
-          }
-        },
-        y: {
-          type: 'category',
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: '#94a3b8',
-            font: {
-              weight: '600'
-            }
-          }
-        }
-      }
-    });
+    this.reputationChart.set(buildReputationChart(
+      labels.map((label, index) => ({label, value: values[index], color: REPUTATION_COLORS[index]})),
+      value => this.numberFormatter.format(value),
+    ));
   }
 
   private buildProxiesLineChart(history: ProxyHistoryEntry[], limit: number | null | undefined): void {
@@ -994,119 +717,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
       minute: '2-digit'
     });
 
-    if (!parsed.length) {
-      this.proxiesLineDiff = { gained: [0], lost: [0] };
-      const diffRef = this.proxiesLineDiff;
-      const datasets: Array<Record<string, unknown>> = [
-        {
-          label: this.proxyLineI18n.proxiesLabel,
-          data: [0],
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.2)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 4,
-          pointHoverRadius: 6
-        }
-      ];
-
-      if (effectiveLimit !== null) {
-        datasets.push({
-          label: this.proxyLineI18n.limitLabel,
-          data: [effectiveLimit],
-          borderColor: '#f59e0b',
-          borderDash: [5, 5],
-          pointRadius: 0,
-          fill: false
-        });
-      }
-
-      this.proxiesLineData.set({
-        labels: [this.proxyLineI18n.noDataLabel],
-        datasets
-      });
-      this.proxiesLineOptions.set(this.createProxyLineOptions(diffRef));
-      return;
-    }
-
-    const labels = parsed.map((entry) => labelFormatter.format(entry.timestamp));
-    const values = parsed.map((entry) => entry.count);
-
-    const gained = values.map((value, index) => (index === 0 ? value : value - values[index - 1]));
-    const lost = gained.map((value) => (value < 0 ? Math.abs(value) : 0));
-    this.proxiesLineDiff = { gained, lost };
-
-    const datasets: Array<Record<string, unknown>> = [
-      {
-        label: this.proxyLineI18n.proxiesLabel,
-        data: values,
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 4,
-        pointHoverRadius: 6
-      }
-    ];
-
-    if (effectiveLimit !== null) {
-      datasets.push({
-        label: this.proxyLineI18n.limitLabel,
-        data: values.map(() => effectiveLimit),
-        borderColor: '#f59e0b',
-        borderDash: [5, 5],
-        pointRadius: 0,
-        fill: false
-      });
-    }
-
-    const diffRef = this.proxiesLineDiff;
-
-    this.proxiesLineData.set({
-      labels,
-      datasets
+    const entries = parsed.length ? parsed : [{timestamp: null, count: 0}];
+    const points = entries.map((entry, index) => {
+      const delta = index === 0 ? entry.count : entry.count - entries[index - 1].count;
+      return {
+        index,
+        label: entry.timestamp ? labelFormatter.format(entry.timestamp) : this.proxyLineI18n.noDataLabel,
+        count: entry.count,
+        gained: Math.max(delta, 0),
+        lost: Math.max(-delta, 0),
+      };
     });
-
-    this.proxiesLineOptions.set(this.createProxyLineOptions(diffRef));
+    this.inventoryLimit.set(effectiveLimit);
+    this.inventoryChart.set(buildInventoryChart(points, effectiveLimit, this.proxyLineI18n, value => this.numberFormatter.format(value)));
   }
 
-  private createProxyLineOptions(diffRef: { gained: number[]; lost: number[] }) {
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: (context: any) => {
-              const index = context.dataIndex;
-              const value = context.dataset.data[index];
-              if (context.datasetIndex === 0) {
-                const gainedValue = diffRef.gained[index] ?? 0;
-                const lostValue = diffRef.lost[index] ?? 0;
-                return `${this.proxyLineI18n.tooltipProxiesLabel}: ${this.formatChartValue(value)} (${this.proxyLineI18n.tooltipGainedLabel}: ${this.formatChartValue(Math.max(gainedValue, 0))}, ${this.proxyLineI18n.tooltipLostLabel}: ${this.formatChartValue(lostValue)})`;
-              }
-              return `${this.proxyLineI18n.tooltipLimitLabel}: ${this.formatChartValue(value)}`;
-            }
-          }
-        },
-        legend: {
-          labels: { color: '#e5e7eb' }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#9ca3af' },
-          grid: { color: '#374151' }
-        },
-        y: {
-          ticks: {
-            color: '#9ca3af',
-            callback: (value: string | number) => this.formatChartValue(value)
-          },
-          grid: { color: '#374151' }
-        }
-      }
-    };
+  get inventoryLegend(): Array<{label: string; color: string; dashed?: boolean}> {
+    return [
+      {label: this.proxyLineI18n.proxiesLabel, color: '#3b82f6'},
+      ...(this.inventoryLimit() === null ? [] : [{label: this.proxyLineI18n.limitLabel, color: '#f59e0b', dashed: true}]),
+    ];
   }
 
   private parseDate(raw?: string): Date | null {
@@ -1124,14 +754,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }).format(date);
   }
 
-  private formatChartValue(value: string | number): string {
-    if (typeof value === 'number') {
-      return this.numberFormatter.format(value);
-    }
 
-    const parsed = Number(value);
-    return Number.isNaN(parsed) ? value : this.numberFormatter.format(parsed);
-  }
 
   private resolveProxyLineI18n(_localeId: string): ProxyLineI18n {
     return {

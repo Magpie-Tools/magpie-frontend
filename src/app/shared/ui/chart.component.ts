@@ -11,7 +11,7 @@ import { Chart, ChartType, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 
-/** Owns Chart.js canvases, including the registered geographic chart controllers. */
+/** Owns the proxy detail page's Chart.js canvas. */
 @Component({
   selector: 'app-chart',
   template:

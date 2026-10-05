@@ -1,17 +1,16 @@
 import {HlmCardImports} from '@spartan-ng/helm/card';
 import {DialogComponent} from '../../../shared/ui/dialog.component';
-import {ChartComponent} from '../../../shared/ui/chart.component';
-import {AfterViewInit, Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {DashboardChartComponent} from '../../../shared/ui/dashboard-chart.component';
+import type {DashboardChartDefinition} from '../../../shared/ui/dashboard-chart.component';
+import {buildCountryMapChart, CountryMapFeature} from './country-map-chart';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {DecimalPipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
-import Chart from 'chart.js/auto';
-import {ChartData, ChartOptions, ChartType, Tooltip, TooltipItem, TooltipPositionerFunction, TooltipPositionerMap} from 'chart.js';
-import {ChoroplethController, GeoFeature, ColorScale, ProjectionScale} from 'chartjs-chart-geo';
 import {feature} from 'topojson-client';
 import worldMap from 'world-atlas/countries-110m.json';
-import {Feature, FeatureCollection} from 'geojson';
-import {geoMercator} from 'd3-geo';
+import type {Feature} from 'geojson';
+import type {GeometryCollection, Topology} from 'topojson-specification';
 
 interface CountryBreakdown {
   name: string;
@@ -22,67 +21,12 @@ interface CountryBreakdown {
 
 type CountryFeature = Feature & { properties: { name: string } };
 
-Chart.register(ChoroplethController, GeoFeature, ColorScale, ProjectionScale);
-
-const GEO_TOOLTIP_POSITIONER = 'cursorSafe';
-const GEO_TOOLTIP_OFFSET = 14;
-const GEO_TOOLTIP_MARGIN = 8;
-
-declare module 'chart.js' {
-  interface TooltipPositionerMap {
-    cursorSafe: TooltipPositionerFunction<ChartType>;
-  }
-}
-
-const tooltipPositioners = Tooltip.positioners as TooltipPositionerMap;
-
-if (!tooltipPositioners[GEO_TOOLTIP_POSITIONER]) {
-  tooltipPositioners[GEO_TOOLTIP_POSITIONER] = function (_items, eventPosition) {
-    const chartArea = this.chart.chartArea;
-    const width = this.width ?? 0;
-    const height = this.height ?? 0;
-    const anchorX = eventPosition?.x ?? chartArea.left;
-    const anchorY = eventPosition?.y ?? chartArea.top;
-
-    const placeRight = anchorX + GEO_TOOLTIP_OFFSET + width <= chartArea.right - GEO_TOOLTIP_MARGIN;
-    const placeBelow = anchorY + GEO_TOOLTIP_OFFSET + height <= chartArea.bottom - GEO_TOOLTIP_MARGIN;
-
-    const nextX = placeRight
-      ? anchorX + GEO_TOOLTIP_OFFSET
-      : anchorX - width - GEO_TOOLTIP_OFFSET;
-    const nextY = placeBelow
-      ? anchorY + GEO_TOOLTIP_OFFSET
-      : anchorY - height - GEO_TOOLTIP_OFFSET;
-
-    const x = Math.min(
-      chartArea.right - width - GEO_TOOLTIP_MARGIN,
-      Math.max(chartArea.left + GEO_TOOLTIP_MARGIN, nextX)
-    );
-    const y = Math.min(
-      chartArea.bottom - height - GEO_TOOLTIP_MARGIN,
-      Math.max(chartArea.top + GEO_TOOLTIP_MARGIN, nextY)
-    );
-
-    return {
-      x,
-      y,
-      xAlign: placeRight ? 'left' : 'right',
-      yAlign: placeBelow ? 'top' : 'bottom'
-    };
-  };
-}
-
-const WORLD_TOPO = worldMap as unknown as { objects: { countries: any } };
-const WORLD_FEATURE_COLLECTION = feature(
-  WORLD_TOPO as any,
-  WORLD_TOPO.objects.countries
-) as unknown as FeatureCollection;
-const WORLD_FEATURES_ALL = WORLD_FEATURE_COLLECTION.features as CountryFeature[];
+const WORLD_TOPO = worldMap as unknown as Topology<{countries: GeometryCollection<{name: string}>}>;
+const WORLD_FEATURES_ALL = feature(WORLD_TOPO, WORLD_TOPO.objects.countries).features;
 const WORLD_FEATURES = WORLD_FEATURES_ALL.filter(
   (feat) => (feat.properties?.name ?? '').toLowerCase() !== 'antarctica'
-) as CountryFeature[];
+);
 const FEATURE_BY_NAME = new Map<string, CountryFeature>();
-const WORLD_PROJECTION = geoMercator().rotate([-10, 0]);
 
 WORLD_FEATURES.forEach((feat) => {
   const key = (feat.properties?.name ?? '').toString().toLowerCase();
@@ -206,29 +150,25 @@ const COUNTRY_CODE_OVERRIDES: Record<string, string> = {
 @Component({
   selector: 'app-proxies-per-country-card',
   standalone: true,
-  imports: [HlmCardImports, DialogComponent, ChartComponent, FormsModule],
+  imports: [HlmCardImports, DialogComponent, DashboardChartComponent, FormsModule],
   providers: [DecimalPipe],
   templateUrl: './proxies-per-country-card.component.html',
   styleUrl: './proxies-per-country-card.component.scss'
 })
-export class ProxiesPerCountryCardComponent implements OnChanges, AfterViewInit {
+export class ProxiesPerCountryCardComponent implements OnChanges {
   @Input() title = 'Proxies per country';
   @Input() countries: CountryBreakdown[] = [];
   @Input() styleClass = 'dashboard-card country-card';
 
   viewMode: 'map' | 'countries' = 'map';
-  mapData: ChartData<'choropleth'> = { labels: [], datasets: [] };
-  mapOptions: ChartOptions<'choropleth'> = {};
+  mapChart: DashboardChartDefinition = {marks: [], scales: {x: null, y: null}};
+  mapFeatures: CountryMapFeature[] = [];
   maxCountryValue = 1;
   totalValue = 0;
-  readonly mapChartType: any = 'choropleth';
   readonly listLimit = 7;
   showAllCountries = false;
   searchTerm = '';
-  private refreshQueued = false;
   private readonly decimalPipe: DecimalPipe;
-
-  @ViewChild('mapChart') mapChart?: ChartComponent;
 
   constructor(decimalPipe: DecimalPipe) {
     this.decimalPipe = decimalPipe;
@@ -244,10 +184,6 @@ export class ProxiesPerCountryCardComponent implements OnChanges, AfterViewInit 
       this.recalculateTotals();
       this.buildMap();
     }
-  }
-
-  ngAfterViewInit(): void {
-    this.scheduleMapRefresh();
   }
 
   countryFlag(country: CountryBreakdown): string {
@@ -278,9 +214,6 @@ export class ProxiesPerCountryCardComponent implements OnChanges, AfterViewInit 
 
   setViewMode(mode: 'map' | 'countries'): void {
     this.viewMode = mode;
-    if (mode === 'map') {
-      this.scheduleMapRefresh();
-    }
   }
 
   countryPercent(country: CountryBreakdown): number {
@@ -430,55 +363,11 @@ export class ProxiesPerCountryCardComponent implements OnChanges, AfterViewInit 
 
     this.maxCountryValue = Math.max(maxValue, 1);
 
-    const dataset = WORLD_FEATURES.map((feature) => {
-      const key = (feature.properties?.name ?? '').toLowerCase();
-      return {
-        feature,
-        value: values.get(key) ?? 0
-      };
-    });
-
-    this.mapData = {
-      labels: WORLD_FEATURES.map((feat) => feat.properties?.name ?? ''),
-      datasets: [
-        {
-          label: 'Proxies',
-          outline: WORLD_FEATURES as any[],
-          data: dataset,
-          borderColor: 'rgba(255, 255, 255, 0.18)',
-          borderWidth: 1.1,
-          hoverBorderColor: 'rgba(255, 255, 255, 0.85)',
-          hoverBorderWidth: 1.1,
-          hoverBackgroundColor: (context: any) => {
-            const raw = context.raw as { value?: number } | undefined;
-            const value = typeof raw?.value === 'number' ? raw.value : 0;
-            const normalized = this.maxCountryValue > 0 ? value / this.maxCountryValue : 0;
-            return this.interpolateColor(Math.min(1, normalized + 0.25));
-          }
-        }
-      ]
-    };
-
-    this.mapOptions = this.createMapOptions(this.maxCountryValue);
-    this.scheduleMapRefresh();
-  }
-
-  private scheduleMapRefresh(): void {
-    if (this.refreshQueued) {
-      return;
-    }
-    this.refreshQueued = true;
-
-    const finalize = () => {
-      this.refreshQueued = false;
-      this.mapChart?.refresh();
-    };
-
-    if (typeof requestAnimationFrame !== 'undefined') {
-      requestAnimationFrame(() => requestAnimationFrame(finalize));
-    } else {
-      setTimeout(finalize, 0);
-    }
+    this.mapFeatures = WORLD_FEATURES.map(feature => ({
+      ...feature,
+      properties: {...feature.properties, value: values.get(feature.properties.name.toLowerCase()) ?? 0},
+    }));
+    this.mapChart = buildCountryMapChart(this.mapFeatures, this.maxCountryValue, value => this.formatNumber(value));
   }
 
   private resolveFeature(name: string | undefined | null): CountryFeature | undefined {
@@ -567,89 +456,8 @@ export class ProxiesPerCountryCardComponent implements OnChanges, AfterViewInit 
     this.totalValue = sum;
   }
 
-  private createMapOptions(maxValue: number): ChartOptions<'choropleth'> {
-    const max = Math.max(maxValue, 1);
-    return {
-      maintainAspectRatio: false,
-      transitions: {
-        active: {
-          animation: { duration: 0 }
-        }
-      },
-      interaction: {
-        mode: 'nearest',
-        intersect: true
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          position: GEO_TOOLTIP_POSITIONER,
-          animation: false,
-          animations: {
-            numbers: { duration: 0 },
-            opacity: { duration: 0 }
-          },
-          displayColors: false,
-          caretSize: 0,
-          caretPadding: 10,
-          callbacks: {
-            label: (context: TooltipItem<'choropleth'>) => {
-              const raw = context.raw as any;
-              const feature = raw?.feature as CountryFeature | undefined;
-              const label = feature?.properties?.name ?? context.label ?? 'Unknown';
-              const value = typeof raw?.value === 'number' ? raw.value : 0;
-              return `${label}: ${this.formatNumber(value)}`;
-            }
-          },
-          backgroundColor: '#0b1220',
-          titleColor: '#e5e7eb',
-          bodyColor: '#cbd5e1',
-          borderColor: '#1f2937',
-          borderWidth: 1,
-          padding: 10
-        }
-      },
-      elements: {
-        geoFeature: {
-          borderColor: 'rgba(255, 255, 255, 0.2)',
-          borderWidth: 1.1,
-          hoverBorderColor: 'rgba(255, 255, 255, 0.85)',
-          hoverBorderWidth: 1.1,
-          graticuleBorderColor: 'rgba(255, 255, 255, 0.08)',
-          graticuleBorderWidth: 0.6
-        }
-      },
-      showOutline: true,
-      showGraticule: false,
-      scales: {
-        projection: {
-          axis: 'x',
-          projection: WORLD_PROJECTION
-        },
-        color: {
-          axis: 'x',
-          min: 0,
-          max,
-          quantize: 8,
-          missing: '#0c1424',
-          display: false,
-          ticks: { display: false },
-          interpolate: (value: number) => this.interpolateColor(value)
-        }
-      }
-    };
-  }
-
   private formatNumber(value: number): string {
     return this.decimalPipe.transform(value, '1.0-0') ?? '0';
   }
 
-  private interpolateColor(value: number): string {
-    const clamped = Math.min(1, Math.max(0, value));
-    const start = [9, 12, 24];
-    const end = [180, 225, 255];
-    const channel = (index: number) => Math.round(start[index] + (end[index] - start[index]) * clamped);
-    const alpha = 0.55 + clamped * 0.4;
-    return `rgba(${channel(0)}, ${channel(1)}, ${channel(2)}, ${alpha})`;
-  }
 }

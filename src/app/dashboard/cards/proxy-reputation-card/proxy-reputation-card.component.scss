@@ -21,8 +21,8 @@
   background: rgba(255, 255, 255, 0.012);
 }
 
-:host ::ng-deep .reputation-card__chart app-chart,
-:host ::ng-deep .reputation-card__chart canvas {
+:host ::ng-deep .reputation-card__chart app-dashboard-chart,
+:host ::ng-deep .reputation-card__chart svg {
   display: block;
   width: 100% !important;
   height: 100% !important;
@@ -62,7 +62,6 @@
   width: 0.56rem;
   height: 0.56rem;
   border-radius: 50%;
-  box-shadow: 0 0 0.7rem currentColor;
 }
 
 .legend-text {

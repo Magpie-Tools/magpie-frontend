@@ -79,8 +79,8 @@
   to { clip-path: inset(0 0 0 0); }
 }
 
-:host ::ng-deep .metric-card__visual app-chart,
-:host ::ng-deep .metric-card__visual canvas {
+:host ::ng-deep .metric-card__visual app-dashboard-chart,
+:host ::ng-deep .metric-card__visual svg {
   display: block;
   width: 100% !important;
   height: 100% !important;

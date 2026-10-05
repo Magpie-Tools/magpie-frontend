@@ -24,10 +24,9 @@
     <strong class="metric-card__value">{{ displayValue ?? value }}</strong>
 
     <div class="metric-card__visual">
-      <app-chart
-        type="line"
-        [data]="sparklineData"
-        [options]="sparklineOptions"
+      <app-dashboard-chart
+        [definition]="sparklineChart"
+        [label]="title + ' trend'"
         [ngClass]="getChangeColorClass(resolvedChange)"
       />
     </div>

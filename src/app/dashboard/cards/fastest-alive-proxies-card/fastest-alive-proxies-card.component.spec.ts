@@ -14,8 +14,7 @@ describe('FastestAliveProxiesCardComponent', () => {
 
     fixture = TestBed.createComponent(FastestAliveProxiesCardComponent);
     component = fixture.componentInstance;
-    component.chartData = { datasets: [] };
-    component.chartOptions = {};
+    component.chart = {marks: [], scales: {x: null, y: null}};
     fixture.detectChanges();
   });
 

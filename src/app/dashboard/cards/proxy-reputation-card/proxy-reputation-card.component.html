@@ -24,7 +24,7 @@
   <div class="reputation-card__body">
     <div class="reputation-card__chart">
       @if (total > 0) {
-        <app-chart type="bar" [data]="chartData" [options]="chartOptions" />
+        <app-dashboard-chart [definition]="chart" label="Proxy counts by reputation" />
       } @else {
         <div class="dashboard-empty reputation-card__empty">
           <span class="dashboard-empty__icon"

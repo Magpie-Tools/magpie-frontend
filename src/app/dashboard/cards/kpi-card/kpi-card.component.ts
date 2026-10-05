@@ -1,6 +1,8 @@
 import {HlmCardImports} from '@spartan-ng/helm/card';
 import {HlmBadge} from '@spartan-ng/helm/badge';
-import {ChartComponent} from '../../../shared/ui/chart.component';
+import {DashboardChartComponent} from '../../../shared/ui/dashboard-chart.component';
+import {buildMetricChart, MetricPoint} from '../../dashboard-charts';
+import type {DashboardChartDefinition} from '../../../shared/ui/dashboard-chart.component';
 import {Component, Inject, Input, LOCALE_ID, OnChanges, SimpleChanges} from '@angular/core';
 
 import {NgClass} from '@angular/common';
@@ -8,7 +10,7 @@ import {NgClass} from '@angular/common';
 @Component({
   selector: 'app-kpi-card',
   standalone: true,
-  imports: [HlmCardImports, HlmBadge, ChartComponent, NgClass],
+  imports: [HlmCardImports, HlmBadge, DashboardChartComponent, NgClass],
   templateUrl: './kpi-card.component.html',
   styleUrl: './kpi-card.component.scss'
 })
@@ -22,7 +24,8 @@ export class KpiCardComponent implements OnChanges {
   @Input() changeSuffix = '%';
   @Input() chartValues: Array<number | null | undefined> = [];
 
-  sparklineData: any = {};
+  sparklinePoints: MetricPoint[] = [];
+  sparklineChart: DashboardChartDefinition = {marks: [], scales: {x: null, y: null}};
   resolvedChange = 0;
   private readonly numberFormatter: Intl.NumberFormat;
   private readonly percentFormatter: Intl.NumberFormat;
@@ -37,36 +40,10 @@ export class KpiCardComponent implements OnChanges {
     });
   }
 
-  sparklineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    // Reveal the finished curve in CSS instead of growing it from the baseline.
-    animation: false as const,
-    plugins: {
-      legend: {
-        display: false
-      },
-      tooltip: {
-        callbacks: {
-          label: (context: any) => this.formatNumber(context?.parsed?.y),
-          title: () => []
-        },
-        displayColors: false
-      }
-    },
-    scales: {
-      x: {
-        display: false
-      },
-      y: {
-        display: false
-      }
-    }
-  };
-
   ngOnChanges(_changes: SimpleChanges): void {
     this.resolvedChange = this.resolveChange();
-    this.sparklineData = this.buildSparklineData();
+    this.sparklinePoints = this.buildSparklinePoints();
+    this.sparklineChart = buildMetricChart(this.sparklinePoints, this.getTrendColor(this.resolvedChange), value => this.formatNumber(value));
   }
 
   getChipClass(change: number): string {
@@ -109,7 +86,7 @@ export class KpiCardComponent implements OnChanges {
     return `${this.numberFormatter.format(change)}${this.changeSuffix}`;
   }
 
-  private buildSparklineData(): any {
+  private buildSparklinePoints(): MetricPoint[] {
     const currentValue = this.coerceNumericValue(this.value);
     const history = [...this.sanitiseHistory(this.chartValues)];
 
@@ -119,29 +96,13 @@ export class KpiCardComponent implements OnChanges {
     }
 
     const values = [...trimmed, currentValue];
-    const color = this.getTrendColor(this.resolvedChange);
-
-    return {
-      labels: values.map((_, index) => values[index]),
-      datasets: [
-        {
-          data: values,
-          borderColor: color,
-          borderWidth: 2,
-          tension: 0.35,
-          fill: true,
-          backgroundColor: this.withAlpha(color, 0.15),
-          pointRadius: 0,
-          pointHitRadius: 8
-        }
-      ]
-    };
+    return values.map((value, index) => ({index, value}));
   }
 
   private sanitiseHistory(values: Array<number | null | undefined>): number[] {
     return (values ?? [])
       .map(v => (typeof v === 'number' ? v : NaN))
-      .filter(v => !Number.isNaN(v));
+      .filter(v => Number.isFinite(v));
   }
 
   private resolveChange(): number {
@@ -207,12 +168,4 @@ export class KpiCardComponent implements OnChanges {
     return '#60a5fa';
   }
 
-  private withAlpha(hex: string, opacity: number): string {
-    const normalized = hex.replace('#', '');
-    const bigint = parseInt(normalized, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  }
 }

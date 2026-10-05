@@ -32,7 +32,7 @@ describe('KpiCardComponent', () => {
       chartValues: new SimpleChange(null, component.chartValues, true)
     });
 
-    const dataset = component.sparklineData.datasets[0].data as number[];
+    const dataset = component.sparklinePoints.map(point => point.value);
     expect(dataset.length).toBe(5);
     expect(dataset[dataset.length - 1]).toBe(200);
     expect(component.resolvedChange).toBe(11.1);
@@ -64,17 +64,8 @@ describe('KpiCardComponent', () => {
     });
 
     expect(component.resolvedChange).toBe(4.2);
-    const dataset = component.sparklineData.datasets[0].data as number[];
+    const dataset = component.sparklinePoints.map(point => point.value);
     expect(dataset[dataset.length - 1]).toBe(25000);
-  });
-
-  it('should configure tooltip to show only value', () => {
-    const tooltipConfig = component.sparklineOptions.plugins.tooltip;
-    const label = tooltipConfig.callbacks.label({ parsed: { y: 1000 } } as any);
-    const title = tooltipConfig.callbacks.title();
-
-    expect(label).toBe('1.000');
-    expect(title).toEqual([]);
   });
 
   it('should localize percent change label', () => {

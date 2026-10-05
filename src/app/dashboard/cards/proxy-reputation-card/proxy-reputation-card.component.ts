@@ -1,5 +1,7 @@
 import {HlmCardImports} from '@spartan-ng/helm/card';
-import {ChartComponent} from '../../../shared/ui/chart.component';
+import {DashboardChartComponent} from '../../../shared/ui/dashboard-chart.component';
+import type {DashboardChartDefinition} from '../../../shared/ui/dashboard-chart.component';
+import {REPUTATION_COLORS} from '../../dashboard-charts';
 import {Component, Input} from '@angular/core';
 
 import {DecimalPipe, NgStyle} from '@angular/common';
@@ -14,14 +16,13 @@ interface ReputationBreakdown {
 @Component({
   selector: 'app-proxy-reputation-card',
   standalone: true,
-  imports: [HlmCardImports, ChartComponent, NgStyle, DecimalPipe],
+  imports: [HlmCardImports, DashboardChartComponent, NgStyle, DecimalPipe],
   templateUrl: './proxy-reputation-card.component.html',
   styleUrl: './proxy-reputation-card.component.scss'
 })
 export class ProxyReputationCardComponent {
   @Input({ required: true }) breakdown!: ReputationBreakdown;
-  @Input({ required: true }) chartData!: any;
-  @Input({ required: true }) chartOptions!: any;
+  @Input({ required: true }) chart!: DashboardChartDefinition;
 
   readonly cardStyleClass = 'dashboard-card reputation-card';
   readonly labels: Array<{ key: keyof ReputationBreakdown; title: string }> = [
@@ -51,13 +52,9 @@ export class ProxyReputationCardComponent {
     color: string;
   }> {
     const total = this.total;
-    const datasets = Array.isArray(this.chartData?.datasets) ? this.chartData.datasets : [];
-    const primaryColors = Array.isArray(datasets?.[0]?.backgroundColor) ? datasets[0].backgroundColor : [];
-    const accentColors = Array.isArray(datasets?.[1]?.backgroundColor) ? datasets[1].backgroundColor : [];
-
     return this.labels.map((entry, index) => {
       const raw = this.breakdown?.[entry.key] ?? 0;
-      const color = accentColors[index] ?? primaryColors[index] ?? 'rgba(148,163,184,0.6)';
+      const color = REPUTATION_COLORS[index];
       return {
         key: entry.key,
         title: entry.title,

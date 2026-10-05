@@ -69,6 +69,9 @@
       ],
       "@spartan-ng/helm/dropdown-menu": [
         "./src/app/ui/dropdown-menu/src/index.ts"
+      ],
+      "@spartan-ng/helm/chart": [
+        "./src/app/ui/chart/src/index.ts"
       ]
     }
   },

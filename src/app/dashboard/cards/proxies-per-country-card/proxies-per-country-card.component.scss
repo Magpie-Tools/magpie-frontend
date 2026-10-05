@@ -36,10 +36,15 @@
 }
 
 :host ::ng-deep .map-chart,
-:host ::ng-deep .map-chart canvas {
+:host ::ng-deep .map-chart svg {
   display: block;
   width: 100% !important;
   height: 100% !important;
+}
+
+:host ::ng-deep .map-chart .ts-chart__geo path:hover {
+  filter: brightness(1.25);
+  stroke: rgba(255, 255, 255, 0.85);
 }
 
 .map-caption {
@@ -86,7 +91,7 @@
   inset: 0;
   width: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(var(--theme-primary-500-rgb), 0.14), rgba(var(--theme-primary-500-rgb), 0.025));
+  background: rgba(var(--theme-primary-500-rgb), 0.06);
   transition: width 0.3s ease;
 }
 

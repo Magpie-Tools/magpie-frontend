@@ -19,6 +19,11 @@
     </div>
   </div>
   <div class="dashboard-card__body throughput-card__body">
-    <app-chart [type]="chartType" [data]="chartData" [options]="chartOptions" />
+    <app-dashboard-chart [definition]="chart" [label]="title" />
+  </div>
+  <div class="inventory-legend" aria-label="Inventory chart legend">
+    @for (entry of legend; track entry.label) {
+      <span><i [style.border-color]="entry.color" [class.is-dashed]="entry.dashed" aria-hidden="true"></i>{{ entry.label }}</span>
+    }
   </div>
 </section>

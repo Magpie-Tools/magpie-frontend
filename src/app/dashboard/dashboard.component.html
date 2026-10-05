@@ -115,8 +115,8 @@
         <app-proxies-per-hour-card
           class="dashboard-grid__throughput"
           [title]="proxiesPerHourTitle"
-          [chartData]="proxiesLineData()"
-          [chartOptions]="proxiesLineOptions()"
+          [chart]="inventoryChart()"
+          [legend]="inventoryLegend"
         >
         </app-proxies-per-hour-card>
 
@@ -142,8 +142,7 @@
 
         <app-fastest-alive-proxies-card
           class="dashboard-grid__latency"
-          [chartData]="fastestAliveScatterData()"
-          [chartOptions]="fastestAliveScatterOptions()"
+          [chart]="latencyChart()"
           [proxyCount]="fastestAliveProxyCount()"
           [countryLegend]="fastestAliveCountryLegend()"
           [sortDirection]="fastestAliveSortDirection()"
@@ -154,8 +153,7 @@
         <app-proxy-reputation-card
           class="dashboard-grid__reputation"
           [breakdown]="reputationBreakdown()"
-          [chartData]="reputationChartData()"
-          [chartOptions]="reputationChartOptions()"
+          [chart]="reputationChart()"
         >
         </app-proxy-reputation-card>
       </div>

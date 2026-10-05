@@ -38,11 +38,9 @@
       @if (viewMode === "map") {
         <div class="map-panel">
           <div class="map-frame">
-            <app-chart
-              #mapChart
-              [type]="mapChartType"
-              [data]="mapData"
-              [options]="mapOptions"
+            <app-dashboard-chart
+              [definition]="mapChart"
+              label="Proxy counts by country"
               class="map-chart"
             />
           </div>

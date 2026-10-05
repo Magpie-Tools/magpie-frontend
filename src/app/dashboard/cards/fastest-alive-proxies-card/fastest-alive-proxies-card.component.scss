@@ -32,8 +32,8 @@
   padding: 0.35rem;
 }
 
-:host ::ng-deep .fastest-alive-card__chart app-chart,
-:host ::ng-deep .fastest-alive-card__chart canvas {
+:host ::ng-deep .fastest-alive-card__chart app-dashboard-chart,
+:host ::ng-deep .fastest-alive-card__chart svg {
   display: block;
   width: 100% !important;
   height: 100% !important;
@@ -117,7 +117,6 @@
   width: 0.52rem;
   height: 0.52rem;
   border-radius: 50%;
-  box-shadow: 0 0 0.55rem currentColor;
 }
 
 .country-key__name {

@@ -7,8 +7,31 @@
   height: 24rem;
 }
 
-:host ::ng-deep .throughput-card__body app-chart,
-:host ::ng-deep .throughput-card__body canvas {
+.inventory-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  padding: 0 1rem 1rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.68rem;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  i {
+    width: 1rem;
+    border-top: 2px solid;
+
+    &.is-dashed { border-top-style: dashed; }
+  }
+}
+
+:host ::ng-deep .throughput-card__body app-dashboard-chart,
+:host ::ng-deep .throughput-card__body svg {
   display: block;
   width: 100% !important;
   height: 100% !important;
