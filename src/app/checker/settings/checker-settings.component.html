@@ -40,15 +40,24 @@
         </div>
       </div>
       @if (!editingDefault) {
-        @if (selectedRule; as rule) {
-          <div class="rule-mode" [formGroup]="rule">
-            <div><label class="field-label" for="checker-rule-mode">How this tag changes protocols</label><app-select inputId="checker-rule-mode" [options]="ruleModes" formControlName="Mode" optionLabel="label" optionValue="value"></app-select></div>
-            <button type="button" hlmBtn variant="outline" [disabled]="!workspaces.canOperate()" (click)="removeRule()">Remove checker rule</button>
+        <div class="rule-editor">
+          <div>
+            @if (selectedRule; as rule) {
+              <div class="rule-mode" [formGroup]="rule">
+                <label class="field-label" for="checker-rule-mode">How this tag changes protocols</label>
+                <app-select inputId="checker-rule-mode" [options]="ruleModes" formControlName="Mode" optionLabel="label" optionValue="value"></app-select>
+              </div>
+              <p class="field-hint">Replace uses the selected protocols. Add includes them. Remove excludes them. Shared settings apply to all enabled protocols; inherited fields follow earlier rules.</p>
+            } @else {
+              <p class="field-hint">This tag uses Default and any other matching tag rules.</p>
+            }
           </div>
-          <p class="field-hint">Replace uses the selected protocols. Add includes them. Remove excludes them. Shared settings apply to all enabled protocols; inherited fields follow earlier rules.</p>
-        } @else {
-          <div class="no-rule"><p class="field-hint">This tag uses Default and any other matching tag rules.</p><button type="button" hlmBtn [disabled]="!workspaces.canOperate()" (click)="addRule()">Add checker rule</button></div>
-        }
+          @if (selectedRule) {
+            <button type="button" hlmBtn variant="outline" [disabled]="!workspaces.canOperate()" (click)="removeRule()">Remove checker rule</button>
+          } @else {
+            <button type="button" hlmBtn [disabled]="!workspaces.canOperate()" (click)="addRule()">Add checker rule</button>
+          }
+        </div>
       } @else { <p class="field-hint">Default applies to every proxy. Tags can adjust these settings.</p> }
     </section>
     <div class="settings-grid">
@@ -226,6 +235,7 @@
       </section>
 
       }
+      @if (editingDefault) {
       <section class="settings-card settings-card--validation">
         <div class="card-heading">
           <span class="card-icon"
@@ -357,6 +367,7 @@
           </p>
         </div>
       </section>
+      }
     </div>
 
     <p class="field-hint">Changes apply on the next scheduled check. An empty protocol selection skips checks and does not count as failure.</p>

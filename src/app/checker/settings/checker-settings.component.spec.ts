@@ -193,7 +193,7 @@ describe('CheckerSettingsComponent', () => {
     const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
     expect(service.lastPayload.checker_settings.rules).toEqual([
       {tag_id: 2, mode: 'remove', protocols: ['socks5']},
-      {tag_id: 1, mode: 'add', protocols: ['http'], timeout: 2000, retries: 0},
+      {tag_id: 1, mode: 'replace', protocols: ['http'], timeout: 2000, retries: 0},
     ]);
     expect(service.lastPayload.SOCKS5Protocol).toBeTrue();
   });
@@ -203,9 +203,9 @@ describe('CheckerSettingsComponent', () => {
     component.addRule();
     component.profileForm.patchValue({HTTPProtocol: true, Timeout: 1200, Retries: 0});
     component.setInherited('Timeout', true);
-    expect(component.serializeProfiles().rules[0]).toEqual({tag_id: 1, mode: 'add', protocols: ['http'], retries: 0});
+    expect(component.serializeProfiles().rules[0]).toEqual({tag_id: 1, mode: 'replace', protocols: ['http'], retries: 0});
     component.setInherited('Retries', true);
-    expect(component.serializeProfiles().rules[0]).toEqual({tag_id: 1, mode: 'add', protocols: ['http']});
+    expect(component.serializeProfiles().rules[0]).toEqual({tag_id: 1, mode: 'replace', protocols: ['http']});
   });
 
   it('keeps drafts and their priority after a failed save', () => {
@@ -264,7 +264,7 @@ describe('CheckerSettingsComponent', () => {
   });
   it('allows tags to override shared settings without changing protocol selection', () => {
     component.selectedProfile.setValue(1); component.addRule();
-    component.profileForm.patchValue({Timeout: 1600, TransportProtocol: 'tcp'});
+    component.profileForm.patchValue({Mode: 'add', Timeout: 1600, TransportProtocol: 'tcp'});
     expect(component.serializeProfiles().rules[0]).toEqual({tag_id: 1, mode: 'add', protocols: [], transport: 'tcp', timeout: 1600});
   });
   it('enables loaded settings when workspace permissions arrive later', () => {

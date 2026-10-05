@@ -783,9 +783,13 @@
 .profile-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .profile-field { width: min(100%, 22rem); min-width: 0; }
 .profile-actions { display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap; }
-.rule-mode { display: flex; align-items: end; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
-.rule-mode > div { width: min(100%, 22rem); }
-.no-rule { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+.rule-editor { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 1rem; margin-top: 1rem; }
+.rule-mode { width: min(100%, 22rem); }
+.rule-mode + .field-hint { margin-top: 0.5rem; }
+@container checker-settings (max-width: 520px) {
+  .rule-editor { grid-template-columns: minmax(0, 1fr); }
+  .rule-editor > button { grid-row: 1; justify-self: end; }
+}
 .inherit-toggle { display: flex; align-items: center; gap: 0.5rem; margin: 0.35rem 0; color: var(--card-muted); font-size: 0.75rem; }
 .inherit-toggle input { accent-color: var(--theme-primary-300); }
 fieldset.checker-settings-page { min-width: 0; margin: 0; padding: 0; border: 0; }

@@ -183,7 +183,7 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
   }
   addRule(): void {
     if (!this.workspaces.canOperate() || this.editingDefault || this.selectedRule) { return; }
-    this.rules.push(this.ruleForm({tag_id: this.selectedProfile.value, mode: 'add', protocols: []}));
+    this.rules.push(this.ruleForm({tag_id: this.selectedProfile.value, mode: 'replace', protocols: []}));
     this.rules.markAsDirty();
   }
   removeRule(): void {
