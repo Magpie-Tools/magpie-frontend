@@ -1,13 +1,17 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {of, Subject} from 'rxjs';
-import {signal} from '@angular/core';
+import {provideZonelessChangeDetection, signal} from '@angular/core';
 import {ProxyTagService} from '../../services/proxy-tag.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {CheckerSettingsComponent} from './checker-settings.component';
 import {SettingsService} from '../../services/settings.service';
 import {UserSettings} from '../../models/UserSettings';
 import {WorkspaceService} from '../../services/workspace.service';
+import {HttpService} from '../../services/http.service';
+import {UserService} from '../../services/authorization/user.service';
+import {HlmToaster} from '@spartan-ng/helm/sonner';
+import {toast} from '@spartan-ng/brain/sonner';
 
 class SettingsServiceStub {
   private settings: UserSettings = {
@@ -47,6 +51,7 @@ describe('CheckerSettingsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CheckerSettingsComponent],
       providers: [
+        provideZonelessChangeDetection(),
         { provide: SettingsService, useClass: SettingsServiceStub },
         { provide: WorkspaceService, useValue: {canOperate: () => true} },
         { provide: ProxyTagService, useValue: {loading: signal(false), tags: signal([{id: 1, name: 'One', color: '#22C55E'}, {id: 2, name: 'Two', color: '#22C55E'}]), load: () => of([])} },
@@ -208,21 +213,49 @@ describe('CheckerSettingsComponent', () => {
     expect(component.serializeProfiles().rules[0]).toEqual({tag_id: 1, mode: 'replace', protocols: ['http']});
   });
 
-  it('keeps drafts and their priority after a failed save', () => {
+  it('unlocks the page and keeps drafts and their priority after a failed save', async () => {
     const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
     service.response = new Subject();
     component.selectedProfile.setValue(1);
     component.addRule();
     component.profileForm.patchValue({HTTPProtocol: true, Timeout: 1000});
     const draft = component.serializeProfiles();
-    component.onSubmit();
     fixture.detectChanges();
-    expect(component.saving).toBeTrue();
+    (fixture.nativeElement.querySelector('.save-settings-button') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(component.saving()).toBeTrue();
     expect(fixture.nativeElement.querySelector('fieldset').disabled).toBeTrue();
     service.response.error({error: {error: 'Save failed'}});
-    expect(component.saving).toBeFalse();
+    await fixture.whenStable();
+    expect(component.saving()).toBeFalse();
+    expect(fixture.nativeElement.querySelector('fieldset').disabled).toBeFalse();
     expect(component.settingsForm.dirty).toBeTrue();
     expect(component.serializeProfiles()).toEqual(draft);
+    const protocolButton = fixture.nativeElement.querySelectorAll('.protocol-choice')[1] as HTMLButtonElement;
+    protocolButton.click();
+    await fixture.whenStable();
+    expect(component.selectedProtocolCount).toBe(2);
+    expect(protocolButton.getAttribute('aria-pressed')).toBe('true');
+    expect(fixture.nativeElement.querySelector('.save-settings-button').disabled).toBeFalse();
+  });
+
+  it('unlocks the page and retains edits if the save completes without a response', async () => {
+    const service = TestBed.inject(SettingsService) as unknown as SettingsServiceStub;
+    service.response = new Subject();
+    (fixture.nativeElement.querySelector('.protocol-choice') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    const draft = component.serializeProfiles();
+    (fixture.nativeElement.querySelector('.save-settings-button') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('fieldset').disabled).toBeTrue();
+
+    service.response.complete();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('fieldset').disabled).toBeFalse();
+    expect(component.settingsForm.dirty).toBeTrue();
+    expect(component.serializeProfiles()).toEqual(draft);
+    expect(fixture.nativeElement.querySelector('.save-settings-button').disabled).toBeFalse();
   });
 
   it('removes a deleted tag rule without dropping edits to other profiles', () => {
@@ -287,4 +320,90 @@ describe('CheckerSettingsComponent', () => {
     expect(component.settingsForm.disabled).toBeTrue();
   });
 
+});
+
+describe('CheckerSettingsComponent with SettingsService', () => {
+  afterEach(() => toast.dismiss());
+
+  for (const {profile, empty} of [
+    {profile: 'Default', empty: true},
+    {profile: 'tag', empty: true},
+    {profile: 'Default', empty: false},
+    {profile: 'tag', empty: false},
+  ]) {
+    it(`can edit and save ${profile} repeatedly after saving ${empty ? 'no protocols' : 'enabled protocols'}`, async () => {
+      spyOn(UserService, 'isLoggedIn').and.returnValue(true);
+      spyOn(UserService, 'isAdmin').and.returnValue(false);
+      const response = new Subject<{message: string}>();
+      const http = jasmine.createSpyObj<HttpService>('HttpService', ['getUserSettings', 'saveUserSettings']);
+      http.getUserSettings.and.returnValue(of(new SettingsServiceStub().getUserSettings()!));
+      http.saveUserSettings.and.returnValue(response);
+      await TestBed.configureTestingModule({
+        imports: [CheckerSettingsComponent, HlmToaster],
+        providers: [
+          provideZonelessChangeDetection(),
+          SettingsService,
+          {provide: HttpService, useValue: http},
+          {provide: UserService, useValue: {role$: of('user')}},
+          {provide: WorkspaceService, useValue: {canOperate: () => true}},
+          {provide: ProxyTagService, useValue: {loading: signal(false), tags: signal([{id: 1, name: 'One', color: '#22C55E'}]), load: () => of([])}},
+          NotificationService,
+        ],
+      }).compileComponents();
+      const notification = TestBed.inject(NotificationService);
+      spyOn(notification, 'showSuccess').and.callThrough();
+      const toasterFixture = TestBed.createComponent(HlmToaster);
+      const fixture = TestBed.createComponent(CheckerSettingsComponent);
+      const component = fixture.componentInstance;
+      await fixture.whenStable();
+      if (profile === 'tag') {
+        component.selectedProfile.setValue(1);
+        component.addRule();
+        fixture.detectChanges();
+        if (!empty) {
+          (fixture.nativeElement.querySelectorAll('.protocol-choice')[1] as HTMLButtonElement).click();
+          await fixture.whenStable();
+        }
+      } else {
+        for (const button of fixture.nativeElement.querySelectorAll('.protocol-choice.is-active')) {
+          if (empty || (button as HTMLButtonElement).querySelector('strong')?.textContent?.trim() === 'HTTP') {
+            (button as HTMLButtonElement).click();
+          }
+        }
+        await fixture.whenStable();
+      }
+      expect(component.selectedProtocolCount).toBe(empty ? 0 : 1);
+      const saveButton = fixture.nativeElement.querySelector('.save-settings-button') as HTMLButtonElement;
+      const fieldset = fixture.nativeElement.querySelector('fieldset') as HTMLFieldSetElement;
+      saveButton.click();
+      await fixture.whenStable();
+      expect(fieldset.disabled).toBeTrue();
+
+      response.next({message: 'saved'});
+      response.complete();
+      await fixture.whenStable();
+
+      expect(TestBed.inject(NotificationService).showSuccess).toHaveBeenCalledWith('saved');
+      expect(toasterFixture.nativeElement.textContent).toContain('saved');
+      expect(component.selectedProtocolCount).toBe(empty ? 0 : 1);
+      expect(fieldset.disabled).toBeFalse();
+      const protocolButton = fixture.nativeElement.querySelector('.protocol-choice') as HTMLButtonElement;
+      expect(protocolButton.matches(':disabled')).toBeFalse();
+      protocolButton.click();
+      await fixture.whenStable();
+      expect(component.selectedProtocolCount).toBe(empty ? 1 : 2);
+      expect(protocolButton.getAttribute('aria-pressed')).toBe('true');
+      expect(component.settingsForm.dirty).toBeTrue();
+      expect(saveButton.disabled).toBeFalse();
+
+      http.saveUserSettings.and.returnValue(of({message: 'saved again'}));
+      saveButton.click();
+      await fixture.whenStable();
+      expect(http.saveUserSettings).toHaveBeenCalledTimes(2);
+      const saved = TestBed.inject(SettingsService).getUserSettings()!.checker_settings!;
+      expect(profile === 'Default' ? saved.defaults.protocols : saved.rules[0].protocols).toEqual(empty ? ['http'] : ['http', 'https']);
+      expect(component.settingsForm.pristine).toBeTrue();
+      expect(fieldset.disabled).toBeFalse();
+    });
+  }
 });

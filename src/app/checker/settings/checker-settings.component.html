@@ -1,4 +1,4 @@
-<fieldset class="checker-settings-page" [formGroup]="settingsForm" [disabled]="saving || !settingsLoaded">
+<fieldset class="checker-settings-page" [formGroup]="settingsForm" [disabled]="saving() || !settingsLoaded">
   <section class="settings-stage">
 
     <section class="profile-picker" aria-label="Checker profile">
@@ -370,7 +370,7 @@
       }
     </div>
 
-    <p class="field-hint">Changes apply on the next scheduled check. An empty protocol selection skips checks and does not count as failure.</p>
+<!--    <p class="field-hint">Changes apply on the next scheduled check. An empty protocol selection skips checks and does not count as failure.</p>-->
     <footer class="save-dock">
       <div class="save-state" aria-live="polite">
         <span
@@ -397,7 +397,7 @@
         [disabled]="
           !workspaces.canOperate() ||
           !settingsForm.dirty ||
-          settingsForm.invalid || saving || !settingsLoaded
+          settingsForm.invalid || saving() || !settingsLoaded
         "
         class="save-settings-button"
         (click)="onSubmit()"

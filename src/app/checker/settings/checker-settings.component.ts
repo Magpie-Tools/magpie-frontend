@@ -15,7 +15,7 @@ import {CheckerProtocol, CheckerSettings, TagCheckerRule, UserSettings} from '..
 import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {Subject} from 'rxjs';
-import {filter, takeUntil} from 'rxjs/operators';
+import {filter, finalize, takeUntil} from 'rxjs/operators';
 import {WorkspaceService} from '../../services/workspace.service';
 import {gsap} from 'gsap';
 import {ScrollTrigger} from 'gsap/ScrollTrigger';
@@ -35,7 +35,7 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
   readonly priorityOpen = signal(false);
   readonly priorityDraft = signal<number[]>([]);
   priorityDragging = false;
-  saving = false;
+  readonly saving = signal(false);
   settingsLoaded = false;
   readonly ruleModes = [{label: 'Replace', value: 'replace'}, {label: 'Add', value: 'add'}, {label: 'Remove', value: 'remove'}];
   readonly protocolOptions = [
@@ -170,7 +170,7 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
   ruleMode(id: number): string { return this.rules.controls.find(rule => rule.get('TagID')?.value === id)?.get('Mode')?.value ?? ''; }
 
   toggleProtocol(controlName: string): void {
-    if (!this.workspaces.canOperate() || this.saving) { return; }
+    if (!this.workspaces.canOperate() || this.saving()) { return; }
     const control = this.profileForm.get(controlName);
     control?.setValue(!control.value);
     control?.markAsDirty();
@@ -275,7 +275,7 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
   private populateForm(settings: UserSettings | undefined, force = false): void {
-    if (!settings || (this.settingsForm.dirty && !force && !this.saving)) { return; }
+    if (!settings || (this.settingsForm.dirty && !force && !this.saving())) { return; }
     const defaults = settings.checker_settings?.defaults ?? {
       protocols: this.protocolOptions.filter(p => settings[p.key + '_protocol' as keyof UserSettings]).map(p => p.key),
       transport: settings.transport_protocol || 'tcp', timeout: settings.timeout, retries: settings.retries,
@@ -295,20 +295,21 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
     this.changeDetector.markForCheck();
   }
   onSubmit(): void {
-    if (!this.workspaces.canOperate() || this.saving || !this.settingsLoaded) { return; }
+    if (!this.workspaces.canOperate() || this.saving() || !this.settingsLoaded) { return; }
     this.settingsForm.get('AutoRemoveFailureThreshold')?.setValue(this.cleanupThreshold, {emitEvent: false});
     if (this.settingsForm.invalid) { this.notification.showError('Check the checker settings before saving'); return; }
     const payload = {...this.settingsForm.getRawValue(), checker_settings: this.serializeProfiles()};
     payload.AutoRemoveFailureThreshold = this.cleanupThreshold;
-    this.saving = true;
-    this.settingsService.saveUserSettings(payload).pipe(takeUntil(this.destroy$)).subscribe({
+    this.saving.set(true);
+    this.settingsService.saveUserSettings(payload).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.saving.set(false)),
+    ).subscribe({
       next: resp => {
-        this.saving = false;
         this.notification.showSuccess(resp.message);
         this.populateForm({...this.settingsService.getUserSettings()!, checker_settings: payload.checker_settings}, true);
       },
       error: err => {
-        this.saving = false;
         this.settingsForm.markAsDirty();
         this.notification.showError(err?.error?.message ?? err?.error?.error ?? 'Failed to save settings!');
       }
