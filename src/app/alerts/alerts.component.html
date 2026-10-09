@@ -1,0 +1,98 @@
+<section class="alerts-page" aria-label="Workspace alerts">
+  <header class="page-heading">
+    <div><span class="eyebrow">{{ workspace.current()?.name }}</span><h1>Alerts</h1><p>Monitor pool availability and checker health. Follow incidents from opening to recovery.</p></div>
+    <button type="button" (click)="refresh()" [disabled]="loading() || busy()">Refresh</button>
+  </header>
+  <p class="policy-note">Conditions must last two minutes to open or recover. Checker metrics use a 15-minute window with at least 20 samples. Missing data keeps an open incident open.</p>
+  @if (error()) { <div class="error" role="alert">{{ error() }} <button type="button" (click)="load(cursor)" [disabled]="busy()">Retry</button></div> }
+  @if (rotatorsLoading()) { <p class="muted" role="status">Loading rotator details…</p> }
+  @if (rotatorsError()) { <div class="error" role="status">Rotator details are unavailable. Alert rules and incident history can still be viewed. <button type="button" (click)="loadRotators()">Retry rotator details</button></div> }
+  @if (loading()) { <p role="status">Loading alerts…</p> }
+  @if (loaded()) {
+    @if (confirmDelete(); as item) {
+      <div class="confirmation" role="alert" tabindex="-1">
+        <p>Delete {{ item.name }}? @if (item.kind === 'rule') { Its open incident will close as a configuration change. } @else { Queued messages to this destination will be canceled. }</p>
+        <button type="button" class="danger" (click)="deleteConfirmed()" [disabled]="busy()">Delete {{ item.kind }}</button>
+        <button type="button" (click)="confirmDelete.set(null)" [disabled]="busy()">Cancel</button>
+      </div>
+    }
+    <section class="panel" aria-labelledby="rules-title">
+      <div class="section-heading"><div><h2 id="rules-title">Alert rules</h2><p>Usable counts follow the rotator’s filters. Success rate and latency cover workspace checks for its upstream protocol over TCP, including failed and subsequently paused routes. Rotators sharing a protocol share these checker metrics.</p></div><span class="count">{{ page().rules.length }} / 100</span></div>
+      @if (page().rules.length === 0) { <p class="empty">No rules yet. Add a condition to start monitoring.</p> }
+      <div class="rule-list">
+        @for (item of page().rules; track item.id) {
+          <article class="rule-card">
+            <div class="rule-top"><div><h3>{{ item.name }}</h3><span class="muted">{{ scopeName(item.rotator_id) }}</span></div><span class="badge" [class.warning]="item.active_incident_id || item.breach_since" [class.good]="item.status === 'healthy' && !item.active_incident_id">{{ statusLabel(item) }}</span></div>
+            <p>{{ metricLabel(item.metric) }} {{ item.metric === 'latency_ms' ? 'above' : 'below' }} {{ item.threshold | number:'1.0-2' }}{{ unit(item.metric) }}</p>
+            <small class="muted">{{ measurementScope(item) }}</small>
+            <dl><div><dt>Latest value</dt><dd>@if (item.last_value !== null) { {{ item.last_value | number:'1.0-2' }}{{ unit(item.metric) }} } @else { Unknown }</dd></div><div><dt>Checked</dt><dd>{{ item.last_evaluated_at ? (item.last_evaluated_at | date:'medium') : 'Waiting for evaluation' }}</dd></div></dl>
+            @if (item.unknown_reason && item.status === 'unknown') { <p class="muted">{{ item.unknown_reason }}</p> }
+            @if (item.destination_ids.length === 0) { <p class="muted">Incident history only. No delivery destinations attached.</p> }
+            @if (workspace.canOperate()) { <div class="actions"><button type="button" (click)="editRule(item)" [disabled]="busy()">Edit</button><button type="button" class="quiet" (click)="requestDelete('rule', item.id, item.name)" [disabled]="busy()">Delete</button></div> }
+          </article>
+        }
+      </div>
+      @if (workspace.canOperate()) {
+        <form #ruleForm="ngForm" (ngSubmit)="saveRule()" class="config-form" aria-label="Alert rule">
+          <h3>{{ editingRuleId === null ? 'Add a rule' : 'Edit rule' }}</h3>
+          <div class="fields">
+            <label>Name<input name="ruleName" [(ngModel)]="rule.name" required maxlength="120" placeholder="Production pool availability" [disabled]="busy()"></label>
+            <label>Scope<select name="scope" [(ngModel)]="rule.rotator_id" [disabled]="busy()"><option [ngValue]="null">Whole workspace</option>@if (missingDraftRotator()) { <option [ngValue]="rule.rotator_id">{{ scopeName(rule.rotator_id) }}</option> }@for (rotator of rotators(); track rotator.id) { <option [ngValue]="rotator.id">{{ rotator.name }}</option> }</select></label>
+            <label>Condition<select name="metric" [ngModel]="rule.metric" (ngModelChange)="rule.metric = $event; rule.threshold = null" [disabled]="busy()">@for (metric of metrics; track metric.value) { <option [ngValue]="metric.value">{{ metric.label }}</option> }</select></label>
+            <label>Threshold{{ unit(rule.metric) }}<input type="number" name="threshold" [(ngModel)]="rule.threshold" required [min]="rule.metric === 'usable_routes' ? 1 : 0" [max]="rule.metric === 'success_rate' ? 100 : rule.metric === 'latency_ms' ? 65535 : 1000000000" [step]="rule.metric === 'usable_routes' ? '1' : 'any'" [disabled]="busy()"></label>
+          </div>
+          <fieldset [disabled]="busy()"><legend>Delivery destinations</legend>
+            @for (item of page().destinations; track item.id) { <label class="check"><input type="checkbox" [name]="'destination-' + item.id" [ngModel]="rule.destination_ids.includes(item.id)" (ngModelChange)="selectDestination(item.id, $event)">{{ item.name }} <span class="muted">{{ item.kind }}{{ item.enabled ? '' : ', disabled' }}</span></label> }
+            @if (page().destinations.length === 0) { <p class="muted">An admin can add destinations below. Rules can still record incidents without delivery.</p> }
+          </fieldset>
+          <label class="check"><input type="checkbox" name="ruleEnabled" [(ngModel)]="rule.enabled" [disabled]="busy()">Enable this rule</label>
+          @if (editingRuleId !== null) { <p class="muted">Saving closes any open incident as a configuration change and starts evaluation again.</p> }
+          <div class="actions"><button type="submit" class="primary" [disabled]="ruleForm.invalid || !validThreshold() || busy()">{{ busy() ? 'Saving…' : 'Save rule' }}</button>@if (editingRuleId !== null) { <button type="button" (click)="cancelRule()" [disabled]="busy()">Cancel edit</button> }</div>
+        </form>
+      }
+    </section>
+    <section class="panel" aria-labelledby="destinations-title">
+      <div class="section-heading"><div><h2 id="destinations-title">Delivery destinations</h2><p>Shared across this workspace. Admins and owners configure destinations; operators attach them to rules.</p></div><span class="count">{{ page().destinations.length }} / 20</span></div>
+      @if (page().destinations.length === 0) { <p class="empty">No destinations configured.</p> }
+      @for (item of page().destinations; track item.id) {
+        <article class="destination-row"><div><strong>{{ item.name }}</strong><span class="muted">{{ item.kind | titlecase }} · {{ item.enabled ? 'Enabled' : 'Disabled' }}{{ item.signing_configured ? ' · Signed' : '' }}@if (mentionLabel(item); as mention) { · Mentions {{ mention }} }</span></div>
+          @if (workspace.canAdminister()) { <div class="actions"><button type="button" (click)="editDestination(item)" [disabled]="busy()">Edit</button><button type="button" class="quiet" (click)="requestDelete('destination', item.id, item.name)" [disabled]="busy()">Delete</button></div> }
+        </article>
+      }
+      @if (workspace.canAdminister()) {
+        <form #destinationForm="ngForm" (ngSubmit)="saveDestination()" class="config-form" aria-label="Alert destination">
+          <h3>{{ editingDestinationId === null ? 'Add a destination' : 'Edit destination' }}</h3>
+          <div class="fields"><label>Name<input name="destinationName" [(ngModel)]="destination.name" required maxlength="120" placeholder="Operations team" [disabled]="busy()"></label>
+            <label>Channel<select name="channel" [ngModel]="destination.kind" (ngModelChange)="changeChannel($event)" [disabled]="busy() || editingDestinationId !== null">@for (channel of channels; track channel) { <option [ngValue]="channel">{{ channel | titlecase }}</option> }</select></label>
+            <label class="wide">{{ destination.kind === 'email' ? 'Email address' : 'Webhook URL' }}<input name="target" [(ngModel)]="destination.target" [type]="destination.kind === 'email' ? 'email' : 'password'" [required]="editingDestinationId === null" [email]="destination.kind === 'email'" maxlength="4096" autocomplete="off" [placeholder]="editingDestinationId === null ? (destination.kind === 'email' ? 'ops@example.com' : 'https://…') : 'Leave blank to keep the saved destination'" [disabled]="busy()"></label>
+            @if (destination.kind === 'webhook') { <label class="wide">Optional signing secret<input type="password" name="signingSecret" [(ngModel)]="destination.signing_secret" maxlength="4096" autocomplete="new-password" placeholder="Leave blank to keep an existing secret" [disabled]="busy() || destination.clear_signing_secret"></label> }
+            @if (destination.kind === 'discord' || destination.kind === 'slack') {
+              <label>Mention<select name="mentionMode" [(ngModel)]="destination.mention_mode" [disabled]="busy()">@for (option of mentionOptions(); track option.value) { <option [ngValue]="option.value">{{ option.label }}</option> }</select></label>
+              @if (needsMentionId()) { <label>{{ destination.kind === 'discord' ? 'Discord role ID' : 'Slack user group ID' }}<input name="mentionId" [(ngModel)]="destination.mention_id" required maxlength="32" [placeholder]="destination.kind === 'discord' ? '165511591545143296' : 'S0123456789'" [disabled]="busy()"></label> }
+            }
+          </div>
+          @if (destination.kind === 'discord' || destination.kind === 'slack') { <p class="muted">Optional mentions apply to opening and recovery messages. Your channel permissions control who gets notified.@if (destination.mention_mode === 'role') { Copy the role ID using Discord Developer Mode. }@if (destination.mention_mode === 'user_group') { Use the group ID from its Slack profile URL. }</p> }
+          @if (destination.kind === 'webhook' && editingDestinationId !== null) { <label class="check"><input type="checkbox" name="clearSigning" [(ngModel)]="destination.clear_signing_secret" [disabled]="busy()">Remove the saved signing secret</label> }
+          <p class="muted">Saved addresses, URLs, and signing secrets are hidden. Email requires SMTP configuration.</p>
+          <label class="check"><input type="checkbox" name="destinationEnabled" [(ngModel)]="destination.enabled" [disabled]="busy()">Enable this destination</label>
+          <div class="actions"><button type="submit" class="primary" [disabled]="destinationForm.invalid || !validMention() || busy()">Save destination</button>@if (editingDestinationId !== null) { <button type="button" (click)="cancelDestination()" [disabled]="busy()">Cancel edit</button> }</div>
+        </form>
+      }
+    </section>
+    <section class="panel" aria-labelledby="history-title">
+      <div class="section-heading"><div><h2 id="history-title">Incident history</h2><p>Open incidents remain visible. Closed incidents are kept for 90 days.</p></div>@if (cursor) { <button type="button" (click)="load()" [disabled]="loading() || busy()">Latest incidents</button> }</div>
+      @if (page().incidents.length === 0) { <p class="empty">No incidents on this page.</p> }
+      @for (incident of page().incidents; track incident.id) {
+        <article class="incident">
+          <div class="rule-top"><h3>{{ incident.rule_name }}</h3><span class="badge" [class.warning]="!incident.closed_at">{{ !incident.closed_at ? 'Open' : incident.close_reason === 'recovered' ? 'Recovered' : 'Configuration changed' }}</span></div>
+          <p>{{ incident.scope_name }} · {{ metricLabel(incident.metric) }} · Opening value {{ incident.opening_value | number:'1.0-2' }}{{ unit(incident.metric) }}</p>
+          <small class="muted">Opened {{ incident.opened_at | date:'medium' }}@if (incident.closed_at) { · Closed {{ incident.closed_at | date:'medium' }} }</small>
+          <ul class="deliveries">@for (delivery of page().deliveries; track delivery.id) { @if (delivery.incident_id === incident.id) {
+            <li><span>{{ delivery.destination_name }} · {{ delivery.event }} · {{ delivery.status }}@if (delivery.last_error) { · {{ delivery.last_error }} }</span>@if (canRetry(delivery, incident)) { <button type="button" (click)="retryDelivery(delivery.id)" [disabled]="busy()">Retry message</button> }</li>
+          } }</ul>
+        </article>
+      }
+      @if (page().next_cursor) { <button type="button" (click)="load(page().next_cursor)" [disabled]="loading() || busy()">Older incidents</button> }
+    </section>
+  }
+</section>

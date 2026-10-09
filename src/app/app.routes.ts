@@ -24,6 +24,7 @@ import {ScrapeSourceDetailComponent} from './scraper/scrape-source-detail/scrape
 import {NotificationsComponent} from './notifications/notifications.component';
 import {WorkspaceComponent} from './workspace/workspace.component';
 import {WorkspaceInvitationsComponent} from './workspace-invitations/workspace-invitations.component';
+import {AlertsComponent} from './alerts/alerts.component';
 
 const authGuard = [AuthGuardService];
 const loginGuard = [AuthLoginGuardService];
@@ -45,6 +46,7 @@ export const routes: Routes = [
 
   {path: 'account', component: AccountComponent, canActivate: authGuard},
   {path: 'workspace', component: WorkspaceComponent, canActivate: authGuard, data: {title: 'Workspace'}},
+  {path: 'alerts', component: AlertsComponent, canActivate: authGuard, data: {title: 'Alerts'}},
   {path: 'invitations', component: WorkspaceInvitationsComponent, canActivate: authGuard, data: {title: 'Invitations'}},
   {path: 'addProxies', component: AddProxiesComponent, canActivate: authGuard},
   {path: 'rotating', component: RotatingProxiesComponent, canActivate: authGuard},

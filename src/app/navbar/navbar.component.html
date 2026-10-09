@@ -41,6 +41,13 @@
       </a>
     </section>
 
+    <section class="nav-section" aria-label="Operational alerts">
+      <a class="navbar-item" routerLink="/alerts" routerLinkActive="active">
+        <span class="navbar-item__icon"><i class="icon icon-bell" aria-hidden="true"></i></span>
+        <span>Alerts</span>
+      </a>
+    </section>
+
     @for (group of menuItems; track group.label) {
       @if (group.visible !== false) {
         <details class="nav-cluster" [open]="group.expanded === true">
