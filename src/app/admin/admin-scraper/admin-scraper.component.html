@@ -291,8 +291,9 @@
                 <div class="card-heading__copy">
                   <h2>Account proxy limits</h2>
                   <p>
-                    Cap stored proxies per account after sources finish
-                    scraping.
+                    Set active proxy limits for new workspaces. Extra scraped or
+                    imported proxies are stored as paused. Existing workspace
+                    limits stay unchanged.
                   </p>
                 </div>
               </div>
@@ -304,13 +305,13 @@
                 "
               >
                 <div>
-                  <span>Account allowance</span>
+                  <span>New workspace allowance</span>
                   <strong>{{ proxyLimitLabel }}</strong>
                 </div>
                 <hlm-checkbox
                   formControlName="proxy_limit_enabled"
                   inputId="proxy-limit-enabled"
-                  aria-label="Enforce proxy limit"
+                  aria-label="Limit active proxies in new workspaces"
                 />
               </div>
 
@@ -322,7 +323,7 @@
               >
                 <div class="field-group">
                   <label class="field-label" for="proxy_limit_max_per_user"
-                    >Maximum proxies per account</label
+                    >Maximum active proxies per new workspace</label
                   >
                   <input
                     hlmInput
@@ -343,7 +344,8 @@
                   <span
                     ><strong>Exclude administrators</strong
                     ><small
-                      >Admin accounts can store more than the limit.</small
+                      >New workspaces created by instance administrators have
+                      unlimited active capacity.</small
                     ></span
                   >
                 </label>

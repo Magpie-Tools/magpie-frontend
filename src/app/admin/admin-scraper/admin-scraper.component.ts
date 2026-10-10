@@ -227,11 +227,12 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
 
   get proxyLimitLabel(): string {
     if (!this.settingsForm.get('proxy_limit_enabled')?.value) {
-      return 'No account limit';
+      return 'Unlimited active proxies';
     }
 
     const value = Number(this.settingsForm.get('proxy_limit_max_per_user')?.value ?? 0);
-    return value > 0 ? `${Math.round(value).toLocaleString()} per account` : 'No account limit';
+    const limit = Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+    return `${limit.toLocaleString()} active proxies`;
   }
 
   addScrapeSite(): void {
