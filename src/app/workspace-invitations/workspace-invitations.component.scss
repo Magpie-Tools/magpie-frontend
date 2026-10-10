@@ -86,7 +86,7 @@ dl { margin: 0; }
 .guide-note { display: flex; align-items: flex-start; gap: 0.5rem; margin-top: 1.8rem; padding: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 0.8rem; background: rgba(255, 255, 255, 0.025); color: rgba(255, 255, 255, 0.43); font-size: 0.62rem; line-height: 1.45; }
 .guide-note i { color: var(--theme-primary-300); }
 
-.invitation-list { margin-top: 1.4rem; }
+.invitation-list { margin-top: 1.4rem; overflow-x: hidden; padding-right: 3px; }
 .invitation-row { display: grid; grid-template-columns: minmax(12rem, 1.4fr) minmax(15rem, 1fr) auto; align-items: center; gap: 1rem; min-height: 6.1rem; padding: 0.95rem; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 0.95rem; background: rgba(255, 255, 255, 0.02); transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease; }
 .invitation-row + .invitation-row { margin-top: 0.65rem; }
 .invitation-row:hover,

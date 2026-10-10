@@ -108,7 +108,7 @@
                   <p>@if (workspace.canOperate()) { Add a condition to start monitoring this workspace. } @else { An operator or admin can add conditions for this workspace. }</p>
                 </div>
               } @else {
-                <div class="rule-list">
+                <div class="rule-list" [appVisibleRows]="3.5">
                   @for (item of page().rules; track item.id) {
                     <article class="rule-card" [class.rule-card--active]="item.active_incident_id" [class.rule-card--editing]="editingRuleId === item.id">
                       <div class="rule-top">
@@ -197,7 +197,7 @@
                   </div>
                 </div>
                 <fieldset [disabled]="busy()" class="destination-picker"><legend>Delivery destinations</legend>
-                  <div class="destination-picker__options">
+                  <div class="destination-picker__options" [appVisibleRows]="6.5">
                     @for (item of page().destinations; track item.id) {
                       <label class="destination-choice" [class.destination-choice--selected]="rule.destination_ids.includes(item.id)" [title]="item.name">
                         <input type="checkbox" [name]="'destination-' + item.id" [ngModel]="rule.destination_ids.includes(item.id)" (ngModelChange)="selectDestination(item.id, $event)">

@@ -442,7 +442,7 @@
                 </div>
                 <span class="card-count">{{ judges.length }} endpoints</span>
               </div>
-              <div formArrayName="judges" class="judge-list">
+              <div formArrayName="judges" class="judge-list" [appVisibleRows]="4.5">
                 @for (judge of judges.controls; track judge; let i = $index) {
                   <div [formGroupName]="i" class="judge-row">
                     <span class="judge-index">{{ i + 1 }}</span>

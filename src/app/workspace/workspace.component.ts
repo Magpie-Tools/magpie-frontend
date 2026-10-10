@@ -19,6 +19,7 @@ import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
 import {RevealGroupDirective, RevealStep} from '../shared/reveal-group.directive';
+import {VisibleRowsDirective} from '../shared/visible-rows.directive';
 
 type WorkspaceSection = 'overview' | 'members' | 'settings';
 
@@ -34,6 +35,7 @@ interface OwnershipChange {
   standalone: true,
   imports: [HlmSkeleton, HlmTooltip, HlmTabs, HlmTabsList, HlmTabsTrigger, HlmTabsContent, DialogComponent,
     RevealGroupDirective,
+    VisibleRowsDirective,
     CommonModule,
     FormsModule,
     DatePipe,

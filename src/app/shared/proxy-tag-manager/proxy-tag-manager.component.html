@@ -124,7 +124,7 @@
           <p>Create the first workspace label above.</p>
         </div>
       } @else {
-        <div class="tag-manager__list">
+        <div class="tag-manager__list" [appVisibleRows]="4.5">
           @for (tag of tagService.tags(); track tag.id) {
             <div class="tag-manager__row">
               <div class="tag-manager__identity">

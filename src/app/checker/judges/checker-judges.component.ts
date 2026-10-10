@@ -1,6 +1,7 @@
 import {HlmInput} from '@spartan-ng/helm/input';
 import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/admin-settings-save-dock.component';
 import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {VisibleRowsDirective} from '../../shared/visible-rows.directive';
 
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {TooltipComponent} from '../../tooltip/tooltip.component';
@@ -16,7 +17,7 @@ import {gsap} from 'gsap';
 @Component({
   selector: 'app-checker-judges',
   standalone: true,
-  imports: [HlmInput, AdminSettingsSaveDockComponent, ReactiveFormsModule, TooltipComponent],
+  imports: [HlmInput, AdminSettingsSaveDockComponent, ReactiveFormsModule, TooltipComponent, VisibleRowsDirective],
   templateUrl: './checker-judges.component.html',
   styleUrls: ['./checker-judges.component.scss']
 })

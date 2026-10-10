@@ -8,11 +8,12 @@ import {ProxyTag} from '../../models/ProxyTag';
 import {NotificationService} from '../../services/notification-service.service';
 import {ProxyTagService} from '../../services/proxy-tag.service';
 import {animateDialogSections} from '../dialog-motion';
+import {VisibleRowsDirective} from '../visible-rows.directive';
 
 @Component({
   selector: 'app-proxy-tag-manager',
   standalone: true,
-  imports: [HlmButton, DialogComponent, FormsModule],
+  imports: [HlmButton, DialogComponent, FormsModule, VisibleRowsDirective],
   templateUrl: './proxy-tag-manager.component.html',
   styleUrl: './proxy-tag-manager.component.scss',
 })

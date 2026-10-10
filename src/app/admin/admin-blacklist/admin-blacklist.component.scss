@@ -163,6 +163,7 @@
 
 .entry-row {
   display: grid;
+  flex-shrink: 0;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: end;
   gap: 0.8rem;

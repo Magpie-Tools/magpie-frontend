@@ -166,7 +166,7 @@
             >
           </div>
         } @else {
-          <div class="invitation-list">
+          <div class="invitation-list" [appVisibleRows]="4.5">
             @for (
               invitation of invitations.invitations();
               track invitation.id

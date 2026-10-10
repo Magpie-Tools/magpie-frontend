@@ -299,6 +299,11 @@ dl { margin: 0; }
 .subsection-heading p { margin-top: 0.25rem; color: rgba(255, 255, 255, 0.4); font-size: 0.75rem; }
 .pending-heading { margin-top: 1.75rem; padding-top: 1.35rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
 
+.member-list > .data-header,
+.invitation-list > .data-header { overflow-y: hidden; scrollbar-gutter: stable; scrollbar-width: thin; }
+.member-list__rows > .data-row:first-child,
+.invitation-list__rows > .data-row:first-child { border-top: 0; }
+
 .search-field { position: relative; width: min(15rem, 38vw); }
 .search-field i { position: absolute; z-index: 1; top: 50%; left: 0.72rem; transform: translateY(-50%); color: rgba(255, 255, 255, 0.4); font-size: 0.7rem; }
 .search-field input { width: 100%; min-height: 2.25rem; padding: 0.48rem 0.68rem 0.48rem 2rem; }

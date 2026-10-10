@@ -10,6 +10,7 @@ import {filter, takeUntil} from 'rxjs/operators';
 import {NotificationService} from '../../services/notification-service.service';
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
 import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
+import {VisibleRowsDirective} from '../../shared/visible-rows.directive';
 import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
 import {AdminSettingsHeaderComponent} from '../../shared/admin-settings-shell/admin-settings-header.component';
 import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/admin-settings-save-dock.component';
@@ -21,6 +22,7 @@ import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/
     ReactiveFormsModule,
 
     RevealGroupDirective,
+    VisibleRowsDirective,
     AdminSettingsShellComponent,
     AdminSettingsHeaderComponent,
     AdminSettingsSaveDockComponent,

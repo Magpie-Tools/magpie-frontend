@@ -443,115 +443,117 @@
                 <span>Member</span><span>Role</span><span>Billing</span
                 ><span>Joined</span><span></span>
               </div>
-              @for (member of filteredMembers(); track member.user_id) {
-                @if (memberEdits[member.user_id]; as edit) {
-                  <article class="data-row member-grid">
-                    <div class="identity-cell">
-                      <span class="workspace-avatar" aria-hidden="true">{{
-                        member.email.slice(0, 1).toUpperCase()
-                      }}</span>
-                      <div>
-                        <strong>{{ member.email }}</strong
-                        >
+              <div class="member-list__rows" [appVisibleRows]="9.5">
+                @for (member of filteredMembers(); track member.user_id) {
+                  @if (memberEdits[member.user_id]; as edit) {
+                    <article class="data-row member-grid">
+                      <div class="identity-cell">
+                        <span class="workspace-avatar" aria-hidden="true">{{
+                          member.email.slice(0, 1).toUpperCase()
+                        }}</span>
+                        <div>
+                          <strong>{{ member.email }}</strong
+                          >
+                        </div>
                       </div>
-                    </div>
-                    <div class="control-cell" data-label="Role">
-                      @if (canEditMemberRole(member)) {
-                        <select
-                          class="select-input select-input--compact"
-                          [ngModel]="edit.role"
-                          (ngModelChange)="setMemberRole(member, $event)"
-                          [disabled]="savingMemberIds()[member.user_id]"
-                          [attr.aria-label]="'Role for ' + member.email"
-                        >
-                          @for (role of memberRoleOptions(); track role) {
-                            <option [ngValue]="role">
-                              {{ role | titlecase }}
-                            </option>
-                          }
-                        </select>
-                      } @else {
-                        <span class="plain-value">{{
-                          member.role | titlecase
-                        }}</span>
-                      }
-                    </div>
-                    <div class="control-cell" data-label="Billing">
-                      @if (canEditMemberBilling(member)) {
-                        <label class="compact-checkbox"
-                          ><input
-                            type="checkbox"
-                            [ngModel]="edit.billing_admin"
-                            (ngModelChange)="setMemberBilling(member, $event)"
+                      <div class="control-cell" data-label="Role">
+                        @if (canEditMemberRole(member)) {
+                          <select
+                            class="select-input select-input--compact"
+                            [ngModel]="edit.role"
+                            (ngModelChange)="setMemberRole(member, $event)"
                             [disabled]="savingMemberIds()[member.user_id]"
-                            [attr.aria-label]="
-                              'Billing access for ' + member.email
-                            "
-                          /><span>{{
-                            edit.billing_admin ? "Yes" : "No"
-                          }}</span></label
-                        >
-                      } @else {
-                        <span class="plain-value">{{
-                          member.billing_admin ? "Yes" : "No"
-                        }}</span>
-                      }
-                    </div>
-                    <span
-                      class="plain-value joined-value"
-                      data-label="Joined"
-                      >{{ member.joined_at | date: "mediumDate" }}</span
-                    >
-                    <div class="row-actions">
-                      @if (isMemberDirty(member)) {
-                        <button
-                          type="button"
-                          class="button button--quiet button--compact"
-                          [disabled]="savingMemberIds()[member.user_id]"
-                          (click)="saveMember(member)"
-                        >
-                          @if (savingMemberIds()[member.user_id]) {
-                            <i
-                              class="icon icon-spin icon-loader-circle"
-                              aria-hidden="true"
-                            ></i>
-                          }
-                          Save
-                        </button>
-                      }
-                      @if (
-                        canRemoveMember(member) || memberRemovalReason(member)
-                      ) {
-                        <span
-                          class="tooltip-target"
-                          [hlmTooltip]="memberRemovalReason(member) ?? ''"
-                          [attr.tabindex]="
-                            memberRemovalReason(member) ? 0 : null
-                          "
-                          [attr.aria-label]="
-                            memberRemovalReason(member) ?? null
-                          "
-                        >
+                            [attr.aria-label]="'Role for ' + member.email"
+                          >
+                            @for (role of memberRoleOptions(); track role) {
+                              <option [ngValue]="role">
+                                {{ role | titlecase }}
+                              </option>
+                            }
+                          </select>
+                        } @else {
+                          <span class="plain-value">{{
+                            member.role | titlecase
+                          }}</span>
+                        }
+                      </div>
+                      <div class="control-cell" data-label="Billing">
+                        @if (canEditMemberBilling(member)) {
+                          <label class="compact-checkbox"
+                            ><input
+                              type="checkbox"
+                              [ngModel]="edit.billing_admin"
+                              (ngModelChange)="setMemberBilling(member, $event)"
+                              [disabled]="savingMemberIds()[member.user_id]"
+                              [attr.aria-label]="
+                                'Billing access for ' + member.email
+                              "
+                            /><span>{{
+                              edit.billing_admin ? "Yes" : "No"
+                            }}</span></label
+                          >
+                        } @else {
+                          <span class="plain-value">{{
+                            member.billing_admin ? "Yes" : "No"
+                          }}</span>
+                        }
+                      </div>
+                      <span
+                        class="plain-value joined-value"
+                        data-label="Joined"
+                        >{{ member.joined_at | date: "mediumDate" }}</span
+                      >
+                      <div class="row-actions">
+                        @if (isMemberDirty(member)) {
                           <button
                             type="button"
-                            class="icon-button icon-button--danger"
-                            [disabled]="
-                              !canRemoveMember(member) ||
-                              savingMemberIds()[member.user_id]
-                            "
-                            [attr.aria-label]="'Remove ' + member.email"
-                            (click)="requestMemberRemoval(member)"
+                            class="button button--quiet button--compact"
+                            [disabled]="savingMemberIds()[member.user_id]"
+                            (click)="saveMember(member)"
                           >
-                            <i class="icon icon-trash" aria-hidden="true"></i>
+                            @if (savingMemberIds()[member.user_id]) {
+                              <i
+                                class="icon icon-spin icon-loader-circle"
+                                aria-hidden="true"
+                              ></i>
+                            }
+                            Save
                           </button>
-                        </span>
-                      }
-                    </div>
-                  </article>
+                        }
+                        @if (
+                          canRemoveMember(member) || memberRemovalReason(member)
+                        ) {
+                          <span
+                            class="tooltip-target"
+                            [hlmTooltip]="memberRemovalReason(member) ?? ''"
+                            [attr.tabindex]="
+                              memberRemovalReason(member) ? 0 : null
+                            "
+                            [attr.aria-label]="
+                              memberRemovalReason(member) ?? null
+                            "
+                          >
+                            <button
+                              type="button"
+                              class="icon-button icon-button--danger"
+                              [disabled]="
+                                !canRemoveMember(member) ||
+                                savingMemberIds()[member.user_id]
+                              "
+                              [attr.aria-label]="'Remove ' + member.email"
+                              (click)="requestMemberRemoval(member)"
+                            >
+                              <i class="icon icon-trash" aria-hidden="true"></i>
+                            </button>
+                          </span>
+                        }
+                      </div>
+                    </article>
+                  }
+                } @empty {
+                  <div class="list-empty">No members match your search.</div>
                 }
-              } @empty {
-                <div class="list-empty">No members match your search.</div>
-              }
+              </div>
             </div>
           }
 
@@ -626,128 +628,130 @@
                   <span>Recipient</span><span>Role</span><span>Billing</span
                   ><span>Expires</span><span>Notification</span><span></span>
                 </div>
-                @for (invitation of invitations(); track invitation.id) {
-                  @if (invitationEdits[invitation.id]; as edit) {
-                    <article class="data-row invitation-grid">
-                      <div class="identity-cell identity-cell--invitation">
-                        <span class="avatar avatar--pending" aria-hidden="true"
-                          ><i class="icon icon-mail"></i
-                        ></span>
-                        <div>
-                          <strong>{{ invitation.invitee_email }}</strong
-                          ><span
-                            >Invited by {{ invitation.inviter_email }}</span
-                          >
+                <div class="invitation-list__rows" [appVisibleRows]="4.5">
+                  @for (invitation of invitations(); track invitation.id) {
+                    @if (invitationEdits[invitation.id]; as edit) {
+                      <article class="data-row invitation-grid">
+                        <div class="identity-cell identity-cell--invitation">
+                          <span class="avatar avatar--pending" aria-hidden="true"
+                            ><i class="icon icon-mail"></i
+                          ></span>
+                          <div>
+                            <strong>{{ invitation.invitee_email }}</strong
+                            ><span
+                              >Invited by {{ invitation.inviter_email }}</span
+                            >
+                          </div>
                         </div>
-                      </div>
-                      <div class="control-cell" data-label="Role">
-                        @if (canManageInvitation(invitation)) {
-                          <select
-                            class="select-input select-input--compact"
-                            [ngModel]="edit.role"
-                            (ngModelChange)="
-                              setInvitationRole(invitation, $event)
-                            "
-                            [disabled]="savingInvitationIds()[invitation.id]"
-                            [attr.aria-label]="
-                              'Invitation role for ' + invitation.invitee_email
-                            "
-                          >
-                            @for (role of invitationRoleOptions(); track role) {
-                              <option [ngValue]="role">
-                                {{ role | titlecase }}
-                              </option>
-                            }
-                          </select>
-                        } @else {
-                          <span class="plain-value">{{
-                            invitation.role | titlecase
-                          }}</span>
-                        }
-                      </div>
-                      <div class="control-cell" data-label="Billing">
-                        @if (
-                          workspaces.isOwner() &&
-                          canManageInvitation(invitation)
-                        ) {
-                          <label class="compact-checkbox"
-                            ><input
-                              type="checkbox"
-                              [ngModel]="edit.billing_admin"
+                        <div class="control-cell" data-label="Role">
+                          @if (canManageInvitation(invitation)) {
+                            <select
+                              class="select-input select-input--compact"
+                              [ngModel]="edit.role"
                               (ngModelChange)="
-                                setInvitationBilling(invitation, $event)
+                                setInvitationRole(invitation, $event)
                               "
                               [disabled]="savingInvitationIds()[invitation.id]"
                               [attr.aria-label]="
-                                'Invitation billing access for ' +
+                                'Invitation role for ' + invitation.invitee_email
+                              "
+                            >
+                              @for (role of invitationRoleOptions(); track role) {
+                                <option [ngValue]="role">
+                                  {{ role | titlecase }}
+                                </option>
+                              }
+                            </select>
+                          } @else {
+                            <span class="plain-value">{{
+                              invitation.role | titlecase
+                            }}</span>
+                          }
+                        </div>
+                        <div class="control-cell" data-label="Billing">
+                          @if (
+                            workspaces.isOwner() &&
+                            canManageInvitation(invitation)
+                          ) {
+                            <label class="compact-checkbox"
+                              ><input
+                                type="checkbox"
+                                [ngModel]="edit.billing_admin"
+                                (ngModelChange)="
+                                  setInvitationBilling(invitation, $event)
+                                "
+                                [disabled]="savingInvitationIds()[invitation.id]"
+                                [attr.aria-label]="
+                                  'Invitation billing access for ' +
+                                  invitation.invitee_email
+                                "
+                              /><span>{{
+                                edit.billing_admin ? "Yes" : "No"
+                              }}</span></label
+                            >
+                          } @else {
+                            <span class="plain-value">{{
+                              invitation.billing_admin ? "Yes" : "No"
+                            }}</span>
+                          }
+                        </div>
+                        <span class="plain-value joined-value" data-label="Expires">{{
+                          invitation.expires_at | date: "mediumDate"
+                        }}</span>
+                        <span
+                          class="notification-state"
+                          [class.notification-state--failed]="
+                            invitation.notification_status === 'failed'
+                          "
+                          data-label="Notification"
+                          ><i
+                            class="icon"
+                            [class]="
+                              'icon ' +
+                              notificationIcon(invitation.notification_status)
+                            "
+                            aria-hidden="true"
+                          ></i
+                          >{{
+                            notificationLabel(invitation.notification_status)
+                          }}</span
+                        >
+                        <div class="row-actions">
+                          @if (invitationDirty(invitation)) {
+                            <button
+                              type="button"
+                              class="button button--quiet button--compact"
+                              [disabled]="savingInvitationIds()[invitation.id]"
+                              (click)="saveInvitation(invitation)"
+                            >
+                              @if (savingInvitationIds()[invitation.id]) {
+                                <i
+                                  class="icon icon-spin icon-loader-circle"
+                                  aria-hidden="true"
+                                ></i>
+                              }
+                              Save
+                            </button>
+                          }
+                          @if (canManageInvitation(invitation)) {
+                            <button
+                              type="button"
+                              class="icon-button icon-button--danger"
+                              [disabled]="savingInvitationIds()[invitation.id]"
+                              [attr.aria-label]="
+                                'Revoke invitation for ' +
                                 invitation.invitee_email
                               "
-                            /><span>{{
-                              edit.billing_admin ? "Yes" : "No"
-                            }}</span></label
-                          >
-                        } @else {
-                          <span class="plain-value">{{
-                            invitation.billing_admin ? "Yes" : "No"
-                          }}</span>
-                        }
-                      </div>
-                      <span class="plain-value joined-value" data-label="Expires">{{
-                        invitation.expires_at | date: "mediumDate"
-                      }}</span>
-                      <span
-                        class="notification-state"
-                        [class.notification-state--failed]="
-                          invitation.notification_status === 'failed'
-                        "
-                        data-label="Notification"
-                        ><i
-                          class="icon"
-                          [class]="
-                            'icon ' +
-                            notificationIcon(invitation.notification_status)
-                          "
-                          aria-hidden="true"
-                        ></i
-                        >{{
-                          notificationLabel(invitation.notification_status)
-                        }}</span
-                      >
-                      <div class="row-actions">
-                        @if (invitationDirty(invitation)) {
-                          <button
-                            type="button"
-                            class="button button--quiet button--compact"
-                            [disabled]="savingInvitationIds()[invitation.id]"
-                            (click)="saveInvitation(invitation)"
-                          >
-                            @if (savingInvitationIds()[invitation.id]) {
-                              <i
-                                class="icon icon-spin icon-loader-circle"
-                                aria-hidden="true"
-                              ></i>
-                            }
-                            Save
-                          </button>
-                        }
-                        @if (canManageInvitation(invitation)) {
-                          <button
-                            type="button"
-                            class="icon-button icon-button--danger"
-                            [disabled]="savingInvitationIds()[invitation.id]"
-                            [attr.aria-label]="
-                              'Revoke invitation for ' +
-                              invitation.invitee_email
-                            "
-                            (click)="requestInvitationRevoke(invitation)"
-                          >
-                            <i class="icon icon-x" aria-hidden="true"></i>
-                          </button>
-                        }
-                      </div>
-                    </article>
+                              (click)="requestInvitationRevoke(invitation)"
+                            >
+                              <i class="icon icon-x" aria-hidden="true"></i>
+                            </button>
+                          }
+                        </div>
+                      </article>
+                    }
                   }
-                }
+                </div>
               </div>
             }
           }

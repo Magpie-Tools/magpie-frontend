@@ -243,6 +243,7 @@
 
 .judge-row {
   display: grid;
+  flex-shrink: 0;
   grid-template-columns: auto minmax(14rem, 1.3fr) minmax(12rem, 0.7fr) auto;
   align-items: end;
   gap: 0.85rem;

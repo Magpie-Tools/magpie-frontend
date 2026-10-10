@@ -139,7 +139,7 @@
         </div>
 
         <div formArrayName="blacklist_sources" class="entry-editor">
-          <div class="entry-list">
+          <div class="entry-list" [appVisibleRows]="4.5">
             @for (source of sources.controls; track source; let i = $index) {
               <div class="entry-row" [attr.data-index]="i">
                 <span class="entry-index">{{ i + 1 }}</span>
@@ -198,7 +198,7 @@
         </div>
 
         <div formArrayName="website_blacklist" class="entry-editor">
-          <div class="entry-list">
+          <div class="entry-list" [appVisibleRows]="4.5">
             @for (site of blockedSites.controls; track site; let i = $index) {
               <div class="entry-row" [attr.data-index]="i">
                 <span class="entry-index">{{ i + 1 }}</span>
