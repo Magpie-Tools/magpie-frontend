@@ -1,8 +1,8 @@
-import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
 import {HlmSwitch} from '@spartan-ng/helm/switch';
 import {SelectComponent} from '../../../shared/ui/select.component';
 import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
+import {PasswordComponent} from '../../../shared/ui/password.component';
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
@@ -18,7 +18,7 @@ import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.dir
 @Component({
   selector: 'app-plugin-geolite',
   standalone: true,
-  imports: [HlmInput, HlmCheckbox, HlmSwitch, SelectComponent,
+  imports: [HlmCheckbox, HlmSwitch, SelectComponent, PasswordComponent,
     AdminSettingsSaveDockComponent,
     RouterLink,
     ReactiveFormsModule,

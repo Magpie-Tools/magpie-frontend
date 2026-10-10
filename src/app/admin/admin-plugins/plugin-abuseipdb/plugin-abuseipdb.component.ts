@@ -1,6 +1,7 @@
 import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmSwitch} from '@spartan-ng/helm/switch';
 import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
+import {PasswordComponent} from '../../../shared/ui/password.component';
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
@@ -15,7 +16,7 @@ import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.dir
 @Component({
   selector: 'app-plugin-abuseipdb',
   standalone: true,
-  imports: [HlmInput, HlmSwitch,
+  imports: [HlmInput, HlmSwitch, PasswordComponent,
     AdminSettingsSaveDockComponent,
     RouterLink,
     ReactiveFormsModule,

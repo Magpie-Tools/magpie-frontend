@@ -61,13 +61,13 @@
 
         <div class="field-group">
           <label for="geolite-api-key">MaxMind license key</label>
-          <input
-            id="geolite-api-key"
-            type="text"
-            hlmInput
+          <app-password
+            inputId="geolite-api-key"
             formControlName="api_key"
             autocomplete="off"
             placeholder="Enter your license key"
+            showLabel="Show MaxMind license key"
+            hideLabel="Hide MaxMind license key"
           />
         </div>
       </section>

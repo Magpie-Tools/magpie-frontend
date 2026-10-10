@@ -31,9 +31,10 @@ import { HlmButton } from '@spartan-ng/helm/button';
       variant="ghost"
       size="icon-sm"
       type="button"
-      class="absolute right-1 top-0.5"
-      [attr.aria-label]="revealed() ? 'Hide password' : 'Show password'"
+      class="absolute inset-y-0 right-1 my-auto active:not-aria-[haspopup]:translate-y-0"
+      [attr.aria-label]="revealed() ? hideLabel() : showLabel()"
       [attr.aria-pressed]="revealed()"
+      [attr.aria-controls]="inputId()"
       [disabled]="disabled()"
       (click)="revealed.set(!revealed())"
     >
@@ -48,6 +49,8 @@ export class PasswordComponent implements ControlValueAccessor {
   readonly inputId = input('password');
   readonly autocomplete = input('current-password');
   readonly placeholder = input('');
+  readonly showLabel = input('Show password');
+  readonly hideLabel = input('Hide password');
   readonly revealed = signal(false);
   readonly disabled = signal(false);
   readonly value = signal('');

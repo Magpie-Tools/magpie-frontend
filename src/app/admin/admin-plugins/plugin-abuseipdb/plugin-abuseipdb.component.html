@@ -49,13 +49,13 @@
 
         <div class="field-group">
           <label for="abuseipdb-api-key">AbuseIPDB API key</label>
-          <input
-            id="abuseipdb-api-key"
-            type="text"
-            hlmInput
+          <app-password
+            inputId="abuseipdb-api-key"
             formControlName="api_key"
             autocomplete="off"
             placeholder="Enter your API key"
+            showLabel="Show AbuseIPDB API key"
+            hideLabel="Hide AbuseIPDB API key"
           />
           <small>The key is used only for IP check requests.</small>
         </div>
