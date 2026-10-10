@@ -17,7 +17,7 @@ function scan(directory) {
     if (entry.isDirectory()) scan(path);
     else if (/\.(html|ts|scss)$/.test(path)) {
       for (const match of readFileSync(path, "utf8").matchAll(
-        /\bicon-([a-z]+(?:-[a-z]+)*)(?![\w-])/g,
+        /\bicon-([a-z0-9]+(?:-[a-z0-9]+)*)(?![\w-])/g,
       )) {
         const name = match[1];
         const exportName = `lucide${name

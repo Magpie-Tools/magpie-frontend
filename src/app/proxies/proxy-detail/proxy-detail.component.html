@@ -269,6 +269,7 @@
                       [disabled]="!workspaces.canOperate()"
                       [compact]="false"
                       [maxVisibleTags]="5"
+                      [fitToWidth]="true"
                       (selectionChange)="updateTags($event)"
                       (manageTags)="detailTagManager.open()"
                     ></app-proxy-tag-selector>

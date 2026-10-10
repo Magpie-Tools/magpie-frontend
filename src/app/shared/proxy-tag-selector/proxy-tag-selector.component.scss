@@ -3,6 +3,49 @@
   max-width: 100%;
 }
 
+:host(.fit-to-width) {
+  display: block;
+  min-width: 0;
+  width: 100%;
+
+  hlm-popover {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .proxy-tag-selector {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .proxy-tag-selector__chips {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .proxy-tag-chip,
+  .proxy-tag-selector__more {
+    flex: none;
+  }
+}
+
+.proxy-tag-selector__measurements {
+  position: absolute;
+  display: inline-flex;
+  width: max-content;
+  visibility: hidden;
+  pointer-events: none;
+
+  > * {
+    box-sizing: border-box;
+    flex: none;
+  }
+}
+
 .proxy-tag-selector {
   display: inline-flex;
   align-items: center;

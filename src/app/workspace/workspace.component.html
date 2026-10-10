@@ -618,8 +618,15 @@
                           <div>
                             <strong>{{ invitation.invitee_email }}</strong
                             ><span
+                              [hlmTooltip]="inviterTooltip"
+                              tabindex="0"
                               >Invited by {{ invitation.inviter_email }}</span
                             >
+                            <ng-template #inviterTooltip>
+                              <span class="block max-w-[80vw] break-all sm:max-w-sm">{{
+                                invitation.inviter_email
+                              }}</span>
+                            </ng-template>
                           </div>
                         </div>
                         <div class="control-cell" data-label="Role">

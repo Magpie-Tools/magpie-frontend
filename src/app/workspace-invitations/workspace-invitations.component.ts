@@ -1,4 +1,5 @@
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
+import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {CommonModule, DatePipe, TitleCasePipe} from '@angular/common';
 import {Component, OnInit, signal} from '@angular/core';
 import {Router} from '@angular/router';
@@ -14,7 +15,7 @@ import {VisibleRowsDirective} from '../shared/visible-rows.directive';
 @Component({
   selector: 'app-workspace-invitations',
   standalone: true,
-  imports: [HlmSkeleton, RevealGroupDirective, VisibleRowsDirective, CommonModule, DatePipe, TitleCasePipe],
+  imports: [HlmSkeleton, HlmTooltip, RevealGroupDirective, VisibleRowsDirective, CommonModule, DatePipe, TitleCasePipe],
   templateUrl: './workspace-invitations.component.html',
   styleUrl: './workspace-invitations.component.scss',
 })

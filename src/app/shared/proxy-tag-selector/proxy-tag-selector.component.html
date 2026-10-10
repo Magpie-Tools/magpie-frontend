@@ -1,5 +1,6 @@
 <hlm-popover #tagPopover="brnPopover">
   <button
+    #tagTrigger
     type="button"
     class="proxy-tag-selector"
     [class.proxy-tag-selector--compact]="compact"
@@ -17,7 +18,7 @@
       <i class="icon icon-plus" aria-hidden="true"></i>
       <span>Add tags</span>
     } @else {
-      <span class="proxy-tag-selector__chips">
+      <span #tagChips class="proxy-tag-selector__chips">
         @for (tag of visibleTags(); track tag.id) {
           <span class="proxy-tag-chip" [style.--proxy-tag-color]="tag.color">
             <span class="proxy-tag-chip__name">{{ tag.name }}</span>
@@ -31,6 +32,18 @@
         class="icon icon-pencil proxy-tag-selector__edit"
         aria-hidden="true"
       ></i>
+    }
+    @if (fitToWidth && displayTags().length > 0) {
+      <span #tagMeasurements class="proxy-tag-selector__measurements" aria-hidden="true">
+        @for (tag of candidateTags(); track tag.id) {
+          <span class="proxy-tag-chip" [style.--proxy-tag-color]="tag.color">
+            <span class="proxy-tag-chip__name">{{ tag.name }}</span>
+          </span>
+        }
+        @for (count of overflowCounts(); track count) {
+          <span class="proxy-tag-selector__more" [attr.data-hidden-count]="count">+{{ count }}</span>
+        }
+      </span>
     }
   </button>
 
