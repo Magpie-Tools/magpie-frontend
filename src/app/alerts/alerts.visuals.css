@@ -1,0 +1,67 @@
+.alerts-page [hlmInput],
+.alerts-page [data-slot="select-trigger"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.88);
+  font: inherit;
+  font-size: 0.72rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.alerts-page [hlmInput] { padding: 0.62rem 0.72rem; }
+.alerts-page [hlmInput]::placeholder { color: rgba(255, 255, 255, 0.35); }
+.alerts-page [data-slot="select-trigger"] { display: flex; align-items: center; gap: 0.35rem; padding: 0.62rem 0.72rem; }
+.alerts-page [data-slot="select-trigger"] > span { min-width: 0; flex: 1; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.alerts-page [data-slot="select-trigger"] > ng-icon { flex: 0 0 auto; color: rgba(255, 255, 255, 0.4); }
+
+.alerts-page [hlmInput]:not(:disabled):hover,
+.alerts-page [data-slot="select-trigger"]:not(:disabled):hover { border-color: rgba(255, 255, 255, 0.23); }
+.alerts-page [hlmInput]:focus,
+.alerts-page [data-slot="select-trigger"]:focus-visible { outline: none; border-color: rgba(var(--theme-primary-300-rgb), 0.55); box-shadow: 0 0 0 3px rgba(var(--theme-primary-500-rgb), 0.13); }
+.alerts-page [hlmInput]:disabled,
+.alerts-page [data-slot="select-trigger"]:disabled { opacity: 0.45; cursor: not-allowed; }
+.alerts-page hlm-skeleton { background: rgba(255, 255, 255, 0.055); }
+.alerts-page hlm-skeleton::after { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.045), transparent); }
+
+/* Hover cards render in the overlay container, outside the alerts page. */
+.destination-hover-card {
+  cursor: default;
+  width: 20rem;
+  max-width: calc(100vw - 2rem);
+  max-height: min(24rem, calc(100dvh - 2rem));
+  overflow-y: auto;
+  padding: 0.85rem;
+  border: 1px solid rgba(239, 229, 237, 0.18);
+  border-radius: 0.85rem;
+  background: #141416;
+  color: #f7f5f7;
+  font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+.destination-hover-card__heading { display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.7rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.74rem; }
+.destination-hover-card__heading > i { color: var(--theme-primary-200); }
+.destination-hover-card__heading strong { font-weight: 550; }
+.destination-hover-card__list { margin: 0; padding: 0; list-style: none; }
+.destination-hover-card__list li { display: flex; align-items: center; gap: 0.65rem; padding: 0.7rem 0 0; }
+.destination-hover-card__list li > i { flex: 0 0 auto; color: var(--theme-primary-200); font-size: 0.8rem; }
+.destination-hover-card__list li > div { display: grid; min-width: 0; flex: 1; gap: 0.2rem; }
+.destination-hover-card__list strong { color: rgba(255, 255, 255, 0.88); font-size: 0.72rem; font-weight: 500; overflow-wrap: anywhere; }
+.destination-hover-card__list li > div > span { color: rgba(222, 215, 222, 0.59); font-size: 0.65rem; }
+.destination-hover-card__status { flex: 0 0 auto; padding: 0.22rem 0.4rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.4rem; background: rgba(255, 255, 255, 0.04); color: rgba(222, 215, 222, 0.59); font-size: 0.6rem; }
+.destination-hover-card__status--enabled { border-color: rgba(132, 203, 161, 0.18); background: rgba(81, 157, 111, 0.08); color: #a4dfb9; }
+
+@container alerts-page (max-width: 600px) {
+  .alerts-tabs [data-slot="tabs-list"] { display: grid; width: 100%; height: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .alerts-tabs [data-slot="tabs-trigger"] { min-width: 0; min-height: 2.8rem; gap: 0.3rem; padding: 0.45rem 0.3rem; font-size: 0.64rem; line-height: 1.4; white-space: normal; }
+  .alerts-tabs [data-slot="tabs-trigger"] .icon,
+  .alerts-tabs [data-slot="tabs-trigger"] .tab-count { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alerts-page [hlmInput], .alerts-page [data-slot="select-trigger"] { transition: none; }
+}

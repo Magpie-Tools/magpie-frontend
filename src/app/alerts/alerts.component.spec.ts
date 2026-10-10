@@ -1,5 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {signal} from '@angular/core';
+import {By} from '@angular/platform-browser';
+import {BrnHoverCard, BrnHoverCardContentService} from '@spartan-ng/brain/hover-card';
 import {of, Subject, throwError} from 'rxjs';
 import {AlertsComponent} from './alerts.component';
 import {AlertsService} from '../services/alerts.service';
@@ -48,6 +50,36 @@ describe('AlertsComponent', () => {
     expect(fixture.nativeElement.querySelector('form[aria-label="Alert destination"]')).toBeNull();
     component.editDestination(page.destinations[0]); expect(component.editingDestinationId).toBeNull();
     component.rule = {...rule}; component.saveRule(); expect(api.saveRule).toHaveBeenCalled();
+  });
+
+  it('shows only attached destinations, including disabled and missing entries, on keyboard focus', async () => {
+    canOperate.set(false); canAdminister.set(false);
+    component.page.set({...page, rules: [{...rule, destination_ids: [2, 3, 99]}], destinations: [
+      ...page.destinations,
+      {...page.destinations[0], id: 3, name: 'Maintenance webhook', kind: 'webhook', enabled: false},
+      {...page.destinations[0], id: 4, name: 'Unattached destination'},
+    ]});
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector('.delivery-count--trigger') as HTMLButtonElement;
+    const hoverCard = fixture.debugElement.query(By.directive(BrnHoverCard)).injector.get(BrnHoverCardContentService);
+    try {
+      trigger.focus();
+      await new Promise(resolve => setTimeout(resolve, 250));
+      fixture.detectChanges();
+      const content = document.querySelector('.destination-hover-card') as HTMLElement;
+      expect(content).not.toBeNull();
+      expect(content.id).toBe(trigger.getAttribute('aria-describedby')!);
+      expect(content.textContent).toContain('Ops');
+      expect(content.textContent).toContain('Email');
+      expect(content.textContent).toContain('Maintenance webhook');
+      expect(content.textContent).toContain('Disabled');
+      expect(content.textContent).toContain('Destination #99');
+      expect(content.textContent).toContain('No longer configured');
+      expect(content.textContent).not.toContain('Unattached destination');
+      expect(api.load).toHaveBeenCalledTimes(1);
+    } finally {
+      trigger.blur(); hoverCard.hide();
+    }
   });
 
   it('omits blank destination secrets when editing', () => {
@@ -140,8 +172,8 @@ describe('AlertsComponent', () => {
   it('preserves a rule scope in the form when metadata is unavailable', async () => {
     api.rotators.and.returnValue(throwError(() => ({status: 500}))); component.loadRotators();
     component.editRule({...rule, rotator_id: 12}); fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
-    const scope = fixture.nativeElement.querySelector('select[name="scope"]') as HTMLSelectElement;
-    expect(scope.selectedOptions[0].textContent).toContain('Rotator #12'); expect(component.rule.rotator_id).toBe(12);
+    const scope = fixture.nativeElement.querySelector('app-select[name="scope"] [data-slot="select-trigger"]') as HTMLElement;
+    expect(scope.textContent).toContain('Rotator #12'); expect(component.rule.rotator_id).toBe(12);
     component.saveRule(); expect(api.saveRule).toHaveBeenCalledWith(1, jasmine.objectContaining({rotator_id: 12}));
   });
 
@@ -150,6 +182,28 @@ describe('AlertsComponent', () => {
     component.rule = {...rule}; component.saveRule();
     current.set({id: 8, name: 'Second'} as Workspace); fixture.detectChanges(); component.rule.name = 'New draft';
     save.next(rule); save.complete(); expect(component.rule.name).toBe('New draft'); expect(component.busy()).toBeFalse();
+  });
+
+  it('opens the matching editor tab and keeps drafts when switching sections', () => {
+    component.rule.name = 'Unsaved rule';
+    component.selectSection('alerts-history'); fixture.detectChanges();
+    expect(component.activeSection()).toBe('history');
+    expect(fixture.nativeElement.querySelector('[hlmTabsContent="alerts-history"]').hidden).toBeFalse();
+    expect(fixture.nativeElement.querySelector('[hlmTabsContent="alerts-rules"]').hidden).toBeTrue();
+    component.editDestination(page.destinations[0]); fixture.detectChanges();
+    expect(component.activeSection()).toBe('destinations');
+    expect(component.rule.name).toBe('Unsaved rule');
+    component.editRule(rule); fixture.detectChanges();
+    expect(component.activeSection()).toBe('rules');
+    current.set({id: 8, name: 'Second'} as Workspace); fixture.detectChanges();
+    expect(component.activeSection()).toBe('rules'); expect(component.rule.name).toBe('');
+  });
+
+  it('derives the open incident summary from rules when viewing older history', () => {
+    component.page.set({...page, rules: [{...rule, active_incident_id: 9}, {...rule, id: 3, enabled: false, active_incident_id: null}], incidents: []});
+    component.cursor = 99; fixture.detectChanges();
+    expect(component.enabledRuleCount()).toBe(1); expect(component.openIncidentCount()).toBe(1);
+    expect(component.statusTone({...rule, status: 'healthy', active_incident_id: 9})).toBe('danger');
   });
 
   it('accepts submillisecond latency thresholds and rejects fractional route counts', () => {

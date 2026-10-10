@@ -1,19 +1,25 @@
 import {CommonModule} from '@angular/common';
-import {afterNextRender, Component, DestroyRef, effect, ElementRef, Injector, signal, untracked} from '@angular/core';
+import {afterNextRender, Component, computed, DestroyRef, effect, ElementRef, Injector, signal, untracked} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {BrnHoverCardImports} from '@spartan-ng/brain/hover-card';
+import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
+import {HlmTabsImports} from '@spartan-ng/helm/tabs';
 import {Observable, Subscription, timer} from 'rxjs';
 import {AlertChannel, AlertDelivery, AlertDestination, AlertDestinationWrite, AlertIncident, AlertMentionMode, AlertMetric, AlertRotator, AlertRule, AlertRuleWrite, AlertsPage} from '../models/Alert';
 import {AlertsService} from '../services/alerts.service';
 import {WorkspaceService} from '../services/workspace.service';
 import {NotificationService} from '../services/notification-service.service';
+import {SelectComponent} from '../shared/ui/select.component';
 
 const emptyPage = (): AlertsPage => ({rules: [], destinations: [], incidents: [], deliveries: [], next_cursor: 0});
 const emptyRule = () => ({name: '', rotator_id: null as number | null, metric: 'usable_routes' as AlertMetric, threshold: null as number | null, enabled: true, destination_ids: [] as number[]});
 const emptyDestination = () => ({name: '', kind: 'email' as AlertChannel, enabled: true, target: '', signing_secret: '', clear_signing_secret: false, mention_mode: 'none' as AlertMentionMode, mention_id: ''});
 
 @Component({
-  selector: 'app-alerts', standalone: true, imports: [CommonModule, FormsModule],
+  selector: 'app-alerts', standalone: true,
+  imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent],
   templateUrl: './alerts.component.html', styleUrl: './alerts.component.scss',
 })
 export class AlertsComponent {
@@ -26,6 +32,15 @@ export class AlertsComponent {
   readonly busy = signal(false);
   readonly error = signal('');
   readonly loaded = signal(false);
+  readonly activeSection = signal('rules');
+  readonly enabledRuleCount = computed(() => this.page().rules.filter(rule => rule.enabled).length);
+  readonly openIncidentCount = computed(() => new Set(this.page().rules.flatMap(rule => rule.active_incident_id ? [rule.active_incident_id] : [])).size);
+  readonly destinationsById = computed(() => new Map(this.page().destinations.map(destination => [destination.id, destination])));
+  readonly sections = [
+    {id: 'rules', label: 'Alert rules', icon: 'icon-sliders-horizontal'},
+    {id: 'destinations', label: 'Destinations', icon: 'icon-send'},
+    {id: 'history', label: 'Incident history', icon: 'icon-history'},
+  ];
   readonly confirmDelete = signal<{kind: 'rule' | 'destination'; id: number; name: string} | null>(null);
   readonly metrics: {value: AlertMetric; label: string}[] = [
     {value: 'usable_routes', label: 'Usable routes below minimum'},
@@ -33,6 +48,7 @@ export class AlertsComponent {
     {value: 'latency_ms', label: 'Average successful-check latency above maximum'},
   ];
   readonly channels: AlertChannel[] = ['email', 'slack', 'discord', 'webhook'];
+  readonly channelOptions = this.channels.map(value => ({value, label: value.charAt(0).toUpperCase() + value.slice(1)}));
   rule = emptyRule();
   destination = emptyDestination();
   editingRuleId: number | null = null;
@@ -54,7 +70,7 @@ export class AlertsComponent {
         this.requestVersion++; this.rotatorsVersion++; this.actionVersion++; this.page.set(emptyPage()); this.rotators.set([]);
         this.rotatorsLoading.set(false); this.rotatorsLoaded.set(false); this.rotatorsError.set(false);
         this.loading.set(!!workspaceId);
-        this.loaded.set(false); this.busy.set(false); this.error.set(''); this.cursor = 0;
+        this.loaded.set(false); this.busy.set(false); this.error.set(''); this.cursor = 0; this.activeSection.set('rules');
         this.cancelRule(); this.cancelDestination(); this.confirmDelete.set(null);
         if (workspaceId) { this.load(); this.loadRotators(); }
       });
@@ -83,6 +99,10 @@ export class AlertsComponent {
     });
   }
   refresh(): void { this.load(); this.loadRotators(); }
+  selectSection(tab: string): void {
+    const section = this.sections.find(section => 'alerts-' + section.id === tab);
+    if (section) this.activeSection.set(section.id);
+  }
   loadRotators(): void {
     const workspaceId = this.workspace.current()?.id;
     if (!workspaceId || this.rotatorsLoading()) return;
@@ -108,6 +128,24 @@ export class AlertsComponent {
       ?? (this.rotatorsLoaded() && !this.rotatorsError() && !this.rotatorsLoading() ? `Deleted rotator #${id}` : `Rotator #${id}`);
   }
   missingDraftRotator(): boolean { return this.rule.rotator_id !== null && !this.rotators().some(r => r.id === this.rule.rotator_id); }
+  scopeOptions(): {label: string; value: number | null}[] {
+    return [
+      {label: 'Whole workspace', value: null},
+      ...(this.missingDraftRotator() ? [{label: this.scopeName(this.rule.rotator_id), value: this.rule.rotator_id}] : []),
+      ...this.rotators().map(rotator => ({label: rotator.name, value: rotator.id})),
+    ];
+  }
+  metricIcon(metric: AlertMetric): string {
+    return metric === 'usable_routes' ? 'icon-network' : metric === 'success_rate' ? 'icon-activity' : 'icon-clock';
+  }
+  channelIcon(channel: AlertChannel): string {
+    switch (channel) {
+      case 'email': return 'icon-mail';
+      case 'slack': return 'icon-slack';
+      case 'discord': return 'icon-discord';
+      case 'webhook': return 'icon-code';
+    }
+  }
   measurementScope(rule: AlertRule): string {
     if (rule.metric === 'usable_routes') return 'Current routing eligibility';
     if (rule.rotator_id === null) return 'All attributed workspace checks, last 15 minutes';
@@ -120,9 +158,16 @@ export class AlertsComponent {
     if (rule.active_incident_id) return rule.recovery_since ? 'Recovering' : 'Incident open';
     return rule.breach_since ? 'Pending breach' : 'Healthy';
   }
+  statusTone(rule: AlertRule): string {
+    if (rule.status === 'disabled') return 'neutral';
+    if (rule.active_incident_id) return rule.recovery_since ? 'warning' : 'danger';
+    if (rule.breach_since) return 'warning';
+    return rule.status === 'healthy' ? 'healthy' : 'neutral';
+  }
   unit(metric: AlertMetric): string { return metric === 'success_rate' ? '%' : metric === 'latency_ms' ? ' ms' : ''; }
   editRule(rule: AlertRule): void {
     if (!this.workspace.canOperate()) return;
+    this.activeSection.set('rules');
     this.editingRuleId = rule.id;
     this.rule = {...rule, destination_ids: rule.destination_ids.filter(id => this.page().destinations.some(d => d.id === id))};
     this.focus('[name="ruleName"]');
@@ -138,6 +183,7 @@ export class AlertsComponent {
   }
   editDestination(destination: AlertDestination): void {
     if (!this.workspace.canAdminister()) return;
+    this.activeSection.set('destinations');
     this.editingDestinationId = destination.id; this.destination = {...emptyDestination(), name: destination.name, kind: destination.kind, enabled: destination.enabled, mention_mode: destination.mention_mode ?? 'none', mention_id: destination.mention_id ?? ''};
     this.focus('[name="destinationName"]');
   }
