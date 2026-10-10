@@ -51,16 +51,6 @@
             </p>
           </div>
         </div>
-
-        <div class="workspace-context__actions">
-          @if (workspaces.canAdminister()) {
-            <button type="button" class="button button--primary"
-              [attr.aria-expanded]="inviteExpanded() && activeSection() === 'members'"
-              [attr.aria-controls]="inviteExpanded() ? 'workspace-invite-form' : 'brn-tabs-content-workspace-members'" (click)="openInvitation()">
-              <i class="icon icon-user-plus" aria-hidden="true"></i>Invite member
-            </button>
-          }
-        </div>
       </header>
 
       <hlm-tabs class="settings-section-tabs workspace-tabs" [tab]="'workspace-' + activeSection()"
@@ -301,33 +291,23 @@
             >
           </div>
 
-          @if (workspaces.canAdminister() && inviteExpanded()) {
-            <form id="workspace-invite-form" class="invite-form" (ngSubmit)="sendInvitation()">
-              <div class="form-heading">
-                <span class="invite-icon"
-                  ><i class="icon icon-user-plus" aria-hidden="true"></i
-                ></span>
-                <div>
-                  <strong>Invite a member</strong
-                  ><span
-                    >Use an existing Magpie account.</span
-                  >
-                </div>
-              </div>
+          @if (workspaces.canAdminister()) {
+            <form id="workspace-invite-form" class="invite-form" aria-label="Invite a member" (ngSubmit)="sendInvitation()">
               <div class="invite-fields">
-                <label
-                  ><span>Email address</span
+                <label class="invite-email"
+                  ><span>Invite by email</span
                   ><input
                     class="text-input"
                     type="email"
                     name="inviteEmail"
                     autocomplete="off"
+                    aria-describedby="workspace-invite-hint"
                     placeholder="member@example.com"
                     [(ngModel)]="inviteEmail"
                     required
                     [disabled]="sendingInvitation()"
                 /></label>
-                <label
+                <label class="invite-role"
                   ><span>Role</span
                   ><select
                     class="select-input"
@@ -364,8 +344,7 @@
                   Send invitation
                 </button>
               </div>
-              <button type="button" class="button button--quiet invite-cancel"
-                [disabled]="sendingInvitation()" (click)="inviteExpanded.set(false)">Cancel</button>
+              <p id="workspace-invite-hint" class="invite-hint">Use an existing Magpie account.</p>
               @if (inviteError()) {
                 <p class="form-error" role="alert">
                   <span class="error-icon"

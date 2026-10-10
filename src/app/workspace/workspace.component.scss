@@ -66,7 +66,6 @@ dl { margin: 0; }
 
 .workspace-mark,
 .card-icon,
-.invite-icon,
 .error-icon {
   display: inline-flex;
   flex: 0 0 auto;
@@ -114,7 +113,6 @@ dl { margin: 0; }
 }
 
 .workspace-context__identity > div { min-width: 0; }
-.workspace-context__actions { flex: 0 0 auto; }
 .workspace-tab-panels { margin-top: 1rem; }
 .tab-member-count {
   display: inline-flex;
@@ -140,7 +138,6 @@ dl { margin: 0; }
 .plan-highlights > div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0; }
 .plan-highlights dt { color: var(--card-muted); font-size: 0.8rem; }
 .plan-highlights dd { font-size: 0.85rem; }
-.invite-cancel { margin-top: 0.75rem; }
 
 .workspace-grid {
   display: grid;
@@ -235,15 +232,15 @@ dl { margin: 0; }
 .disclosure__copy small { max-width: 34rem; color: var(--card-muted); font-size: 0.75rem; line-height: 1.5; }
 .disclosure__chevron { color: rgba(255, 255, 255, 0.38); font-size: 0.7rem; }
 .create-form { position: relative; z-index: 1; max-width: 38rem; margin-top: 1.4rem; padding-top: 1.1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
-.invite-form { position: relative; z-index: 1; margin: 1rem 0 1.25rem; padding: 1rem; border: 1px solid rgba(var(--theme-primary-300-rgb), 0.15); border-radius: 1rem; background: rgba(var(--theme-primary-500-rgb), 0.04); }
-.form-heading { display: flex; align-items: center; gap: 0.65rem; }
-.invite-icon { width: 2.15rem; height: 2.15rem; border-radius: 0.68rem; }
-.form-heading > div { display: flex; flex-direction: column; gap: 0.15rem; }
-.form-heading strong { color: rgba(255, 255, 255, 0.8); font-size: 0.8rem; font-weight: 580; }
-.form-heading span { color: rgba(255, 255, 255, 0.4); font-size: 0.75rem; }
+.invite-form { position: relative; z-index: 1; margin-top: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.invite-hint { margin-top: 0.5rem; color: var(--card-muted); font-size: 0.75rem; line-height: 1.45; }
 
-.invite-fields { display: grid; grid-template-columns: minmax(13rem, 1fr) 9rem auto auto; align-items: end; gap: 0.65rem; margin-top: 0.85rem; }
-.invite-fields > label:not(.checkbox-field) { display: grid; gap: 0.35rem; }
+.invite-fields { display: flex; flex-wrap: wrap; align-items: end; gap: 0.65rem; }
+.invite-fields > label:not(.checkbox-field) { display: grid; min-width: 0; gap: 0.35rem; }
+.invite-email { flex: 1 1 15rem; }
+.invite-role { flex: 0 0 9rem; }
+.invite-fields .checkbox-field,
+.invite-submit { flex: 0 0 auto; }
 .invite-fields > label > span { color: rgba(255, 255, 255, 0.5); font-size: 0.75rem; }
 .invite-fields .text-input,
 .invite-fields .select-input { width: 100%; }
@@ -351,8 +348,6 @@ dl { margin: 0; }
   .identity-card,
   .create-card { grid-column: span 6; }
   .plan-accordions { flex-direction: column; }
-  .invite-fields { grid-template-columns: minmax(13rem, 1fr) 9rem auto; }
-  .invite-submit { grid-column: 1 / -1; justify-self: start; }
   .data-header { display: none; }
   .data-row.member-grid,
   .data-row.invitation-grid { grid-template-columns: minmax(0, 1fr) minmax(7rem, auto); align-items: start; gap: 0.7rem 1rem; padding-block: 1rem; }
@@ -377,9 +372,8 @@ dl { margin: 0; }
   .capacity-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .card-heading--split { grid-template-columns: auto minmax(0, 1fr); }
   .section-count { grid-column: 2; width: fit-content; }
-  .invite-fields { grid-template-columns: minmax(0, 1fr) minmax(7rem, 0.45fr); }
-  .checkbox-field { grid-column: 1 / -1; }
-  .invite-submit { grid-column: 1 / -1; width: 100%; }
+  .invite-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(7rem, 0.45fr); }
+  .invite-submit { grid-column: 2; width: 100%; }
 }
 
 @container workspace-page (max-width: 500px) {

@@ -152,6 +152,7 @@ describe('WorkspaceComponent', () => {
   });
 
   it('creates a pending invitation and surfaces an unknown-account error inline', () => {
+    showMembers();
     const response: WorkspaceInvitationResponse = {
       invitation: {
         id: 8,
@@ -179,9 +180,11 @@ describe('WorkspaceComponent', () => {
       billing_admin: false,
     });
     expect(component.invitations()).toEqual([response.invitation]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.invite-form')).not.toBeNull();
+    expect(component.inviteEmail).toBe('');
 
     http.createWorkspaceInvitation.and.returnValue(throwError(() => ({error: {error: 'No Magpie account exists for that email address'}})));
-    component.openInvitation();
     component.inviteEmail = 'missing@example.test';
     component.sendInvitation();
     fixture.detectChanges();
@@ -204,7 +207,7 @@ describe('WorkspaceComponent', () => {
     expect(panel('overview').hidden).toBeFalse();
     expect(panel('members').hidden).toBeTrue();
     expect(panel('settings').hidden).toBeTrue();
-    expect(fixture.nativeElement.querySelector('.invite-form')).toBeNull();
+    expect(panel('members').querySelector('.invite-form')).not.toBeNull();
     expect(fixture.nativeElement.querySelectorAll('.plan-accordions details[open]').length).toBe(0);
   });
 
@@ -239,17 +242,19 @@ describe('WorkspaceComponent', () => {
     expect(memberSaveButtons().length).toBe(1);
   });
 
-  it('opens invitations from the header and allows cancelling without sending', () => {
-    fixture.nativeElement.querySelector('.workspace-context__actions button').click();
-    fixture.detectChanges();
+  it('keeps invitations open in Members and preserves a draft between sections', () => {
+    showMembers();
     expect(panel('members').hidden).toBeFalse();
     expect(fixture.nativeElement.querySelector('.invite-form')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.workspace-context button')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.invite-cancel')).toBeNull();
     component.inviteEmail = 'draft@example.test';
-    fixture.nativeElement.querySelector('.invite-cancel').click();
+    fixture.nativeElement.querySelector('#brn-tabs-label-workspace-overview').click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.invite-form')).toBeNull();
+    expect(panel('members').hidden).toBeTrue();
+    showMembers();
+    expect(fixture.nativeElement.querySelector('.invite-form')).not.toBeNull();
     expect(http.createWorkspaceInvitation).not.toHaveBeenCalled();
-    component.openInvitation();
     expect(component.inviteEmail).toBe('draft@example.test');
   });
 
