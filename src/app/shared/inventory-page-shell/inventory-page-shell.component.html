@@ -3,17 +3,7 @@
   [attr.aria-label]="embedded ? pageTitle : null"
   [class.inventory-page--embedded]="embedded"
   class="inventory-page"
-  [class.inventory-page--loading]="!initialLoadComplete"
-  [attr.aria-busy]="loading"
-  [appRevealGroup]="combinedCard ? '.inventory-context, .inventory-grid' : '.inventory-context, .inventory-toolbar, .inventory-card'"
-  [revealReady]="initialLoadComplete"
 >
-  @if (!initialLoadComplete) {
-    <div class="inventory-initial-loading" role="status">
-      <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
-      {{ loadingLabel }}
-    </div>
-  }
   <section class="inventory-stage">
     @if (showPageHeading) {
       <header class="inventory-context">
@@ -89,6 +79,7 @@
 
       <section
         class="inventory-card"
+        [attr.aria-busy]="loading"
         [attr.aria-labelledby]="showResultHeading ? 'inventory-list-title' : null"
         [attr.aria-label]="showResultHeading ? null : resultTitle"
       >

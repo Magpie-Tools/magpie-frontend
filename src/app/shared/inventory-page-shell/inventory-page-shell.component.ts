@@ -1,14 +1,12 @@
-import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
-import {RevealGroupDirective} from '../reveal-group.directive';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 @Component({
   selector: 'app-inventory-page-shell',
   standalone: true,
-  imports: [RevealGroupDirective],
   templateUrl: './inventory-page-shell.component.html',
   styleUrl: './inventory-page-shell.component.scss',
 })
-export class InventoryPageShellComponent implements OnChanges {
+export class InventoryPageShellComponent {
   @Input() embedded = false;
   @Input() showPageHeading = true;
   @Input() searchScope = 'Searches all pages';
@@ -40,15 +38,6 @@ export class InventoryPageShellComponent implements OnChanges {
   @Output() searchTermChange = new EventEmitter<string>();
   @Output() clearSearch = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();
-
-  initialLoadComplete = false;
-
-  ngOnChanges(): void {
-    // Keep later refreshes from hiding the page or replaying its entrance.
-    if (this.hasLoaded && !this.loading) {
-      this.initialLoadComplete = true;
-    }
-  }
 
   get isEmpty(): boolean {
     return this.hasLoaded && !this.loading && this.totalItems === 0;

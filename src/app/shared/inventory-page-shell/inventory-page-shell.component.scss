@@ -12,22 +12,6 @@
   container: inventory-page / inline-size;
 }
 
-.inventory-page--loading .inventory-stage {
-  visibility: hidden;
-}
-
-.inventory-initial-loading {
-  position: absolute;
-  inset: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  padding: 4rem 1rem;
-  color: var(--card-muted, rgba(222, 215, 222, 0.59));
-  font-size: 0.75rem;
-}
-
 .inventory-stage {
   --card-border: rgba(239, 229, 237, 0.15);
   --card-muted: rgba(222, 215, 222, 0.59);
@@ -103,6 +87,28 @@ p { margin: 0; }
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-auto-flow: dense;
   gap: 0.9rem;
+}
+
+// Let the browser play the entrance independently of requests and JS animation ticks.
+.inventory-context,
+.inventory-grid--combined,
+.inventory-grid:not(.inventory-grid--combined) .inventory-toolbar,
+.inventory-grid:not(.inventory-grid--combined) .inventory-card {
+  animation: inventory-enter 650ms cubic-bezier(0.165, 0.84, 0.44, 1) backwards;
+  animation-delay: var(--inventory-enter-delay, 0ms);
+}
+
+.inventory-context + .inventory-grid {
+  --inventory-enter-delay: 55ms;
+}
+
+.inventory-grid:not(.inventory-grid--combined) .inventory-card {
+  animation-delay: calc(var(--inventory-enter-delay, 0ms) + 55ms);
+}
+
+@keyframes inventory-enter {
+  from { transform: translateY(20px) scale(0.99); }
+  to { transform: none; }
 }
 
 .inventory-toolbar,
@@ -517,7 +523,10 @@ p { margin: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .inventory-initial-loading .icon-spin { animation: none; }
+  .inventory-context,
+  .inventory-grid--combined,
+  .inventory-grid:not(.inventory-grid--combined) .inventory-toolbar,
+  .inventory-grid:not(.inventory-grid--combined) .inventory-card { animation: none; }
 
   ::ng-deep .tool-button,
   .button { transition: none; }

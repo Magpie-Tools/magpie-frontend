@@ -7,6 +7,8 @@ import {HttpService} from '../../services/http.service';
 import {SettingsService} from '../../services/settings.service';
 import {UserService} from '../../services/authorization/user.service';
 import {NotificationService} from '../../services/notification-service.service';
+import {ScrapeSourceInfo} from '../../models/ScrapeSourceInfo';
+import {WorkspaceService} from '../../services/workspace.service';
 
 describe('ScrapeSourceListComponent', () => {
   const pageSizeStorageKey = 'magpie-scrape-source-list-page-size';
@@ -113,6 +115,64 @@ describe('ScrapeSourceListComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the page controls and table skeletons while the first source request is pending', async () => {
+    fixture.destroy();
+    const request = new Subject<ScrapeSourceInfo[]>();
+    (TestBed.inject(HttpService).getScrapingSourcePage as jasmine.Spy).and.returnValue(request);
+    (TestBed.inject(HttpService).getScrapingSourcesCount as jasmine.Spy).and.returnValue(of(1));
+    spyOn(TestBed.inject(WorkspaceService), 'canOperate').and.returnValue(true);
+    fixture = TestBed.createComponent(ScrapeSourceListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const grid = element.querySelector<HTMLElement>('.inventory-grid')!;
+    const toolbar = element.querySelector<HTMLElement>('.inventory-toolbar')!;
+    const search = element.querySelector<HTMLInputElement>('input[aria-label="Search scrape sources"]')!;
+    const entrance = grid.getAnimations()[0];
+    expect(entrance).toBeInstanceOf(CSSAnimation);
+    expect(element.querySelector('.inventory-context')!.getAnimations()[0]).toBeInstanceOf(CSSAnimation);
+    entrance.pause();
+    entrance.currentTime = 350;
+
+    expect(request.observed).toBeTrue();
+    expect(component.loading()).toBeTrue();
+    expect(component.hasLoaded()).toBeFalse();
+    expect(element.querySelector('h1')!.textContent).toContain('Scrape sources');
+    expect(getComputedStyle(toolbar).visibility).toBe('visible');
+    expect(getComputedStyle(toolbar).opacity).toBe('1');
+    expect(getComputedStyle(grid).opacity).toBe('1');
+    expect(getComputedStyle(grid).transform).not.toBe('none');
+    expect(search.disabled).toBeFalse();
+    expect(toolbar.textContent).toContain('Refresh');
+    expect(toolbar.textContent).toContain('Filters');
+    expect(toolbar.textContent).toContain('Columns');
+    expect(element.querySelector('app-add-scrape-source')).not.toBeNull();
+    expect(element.querySelector('.inventory-initial-loading')).toBeNull();
+    expect(element.querySelectorAll('.scrape-skeleton-row').length).toBe(component.skeletonRows.length);
+    expect(element.querySelector('.data-table')!.getAttribute('aria-busy')).toBe('true');
+
+    request.next([{
+      id: 7, url: 'https://source.example/list',
+      proxy_count: 12, alive_count: 8, dead_count: 4, unknown_count: 0,
+    }]);
+    request.complete();
+    // Source responses are delivered on asapScheduler before the next render.
+    await new Promise<void>(resolve => queueMicrotask(resolve));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(element.querySelector('.inventory-toolbar')).toBe(toolbar);
+    expect(element.querySelector('input[aria-label="Search scrape sources"]')).toBe(search);
+    expect(element.querySelector('.scrape-skeleton-row')).toBeNull();
+    expect(element.querySelector('tbody')!.textContent).toContain('source.example');
+    expect(element.querySelector('.data-table')!.getAttribute('aria-busy')).toBe('false');
+    expect(getComputedStyle(grid).opacity).toBe('1');
+    expect(grid.getAnimations()).toEqual([entrance]);
+    expect(entrance.currentTime).toBe(350);
   });
 
   it('persists table row count changes', () => {

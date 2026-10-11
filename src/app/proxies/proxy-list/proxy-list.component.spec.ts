@@ -1,6 +1,6 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {BehaviorSubject, of} from 'rxjs';
+import {BehaviorSubject, of, Subject} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ProxyListComponent} from './proxy-list.component';
 import {HttpService} from '../../services/http.service';
@@ -113,6 +113,58 @@ describe('ProxyListComponent', () => {
     expect(element.querySelector('.summary-card')).toBeNull();
     expect(element.querySelector('.inventory-toolbar')).not.toBeNull();
     expect(element.querySelector('.inventory-card')).not.toBeNull();
+  });
+
+  it('shows the page controls and table skeletons while the first proxy request is pending', async () => {
+    fixture.destroy();
+    const request = new Subject<{proxies: ProxyInfo[]; total: number}>();
+    httpServiceStub.getProxyPage.and.returnValue(request);
+    spyOn(TestBed.inject(WorkspaceService), 'canOperate').and.returnValue(true);
+    fixture = TestBed.createComponent(ProxyListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const grid = element.querySelector<HTMLElement>('.inventory-grid')!;
+    const toolbar = element.querySelector<HTMLElement>('.inventory-toolbar')!;
+    const search = element.querySelector<HTMLInputElement>('input[aria-label="Search proxies"]')!;
+    const entrance = grid.getAnimations()[0];
+    expect(entrance).toBeInstanceOf(CSSAnimation);
+    expect(element.querySelector('.inventory-context')!.getAnimations()[0]).toBeInstanceOf(CSSAnimation);
+    entrance.pause();
+    entrance.currentTime = 350;
+
+    expect(request.observed).toBeTrue();
+    expect(component.isLoading()).toBeTrue();
+    expect(component.hasLoaded()).toBeFalse();
+    expect(element.querySelector('h1')!.textContent).toContain('Managed proxies');
+    expect(getComputedStyle(toolbar).visibility).toBe('visible');
+    expect(getComputedStyle(toolbar).opacity).toBe('1');
+    expect(getComputedStyle(grid).opacity).toBe('1');
+    expect(getComputedStyle(grid).transform).not.toBe('none');
+    expect(search.disabled).toBeFalse();
+    expect(toolbar.textContent).toContain('Refresh');
+    expect(toolbar.textContent).toContain('Filters');
+    expect(toolbar.textContent).toContain('Columns');
+    expect(element.querySelector('app-add-proxies')).not.toBeNull();
+    expect(element.querySelector('.inventory-initial-loading')).toBeNull();
+    expect(element.querySelectorAll('.proxy-skeleton-row').length).toBe(component.skeletonRows.length);
+    expect(element.querySelector('.data-table')!.getAttribute('aria-busy')).toBe('true');
+
+    request.next({proxies: [{id: 42, ip: '192.0.2.42', port: 8080} as ProxyInfo], total: 1});
+    request.complete();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(element.querySelector('.inventory-toolbar')).toBe(toolbar);
+    expect(element.querySelector('input[aria-label="Search proxies"]')).toBe(search);
+    expect(element.querySelector('.proxy-skeleton-row')).toBeNull();
+    expect(element.querySelector('tbody')!.textContent).toContain('192.0.2.42');
+    expect(element.querySelector('.data-table')!.getAttribute('aria-busy')).toBe('false');
+    expect(getComputedStyle(grid).opacity).toBe('1');
+    expect(grid.getAnimations()).toEqual([entrance]);
+    expect(entrance.currentTime).toBe(350);
   });
 
   async function openFilters(): Promise<HTMLButtonElement> {
