@@ -2,6 +2,7 @@ import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {HlmTableImports} from '@spartan-ng/helm/table';
 import {DialogComponent} from '../../shared/ui/dialog.component';
 import {ChartComponent} from '../../shared/ui/chart.component';
+import {CountryHoverCardComponent} from '../../shared/ui/country-hover-card.component';
 import {Component, OnDestroy, OnInit, computed, signal} from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -55,7 +56,7 @@ interface ReputationSignalStructuredItem {
 @Component({
   selector: 'app-proxy-detail',
   standalone: true,
-  imports: [HlmTooltip, HlmTableImports, DialogComponent, ChartComponent,
+  imports: [HlmTooltip, HlmTableImports, DialogComponent, ChartComponent, CountryHoverCardComponent,
     CommonModule,
     RouterLink,
 

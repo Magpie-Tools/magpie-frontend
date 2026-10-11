@@ -7,10 +7,7 @@ import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {DecimalPipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
-import {feature} from 'topojson-client';
-import worldMap from 'world-atlas/countries-110m.json';
-import type {Feature} from 'geojson';
-import type {GeometryCollection, Topology} from 'topojson-specification';
+import {COUNTRY_ALIASES, WORLD_FEATURES, resolveWorldCountry} from '../../../shared/world-map';
 
 interface CountryBreakdown {
   name: string;
@@ -18,72 +15,6 @@ interface CountryBreakdown {
   value?: number;
   color?: string;
 }
-
-type CountryFeature = Feature & { properties: { name: string } };
-
-const WORLD_TOPO = worldMap as unknown as Topology<{countries: GeometryCollection<{name: string}>}>;
-const WORLD_FEATURES_ALL = feature(WORLD_TOPO, WORLD_TOPO.objects.countries).features;
-const WORLD_FEATURES = WORLD_FEATURES_ALL.filter(
-  (feat) => (feat.properties?.name ?? '').toLowerCase() !== 'antarctica'
-);
-const FEATURE_BY_NAME = new Map<string, CountryFeature>();
-
-WORLD_FEATURES.forEach((feat) => {
-  const key = (feat.properties?.name ?? '').toString().toLowerCase();
-  if (key) {
-    FEATURE_BY_NAME.set(key, feat);
-  }
-});
-
-const COUNTRY_ALIASES: Record<string, string> = {
-  usa: 'United States of America',
-  'united states': 'United States of America',
-  'united states of america': 'United States of America',
-  uk: 'United Kingdom',
-  'south korea': 'South Korea',
-  'north korea': 'North Korea',
-  russia: 'Russia',
-  'czech republic': 'Czechia',
-  laos: 'Laos',
-  'lao people\'s democratic republic': 'Laos',
-  vietnam: 'Vietnam',
-  venezuela: 'Venezuela',
-  bolivia: 'Bolivia',
-  tanzania: 'Tanzania',
-  syria: 'Syria',
-  iran: 'Iran',
-  moldova: 'Moldova',
-  palestine: 'Palestine',
-  'palestinian territories': 'Palestine',
-  macedonia: 'Macedonia',
-  'north macedonia': 'Macedonia',
-  'bosnia and herzegovina': 'Bosnia and Herz.',
-  'saint lucia': 'Saint Lucia',
-  'st lucia': 'Saint Lucia',
-  'st. lucia': 'Saint Lucia',
-  'democratic republic of the congo': 'Dem. Rep. Congo',
-  'congo (drc)': 'Dem. Rep. Congo',
-  'congo drc': 'Dem. Rep. Congo',
-  drc: 'Dem. Rep. Congo',
-  'republic of the congo': 'Congo',
-  'congo republic': 'Congo',
-  congo: 'Congo',
-  'dr congo': 'Dem. Rep. Congo',
-  ivorycoast: "Côte d'Ivoire",
-  "cote d'ivoire": "Côte d'Ivoire",
-  'ivory coast': "Côte d'Ivoire",
-  swaziland: 'eSwatini',
-  eswatini: 'eSwatini',
-  'the netherlands': 'Netherlands',
-  'trinidad and tobago': 'Trinidad and Tobago'
-};
-
-Object.entries(COUNTRY_ALIASES).forEach(([alias, canonical]) => {
-  const target = FEATURE_BY_NAME.get(canonical.toLowerCase());
-  if (target) {
-    FEATURE_BY_NAME.set(alias, target);
-  }
-});
 
 const REGION_CODES = [
   'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ',
@@ -345,7 +276,7 @@ export class ProxiesPerCountryCardComponent implements OnChanges {
     let maxValue = 0;
 
     for (const entry of this.countries ?? []) {
-      const featureMatch = this.resolveFeature(entry.name);
+      const featureMatch = resolveWorldCountry(entry.name);
       if (!featureMatch) {
         continue;
       }
@@ -368,44 +299,6 @@ export class ProxiesPerCountryCardComponent implements OnChanges {
       properties: {...feature.properties, value: values.get(feature.properties.name.toLowerCase()) ?? 0},
     }));
     this.mapChart = buildCountryMapChart(this.mapFeatures, this.maxCountryValue, value => this.formatNumber(value));
-  }
-
-  private resolveFeature(name: string | undefined | null): CountryFeature | undefined {
-    const normalized = (name ?? '').trim();
-    if (!normalized || normalized.toLowerCase() === 'unknown' || normalized.toLowerCase() === 'others') {
-      return undefined;
-    }
-
-    const lower = normalized.toLowerCase();
-    const exact = FEATURE_BY_NAME.get(lower);
-    if (exact) {
-      return exact;
-    }
-
-    const alias = COUNTRY_ALIASES[lower];
-    if (alias) {
-      const mapped = FEATURE_BY_NAME.get(alias.toLowerCase());
-      if (mapped) {
-        return mapped;
-      }
-    }
-
-    if (this.regionNames && /^[a-z]{2,3}$/i.test(normalized)) {
-      const display = this.regionNames.of(normalized.toUpperCase());
-      if (display) {
-        const displayKey = display.toLowerCase();
-        const displayMatch = FEATURE_BY_NAME.get(displayKey)
-          ?? FEATURE_BY_NAME.get((COUNTRY_ALIASES[displayKey] ?? '').toLowerCase());
-        if (displayMatch) {
-          return displayMatch;
-        }
-      }
-    }
-
-    return WORLD_FEATURES.find((feat) => {
-      const key = (feat.properties?.name ?? '').toString().toLowerCase();
-      return key === lower || key.startsWith(lower) || lower.startsWith(key);
-    });
   }
 
   private resolveValue(country: CountryBreakdown): number {

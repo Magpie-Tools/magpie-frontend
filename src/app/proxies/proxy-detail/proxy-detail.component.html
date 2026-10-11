@@ -186,7 +186,7 @@
               <div class="fact-list">
                 <div class="detail-item">
                   <span class="label">Country</span>
-                  <span class="value capitalize">{{ detail()?.country || "Unknown" }}</span>
+                  <app-country-hover-card class="value capitalize" [country]="detail()?.country" />
                 </div>
                 <div class="detail-item">
                   <span class="label">Check protocol</span>

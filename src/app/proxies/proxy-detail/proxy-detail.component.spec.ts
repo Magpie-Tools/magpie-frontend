@@ -9,6 +9,7 @@ import {HttpService} from '../../services/http.service';
 import {ProxyDetail} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
 import {gsap} from 'gsap';
+import {CountryHoverCardComponent} from '../../shared/ui/country-hover-card.component';
 
 describe('ProxyDetailComponent', () => {
   let component: ProxyDetailComponent;
@@ -60,6 +61,16 @@ describe('ProxyDetailComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('passes the current proxy country to the map hover card', () => {
+    component.detail.update(detail => detail ? {...detail, country: 'Germany'} : detail);
+    fixture.detectChanges();
+    const country = fixture.debugElement.query(By.directive(CountryHoverCardComponent)).componentInstance as CountryHoverCardComponent;
+    expect(country.country()).toBe('Germany');
+    component.detail.update(detail => detail ? {...detail, country: 'Singapore'} : detail);
+    fixture.detectChanges();
+    expect(country.country()).toBe('Singapore');
   });
 
   it('shows an empty latest-check summary before any results exist', () => {
