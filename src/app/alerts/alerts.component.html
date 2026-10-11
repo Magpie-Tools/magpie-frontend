@@ -97,7 +97,7 @@
               <div class="section-heading">
                 <div class="card-heading">
                   <span class="card-icon"><i class="icon icon-sliders-horizontal" aria-hidden="true"></i></span>
-                  <div><h2 id="rules-title">Alert rules</h2><p>Conditions that open incidents and track recovery.</p></div>
+                  <h2 id="rules-title">Alert rules</h2>
                 </div>
                 <span class="section-count">{{ page().rules.length }} / 100</span>
               </div>
@@ -178,7 +178,7 @@
               <form #ruleForm="ngForm" (ngSubmit)="saveRule()" class="alert-panel config-form" aria-label="Alert rule">
                 <div class="card-heading">
                   <span class="card-icon"><i [class]="editingRuleId === null ? 'icon icon-plus' : 'icon icon-pencil'" aria-hidden="true"></i></span>
-                  <div><h2>{{ editingRuleId === null ? 'Add a rule' : 'Edit rule' }}</h2><p>Choose a scope, condition, and destination.</p></div>
+                  <h2>{{ editingRuleId === null ? 'Add a rule' : 'Edit rule' }}</h2>
                 </div>
                 <div class="fields">
                   <div class="field-group wide"><label for="alert-rule-name">Name</label><input hlmInput id="alert-rule-name" name="ruleName" [(ngModel)]="rule.name" required maxlength="120" placeholder="Production pool availability" [disabled]="busy()"></div>
@@ -225,7 +225,7 @@
               <div class="section-heading">
                 <div class="card-heading">
                   <span class="card-icon"><i class="icon icon-send" aria-hidden="true"></i></span>
-                  <div><h2 id="destinations-title">Delivery destinations</h2><p>Shared across this workspace. Admins and owners configure destinations; operators attach them to rules.</p></div>
+                  <h2 id="destinations-title">Delivery destinations</h2>
                 </div>
                 <span class="section-count">{{ page().destinations.length }} / 20</span>
               </div>
@@ -262,7 +262,7 @@
               <form #destinationForm="ngForm" (ngSubmit)="saveDestination()" class="alert-panel config-form" aria-label="Alert destination">
                 <div class="card-heading">
                   <span class="card-icon"><i [class]="editingDestinationId === null ? 'icon icon-plus' : 'icon icon-pencil'" aria-hidden="true"></i></span>
-                  <div><h2>{{ editingDestinationId === null ? 'Add a destination' : 'Edit destination' }}</h2><p>Send opening and recovery messages to your team.</p></div>
+                  <h2>{{ editingDestinationId === null ? 'Add a destination' : 'Edit destination' }}</h2>
                 </div>
                 <div class="fields">
                   <div class="field-group wide"><label for="alert-destination-name">Name</label><input hlmInput id="alert-destination-name" name="destinationName" [(ngModel)]="destination.name" required maxlength="120" placeholder="Operations team" [disabled]="busy()"></div>
