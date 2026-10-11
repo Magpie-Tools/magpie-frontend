@@ -78,14 +78,6 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  get enabledPluginCount(): number {
-    return this.plugins.filter(plugin => this.isPluginEnabled(plugin.id)).length;
-  }
-
-  get configuredPluginCount(): number {
-    return this.plugins.filter(plugin => this.isPluginConfigured(plugin.id)).length;
-  }
-
   isPluginConfigured(pluginId: string): boolean {
     if (pluginId === 'geolite') {
       return !!this.settings()?.plugins?.geolite?.api_key?.trim();

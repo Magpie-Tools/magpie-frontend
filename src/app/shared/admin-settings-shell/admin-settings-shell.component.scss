@@ -70,7 +70,6 @@ app-admin-settings-shell {
     text-transform: uppercase;
   }
 
-  .scope-badge,
   .card-count {
     display: inline-flex;
     align-items: center;
@@ -81,14 +80,6 @@ app-admin-settings-shell {
     color: rgba(255, 255, 255, 0.62);
     font-size: 0.68rem;
     white-space: nowrap;
-  }
-
-  .scope-badge span {
-    width: 0.42rem;
-    height: 0.42rem;
-    border-radius: 50%;
-    background: var(--theme-primary-300);
-    box-shadow: 0 0 0.8rem var(--theme-primary-shadow);
   }
 
   .settings-grid {

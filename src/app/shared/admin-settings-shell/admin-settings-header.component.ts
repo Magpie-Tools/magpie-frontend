@@ -13,7 +13,6 @@ import {Component, Input} from '@angular/core';
           <p>{{ description }}</p>
         </div>
       </div>
-      <div class="scope-badge"><span aria-hidden="true"></span>{{ badge }}</div>
     </header>
   `,
 })
@@ -22,5 +21,4 @@ export class AdminSettingsHeaderComponent {
   @Input({required: true}) title = '';
   @Input({required: true}) description = '';
   @Input() eyebrow = '';
-  @Input() badge = 'System defaults';
 }

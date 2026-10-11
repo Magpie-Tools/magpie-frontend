@@ -41,6 +41,10 @@
   gap: 0.75rem;
 }
 
+.dashboard-card__heading:not(:has(.dashboard-card__subtitle)) {
+  align-items: center;
+}
+
 .dashboard-card__icon {
   display: inline-flex;
   width: 2.35rem;
