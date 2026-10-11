@@ -9,7 +9,7 @@ import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
 import {NotificationService} from '../../services/notification-service.service';
 
-import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
+import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-admin-plugins',
@@ -24,10 +24,6 @@ import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.direct
   styleUrl: './admin-plugins.component.scss'
 })
 export class AdminPluginsComponent implements OnInit, OnDestroy {
-  readonly revealSteps: readonly RevealStep[] = [{
-    selector: '.admin-context, .plugin-card',
-    to: {stagger: 0.07},
-  }];
   plugins = [
     {
       id: 'geolite',

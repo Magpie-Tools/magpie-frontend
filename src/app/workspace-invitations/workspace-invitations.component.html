@@ -1,4 +1,8 @@
-<main [appRevealGroup]="revealSteps" class="invitation-page">
+<main
+  class="invitation-page"
+  appRevealGroup=".invitation-context, .accepted-notice, .invitation-card"
+  [revealReady]="!invitations.loading()"
+>
   <div class="invitation-stage">
     <header class="invitation-context">
       <div class="invitation-context__copy">

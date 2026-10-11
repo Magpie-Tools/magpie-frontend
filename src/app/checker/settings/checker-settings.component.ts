@@ -5,7 +5,7 @@ import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-dr
 import {TooltipComponent} from '../../tooltip/tooltip.component';
 import {HlmInput} from '@spartan-ng/helm/input';
 import {SelectComponent} from '../../shared/ui/select.component';
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, effect, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, effect, signal} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CheckboxComponent} from '../../checkbox/checkbox.component';
 
@@ -17,19 +17,16 @@ import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag
 import {Subject} from 'rxjs';
 import {filter, finalize, takeUntil} from 'rxjs/operators';
 import {WorkspaceService} from '../../services/workspace.service';
-import {gsap} from 'gsap';
-import {ScrollTrigger} from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-checker-settings',
   standalone: true,
-  imports: [HlmButton, HlmInput, SelectComponent, ReactiveFormsModule, CheckboxComponent, ProxyTagManagerComponent, TooltipComponent, HlmBadge, HlmPopoverImports, DragDropModule],
+  imports: [HlmButton, HlmInput, SelectComponent, ReactiveFormsModule, CheckboxComponent, ProxyTagManagerComponent, TooltipComponent, HlmBadge, HlmPopoverImports, DragDropModule, RevealGroupDirective],
   templateUrl: './checker-settings.component.html',
   styleUrls: ['./checker-settings.component.scss']
 })
-export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CheckerSettingsComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
   readonly selectedProfile = new FormControl<number>(0, {nonNullable: true});
   readonly priorityOpen = signal(false);
@@ -76,14 +73,12 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
   readonly transportProtocolTooltip =
     'TCP uses standard HTTP over TCP. QUIC and HTTP/3 both use HTTP/3 over QUIC; QUIC enables HTTP/3 datagrams (unreliable messages), HTTP/3 uses streams only.';
   private destroy$ = new Subject<void>();
-  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private changeDetector: ChangeDetectorRef,
     private settingsService: SettingsService,
     private notification: NotificationService,
-    private elementRef: ElementRef<HTMLElement>,
     readonly workspaces: WorkspaceService,
     readonly tags: ProxyTagService,
   ) {
@@ -107,39 +102,7 @@ export class CheckerSettingsComponent implements OnInit, AfterViewInit, OnDestro
       .subscribe(settings => this.populateForm(settings));
   }
 
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    const host = this.elementRef.nativeElement;
-    const scrollContainer = host.closest('main') as HTMLElement | null;
-    const scroller = scrollContainer ?? undefined;
-
-    this.animationContext = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>('.settings-card').forEach((card, index) => {
-        gsap.from(card, {
-          opacity: 0,
-          y: 28,
-          scale: 0.985,
-          duration: 0.7,
-          delay: index * 0.04,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: card,
-            scroller,
-            start: 'top 94%',
-            toggleActions: 'play none none reverse',
-          },
-        });
-      });
-    }, host);
-
-    requestAnimationFrame(() => ScrollTrigger.refresh());
-  }
-
   ngOnDestroy(): void {
-    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }

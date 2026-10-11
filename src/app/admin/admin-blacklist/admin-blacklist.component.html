@@ -1,6 +1,6 @@
 <app-admin-settings-shell
   class="admin-blacklist-page"
-  [appRevealGroup]="revealSteps"
+  appRevealGroup=".admin-context, .settings-card, .save-dock"
 >
   <form [formGroup]="form" class="settings-stage" (ngSubmit)="onSubmit()">
     <app-admin-settings-header

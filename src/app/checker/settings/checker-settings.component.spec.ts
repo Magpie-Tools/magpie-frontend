@@ -12,6 +12,7 @@ import {HttpService} from '../../services/http.service';
 import {UserService} from '../../services/authorization/user.service';
 import {HlmToaster} from '@spartan-ng/helm/sonner';
 import {toast} from '@spartan-ng/brain/sonner';
+import {gsap} from 'gsap';
 
 class SettingsServiceStub {
   private settings: UserSettings = {
@@ -62,6 +63,15 @@ describe('CheckerSettingsComponent', () => {
     fixture = TestBed.createComponent(CheckerSettingsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('includes the page title in the settings card entrance', async () => {
+    await fixture.whenStable();
+    const header = fixture.nativeElement.querySelector('.checker-context');
+    const card = fixture.nativeElement.querySelector('.settings-card');
+    const entrance = gsap.getTweensOf(card);
+    expect(entrance.length).toBe(1);
+    expect(gsap.getTweensOf(header)).toEqual(entrance);
   });
 
   it('should create', () => {

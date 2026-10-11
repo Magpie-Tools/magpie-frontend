@@ -3,6 +3,7 @@ import {signal} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import {BrnHoverCard, BrnHoverCardContentService} from '@spartan-ng/brain/hover-card';
 import {of, Subject, throwError} from 'rxjs';
+import {gsap} from 'gsap';
 import {AlertsComponent} from './alerts.component';
 import {AlertsService} from '../services/alerts.service';
 import {WorkspaceService} from '../services/workspace.service';
@@ -28,12 +29,79 @@ describe('AlertsComponent', () => {
     api.load.and.callFake(() => of(page)); api.rotators.and.returnValue(of([]));
     api.saveRule.and.returnValue(of(rule)); api.deleteRule.and.returnValue(of(undefined));
     api.saveDestination.and.returnValue(of(page.destinations[0])); api.deleteDestination.and.returnValue(of(undefined)); api.retryDelivery.and.returnValue(of(undefined));
-    await TestBed.configureTestingModule({imports: [AlertsComponent], providers: [
+    await TestBed.configureTestingModule({animationsEnabled: true, imports: [AlertsComponent], providers: [
       {provide: AlertsService, useValue: api},
       {provide: WorkspaceService, useValue: {current, canOperate, canAdminister}},
       {provide: NotificationService, useValue: jasmine.createSpyObj('NotificationService', ['showSuccess'])},
     ]}).compileComponents();
     fixture = TestBed.createComponent(AlertsComponent); component = fixture.componentInstance; fixture.detectChanges();
+  });
+
+  for (const progress of [0.35, 1]) {
+    it(`keeps the page entrance at ${progress} when alert data arrives`, async () => {
+      fixture.destroy();
+      const request = new Subject<AlertsPage>();
+      api.load.and.returnValue(request);
+      fixture = TestBed.createComponent(AlertsComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const header: HTMLElement = fixture.nativeElement.querySelector('.alerts-context');
+      const stage: HTMLElement = fixture.nativeElement.querySelector('.loading-stage');
+      const entrance = gsap.getTweensOf(header)[0];
+      expect(entrance).toBeDefined();
+      expect(gsap.getTweensOf(stage)).toEqual([entrance]);
+      entrance.pause().progress(progress);
+      const initialOpacity = header.style.opacity;
+      const initialTransform = header.style.transform;
+      const skeleton: HTMLElement = fixture.nativeElement.querySelector('.alerts-skeleton');
+      expect(skeleton).not.toBeNull();
+
+      request.next(page);
+      request.complete();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const content: HTMLElement = fixture.nativeElement.querySelector('.loading-stage__content');
+      expect(fixture.nativeElement.querySelector('.loading-stage')).toBe(stage);
+      expect(entrance.progress()).toBe(progress);
+      expect(header.style.opacity).toBe(initialOpacity);
+      expect(header.style.transform).toBe(initialTransform);
+      expect(content.querySelector('.alert-panel')).not.toBeNull();
+      expect(content.style.transform).toBe('');
+      expect(getComputedStyle(skeleton).position).toBe('absolute');
+      expect(skeleton.classList).toContain('loading-stage__leave');
+      expect(content.classList).toContain('loading-stage__enter');
+
+      await Promise.all([...content.getAnimations(), ...skeleton.getAnimations()].map(animation => animation.finished));
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      expect(fixture.nativeElement.querySelector('.alerts-skeleton')).toBeNull();
+      expect(header.style.opacity).toBe(initialOpacity);
+      expect(entrance.progress()).toBe(progress);
+    });
+  }
+
+  it('keeps the settled content visible during an alert refresh', async () => {
+    await fixture.whenStable();
+    const stage = fixture.nativeElement.querySelector('.loading-stage');
+    const content: HTMLElement = fixture.nativeElement.querySelector('.loading-stage__content');
+    await Promise.all(content.getAnimations().map(animation => animation.finished));
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+
+    const request = new Subject<AlertsPage>();
+    api.load.and.returnValue(request);
+    component.refresh();
+    fixture.detectChanges();
+    request.next(page);
+    request.complete();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.loading-stage')).toBe(stage);
+    expect(fixture.nativeElement.querySelector('.loading-stage__content')).toBe(content);
+    expect(content.getAnimations()).toEqual([]);
+    expect(fixture.nativeElement.querySelector('.alerts-skeleton')).toBeNull();
   });
 
   it('gives viewers read-only incident and rule access', () => {

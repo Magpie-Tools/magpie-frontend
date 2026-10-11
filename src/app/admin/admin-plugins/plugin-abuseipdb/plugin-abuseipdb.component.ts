@@ -11,7 +11,7 @@ import {filter, startWith, takeUntil} from 'rxjs/operators';
 import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
 import {NotificationService} from '../../../services/notification-service.service';
-import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.directive';
+import {RevealGroupDirective} from '../../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-plugin-abuseipdb',
@@ -27,9 +27,6 @@ import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.dir
   styleUrl: './plugin-abuseipdb.component.scss'
 })
 export class PluginAbuseIPDBComponent implements OnInit, OnDestroy {
-  readonly revealSteps: readonly RevealStep[] = [{
-    selector: '.admin-context, .settings-card, .save-dock',
-  }];
   form: FormGroup;
   pluginEnabled = signal(false);
   quotaLimit = signal<number | null>(null);

@@ -1,4 +1,7 @@
-<main class="dashboard-page">
+<main
+  class="dashboard-page"
+  appRevealGroup=".dashboard-context, .loading-stage"
+>
   <section class="dashboard-stage">
     <header class="dashboard-context">
       <div class="dashboard-context__identity">
@@ -11,152 +14,159 @@
       </div>
     </header>
 
-    @if (dashboardInfo().loading && !dashboardInfo().loaded) {
-      <div
-        class="dashboard-grid dashboard-skeleton"
-        aria-label="Loading dashboard"
-      >
-        @for (card of kpiSkeletons; track $index) {
-          <section
-            class="dashboard-skeleton-card dashboard-skeleton-card--metric"
-          >
-            <div class="skeleton-line">
-              <hlm-skeleton
-                [style.width]="'2.4rem'"
-                [style.height]="'2.4rem'"
-                [style.border-radius]="'0.75rem'"
-              />
-              <hlm-skeleton [style.width]="'7rem'" [style.height]="'0.75rem'" />
-            </div>
-            <hlm-skeleton [style.width]="'8rem'" [style.height]="'2.2rem'" />
-            <hlm-skeleton [style.width]="'100%'" [style.height]="'3.6rem'" />
+    <div class="loading-stage" [attr.aria-busy]="dashboardInfo().loading">
+      @if (dashboardInfo().loading && !dashboardInfo().loaded) {
+        <div
+          class="dashboard-grid dashboard-skeleton"
+          animate.leave="loading-stage__leave"
+          aria-label="Loading dashboard"
+        >
+          @for (card of kpiSkeletons; track $index) {
+            <section
+              class="dashboard-skeleton-card dashboard-skeleton-card--metric"
+            >
+              <div class="skeleton-line">
+                <hlm-skeleton
+                  [style.width]="'2.4rem'"
+                  [style.height]="'2.4rem'"
+                  [style.border-radius]="'0.75rem'"
+                />
+                <hlm-skeleton [style.width]="'7rem'" [style.height]="'0.75rem'" />
+              </div>
+              <hlm-skeleton [style.width]="'8rem'" [style.height]="'2.2rem'" />
+              <hlm-skeleton [style.width]="'100%'" [style.height]="'3.6rem'" />
+            </section>
+          }
+
+          <section class="dashboard-skeleton-card dashboard-skeleton-card--wide">
+            <hlm-skeleton [style.width]="'12rem'" [style.height]="'1rem'" />
+            <hlm-skeleton [style.width]="'100%'" [style.height]="'22rem'" />
           </section>
-        }
+          <section
+            class="dashboard-skeleton-card dashboard-skeleton-card--narrow"
+          >
+            <hlm-skeleton [style.width]="'9rem'" [style.height]="'1rem'" />
+            <div class="dashboard-skeleton-list">
+              @for (row of historySkeletons; track $index) {
+                <hlm-skeleton [style.width]="'100%'" [style.height]="'2.6rem'" />
+              }
+            </div>
+          </section>
+          <section
+            class="dashboard-skeleton-card dashboard-skeleton-card--country"
+          >
+            <hlm-skeleton [style.width]="'11rem'" [style.height]="'1rem'" />
+            <hlm-skeleton [style.width]="'100%'" [style.height]="'19rem'" />
+          </section>
+          <section class="dashboard-skeleton-card dashboard-skeleton-card--judge">
+            <hlm-skeleton [style.width]="'10rem'" [style.height]="'1rem'" />
+            <div class="dashboard-skeleton-list">
+              @for (row of countrySkeletons; track $index) {
+                <hlm-skeleton [style.width]="'100%'" [style.height]="'2rem'" />
+              }
+            </div>
+          </section>
+        </div>
+      }
 
-        <section class="dashboard-skeleton-card dashboard-skeleton-card--wide">
-          <hlm-skeleton [style.width]="'12rem'" [style.height]="'1rem'" />
-          <hlm-skeleton [style.width]="'100%'" [style.height]="'22rem'" />
-        </section>
-        <section
-          class="dashboard-skeleton-card dashboard-skeleton-card--narrow"
-        >
-          <hlm-skeleton [style.width]="'9rem'" [style.height]="'1rem'" />
-          <div class="dashboard-skeleton-list">
-            @for (row of historySkeletons; track $index) {
-              <hlm-skeleton [style.width]="'100%'" [style.height]="'2.6rem'" />
-            }
-          </div>
-        </section>
-        <section
-          class="dashboard-skeleton-card dashboard-skeleton-card--country"
-        >
-          <hlm-skeleton [style.width]="'11rem'" [style.height]="'1rem'" />
-          <hlm-skeleton [style.width]="'100%'" [style.height]="'19rem'" />
-        </section>
-        <section class="dashboard-skeleton-card dashboard-skeleton-card--judge">
-          <hlm-skeleton [style.width]="'10rem'" [style.height]="'1rem'" />
-          <div class="dashboard-skeleton-list">
-            @for (row of countrySkeletons; track $index) {
-              <hlm-skeleton [style.width]="'100%'" [style.height]="'2rem'" />
-            }
-          </div>
-        </section>
-      </div>
-    }
+      @if (dashboardInfo().loaded || dashboardInfo().error) {
+        <div class="loading-stage__content" animate.enter="loading-stage__enter">
+          @if (dashboardInfo().error) {
+            <app-page-load-error
+              [title]="
+                dashboardInfo().backendUnavailable
+                  ? 'Backend unavailable'
+                  : 'Dashboard could not be loaded'
+              "
+              [message]="
+                dashboardInfo().backendUnavailable
+                  ? 'Dashboard data cannot load while the API is unreachable.'
+                  : dashboardInfo().error || ''
+              "
+              (retry)="retryDashboardLoad()"
+            />
+          }
 
-    @if (dashboardInfo().error) {
-      <app-page-load-error
-        [title]="
-          dashboardInfo().backendUnavailable
-            ? 'Backend unavailable'
-            : 'Dashboard could not be loaded'
-        "
-        [message]="
-          dashboardInfo().backendUnavailable
-            ? 'Dashboard data cannot load while the API is unreachable.'
-            : dashboardInfo().error || ''
-        "
-        (retry)="retryDashboardLoad()"
-      />
-    }
+          @if (dashboardInfo().loaded) {
+            <div class="dashboard-grid">
+              <app-kpi-card
+                class="dashboard-grid__kpi"
+                title="Alive proxies"
+                icon="icon icon-bolt"
+                [value]="conversionRate().value"
+                [displayValue]="conversionRate().value | number"
+                [chartValues]="conversionRate().history"
+              >
+              </app-kpi-card>
 
-    @if (dashboardInfo().loaded) {
-      <div class="dashboard-grid">
-        <app-kpi-card
-          class="dashboard-grid__kpi"
-          title="Alive proxies"
-          icon="icon icon-bolt"
-          [value]="conversionRate().value"
-          [displayValue]="conversionRate().value | number"
-          [chartValues]="conversionRate().history"
-        >
-        </app-kpi-card>
+              <app-kpi-card
+                class="dashboard-grid__kpi"
+                title="Total proxies"
+                icon="icon icon-server"
+                [value]="avgOrderValue().value"
+                [displayValue]="avgOrderValue().value | number"
+                [chartValues]="avgOrderValue().history"
+              >
+              </app-kpi-card>
 
-        <app-kpi-card
-          class="dashboard-grid__kpi"
-          title="Total proxies"
-          icon="icon icon-server"
-          [value]="avgOrderValue().value"
-          [displayValue]="avgOrderValue().value | number"
-          [chartValues]="avgOrderValue().history"
-        >
-        </app-kpi-card>
+              <app-kpi-card
+                class="dashboard-grid__kpi"
+                title="Scraped proxies"
+                icon="icon icon-download"
+                [value]="orderQuantity().value"
+                [displayValue]="orderQuantity().value | number"
+                [chartValues]="orderQuantity().history"
+              >
+              </app-kpi-card>
 
-        <app-kpi-card
-          class="dashboard-grid__kpi"
-          title="Scraped proxies"
-          icon="icon icon-download"
-          [value]="orderQuantity().value"
-          [displayValue]="orderQuantity().value | number"
-          [chartValues]="orderQuantity().history"
-        >
-        </app-kpi-card>
+              <app-proxies-per-hour-card
+                class="dashboard-grid__throughput"
+                [title]="proxiesPerHourTitle"
+                [chart]="inventoryChart()"
+                [legend]="inventoryLegend"
+              >
+              </app-proxies-per-hour-card>
 
-        <app-proxies-per-hour-card
-          class="dashboard-grid__throughput"
-          [title]="proxiesPerHourTitle"
-          [chart]="inventoryChart()"
-          [legend]="inventoryLegend"
-        >
-        </app-proxies-per-hour-card>
+              <app-proxy-history-card
+                class="dashboard-grid__history"
+                [history]="proxyHistory()"
+                [refreshing]="proxyHistoryRefreshing()"
+                (refresh)="onProxyHistoryRefresh()"
+              >
+              </app-proxy-history-card>
 
-        <app-proxy-history-card
-          class="dashboard-grid__history"
-          [history]="proxyHistory()"
-          [refreshing]="proxyHistoryRefreshing()"
-          (refresh)="onProxyHistoryRefresh()"
-        >
-        </app-proxy-history-card>
+              <app-proxies-per-country-card
+                class="dashboard-grid__countries"
+                [countries]="majorCountries()"
+              >
+              </app-proxies-per-country-card>
 
-        <app-proxies-per-country-card
-          class="dashboard-grid__countries"
-          [countries]="majorCountries()"
-        >
-        </app-proxies-per-country-card>
+              <app-judge-by-percentage-card
+                class="dashboard-grid__judges"
+                [data]="judgeTrafficData()"
+              >
+              </app-judge-by-percentage-card>
 
-        <app-judge-by-percentage-card
-          class="dashboard-grid__judges"
-          [data]="judgeTrafficData()"
-        >
-        </app-judge-by-percentage-card>
+              <app-fastest-alive-proxies-card
+                class="dashboard-grid__latency"
+                [chart]="latencyChart()"
+                [proxyCount]="fastestAliveProxyCount()"
+                [countryLegend]="fastestAliveCountryLegend()"
+                [sortDirection]="fastestAliveSortDirection()"
+                (sortDirectionChange)="onFastestAliveSortDirectionChange($event)"
+              >
+              </app-fastest-alive-proxies-card>
 
-        <app-fastest-alive-proxies-card
-          class="dashboard-grid__latency"
-          [chart]="latencyChart()"
-          [proxyCount]="fastestAliveProxyCount()"
-          [countryLegend]="fastestAliveCountryLegend()"
-          [sortDirection]="fastestAliveSortDirection()"
-          (sortDirectionChange)="onFastestAliveSortDirectionChange($event)"
-        >
-        </app-fastest-alive-proxies-card>
-
-        <app-proxy-reputation-card
-          class="dashboard-grid__reputation"
-          [breakdown]="reputationBreakdown()"
-          [chart]="reputationChart()"
-        >
-        </app-proxy-reputation-card>
-      </div>
-    }
+              <app-proxy-reputation-card
+                class="dashboard-grid__reputation"
+                [breakdown]="reputationBreakdown()"
+                [chart]="reputationChart()"
+              >
+              </app-proxy-reputation-card>
+            </div>
+          }
+        </div>
+      }
+    </div>
   </section>
 </main>

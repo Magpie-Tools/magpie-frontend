@@ -1,76 +1,56 @@
-import {AfterViewInit, Directive, ElementRef, Input, OnChanges, OnDestroy} from '@angular/core';
+import {afterEveryRender, AfterRenderRef, Directive, ElementRef, Input, OnDestroy} from '@angular/core';
 import {gsap} from 'gsap';
-
-export interface RevealStep {
-  selector: string;
-  from?: gsap.TweenVars;
-  to?: gsap.TweenVars;
-}
-
-export type RevealGroupConfig = string | readonly RevealStep[];
 
 @Directive({
   selector: '[appRevealGroup]',
   standalone: true,
 })
-export class RevealGroupDirective implements AfterViewInit, OnChanges, OnDestroy {
-  @Input('appRevealGroup') config: RevealGroupConfig = '';
+export class RevealGroupDirective implements OnDestroy {
+  @Input('appRevealGroup') targets = '';
   @Input() revealReady = true;
 
   private animationContext?: gsap.Context;
-  private viewInitialized = false;
+  private readonly renderRef: AfterRenderRef;
   private revealed = false;
 
-  constructor(private readonly elementRef: ElementRef<HTMLElement>) {}
-
-  ngAfterViewInit(): void {
-    this.viewInitialized = true;
-    this.reveal();
-  }
-
-  ngOnChanges(): void {
-    this.reveal();
+  constructor(private readonly elementRef: ElementRef<HTMLElement>) {
+    // Inputs can become ready before Angular renders their conditional content.
+    this.renderRef = afterEveryRender(() => this.reveal());
   }
 
   private reveal(): void {
-    if (!this.viewInitialized || !this.revealReady || this.revealed) {
+    if (!this.revealReady || !this.targets || this.revealed) {
       return;
     }
 
     this.revealed = true;
+    this.renderRef.destroy();
     if (
-      !this.config ||
       typeof window === 'undefined' ||
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     ) {
       return;
     }
 
-    const steps = typeof this.config === 'string'
-      ? [{selector: this.config}]
-      : this.config;
-
     this.animationContext = gsap.context(() => {
-      for (const step of steps) {
-        gsap.fromTo(
-          step.selector,
-          {opacity: 0, y: 22, scale: 0.99, ...step.from},
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.68,
-            stagger: 0.06,
-            ease: 'power3.out',
-            clearProps: 'transform',
-            ...step.to,
-          },
-        );
-      }
+      gsap.fromTo(
+        this.targets,
+        {opacity: 0, y: 20, scale: 0.99},
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.65,
+          stagger: 0.055,
+          ease: 'power3.out',
+          clearProps: 'transform',
+        },
+      );
     }, this.elementRef.nativeElement);
   }
 
   ngOnDestroy(): void {
+    this.renderRef.destroy();
     this.animationContext?.revert();
   }
 }

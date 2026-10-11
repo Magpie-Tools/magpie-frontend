@@ -9,7 +9,7 @@ import {filter, takeUntil} from 'rxjs/operators';
 
 import {NotificationService} from '../../services/notification-service.service';
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
-import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
+import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 import {VisibleRowsDirective} from '../../shared/visible-rows.directive';
 import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
 import {AdminSettingsHeaderComponent} from '../../shared/admin-settings-shell/admin-settings-header.component';
@@ -35,17 +35,6 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
   readonly hoursList = hourOptions;
   readonly minutesList = minuteOptions;
   readonly secondsList = secondOptions;
-  readonly revealSteps: readonly RevealStep[] = [
-    {
-      selector: '.admin-context, .settings-card, .save-dock',
-      to: {stagger: 0.055},
-    },
-    {
-      selector: '.enforcement-node',
-      from: {opacity: 0.15, scale: 0.78, y: 0},
-      to: {opacity: 1, scale: 1, y: 0, duration: 0.62, stagger: 0.12, delay: 0.18, ease: 'back.out(1.45)'},
-    },
-  ];
 
   form: FormGroup;
   private destroy$ = new Subject<void>();

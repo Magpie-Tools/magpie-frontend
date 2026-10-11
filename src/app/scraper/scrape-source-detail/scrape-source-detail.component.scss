@@ -500,24 +500,6 @@ input {
   .health-metric { padding-inline: 0.4rem; }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .detail-card { animation: detail-card-enter 320ms ease both; }
-  .source-insights { animation-delay: 50ms; }
-  .proxy-registry { animation-delay: 90ms; }
-}
-
-@keyframes detail-card-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .scrape-error {
   display: flex;
   align-items: center;

@@ -1,6 +1,6 @@
 import {HlmInput} from '@spartan-ng/helm/input';
 import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/admin-settings-save-dock.component';
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {VisibleRowsDirective} from '../../shared/visible-rows.directive';
 
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
@@ -12,20 +12,19 @@ import {UserSettings} from '../../models/UserSettings';
 import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
 import {WorkspaceService} from '../../services/workspace.service';
-import {gsap} from 'gsap';
+import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-checker-judges',
   standalone: true,
-  imports: [HlmInput, AdminSettingsSaveDockComponent, ReactiveFormsModule, TooltipComponent, VisibleRowsDirective],
+  imports: [HlmInput, AdminSettingsSaveDockComponent, ReactiveFormsModule, TooltipComponent, VisibleRowsDirective, RevealGroupDirective],
   templateUrl: './checker-judges.component.html',
   styleUrls: ['./checker-judges.component.scss']
 })
-export class CheckerJudgesComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CheckerJudgesComponent implements OnInit, OnDestroy {
   judgesForm: FormArray<FormGroup>;
   form: FormGroup<{judges: FormArray<FormGroup>}>;
   private destroy$ = new Subject<void>();
-  private animationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
@@ -33,7 +32,6 @@ export class CheckerJudgesComponent implements OnInit, AfterViewInit, OnDestroy 
     private settingsService: SettingsService,
     private notification: NotificationService,
     readonly workspaces: WorkspaceService,
-    private elementRef: ElementRef<HTMLElement>,
   ) {
     this.judgesForm = this.fb.array<FormGroup>([]);
     this.form = this.fb.group({judges: this.judgesForm});
@@ -50,37 +48,7 @@ export class CheckerJudgesComponent implements OnInit, AfterViewInit, OnDestroy 
       .subscribe(settings => this.populateJudges(settings));
   }
 
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    const host = this.elementRef.nativeElement;
-    this.animationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.settings-card, .save-dock',
-        {opacity: 0, y: 22, scale: 0.99},
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.68,
-          stagger: 0.07,
-          ease: 'power3.out',
-          clearProps: 'transform',
-        }
-      );
-
-      gsap.fromTo(
-        '.flow-node, .judge-row',
-        {opacity: 0.15, y: 12},
-        {opacity: 1, y: 0, duration: 0.55, stagger: 0.08, delay: 0.16, ease: 'power2.out'}
-      );
-    }, host);
-  }
-
   ngOnDestroy(): void {
-    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }

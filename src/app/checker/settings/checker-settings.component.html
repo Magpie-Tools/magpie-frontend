@@ -1,4 +1,9 @@
-<fieldset class="checker-settings-page" [formGroup]="settingsForm" [disabled]="saving() || !settingsLoaded">
+<fieldset
+  class="checker-settings-page"
+  appRevealGroup=".checker-context, .profile-picker, .settings-card, .save-dock"
+  [formGroup]="settingsForm"
+  [disabled]="saving() || !settingsLoaded"
+>
   <section class="settings-stage">
     <header class="checker-context">
       <span class="context-icon"

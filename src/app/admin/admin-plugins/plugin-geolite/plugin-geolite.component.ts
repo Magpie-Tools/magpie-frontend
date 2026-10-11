@@ -13,7 +13,7 @@ import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
 import {NotificationService} from '../../../services/notification-service.service';
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../../shared/duration-options';
-import {RevealGroupDirective, RevealStep} from '../../../shared/reveal-group.directive';
+import {RevealGroupDirective} from '../../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-plugin-geolite',
@@ -33,9 +33,6 @@ export class PluginGeoliteComponent implements OnInit, OnDestroy {
   readonly hoursList = hourOptions;
   readonly minutesList = minuteOptions;
   readonly secondsList = secondOptions;
-  readonly revealSteps: readonly RevealStep[] = [{
-    selector: '.admin-context, .settings-card, .save-dock',
-  }];
   form: FormGroup;
   lastUpdatedLabel = 'Never';
   pluginEnabled = signal(false);

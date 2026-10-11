@@ -18,7 +18,7 @@ import {
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
-import {RevealGroupDirective, RevealStep} from '../shared/reveal-group.directive';
+import {RevealGroupDirective} from '../shared/reveal-group.directive';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
 
 type WorkspaceSection = 'overview' | 'members' | 'settings';
@@ -88,19 +88,6 @@ export class WorkspaceComponent implements OnInit {
   readonly ownerMemberRoles: WorkspaceRole[] = ['owner', 'admin', 'operator', 'viewer'];
   readonly ownerInvitationRoles: InvitationRole[] = ['admin', 'operator', 'viewer'];
   readonly adminRoles: InvitationRole[] = ['operator', 'viewer'];
-
-  readonly revealSteps: readonly RevealStep[] = [
-    {
-      selector: '.workspace-context, .workspace-card',
-      from: {opacity: 0, y: 26, scale: 0.985},
-      to: {opacity: 1, y: 0, scale: 1, duration: 0.72, stagger: 0.065, ease: 'power3.out', clearProps: 'transform'},
-    },
-    {
-      selector: '.workspace-avatar, .metric-value',
-      from: {opacity: 0, y: 0, scale: 0.78},
-      to: {opacity: 1, scale: 1, duration: 0.55, stagger: 0.05, delay: 0.18, ease: 'back.out(1.35)', clearProps: ''},
-    },
-  ];
 
   constructor(
     readonly workspaces: WorkspaceService,

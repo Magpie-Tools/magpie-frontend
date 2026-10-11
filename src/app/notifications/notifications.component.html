@@ -1,4 +1,8 @@
-<main class="notifications-page">
+<main
+  class="notifications-page"
+  appRevealGroup=".notifications-context, .notification-card, app-page-load-error"
+  [revealReady]="!status().loading"
+>
   <div class="notifications-stage">
     <header class="notifications-context">
       <div class="notifications-context__copy">

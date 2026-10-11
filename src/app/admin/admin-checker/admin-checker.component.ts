@@ -16,7 +16,7 @@ import {NotificationService} from '../../services/notification-service.service';
 import {Subject} from 'rxjs';
 
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
-import {RevealGroupDirective, RevealStep} from '../../shared/reveal-group.directive';
+import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 import {VisibleRowsDirective} from '../../shared/visible-rows.directive';
 import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
 import {AdminSettingsHeaderComponent} from '../../shared/admin-settings-shell/admin-settings-header.component';
@@ -53,11 +53,6 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
   readonly hoursList = hourOptions;
   readonly minutesList = minuteOptions;
   readonly secondsList = secondOptions;
-  readonly revealSteps: readonly RevealStep[] = [{
-    selector: '.admin-context, .settings-card, .save-dock',
-    from: {opacity: 0, y: 20, scale: 0.99},
-    to: {opacity: 1, y: 0, scale: 1, duration: 0.65, stagger: 0.055, ease: 'power3.out', clearProps: 'transform'},
-  }];
   isRequeueing = false;
   private destroy$ = new Subject<void>();
 

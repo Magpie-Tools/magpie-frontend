@@ -1,4 +1,8 @@
-<main class="rotating-proxies-page">
+<main
+  class="rotating-proxies-page"
+  appRevealGroup=".rotating-context, .composer-form, .read-only-card, .fleet-heading, .rotator-card:not(.skeleton-card), .empty-state"
+  [revealReady]="hasLoaded()"
+>
   <section class="rotating-stage">
     <header class="rotating-context">
       <div class="rotating-context__copy">

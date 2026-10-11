@@ -1,4 +1,8 @@
-<main class="source-detail-page">
+<main
+  class="source-detail-page"
+  appRevealGroup=".detail-context, .detail-card"
+  [revealReady]="!isLoading()"
+>
   <section class="detail-stage">
     <header class="detail-context">
       <div class="detail-context__copy">

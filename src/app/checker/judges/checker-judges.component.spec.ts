@@ -7,6 +7,7 @@ import {UserSettings} from '../../models/UserSettings';
 import {SettingsService} from '../../services/settings.service';
 import {WorkspaceService} from '../../services/workspace.service';
 import {NotificationService} from '../../services/notification-service.service';
+import {gsap} from 'gsap';
 
 class SettingsServiceStub {
   private settings: UserSettings | undefined = {
@@ -59,6 +60,15 @@ describe('CheckerJudgesComponent', () => {
     fixture = TestBed.createComponent(CheckerJudgesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('includes the page title in the judge card entrance', async () => {
+    await fixture.whenStable();
+    const header = fixture.nativeElement.querySelector('.checker-context');
+    const card = fixture.nativeElement.querySelector('.settings-card');
+    const entrance = gsap.getTweensOf(card);
+    expect(entrance.length).toBe(1);
+    expect(gsap.getTweensOf(header)).toEqual(entrance);
   });
 
   it('should create', () => {

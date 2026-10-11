@@ -1,4 +1,8 @@
-<main class="proxy-detail-page">
+<main
+  class="proxy-detail-page"
+  appRevealGroup=".detail-context, .route-utility-bar, .route-card"
+  [revealReady]="!isLoadingDetail()"
+>
   <section class="detail-stage">
     <header class="detail-context">
       <div class="detail-context__copy">

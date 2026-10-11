@@ -4,7 +4,7 @@ import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
 import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {SelectComponent} from '../shared/ui/select.component';
 import {DialogComponent} from '../shared/ui/dialog.component';
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, OnDestroy, OnInit, signal} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {forkJoin, Subject} from 'rxjs';
@@ -21,10 +21,7 @@ import {TooltipComponent} from '../tooltip/tooltip.component';
 
 import {formatHostPort} from '../shared/proxy-address';
 import {WorkspaceService} from '../services/workspace.service';
-import {gsap} from 'gsap';
-import {ScrollTrigger} from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 type RotatorInstanceOption = {
   label: string;
@@ -42,12 +39,12 @@ type RotatorInstanceOption = {
     DatePipe,
 
     TooltipComponent,
-
+    RevealGroupDirective,
   ],
   templateUrl: './rotating-proxies.component.html',
   styleUrl: './rotating-proxies.component.scss'
 })
-export class RotatingProxiesComponent implements OnInit, AfterViewInit, OnDestroy {
+export class RotatingProxiesComponent implements OnInit, OnDestroy {
   private readonly protocolOptionList: { label: string; value: string }[] = [
     {label: 'HTTP', value: 'http'},
     {label: 'HTTPS', value: 'https'},
@@ -98,15 +95,12 @@ export class RotatingProxiesComponent implements OnInit, AfterViewInit, OnDestro
   rotatorHost = signal(this.loopbackHost);
   private destroy$ = new Subject<void>();
   private authCopyFeedbackTimeout?: ReturnType<typeof setTimeout>;
-  private shellAnimationContext?: gsap.Context;
-  private fleetAnimationContext?: gsap.Context;
 
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
     private clipboardService: ClipboardService,
     private notification: NotificationService,
-    private elementRef: ElementRef<HTMLElement>,
     readonly workspaces: WorkspaceService,
   ) {
     this.createForm = this.fb.group({
@@ -137,27 +131,11 @@ export class RotatingProxiesComponent implements OnInit, AfterViewInit, OnDestro
     this.loadInitialData();
   }
 
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    this.shellAnimationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.rotating-context, .composer-form',
-        {opacity: 0, y: 24, scale: 0.99},
-        {opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.07, ease: 'power3.out', clearProps: 'transform'},
-      );
-    }, this.elementRef.nativeElement);
-  }
-
   ngOnDestroy(): void {
     if (this.authCopyFeedbackTimeout) {
       clearTimeout(this.authCopyFeedbackTimeout);
       this.authCopyFeedbackTimeout = undefined;
     }
-    this.shellAnimationContext?.revert();
-    this.fleetAnimationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -234,7 +212,6 @@ export class RotatingProxiesComponent implements OnInit, AfterViewInit, OnDestro
           this.updateFormDisabledStates();
           this.loading.set(false);
           this.hasLoaded.set(true);
-          this.scheduleFleetAnimation();
       },
       error: err => {
         this.loading.set(false);
@@ -739,63 +716,5 @@ export class RotatingProxiesComponent implements OnInit, AfterViewInit, OnDestro
 
     this.instanceOptions.set(options);
     this.hasAvailableInstances.set(options.length > 0);
-  }
-
-  private scheduleFleetAnimation(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    requestAnimationFrame(() => {
-      this.fleetAnimationContext?.revert();
-
-      const host = this.elementRef.nativeElement;
-      const scrollContainer = host.closest('main') as HTMLElement | null;
-      const scroller = scrollContainer ?? undefined;
-
-      this.fleetAnimationContext = gsap.context(() => {
-        gsap.utils.toArray<HTMLElement>('.rotator-card').forEach((card, index) => {
-          gsap.fromTo(
-            card,
-            {opacity: 0, y: 26, scale: 0.97},
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.68,
-              delay: index * 0.045,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: card,
-                scroller,
-                start: 'top 94%',
-                toggleActions: 'play none none reverse',
-              },
-            },
-          );
-
-          const poolCount = card.querySelector<HTMLElement>('.pool-count');
-          if (poolCount) {
-            gsap.fromTo(
-              poolCount,
-              {opacity: 0.16},
-              {
-                opacity: 1,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: card,
-                  scroller,
-                  start: 'top 92%',
-                  end: 'center 62%',
-                  scrub: 0.3,
-                },
-              },
-            );
-          }
-        });
-      }, host);
-
-      requestAnimationFrame(() => ScrollTrigger.refresh());
-    });
   }
 }

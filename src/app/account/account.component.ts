@@ -1,6 +1,6 @@
 import {DialogComponent} from '../shared/ui/dialog.component';
 import {PasswordComponent} from '../shared/ui/password.component';
-import { AfterViewInit, Component, ElementRef, OnDestroy, Signal } from '@angular/core';
+import { Component, Signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 
 import { ReactiveFormsModule } from '@angular/forms';
@@ -14,21 +14,18 @@ import {DeleteAccount} from '../models/DeleteAccount';
 import {UserService} from '../services/authorization/user.service';
 
 import { passwordMinLength, passwordPolicyMessages, passwordPolicyValidators } from '../auth/password-policy';
-import {gsap} from 'gsap';
-import {ScrollTrigger} from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 @Component({
     selector: 'app-account',
   imports: [DialogComponent, PasswordComponent,
     ReactiveFormsModule,
-
+    RevealGroupDirective,
   ],
     templateUrl: './account.component.html',
     styleUrls: ['./account.component.scss']
 })
-export class AccountComponent implements AfterViewInit, OnDestroy {
+export class AccountComponent {
   passwordForm: FormGroup;
   deleteAccountForm: FormGroup;
   deleteDialogVisible = false;
@@ -36,7 +33,6 @@ export class AccountComponent implements AfterViewInit, OnDestroy {
   readonly currentTheme: Signal<ThemeName>;
   private readonly purpleActivationTarget = 10;
   private purpleActivationCount = 0;
-  private animationContext?: gsap.Context;
   deletingAccount = false;
   private readonly themeLabels: Record<ThemeName, string> = {
     green: 'Green',
@@ -57,8 +53,7 @@ export class AccountComponent implements AfterViewInit, OnDestroy {
               private http: HttpService,
               private themeService: ThemeService,
               private userService: UserService,
-              private notification: NotificationService,
-              private elementRef: ElementRef<HTMLElement>) {
+              private notification: NotificationService) {
     this.passwordForm = this.fb.group(
       {
         oldPassword: ['', [Validators.required]],
@@ -74,63 +69,6 @@ export class AccountComponent implements AfterViewInit, OnDestroy {
 
     this.themes = this.themeService.themes;
     this.currentTheme = this.themeService.theme;
-  }
-
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    const host = this.elementRef.nativeElement;
-    const scrollContainer = host.closest('main') as HTMLElement | null;
-    const scroller = scrollContainer ?? undefined;
-
-    this.animationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.account-context',
-        {opacity: 0, y: 20},
-        {opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', clearProps: 'transform'},
-      );
-
-      gsap.utils.toArray<HTMLElement>('.account-card').forEach((card, index) => {
-        gsap.from(card, {
-          opacity: 0,
-          y: 30,
-          scale: 0.985,
-          duration: 0.72,
-          delay: index * 0.045,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: card,
-            scroller,
-            start: 'top 94%',
-            toggleActions: 'play none none reverse',
-          },
-        });
-      });
-
-      gsap.fromTo(
-        '.account-context__copy p',
-        {opacity: 0.38},
-        {
-          opacity: 1,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: '.account-context',
-            scroller,
-            start: 'top 96%',
-            end: 'bottom 74%',
-            scrub: 0.35,
-          },
-        },
-      );
-    }, host);
-
-    requestAnimationFrame(() => ScrollTrigger.refresh());
-  }
-
-  ngOnDestroy(): void {
-    this.animationContext?.revert();
   }
 
   setTheme(theme: ThemeName): void {

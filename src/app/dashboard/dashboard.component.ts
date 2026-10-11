@@ -1,6 +1,6 @@
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
 import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
-import {Component, ElementRef, Inject, LOCALE_ID, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, Inject, LOCALE_ID, OnDestroy, OnInit, signal} from '@angular/core';
 import {DecimalPipe} from '@angular/common';
 import {Subject} from 'rxjs';
 import {finalize, takeUntil} from 'rxjs/operators';
@@ -33,10 +33,7 @@ import {
 import {formatHostPort} from '../shared/proxy-address';
 import {buildInventoryChart, buildLatencyChart, buildReputationChart, REPUTATION_COLORS} from './dashboard-charts';
 import type {DashboardChartDefinition} from '../shared/ui/dashboard-chart.component';
-import {gsap} from 'gsap';
-import {ScrollTrigger} from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 interface SparklineMetric {
   value: number;
@@ -71,6 +68,7 @@ const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirecti
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   imports: [HlmSkeleton,
+    RevealGroupDirective,
     PageLoadErrorComponent,
     DecimalPipe,
     KpiCardComponent,
@@ -124,7 +122,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   judgeTrafficData = signal<Record<string, number>>({});
 
   private readonly destroy$ = new Subject<void>();
-  private animationContext?: gsap.Context;
   proxyHistoryRefreshing = signal(false);
   readonly kpiSkeletons = Array.from({ length: 3 });
   readonly historySkeletons = Array.from({ length: 6 });
@@ -132,8 +129,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private graphqlService: GraphqlService,
-    @Inject(LOCALE_ID) localeId: string,
-    private readonly elementRef: ElementRef<HTMLElement>
+    @Inject(LOCALE_ID) localeId: string
   ) {
     this.localeId = localeId || 'en-US';
     this.numberFormatter = new Intl.NumberFormat(this.localeId);
@@ -146,7 +142,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.animationContext?.revert();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -195,7 +190,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: ({ viewer }) => {
           this.applyDashboardData(viewer);
           this.dashboardInfo.set({ loading: false, loaded: true, backendUnavailable: false });
-          this.scheduleDashboardAnimation();
         },
         error: (error: Error) => {
           const resolved = this.resolveDashboardError(error, 'Failed to load dashboard data');
@@ -207,71 +201,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           });
         }
       });
-  }
-
-  private scheduleDashboardAnimation(): void {
-    if (
-      typeof window === 'undefined' ||
-      typeof window.matchMedia !== 'function' ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      return;
-    }
-
-    requestAnimationFrame(() => {
-      this.animationContext?.revert();
-
-      const host = this.elementRef.nativeElement;
-      const scrollContainer = host.closest('main') as HTMLElement | null;
-      const scroller = scrollContainer ?? undefined;
-
-      this.animationContext = gsap.context(() => {
-        gsap.fromTo(
-          '.dashboard-context',
-          {opacity: 0, y: 20},
-          {opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', clearProps: 'transform'},
-        );
-
-        gsap.utils.toArray<HTMLElement>('.dashboard-grid > *').forEach((card, index) => {
-          gsap.fromTo(
-            card,
-            {opacity: 0.18, y: 28, scale: 0.965},
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.72,
-              delay: index * 0.035,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: card,
-                scroller,
-                start: 'top 94%',
-                toggleActions: 'play none none reverse',
-              },
-            },
-          );
-        });
-
-        gsap.fromTo(
-          '.dashboard-context__copy p',
-          {opacity: 0.38},
-          {
-            opacity: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: '.dashboard-context',
-              scroller,
-              start: 'top 96%',
-              end: 'bottom 74%',
-              scrub: 0.35,
-            },
-          },
-        );
-      }, host);
-
-      ScrollTrigger.refresh();
-    });
   }
 
   private resolveDashboardError(error: unknown, fallbackMessage: string): { message: string; backendUnavailable: boolean } {

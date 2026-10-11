@@ -13,6 +13,7 @@ import {WorkspaceService} from '../services/workspace.service';
 import {NotificationService} from '../services/notification-service.service';
 import {SelectComponent} from '../shared/ui/select.component';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
+import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 const emptyPage = (): AlertsPage => ({rules: [], destinations: [], incidents: [], deliveries: [], next_cursor: 0});
 const emptyRule = () => ({name: '', rotator_id: null as number | null, metric: 'usable_routes' as AlertMetric, threshold: null as number | null, enabled: true, destination_ids: [] as number[]});
@@ -20,7 +21,7 @@ const emptyDestination = () => ({name: '', kind: 'email' as AlertChannel, enable
 
 @Component({
   selector: 'app-alerts', standalone: true,
-  imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, VisibleRowsDirective],
+  imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, VisibleRowsDirective, RevealGroupDirective],
   templateUrl: './alerts.component.html', styleUrl: './alerts.component.scss',
 })
 export class AlertsComponent {

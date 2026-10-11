@@ -1,0 +1,38 @@
+@mixin loading-stage {
+  .loading-stage {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .loading-stage > * {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+
+  .loading-stage__leave {
+    position: absolute;
+    inset: 0 0 auto;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .loading-stage__enter {
+      animation: loading-content-in 200ms ease-out both;
+    }
+
+    .loading-stage__leave {
+      animation: loading-placeholder-out 200ms ease-out both;
+    }
+  }
+
+  @keyframes loading-content-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes loading-placeholder-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+}

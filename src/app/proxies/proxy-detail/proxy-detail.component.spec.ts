@@ -8,6 +8,7 @@ import {By} from '@angular/platform-browser';
 import {HttpService} from '../../services/http.service';
 import {ProxyDetail} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
+import {gsap} from 'gsap';
 
 describe('ProxyDetailComponent', () => {
   let component: ProxyDetailComponent;
@@ -165,7 +166,7 @@ describe('ProxyDetailComponent', () => {
       .toBe('user%40example:p%3Aa%2Fs%3F%23%25@[2001:db8::1]:8080');
   });
 
-  it('keeps auth controls compact on one row with both values visible', () => {
+  it('keeps auth controls compact on one row with both values visible', async () => {
     component.detail.update(detail => detail ? {
       ...detail,
       has_auth: true,
@@ -173,6 +174,11 @@ describe('ProxyDetailComponent', () => {
       password: 'a-long-proxy-password-that-must-not-squeeze-out-the-username',
     } : detail);
     fixture.detectChanges();
+
+    await fixture.whenStable();
+    // Compare bounds after the page has finished scaling into place.
+    const header = fixture.nativeElement.querySelector('.detail-context');
+    gsap.getTweensOf(header).forEach(entrance => entrance.progress(1));
 
     const auth = fixture.nativeElement.querySelector('.auth-credentials') as HTMLElement;
     auth.style.width = '160px';

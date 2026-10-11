@@ -1,3 +1,7 @@
+@use '../shared/loading-stage' as loading;
+
+@include loading.loading-stage;
+
 :host {
   display: block;
   color: #f7f5f7;

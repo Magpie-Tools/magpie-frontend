@@ -9,7 +9,7 @@ import {WorkspaceInvitation, WorkspaceInvitationAcceptance} from '../models/Work
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceInvitationService} from '../services/workspace-invitation.service';
 import {WorkspaceService} from '../services/workspace.service';
-import {RevealGroupDirective, RevealStep} from '../shared/reveal-group.directive';
+import {RevealGroupDirective} from '../shared/reveal-group.directive';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
 
 @Component({
@@ -24,19 +24,6 @@ export class WorkspaceInvitationsComponent implements OnInit {
   readonly decliningIds = signal<Record<number, boolean>>({});
   readonly acceptedWorkspace = signal<WorkspaceInvitationAcceptance | null>(null);
   readonly openingWorkspace = signal(false);
-
-  readonly revealSteps: readonly RevealStep[] = [
-    {
-      selector: '.invitation-context, .accepted-notice, .invitation-card',
-      from: {opacity: 0, y: 24, scale: 0.985},
-      to: {opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.065, ease: 'power3.out', clearProps: 'transform'},
-    },
-    {
-      selector: '.workspace-avatar, .flow-node',
-      from: {opacity: 0, y: 0, scale: 0.76},
-      to: {opacity: 1, scale: 1, duration: 0.52, stagger: 0.06, delay: 0.16, ease: 'back.out(1.35)', clearProps: ''},
-    },
-  ];
 
   constructor(
     readonly invitations: WorkspaceInvitationService,

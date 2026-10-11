@@ -49,6 +49,7 @@ import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
 import {SourceAutoTagsComponent} from '../source-auto-tags/source-auto-tags.component';
+import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 
 type HealthTone = 'healthy' | 'mixed' | 'unhealthy' | 'empty';
 type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
@@ -58,6 +59,7 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
   standalone: true,
   imports: [
     InventoryPageShellComponent,
+    RevealGroupDirective,
     HlmPopoverImports,
     HlmTooltip,
     CommonModule,

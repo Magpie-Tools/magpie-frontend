@@ -1,13 +1,14 @@
 import {DialogComponent} from '../shared/ui/dialog.component';
 import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
 import { CommonModule, DatePipe } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, computed, signal } from '@angular/core';
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { marked } from 'marked';
 import { BuildInfo, ReleaseNote, UpdateNotificationService } from '../services/update-notification.service';
 import { LoadingComponent } from '../ui-elements/loading/loading.component';
+import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -68,11 +69,11 @@ function normalizeReleaseBodyToMarkdown(body: string): string {
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [DialogComponent, PageLoadErrorComponent, CommonModule, DatePipe, LoadingComponent],
+  imports: [DialogComponent, PageLoadErrorComponent, CommonModule, DatePipe, LoadingComponent, RevealGroupDirective],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })
-export class NotificationsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class NotificationsComponent implements OnInit, OnDestroy {
   status = signal<{ loading: boolean; error?: string | null }>({ loading: true, error: null });
   newReleases = signal<ReleaseNote[]>([]);
   allReleases = signal<ReleaseNote[]>([]);
@@ -107,8 +108,8 @@ export class NotificationsComponent implements OnInit, AfterViewInit, OnDestroy 
       gfm: true
     }) as string;
   });
-  private shellAnimationContext?: gsap.Context;
-  private contentAnimationContext?: gsap.Context;
+  private archiveScrollContext?: gsap.Context;
+  private archivePinFrame?: number;
 
   constructor(
     private updates: UpdateNotificationService,
@@ -119,23 +120,11 @@ export class NotificationsComponent implements OnInit, AfterViewInit, OnDestroy 
     this.loadReleases();
   }
 
-  ngAfterViewInit(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    this.shellAnimationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.notifications-context',
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', clearProps: 'transform' }
-      );
-    }, this.elementRef.nativeElement);
-  }
-
   ngOnDestroy(): void {
-    this.shellAnimationContext?.revert();
-    this.contentAnimationContext?.revert();
+    if (this.archivePinFrame !== undefined) {
+      cancelAnimationFrame(this.archivePinFrame);
+    }
+    this.archiveScrollContext?.revert();
   }
 
   markAllSeen(): void {
@@ -176,7 +165,7 @@ export class NotificationsComponent implements OnInit, AfterViewInit, OnDestroy 
         this.latestTag.set(feed.latestTag);
         this.backendBuild.set(feed.backendBuild);
         this.status.set({ loading: false, error: null });
-        this.scheduleContentAnimation();
+        this.scheduleArchivePin();
       },
       error: (err: Error) => {
         this.status.set({
@@ -187,59 +176,28 @@ export class NotificationsComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  private scheduleContentAnimation(): void {
+  private scheduleArchivePin(): void {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
 
-    requestAnimationFrame(() => this.animateContent());
+    if (this.archivePinFrame !== undefined) {
+      cancelAnimationFrame(this.archivePinFrame);
+    }
+    this.archivePinFrame = requestAnimationFrame(() => {
+      this.archivePinFrame = undefined;
+      this.pinArchiveIntro();
+    });
   }
 
-  private animateContent(): void {
-    this.contentAnimationContext?.revert();
+  private pinArchiveIntro(): void {
+    this.archiveScrollContext?.revert();
 
     const host = this.elementRef.nativeElement;
     const scrollContainer = host.closest('main') as HTMLElement | null;
     const scroller = scrollContainer ?? undefined;
 
-    this.contentAnimationContext = gsap.context(() => {
-      gsap.fromTo(
-        '.notification-card',
-        { opacity: 0, y: 26, scale: 0.985 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.7,
-          stagger: 0.065,
-          ease: 'power3.out',
-          clearProps: 'transform'
-        }
-      );
-
-      gsap.utils.toArray<HTMLElement>('.archive-row').forEach((row) => {
-        const preview = row.querySelector<HTMLElement>('.archive-preview');
-        if (!preview) {
-          return;
-        }
-
-        gsap.fromTo(
-          preview,
-          { opacity: 0.42 },
-          {
-            opacity: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: row,
-              scroller,
-              start: 'top 92%',
-              end: 'center 58%',
-              scrub: 0.35
-            }
-          }
-        );
-      });
-
+    this.archiveScrollContext = gsap.context(() => {
       const archiveLayout = host.querySelector<HTMLElement>('.archive-layout');
       const archiveIntro = host.querySelector<HTMLElement>('.archive-intro');
       const archiveList = host.querySelector<HTMLElement>('.archive-list');
@@ -263,6 +221,6 @@ export class NotificationsComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     }, host);
 
-    requestAnimationFrame(() => ScrollTrigger.refresh());
+    ScrollTrigger.refresh();
   }
 }
