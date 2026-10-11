@@ -150,14 +150,6 @@
   gap: 0.14rem;
 }
 
-.rotator-dialog__header > span {
-  color: var(--theme-primary-200);
-  font-size: 0.58rem;
-  font-weight: 620;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
 .rotator-dialog__title-row {
   display: flex;
   min-width: 0;

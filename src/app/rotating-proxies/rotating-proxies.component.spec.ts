@@ -91,14 +91,6 @@ describe('RotatingProxiesComponent', () => {
     expect(component.rotatorConnectionString(rotator)).toBe('http://[2001:db8::5]:19001');
   });
 
-  it('summarizes the managed pool', () => {
-    component.rotatingProxies.set([
-      createRotatorFixture({id: 1, alive_proxy_count: 7}),
-      createRotatorFixture({id: 2, alive_proxy_count: 5}),
-    ]);
-    expect(component.totalMatchingProxies()).toBe(12);
-  });
-
   it('opens connection details from a managed endpoint card', () => {
     const rotator = createRotatorFixture({name: 'Production pool', alive_proxy_count: 18});
     component.rotatingProxies.set([rotator]);

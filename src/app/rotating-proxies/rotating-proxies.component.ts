@@ -4,7 +4,7 @@ import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
 import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {SelectComponent} from '../shared/ui/select.component';
 import {DialogComponent} from '../shared/ui/dialog.component';
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, signal} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {forkJoin, Subject} from 'rxjs';
@@ -93,9 +93,6 @@ export class RotatingProxiesComponent implements OnInit, AfterViewInit, OnDestro
     poor: 'Bad',
   };
   readonly skeletonRows = Array.from({ length: 5 });
-  readonly totalMatchingProxies = computed(() =>
-    this.rotatingProxies().reduce((total, proxy) => total + Math.max(0, proxy.alive_proxy_count ?? 0), 0)
-  );
   private readonly loopbackHost = '127.0.0.1';
   private readonly defaultRotatorHost = this.resolveDefaultHost();
   rotatorHost = signal(this.loopbackHost);

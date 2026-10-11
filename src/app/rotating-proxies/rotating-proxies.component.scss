@@ -93,41 +93,6 @@ dl {
   text-transform: uppercase;
 }
 
-.context-metrics {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.8rem;
-  background: rgba(8, 8, 10, 0.22);
-
-  > div {
-    display: flex;
-    align-items: baseline;
-    gap: 0.35rem;
-  }
-
-  strong {
-    color: rgba(255, 255, 255, 0.88);
-    font-size: 0.78rem;
-    font-weight: 620;
-  }
-
-  span:not(.metric-divider) {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 0.59rem;
-    white-space: nowrap;
-  }
-}
-
-.metric-divider {
-  width: 1px;
-  height: 0.9rem;
-  background: rgba(255, 255, 255, 0.13);
-}
-
 .read-only-card {
   position: relative;
   overflow: hidden;
@@ -990,11 +955,6 @@ app-select {
   .rotating-context {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .context-metrics {
-    width: 100%;
-    justify-content: space-between;
   }
 
   .route-accordion {

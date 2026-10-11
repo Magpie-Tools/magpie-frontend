@@ -89,6 +89,7 @@ input {
 
 .source-title {
   min-width: 0;
+  padding-block: 0.1em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -110,7 +111,11 @@ input {
   }
 }
 
-.source-title__text { display: inline-block; }
+.source-title__text {
+  display: inline-block;
+  // Include the glyph padding in the text width used by the URL scroll animation.
+  padding-inline: 0.08em;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .source-title--overflowing:is(:hover, :focus-visible) {

@@ -47,6 +47,8 @@ dl { margin: 0; }
   h1 {
     max-width: 64rem;
     margin-top: 0.05rem;
+    // Leave room for descenders and glyphs beyond the tightly tracked text box.
+    padding: 0.1em 0.08em;
     overflow: hidden;
     color: rgba(255, 255, 255, 0.98);
     font-size: clamp(1.35rem, 2.2vw, 1.8rem);
