@@ -23,7 +23,6 @@
     >
       <div class="skeleton-heading">
         <hlm-skeleton [style.width]="'14rem'" [style.height]="'1.9rem'" />
-        <hlm-skeleton [style.width]="'20rem'" [style.height]="'0.8rem'" />
       </div>
       <div class="workspace-grid">
         @for (_ of [1, 2, 3, 4]; track $index) {
@@ -43,12 +42,6 @@
           }}</span>
           <div>
             <h1>{{ workspace.name }}</h1>
-            <p>
-              {{ workspace.role | titlecase }} access
-              @if (workspace.billing_admin) {
-                <span aria-hidden="true"> · </span>Billing access
-              }
-            </p>
           </div>
         </div>
       </header>
