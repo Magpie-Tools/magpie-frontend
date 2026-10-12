@@ -32,9 +32,20 @@ describe('Country map previews', () => {
 
   it('centers mainland France instead of the Atlantic between its overseas territories', () => {
     const map = buildCountryMapPreview(resolveWorldCountry('France', true)!);
-    // French Guiana must not appear in a close view of mainland France.
-    expect(map.countries.find(region => region.name === 'Suriname')?.path).toBeNull();
-    expect(map.countries.find(region => region.name === 'Germany')?.path).toBeTruthy();
+    expect(map.focusLocation[0]).toBeGreaterThan(-5);
+    expect(map.focusLocation[0]).toBeLessThan(10);
+    expect(map.focusLocation[1]).toBeGreaterThan(42);
+    expect(map.focusLocation[1]).toBeLessThan(52);
+  });
+
+  it('retains distant countries for panning and supplies continuous world copies', () => {
+    const map = buildCountryMapPreview(resolveWorldCountry('France', true)!);
+    expect(map.countries.find(region => region.name === 'Suriname')?.path).toBeTruthy();
+    expect(map.countries.find(region => region.name === 'Japan')?.path).toBeTruthy();
+    expect(map.wrapOffsets).toEqual([-map.worldWidth, 0, map.worldWidth]);
+    expect(map.worldWidth).toBeGreaterThan(COUNTRY_PREVIEW_WIDTH);
+    expect(map.panBounds.minY).toBeLessThan(0);
+    expect(map.panBounds.maxY).toBeGreaterThan(0);
   });
 
   it('marks small countries omitted from the dashboard atlas at the center of the map', () => {

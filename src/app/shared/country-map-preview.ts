@@ -20,15 +20,25 @@ export function buildCountryMapPreview(country: CountryFeature) {
   const width = COUNTRY_PREVIEW_WIDTH;
   const height = COUNTRY_PREVIEW_HEIGHT;
   const scale = Math.min(600, width * 0.7 / Math.max(right - left, 1e-6), height * 0.65 / Math.max(bottom - top, 1e-6));
-  projection.scale(scale).translate([
+  const translation: [number, number] = [
     width / 2 - scale * (left + right) / 2,
     height / 2 - scale * (top + bottom) / 2,
-  ]).clipExtent([[0, 0], [width, height]]);
+  ];
+  // Keep the full geometry available as the SVG viewport moves across the map.
+  projection.scale(scale).translate(translation);
 
   const marker = projection(center)!;
+  const worldWidth = 2 * Math.PI * scale;
   return {
     countries: WORLD_FEATURES.map(feature => ({name: feature.properties.name, path: path(feature)})),
     selectedPath: country.geometry.type === 'Point' ? null : path(country),
     marker,
+    focusLocation: center,
+    worldWidth,
+    wrapOffsets: [-worldWidth, 0, worldWidth],
+    panBounds: {
+      minY: height - Math.PI * scale - translation[1],
+      maxY: Math.PI * scale - translation[1],
+    },
   };
 }

@@ -44,6 +44,8 @@
 
 .country-hover-card {
   width: min(24rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
   padding: 0.8rem;
   border: 1px solid rgba(239, 229, 237, 0.18);
   border-radius: 0.9rem;
@@ -62,7 +64,13 @@
   font-size: 0.75rem;
 
   i { color: var(--theme-primary-200); }
-  strong { font-weight: 550; }
+  strong {
+    min-width: 0;
+    overflow: hidden;
+    font-weight: 550;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .country-hover-card__map {
@@ -73,18 +81,74 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 0.65rem;
   background: radial-gradient(circle at 50% 50%, rgba(var(--theme-primary-500-rgb), 0.08), transparent 65%), #0d101b;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+
+  &--dragging { cursor: grabbing; }
+
+  &:focus-visible {
+    outline: 2px solid rgba(var(--theme-primary-300-rgb), 0.55);
+    outline-offset: 2px;
+  }
+}
+
+.country-hover-card__controls {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.country-hover-card__control {
+  padding: 0.2rem 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.7);
+  font: inherit;
+  font-size: 0.6rem;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    border-color: rgba(var(--theme-primary-300-rgb), 0.5);
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(var(--theme-primary-300-rgb), 0.55);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.country-hover-card__zoom {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1;
 }
 
 .country-hover-card__countries {
   fill: rgba(9, 12, 24, 0.55);
   stroke: rgba(255, 255, 255, 0.2);
   stroke-width: 0.65;
+
+  path { vector-effect: non-scaling-stroke; }
 }
 
 .country-hover-card__selected {
   fill: rgba(180, 225, 255, 0.9);
   stroke: #dbf2ff;
   stroke-width: 1.1;
+  vector-effect: non-scaling-stroke;
 }
 
 .country-hover-card__marker {
