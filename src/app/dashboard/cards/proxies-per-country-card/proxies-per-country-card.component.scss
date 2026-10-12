@@ -33,6 +33,33 @@
   background:
     radial-gradient(circle at 50% 48%, rgba(var(--theme-primary-500-rgb), 0.08), transparent 58%),
     rgba(255, 255, 255, 0.012);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+
+  &--dragging { cursor: grabbing; }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: 2px;
+  }
+}
+
+.map-controls {
+  position: absolute;
+  z-index: 2;
+  top: 0.65rem;
+  right: 0.65rem;
+  display: flex;
+  gap: 0.35rem;
+
+  button { background: #17171b; }
+}
+
+.map-zoom {
+  width: 2.1rem;
+  padding: 0;
+  font-size: 1rem;
 }
 
 :host ::ng-deep .map-chart,

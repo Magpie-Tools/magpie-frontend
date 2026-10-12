@@ -3,6 +3,7 @@ import {CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay} from 
 import {ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, signal, viewChild} from '@angular/core';
 import {buildCountryMapPreview, COUNTRY_PREVIEW_HEIGHT, COUNTRY_PREVIEW_WIDTH} from '../country-map-preview';
 import {resolveWorldCountry} from '../world-map';
+import {constrainMapView, MAP_MAX_ZOOM, mapPanKeyStep, mapWheelZoomFactor, mapZoomKeyFactor, svgMapPoint, zoomMapView} from '../map-navigation';
 
 let nextCountryMapId = 0;
 
@@ -96,7 +97,7 @@ export class CountryHoverCardComponent {
     return country ? buildCountryMapPreview(country) : null;
   });
   private readonly minZoom = computed(() => Math.min(1, COUNTRY_PREVIEW_WIDTH / (this.preview()?.worldWidth ?? COUNTRY_PREVIEW_WIDTH)));
-  private readonly maxZoom = 8;
+  private readonly maxZoom = MAP_MAX_ZOOM;
   readonly canZoomOut = computed(() => this.zoom() > this.minZoom() + 1e-6);
   readonly canZoomIn = computed(() => this.zoom() < this.maxZoom - 1e-6);
   readonly positions: ConnectedPosition[] = [
@@ -167,7 +168,7 @@ export class CountryHoverCardComponent {
     const svg = event.currentTarget as SVGSVGElement;
     event.preventDefault();
     svg.focus({preventScroll: true});
-    this.drag = {pointerId: event.pointerId, svg, start: this.mapPoint(svg, event), pan: this.pan()};
+    this.drag = {pointerId: event.pointerId, svg, start: svgMapPoint(svg, event), pan: this.pan()};
     svg.setPointerCapture(event.pointerId);
     this.isDragging.set(true);
     this.updateVisibility();
@@ -175,7 +176,7 @@ export class CountryHoverCardComponent {
 
   movePan(event: PointerEvent): void {
     if (!this.drag || event.pointerId !== this.drag.pointerId) return;
-    const point = this.mapPoint(this.drag.svg, event);
+    const point = svgMapPoint(this.drag.svg, event);
     this.setPan(this.drag.pan[0] + point.x - this.drag.start.x, this.drag.pan[1] + point.y - this.drag.start.y);
   }
 
@@ -187,18 +188,17 @@ export class CountryHoverCardComponent {
   }
 
   onMapKeyDown(event: KeyboardEvent): void {
-    const steps: Record<string, [number, number]> = {
-      ArrowLeft: [32, 0], ArrowRight: [-32, 0], ArrowUp: [0, 32], ArrowDown: [0, -32],
-    };
+    const step = mapPanKeyStep(event.key);
+    const factor = mapZoomKeyFactor(event);
     if (event.key === 'Home') {
       event.preventDefault();
       this.recenter();
-    } else if (['+', '=', '-', '_'].includes(event.key) && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    } else if (factor !== undefined) {
       event.preventDefault();
-      this.zoomBy(event.key === '+' || event.key === '=' ? 1.25 : 1 / 1.25);
-    } else if (steps[event.key]) {
+      this.zoomBy(factor);
+    } else if (step) {
       event.preventDefault();
-      const [x, y] = steps[event.key];
+      const [x, y] = step;
       this.setPan(this.pan()[0] + x, this.pan()[1] + y);
     }
   }
@@ -207,25 +207,18 @@ export class CountryHoverCardComponent {
     if (!event.deltaY) return;
     event.preventDefault();
     event.stopPropagation();
-    const point = this.mapPoint(event.currentTarget as SVGSVGElement, event);
-    const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16
-      : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? COUNTRY_PREVIEW_HEIGHT : 1;
-    const delta = Math.max(-1000, Math.min(1000, event.deltaY * unit));
-    this.zoomBy(Math.exp(-delta * 0.002), [point.x, point.y]);
+    const point = svgMapPoint(event.currentTarget as SVGSVGElement, event);
+    this.zoomBy(mapWheelZoomFactor(event, COUNTRY_PREVIEW_HEIGHT), [point.x, point.y]);
   }
 
   zoomBy(factor: number, anchor?: [number, number]): void {
     if (!this.preview()) return;
-    const currentZoom = this.zoom();
-    const nextZoom = Math.max(this.minZoom(), Math.min(this.maxZoom, currentZoom * factor));
-    if (Math.abs(nextZoom - currentZoom) < 1e-6) return;
+    const view = {zoom: this.zoom(), pan: this.pan()};
+    const next = zoomMapView(view, factor, anchor ?? [COUNTRY_PREVIEW_WIDTH / 2, COUNTRY_PREVIEW_HEIGHT / 2], this.minZoom());
+    if (next === view) return;
     this.stopDrag();
-    const ratio = nextZoom / currentZoom;
-    const [anchorX, anchorY] = anchor ?? [COUNTRY_PREVIEW_WIDTH / 2, COUNTRY_PREVIEW_HEIGHT / 2];
-    const [x, y] = this.pan();
-    this.zoom.set(nextZoom);
-    // Leave the geographic point under the pointer (or viewport center) in place.
-    this.setPan(anchorX - (anchorX - x) * ratio, anchorY - (anchorY - y) * ratio);
+    this.zoom.set(next.zoom);
+    this.setPan(...next.pan);
     if (!anchor) this.mapCard()?.nativeElement.querySelector<SVGSVGElement>('svg')?.focus({preventScroll: true});
     this.updateVisibility();
   }
@@ -240,17 +233,10 @@ export class CountryHoverCardComponent {
   private setPan(x: number, y: number): void {
     const map = this.preview();
     if (!map) return;
-    const zoom = this.zoom();
-    const width = map.worldWidth * zoom;
-    const wrappedX = ((x + width / 2) % width + width) % width - width / 2;
-    this.pan.set([
-      Math.abs(wrappedX) < 1e-6 ? 0 : wrappedX,
-      Math.min(map.panBounds.maxY * zoom, Math.max(COUNTRY_PREVIEW_HEIGHT - (COUNTRY_PREVIEW_HEIGHT - map.panBounds.minY) * zoom, y)),
-    ]);
-  }
-
-  private mapPoint(svg: SVGSVGElement, event: MouseEvent): DOMPoint {
-    return new DOMPoint(event.clientX, event.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
+    this.pan.set(constrainMapView({zoom: this.zoom(), pan: [x, y]}, {
+      width: COUNTRY_PREVIEW_WIDTH, height: COUNTRY_PREVIEW_HEIGHT, worldWidth: map.worldWidth,
+      worldTop: -map.panBounds.maxY, worldBottom: COUNTRY_PREVIEW_HEIGHT - map.panBounds.minY,
+    }).pan);
   }
 
   private stopDrag(): void {

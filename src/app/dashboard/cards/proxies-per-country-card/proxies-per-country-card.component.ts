@@ -2,12 +2,13 @@ import {HlmCardImports} from '@spartan-ng/helm/card';
 import {DialogComponent} from '../../../shared/ui/dialog.component';
 import {DashboardChartComponent} from '../../../shared/ui/dashboard-chart.component';
 import type {DashboardChartDefinition} from '../../../shared/ui/dashboard-chart.component';
-import {buildCountryMapChart, CountryMapFeature} from './country-map-chart';
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {buildCountryMapChart, CountryMapFeature, CountryMapFrame} from './country-map-chart';
+import {Component, computed, DestroyRef, ElementRef, inject, Input, OnChanges, signal, SimpleChanges, viewChild} from '@angular/core';
 import {DecimalPipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
 import {COUNTRY_ALIASES, WORLD_FEATURES, resolveWorldCountry} from '../../../shared/world-map';
+import {constrainMapView, INITIAL_MAP_VIEW, MAP_MAX_ZOOM, mapPanKeyStep, MapView, mapWheelZoomFactor, mapZoomKeyFactor, svgMapPoint, zoomMapView} from '../../../shared/map-navigation';
 
 interface CountryBreakdown {
   name: string;
@@ -99,10 +100,19 @@ export class ProxiesPerCountryCardComponent implements OnChanges {
   readonly listLimit = 7;
   showAllCountries = false;
   searchTerm = '';
+  readonly mapView = signal<MapView>(INITIAL_MAP_VIEW);
+  readonly isMapDragging = signal(false);
+  readonly canZoomOut = computed(() => this.mapView().zoom > 1 + 1e-6);
+  readonly canZoomIn = computed(() => this.mapView().zoom < MAP_MAX_ZOOM - 1e-6);
+  readonly hasChangedMapView = computed(() => this.mapView().zoom !== 1 || this.mapView().pan.some(value => value !== 0));
+  private readonly mapFrame = viewChild<ElementRef<HTMLElement>>('mapFrame');
+  private mapLayout?: CountryMapFrame;
+  private mapDrag?: {pointerId: number; host: HTMLElement; start: [number, number]; pan: [number, number]};
   private readonly decimalPipe: DecimalPipe;
 
   constructor(decimalPipe: DecimalPipe) {
     this.decimalPipe = decimalPipe;
+    inject(DestroyRef).onDestroy(() => this.stopMapDrag());
   }
 
   private readonly regionNames = typeof Intl.DisplayNames !== 'undefined'
@@ -112,6 +122,7 @@ export class ProxiesPerCountryCardComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['countries']) {
+      if (!this.countries.length) this.stopMapDrag();
       this.recalculateTotals();
       this.buildMap();
     }
@@ -144,7 +155,106 @@ export class ProxiesPerCountryCardComponent implements OnChanges {
   }
 
   setViewMode(mode: 'map' | 'countries'): void {
+    this.stopMapDrag();
+    this.refreshMapChart();
     this.viewMode = mode;
+  }
+
+  startMapPan(event: PointerEvent): void {
+    if (this.mapDrag || event.button !== 0 || !event.isPrimary || (event.target as Element).closest('button')) return;
+    const point = this.mapPoint(event);
+    const host = this.mapFrame()?.nativeElement;
+    if (!point || !host || !this.mapLayout) return;
+    event.preventDefault();
+    host.focus({preventScroll: true});
+    this.mapDrag = {pointerId: event.pointerId, host, start: point, pan: constrainMapView(this.mapView(), this.mapLayout).pan};
+    host.setPointerCapture(event.pointerId);
+    this.isMapDragging.set(true);
+    this.refreshMapChart();
+  }
+
+  moveMapPan(event: PointerEvent): void {
+    if (!this.mapDrag || event.pointerId !== this.mapDrag.pointerId) return;
+    const point = this.mapPoint(event);
+    if (!point) return;
+    this.setMapView({zoom: this.mapView().zoom, pan: [
+      this.mapDrag.pan[0] + point[0] - this.mapDrag.start[0],
+      this.mapDrag.pan[1] + point[1] - this.mapDrag.start[1],
+    ]});
+  }
+
+  endMapPan(event: PointerEvent): void {
+    if (!this.mapDrag || event.pointerId !== this.mapDrag.pointerId) return;
+    if (event.type === 'pointerup') this.moveMapPan(event);
+    this.stopMapDrag();
+    this.refreshMapChart();
+  }
+
+  onMapWheel(event: WheelEvent): void {
+    if (!event.deltaY || (event.target as Element).closest('button')) return;
+    const point = this.mapPoint(event);
+    if (!point || !this.mapLayout) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.zoomMapBy(mapWheelZoomFactor(event, this.mapLayout.plotHeight), point);
+  }
+
+  onMapKeyDown(event: KeyboardEvent): void {
+    if ((event.target as Element).closest('button')) return;
+    const factor = mapZoomKeyFactor(event);
+    const step = mapPanKeyStep(event.key);
+    if (event.key === 'Home') {
+      event.preventDefault();
+      this.resetMapView();
+    } else if (factor !== undefined) {
+      event.preventDefault();
+      this.zoomMapBy(factor);
+    } else if (step && this.mapLayout) {
+      event.preventDefault();
+      const view = this.mapView();
+      this.setMapView({zoom: view.zoom, pan: [view.pan[0] + step[0] / this.mapLayout.plotWidth, view.pan[1] + step[1] / this.mapLayout.plotHeight]});
+    }
+  }
+
+  zoomMapBy(factor: number, anchor?: [number, number]): void {
+    if (!this.mapLayout) return;
+    const view = this.mapView();
+    const next = zoomMapView(view, factor, anchor ?? [0.5, 0.5], 1);
+    if (next === view) return;
+    this.stopMapDrag();
+    this.setMapView(next);
+    if (!anchor) this.mapFrame()?.nativeElement.focus({preventScroll: true});
+  }
+
+  resetMapView(): void {
+    this.stopMapDrag();
+    this.setMapView(INITIAL_MAP_VIEW);
+    this.mapFrame()?.nativeElement.focus({preventScroll: true});
+  }
+
+  private setMapView(view: MapView): void {
+    this.mapView.set(this.mapLayout ? constrainMapView(view, this.mapLayout) : view);
+    this.refreshMapChart();
+  }
+
+  private mapPoint(event: MouseEvent): [number, number] | undefined {
+    const svg = this.mapFrame()?.nativeElement.querySelector<SVGSVGElement>('svg');
+    if (!svg || !this.mapLayout) return undefined;
+    const point = svgMapPoint(svg, event);
+    return [(point.x - this.mapLayout.x) / this.mapLayout.plotWidth, (point.y - this.mapLayout.y) / this.mapLayout.plotHeight];
+  }
+
+  private stopMapDrag(): void {
+    const drag = this.mapDrag;
+    this.mapDrag = undefined;
+    this.isMapDragging.set(false);
+    if (drag?.host.hasPointerCapture(drag.pointerId)) drag.host.releasePointerCapture(drag.pointerId);
+  }
+
+  private refreshMapChart(): void {
+    this.mapChart = buildCountryMapChart(this.mapFeatures, this.maxCountryValue, value => this.formatNumber(value), {
+      view: this.mapView(), dragging: this.isMapDragging(), onFrame: frame => { this.mapLayout = frame; },
+    });
   }
 
   countryPercent(country: CountryBreakdown): number {
@@ -298,7 +408,7 @@ export class ProxiesPerCountryCardComponent implements OnChanges {
       ...feature,
       properties: {...feature.properties, value: values.get(feature.properties.name.toLowerCase()) ?? 0},
     }));
-    this.mapChart = buildCountryMapChart(this.mapFeatures, this.maxCountryValue, value => this.formatNumber(value));
+    this.refreshMapChart();
   }
 
   private resolveValue(country: CountryBreakdown): number {

@@ -34,7 +34,20 @@
     <div class="dashboard-card__body country-card__body">
       @if (viewMode === "map") {
         <div class="map-panel">
-          <div class="map-frame">
+          <div #mapFrame class="map-frame" tabindex="0" role="group" aria-label="Interactive proxy country map"
+            aria-description="Drag or use arrow keys to move. Scroll or use plus and minus to zoom; Home resets the view."
+            [class.map-frame--dragging]="isMapDragging()"
+            (pointerdown)="startMapPan($event)" (pointermove)="moveMapPan($event)" (pointerup)="endMapPan($event)"
+            (pointercancel)="endMapPan($event)" (lostpointercapture)="endMapPan($event)"
+            (wheel)="onMapWheel($event)" (keydown)="onMapKeyDown($event)">
+            <div class="map-controls" role="group" aria-label="Map controls">
+              <button type="button" class="dashboard-control map-zoom" aria-label="Zoom out" title="Zoom out"
+                [disabled]="!canZoomOut()" (click)="zoomMapBy(1 / 1.25)"><span aria-hidden="true">−</span></button>
+              <button type="button" class="dashboard-control map-zoom" aria-label="Zoom in" title="Zoom in"
+                [disabled]="!canZoomIn()" (click)="zoomMapBy(1.25)"><span aria-hidden="true">+</span></button>
+              <button type="button" class="dashboard-control" [disabled]="!hasChangedMapView()"
+                (click)="resetMapView()">Reset view</button>
+            </div>
             <app-dashboard-chart
               [definition]="mapChart"
               label="Proxy counts by country"
