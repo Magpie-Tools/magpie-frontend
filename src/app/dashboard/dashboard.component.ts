@@ -237,31 +237,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
     proxyHistory: ProxyHistoryEntry[] | undefined
   ): void {
     const aliveSeries = this.extractSnapshotCounts(snapshots?.alive);
-    const fallbackAlive = this.resolveAliveFallback(dashboard);
-    const aliveValue = aliveSeries.length ? aliveSeries[aliveSeries.length - 1] : fallbackAlive.value;
-    const aliveHistory = aliveSeries.length ? aliveSeries.slice(0, -1) : fallbackAlive.history;
+    const aliveValue = aliveSeries.length ? aliveSeries[aliveSeries.length - 1] : this.resolveAliveFallback(dashboard);
 
     this.conversionRate.set({
       value: aliveValue,
-      history: aliveHistory,
+      history: aliveSeries.slice(0, -1),
       displayValue: aliveValue.toLocaleString()
     });
 
     const totalSeries = (proxyHistory ?? []).map((entry) => entry.count);
     this.avgOrderValue.set({
       value: proxyCount,
-      history: totalSeries.length ? totalSeries : [proxyCount],
+      history: totalSeries,
       displayValue: proxyCount.toLocaleString()
     });
 
     const scrapedSeries = this.extractSnapshotCounts(snapshots?.scraped);
-    const fallbackScraped = this.resolveScrapedFallback(dashboard);
-    const scrapedValue = scrapedSeries.length ? scrapedSeries[scrapedSeries.length - 1] : fallbackScraped.value;
-    const scrapedHistory = scrapedSeries.length ? scrapedSeries.slice(0, -1) : fallbackScraped.history;
+    const scrapedValue = scrapedSeries.length ? scrapedSeries[scrapedSeries.length - 1] : dashboard?.totalScraped ?? 0;
 
     this.orderQuantity.set({
       value: scrapedValue,
-      history: scrapedHistory,
+      history: scrapedSeries.slice(0, -1),
       displayValue: scrapedValue.toLocaleString()
     });
   }
@@ -276,36 +272,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .filter((value) => Number.isFinite(value) && value >= 0);
   }
 
-  private resolveAliveFallback(dashboard: DashboardInfo | undefined): { value: number; history: number[] } {
+  private resolveAliveFallback(dashboard: DashboardInfo | undefined): number {
     const judgeEntries = dashboard?.judgeValidProxies ?? [];
     if (!judgeEntries.length) {
-      return { value: 0, history: [] };
+      return 0;
     }
 
     const totals = judgeEntries.map(
       (entry) => entry.eliteProxies + entry.anonymousProxies + entry.transparentProxies
     );
-    const aggregate = totals.reduce((sum, value) => sum + value, 0);
-
-    return {
-      value: aggregate,
-      history: totals.filter((value) => value > 0)
-    };
-  }
-
-  private resolveScrapedFallback(dashboard: DashboardInfo | undefined): { value: number; history: number[] } {
-    if (!dashboard) {
-      return { value: 0, history: [] };
-    }
-
-    const totalScraped = dashboard.totalScraped ?? 0;
-    const totalScrapedWeek = dashboard.totalScrapedWeek ?? 0;
-    const history = totalScrapedWeek > 0 ? [totalScrapedWeek] : [];
-
-    return {
-      value: totalScraped,
-      history
-    };
+    return totals.reduce((sum, value) => sum + value, 0);
   }
 
   private updateCountryBreakdown(breakdown: CountryBreakdownEntry[] = []): void {

@@ -23,6 +23,67 @@ describe('KpiCardComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  for (const history of [[], [null, undefined, NaN, Infinity]]) {
+    it(`hides trends without usable history ${JSON.stringify(history)}`, () => {
+      fixture.componentRef.setInput('value', 200);
+      fixture.componentRef.setInput('chartValues', history);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.metric-card__value').textContent.trim()).toBe('200');
+      expect(fixture.nativeElement.querySelector('.metric-card__trend')).toBeNull();
+      expect(fixture.nativeElement.querySelector('app-dashboard-chart')).toBeNull();
+      expect(component.sparklinePoints).toEqual([]);
+      expect(component.resolvedChange).toBeNull();
+    });
+  }
+
+  it('shows only real samples as history becomes available and hides trends when it disappears', () => {
+    fixture.componentRef.setInput('value', 200);
+    fixture.componentRef.setInput('chartValues', [null, 180, undefined]);
+    fixture.detectChanges();
+
+    expect(component.sparklinePoints.map(point => point.value)).toEqual([180, 200]);
+    expect(fixture.nativeElement.querySelector('app-dashboard-chart')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.metric-card__trend').textContent).toContain('11,1');
+
+    fixture.componentRef.setInput('chartValues', []);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.metric-card__trend')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-dashboard-chart')).toBeNull();
+  });
+
+  it('hides an undefined percentage comparison from zero while keeping the real sparkline', () => {
+    fixture.componentRef.setInput('value', 200);
+    fixture.componentRef.setInput('chartValues', [0]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.metric-card__trend')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-dashboard-chart')).not.toBeNull();
+    expect(component.sparklinePoints.map(point => point.value)).toEqual([0, 200]);
+  });
+
+  it('keeps a genuine zero percent change visible', () => {
+    fixture.componentRef.setInput('value', 200);
+    fixture.componentRef.setInput('chartValues', [200]);
+    fixture.detectChanges();
+
+    expect(component.resolvedChange).toBe(0);
+    expect(fixture.nativeElement.querySelector('.metric-card__trend').textContent).toContain('0,0');
+    expect(fixture.nativeElement.querySelector('app-dashboard-chart')).not.toBeNull();
+  });
+
+  for (const value of [NaN, Infinity, 'Unknown']) {
+    it(`hides trends for an invalid current value ${value}`, () => {
+      fixture.componentRef.setInput('value', value);
+      fixture.componentRef.setInput('chartValues', [100, 150]);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.metric-card__trend')).toBeNull();
+      expect(fixture.nativeElement.querySelector('app-dashboard-chart')).toBeNull();
+    });
+  }
+
   it('should align chart data with current value', () => {
     component.value = 200;
     component.chartValues = [120, 140, 160, 180];

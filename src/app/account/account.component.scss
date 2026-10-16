@@ -63,7 +63,6 @@ p {
 
 .context-icon,
 .card-icon,
-.account-state__mark,
 .dialog-icon {
   display: inline-flex;
   flex: 0 0 auto;
@@ -89,44 +88,6 @@ p {
   font-weight: 620;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-}
-
-.account-state {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.65rem;
-  min-width: 10rem;
-  padding: 0.5rem 0.72rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.78rem;
-  background: rgba(8, 8, 10, 0.22);
-
-  > span:last-child {
-    display: flex;
-    flex-direction: column;
-    gap: 0.05rem;
-  }
-
-  small {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 0.56rem;
-  }
-
-  strong {
-    color: rgba(255, 255, 255, 0.84);
-    font-size: 0.68rem;
-    font-weight: 580;
-  }
-}
-
-.account-state__mark {
-  width: 1.85rem;
-  height: 1.85rem;
-  border-color: rgba(var(--theme-primary-300-rgb), 0.22);
-  border-radius: 0.58rem;
-  background: rgba(var(--theme-primary-500-rgb), 0.08);
-  font-size: 0.72rem;
 }
 
 .account-grid {
@@ -755,10 +716,6 @@ p {
   .account-context {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .account-state {
-    width: 100%;
   }
 
   .appearance-card,

@@ -63,6 +63,49 @@ describe('DashboardComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('shows fallback metric values without inventing trend history', () => {
+    dashboardData.viewer.proxyCount = 400;
+    dashboardData.viewer.dashboard.totalScraped = 250;
+    dashboardData.viewer.dashboard.totalScrapedWeek = 90;
+    dashboardData.viewer.dashboard.judgeValidProxies = [
+      {judgeUrl: 'https://judge-one.example', eliteProxies: 10, anonymousProxies: 20, transparentProxies: 0},
+      {judgeUrl: 'https://judge-two.example', eliteProxies: 5, anonymousProxies: 10, transparentProxies: 5}
+    ];
+
+    component.onProxyHistoryRefresh();
+    fixture.detectChanges();
+
+    const cards: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('app-kpi-card');
+    expect(Array.from(cards, card => card.querySelector('.metric-card__value')?.textContent?.trim())).toEqual(['50', '400', '250']);
+    expect(fixture.nativeElement.querySelectorAll('.metric-card__trend').length).toBe(0);
+    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-dashboard-chart').length).toBe(0);
+  });
+
+  it('shows KPI trends only after real prior samples arrive', () => {
+    const previousTime = '2026-10-16T10:00:00Z';
+    const currentTime = '2026-10-16T11:00:00Z';
+    dashboardData.viewer.proxyCount = 40;
+    dashboardData.viewer.proxySnapshots = {
+      alive: [{count: 12, recordedAt: currentTime}],
+      scraped: [{count: 24, recordedAt: currentTime}]
+    };
+
+    component.onProxyHistoryRefresh();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.metric-card__trend').length).toBe(0);
+    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-dashboard-chart').length).toBe(0);
+
+    dashboardData.viewer.proxySnapshots.alive.unshift({count: 10, recordedAt: previousTime});
+    dashboardData.viewer.proxySnapshots.scraped.unshift({count: 20, recordedAt: previousTime});
+    dashboardData.viewer.proxyHistory = [{count: 30, recordedAt: previousTime}];
+    component.onProxyHistoryRefresh();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.metric-card__trend').length).toBe(3);
+    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-dashboard-chart').length).toBe(3);
+  });
+
   for (const progress of [0.35, 1]) {
     it(`keeps the page entrance at ${progress} when dashboard data arrives`, async () => {
       fixture.destroy();

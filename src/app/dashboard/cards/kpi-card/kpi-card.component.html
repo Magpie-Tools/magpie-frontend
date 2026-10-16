@@ -7,28 +7,32 @@
         ></span>
         <span>{{ title }}</span>
       </div>
-      <span
-        hlmBadge
-        class="metric-card__trend"
-        [ngClass]="getChipClass(resolvedChange)"
-      >
-        <i
-          class="icon"
-          [ngClass]="getChangeIcon(resolvedChange)"
-          aria-hidden="true"
-        ></i>
-        {{ formatChange(resolvedChange) }}
-      </span>
+      @if (resolvedChange !== null) {
+        <span
+          hlmBadge
+          class="metric-card__trend"
+          [ngClass]="getChipClass(resolvedChange)"
+        >
+          <i
+            class="icon"
+            [ngClass]="getChangeIcon(resolvedChange)"
+            aria-hidden="true"
+          ></i>
+          {{ formatChange(resolvedChange) }}
+        </span>
+      }
     </div>
 
     <strong class="metric-card__value">{{ displayValue ?? value }}</strong>
 
-    <div class="metric-card__visual">
-      <app-dashboard-chart
-        [definition]="sparklineChart"
-        [label]="title + ' trend'"
-        [ngClass]="getChangeColorClass(resolvedChange)"
-      />
-    </div>
+    @if (sparklinePoints.length > 1) {
+      <div class="metric-card__visual">
+        <app-dashboard-chart
+          [definition]="sparklineChart"
+          [label]="title + ' trend'"
+          [ngClass]="getChangeColorClass(resolvedChange ?? 0)"
+        />
+      </div>
+    }
   </div>
 </section>

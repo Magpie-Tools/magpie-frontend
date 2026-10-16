@@ -26,7 +26,7 @@ export class KpiCardComponent implements OnChanges {
 
   sparklinePoints: MetricPoint[] = [];
   sparklineChart: DashboardChartDefinition = {marks: [], scales: {x: null, y: null}};
-  resolvedChange = 0;
+  resolvedChange: number | null = null;
   private readonly numberFormatter: Intl.NumberFormat;
   private readonly percentFormatter: Intl.NumberFormat;
 
@@ -43,7 +43,7 @@ export class KpiCardComponent implements OnChanges {
   ngOnChanges(_changes: SimpleChanges): void {
     this.resolvedChange = this.resolveChange();
     this.sparklinePoints = this.buildSparklinePoints();
-    this.sparklineChart = buildMetricChart(this.sparklinePoints, this.getTrendColor(this.resolvedChange), value => this.formatNumber(value));
+    this.sparklineChart = buildMetricChart(this.sparklinePoints, this.getTrendColor(this.resolvedChange ?? 0), value => this.formatNumber(value));
   }
 
   getChipClass(change: number): string {
@@ -74,9 +74,9 @@ export class KpiCardComponent implements OnChanges {
     return change > 0 ? 'icon-arrow-up' : change == 0 ? 'icon-move-vertical' : 'icon-arrow-down';
   }
 
-  formatChange(change: number): string {
-    if (!Number.isFinite(change)) {
-      return this.changeSuffix === '%' ? this.percentFormatter.format(0) : `0${this.changeSuffix}`;
+  formatChange(change: number | null): string {
+    if (change === null || !Number.isFinite(change)) {
+      return '';
     }
 
     if (this.changeSuffix === '%') {
@@ -88,14 +88,12 @@ export class KpiCardComponent implements OnChanges {
 
   private buildSparklinePoints(): MetricPoint[] {
     const currentValue = this.coerceNumericValue(this.value);
-    const history = [...this.sanitiseHistory(this.chartValues)];
-
-    const trimmed = history.slice(-4);
-    while (trimmed.length < 4) {
-      trimmed.unshift(currentValue);
+    const history = this.sanitiseHistory(this.chartValues);
+    if (currentValue === null || !history.length) {
+      return [];
     }
 
-    const values = [...trimmed, currentValue];
+    const values = [...history.slice(-4), currentValue];
     return values.map((value, index) => ({index, value}));
   }
 
@@ -105,42 +103,45 @@ export class KpiCardComponent implements OnChanges {
       .filter(v => Number.isFinite(v));
   }
 
-  private resolveChange(): number {
+  private resolveChange(): number | null {
     if (typeof this.change === 'number' && Number.isFinite(this.change)) {
       return this.change;
     }
 
     const current = this.coerceNumericValue(this.value);
     const history = this.sanitiseHistory(this.chartValues);
-    if (!history.length) {
-      return 0;
+    if (current === null || !history.length) {
+      return null;
     }
 
     const previous = history[history.length - 1];
     if (!Number.isFinite(previous) || Math.abs(previous) < 1e-6) {
-      return 0;
+      return null;
     }
 
     const deltaPercent = ((current - previous) / Math.abs(previous)) * 100;
     if (!Number.isFinite(deltaPercent)) {
-      return 0;
+      return null;
     }
 
     return Math.round(deltaPercent * 10) / 10;
   }
 
-  private coerceNumericValue(value: number | string | null | undefined): number {
+  private coerceNumericValue(value: number | string | null | undefined): number | null {
     if (typeof value === 'number') {
-      return value;
+      return Number.isFinite(value) ? value : null;
     }
 
     if (typeof value === 'string') {
       const normalised = value.replace(/[^0-9+\-.,]/g, '').replace(/,(?=\d{3}(\D|$))/g, '');
+      if (!normalised.trim()) {
+        return null;
+      }
       const parsed = Number(normalised.replace(',', '.'));
-      return Number.isFinite(parsed) ? parsed : 0;
+      return Number.isFinite(parsed) ? parsed : null;
     }
 
-    return 0;
+    return null;
   }
 
   private formatNumber(value: number | string | null | undefined): string {
