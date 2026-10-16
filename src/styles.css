@@ -486,7 +486,6 @@ body { color: var(--foreground); font-family: 'Geist Variable', sans-serif; }
 .table-scroll { overflow: auto; }
 .data-table { width: 100%; min-width: 0; position: relative; }
 .table-loading { padding: .5rem 1rem; font-size: .8rem; color: var(--muted-foreground); }
-.table-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem; padding: 1rem; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: .8rem; }
 .table-sort { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; }
 .table-sort:focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
 .ui-message { padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); color: var(--foreground); }

@@ -16,7 +16,6 @@ import {LoadingComponent} from './ui-elements/loading/loading.component';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Magpie';
   layout = inject(LayoutService);
   constructor() {
     // Constructing UserService initializes the session before the router view is shown.

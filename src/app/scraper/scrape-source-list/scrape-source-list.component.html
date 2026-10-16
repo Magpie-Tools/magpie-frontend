@@ -475,48 +475,8 @@
       [disabled]="loading()"
       [sortField]="sortField"
       [sortOrder]="sortOrder"
-    >
-      <form class="scrape-page-jump" (submit)="onPageJumpSubmit($event)">
-        <label class="scrape-page-jump__label" [attr.for]="pageJumpInputId"
-          >Page</label
-        >
-        <input
-          class="scrape-page-jump__input"
-          type="number"
-          inputmode="numeric"
-          name="scrapeSourcePageJump"
-          [id]="pageJumpInputId"
-          [min]="1"
-          [max]="totalPages"
-          [disabled]="loading() || totalPages <= 1"
-          [(ngModel)]="pageJumpValue"
-          [attr.aria-describedby]="pageJumpTotalId"
-        />
-        <span class="scrape-page-jump__total" [id]="pageJumpTotalId"
-          >of {{ totalPages }}</span
-        >
-        <button
-          type="submit"
-          class="scrape-page-jump__submit"
-          [disabled]="loading() || totalPages <= 1"
-        >
-          Go
-        </button>
-        <button
-          type="button"
-          class="scrape-page-jump__scroll-toggle"
-          [attr.aria-label]="pageScrollTargetLabel"
-          [attr.aria-pressed]="pageScrollTarget === 'top'"
-          [hlmTooltip]="pageScrollTargetLabel"
-          (click)="togglePageScrollTarget()"
-        >
-          <i
-            class="icon"
-            [ngClass]="pageScrollTargetIcon"
-            aria-hidden="true"
-          ></i>
-        </button>
-      </form>
-    </app-pagination>
+      pageScrollTargetStorageKey="magpie-scrape-source-list-page-scroll-target"
+      (pageScrollTargetChange)="pageScrollTarget = $event"
+    />
   </div>
 </app-inventory-page-shell>

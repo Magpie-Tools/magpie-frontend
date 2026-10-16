@@ -78,7 +78,7 @@ describe('DashboardComponent', () => {
     const cards: NodeListOf<HTMLElement> = fixture.nativeElement.querySelectorAll('app-kpi-card');
     expect(Array.from(cards, card => card.querySelector('.metric-card__value')?.textContent?.trim())).toEqual(['50', '400', '250']);
     expect(fixture.nativeElement.querySelectorAll('.metric-card__trend').length).toBe(0);
-    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-dashboard-chart').length).toBe(0);
+    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-chart').length).toBe(0);
   });
 
   it('shows KPI trends only after real prior samples arrive', () => {
@@ -94,7 +94,7 @@ describe('DashboardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelectorAll('.metric-card__trend').length).toBe(0);
-    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-dashboard-chart').length).toBe(0);
+    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-chart').length).toBe(0);
 
     dashboardData.viewer.proxySnapshots.alive.unshift({count: 10, recordedAt: previousTime});
     dashboardData.viewer.proxySnapshots.scraped.unshift({count: 20, recordedAt: previousTime});
@@ -103,7 +103,7 @@ describe('DashboardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelectorAll('.metric-card__trend').length).toBe(3);
-    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-dashboard-chart').length).toBe(3);
+    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-chart').length).toBe(3);
   });
 
   for (const progress of [0.35, 1]) {

@@ -2,6 +2,7 @@ import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {HlmTableImports} from '@spartan-ng/helm/table';
 import {DialogComponent} from '../../shared/ui/dialog.component';
 import {ChartComponent} from '../../shared/ui/chart.component';
+import {buildProxyResponseChart} from './proxy-response-chart';
 import {CountryHoverCardComponent} from '../../shared/ui/country-hover-card.component';
 import {Component, OnDestroy, OnInit, computed, signal} from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
@@ -23,15 +24,6 @@ import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag
 import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
 import {RevealGroupDirective} from '../../shared/reveal-group.directive';
-
-interface ThemePalette {
-  primary: string;
-  primarySoft: string;
-  text: string;
-  muted: string;
-  gridStrong: string;
-  gridLight: string;
-}
 
 type CopyField = 'ip' | 'port' | 'address' | 'username' | 'password' | 'combined' | 'credentialAddress';
 
@@ -74,7 +66,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   proxyId = signal<number | undefined>(undefined);
   detail = signal<ProxyDetail | null>(null);
   statistics = signal<ProxyStatistic[]>([]);
-  chronologicalStats = computed(() => this.computeChronologicalStatistics());
+  readonly responseTimeChart = computed(() => buildProxyResponseChart(this.statistics(), this.detail()?.latest_statistic));
 
   isLoadingDetail = signal(true);
   isLoadingStatistics = signal(true);
@@ -94,8 +86,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   savingTags = signal(false);
   changingLifecycle = signal(false);
 
-  chartData = signal<any>({ labels: [], datasets: [] });
-  chartOptions = signal<any>(this.buildDefaultChartOptions());
   returnLink = signal<string>('/proxies');
   returnLabel = signal<string>('Back to proxies');
 
@@ -372,80 +362,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  get overallAlive(): boolean | null {
-    const detail = this.detail();
-    if (detail && 'alive' in detail) { return detail.alive ?? null; }
-    const stats = this.statistics().filter(stat => stat.current !== false);
-    if (stats.length > 0) {
-      const latestByProtocol = new Map<string, ProxyStatistic>();
-      for (const stat of stats) {
-        const key = this.normalizeProtocolKey(stat.protocol);
-        const existing = latestByProtocol.get(key);
-        if (!existing || this.isNewerStatistic(stat, existing)) {
-          latestByProtocol.set(key, stat);
-        }
-      }
-
-      if (latestByProtocol.size > 0) {
-        for (const stat of latestByProtocol.values()) {
-          if (stat.alive) {
-            return true;
-          }
-        }
-        return false;
-      }
-    }
-
-    const fallback = this.detail()?.latest_statistic;
-    if (fallback) {
-      return fallback.alive;
-    }
-
-    return null;
-  }
-
-  get overallAliveStatus(): 'alive' | 'dead' | 'unknown' {
-    const overall = this.overallAlive;
-    if (overall === null) {
-      return 'unknown';
-    }
-    return overall ? 'alive' : 'dead';
-  }
-
-  get overallAliveLabel(): string {
-    const status = this.overallAliveStatus;
-    if (status === 'alive') {
-      return 'Alive';
-    }
-    if (status === 'dead') {
-      return 'Dead';
-    }
-    return 'Unknown';
-  }
-
-  private isNewerStatistic(candidate: ProxyStatistic, current: ProxyStatistic): boolean {
-    const candidateTime = this.statTimestamp(candidate);
-    const currentTime = this.statTimestamp(current);
-    if (candidateTime !== currentTime) {
-      return candidateTime > currentTime;
-    }
-    return (candidate.id ?? 0) > (current.id ?? 0);
-  }
-
-  private statTimestamp(stat: ProxyStatistic): number {
-    const raw = stat.created_at?.toString().trim();
-    if (!raw) {
-      return 0;
-    }
-    const parsed = Date.parse(raw);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  }
-
-  private normalizeProtocolKey(protocol: string): string {
-    const trimmed = (protocol || '').trim().toLowerCase();
-    return trimmed || 'unknown';
-  }
-
   get reputationOverall(): ProxyReputation | null {
     const overall = this.detail()?.reputation?.overall;
     if (!overall) {
@@ -479,10 +395,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     });
 
     return entries.sort((a, b) => b.score - a.score);
-  }
-
-  get hasReputation(): boolean {
-    return !!this.reputationOverall || this.reputationProtocols.length > 0;
   }
 
   reputationBadgeClass(label?: string | null): string {
@@ -653,7 +565,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       next: detail => {
         this.detail.set(detail);
         this.isLoadingDetail.set(false);
-        this.updateChart();
       },
       error: err => {
         this.isLoadingDetail.set(false);
@@ -1121,7 +1032,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       next: stats => {
         this.statistics.set(stats);
         this.isLoadingStatistics.set(false);
-        this.updateChart();
       },
       error: err => {
         this.isLoadingStatistics.set(false);
@@ -1309,159 +1219,4 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     return ['USER-AGENT', 'HOST', 'ACCEPT', 'ACCEPT-ENCODING'];
   }
 
-  private updateChart(): void {
-    const points: ProxyStatistic[] = this.chronologicalStats();
-
-    const palette = this.getThemePalette();
-
-    if (!points.length) {
-      this.chartData.set({
-        labels: [],
-        datasets: [
-          {
-            data: [],
-            borderColor: palette.primary,
-            backgroundColor: palette.primarySoft,
-            tension: 0.35,
-            fill: true,
-            pointRadius: 0,
-            borderWidth: 2,
-          }
-        ]
-      });
-      this.chartOptions.set(this.buildDefaultChartOptions(palette));
-      return;
-    }
-
-    const formatter = new Intl.DateTimeFormat(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-
-    const labels = points.map(p => {
-      const parsed = new Date(p.created_at);
-      return Number.isNaN(parsed.getTime()) ? '—' : formatter.format(parsed);
-    });
-    const values = points.map(p => p.response_time);
-
-    this.chartData.set({
-      labels,
-      datasets: [
-        {
-          label: 'Response Time (ms)',
-          data: values,
-          borderColor: palette.primary,
-          backgroundColor: palette.primarySoft,
-          tension: 0.35,
-          fill: true,
-          pointRadius: 0,
-          pointHitRadius: 8,
-          borderWidth: 2,
-        }
-      ]
-    });
-
-    this.chartOptions.set(this.buildDefaultChartOptions(palette));
-  }
-
-  private computeChronologicalStatistics(): ProxyStatistic[] {
-    const statistics = this.statistics();
-    if (statistics.length) {
-      return [...statistics].sort((a, b) => {
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      });
-    }
-
-    const detail = this.detail();
-    if (detail?.latest_statistic) {
-      return [detail.latest_statistic];
-    }
-
-    return [];
-  }
-
-  private getThemePalette(): ThemePalette {
-    const fallback: ThemePalette = {
-      primary: '#3b82f6',
-      primarySoft: 'rgba(59, 130, 246, 0.2)',
-      text: '#e2e8f0',
-      muted: 'rgba(148, 163, 184, 0.82)',
-      gridStrong: 'rgba(148, 163, 184, 0.18)',
-      gridLight: 'rgba(148, 163, 184, 0.12)',
-    };
-
-    if (typeof window === 'undefined') {
-      return fallback;
-    }
-
-    const styles = getComputedStyle(document.documentElement);
-    const primary = styles.getPropertyValue('--theme-primary-500').trim() || fallback.primary;
-    const primarySoft = styles.getPropertyValue('--theme-primary-soft-bg').trim() || fallback.primarySoft;
-    const text = styles.getPropertyValue('--theme-text-color').trim() || fallback.text;
-    const muted = styles.getPropertyValue('--theme-primary-200').trim() || fallback.muted;
-    const primaryRgb = styles.getPropertyValue('--theme-primary-500-rgb').trim();
-
-    const gridStrong = primaryRgb ? `rgba(${primaryRgb}, 0.18)` : fallback.gridStrong;
-    const gridLight = primaryRgb ? `rgba(${primaryRgb}, 0.12)` : fallback.gridLight;
-
-    return {
-      primary,
-      primarySoft,
-      text,
-      muted,
-      gridStrong,
-      gridLight,
-    };
-  }
-
-  private buildDefaultChartOptions(palette: ThemePalette = this.getThemePalette()): any {
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: (context: any) => `${context.parsed.y} ms`
-          }
-        }
-      },
-      interaction: {
-        intersect: false,
-        mode: 'nearest'
-      },
-      scales: {
-        x: {
-          border: { display: false },
-          ticks: {
-            color: palette.muted,
-            maxTicksLimit: 3,
-            maxRotation: 0,
-            minRotation: 0,
-            font: { size: 10 }
-          },
-          grid: {
-            display: false
-          }
-        },
-        y: {
-          border: { display: false },
-          ticks: {
-            color: palette.muted,
-            maxTicksLimit: 4,
-            font: { size: 10 },
-            callback: (value: number | string) => `${value} ms`
-          },
-          grid: {
-            color: palette.gridStrong
-          }
-        }
-      }
-    };
-  }
 }

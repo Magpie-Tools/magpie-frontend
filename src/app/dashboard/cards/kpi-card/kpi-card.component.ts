@@ -1,8 +1,8 @@
 import {HlmCardImports} from '@spartan-ng/helm/card';
 import {HlmBadge} from '@spartan-ng/helm/badge';
-import {DashboardChartComponent} from '../../../shared/ui/dashboard-chart.component';
+import {ChartComponent} from '../../../shared/ui/chart.component';
 import {buildMetricChart, MetricPoint} from '../../dashboard-charts';
-import type {DashboardChartDefinition} from '../../../shared/ui/dashboard-chart.component';
+import type {AppChartDefinition} from '../../../shared/ui/chart.component';
 import {Component, Inject, Input, LOCALE_ID, OnChanges, SimpleChanges} from '@angular/core';
 
 import {NgClass} from '@angular/common';
@@ -10,7 +10,7 @@ import {NgClass} from '@angular/common';
 @Component({
   selector: 'app-kpi-card',
   standalone: true,
-  imports: [HlmCardImports, HlmBadge, DashboardChartComponent, NgClass],
+  imports: [HlmCardImports, HlmBadge, ChartComponent, NgClass],
   templateUrl: './kpi-card.component.html',
   styleUrl: './kpi-card.component.scss'
 })
@@ -25,7 +25,7 @@ export class KpiCardComponent implements OnChanges {
   @Input() chartValues: Array<number | null | undefined> = [];
 
   sparklinePoints: MetricPoint[] = [];
-  sparklineChart: DashboardChartDefinition = {marks: [], scales: {x: null, y: null}};
+  sparklineChart: AppChartDefinition = {marks: [], scales: {x: null, y: null}};
   resolvedChange: number | null = null;
   private readonly numberFormatter: Intl.NumberFormat;
   private readonly percentFormatter: Intl.NumberFormat;

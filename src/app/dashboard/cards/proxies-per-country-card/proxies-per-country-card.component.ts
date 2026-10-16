@@ -1,7 +1,7 @@
 import {HlmCardImports} from '@spartan-ng/helm/card';
 import {DialogComponent} from '../../../shared/ui/dialog.component';
-import {DashboardChartComponent} from '../../../shared/ui/dashboard-chart.component';
-import type {DashboardChartDefinition} from '../../../shared/ui/dashboard-chart.component';
+import {ChartComponent} from '../../../shared/ui/chart.component';
+import type {AppChartDefinition} from '../../../shared/ui/chart.component';
 import {buildCountryMapChart, CountryMapFeature, CountryMapFrame} from './country-map-chart';
 import {Component, computed, DestroyRef, ElementRef, inject, Input, OnChanges, signal, SimpleChanges, viewChild} from '@angular/core';
 import {DecimalPipe} from '@angular/common';
@@ -82,7 +82,7 @@ const COUNTRY_CODE_OVERRIDES: Record<string, string> = {
 @Component({
   selector: 'app-proxies-per-country-card',
   standalone: true,
-  imports: [HlmCardImports, DialogComponent, DashboardChartComponent, FormsModule],
+  imports: [HlmCardImports, DialogComponent, ChartComponent, FormsModule],
   providers: [DecimalPipe],
   templateUrl: './proxies-per-country-card.component.html',
   styleUrl: './proxies-per-country-card.component.scss'
@@ -93,7 +93,7 @@ export class ProxiesPerCountryCardComponent implements OnChanges {
   @Input() styleClass = 'dashboard-card country-card';
 
   viewMode: 'map' | 'countries' = 'map';
-  mapChart: DashboardChartDefinition = {marks: [], scales: {x: null, y: null}};
+  mapChart: AppChartDefinition = {marks: [], scales: {x: null, y: null}};
   mapFeatures: CountryMapFeature[] = [];
   maxCountryValue = 1;
   totalValue = 0;

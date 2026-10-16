@@ -5,10 +5,9 @@ import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {HlmButton} from '@spartan-ng/helm/button';
 import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
-import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {HlmTableImports} from '@spartan-ng/helm/table';
 import {PaginationComponent} from '../../shared/ui/pagination.component';
-import {PageScrollTarget, readPageSize, writePageSize, readPageScrollTarget, writePageScrollTarget, scrollTableToPageTarget} from '../../shared/table-pagination';
+import {PageScrollTarget, readPageSize, writePageSize, scrollTableToPageTarget} from '../../shared/table-pagination';
 import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
 import {
   Component,
@@ -29,8 +28,6 @@ import {AddScrapeSourceComponent} from '../add-scrape-source/add-scrape-source.c
 import {ExportSourcesComponent} from './export-sources/export-sources.component';
 import {DeleteSourcesComponent} from './delete-sources/delete-sources.component';
 import {ScrapeSourceFilterPanelComponent} from './scrape-source-filter-panel/scrape-source-filter-panel.component';
-
-// Table pagination
 
 import {NotificationService} from '../../services/notification-service.service';
 import {SettingsService} from '../../services/settings.service';
@@ -76,7 +73,7 @@ type ScrapeSourceAppliedFilters = {
 @Component({
   selector: 'app-scrape-source-list',
   imports: [
-    HlmDropdownMenuImports, HlmPopoverImports,HlmButton, HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
+    HlmDropdownMenuImports, HlmPopoverImports,HlmButton, HlmCheckbox, HlmSkeleton, HlmTableImports, PaginationComponent,
     CommonModule,
     SourceScrapeStatusComponent,
     FormsModule,
@@ -94,8 +91,6 @@ type ScrapeSourceAppliedFilters = {
   standalone: true
 })
 export class ScrapeSourceListComponent implements OnInit, OnDestroy {
-  private static nextPageJumpInputId = 0;
-  private readonly pageScrollTargetStorageKey = 'magpie-scrape-source-list-page-scroll-target';
   private readonly pageSizeStorageKey = 'magpie-scrape-source-list-page-size';
 
   @ViewChild('scrapeSourceTableRoot', { read: ElementRef }) private scrapeSourceTableRoot?: ElementRef<HTMLElement>;
@@ -104,7 +99,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   selection = new SelectionModel<ScrapeSourceView>(true, []);
   selectedScrapeSources: ScrapeSourceView[] = [];
   page = 0; // Tables use 0-based pagination
-  pageJumpValue = 1;
   pageScrollTarget: PageScrollTarget = 'top';
   pageSize = 40;
   totalItems = signal(0);
@@ -125,8 +119,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   readonly rowsPerPageOptions = [20, 40, 60, 100];
   readonly defaultScrapeSourceColumns = DEFAULT_SCRAPE_SOURCE_LIST_COLUMNS;
   readonly scrapeSourceColumnDefinitions = SCRAPE_SOURCE_LIST_COLUMN_DEFINITIONS;
-  readonly pageJumpInputId = `scrape-source-page-jump-${ScrapeSourceListComponent.nextPageJumpInputId++}`;
-  readonly pageJumpTotalId = `${this.pageJumpInputId}-total`;
   columnPickerColumns: readonly ScrapeSourceListColumnDefinition[] = this.resolveColumnPickerColumns();
   filterForm: FormGroup;
   appliedFilters: ScrapeSourceAppliedFilters = this.createDefaultAppliedFilters();
@@ -160,10 +152,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const storedPageScrollTarget = this.getStoredPageScrollTarget();
-    if (storedPageScrollTarget) {
-      this.pageScrollTarget = storedPageScrollTarget;
-    }
     const storedPageSize = this.getStoredPageSize();
     if (storedPageSize !== null) {
       this.pageSize = storedPageSize;
@@ -294,7 +282,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     const shouldFetch = sortChanged || newPage !== this.page || pageSizeChanged;
 
     this.page = sortChanged ? 0 : newPage;
-    this.pageJumpValue = this.page + 1;
     this.pageSize = newPageSize;
     this.sortField = nextSortField;
     this.sortOrder = nextSortOrder;
@@ -307,56 +294,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
       this.pendingPageScroll = !sortChanged;
       this.getAndSetScrapeSourcesList();
     }
-  }
-
-  get totalPages(): number {
-    if (!Number.isFinite(this.totalItems()) || !Number.isFinite(this.pageSize) || this.pageSize <= 0) {
-      return 1;
-    }
-
-    return Math.max(1, Math.ceil(this.totalItems() / this.pageSize));
-  }
-
-  get pageScrollTargetIcon(): string {
-    return this.pageScrollTarget === 'top' ? 'icon-arrow-up' : 'icon-arrow-down';
-  }
-
-  get pageScrollTargetLabel(): string {
-    return this.pageScrollTarget === 'top'
-      ? 'Page changes scroll to top'
-      : 'Page changes stay at bottom';
-  }
-
-  onPageJumpSubmit(event: Event): void {
-    event.preventDefault();
-    this.commitPageJump();
-  }
-
-  togglePageScrollTarget(): void {
-    this.pageScrollTarget = this.pageScrollTarget === 'top' ? 'bottom' : 'top';
-    this.persistPageScrollTarget(this.pageScrollTarget);
-  }
-
-  commitPageJump(): void {
-    const rawPage = Number(this.pageJumpValue);
-    if (!Number.isFinite(rawPage)) {
-      this.pageJumpValue = this.page + 1;
-      return;
-    }
-
-    const nextPage = Math.min(this.totalPages, Math.max(1, Math.floor(rawPage)));
-    this.pageJumpValue = nextPage;
-
-    if (nextPage === this.page + 1) {
-      return;
-    }
-
-    this.onLazyLoad({
-      first: (nextPage - 1) * this.pageSize,
-      rows: this.pageSize,
-      sortField: this.sortField,
-      sortOrder: this.sortOrder,
-    });
   }
 
   toggleSelection(source: ScrapeSourceView): void {
@@ -471,12 +408,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
   filterButtonLabel(): string {
     const count = this.activeFilterCount();
     return count > 0 ? `Filters (${count})` : 'Filters';
-  }
-
-  filterToggleClass(): string {
-    return this.hasActiveFilters()
-      ? 'ui-button-outlined filter-toggle filter-toggle--active'
-      : 'ui-button-outlined filter-toggle';
   }
 
   saveColumnPreferences(nextColumns: string[]): void {
@@ -597,7 +528,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
 
   private resetPaginatorToFirstPage(): void {
     this.page = 0;
-    this.pageJumpValue = 1;
   }
 
   private applyPendingPageScroll(): void {
@@ -607,14 +537,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
 
     this.pendingPageScroll = false;
     setTimeout(() => this.scrollToPageTarget(), 0);
-  }
-
-  private getStoredPageScrollTarget(): PageScrollTarget | null {
-    return readPageScrollTarget(this.pageScrollTargetStorageKey);
-  }
-
-  private persistPageScrollTarget(target: PageScrollTarget): void {
-    writePageScrollTarget(this.pageScrollTargetStorageKey, target);
   }
 
   private getStoredPageSize(): number | null {

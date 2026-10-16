@@ -1,12 +1,12 @@
 import {Component, signal} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {DashboardChartComponent} from './dashboard-chart.component';
+import {ChartComponent} from './chart.component';
 import {buildMetricChart} from '../../dashboard/dashboard-charts';
 
 @Component({
-  imports: [DashboardChartComponent],
+  imports: [ChartComponent],
   template: `<div [style.width.px]="width()" style="height:52px;transform:scale(0.965)">
-    <app-dashboard-chart [definition]="chart" label="Metric trend" />
+    <app-chart [definition]="chart" label="Metric trend" />
   </div>`,
 })
 class ScaledChartHost {
@@ -14,7 +14,7 @@ class ScaledChartHost {
   readonly chart = buildMetricChart([{index: 0, value: 100}, {index: 1, value: 120}], '#60a5fa', String);
 }
 
-describe('DashboardChartComponent sizing', () => {
+describe('ChartComponent sizing', () => {
   let fixture: ComponentFixture<ScaledChartHost>;
 
   beforeEach(async () => {

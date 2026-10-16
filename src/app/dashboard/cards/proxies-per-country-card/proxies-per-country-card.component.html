@@ -48,7 +48,7 @@
               <button type="button" class="dashboard-control" [disabled]="!hasChangedMapView()"
                 (click)="resetMapView()">Reset view</button>
             </div>
-            <app-dashboard-chart
+            <app-chart
               [definition]="mapChart"
               label="Proxy counts by country"
               class="map-chart"

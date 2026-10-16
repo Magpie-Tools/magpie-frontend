@@ -15,7 +15,7 @@
     </div>
   </div>
   <div class="dashboard-card__body throughput-card__body">
-    <app-dashboard-chart [definition]="chart" [label]="title" />
+    <app-chart [definition]="chart" [label]="title" />
   </div>
   <div class="inventory-legend" aria-label="Inventory chart legend">
     @for (entry of legend; track entry.label) {

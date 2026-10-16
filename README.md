@@ -7,7 +7,7 @@ Current stack:
 
 - Angular `21.2`
 - [Spartan UI](https://spartan.ng/) `1.4.1`, with local Helm components
-- Lucide icons and Chart.js
+- Lucide icons and TanStack Charts
 - Tailwind CSS `4`
 - npm-based workflow
 
@@ -60,10 +60,10 @@ npx ng generate @spartan-ng/cli:ui <component>
 ```
 
 Application components in `src/app/shared/ui` handle option objects and Angular
-forms, dialog content, pagination, passwords, and Chart.js canvas lifecycle.
-Tables use semantic HTML with Spartan directives. Proxy sorting and pagination
-continue to request pages from the backend; scrape-source sorting remains within
-the current page. Chart.js also retains the geographic chart controllers.
+forms, dialog content, pagination, passwords, and responsive TanStack charts.
+Tables use semantic HTML with Spartan directives. Proxy and scrape-source lists
+request pagination and sorting from the backend. TanStack renders the
+dashboard charts, country map, and proxy response-time trend.
 
 Theme variables in `src/styles.css` apply to controls and overlays, including the
 four account color themes. When adding a Lucide icon class such as `icon-plus`,

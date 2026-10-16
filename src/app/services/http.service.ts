@@ -36,6 +36,16 @@ import {
   WorkspaceMemberWriteRequest,
 } from '../models/Workspace';
 
+interface ProxyPageOptions {
+  rows?: number;
+  search?: string;
+  filters?: ProxyListFilters;
+  includeHealth?: boolean;
+  includeReputation?: boolean;
+  sortField?: string | null;
+  sortOrder?: number | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -155,43 +165,8 @@ export class HttpService {
   }
 
 
-  getProxyPage(
-    pageNumber: number,
-    options?: {
-      rows?: number;
-      search?: string;
-      filters?: ProxyListFilters;
-      includeHealth?: boolean;
-      includeReputation?: boolean;
-      sortField?: string | null;
-      sortOrder?: number | null;
-    }
-  ) {
-    let params = new HttpParams();
-
-    if (options?.rows && options.rows > 0) {
-      params = params.set('pageSize', options.rows.toString());
-    }
-
-    if (options?.search && options.search.trim().length > 0) {
-      params = params.set('search', options.search.trim());
-    }
-
-    if (options?.includeHealth !== undefined) {
-      params = params.set('includeHealth', options.includeHealth ? 'true' : 'false');
-    }
-
-    if (options?.includeReputation !== undefined) {
-      params = params.set('includeReputation', options.includeReputation ? 'true' : 'false');
-    }
-
-    if (options?.sortField && options.sortOrder && options.sortOrder !== 0) {
-      params = params.set('sortField', options.sortField);
-      params = params.set('sortOrder', options.sortOrder === 1 ? 'asc' : 'desc');
-    }
-
-    params = this.appendProxyFilterParams(params, options?.filters);
-
+  getProxyPage(pageNumber: number, options?: ProxyPageOptions) {
+    const params = this.buildProxyPageParams(options);
     return this.http.get<ProxyPage>(`${this.apiUrl}/getProxyPage/${pageNumber}`, { params });
   }
 
@@ -310,10 +285,6 @@ export class HttpService {
     return this.http.get<{email: string; role: string}>(this.apiUrl + '/user/profile');
   }
 
-  getUserRole() {
-    return this.http.get<string>(this.apiUrl + '/user/role');
-  }
-
   exportProxies(settings: ExportSettings) {
     return this.http.post(this.apiUrl + '/user/export', settings, {
       responseType: 'text',
@@ -370,21 +341,29 @@ export class HttpService {
     return this.http.get<ScrapeSourceDetail>(`${this.apiUrl}/scrapingSources/${sourceId}`);
   }
 
-  getScrapeSourceProxyPage(sourceId: number, options?: {
-    page?: number;
-    rows?: number;
-    search?: string;
-    filters?: ProxyListFilters;
-    includeHealth?: boolean;
-    includeReputation?: boolean;
-    sortField?: string | null;
-    sortOrder?: number | null;
-  }) {
-    let params = new HttpParams();
-
+  getScrapeSourceProxyPage(sourceId: number, options?: ProxyPageOptions & {page?: number}) {
     const page = options?.page && options.page > 0 ? options.page : 1;
-    params = params.set('page', page.toString());
+    const params = this.buildProxyPageParams(options, new HttpParams().set('page', page.toString()));
 
+    return this.http.get<ProxyPage>(`${this.apiUrl}/scrapingSources/${sourceId}/proxies`, { params });
+  }
+
+  deleteScrapingSource(proxies: number[] | ScrapeSourceDeleteSettings) {
+    return this.http.request<string>('delete', this.apiUrl + '/scrapingSources', {
+      body: proxies,
+    });
+  }
+
+  checkScrapeSource(url: string) {
+    const params = new HttpParams().set('url', url);
+    return this.http.get<{allowed: boolean; robots_found: boolean; error?: string}>(this.apiUrl + '/scrapingSources/check', { params });
+  }
+
+  getRespectRobotsSetting() {
+    return this.http.get<{respect_robots_txt: boolean}>(this.apiUrl + '/scrapingSources/respectRobots');
+  }
+
+  private buildProxyPageParams(options?: ProxyPageOptions, params = new HttpParams()): HttpParams {
     if (options?.rows && options.rows > 0) {
       params = params.set('pageSize', options.rows.toString());
     }
@@ -406,24 +385,7 @@ export class HttpService {
       params = params.set('sortOrder', options.sortOrder === 1 ? 'asc' : 'desc');
     }
 
-    params = this.appendProxyFilterParams(params, options?.filters);
-
-    return this.http.get<ProxyPage>(`${this.apiUrl}/scrapingSources/${sourceId}/proxies`, { params });
-  }
-
-  deleteScrapingSource(proxies: number[] | ScrapeSourceDeleteSettings) {
-    return this.http.request<string>('delete', this.apiUrl + '/scrapingSources', {
-      body: proxies,
-    });
-  }
-
-  checkScrapeSource(url: string) {
-    const params = new HttpParams().set('url', url);
-    return this.http.get<{allowed: boolean; robots_found: boolean; error?: string}>(this.apiUrl + '/scrapingSources/check', { params });
-  }
-
-  getRespectRobotsSetting() {
-    return this.http.get<{respect_robots_txt: boolean}>(this.apiUrl + '/scrapingSources/respectRobots');
+    return this.appendProxyFilterParams(params, options?.filters);
   }
 
   private appendProxyFilterParams(params: HttpParams, filters?: ProxyListFilters): HttpParams {

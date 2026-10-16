@@ -280,7 +280,6 @@ describe('ScrapeSourceListComponent', () => {
     component.sortColumn('alive_count');
 
     expect(component.page).toBe(0);
-    expect(component.pageJumpValue).toBe(1);
     expect(getPage).toHaveBeenCalledOnceWith(1, jasmine.objectContaining({search: 'example', sortField: 'alive_count', sortOrder: 1}));
     expect(component.loading()).toBeTrue();
     expect(component.scrapeSources().map(source => source.id)).toEqual([2, 1]);

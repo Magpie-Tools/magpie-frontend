@@ -113,7 +113,6 @@ export class ProxyListComponent implements OnInit, OnDestroy {
   readonly proxyStatusOptions = PROXY_STATUS_OPTIONS;
   readonly proxyReputationOptions = PROXY_REPUTATION_OPTIONS;
   readonly defaultProxyTableColumns = DEFAULT_PROXY_TABLE_COLUMNS;
-  readonly proxyTableColumnDefinitions = PROXY_TABLE_COLUMN_DEFINITIONS;
   isAdmin = signal(UserService.isAdmin());
   private readonly defaultFilterValues: ProxyListFilterFormValues = createDefaultProxyFilterValues();
   private searchDebounceHandle?: ReturnType<typeof setTimeout>;
@@ -478,13 +477,6 @@ export class ProxyListComponent implements OnInit, OnDestroy {
     return `Filters (${count})`;
   }
 
-  filterToggleClass(): string {
-    if (this.hasActiveFilters()) {
-      return 'ui-button-outlined filter-toggle filter-toggle--active';
-    }
-    return 'ui-button-outlined filter-toggle';
-  }
-
   private ensureFilterOptionsLoaded(): void {
     if (this.filterOptionsLoaded()) {
       return;
@@ -675,12 +667,6 @@ export class ProxyListComponent implements OnInit, OnDestroy {
         return next;
       });
     });
-  }
-
-  onSelectionChange(selected: ProxyInfo[]): void {
-    this.selection.clear();
-    selected.forEach(proxy => this.selection.select(proxy));
-    this.selectedProxies.set([...selected]);
   }
 
   private getStoredPageSize(): number | null {

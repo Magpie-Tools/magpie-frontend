@@ -1,6 +1,6 @@
 import {HlmCardImports} from '@spartan-ng/helm/card';
-import {DashboardChartComponent} from '../../../shared/ui/dashboard-chart.component';
-import type {DashboardChartDefinition} from '../../../shared/ui/dashboard-chart.component';
+import {ChartComponent} from '../../../shared/ui/chart.component';
+import type {AppChartDefinition} from '../../../shared/ui/chart.component';
 import {REPUTATION_COLORS} from '../../dashboard-charts';
 import {Component, Input} from '@angular/core';
 
@@ -16,13 +16,13 @@ interface ReputationBreakdown {
 @Component({
   selector: 'app-proxy-reputation-card',
   standalone: true,
-  imports: [HlmCardImports, DashboardChartComponent, NgStyle, DecimalPipe],
+  imports: [HlmCardImports, ChartComponent, NgStyle, DecimalPipe],
   templateUrl: './proxy-reputation-card.component.html',
   styleUrl: './proxy-reputation-card.component.scss'
 })
 export class ProxyReputationCardComponent {
   @Input({ required: true }) breakdown!: ReputationBreakdown;
-  @Input({ required: true }) chart!: DashboardChartDefinition;
+  @Input({ required: true }) chart!: AppChartDefinition;
 
   readonly cardStyleClass = 'dashboard-card reputation-card';
   readonly labels: Array<{ key: keyof ReputationBreakdown; title: string }> = [

@@ -310,12 +310,8 @@
                 <div class="mini-chart" aria-label="Recent response-time trend">
                   @if (isLoadingStatistics()) {
                     <app-loading></app-loading>
-                  } @else if (chartData()?.datasets?.[0]?.data?.length) {
-                    <app-chart
-                      type="line"
-                      [data]="chartData()"
-                      [options]="chartOptions()"
-                    />
+                  } @else if (responseTimeChart(); as chart) {
+                    <app-chart [definition]="chart" label="Recent response-time trend" />
                   } @else {
                     <span>No response-time trend yet.</span>
                   }

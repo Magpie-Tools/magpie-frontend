@@ -1,5 +1,4 @@
 .rotating-proxies-page [hlmInput],
-.rotating-proxies-page [data-slot="select-trigger"],
 .rotating-proxies-page [data-slot="select-trigger"] {
   width: 100%;
   min-height: 2.45rem;
@@ -13,7 +12,6 @@
   transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.rotating-proxies-page [data-slot="select-trigger"],
 .rotating-proxies-page [data-slot="select-trigger"] {
   display: flex;
   min-width: 0;
@@ -30,25 +28,14 @@
   color: rgba(255, 255, 255, 0.25);
 }
 
-.rotating-proxies-page [data-slot="select-trigger"] > span,
 .rotating-proxies-page [data-slot="select-trigger"] > span {
   padding: 0.62rem 0.72rem;
   color: rgba(255, 255, 255, 0.72);
   font-size: 0.68rem;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.rotating-proxies-page [data-slot="select-trigger"] > span {
-  display: flex;
-  width: 1%;
-  min-width: 0;
   flex: 1 1 auto;
   align-items: center;
-  overflow: hidden;
-}
-
-.rotating-proxies-page [data-slot="select-trigger"] > span {
   display: block;
   width: 100%;
   min-width: 0;
@@ -56,7 +43,6 @@
   box-sizing: border-box;
 }
 
-.rotating-proxies-page [data-slot="select-trigger"] > ng-icon,
 .rotating-proxies-page [data-slot="select-trigger"] > ng-icon {
   display: flex;
   width: 2.35rem;
@@ -76,14 +62,12 @@
 }
 
 .rotating-proxies-page [hlmInput]:hover,
-.rotating-proxies-page [data-slot="select-trigger"]:not(:disabled):hover,
 .rotating-proxies-page [data-slot="select-trigger"]:not(:disabled):hover {
   border-color: rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.05);
 }
 
 .rotating-proxies-page [hlmInput]:focus,
-.rotating-proxies-page [data-slot="select-trigger"]:focus-within,
 .rotating-proxies-page [data-slot="select-trigger"]:focus-within {
   outline: none;
   border-color: rgba(var(--theme-primary-300-rgb), 0.55);
@@ -92,7 +76,6 @@
 }
 
 .rotating-proxies-page [hlmInput]:disabled,
-.rotating-proxies-page [data-slot="select-trigger"]:disabled,
 .rotating-proxies-page [data-slot="select-trigger"]:disabled {
   opacity: 0.46;
 }

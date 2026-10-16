@@ -32,7 +32,7 @@ import {
 } from './cards/fastest-alive-proxies-card/fastest-alive-proxies-card.component';
 import {formatHostPort} from '../shared/proxy-address';
 import {buildInventoryChart, buildLatencyChart, buildReputationChart, REPUTATION_COLORS} from './dashboard-charts';
-import type {DashboardChartDefinition} from '../shared/ui/dashboard-chart.component';
+import type {AppChartDefinition} from '../shared/ui/chart.component';
 import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 interface SparklineMetric {
@@ -88,7 +88,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   avgOrderValue = signal<SparklineMetric>({ value: 0, history: [] });
   orderQuantity = signal<SparklineMetric>({ value: 0, history: [] });
 
-  inventoryChart = signal<DashboardChartDefinition>({marks: [], scales: {x: null, y: null}});
+  inventoryChart = signal<AppChartDefinition>({marks: [], scales: {x: null, y: null}});
   inventoryLimit = signal<number | null>(null);
 
   majorCountries = signal<Array<{ name: string; value: number; color?: string; percentage: string }>>([]);
@@ -107,12 +107,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   fastestAliveProxies = signal<FastestAliveProxy[]>([]);
   fastestAliveProxyCount = signal(0);
-  latencyChart = signal<DashboardChartDefinition>({marks: [], scales: {x: null, y: null}});
+  latencyChart = signal<AppChartDefinition>({marks: [], scales: {x: null, y: null}});
   fastestAliveCountryLegend = signal<FastestAliveProxyCountryLegend[]>([]);
   fastestAliveSortDirection = signal<FastestAliveSortDirection>(this.loadFastestAliveSortDirection());
 
   reputationBreakdown = signal<ReputationBreakdown>({ good: 0, neutral: 0, poor: 0, unknown: 0 });
-  reputationChart = signal<DashboardChartDefinition>({marks: [], scales: {x: null, y: null}});
+  reputationChart = signal<AppChartDefinition>({marks: [], scales: {x: null, y: null}});
 
   readonly proxiesPerHourTitle: string;
   private readonly localeId: string;

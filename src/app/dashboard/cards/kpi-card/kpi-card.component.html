@@ -27,7 +27,7 @@
 
     @if (sparklinePoints.length > 1) {
       <div class="metric-card__visual">
-        <app-dashboard-chart
+        <app-chart
           [definition]="sparklineChart"
           [label]="title + ' trend'"
           [ngClass]="getChangeColorClass(resolvedChange ?? 0)"

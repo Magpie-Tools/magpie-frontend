@@ -5,7 +5,7 @@ import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {HlmDropdownMenuImports} from '@spartan-ng/helm/dropdown-menu';
 import {HlmTableImports} from '@spartan-ng/helm/table';
 import {PaginationComponent} from '../ui/pagination.component';
-import {PageScrollTarget, readPageScrollTarget, writePageScrollTarget, scrollTableToPageTarget} from '../table-pagination';
+import {PageScrollTarget, scrollTableToPageTarget} from '../table-pagination';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -15,7 +15,6 @@ import {
   Input,
   OnChanges,
   OnDestroy,
-  OnInit,
   Output,
   SimpleChanges,
   ViewChild
@@ -64,12 +63,11 @@ type ProxyRow = ProxyInfo & { __meta?: ProxyRowMeta };
   styleUrls: ['./proxy-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
+export class ProxyTableComponent implements OnChanges, OnDestroy {
   @ViewChild('tableRoot', { read: ElementRef }) private tableRoot?: ElementRef<HTMLElement>;
 
   private _proxies: ProxyRow[] = [];
   private _columns: ProxyTableColumnId[] = [...DEFAULT_PROXY_TABLE_COLUMNS];
-  private static nextPageJumpInputId = 0;
   private readonly dateFormatter = new Intl.DateTimeFormat(undefined, {
     dateStyle: 'short',
     timeStyle: 'short',
@@ -117,12 +115,10 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input() emptyReputationLabel = '—';
   @Input() missingReputationScoreLabel: string | null = null;
   @Input() virtualScroll = false;
-  @Input() virtualScrollItemSize = 46;
   @Input() scrollHeight: string | null = null;
   @Input() pageScrollTargetStorageKey: string | null = null;
 
   @Output() lazyLoad = new EventEmitter<TablePageEvent>();
-  @Output() selectionChange = new EventEmitter<ProxyInfo[]>();
   @Output() toggleSelection = new EventEmitter<ProxyInfo>();
   @Output() masterToggle = new EventEmitter<void>();
   @Output() sort = new EventEmitter<{ field: string; order: number }>();
@@ -133,10 +129,7 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
   @Output() lifecycleChange = new EventEmitter<{proxy: ProxyInfo; state: ManagedProxyState}>();
 
   copiedValueKey: string | null = null;
-  pageJumpValue = this.page;
   pageScrollTarget: PageScrollTarget = 'top';
-  readonly pageJumpInputId = `proxy-table-page-jump-${ProxyTableComponent.nextPageJumpInputId++}`;
-  readonly pageJumpTotalId = `${this.pageJumpInputId}-total`;
   private copyFeedbackTimeout?: ReturnType<typeof setTimeout>;
   private pendingPageScroll = false;
 
@@ -145,16 +138,8 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
     private clipboardService: ClipboardService,
   ) {}
 
-  ngOnInit(): void {
-    const storedPageScrollTarget = this.getStoredPageScrollTarget();
-    if (storedPageScrollTarget) {
-      this.pageScrollTarget = storedPageScrollTarget;
-    }
-  }
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['page']) {
-      this.pageJumpValue = this.page;
       if (!changes['page'].firstChange) {
         this.pendingPageScroll = true;
         if (!this.loading) {
@@ -191,35 +176,6 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
     return this.missingReputationScoreLabel ?? this.emptyReputationLabel;
   }
 
-  get totalPages(): number {
-    if (!Number.isFinite(this.totalRecords) || !Number.isFinite(this.pageSize) || this.pageSize <= 0) {
-      return 1;
-    }
-
-    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
-  }
-
-  get pageScrollTargetIcon(): string {
-    return this.pageScrollTarget === 'top' ? 'icon-arrow-up' : 'icon-arrow-down';
-  }
-
-  get pageScrollTargetLabel(): string {
-    return this.pageScrollTarget === 'top'
-      ? 'Page changes scroll to top'
-      : 'Page changes stay at bottom';
-  }
-
-  trackByProxy(_index: number, proxy: ProxyRow): number {
-    return proxy.id;
-  }
-
-  onSelectionChange(value: ProxyInfo[]): void {
-    if (!this.selectionEnabled) {
-      return;
-    }
-    this.selectionChange.emit(value);
-  }
-
   onMasterToggle(): void {
     if (!this.selectionEnabled) {
       return;
@@ -251,38 +207,6 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
     this.sort.emit(event);
-  }
-
-  onPageJumpSubmit(event: Event): void {
-    event.preventDefault();
-    this.commitPageJump();
-  }
-
-  togglePageScrollTarget(): void {
-    this.pageScrollTarget = this.pageScrollTarget === 'top' ? 'bottom' : 'top';
-    this.persistPageScrollTarget(this.pageScrollTarget);
-  }
-
-  commitPageJump(): void {
-    const rawPage = Number(this.pageJumpValue);
-    if (!Number.isFinite(rawPage)) {
-      this.pageJumpValue = this.page;
-      return;
-    }
-
-    const nextPage = Math.min(this.totalPages, Math.max(1, Math.floor(rawPage)));
-    this.pageJumpValue = nextPage;
-
-    if (nextPage === this.page) {
-      return;
-    }
-
-    this.lazyLoad.emit({
-      first: (nextPage - 1) * this.pageSize,
-      rows: this.pageSize,
-      sortField: this.sortField,
-      sortOrder: this.sortOrder,
-    });
   }
 
   isCheckingProxy(proxyId: number): boolean {
@@ -492,14 +416,6 @@ export class ProxyTableComponent implements OnInit, OnChanges, OnDestroy {
 
     this.pendingPageScroll = false;
     setTimeout(() => this.scrollToPageTarget(), 0);
-  }
-
-  private getStoredPageScrollTarget(): PageScrollTarget | null {
-    return readPageScrollTarget(this.pageScrollTargetStorageKey);
-  }
-
-  private persistPageScrollTarget(target: PageScrollTarget): void {
-    writePageScrollTarget(this.pageScrollTargetStorageKey, target);
   }
 
   private scrollToPageTarget(): void {

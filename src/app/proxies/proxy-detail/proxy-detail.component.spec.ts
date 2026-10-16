@@ -79,6 +79,27 @@ describe('ProxyDetailComponent', () => {
     expect(summary.textContent).toContain('No check results yet');
   });
 
+  it('shows the empty trend and renders a responsive SVG when a latest check arrives', async () => {
+    expect(fixture.nativeElement.querySelector('.mini-chart').textContent).toContain('No response-time trend yet.');
+    component.detail.update(detail => detail ? {...detail, latest_statistic: {
+      id: 10, response_time: 120, created_at: '2026-10-16T12:01:00Z',
+      alive: true, attempt: 1, protocol: 'http', anonymity_level: 'elite', judge: 'https://judge.example',
+    }} : detail);
+    fixture.detectChanges();
+    for (let frame = 0; frame < 4; frame++) {
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    }
+    await fixture.whenStable();
+    const chart = fixture.nativeElement.querySelector('.mini-chart app-chart');
+    expect(chart).not.toBeNull();
+    expect(chart.querySelector('canvas')).toBeNull();
+    const svg: SVGSVGElement = chart.querySelector('svg');
+    expect(svg).not.toBeNull();
+    expect(svg.viewBox.baseVal.width).toBeGreaterThan(0);
+    expect(svg.viewBox.baseVal.height).toBeGreaterThan(0);
+    expect(svg.textContent).toContain('ms');
+  });
+
   it('shows the latest check result even when another protocol is alive', () => {
     const latest: ProxyStatistic = {
       id: 12,
@@ -97,7 +118,6 @@ describe('ProxyDetailComponent', () => {
     ]);
     fixture.detectChanges();
 
-    expect(component.overallAlive).toBeTrue();
     const summary = fixture.debugElement.query(By.css('.check-summary')).nativeElement as HTMLElement;
     expect(summary.textContent).toContain('Dead');
     expect(summary.querySelector('.status-dot.dead')).not.toBeNull();
@@ -207,13 +227,15 @@ describe('ProxyDetailComponent', () => {
     expect(bounds[2].width).toBeLessThan(32);
   });
 
-  it('uses current workspace health even when obsolete history contains successes', () => {
+  it('shows no check result when only obsolete history contains successes', () => {
     component.detail.update(detail => detail ? {...detail, alive: null} : detail);
     component.statistics.set([{id: 99, alive: true, protocol: 'http', attempt: 0, response_time: 1, judge: 'old', anonymity_level: 'elite', created_at: new Date().toISOString(), current: false}]);
-    expect(component.overallAlive).toBeNull();
+    fixture.detectChanges();
+
     expect(component.latestStatistic).toBeNull();
-    component.detail.update(detail => detail ? {...detail, alive: false} : detail);
-    expect(component.overallAlive).toBeFalse();
+    const summary = fixture.debugElement.query(By.css('.check-summary')).nativeElement as HTMLElement;
+    expect(summary.textContent).toContain('Not checked');
+    expect(summary.querySelector('.status-dot.unknown')).not.toBeNull();
   });
 
 });

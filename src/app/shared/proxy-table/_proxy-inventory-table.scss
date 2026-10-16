@@ -82,17 +82,6 @@
     color: rgba(255, 255, 255, 0.82);
   }
 
-  .inventory-table .table-pagination {
-    gap: 0.22rem;
-    padding: 0.62rem 0.72rem;
-    border: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 0;
-    background: rgba(255, 255, 255, 0.022);
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.65rem;
-  }
-
   .inventory-table [data-slot="select-trigger"] {
     min-height: 2rem;
     border-color: rgba(255, 255, 255, 0.1);
@@ -166,25 +155,6 @@
 
   .inventory-table .reputation-badge__score {
     font-size: inherit;
-  }
-
-  .inventory-table .proxy-page-jump {
-    flex-wrap: wrap;
-    font-size: 0.65rem;
-  }
-
-  .inventory-table .proxy-page-jump__input {
-    border-color: rgba(255, 255, 255, 0.1);
-    border-radius: 0.56rem;
-    background: rgba(255, 255, 255, 0.035);
-  }
-
-  .inventory-table .proxy-page-jump__submit {
-    border-color: rgba(var(--theme-primary-300-rgb), 0.32);
-    border-radius: 0.56rem;
-    background: rgba(var(--theme-primary-500-rgb), 0.22);
-    color: #fff;
-    font-size: 0.61rem;
   }
 
   .inventory-table .copy-value {

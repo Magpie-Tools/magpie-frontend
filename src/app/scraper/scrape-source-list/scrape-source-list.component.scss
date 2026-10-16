@@ -56,90 +56,6 @@
   gap: 0.35rem;
 }
 
-.scrape-page-jump {
-  display: inline-flex;
-  min-height: 2rem;
-  align-items: center;
-  gap: 0.35rem;
-  margin-inline-start: 0.25rem;
-  padding-inline-start: 0.75rem;
-  border-inline-start: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.65rem;
-}
-
-.scrape-page-jump__label,
-.scrape-page-jump__total {
-  white-space: nowrap;
-}
-
-.scrape-page-jump__input {
-  width: 3.6rem;
-  min-width: 0;
-  height: 1.85rem;
-  padding: 0.3rem 0.4rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.035);
-  color: rgba(255, 255, 255, 0.82);
-  font: inherit;
-  text-align: center;
-
-  &:focus-visible {
-    outline: none;
-    border-color: rgba(var(--theme-primary-300-rgb), 0.52);
-    box-shadow: 0 0 0 0.15rem rgba(var(--theme-primary-500-rgb), 0.1);
-  }
-
-  &:disabled {
-    opacity: 0.45;
-  }
-}
-
-.scrape-page-jump__submit,
-.scrape-page-jump__scroll-toggle {
-  display: inline-flex;
-  height: 1.85rem;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.22);
-  border-radius: 0.5rem;
-  background: rgba(var(--theme-primary-500-rgb), 0.07);
-  color: var(--theme-primary-200);
-  font: inherit;
-  font-weight: 580;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    border-color: rgba(var(--theme-primary-300-rgb), 0.42);
-    background: rgba(var(--theme-primary-500-rgb), 0.12);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--theme-primary-300);
-    outline-offset: 0.12rem;
-  }
-
-  &:disabled {
-    opacity: 0.42;
-    cursor: not-allowed;
-  }
-}
-
-.scrape-page-jump__submit {
-  min-width: 2.3rem;
-  padding: 0 0.5rem;
-}
-
-.scrape-page-jump__scroll-toggle {
-  width: 1.85rem;
-  padding: 0;
-
-  .icon {
-    font-size: 0.65rem;
-  }
-}
-
 :host ::ng-deep {
   .scrape-source-table {
     display: block;
@@ -222,17 +138,6 @@
   .scrape-source-table tbody > tr[data-state="selected"] > td {
     background: rgba(var(--theme-primary-500-rgb), 0.085);
     color: rgba(255, 255, 255, 0.82);
-  }
-
-  .scrape-source-table .table-pagination {
-    gap: 0.22rem;
-    padding: 0.62rem 0.72rem;
-    border: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 0;
-    background: rgba(255, 255, 255, 0.022);
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.65rem;
   }
 
   .scrape-source-table [data-slot="select-trigger"] {

@@ -31,7 +31,7 @@ describe('KpiCardComponent', () => {
 
       expect(fixture.nativeElement.querySelector('.metric-card__value').textContent.trim()).toBe('200');
       expect(fixture.nativeElement.querySelector('.metric-card__trend')).toBeNull();
-      expect(fixture.nativeElement.querySelector('app-dashboard-chart')).toBeNull();
+      expect(fixture.nativeElement.querySelector('app-chart')).toBeNull();
       expect(component.sparklinePoints).toEqual([]);
       expect(component.resolvedChange).toBeNull();
     });
@@ -43,14 +43,14 @@ describe('KpiCardComponent', () => {
     fixture.detectChanges();
 
     expect(component.sparklinePoints.map(point => point.value)).toEqual([180, 200]);
-    expect(fixture.nativeElement.querySelector('app-dashboard-chart')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-chart')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.metric-card__trend').textContent).toContain('11,1');
 
     fixture.componentRef.setInput('chartValues', []);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.metric-card__trend')).toBeNull();
-    expect(fixture.nativeElement.querySelector('app-dashboard-chart')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-chart')).toBeNull();
   });
 
   it('hides an undefined percentage comparison from zero while keeping the real sparkline', () => {
@@ -59,7 +59,7 @@ describe('KpiCardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.metric-card__trend')).toBeNull();
-    expect(fixture.nativeElement.querySelector('app-dashboard-chart')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-chart')).not.toBeNull();
     expect(component.sparklinePoints.map(point => point.value)).toEqual([0, 200]);
   });
 
@@ -70,7 +70,7 @@ describe('KpiCardComponent', () => {
 
     expect(component.resolvedChange).toBe(0);
     expect(fixture.nativeElement.querySelector('.metric-card__trend').textContent).toContain('0,0');
-    expect(fixture.nativeElement.querySelector('app-dashboard-chart')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-chart')).not.toBeNull();
   });
 
   for (const value of [NaN, Infinity, 'Unknown']) {
@@ -80,7 +80,7 @@ describe('KpiCardComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('.metric-card__trend')).toBeNull();
-      expect(fixture.nativeElement.querySelector('app-dashboard-chart')).toBeNull();
+      expect(fixture.nativeElement.querySelector('app-chart')).toBeNull();
     });
   }
 

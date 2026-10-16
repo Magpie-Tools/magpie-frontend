@@ -51,7 +51,6 @@ import {WorkspaceService} from '../../services/workspace.service';
 import {SourceAutoTagsComponent} from '../source-auto-tags/source-auto-tags.component';
 import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 
-type HealthTone = 'healthy' | 'mixed' | 'unhealthy' | 'empty';
 type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
 
 @Component({
@@ -197,56 +196,6 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
 
   get unknownCount(): number {
     return this.detail()?.unknown_count ?? 0;
-  }
-
-  get healthTone(): HealthTone {
-    const total = this.totalProxies;
-    if (total === 0) {
-      return 'empty';
-    }
-    const ratio = this.aliveCount / total;
-    if (ratio >= 0.7) {
-      return 'healthy';
-    }
-    if (ratio >= 0.4) {
-      return 'mixed';
-    }
-    return 'unhealthy';
-  }
-
-  get healthLabel(): string {
-    switch (this.healthTone) {
-      case 'healthy':
-        return 'Healthy';
-      case 'mixed':
-        return 'Mixed';
-      case 'unhealthy':
-        return 'Unhealthy';
-      default:
-        return 'No data';
-    }
-  }
-
-  get healthPillClass(): string {
-    switch (this.healthTone) {
-      case 'mixed':
-        return 'status-pill--mixed';
-      case 'unhealthy':
-        return 'status-pill--dead';
-      case 'empty':
-        return 'status-pill--unknown';
-      default:
-        return '';
-    }
-  }
-
-  get healthDotClass(): Record<string, boolean> {
-    return {
-      alive: this.healthTone === 'healthy',
-      mixed: this.healthTone === 'mixed',
-      dead: this.healthTone === 'unhealthy',
-      unknown: this.healthTone === 'empty',
-    };
   }
 
   get aliveRatioDisplay(): string {
