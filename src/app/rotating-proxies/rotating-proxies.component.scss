@@ -66,6 +66,7 @@ dl {
 .context-icon,
 .card-icon,
 .stage-icon,
+.rotator-icon,
 .state-icon {
   display: inline-flex;
   flex: 0 0 auto;
@@ -150,16 +151,15 @@ dl {
   }
 }
 
-.fleet-count,
-.instance-badge {
+.fleet-count {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
-  gap: 0.42rem;
-  padding: 0.4rem 0.62rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.35rem 0.6rem;
   border-radius: 999px;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.63rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--card-muted);
+  font-size: 0.68rem;
   white-space: nowrap;
 }
 
@@ -573,18 +573,16 @@ app-select {
 }
 
 .fleet-section {
+  min-width: 0;
   margin-top: 0.9rem;
-  padding: clamp(1.3rem, 2.2vw, 1.85rem);
+  padding: clamp(1.15rem, 2.2vw, 1.8rem);
   border: 1px solid var(--card-border);
-  border-radius: 1.35rem;
-  background: rgba(8, 8, 10, 0.76);
-  box-shadow: 0 20px 40px rgba(4, 4, 6, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  border-radius: 1rem;
+  background: rgba(8, 8, 10, 0.82);
 }
 
 .fleet-heading {
-  align-items: center;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  gap: 0.8rem;
 }
 
 .fleet-actions {
@@ -594,237 +592,119 @@ app-select {
 }
 
 .refresh-button {
-  min-height: 2.25rem;
-  gap: 0.38rem;
-  padding: 0.45rem 0.65rem;
-  border-color: rgba(255, 255, 255, 0.11);
-  border-radius: 0.7rem;
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.62rem;
+  min-height: 2.15rem;
+  gap: 0.4rem;
+  padding: 0.4rem 0.65rem;
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.65rem;
 
   &:not(:disabled):hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.065);
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.07);
     color: #fff;
-    transform: translateY(-1px);
   }
 }
 
-.rotator-grid {
+.rotator-list {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-auto-flow: dense;
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  align-content: start;
+  gap: 0.65rem;
+  max-height: 28rem;
   margin-top: 1rem;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: 0.2rem;
+  }
 }
 
 .rotator-card {
-  // Keep the hover offset separate from GSAP entrance transforms.
-  top: 0;
-  position: relative;
-  grid-column: span 6;
   display: flex;
   min-width: 0;
-  min-height: 25rem;
   flex-direction: column;
-  overflow: hidden;
-  padding: 1.15rem;
+  gap: 0.7rem;
+  padding: 0.8rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1.1rem;
-  background:
-    radial-gradient(circle at 6% 0%, rgba(var(--theme-primary-500-rgb), 0.075), transparent 14rem),
-    rgba(255, 255, 255, 0.022);
-  transition: border-color 0.35s ease, background-color 0.35s ease, box-shadow 0.35s ease, top 0.35s ease;
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.022), transparent 65%);
-    opacity: 0;
-    transition: opacity 0.35s ease;
-  }
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.025);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 
   &:hover,
   &:focus-within {
-    border-color: rgba(var(--theme-primary-300-rgb), 0.27);
-    background-color: rgba(var(--theme-primary-500-rgb), 0.025);
-    box-shadow: 0 24px 48px rgba(3, 3, 5, 0.24), 0 0 2rem rgba(var(--theme-primary-500-rgb), 0.05);
-    top: -3px;
-
-    &::after {
-      opacity: 1;
-    }
+    border-color: rgba(255, 255, 255, 0.2);
   }
+}
+
+.rotator-card__header {
+  gap: 0.8rem;
 }
 
 .rotator-identity {
   display: flex;
   min-width: 0;
-  align-items: center;
-  gap: 0.65rem;
+  align-items: flex-start;
+  gap: 0.6rem;
+
+  > div {
+    min-width: 0;
+  }
 
   h3 {
     overflow: hidden;
     color: rgba(255, 255, 255, 0.9);
-    font-size: 0.84rem;
+    font-size: 0.8rem;
     font-weight: 580;
+    letter-spacing: -0.015em;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  p {
-    margin-top: 0.2rem;
-    color: rgba(255, 255, 255, 0.33);
-    font-size: 0.56rem;
-  }
 }
 
-.rotator-state {
-  width: 0.45rem;
-  height: 0.45rem;
+.rotator-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.6rem;
+  font-size: 0.7rem;
+}
+
+.rotator-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+  font-size: 0.62rem;
+  line-height: 1.4;
+}
+
+.rotator-status--healthy {
+  color: #a4dfb9;
+}
+
+.rotator-status--warning {
+  color: #e7c77d;
+}
+
+.status-dot {
+  width: 0.3rem;
+  height: 0.3rem;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.24);
-
-  &.is-live {
-    background: var(--theme-primary-300);
-    box-shadow: 0 0 0.8rem var(--theme-primary-shadow);
-  }
-}
-
-.instance-badge {
-  max-width: 10rem;
-  overflow: hidden;
-  padding-block: 0.3rem;
-  text-overflow: ellipsis;
-}
-
-.pool-summary {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: flex-end;
-  gap: 0.65rem;
-  margin-top: 1.7rem;
-
-  strong {
-    color: rgba(255, 255, 255, 0.97);
-    font-size: clamp(2.3rem, 5vw, 3.6rem);
-    font-weight: 560;
-    letter-spacing: -0.07em;
-    line-height: 0.85;
-  }
-
-  span {
-    max-width: 9rem;
-    padding-bottom: 0.25rem;
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 0.61rem;
-    line-height: 1.35;
-  }
-}
-
-.route-visual {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0.65rem;
-  margin-top: 1.3rem;
-  padding: 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.085);
-  border-radius: 0.85rem;
-  background: rgba(255, 255, 255, 0.02);
-
-  > div {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.12rem;
-    text-align: center;
-  }
-
-  span:not(.route-line),
-  small {
-    color: rgba(255, 255, 255, 0.32);
-    font-size: 0.54rem;
-  }
-
-  strong {
-    color: rgba(255, 255, 255, 0.78);
-    font-size: 0.68rem;
-    font-weight: 580;
-  }
-}
-
-.route-line {
-  position: relative;
-  display: flex;
-  width: 4rem;
-  align-items: center;
-  justify-content: center;
-  color: var(--theme-primary-300);
-  font-size: 0.55rem;
-
-  &::before,
-  &::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: rgba(var(--theme-primary-300-rgb), 0.2);
-  }
-
-  i {
-    margin: 0 0.3rem;
-  }
-}
-
-.rotator-facts {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 1rem;
-  border-block: 1px solid rgba(255, 255, 255, 0.075);
-
-  > div {
-    min-width: 0;
-    padding: 0.65rem 0;
-
-    &:nth-child(even) {
-      padding-left: 0.8rem;
-      border-left: 1px solid rgba(255, 255, 255, 0.075);
-    }
-
-    &:nth-child(n + 3) {
-      border-top: 1px solid rgba(255, 255, 255, 0.075);
-    }
-  }
-
-  dt {
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 0.53rem;
-  }
-
-  dd {
-    margin: 0.18rem 0 0;
-    overflow: hidden;
-    color: rgba(255, 255, 255, 0.61);
-    font-size: 0.59rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+  background: currentColor;
 }
 
 .rotator-actions {
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
   margin-top: auto;
-  padding-top: 1rem;
 
   > div {
     display: flex;
@@ -833,42 +713,41 @@ app-select {
 }
 
 .text-action {
-  gap: 0.42rem;
-  padding: 0;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 0.63rem;
-  font-weight: 570;
+  min-height: 1.9rem;
+  gap: 0.4rem;
+  padding: 0.35rem 0.55rem;
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.62rem;
+  font-weight: 550;
 
   i {
     color: var(--theme-primary-300);
     font-size: 0.58rem;
-    transition: transform 0.2s ease;
   }
 
-  &:hover {
+  &:not(:disabled):hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.07);
     color: #fff;
-
-    i {
-      transform: translate(2px, -2px);
-    }
   }
 }
 
 .icon-action {
-  width: 2.15rem;
-  height: 2.15rem;
+  width: 1.9rem;
+  height: 1.9rem;
   border-color: rgba(255, 255, 255, 0.1);
-  border-radius: 0.68rem;
+  border-radius: 0.6rem;
   background: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.52);
+  color: var(--card-muted);
   font-size: 0.68rem;
 
   &:not(:disabled):hover {
     border-color: rgba(var(--theme-primary-300-rgb), 0.28);
     background: rgba(var(--theme-primary-500-rgb), 0.08);
     color: var(--theme-primary-200);
-    transform: translateY(-2px);
   }
 }
 
@@ -879,8 +758,8 @@ app-select {
 }
 
 .skeleton-card {
-  min-height: 17rem;
-  gap: 1.2rem;
+  display: grid;
+  gap: 0.7rem;
 }
 
 .skeleton-line {
@@ -892,13 +771,13 @@ app-select {
 
 .empty-state {
   display: flex;
+  min-height: 15rem;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
-  margin-top: 1rem;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.025);
+  padding: 2rem 1rem;
+  text-align: center;
 
   .state-icon {
     width: 2.35rem;
@@ -909,18 +788,20 @@ app-select {
   > div {
     display: flex;
     flex-direction: column;
-    gap: 0.18rem;
+    gap: 0.7rem;
   }
 
   strong {
     color: rgba(255, 255, 255, 0.78);
-    font-size: 0.72rem;
+    font-size: 0.84rem;
     font-weight: 580;
   }
 
   span:not(.state-icon) {
-    color: rgba(255, 255, 255, 0.38);
-    font-size: 0.62rem;
+    max-width: 24rem;
+    color: var(--card-muted);
+    font-size: 0.73rem;
+    line-height: 1.6;
   }
 }
 
@@ -974,8 +855,7 @@ app-select {
   }
 
   .policy-card--traffic,
-  .policy-card--access,
-  .rotator-card {
+  .policy-card--access {
     grid-column: 1 / -1;
   }
 
@@ -990,7 +870,6 @@ app-select {
     border-radius: 1.25rem;
   }
 
-  .fleet-section,
   .read-only-card {
     padding: 1.1rem;
     border-radius: 1.05rem;
@@ -999,6 +878,10 @@ app-select {
   .fleet-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .fleet-section {
+    padding: 1rem;
   }
 
   .stage-fields--paired,
@@ -1038,14 +921,6 @@ app-select {
   .fleet-actions {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .rotator-card {
-    min-height: 0;
-  }
-
-  .route-line {
-    width: 2.2rem;
   }
 }
 

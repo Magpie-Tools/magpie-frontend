@@ -428,7 +428,7 @@
       </section>
     }
 
-    <section class="fleet-section" aria-labelledby="fleet-title">
+    <section class="fleet-section" aria-labelledby="fleet-title" [attr.aria-busy]="loading()">
       <div class="fleet-heading">
         <div class="card-heading">
           <span class="card-icon"
@@ -465,20 +465,20 @@
       </div>
 
       @if (loading() && !hasLoaded()) {
-        <div class="rotator-grid" aria-label="Loading rotating proxies">
-          @for (row of skeletonRows.slice(0, 4); track $index) {
-            <article class="rotator-card skeleton-card">
+        <div class="rotator-list" role="status" aria-label="Loading rotating proxies">
+          @for (row of skeletonRows; track $index) {
+            <article class="rotator-card skeleton-card" aria-hidden="true">
               <div class="skeleton-line">
                 <hlm-skeleton
-                  [style.width]="'9rem'"
+                  [style.width]="'55%'"
                   [style.height]="'1rem'"
                 /><hlm-skeleton
-                  [style.width]="'4rem'"
+                  [style.width]="'20%'"
                   [style.height]="'1rem'"
                 />
               </div>
-              <hlm-skeleton [style.width]="'60%'" [style.height]="'2.6rem'" />
-              <hlm-skeleton [style.width]="'100%'" [style.height]="'5rem'" />
+              <hlm-skeleton [style.width]="'45%'" [style.height]="'0.75rem'" />
+              <hlm-skeleton [style.width]="'60%'" [style.height]="'2rem'" />
             </article>
           }
         </div>
@@ -490,97 +490,30 @@
           <div>
             <strong>No rotating proxies yet</strong
             ><span
-              >Create a listener route above to start serving healthy
-              proxies.</span
+              >@if (workspaces.canOperate()) {
+                Create a listener route above to start serving healthy proxies.
+              } @else {
+                An operator or admin can create rotating proxies for this workspace.
+              }</span
             >
           </div>
         </div>
       } @else {
-        <div class="rotator-grid">
+        <div class="rotator-list" role="region" aria-label="Rotating proxy list" tabindex="0">
           @for (proxy of rotatingProxies(); track proxy.id) {
             <article class="rotator-card">
               <header class="rotator-card__header">
                 <div class="rotator-identity">
-                  <span
-                    class="rotator-state"
-                    [class.is-live]="proxy.alive_proxy_count > 0"
-                    aria-hidden="true"
-                  ></span>
+                  <span class="rotator-icon"><i class="icon icon-network" aria-hidden="true"></i></span>
                   <div>
-                    <h3>{{ proxy.name }}</h3>
-                    <p>Created {{ proxy.created_at | date: "mediumDate" }}</p>
+                    <h3 [title]="proxy.name">{{ proxy.name }}</h3>
+                    <span class="rotator-status" [class.rotator-status--healthy]="proxy.alive_proxy_count > 0" [class.rotator-status--warning]="proxy.alive_proxy_count === 0">
+                      <span class="status-dot" aria-hidden="true"></span>
+                      {{ proxy.alive_proxy_count | number }} healthy {{ proxy.alive_proxy_count === 1 ? 'proxy' : 'proxies' }}
+                    </span>
                   </div>
                 </div>
-                <span class="instance-badge">{{
-                  proxy.instance_region ||
-                    proxy.instance_name ||
-                    proxy.instance_id ||
-                    "Unknown"
-                }}</span>
               </header>
-
-              <div class="pool-summary">
-                <strong class="pool-count">{{
-                  proxy.alive_proxy_count
-                }}</strong>
-                <span>healthy proxies match this route</span>
-              </div>
-
-              <div class="route-visual">
-                <div>
-                  <span>Clients</span>
-                  <strong>{{
-                    protocolLabel(proxy.listen_protocol ?? proxy.protocol)
-                  }}</strong>
-                  <small>{{
-                    transportLabel(
-                      proxy.listen_transport_protocol ??
-                        proxy.transport_protocol ??
-                        ""
-                    )
-                  }}</small>
-                </div>
-                <span class="route-line" aria-hidden="true"
-                  ><i class="icon icon-arrow-right"></i
-                ></span>
-                <div>
-                  <span>Upstream</span>
-                  <strong>{{ protocolLabel(proxy.protocol) }}</strong>
-                  <small>{{
-                    transportLabel(proxy.transport_protocol ?? "")
-                  }}</small>
-                </div>
-              </div>
-
-              <dl class="rotator-facts">
-                <div>
-                  <dt>Instance</dt>
-                  <dd>
-                    {{ proxy.instance_name || proxy.instance_id || "Unknown" }}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Reputation</dt>
-                  <dd>
-                    {{ reputationFilterSummary(proxy.reputation_labels) }}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Uptime</dt>
-                  <dd>
-                    {{
-                      uptimeFilterSummary(
-                        proxy.uptime_filter_type,
-                        proxy.uptime_percentage
-                      )
-                    }}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Endpoint</dt>
-                  <dd>{{ rotatorEndpoint(proxy) }}</dd>
-                </div>
-              </dl>
 
               <footer class="rotator-actions">
                 <button
@@ -588,6 +521,7 @@
                   class="text-action"
                   (click)="showRotatorDetails(proxy)"
                   [disabled]="isRotating(proxy.id)"
+                  [attr.aria-label]="'View connection for ' + proxy.name"
                 >
                   View connection
                   <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
@@ -639,21 +573,24 @@
   [dismissableMask]="true"
   (onHide)="onDetailsHide()"
   styleClass="rotator-dialog"
-  [panelStyle]="{ width: '720px', 'max-width': '95vw' }"
+  [panelStyle]="{ width: '640px', 'max-width': '95vw' }"
 >
   <ng-template #dialogHeader>
     <div class="rotator-dialog__header">
-      <div class="rotator-dialog__title-row">
+      <span class="dialog-icon"><i class="icon icon-network" aria-hidden="true"></i></span>
+      <div class="rotator-dialog__identity">
         <strong>{{ selectedRotator()?.name || "Connection details" }}</strong>
-        @if (selectedRotator()) {
-          <small
-            >{{
-              selectedRotator()?.instance_name ||
-                selectedRotator()?.instance_id ||
-                "Unknown instance"
-            }}
-            · {{ selectedRotator()?.instance_region || "Unknown region" }}</small
-          >
+        @if (selectedRotator(); as rotator) {
+          <div class="rotator-dialog__meta">
+            <small>
+              {{ rotator.instance_name || rotator.instance_id || "Unknown instance" }}
+              @if (rotator.instance_region) { · {{ rotator.instance_region }} }
+            </small>
+            <span class="rotator-status" [class.rotator-status--healthy]="rotator.alive_proxy_count > 0" [class.rotator-status--warning]="rotator.alive_proxy_count === 0">
+              <span class="status-dot" aria-hidden="true"></span>
+              {{ rotator.alive_proxy_count | number }} healthy {{ rotator.alive_proxy_count === 1 ? 'proxy' : 'proxies' }}
+            </span>
+          </div>
         }
       </div>
     </div>
@@ -663,12 +600,7 @@
     <div class="details-dialog">
       <section class="connection-panel">
         <div class="connection-heading">
-          <span class="dialog-icon"
-            ><i class="icon icon-link" aria-hidden="true"></i
-          ></span>
-          <div>
-            <strong>Connect to this listener</strong>
-          </div>
+          <h3>Connection</h3>
         </div>
 
         <div class="connection-values">
@@ -720,9 +652,6 @@
       <div class="details-grid">
         <section class="detail-card">
           <div class="detail-card__heading">
-            <span class="dialog-icon"
-              ><i class="icon icon-wifi" aria-hidden="true"></i
-            ></span>
             <h3>Listener</h3>
           </div>
           <dl>
@@ -754,8 +683,7 @@
                     [class.is-copied]="isDetailFieldCopied('ip')"
                     (click)="copyDetailField('ip', listenHost)"
                   >
-                    {{ listenHost
-                    }}<i
+                    <span>{{ listenHost }}</span><i
                       class="icon"
                       [ngClass]="
                         isDetailFieldCopied('ip') ? 'icon-check' : 'icon-copy'
@@ -769,8 +697,7 @@
                   [class.is-copied]="isDetailFieldCopied('port')"
                   (click)="copyDetailField('port', '' + rotator.listen_port)"
                 >
-                  {{ rotator.listen_port
-                  }}<i
+                  <span>{{ rotator.listen_port }}</span><i
                     class="icon"
                     [ngClass]="
                       isDetailFieldCopied('port') ? 'icon-check' : 'icon-copy'
@@ -796,8 +723,7 @@
                         copyDetailField('username', rotator.auth_username)
                       "
                     >
-                      {{ rotator.auth_username
-                      }}<i
+                      <span>{{ rotator.auth_username }}</span><i
                         class="icon"
                         [ngClass]="
                           isDetailFieldCopied('username')
@@ -814,8 +740,7 @@
                         copyDetailField('password', rotator.auth_password)
                       "
                     >
-                      {{ rotator.auth_password
-                      }}<i
+                      <span>{{ rotator.auth_password }}</span><i
                         class="icon"
                         [ngClass]="
                           isDetailFieldCopied('password')
@@ -837,9 +762,6 @@
 
         <section class="detail-card">
           <div class="detail-card__heading">
-            <span class="dialog-icon"
-              ><i class="icon icon-filter" aria-hidden="true"></i
-            ></span>
             <h3>Routing policy</h3>
           </div>
           <dl>
@@ -869,6 +791,7 @@
           </dl>
         </section>
       </div>
+      <p class="rotator-dialog__created">Created <time [attr.datetime]="rotator.created_at">{{ rotator.created_at | date: "medium" }}</time></p>
     </div>
   } @else {
     <div class="empty-details">

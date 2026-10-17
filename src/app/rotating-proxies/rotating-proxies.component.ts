@@ -89,7 +89,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     neutral: 'Neutral',
     poor: 'Bad',
   };
-  readonly skeletonRows = Array.from({ length: 5 });
+  readonly skeletonRows = Array.from({ length: 6 });
   private readonly loopbackHost = '127.0.0.1';
   private readonly defaultRotatorHost = this.resolveDefaultHost();
   rotatorHost = signal(this.loopbackHost);
