@@ -104,9 +104,7 @@ p {
   padding: clamp(1.3rem, 2.2vw, 1.85rem);
   border: 1px solid var(--card-border);
   border-radius: 1.35rem;
-  background:
-    radial-gradient(circle at 5% 0%, rgba(var(--theme-primary-500-rgb), 0.08), transparent 16rem),
-    rgba(8, 8, 10, 0.9);
+  background: rgba(8, 8, 10, 0.9);
   box-shadow: 0 20px 40px rgba(4, 4, 6, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.035);
   transition: border-color 0.35s ease;
 
@@ -215,9 +213,7 @@ p {
   &.is-active {
     flex-grow: 1.45;
     border-color: rgba(var(--theme-primary-300-rgb), 0.48);
-    background:
-      radial-gradient(circle at 20% 5%, rgba(var(--theme-primary-500-rgb), 0.2), transparent 7rem),
-      rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.04);
 
     > i {
       color: var(--theme-primary-200);
@@ -471,9 +467,7 @@ p {
 }
 
 .danger-card {
-  background:
-    radial-gradient(circle at 88% 5%, rgba(185, 70, 70, 0.12), transparent 14rem),
-    rgba(12, 8, 10, 0.92);
+  background: rgba(12, 8, 10, 0.92);
 }
 
 .card-icon--danger,

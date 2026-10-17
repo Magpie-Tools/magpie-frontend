@@ -57,7 +57,7 @@
   &.is-active {
     flex-grow: 1.55;
     border-color: rgba(var(--theme-primary-300-rgb), 0.46);
-    background: radial-gradient(circle at 22% 5%, rgba(var(--theme-primary-500-rgb), 0.2), transparent 7rem), rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.04);
 
     .protocol-choice__icon {
       color: #fff;

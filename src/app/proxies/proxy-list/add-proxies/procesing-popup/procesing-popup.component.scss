@@ -30,9 +30,7 @@
   padding: 2.4rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 1.35rem;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(var(--theme-primary-500-rgb), 0.13), transparent 18rem),
-    rgba(9, 9, 11, 0.98);
+  background: rgba(9, 9, 11, 0.98);
   color: rgba(255, 255, 255, 0.82);
   text-align: center;
   box-shadow: 0 34px 90px rgba(0, 0, 0, 0.66), inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -76,9 +74,6 @@
 
 .popup-content--error {
   border-color: rgba(248, 113, 113, 0.22);
-  background:
-    radial-gradient(circle at 50% 0%, rgba(185, 52, 52, 0.14), transparent 18rem),
-    rgba(9, 9, 11, 0.98);
 }
 
 app-star-background {

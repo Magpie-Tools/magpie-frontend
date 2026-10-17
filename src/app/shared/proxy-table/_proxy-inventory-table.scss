@@ -9,9 +9,7 @@
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.085);
     border-radius: 0.82rem;
-    background:
-      radial-gradient(circle at 4% 0%, rgba(var(--theme-primary-500-rgb), 0.065), transparent 14rem),
-      rgba(8, 8, 10, 0.91);
+    background: rgba(8, 8, 10, 0.91);
   }
 
   .inventory-table .table-scroll {

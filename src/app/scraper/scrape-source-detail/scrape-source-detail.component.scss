@@ -181,9 +181,7 @@ input {
   min-width: 0;
   border: 1px solid var(--detail-border);
   border-radius: 1.2rem;
-  background:
-    radial-gradient(circle at 4% 0%, rgba(var(--theme-primary-500-rgb), 0.065), transparent 14rem),
-    rgba(8, 8, 10, 0.91);
+  background: rgba(8, 8, 10, 0.91);
   box-shadow: 0 16px 34px rgba(4, 4, 6, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 

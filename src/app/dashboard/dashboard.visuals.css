@@ -3,9 +3,7 @@
   overflow: hidden;
   border: 1px solid rgba(239, 229, 237, 0.15);
   border-radius: 1.35rem;
-  background:
-    radial-gradient(circle at 5% 0%, rgba(var(--theme-primary-500-rgb), 0.08), transparent 16rem),
-    rgba(8, 8, 10, 0.9);
+  background: rgba(8, 8, 10, 0.9);
   color: rgba(255, 255, 255, 0.82);
   box-shadow: 0 20px 40px rgba(4, 4, 6, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.035);
   transition: border-color 0.35s ease;
@@ -167,7 +165,7 @@
 .dashboard-country-dialog.app-dialog-panel .app-dialog-header {
   padding: 1.05rem 1.15rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-  background: linear-gradient(135deg, rgba(var(--theme-primary-500-rgb), 0.09), rgba(16, 16, 18, 0.98));
+  background: rgba(16, 16, 18, 0.98);
   color: rgba(255, 255, 255, 0.94);
 }
 

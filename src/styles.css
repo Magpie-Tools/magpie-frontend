@@ -242,7 +242,7 @@
 .stat-response-dialog .app-dialog-header {
   padding: 1.2rem 1.35rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-  background: linear-gradient(135deg, rgba(var(--theme-primary-500-rgb), 0.09), rgba(16, 16, 18, 0.98));
+  background: rgba(16, 16, 18, 0.98);
   color: rgba(255, 255, 255, 0.94);
 }
 
