@@ -1,6 +1,6 @@
 import {HlmInput} from '@spartan-ng/helm/input';
 import {SelectComponent} from '../../shared/ui/select.component';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {SettingsService} from '../../services/settings.service';
 import {GlobalSettings} from '../../models/GlobalSettings';
@@ -41,6 +41,7 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
+    private changeDetector: ChangeDetectorRef,
     private settingsService: SettingsService,
     private notification: NotificationService
   ) {
@@ -165,6 +166,7 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
     this.resetSources(settings.blacklist_sources);
     this.resetWebsiteBlacklist(settings.website_blacklist);
     this.form.markAsPristine();
+    this.changeDetector.markForCheck();
   }
 
   private resetSources(sources: string[] = []): void {

@@ -145,7 +145,8 @@ app-admin-settings-shell {
     font-size: 0.76rem;
     box-shadow: none;
 
-    &:hover {
+    // Labels forward :hover to their associated control in the browser.
+    &:hover:not(:where(label:hover + *)) {
       border-color: rgba(255, 255, 255, 0.23);
     }
 

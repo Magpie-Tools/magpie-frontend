@@ -159,6 +159,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
+  // Leave room inside the scroll area for the first row's hover/focus lift.
+  padding-top: 2px;
 }
 
 .entry-row {

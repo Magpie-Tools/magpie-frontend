@@ -300,6 +300,8 @@
   flex-direction: column;
   gap: 0.7rem;
   margin-top: 1.55rem;
+  // Leave room inside the scroll area for the first row's hover/focus lift.
+  padding-top: 2px;
 }
 
 .judge-row {
@@ -415,7 +417,8 @@
     box-shadow: none;
 
     &::placeholder { color: rgba(255, 255, 255, 0.28); }
-    &:hover { border-color: rgba(255, 255, 255, 0.23); }
+    // Labels forward :hover to their associated control in the browser.
+    &:hover:not(:where(label:hover + *)) { border-color: rgba(255, 255, 255, 0.23); }
     &:focus { border-color: rgba(var(--theme-primary-300-rgb), 0.55); box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13); }
     &[readonly] { cursor: default; opacity: 0.7; }
   }
