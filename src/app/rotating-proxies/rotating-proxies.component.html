@@ -20,11 +20,12 @@
         (ngSubmit)="createRotator()"
         aria-label="Create rotator"
       >
-        @if (noProtocolsAvailable()) {
-          <div class="form-alert" role="alert">
+        @if (noDefaultProtocolsEnabled()) {
+          <div class="form-alert" role="status">
             <i class="icon icon-circle-alert" aria-hidden="true"></i>
-            Enable at least one protocol in workspace checker settings before
-            creating a rotator.
+            No protocols are enabled in Default checker settings. You can still
+            create a rotator, but it cannot serve traffic without healthy upstream
+            proxies for its selected protocol.
           </div>
         }
         @if (!hasAvailableInstances()) {
@@ -397,7 +398,6 @@
             [disabled]="
               createForm.invalid ||
               submitting() ||
-              noProtocolsAvailable() ||
               !hasAvailableInstances()
             "
             [attr.aria-busy]="submitting()"

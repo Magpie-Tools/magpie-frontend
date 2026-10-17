@@ -60,7 +60,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     'TCP uses standard HTTP over TCP. QUIC and HTTP/3 both use HTTP/3 over QUIC; QUIC enables HTTP/3 datagrams (unreliable messages), HTTP/3 uses streams only.';
   createForm: FormGroup;
   rotatingProxies = signal<RotatingProxy[]>([]);
-  protocolOptions = signal<{ label: string; value: string }[]>([]);
+  protocolOptions = signal<{ label: string; value: string }[]>([...this.protocolOptionList]);
   listenProtocolOptions = signal<{ label: string; value: string }[]>([...this.protocolOptionList]);
   transportProtocolOptions = [...this.transportProtocolOptionList];
   instanceOptions = signal<RotatorInstanceOption[]>([]);
@@ -69,7 +69,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   hasLoaded = signal(false);
   submitting = signal(false);
   rotateLoading = signal<Set<number>>(new Set());
-  noProtocolsAvailable = signal(false);
+  noDefaultProtocolsEnabled = signal(false);
   authEnabled = signal(false);
   selectedRotator = signal<RotatingProxy | null>(null);
   detailsVisible = signal(false);
@@ -175,11 +175,10 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
             this.detailsVisible.set(false);
           }
 
-          const options = this.buildProtocolOptions(settings);
-          this.protocolOptions.set(options);
+          const enabledOptions = this.buildEnabledProtocolOptions(settings);
+          const options = this.protocolOptions();
           this.applyInstanceOptions(instances ?? []);
-          const noneAvailable = options.length === 0;
-          this.noProtocolsAvailable.set(noneAvailable);
+          this.noDefaultProtocolsEnabled.set(enabledOptions.length === 0);
           const instanceControl = this.createForm.get('instanceId');
           const protocolControl = this.createForm.get('protocol');
           const listenControl = this.createForm.get('listenProtocol');
@@ -189,7 +188,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
           const currentProtocol = protocolControl?.value;
           const currentListen = listenControl?.value;
           if (!currentProtocol || !availableValues.includes(currentProtocol)) {
-            this.createForm.patchValue({protocol: options[0]?.value ?? ''}, {emitEvent: false});
+            this.createForm.patchValue({protocol: enabledOptions[0]?.value ?? options[0]?.value ?? ''}, {emitEvent: false});
           }
           const listenOptions = this.listenProtocolOptions().map(opt => opt.value);
           if (!currentListen || !listenOptions.includes(currentListen)) {
@@ -514,7 +513,7 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     return `${option.label} (${option.freePorts} free)`;
   }
 
-  private buildProtocolOptions(settings: UserSettings | null | undefined): { label: string; value: string }[] {
+  private buildEnabledProtocolOptions(settings: UserSettings | null | undefined): { label: string; value: string }[] {
     if (!settings) {
       return [];
     }
@@ -537,15 +536,14 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
 
   private updateFormDisabledStates(): void {
     const submitting = this.submitting();
-    const noneAvailable = this.noProtocolsAvailable();
     const noInstances = !this.hasAvailableInstances();
 
-    this.setDisabledState('name', submitting || noneAvailable);
+    this.setDisabledState('name', submitting);
     this.setDisabledState('instanceId', submitting || noInstances);
-    this.setDisabledState('protocol', submitting || noneAvailable);
-    this.setDisabledState('listenProtocol', submitting || noneAvailable);
-    this.setDisabledState('transportProtocol', submitting || noneAvailable);
-    this.setDisabledState('listenTransportProtocol', submitting || noneAvailable);
+    this.setDisabledState('protocol', submitting);
+    this.setDisabledState('listenProtocol', submitting);
+    this.setDisabledState('transportProtocol', submitting);
+    this.setDisabledState('listenTransportProtocol', submitting);
     this.setDisabledState('uptimeFilterType', submitting);
     this.setDisabledState('uptimePercentage', submitting);
     this.setDisabledState('reputationLabels', submitting);

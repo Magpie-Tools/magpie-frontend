@@ -6,25 +6,33 @@ import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
 import {RotatingProxy} from '../models/RotatingProxy';
+import {UserSettings} from '../models/UserSettings';
+
+const defaultSettings: UserSettings = {
+  http_protocol: true,
+  https_protocol: true,
+  socks4_protocol: false,
+  socks5_protocol: false,
+  timeout: 5000,
+  retries: 2,
+  UseHttpsForSocks: true,
+  transport_protocol: 'tcp',
+  auto_remove_failing_proxies: false,
+  auto_remove_failure_threshold: 3,
+  failure_action: 'pause',
+  judges: [],
+  scraping_sources: [],
+};
+
+const availableInstance = {
+  id: 'instance-1', name: 'Test instance', region: 'Test',
+  port_start: 19000, port_end: 19010, used_ports: 0, free_ports: 11, total_ports: 11,
+};
 
 const httpServiceMock = {
   getRotatingProxies: jasmine.createSpy().and.returnValue(of([])),
   getRotatingProxyInstances: jasmine.createSpy().and.returnValue(of([])),
-  getUserSettings: jasmine.createSpy().and.returnValue(of({
-    http_protocol: true,
-    https_protocol: true,
-    socks4_protocol: false,
-    socks5_protocol: false,
-    timeout: 5000,
-    retries: 2,
-    UseHttpsForSocks: true,
-    transport_protocol: 'tcp',
-    auto_remove_failing_proxies: false,
-    auto_remove_failure_threshold: 3,
-    failure_action: 'pause',
-    judges: [],
-    scraping_sources: [],
-  })),
+  getUserSettings: jasmine.createSpy().and.returnValue(of(defaultSettings)),
   createRotatingProxy: jasmine.createSpy().and.returnValue(of({
     id: 1,
     name: 'Test rotator',
@@ -53,6 +61,10 @@ describe('RotatingProxiesComponent', () => {
   let fixture: ComponentFixture<RotatingProxiesComponent>;
 
   beforeEach(async () => {
+    httpServiceMock.getUserSettings.and.returnValue(of(defaultSettings));
+    httpServiceMock.getRotatingProxyInstances.and.returnValue(of([]));
+    httpServiceMock.createRotatingProxy.calls.reset();
+
     await TestBed.configureTestingModule({
       imports: [RotatingProxiesComponent],
       providers: [
@@ -72,6 +84,74 @@ describe('RotatingProxiesComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('warns without blocking creation when all Default checker protocols are disabled', () => {
+    httpServiceMock.getUserSettings.and.returnValue(of({
+      ...defaultSettings, http_protocol: false, https_protocol: false,
+    }));
+    httpServiceMock.getRotatingProxyInstances.and.returnValue(of([availableInstance]));
+    component.loadInitialData();
+    component.createForm.patchValue({name: 'Ready for later', protocol: 'socks5'});
+    fixture.detectChanges();
+
+    const warning = fixture.nativeElement.querySelector('.form-alert[role="status"]') as HTMLElement;
+    expect(warning.textContent).toContain('You can still create a rotator');
+    expect(warning.textContent).toContain('healthy upstream');
+    expect(warning.textContent).toContain('selected protocol');
+    expect(component.protocolOptions().map(option => option.value)).toEqual(['http', 'https', 'socks4', 'socks5']);
+    for (const field of ['name', 'protocol', 'listenProtocol', 'transportProtocol', 'listenTransportProtocol']) {
+      expect(component.createForm.get(field)?.enabled).withContext(field).toBeTrue();
+    }
+
+    const submit = fixture.nativeElement.querySelector('.create-button') as HTMLButtonElement;
+    expect(submit.disabled).toBeFalse();
+    submit.click();
+
+    expect(httpServiceMock.createRotatingProxy).toHaveBeenCalledOnceWith(jasmine.objectContaining({
+      name: 'Ready for later', instance_id: 'instance-1', protocol: 'socks5',
+    }));
+  });
+
+  it('offers protocols outside Default checks and preserves the enabled initial selection', () => {
+    httpServiceMock.getUserSettings.and.returnValue(of({...defaultSettings, http_protocol: false}));
+    httpServiceMock.getRotatingProxyInstances.and.returnValue(of([availableInstance]));
+    component.createForm.patchValue({protocol: ''});
+    component.loadInitialData();
+    fixture.detectChanges();
+
+    expect(component.createForm.get('protocol')?.value).toBe('https');
+    expect(component.protocolOptions().map(option => option.value)).toContain('socks5');
+    expect(fixture.nativeElement.querySelector('.form-alert[role="status"]')).toBeNull();
+
+    component.createForm.patchValue({name: 'Tag checked pool', protocol: 'socks5'});
+    component.loadInitialData();
+    expect(component.createForm.get('protocol')?.value).toBe('socks5');
+    component.createRotator();
+
+    expect(httpServiceMock.createRotatingProxy).toHaveBeenCalledOnceWith(jasmine.objectContaining({protocol: 'socks5'}));
+  });
+
+  it('still requires a valid name and an instance with free ports', () => {
+    httpServiceMock.getUserSettings.and.returnValue(of({
+      ...defaultSettings, http_protocol: false, https_protocol: false,
+    }));
+    component.loadInitialData();
+    component.createForm.patchValue({name: 'Waiting for a port'});
+    fixture.detectChanges();
+
+    const submit = fixture.nativeElement.querySelector('.create-button') as HTMLButtonElement;
+    expect(submit.disabled).toBeTrue();
+    component.createRotator();
+    expect(httpServiceMock.createRotatingProxy).not.toHaveBeenCalled();
+
+    httpServiceMock.getRotatingProxyInstances.and.returnValue(of([availableInstance]));
+    component.loadInitialData();
+    component.createForm.patchValue({name: ''});
+    fixture.detectChanges();
+    expect(submit.disabled).toBeTrue();
+    component.createRotator();
+    expect(httpServiceMock.createRotatingProxy).not.toHaveBeenCalled();
   });
 
   it('brackets IPv6 listener addresses in endpoints and connection URLs', () => {
