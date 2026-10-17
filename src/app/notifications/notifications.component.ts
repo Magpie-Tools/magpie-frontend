@@ -11,6 +11,7 @@ import { marked } from 'marked';
 import { BuildInfo, ReleaseNote, UpdateNotificationService } from '../services/update-notification.service';
 import { LoadingComponent } from '../ui-elements/loading/loading.component';
 import {RevealGroupDirective} from '../shared/reveal-group.directive';
+import {NotificationReadService} from '../services/notification-read.service';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,14 +73,19 @@ function normalizeReleaseBodyToMarkdown(body: string): string {
   selector: 'app-notifications',
   standalone: true,
   imports: [DialogComponent, PageLoadErrorComponent, CommonModule, DatePipe, LoadingComponent, RevealGroupDirective],
+  host: {
+    '(window:focus)': 'refreshReadStatus()',
+    '(document:visibilitychange)': 'onVisibilityChange()',
+  },
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   status = signal<{ loading: boolean; error?: string | null }>({ loading: true, error: null });
-  newReleases = signal<ReleaseNote[]>([]);
   allReleases = signal<ReleaseNote[]>([]);
-  lastSeenTag = signal<string | null>(null);
+  readonly newReleases = computed(() => this.allReleases().filter(release => this.notificationReads.isUnread(`release-${release.id}`)));
+  readonly latestReadTag = computed(() => this.allReleases().find(release => this.notificationReads.isRead(`release-${release.id}`))?.tagName ?? null);
+  readonly readStatusReady = computed(() => this.allReleases().every(release => this.notificationReads.hasStatus(`release-${release.id}`)));
   latestTag = signal<string | null>(null);
   backendBuild = signal<BuildInfo | null>(null);
   selectedRelease = signal<ReleaseNote | null>(null);
@@ -120,6 +126,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     private elementRef: ElementRef<HTMLElement>,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
+    readonly notificationReads: NotificationReadService,
   ) {}
 
   ngOnInit(): void {
@@ -138,15 +145,16 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.archiveScrollContext?.revert();
   }
 
-  markAllSeen(): void {
-    const latest = this.latestTag();
-    if (!latest) {
-      return;
-    }
+  markAllRead(): void {
+    for (const release of this.newReleases()) this.notificationReads.markRead(`release-${release.id}`);
+  }
 
-    this.updates.markAllSeen(latest);
-    this.lastSeenTag.set(latest);
-    this.newReleases.set([]);
+  refreshReadStatus(): void {
+    this.notificationReads.load(this.allReleases().map(release => `release-${release.id}`));
+  }
+
+  onVisibilityChange(): void {
+    if (document.visibilityState === 'visible') this.refreshReadStatus();
   }
 
   retry(): void {
@@ -154,6 +162,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   openReleaseDialog(release: ReleaseNote): void {
+    this.notificationReads.markRead(`release-${release.id}`);
     this.selectedRelease.set(release);
     this.releaseDialogVisible.set(true);
   }
@@ -184,9 +193,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
     this.updates.fetchReleaseFeed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (feed) => {
-        this.newReleases.set(feed.newSinceLastSeen);
         this.allReleases.set(feed.releases);
-        this.lastSeenTag.set(feed.lastSeenTag);
+        this.refreshReadStatus();
         this.latestTag.set(feed.latestTag);
         this.backendBuild.set(feed.backendBuild);
         this.status.set({ loading: false, error: null });

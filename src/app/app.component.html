@@ -1,6 +1,7 @@
 @switch (UserService.authState()) {
   @case ("authenticated") {
     <div
+      appNotificationReadScope
       class="h-screen overflow-hidden flex"
       [class.sidebar-collapsed]="!layout.sidebarOpen()"
     >

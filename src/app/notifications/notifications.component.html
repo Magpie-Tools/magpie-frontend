@@ -46,27 +46,27 @@
             <div class="card-heading__copy">
               <h2 id="overview-title">Unread releases</h2>
               <p>
-                Magpie remembers the latest version reviewed in this browser.
+                Your read status follows your account across browsers.
               </p>
             </div>
           </div>
 
           <div class="unread-summary">
-            <strong class="unread-count">{{ newReleaseCount() }}</strong>
+            <strong class="unread-count">{{ readStatusReady() ? newReleaseCount() : '...' }}</strong>
             <div>
               <span>{{
                 newReleaseCount() === 1 ? "unread release" : "unread releases"
               }}</span>
               <small>{{
-                hasNewReleases() ? "Ready for review" : "You are caught up"
+                !readStatusReady() ? (notificationReads.error() ? "Read status unavailable" : "Loading read status") : hasNewReleases() ? "Ready for review" : "You are caught up"
               }}</small>
             </div>
           </div>
 
           <dl class="version-pair">
             <div>
-              <dt>Last viewed</dt>
-              <dd>{{ lastSeenTag() || "No previous version" }}</dd>
+              <dt>Latest read</dt>
+              <dd>{{ latestReadTag() || "No releases read yet" }}</dd>
             </div>
             <div>
               <dt>Latest available</dt>
@@ -77,12 +77,15 @@
           <button
             type="button"
             class="button button--primary overview-action"
-            [disabled]="!hasNewReleases()"
-            (click)="markAllSeen()"
+            [disabled]="!readStatusReady() || !hasNewReleases()"
+            (click)="markAllRead()"
           >
             <i class="icon icon-check" aria-hidden="true"></i>
             Mark all as read
           </button>
+          @if (notificationReads.error()) {
+            <p role="alert">Could not load read status. <button type="button" class="button button--ghost" (click)="refreshReadStatus()">Try again</button></p>
+          }
         </section>
 
         <section
@@ -128,7 +131,7 @@
                 ><i class="icon icon-sparkles" aria-hidden="true"></i
               ></span>
               <div class="card-heading__copy">
-                <h2 id="recent-title">New since you last checked</h2>
+                <h2 id="recent-title">Unread releases</h2>
                 <p>Open a release for its complete changelog.</p>
               </div>
             </div>
@@ -136,11 +139,13 @@
               class="section-count"
               [class.section-count--muted]="!hasNewReleases()"
             >
-              {{ newReleaseCount() }} new
+              {{ readStatusReady() ? newReleaseCount() : '...' }} unread
             </span>
           </div>
 
-          @if (!hasNewReleases()) {
+          @if (!readStatusReady()) {
+            <div class="empty-state" role="status">{{ notificationReads.error() ? 'Unread releases are unavailable until read status can be loaded.' : 'Loading read status...' }}</div>
+          } @else if (!hasNewReleases()) {
             <div class="empty-state">
               <span class="state-icon state-icon--success"
                 ><i class="icon icon-check" aria-hidden="true"></i

@@ -13,6 +13,7 @@ import {AlertsService} from '../../services/alerts.service';
 import {ReleaseNote, UpdateNotificationService} from '../../services/update-notification.service';
 import {AlertIncident} from '../../models/Alert';
 import {buildNotificationFeed} from './notification-feed';
+import {NotificationReadService} from '../../services/notification-read.service';
 import {gsap} from 'gsap';
 
 export interface TopbarBreadcrumb {
@@ -60,6 +61,10 @@ function formatRouteLabel(segment: string): string {
   selector: 'app-topbar',
   standalone: true,
   imports: [RouterLink, DatePipe, HlmPopoverImports],
+  host: {
+    '(window:focus)': 'refreshReadState()',
+    '(document:visibilitychange)': 'onVisibilityChange()',
+  },
   templateUrl: './topbar.component.html',
   styleUrls: ['./topbar.component.scss']
 })
@@ -75,12 +80,15 @@ export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly recentNotifications = computed(() => buildNotificationFeed(
     this.invitations.invitations(), this.alertIncidents(), this.releases(),
   ));
+  readonly unreadCount = computed(() => this.recentNotifications()
+    .filter(item => this.notificationReads.isUnread(item.id)).length);
   readonly notificationsLoading = computed(() =>
-    this.invitations.loading() || this.alertsLoading() || this.releasesLoading());
+    this.invitations.loading() || this.alertsLoading() || this.releasesLoading() || this.notificationReads.loading());
   readonly unavailableSources = computed(() => [
     ...(this.invitations.error() ? ['invitations'] : []),
     ...(this.alertsError() ? ['alerts'] : []),
     ...(this.releasesError() ? ['releases'] : []),
+    ...(this.notificationReads.error() ? ['read status'] : []),
   ].join(', '));
   private readonly destroyRef = inject(DestroyRef);
   private sub?: Subscription;
@@ -94,7 +102,8 @@ export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
               private notification: NotificationService,
               private elementRef: ElementRef,
               private readonly alerts: AlertsService,
-              private readonly updates: UpdateNotificationService) {
+              private readonly updates: UpdateNotificationService,
+              readonly notificationReads: NotificationReadService) {
     effect(() => {
       const workspaceId = this.workspaces.current()?.id;
       untracked(() => {
@@ -104,6 +113,10 @@ export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
         this.alertsError.set(false);
         if (workspaceId) this.loadAlerts();
       });
+    });
+    effect(() => {
+      const ids = this.recentNotifications().map(item => item.id);
+      untracked(() => this.notificationReads.load(ids));
     });
   }
 
@@ -149,6 +162,7 @@ export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   refreshNotifications(refreshAlerts = true): void {
+    this.refreshReadState();
     if (!this.invitations.loading()) {
       this.invitations.load().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({error: () => undefined});
     }
@@ -167,6 +181,14 @@ export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     }
     if (refreshAlerts && this.workspaces.current() && !this.alertsLoading()) this.loadAlerts();
+  }
+
+  refreshReadState(): void {
+    this.notificationReads.load(this.recentNotifications().map(item => item.id));
+  }
+
+  onVisibilityChange(): void {
+    if (document.visibilityState === 'visible') this.refreshReadState();
   }
 
   private loadAlerts(): void {

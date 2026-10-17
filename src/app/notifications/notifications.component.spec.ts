@@ -3,11 +3,17 @@ import { of } from 'rxjs';
 import { NotificationsComponent } from './notifications.component';
 import { ReleaseFeed, ReleaseNote, UpdateNotificationService } from '../services/update-notification.service';
 import {provideRouter, Router} from '@angular/router';
+import {signal} from '@angular/core';
+import {NotificationReadService} from '../services/notification-read.service';
 
 describe('NotificationsComponent', () => {
   let component: NotificationsComponent;
   let fixture: ComponentFixture<NotificationsComponent>;
   let updatesMock: jasmine.SpyObj<UpdateNotificationService>;
+  let readIds: ReturnType<typeof signal<Set<string>>>;
+  let readStatusKnown: ReturnType<typeof signal<boolean>>;
+  let reads: {load: jasmine.Spy; markRead: jasmine.Spy; isUnread: (id: string) => boolean;
+    isRead: (id: string) => boolean; hasStatus: (id: string) => boolean; error: ReturnType<typeof signal<boolean>>};
   const release: ReleaseNote = {
     id: 42,
     tagName: 'v2.4.0',
@@ -19,22 +25,29 @@ describe('NotificationsComponent', () => {
   };
   const feed: ReleaseFeed = {
     releases: [release],
-    newSinceLastSeen: [release],
-    lastSeenTag: 'v2.3.0',
     latestTag: 'v2.4.0',
     backendBuild: { buildVersion: 'v2.4.0', builtAt: '2026-08-20T09:30:00Z' }
   };
 
   beforeEach(async () => {
+    readIds = signal(new Set<string>());
+    readStatusKnown = signal(true);
+    reads = {
+      load: jasmine.createSpy('load'),
+      markRead: jasmine.createSpy('markRead').and.callFake((id: string) => readIds.update(ids => new Set([...ids, id]))),
+      isRead: id => readIds().has(id),
+      isUnread: id => readStatusKnown() && !readIds().has(id),
+      hasStatus: () => readStatusKnown(), error: signal(false),
+    };
     updatesMock = jasmine.createSpyObj<UpdateNotificationService>('UpdateNotificationService', [
-      'fetchReleaseFeed',
-      'markAllSeen'
+      'fetchReleaseFeed'
     ]);
     updatesMock.fetchReleaseFeed.and.returnValue(of(feed));
 
     await TestBed.configureTestingModule({
       imports: [NotificationsComponent],
-      providers: [provideRouter([]), { provide: UpdateNotificationService, useValue: updatesMock }]
+      providers: [provideRouter([]), { provide: UpdateNotificationService, useValue: updatesMock },
+        {provide: NotificationReadService, useValue: reads}]
     })
     .compileComponents();
 
@@ -73,12 +86,12 @@ describe('NotificationsComponent', () => {
   });
 
   it('marks the latest release as read without clearing the archive', () => {
-    component.markAllSeen();
+    component.markAllRead();
     fixture.detectChanges();
 
-    expect(updatesMock.markAllSeen).toHaveBeenCalledOnceWith('v2.4.0');
+    expect(reads.markRead).toHaveBeenCalledOnceWith('release-42');
     expect(component.newReleases()).toEqual([]);
-    expect(component.lastSeenTag()).toBe('v2.4.0');
+    expect(component.latestReadTag()).toBe('v2.4.0');
     expect(component.allReleases()).toEqual([release]);
   });
 
@@ -90,6 +103,28 @@ describe('NotificationsComponent', () => {
     expect(component.selectedRelease()).toBe(release);
     expect(component.selectedReleaseMarkdown()).toContain('<h2>Improved</h2>');
     expect(component.selectedReleaseMarkdown()).toContain('<li>Reduced queue overhead</li>');
+    expect(reads.markRead).toHaveBeenCalledOnceWith('release-42');
+  });
+
+  it('uses the shared account receipt without removing the release from the archive', () => {
+    readIds.set(new Set(['release-42']));
+    fixture.detectChanges();
+    expect(component.newReleaseCount()).toBe(0);
+    expect(fixture.nativeElement.querySelector('.unread-count')?.textContent?.trim()).toBe('0');
+    expect(fixture.nativeElement.querySelectorAll('.archive-row').length).toBe(1);
+    expect(component.latestReadTag()).toBe('v2.4.0');
+  });
+
+  it('shows unavailable status instead of a false zero and allows retry', () => {
+    readStatusKnown.set(false);
+    reads.error.set(true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.unread-count')?.textContent?.trim()).toBe('...');
+    expect(fixture.nativeElement.textContent).toContain('Read status unavailable');
+    expect(fixture.nativeElement.querySelector('.overview-action').disabled).toBeTrue();
+    reads.load.calls.reset();
+    fixture.nativeElement.querySelector('.overview-card [role="alert"] button').click();
+    expect(reads.load).toHaveBeenCalledOnceWith(['release-42']);
   });
 
   it('opens the release linked by a notification and clears the link when closed', async () => {

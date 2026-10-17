@@ -1,4 +1,8 @@
-import {normalizeBuildCommit, partitionNewReleases, ReleaseNote} from './update-notification.service';
+import {TestBed} from '@angular/core/testing';
+import {provideHttpClient} from '@angular/common/http';
+import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
+import {environment} from '../../environments/environment';
+import {normalizeBuildCommit, ReleaseNote, UpdateNotificationService} from './update-notification.service';
 
 describe('normalizeBuildCommit', () => {
   it('ignores placeholder build shas', () => {
@@ -15,26 +19,25 @@ describe('normalizeBuildCommit', () => {
   });
 });
 
-describe('partitionNewReleases', () => {
+describe('UpdateNotificationService', () => {
   const releases: ReleaseNote[] = [
     { id: 1, tagName: 'v2.0.0', title: 'Latest', body: '', htmlUrl: '', publishedAt: '2024-02-01T00:00:00Z', prerelease: false },
     { id: 2, tagName: 'v1.5.0', title: 'Middle', body: '', htmlUrl: '', publishedAt: '2024-01-15T00:00:00Z', prerelease: false },
     { id: 3, tagName: 'v1.0.0', title: 'Old', body: '', htmlUrl: '', publishedAt: '2024-01-01T00:00:00Z', prerelease: false },
   ];
 
-  it('returns all releases when no last seen tag is stored', () => {
-    expect(partitionNewReleases(releases, null).map(r => r.tagName)).toEqual(['v2.0.0', 'v1.5.0', 'v1.0.0']);
-  });
-
-  it('returns nothing when the latest tag was already seen', () => {
-    expect(partitionNewReleases(releases, 'v2.0.0')).toEqual([]);
-  });
-
-  it('returns only entries newer than the last seen tag', () => {
-    expect(partitionNewReleases(releases, 'v1.5.0').map(r => r.tagName)).toEqual(['v2.0.0']);
-  });
-
-  it('treats unknown tags as unseen (returns everything)', () => {
-    expect(partitionNewReleases(releases, 'v0.9.0').length).toBe(3);
+  it('loads and sorts the full archive without using browser-local read state', () => {
+    TestBed.configureTestingModule({providers: [provideHttpClient(), provideHttpClientTesting()]});
+    const http = TestBed.inject(HttpTestingController);
+    const service = TestBed.inject(UpdateNotificationService);
+    const getStorage = spyOn(Storage.prototype, 'getItem').and.throwError('Browser storage unavailable');
+    service.fetchReleaseFeed().subscribe(feed => {
+      expect(feed.releases.map(release => release.tagName)).toEqual(['v2.0.0', 'v1.5.0', 'v1.0.0']);
+      expect(feed.latestTag).toBe('v2.0.0');
+      expect(feed.backendBuild.buildVersion).toBe('dev');
+    });
+    http.expectOne(`${environment.apiUrl}/releases`).flush({releases: [...releases].reverse()});
+    expect(getStorage).not.toHaveBeenCalled();
+    http.verify();
   });
 });

@@ -12,6 +12,7 @@ import {AlertsService} from '../../services/alerts.service';
 import {ReleaseFeed, ReleaseNote, UpdateNotificationService} from '../../services/update-notification.service';
 import {AlertIncident, AlertsPage} from '../../models/Alert';
 import {Workspace, WorkspaceInvitation} from '../../models/Workspace';
+import {NotificationReadService} from '../../services/notification-read.service';
 
 describe('TopbarComponent', () => {
   let component: TopbarComponent;
@@ -21,15 +22,28 @@ describe('TopbarComponent', () => {
   let current: ReturnType<typeof signal<Workspace | null>>;
   let invitations: ReturnType<typeof signal<WorkspaceInvitation[]>>;
   let overlay: OverlayContainer;
+  let unread: ReturnType<typeof signal<Set<string>>>;
+  let reads: {loading: ReturnType<typeof signal<boolean>>; error: ReturnType<typeof signal<boolean>>;
+    isUnread: (id: string) => boolean; load: jasmine.Spy; markRead: jasmine.Spy};
   const workspace = {id: 7, name: 'Production'} as Workspace;
   const invitation = {id: 1, workspace_name: 'Operations', inviter_email: 'owner@example.test', created_at: '2026-10-17T10:00:00Z'} as WorkspaceInvitation;
   const incident = {id: 2, rule_name: 'Minimum routes', scope_name: 'Production', opened_at: '2026-10-17T09:00:00Z'} as AlertIncident;
   const release = {id: 3, title: 'Faster checks', tagName: 'v2.4.0', publishedAt: '2026-10-17T08:00:00Z'} as ReleaseNote;
   const page: AlertsPage = {rules: [], destinations: [], incidents: [incident], deliveries: [], next_cursor: 0};
-  const feed: ReleaseFeed = {releases: [release], newSinceLastSeen: [], lastSeenTag: 'v2.4.0', latestTag: 'v2.4.0', backendBuild: {buildVersion: 'dev', builtAt: 'unknown'}};
+  const feed: ReleaseFeed = {releases: [release], latestTag: 'v2.4.0', backendBuild: {buildVersion: 'dev', builtAt: 'unknown'}};
 
   beforeEach(async () => {
     spyOn(window, 'matchMedia').and.returnValue({matches: true} as MediaQueryList);
+    unread = signal(new Set(['invitation-1', 'alert-2', 'release-3']));
+    reads = {
+      loading: signal(false), error: signal(false),
+      isUnread: id => unread().has(id), load: jasmine.createSpy('load'),
+      markRead: jasmine.createSpy('markRead').and.callFake((id: string) => unread.update(ids => {
+        const remaining = new Set(ids);
+        remaining.delete(id);
+        return remaining;
+      })),
+    };
     current = signal<Workspace | null>(workspace);
     invitations = signal<WorkspaceInvitation[]>([invitation]);
     alerts = jasmine.createSpyObj<AlertsService>('AlertsService', ['load']);
@@ -69,6 +83,7 @@ describe('TopbarComponent', () => {
         {provide: NotificationService, useValue: {showError: jasmine.createSpy('showError')}},
       ]
     })
+    .overrideComponent(TopbarComponent, {set: {providers: [{provide: NotificationReadService, useValue: reads}]}})
     .compileComponents();
 
     fixture = TestBed.createComponent(TopbarComponent);
@@ -100,6 +115,40 @@ describe('TopbarComponent', () => {
     expect(panel.querySelector('.notification-item--alert')?.getAttribute('href')).toBe('/alerts?section=history&incident=2');
     expect(panel.querySelector('.notification-item--release')?.getAttribute('href')).toBe('/notifications?release=3');
     expect(fixture.nativeElement.querySelector('.notifications-toggle').getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('counts only unread events and marks just the clicked notification as read', async () => {
+    unread.set(new Set(['invitation-1', 'alert-2', 'release-99']));
+    fixture.detectChanges();
+    expect(component.unreadCount()).toBe(2);
+    const panel = await openNotifications();
+    expect(reads.markRead).not.toHaveBeenCalled();
+    expect(panel.querySelectorAll('.notification-item--unread').length).toBe(2);
+    panel.querySelector<HTMLAnchorElement>('.notification-item--alert')!.click();
+    await fixture.whenStable();
+    expect(reads.markRead).toHaveBeenCalledOnceWith('alert-2');
+    expect(component.unreadCount()).toBe(1);
+    expect(component.notificationsState()).toBe('closed');
+    expect(TestBed.inject(Router).url).toBe('/alerts?section=history&incident=2');
+  });
+
+  it('hides the badge when all five recent notifications are read and keeps their links', async () => {
+    unread.set(new Set());
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.notifications-toggle__count')).toBeNull();
+    const panel = await openNotifications();
+    expect(panel.querySelectorAll('.notification-item').length).toBe(3);
+    expect(panel.querySelector('.notification-item--unread')).toBeNull();
+    expect(reads.markRead).not.toHaveBeenCalled();
+  });
+
+  it('refreshes read status on browser focus and reports a read-status failure', async () => {
+    reads.load.calls.reset();
+    window.dispatchEvent(new Event('focus'));
+    expect(reads.load).toHaveBeenCalledWith(['invitation-1', 'alert-2', 'release-3']);
+    reads.error.set(true);
+    const panel = await openNotifications();
+    expect(panel.querySelector('.notification-panel__error')?.textContent).toContain('read status');
   });
 
   it('keeps the invitation inbox reachable when invitations are outside the latest five', async () => {

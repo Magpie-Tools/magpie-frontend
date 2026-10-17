@@ -34,35 +34,6 @@
   </div>
 
   <div class="topbar-actions">
-    @if (workspaces.loading() && workspaces.workspaces().length === 0) {
-      <div
-        class="workspace-switcher workspace-switcher--loading"
-        aria-label="Loading workspace"
-      >
-        <span class="workspace-switcher__skeleton" aria-hidden="true"></span>
-        <span>Loading workspace</span>
-      </div>
-    } @else if (workspaces.current(); as current) {
-      <div class="workspace-switcher" aria-label="Current workspace">
-        <div class="workspace-switcher__control">
-          <label class="sr-only" for="workspace-select">Workspace</label>
-          <span class="workspace-switcher__select-wrap">
-            <select
-              id="workspace-select"
-              class="workspace-switcher__select"
-              [value]="current.id"
-              (change)="onWorkspaceChange($event)"
-            >
-              @for (workspace of workspaces.workspaces(); track workspace.id) {
-                <option [value]="workspace.id">{{ workspace.name }}</option>
-              }
-            </select>
-            <i class="icon icon-chevron-down" aria-hidden="true"></i>
-          </span>
-        </div>
-      </div>
-    }
-
     <hlm-popover
       #notificationsPopover="brnPopover"
       align="end"
@@ -74,12 +45,12 @@
         type="button"
         hlmPopoverTrigger
         class="topbar-icon-button notifications-toggle"
-        [attr.aria-label]="'Notifications, ' + recentNotifications().length + ' recent events'"
+        [attr.aria-label]="'Notifications, ' + unreadCount() + ' unread'"
         title="Notifications"
       >
         <i class="icon icon-bell" aria-hidden="true"></i>
-        @if (recentNotifications().length > 0) {
-          <span class="notifications-toggle__count" aria-hidden="true">{{ recentNotifications().length }}</span>
+        @if (unreadCount() > 0) {
+          <span class="notifications-toggle__count" aria-hidden="true">{{ unreadCount() }}</span>
         }
       </button>
 
@@ -115,14 +86,19 @@
                 <li>
                   <a
                     [class]="'notification-item notification-item--' + item.kind"
+                    [class.notification-item--unread]="notificationReads.isUnread(item.id)"
                     [routerLink]="item.routerLink"
                     [queryParams]="item.queryParams"
-                    (click)="notificationsPopover.close()"
+                    (click)="notificationReads.markRead(item.id); notificationsPopover.close()"
                   >
                     <span class="notification-item__icon"><i [class]="'icon ' + item.icon" aria-hidden="true"></i></span>
                     <span class="notification-item__content">
                       <span class="notification-item__meta">
                         <span>{{ item.label }}</span>
+                        @if (notificationReads.isUnread(item.id)) {
+                          <span class="notification-item__unread" aria-hidden="true"></span>
+                          <span class="sr-only">Unread</span>
+                        }
                         <time [attr.datetime]="item.occurredAt" [title]="(item.occurredAt | date:'full') ?? ''">{{ item.occurredAt | date:'MMM d, HH:mm' }}</time>
                       </span>
                       <strong>{{ item.title }}</strong>
@@ -161,5 +137,33 @@
       </hlm-popover-content>
     </hlm-popover>
 
+    @if (workspaces.loading() && workspaces.workspaces().length === 0) {
+      <div
+        class="workspace-switcher workspace-switcher--loading"
+        aria-label="Loading workspace"
+      >
+        <span class="workspace-switcher__skeleton" aria-hidden="true"></span>
+        <span>Loading workspace</span>
+      </div>
+    } @else if (workspaces.current(); as current) {
+      <div class="workspace-switcher" aria-label="Current workspace">
+        <div class="workspace-switcher__control">
+          <label class="sr-only" for="workspace-select">Workspace</label>
+          <span class="workspace-switcher__select-wrap">
+            <select
+              id="workspace-select"
+              class="workspace-switcher__select"
+              [value]="current.id"
+              (change)="onWorkspaceChange($event)"
+            >
+              @for (workspace of workspaces.workspaces(); track workspace.id) {
+                <option [value]="workspace.id">{{ workspace.name }}</option>
+              }
+            </select>
+            <i class="icon icon-chevron-down" aria-hidden="true"></i>
+          </span>
+        </div>
+      </div>
+    }
   </div>
 </header>

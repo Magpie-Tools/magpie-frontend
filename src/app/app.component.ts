@@ -7,11 +7,12 @@ import { UserService } from './services/authorization/user.service';
 import {LayoutService} from './services/layout.service';
 import {TopbarComponent} from './navbar/topbar/topbar.component';
 import {LoadingComponent} from './ui-elements/loading/loading.component';
+import {NotificationReadScopeDirective} from './shared/notification-read-scope.directive';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HlmToaster, RouterOutlet, NavbarComponent, TopbarComponent, LoadingComponent],
+  imports: [HlmToaster, RouterOutlet, NavbarComponent, TopbarComponent, LoadingComponent, NotificationReadScopeDirective],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
