@@ -157,6 +157,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
       }
 
       this.sourceId.set(id);
+      this.detail.set(null);
       this.loadScrapeSourceDetail(id);
       this.proxyPage.set(1);
       this.proxySearchTerm.set('');

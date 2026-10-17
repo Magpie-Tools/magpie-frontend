@@ -15,6 +15,7 @@ export class SourceAutoTagsComponent {
   @Input() disabled = false;
   @Input() saving = false;
   @Input() forImport = false;
+  @Input() compact = false;
   @Output() tagIdsChange = new EventEmitter<number[]>();
   @Output() catalogChanged = new EventEmitter<void>();
 

@@ -49,7 +49,7 @@
 
     <div class="detail-grid">
       <section class="detail-card source-dashboard" aria-label="Source overview" [attr.aria-busy]="isLoading()">
-        @if (isLoading()) {
+        @if (isLoading() && !detail()) {
           <div class="card-loading"><app-loading></app-loading></div>
         } @else {
           <div class="overview-layout">
@@ -75,7 +75,7 @@
                   <span class="value">{{ totalProxies | number }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="label">Proxies in latest scrape</span>
+                  <span class="label">Found in latest scrape</span>
                   <span class="value">{{ detail()?.last_scrape_proxy_count != null
                     ? (detail()?.last_scrape_proxy_count | number) : "Not recorded" }}</span>
                 </div>
@@ -89,16 +89,20 @@
                     ? (detail()?.last_proxy_added_at | date: "medium") : "Never" }}</span>
                 </div>
               </div>
-              <app-source-fetch-mode class="source-fetch-settings" inputId="source-javascript"
-                [enabled]="detail()?.fetch_mode === 'browser'"
-                [disabled]="!workspaces.canOperate() || savingAutoTags()" [saving]="savingFetchMode()"
-                (enabledChange)="setRequiresJavaScript($event)" />
-              <app-source-auto-tags class="source-tag-settings"
-                [tagIds]="automaticTagIds()"
-                [disabled]="!workspaces.canOperate() || savingFetchMode()"
-                [saving]="savingAutoTags()"
-                (tagIdsChange)="setAutomaticTagIds($event)"
-                (catalogChanged)="onTagCatalogChanged()" />
+              <section class="source-settings" aria-label="Source settings">
+                <div class="source-settings__fields">
+                  <app-source-fetch-mode inputId="source-javascript" [compact]="true"
+                    [enabled]="detail()?.fetch_mode === 'browser'"
+                    [disabled]="!workspaces.canOperate() || isLoading() || savingAutoTags()" [saving]="savingFetchMode()"
+                    (enabledChange)="setRequiresJavaScript($event)" />
+                  <app-source-auto-tags [compact]="true"
+                    [tagIds]="automaticTagIds()"
+                    [disabled]="!workspaces.canOperate() || isLoading() || savingFetchMode()"
+                    [saving]="savingAutoTags()"
+                    (tagIdsChange)="setAutomaticTagIds($event)"
+                    (catalogChanged)="onTagCatalogChanged()" />
+                </div>
+              </section>
             </section>
 
             <aside
@@ -107,26 +111,8 @@
             >
               <section class="health-summary" aria-labelledby="health-summary-title">
                 <div class="insight-heading">
-                  <div>
-                    <h2 id="health-summary-title">Proxy health</h2>
-                    <p class="insight-caption">{{ totalProxies | number }} linked proxies</p>
-                  </div>
+                  <h2 id="health-summary-title" class="overview-title">Proxy health</h2>
                   <strong class="insight-score">{{ aliveRatioDisplay }}</strong>
-                </div>
-
-                <div class="health-metrics">
-                  <div class="health-metric health-metric--alive">
-                    <span>Alive</span>
-                    <strong>{{ aliveCount }}</strong>
-                  </div>
-                  <div class="health-metric health-metric--dead">
-                    <span>Dead</span>
-                    <strong>{{ deadCount }}</strong>
-                  </div>
-                  <div class="health-metric health-metric--unknown">
-                    <span>Unknown</span>
-                    <strong>{{ unknownCount }}</strong>
-                  </div>
                 </div>
 
                 <div class="health-bar" role="img" [attr.aria-label]="aliveCount + ' alive, ' + deadCount + ' dead, ' + unknownCount + ' unknown'">
@@ -146,6 +132,17 @@
                     [attr.title]="unknownCount + ' unknown'"
                   ></span>
                 </div>
+                <ul class="health-legend" aria-label="Proxy health counts">
+                  <li class="health-legend__item health-legend__item--alive">
+                    <span>Alive</span><strong>{{ aliveCount | number }}</strong>
+                  </li>
+                  <li class="health-legend__item health-legend__item--dead">
+                    <span>Dead</span><strong>{{ deadCount | number }}</strong>
+                  </li>
+                  <li class="health-legend__item health-legend__item--unknown">
+                    <span>Unknown</span><strong>{{ unknownCount | number }}</strong>
+                  </li>
+                </ul>
               </section>
 
               <section
@@ -153,24 +150,23 @@
                 aria-labelledby="reputation-summary-title"
               >
                 <div class="reputation-summary__heading">
-                  <span>
-                    <h2 id="reputation-summary-title" class="overview-title">Average reputation</h2>
+                  <h2 id="reputation-summary-title" class="overview-title">Average reputation</h2>
+                  <div class="reputation-summary__score">
                     @if (averageReputationScore !== null) {
                       <strong>{{ averageReputationDisplay }}<em>/100</em></strong>
                     } @else {
                       <strong>—</strong>
                     }
-                  </span>
-
-                  <span [ngClass]="reputationBadgeClass(averageReputationLabel)">
-                    {{ averageReputationLabel | titlecase }}
-                  </span>
+                    <span [ngClass]="reputationBadgeClass(averageReputationLabel)">
+                      {{ averageReputationLabel | titlecase }}
+                    </span>
+                  </div>
                 </div>
 
                 @if (totalProxies === 0) {
                   <p>No proxies are linked to this source yet.</p>
                 } @else {
-                  <div class="reputation-list">
+                  <div class="reputation-list" role="group" aria-label="Reputation breakdown">
                     <div class="reputation-row">
                       <span>Good</span>
                       <span class="reputation-meter">
@@ -179,7 +175,7 @@
                           [style.width.%]="reputationPercent('good')"
                         ></span>
                       </span>
-                      <strong>{{ reputationBreakdown.good }}</strong>
+                      <strong>{{ reputationBreakdown.good | number }}</strong>
                     </div>
                     <div class="reputation-row">
                       <span>Neutral</span>
@@ -189,7 +185,7 @@
                           [style.width.%]="reputationPercent('neutral')"
                         ></span>
                       </span>
-                      <strong>{{ reputationBreakdown.neutral }}</strong>
+                      <strong>{{ reputationBreakdown.neutral | number }}</strong>
                     </div>
                     <div class="reputation-row">
                       <span>Poor</span>
@@ -199,7 +195,7 @@
                           [style.width.%]="reputationPercent('poor')"
                         ></span>
                       </span>
-                      <strong>{{ reputationBreakdown.poor }}</strong>
+                      <strong>{{ reputationBreakdown.poor | number }}</strong>
                     </div>
                     <div class="reputation-row">
                       <span>Unknown</span>
@@ -209,7 +205,7 @@
                           [style.width.%]="reputationPercent('unknown')"
                         ></span>
                       </span>
-                      <strong>{{ reputationBreakdown.unknown }}</strong>
+                      <strong>{{ reputationBreakdown.unknown | number }}</strong>
                     </div>
                   </div>
                 }

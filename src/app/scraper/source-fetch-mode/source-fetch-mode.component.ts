@@ -6,7 +6,7 @@ import {FormsModule} from '@angular/forms';
   selector: 'app-source-fetch-mode',
   imports: [HlmSwitch, FormsModule],
   template: `
-    <div class="fetch-mode" [attr.aria-busy]="saving()">
+    <div class="fetch-mode" [class.fetch-mode--compact]="compact()" [attr.aria-busy]="saving()">
       <label class="fetch-mode__copy" [for]="inputId()">
         <span class="fetch-mode__icon"><i class="icon icon-code" aria-hidden="true"></i></span>
         <span>
@@ -29,6 +29,7 @@ export class SourceFetchModeComponent {
   readonly disabled = input(false);
   readonly saving = input(false);
   readonly hint = input('');
+  readonly compact = input(false);
   readonly enabledChange = output<boolean>();
 
   private readonly toggle = viewChild(HlmSwitch);

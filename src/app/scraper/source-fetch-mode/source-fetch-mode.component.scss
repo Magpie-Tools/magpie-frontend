@@ -54,3 +54,13 @@
   .fetch-mode { gap: .65rem; padding: .75rem; }
   .fetch-mode__icon, .fetch-mode__state { display: none; }
 }
+
+.fetch-mode.fetch-mode--compact {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+
+  .fetch-mode__icon { display: none; }
+}
