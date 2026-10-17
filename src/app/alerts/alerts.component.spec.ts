@@ -392,10 +392,10 @@ describe('AlertsComponent', () => {
     expect(component.activeSection()).toBe('rules'); expect(component.rule.name).toBe('');
   });
 
-  it('derives the open incident summary from rules when viewing older history', () => {
+  it('derives the open incident count from rules when viewing older history', () => {
     component.page.set({...page, rules: [{...rule, active_incident_id: 9}, {...rule, id: 3, enabled: false, active_incident_id: null}], incidents: []});
     component.cursor = 99; fixture.detectChanges();
-    expect(component.enabledRuleCount()).toBe(1); expect(component.openIncidentCount()).toBe(1);
+    expect(component.openIncidentCount()).toBe(1);
     expect(component.statusTone({...rule, status: 'healthy', active_incident_id: 9})).toBe('danger');
   });
 

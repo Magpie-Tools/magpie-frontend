@@ -10,13 +10,6 @@
         <h1>Alerts</h1>
       </div>
       <div class="context-actions">
-        @if (loaded()) {
-          <div class="context-metrics" aria-label="Alert summary">
-            <div><strong>{{ enabledRuleCount() }}</strong><span>enabled rule{{ enabledRuleCount() === 1 ? '' : 's' }}</span></div>
-            <span class="metric-divider" aria-hidden="true"></span>
-            <div><strong [class.has-incidents]="openIncidentCount() > 0">{{ openIncidentCount() }}</strong><span>open incident{{ openIncidentCount() === 1 ? '' : 's' }}</span></div>
-          </div>
-        }
         <button type="button" class="button button--quiet" (click)="refresh()" [disabled]="loading() || busy()">
           <i class="icon icon-refresh-cw" [class.is-spinning]="loading()" aria-hidden="true"></i>
           {{ loading() && loaded() ? 'Refreshing…' : 'Refresh' }}
@@ -83,6 +76,9 @@
                   <i [class]="'icon ' + section.icon" aria-hidden="true"></i>{{ section.label }}
                   @if (section.id === 'rules') { <span class="tab-count">{{ page().rules.length }}</span> }
                   @if (section.id === 'destinations') { <span class="tab-count">{{ page().destinations.length }}</span> }
+                  @if (section.id === 'history') {
+                    <span class="tab-count tab-count--incidents" [class.has-incidents]="openIncidentCount() > 0">{{ openIncidentCount() }}<span class="sr-only"> open incident{{ openIncidentCount() === 1 ? '' : 's' }}</span></span>
+                  }
                 </button>
               }
             </hlm-tabs-list>

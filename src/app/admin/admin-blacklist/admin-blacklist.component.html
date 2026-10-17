@@ -129,10 +129,6 @@
             <h2>IP blacklist sources</h2>
             <p>Add plain-text feeds containing IPv4, IPv6, or CIDR entries.</p>
           </div>
-          <span class="card-count"
-            >{{ configuredSourceCount }}
-            {{ configuredSourceCount === 1 ? "source" : "sources" }}</span
-          >
         </div>
 
         <div formArrayName="blacklist_sources" class="entry-editor">
@@ -188,10 +184,6 @@
               request.
             </p>
           </div>
-          <span class="card-count"
-            >{{ blockedSiteCount }}
-            {{ blockedSiteCount === 1 ? "website" : "websites" }}</span
-          >
         </div>
 
         <div formArrayName="website_blacklist" class="entry-editor">

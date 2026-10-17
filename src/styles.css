@@ -202,14 +202,7 @@
 
 @layer components {
   .theme-card {
-    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
-    will-change: border-color, box-shadow, transform;
-}
-
-  .theme-card:hover {
-    border-color: var(--theme-primary-500);
-    box-shadow: 0 16px 32px -18px var(--theme-primary-shadow);
-    transform: translateY(-2px);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
   .theme-card--active {
@@ -217,11 +210,9 @@
     box-shadow: 0 16px 32px -18px var(--theme-primary-shadow);
 }
 
-  .theme-card.theme-card--disabled,
-  .theme-card.theme-card--disabled:hover {
+  .theme-card.theme-card--disabled {
     border-color: inherit;
     box-shadow: none;
-    transform: none;
 }
 
   .theme-focus {

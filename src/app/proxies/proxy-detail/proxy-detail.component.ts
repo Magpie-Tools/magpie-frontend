@@ -176,36 +176,36 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
         label: 'Talos Intelligence',
         url: `https://talosintelligence.com/reputation_center/lookup?search=${encodedIp}`,
         // icon: '',
-        icon: 'https://talosintelligence.com/favicon.ico',
+        icon: 'https://www.google.com/s2/favicons?domain=talosintelligence.com',
       },
       {
         label: 'AbuseIPDB',
         url: `https://www.abuseipdb.com/check/${encodedIp}`,
-        icon: 'https://www.abuseipdb.com/favicon.ico',
+        icon: 'https://www.google.com/s2/favicons?domain=abuseipdb.com',
       },
       {
         label: 'Scamalytics',
         url: `https://scamalytics.com/ip/${encodedIp}`,
         // icon: '',
-        icon: 'https://scamalytics.com/wp-content/uploads/2016/06/icon_128.png',
+        icon: 'https://www.google.com/s2/favicons?domain=scamalytics.com',
       },
       {
         label: 'Shodan',
         url: `https://www.shodan.io/host/${encodedIp}`,
         // icon: '',
-        icon: 'https://www.shodan.io/static/img/favicon-60c1b1cd.png',
+        icon: 'https://www.google.com/s2/favicons?domain=shodan.io',
       },
       {
         label: 'IPQS',
         url: `https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/${encodedIp}`,
         // icon: ''
-        icon: 'https://www.ipqualityscore.com/favicon.ico'
+        icon: 'https://www.google.com/s2/favicons?domain=ipqualityscore.com'
       },
       {
         label: 'Censys',
         url: `https://platform.censys.io/hosts/${encodedIp}`,
         // icon: ''
-        icon: 'https://platform.censys.io/favicon.ico'
+        icon: 'https://www.google.com/s2/favicons?domain=censys.io'
       }
     ];
   }

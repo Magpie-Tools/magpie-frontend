@@ -40,7 +40,6 @@ export class AlertsComponent {
   readonly loaded = signal(false);
   readonly activeSection = signal('rules');
   readonly highlightedIncidentId = this.notificationFocus.highlightedId;
-  readonly enabledRuleCount = computed(() => this.page().rules.filter(rule => rule.enabled).length);
   readonly openIncidentCount = computed(() => new Set(this.page().rules.flatMap(rule => rule.active_incident_id ? [rule.active_incident_id] : [])).size);
   readonly destinationsById = computed(() => new Map(this.page().destinations.map(destination => [destination.id, destination])));
   readonly sections = [

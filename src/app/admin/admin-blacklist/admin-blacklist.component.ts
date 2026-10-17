@@ -93,14 +93,6 @@ export class AdminBlacklistComponent implements OnInit, OnDestroy {
     return parts.length ? parts.join(' ') : 'Continuous';
   }
 
-  get configuredSourceCount(): number {
-    return this.sources.controls.filter(control => control.value.trim().length > 0).length;
-  }
-
-  get blockedSiteCount(): number {
-    return this.blockedSites.controls.filter(control => control.value.trim().length > 0).length;
-  }
-
   addSource(): void {
     this.sources.push(this.createSourceControl());
     this.form.markAsDirty();

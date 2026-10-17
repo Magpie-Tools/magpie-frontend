@@ -64,22 +64,8 @@ h1, h2, h3, p, dl, dd { margin: 0; }
 .metric-icon, .channel-icon { width: 2.15rem; height: 2.15rem; border-radius: 0.7rem; font-size: 0.8rem; }
 
 .context-actions { flex: 0 0 auto; gap: 0.6rem; }
-.context-metrics {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.8rem;
-  background: rgba(8, 8, 10, 0.22);
-
-  > div { display: flex; align-items: baseline; gap: 0.35rem; }
-  strong { color: rgba(255, 255, 255, 0.88); font-size: 0.78rem; font-weight: 620; font-variant-numeric: tabular-nums; }
-  strong.has-incidents { color: #efa7a7; }
-  span:not(.metric-divider) { color: var(--card-muted); font-size: 0.62rem; white-space: nowrap; }
-}
-.metric-divider { width: 1px; height: 0.9rem; background: rgba(255, 255, 255, 0.13); }
 .tab-count { min-width: 1rem; padding: 0.12rem 0.25rem; border-radius: 0.3rem; background: rgba(255, 255, 255, 0.07); font-size: 0.6rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.tab-count--incidents.has-incidents { color: #efa7a7; }
 .tab-panel { margin-top: 1rem; }
 .tab-panel[hidden] { display: none; }
 
@@ -263,9 +249,6 @@ input[type=checkbox]:disabled { cursor: not-allowed; }
   .alerts-stage { padding: 0.8rem; }
   .alerts-context { padding-inline: 0; }
   .context-actions { width: 100%; }
-  .context-metrics { flex: 1; justify-content: space-between; gap: 0.45rem; padding-inline: 0.6rem; }
-  .context-metrics > div { gap: 0.25rem; }
-  .context-metrics span:not(.metric-divider) { font-size: 0.57rem; }
   .policy-note summary { align-items: flex-start; flex-direction: column; gap: 0.3rem; }
   .policy-note summary > span:first-child { align-items: flex-start; }
   .policy-note summary > span:first-child i { margin-top: 0.25rem; }

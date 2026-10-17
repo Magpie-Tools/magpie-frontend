@@ -59,7 +59,7 @@
   .alerts-tabs [data-slot="tabs-list"] { display: grid; width: 100%; height: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .alerts-tabs [data-slot="tabs-trigger"] { min-width: 0; min-height: 2.8rem; gap: 0.3rem; padding: 0.45rem 0.3rem; font-size: 0.64rem; line-height: 1.4; white-space: normal; }
   .alerts-tabs [data-slot="tabs-trigger"] .icon,
-  .alerts-tabs [data-slot="tabs-trigger"] .tab-count { display: none; }
+  .alerts-tabs [data-slot="tabs-trigger"] .tab-count:not(.tab-count--incidents) { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
