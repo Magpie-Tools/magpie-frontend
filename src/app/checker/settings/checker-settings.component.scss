@@ -786,7 +786,7 @@
 }
 .inherit-toggle { display: flex; align-items: center; gap: 0.5rem; margin: 0.35rem 0; color: var(--card-muted); font-size: 0.75rem; }
 .inherit-toggle input { accent-color: var(--theme-primary-300); }
-fieldset.checker-settings-page { min-width: 0; margin: 0; padding: 0; border: 0; }
+fieldset.checker-settings-page { min-width: 0; margin: 0; border: 0; }
 .tag-priority { display: flex; flex-direction: column; max-height: min(70dvh, 36rem); }
 .tag-priority__header { padding: 1.25rem 1.25rem 1rem; }
 .tag-priority__list { min-height: 0; overflow: auto; padding: 0 1rem 1rem; overscroll-behavior: contain; }
