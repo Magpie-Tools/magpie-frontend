@@ -38,6 +38,12 @@ describe('Inventory sidebar navigation', () => {
           init?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), {once: true});
         });
       }
+      if (path.endsWith('/alerts')) {
+        return Promise.resolve(jsonResponse({rules: [], destinations: [], incidents: [], deliveries: [], next_cursor: 0}));
+      }
+      if (path.endsWith('/releases')) {
+        return Promise.resolve(jsonResponse({releases: [], build: {buildVersion: 'dev', builtAt: 'unknown'}}));
+      }
       return Promise.resolve(jsonResponse(path.endsWith('/getScrapingSourcesCount') ? 0
         : path.endsWith('/respectRobots') ? {respect_robots_txt: false} : []));
     });
@@ -64,7 +70,9 @@ describe('Inventory sidebar navigation', () => {
           workspaces: signal([{id: 1, name: 'Test workspace', role: 'owner'}]),
           loading: signal(false), canOperate: () => true, load: () => of([]),
         }},
-        {provide: WorkspaceInvitationService, useValue: {pendingCount: () => 0, load: () => of([])}},
+        {provide: WorkspaceInvitationService, useValue: {
+          invitations: signal([]), pendingCount: () => 0, loading: signal(false), error: signal(null), load: () => of([]),
+        }},
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(AppComponent);

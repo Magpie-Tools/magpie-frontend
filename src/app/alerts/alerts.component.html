@@ -317,11 +317,13 @@
                 } @else {
                   <div class="incident-list">
                     @for (incident of page().incidents; track incident.id) {
-                      <article class="incident" [class.incident--open]="!incident.closed_at">
+                      <article class="incident" [id]="'alert-incident-' + incident.id" tabindex="-1"
+                        [attr.aria-labelledby]="'alert-incident-title-' + incident.id"
+                        [class.incident--open]="!incident.closed_at" [class.incident--highlighted]="highlightedIncidentId() === incident.id">
                         <span class="incident-marker" aria-hidden="true"><i [class]="!incident.closed_at ? 'icon icon-circle-alert' : incident.close_reason === 'recovered' ? 'icon icon-circle-check' : 'icon icon-sliders-horizontal'"></i></span>
                         <div class="incident-content">
                           <div class="rule-top">
-                            <div><h3>{{ incident.rule_name }}</h3><p class="scope-label">{{ incident.scope_name }}</p></div>
+                            <div><h3 [id]="'alert-incident-title-' + incident.id">{{ incident.rule_name }}</h3><p class="scope-label">{{ incident.scope_name }}</p></div>
                             <span class="badge" [class.badge--danger]="!incident.closed_at" [class.badge--healthy]="incident.close_reason === 'recovered'" [class.badge--neutral]="!!incident.closed_at && incident.close_reason !== 'recovered'"><span class="status-dot" aria-hidden="true"></span>{{ !incident.closed_at ? 'Open' : incident.close_reason === 'recovered' ? 'Recovered' : 'Configuration changed' }}</span>
                           </div>
                           <div class="incident-condition"><span>{{ metricLabel(incident.metric) }}</span><strong>{{ incident.metric === 'latency_ms' ? 'Above' : 'Below' }} {{ incident.threshold | number:'1.0-2' }}{{ unit(incident.metric) }}</strong></div>

@@ -34,22 +34,6 @@
   </div>
 
   <div class="topbar-actions">
-    <a
-      routerLink="/invitations"
-      class="topbar-icon-button invitation-link"
-      [attr.aria-label]="
-        'Workspace invitations, ' + invitations.pendingCount() + ' pending'
-      "
-      title="Workspace invitations"
-    >
-      <i class="icon icon-inbox" aria-hidden="true"></i>
-      @if (invitations.pendingCount() > 0) {
-        <span class="invitation-link__count">{{
-          invitations.pendingCount() > 99 ? "99+" : invitations.pendingCount()
-        }}</span>
-      }
-    </a>
-
     @if (workspaces.loading() && workspaces.workspaces().length === 0) {
       <div
         class="workspace-switcher workspace-switcher--loading"
@@ -78,5 +62,104 @@
         </div>
       </div>
     }
+
+    <hlm-popover
+      #notificationsPopover="brnPopover"
+      align="end"
+      [sideOffset]="12"
+      [state]="notificationsState()"
+      (stateChanged)="onNotificationsStateChange($event)"
+    >
+      <button
+        type="button"
+        hlmPopoverTrigger
+        class="topbar-icon-button notifications-toggle"
+        [attr.aria-label]="'Notifications, ' + recentNotifications().length + ' recent events'"
+        title="Notifications"
+      >
+        <i class="icon icon-bell" aria-hidden="true"></i>
+        @if (recentNotifications().length > 0) {
+          <span class="notifications-toggle__count" aria-hidden="true">{{ recentNotifications().length }}</span>
+        }
+      </button>
+
+      <hlm-popover-content *hlmPopoverPortal class="notification-panel">
+        <div class="notification-panel__header" hlmPopoverHeader>
+          <div>
+            <h2 hlmPopoverTitle>Notifications</h2>
+          </div>
+          <button
+            type="button"
+            class="notification-panel__refresh"
+            aria-label="Refresh notifications"
+            title="Refresh notifications"
+            [disabled]="notificationsLoading()"
+            (click)="refreshNotifications()"
+          >
+            <i class="icon icon-refresh-cw" [class.icon-spin]="notificationsLoading()" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        @if (unavailableSources()) {
+          <div class="notification-panel__error" role="status">
+            <i class="icon icon-triangle-alert" aria-hidden="true"></i>
+            <span>Could not load {{ unavailableSources() }}.</span>
+            <button type="button" [disabled]="notificationsLoading()" (click)="refreshNotifications()">Try again</button>
+          </div>
+        }
+
+        <div class="notification-panel__activity" [attr.aria-busy]="notificationsLoading()">
+          @if (recentNotifications().length > 0) {
+            <ul class="notification-list" aria-label="Recent notifications">
+              @for (item of recentNotifications(); track item.id) {
+                <li>
+                  <a
+                    [class]="'notification-item notification-item--' + item.kind"
+                    [routerLink]="item.routerLink"
+                    [queryParams]="item.queryParams"
+                    (click)="notificationsPopover.close()"
+                  >
+                    <span class="notification-item__icon"><i [class]="'icon ' + item.icon" aria-hidden="true"></i></span>
+                    <span class="notification-item__content">
+                      <span class="notification-item__meta">
+                        <span>{{ item.label }}</span>
+                        <time [attr.datetime]="item.occurredAt" [title]="(item.occurredAt | date:'full') ?? ''">{{ item.occurredAt | date:'MMM d, HH:mm' }}</time>
+                      </span>
+                      <strong>{{ item.title }}</strong>
+                      <span class="notification-item__description">{{ item.description }}</span>
+                    </span>
+                    <i class="icon icon-chevron-right notification-item__arrow" aria-hidden="true"></i>
+                  </a>
+                </li>
+              }
+            </ul>
+          } @else {
+            <div class="notification-panel__empty" role="status">
+              <i [class]="notificationsLoading() ? 'icon icon-loader-circle icon-spin' : 'icon icon-bell'" aria-hidden="true"></i>
+              <strong>{{ notificationsLoading() ? 'Loading notifications' : (unavailableSources() ? 'Notifications are unavailable' : 'No notifications yet') }}</strong>
+              @if (!notificationsLoading()) {
+                <span>{{ unavailableSources() ? 'Try again to load your latest activity.' : 'New invitations, alerts, and releases will appear here.' }}</span>
+              }
+            </div>
+          }
+        </div>
+
+        <footer class="notification-panel__footer">
+          <a routerLink="/invitations" class="notification-panel__invitations" (click)="notificationsPopover.close()">
+            <i class="icon icon-inbox" aria-hidden="true"></i>
+            <span>Workspace invitations</span>
+            @if (invitations.pendingCount() > 0) {
+              <span class="notification-panel__pending">{{ invitations.pendingCount() }} pending</span>
+            }
+            <i class="icon icon-chevron-right" aria-hidden="true"></i>
+          </a>
+          <div class="notification-panel__links">
+            <a routerLink="/alerts" [queryParams]="{section: 'history'}" (click)="notificationsPopover.close()">View alerts<i class="icon icon-arrow-up-right" aria-hidden="true"></i></a>
+            <a routerLink="/notifications" (click)="notificationsPopover.close()">All releases<i class="icon icon-arrow-up-right" aria-hidden="true"></i></a>
+          </div>
+        </footer>
+      </hlm-popover-content>
+    </hlm-popover>
+
   </div>
 </header>

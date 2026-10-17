@@ -8,8 +8,9 @@ import {AlertsComponent} from './alerts.component';
 import {AlertsService} from '../services/alerts.service';
 import {WorkspaceService} from '../services/workspace.service';
 import {NotificationService} from '../services/notification-service.service';
-import {AlertRotator, AlertRule, AlertsPage} from '../models/Alert';
+import {AlertIncident, AlertRotator, AlertRule, AlertsPage} from '../models/Alert';
 import {Workspace} from '../models/Workspace';
+import {provideRouter, Router} from '@angular/router';
 
 describe('AlertsComponent', () => {
   let fixture: ComponentFixture<AlertsComponent>;
@@ -21,6 +22,7 @@ describe('AlertsComponent', () => {
   let page: AlertsPage;
   const workspace = {id: 7, name: 'Production'} as Workspace;
   const rule: AlertRule = {id: 1, revision: 1, name: 'Minimum routes', rotator_id: null, metric: 'usable_routes', threshold: 50, enabled: true, destination_ids: [2], status: 'unknown', unknown_reason: 'Waiting for evaluation', last_value: null, sample_count: 0, last_evaluated_at: null, breach_since: null, recovery_since: null, active_incident_id: null};
+  const incident = (id: number): AlertIncident => ({id, rule_id: 1, rule_revision: 1, rule_name: `Incident ${id}`, scope_name: 'Production', metric: 'usable_routes', threshold: 50, opening_value: 0, closing_value: null, opened_at: '2026-10-17T09:00:00Z', closed_at: null, close_reason: ''});
 
   beforeEach(async () => {
     current = signal<Workspace | null>(workspace); canOperate = signal(true); canAdminister = signal(true);
@@ -30,11 +32,134 @@ describe('AlertsComponent', () => {
     api.saveRule.and.returnValue(of(rule)); api.deleteRule.and.returnValue(of(undefined));
     api.saveDestination.and.returnValue(of(page.destinations[0])); api.deleteDestination.and.returnValue(of(undefined)); api.retryDelivery.and.returnValue(of(undefined));
     await TestBed.configureTestingModule({animationsEnabled: true, imports: [AlertsComponent], providers: [
+      provideRouter([]),
       {provide: AlertsService, useValue: api},
       {provide: WorkspaceService, useValue: {current, canOperate, canAdminister}},
       {provide: NotificationService, useValue: jasmine.createSpyObj('NotificationService', ['showSuccess'])},
     ]}).compileComponents();
     fixture = TestBed.createComponent(AlertsComponent); component = fixture.componentInstance; fixture.detectChanges();
+  });
+
+  it('opens incident history from a notification link and keeps tab changes in the URL', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/?section=history');
+    fixture.detectChanges();
+    expect(component.activeSection()).toBe('history');
+    current.set({id: 9, name: 'Development'} as Workspace);
+    fixture.detectChanges();
+    expect(component.activeSection()).toBe('history');
+    component.selectSection('alerts-rules');
+    await fixture.whenStable();
+    expect(router.url).toBe('/');
+    expect(component.activeSection()).toBe('rules');
+  });
+
+  it('waits for history data before scrolling to, focusing, and highlighting the exact incident', async () => {
+    spyOn(window, 'matchMedia').and.returnValue({matches: true} as MediaQueryList);
+    const scroll = spyOn(HTMLElement.prototype, 'scrollIntoView');
+    const request = new Subject<AlertsPage>();
+    api.load.and.returnValue(request);
+    component.load();
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/?incident=9');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(scroll).not.toHaveBeenCalled();
+
+    request.next({...page, incidents: [incident(10), incident(9)]});
+    request.complete();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const target = fixture.nativeElement.querySelector('#alert-incident-9') as HTMLElement;
+    expect(scroll).toHaveBeenCalledOnceWith({behavior: 'auto', block: 'center', inline: 'nearest'});
+    expect(scroll.calls.mostRecent().object).toBe(target);
+    expect(document.activeElement).toBe(target);
+    expect(target.classList).toContain('incident--highlighted');
+    expect(fixture.nativeElement.querySelector('#alert-incident-10').classList).not.toContain('incident--highlighted');
+    expect(router.url).toBe('/?section=history');
+  });
+
+  it('replays the highlight for another click and does not replay it on background refresh', async () => {
+    spyOn(window, 'matchMedia').and.returnValue({matches: false} as MediaQueryList);
+    const scroll = spyOn(HTMLElement.prototype, 'scrollIntoView');
+    page = {...page, incidents: [incident(9)]};
+    component.load();
+    const router = TestBed.inject(Router);
+    for (let click = 0; click < 2; click++) {
+      await router.navigateByUrl('/?section=history&incident=9');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.highlightedIncidentId()).toBe(9);
+      expect(scroll.calls.count()).toBe(click + 1);
+    }
+    expect(scroll).toHaveBeenCalledWith(jasmine.objectContaining({behavior: 'smooth'}));
+    component.load(0, true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(scroll.calls.count()).toBe(2);
+    component.selectSection('alerts-rules');
+    await fixture.whenStable();
+    expect(component.highlightedIncidentId()).toBeNull();
+  });
+
+  it('returns from an older history page to find the notification incident', async () => {
+    const scroll = spyOn(HTMLElement.prototype, 'scrollIntoView');
+    api.load.and.returnValue(of({...page, incidents: [incident(8)]}));
+    component.load(50);
+    api.load.and.returnValue(of({...page, incidents: [incident(101)]}));
+    await TestBed.inject(Router).navigateByUrl('/?section=history&incident=101');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(api.load).toHaveBeenCalledWith(0);
+    expect(component.cursor).toBe(0);
+    expect(scroll.calls.mostRecent().object).toBe(fixture.nativeElement.querySelector('#alert-incident-101'));
+  });
+
+  it('finds an incident that moved to an older page since the notification loaded', async () => {
+    const scroll = spyOn(HTMLElement.prototype, 'scrollIntoView');
+    api.load.and.returnValues(
+      of({...page, incidents: [incident(100)], next_cursor: 50}),
+      of({...page, incidents: [incident(9)]}),
+    );
+    await TestBed.inject(Router).navigateByUrl('/?section=history&incident=9');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(api.load).toHaveBeenCalledWith(10);
+    expect(component.cursor).toBe(10);
+    expect(scroll.calls.mostRecent().object).toBe(fixture.nativeElement.querySelector('#alert-incident-9'));
+  });
+
+  it('does not highlight another incident when a link is invalid or no longer available', async () => {
+    const scroll = spyOn(HTMLElement.prototype, 'scrollIntoView');
+    page = {...page, incidents: [incident(10)]};
+    component.load();
+    const router = TestBed.inject(Router);
+    for (const id of ['invalid', '-1', '1.5', '9007199254740992', '9']) {
+      await router.navigateByUrl('/?section=history&incident=' + id);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.highlightedIncidentId()).toBeNull();
+    }
+    expect(scroll).not.toHaveBeenCalled();
+  });
+
+  it('cancels a pending incident highlight when the workspace changes', async () => {
+    const scroll = spyOn(HTMLElement.prototype, 'scrollIntoView');
+    const oldRequest = new Subject<AlertsPage>();
+    api.load.and.returnValue(oldRequest);
+    component.load();
+    await TestBed.inject(Router).navigateByUrl('/?section=history&incident=9');
+    api.load.and.returnValue(of({...page, incidents: [incident(9)]}));
+    current.set({id: 8, name: 'Development'} as Workspace);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    oldRequest.next({...page, incidents: [incident(9)]});
+    oldRequest.complete();
+    expect(component.highlightedIncidentId()).toBeNull();
+    expect(scroll).not.toHaveBeenCalled();
   });
 
   for (const progress of [0.35, 1]) {

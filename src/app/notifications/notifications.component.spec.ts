@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { NotificationsComponent } from './notifications.component';
 import { ReleaseFeed, ReleaseNote, UpdateNotificationService } from '../services/update-notification.service';
+import {provideRouter, Router} from '@angular/router';
 
 describe('NotificationsComponent', () => {
   let component: NotificationsComponent;
@@ -33,7 +34,7 @@ describe('NotificationsComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [NotificationsComponent],
-      providers: [{ provide: UpdateNotificationService, useValue: updatesMock }]
+      providers: [provideRouter([]), { provide: UpdateNotificationService, useValue: updatesMock }]
     })
     .compileComponents();
 
@@ -89,5 +90,19 @@ describe('NotificationsComponent', () => {
     expect(component.selectedRelease()).toBe(release);
     expect(component.selectedReleaseMarkdown()).toContain('<h2>Improved</h2>');
     expect(component.selectedReleaseMarkdown()).toContain('<li>Reduced queue overhead</li>');
+  });
+
+  it('opens the release linked by a notification and clears the link when closed', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/?release=42');
+    fixture.detectChanges();
+    expect(component.selectedRelease()).toEqual(release);
+    expect(component.releaseDialogVisible()).toBeTrue();
+    component.onReleaseDialogVisibleChange(false);
+    await fixture.whenStable();
+    expect(router.url).toBe('/');
+    expect(component.selectedRelease()).toBeNull();
+    await router.navigateByUrl('/?release=42');
+    expect(component.releaseDialogVisible()).toBeTrue();
   });
 });

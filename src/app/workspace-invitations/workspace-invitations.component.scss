@@ -1,3 +1,5 @@
+@use '../shared/notification-highlight' as notification;
+
 :host {
   display: block;
   color: #f7f5f7;
@@ -91,6 +93,12 @@ dl { margin: 0; }
 .invitation-row + .invitation-row { margin-top: 0.65rem; }
 .invitation-row:hover,
 .invitation-row:focus-within { border-color: rgba(var(--theme-primary-300-rgb), 0.24); background: rgba(var(--theme-primary-500-rgb), 0.04); }
+.invitation-row { scroll-margin-block: 1.5rem; outline: none; }
+.invitation-row.invitation-row--highlighted { @include notification.glow; }
+
+@media (prefers-reduced-motion: reduce) {
+  .invitation-row { transition: none; }
+}
 
 .invitation-identity { display: flex; min-width: 0; align-items: center; gap: 0.7rem; }
 .workspace-avatar { display: inline-flex; width: 2.5rem; height: 2.5rem; flex: 0 0 auto; align-items: center; justify-content: center; border: 1px solid rgba(var(--theme-primary-300-rgb), 0.22); border-radius: 0.78rem; background: linear-gradient(145deg, rgba(var(--theme-primary-500-rgb), 0.2), rgba(113, 76, 105, 0.28)); color: var(--theme-primary-200); font-size: 0.82rem; font-weight: 620; }

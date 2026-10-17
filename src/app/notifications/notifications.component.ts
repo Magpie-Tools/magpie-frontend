@@ -1,7 +1,9 @@
 import {DialogComponent} from '../shared/ui/dialog.component';
 import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -110,13 +112,22 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   });
   private archiveScrollContext?: gsap.Context;
   private archivePinFrame?: number;
+  private requestedReleaseId: number | null = null;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
     private updates: UpdateNotificationService,
-    private elementRef: ElementRef<HTMLElement>
+    private elementRef: ElementRef<HTMLElement>,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      this.requestedReleaseId = Number(params.get('release')) || null;
+      if (this.requestedReleaseId) this.openRequestedRelease();
+      else this.onReleaseDialogVisibleChange(false);
+    });
     this.loadReleases();
   }
 
@@ -150,14 +161,28 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   onReleaseDialogVisibleChange(visible: boolean): void {
     this.releaseDialogVisible.set(visible);
     if (!visible) {
+      this.requestedReleaseId = null;
       this.selectedRelease.set(null);
+      if (this.route.snapshot.queryParamMap.has('release')) {
+        void this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {release: null},
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+      }
     }
+  }
+
+  private openRequestedRelease(): void {
+    const release = this.allReleases().find(candidate => candidate.id === this.requestedReleaseId);
+    if (release) this.openReleaseDialog(release);
   }
 
   private loadReleases(): void {
     this.status.set({ loading: true, error: null });
 
-    this.updates.fetchReleaseFeed().subscribe({
+    this.updates.fetchReleaseFeed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (feed) => {
         this.newReleases.set(feed.newSinceLastSeen);
         this.allReleases.set(feed.releases);
@@ -165,6 +190,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this.latestTag.set(feed.latestTag);
         this.backendBuild.set(feed.backendBuild);
         this.status.set({ loading: false, error: null });
+        this.openRequestedRelease();
         this.scheduleArchivePin();
       },
       error: (err: Error) => {

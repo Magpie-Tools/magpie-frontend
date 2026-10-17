@@ -1,0 +1,19 @@
+@keyframes notification-target-glow {
+  0%, 20% {
+    border-color: var(--theme-primary-300);
+    background-color: rgba(var(--theme-primary-500-rgb), 0.13);
+    box-shadow: 0 0 0 2px rgba(var(--theme-primary-500-rgb), 0.4), 0 0 1.8rem rgba(var(--theme-primary-500-rgb), 0.3);
+  }
+  100% { box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
+}
+
+@mixin glow {
+  animation: notification-target-glow 3s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    border-color: var(--theme-primary-300);
+    background-color: rgba(var(--theme-primary-500-rgb), 0.13);
+    box-shadow: 0 0 0 2px rgba(var(--theme-primary-500-rgb), 0.4);
+  }
+}

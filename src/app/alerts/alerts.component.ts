@@ -1,7 +1,8 @@
 import {CommonModule} from '@angular/common';
-import {afterNextRender, Component, computed, DestroyRef, effect, ElementRef, Injector, signal, untracked} from '@angular/core';
+import {afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, signal, untracked} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {ActivatedRoute, Router} from '@angular/router';
 import {BrnHoverCardImports} from '@spartan-ng/brain/hover-card';
 import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
@@ -14,6 +15,7 @@ import {NotificationService} from '../services/notification-service.service';
 import {SelectComponent} from '../shared/ui/select.component';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
 import {RevealGroupDirective} from '../shared/reveal-group.directive';
+import {NotificationFocusService, parseNotificationTargetId} from '../shared/notification-focus.service';
 
 const emptyPage = (): AlertsPage => ({rules: [], destinations: [], incidents: [], deliveries: [], next_cursor: 0});
 const emptyRule = () => ({name: '', rotator_id: null as number | null, metric: 'usable_routes' as AlertMetric, threshold: null as number | null, enabled: true, destination_ids: [] as number[]});
@@ -21,10 +23,12 @@ const emptyDestination = () => ({name: '', kind: 'email' as AlertChannel, enable
 
 @Component({
   selector: 'app-alerts', standalone: true,
+  providers: [NotificationFocusService],
   imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, VisibleRowsDirective, RevealGroupDirective],
   templateUrl: './alerts.component.html', styleUrl: './alerts.component.scss',
 })
 export class AlertsComponent {
+  private readonly notificationFocus = inject(NotificationFocusService);
   readonly page = signal<AlertsPage>(emptyPage());
   readonly rotators = signal<AlertRotator[]>([]);
   readonly rotatorsLoading = signal(false);
@@ -35,6 +39,7 @@ export class AlertsComponent {
   readonly error = signal('');
   readonly loaded = signal(false);
   readonly activeSection = signal('rules');
+  readonly highlightedIncidentId = this.notificationFocus.highlightedId;
   readonly enabledRuleCount = computed(() => this.page().rules.filter(rule => rule.enabled).length);
   readonly openIncidentCount = computed(() => new Set(this.page().rules.flatMap(rule => rule.active_incident_id ? [rule.active_incident_id] : [])).size);
   readonly destinationsById = computed(() => new Map(this.page().destinations.map(destination => [destination.id, destination])));
@@ -61,21 +66,43 @@ export class AlertsComponent {
   private actionVersion = 0;
   private pageRequest?: Subscription;
   private rotatorsRequest?: Subscription;
+  private requestedIncidentId: number | null = null;
+  private requestedIncidentWorkspaceId?: number;
 
   constructor(private readonly api: AlertsService, public readonly workspace: WorkspaceService,
               private readonly notification: NotificationService, private readonly destroyRef: DestroyRef,
-              private readonly host: ElementRef<HTMLElement>, private readonly injector: Injector) {
+              private readonly host: ElementRef<HTMLElement>, private readonly injector: Injector,
+              private readonly route: ActivatedRoute, private readonly router: Router) {
     effect(() => {
       const workspaceId = workspace.current()?.id;
       untracked(() => {
+        this.notificationFocus.clear();
         this.pageRequest?.unsubscribe(); this.rotatorsRequest?.unsubscribe();
         this.requestVersion++; this.rotatorsVersion++; this.actionVersion++; this.page.set(emptyPage()); this.rotators.set([]);
         this.rotatorsLoading.set(false); this.rotatorsLoaded.set(false); this.rotatorsError.set(false);
         this.loading.set(!!workspaceId);
-        this.loaded.set(false); this.busy.set(false); this.error.set(''); this.cursor = 0; this.activeSection.set('rules');
+        this.loaded.set(false); this.busy.set(false); this.error.set(''); this.cursor = 0;
+        this.activeSection.set(this.requestedIncidentId ? 'history' : this.sectionFromRoute(this.route.snapshot.queryParamMap.get('section')));
         this.cancelRule(); this.cancelDestination(); this.confirmDelete.set(null);
         if (workspaceId) { this.load(); this.loadRotators(); }
       });
+    });
+    this.route.queryParamMap.pipe(takeUntilDestroyed(destroyRef)).subscribe(params => {
+      const id = parseNotificationTargetId(params.get('incident'));
+      this.requestedIncidentId = id;
+      this.notificationFocus.cancelPending();
+      this.activeSection.set(this.requestedIncidentId ? 'history' : this.sectionFromRoute(params.get('section')));
+      if (this.requestedIncidentId) {
+        this.notificationFocus.clear();
+        this.requestedIncidentWorkspaceId = this.workspace.current()?.id;
+        if (this.cursor || (this.loaded() && !this.loading() && !this.page().incidents.some(incident => incident.id === id))) {
+          this.load();
+        } else {
+          this.focusRequestedIncident();
+        }
+      } else if (this.activeSection() !== 'history') {
+        this.notificationFocus.clear();
+      }
     });
     timer(60_000, 60_000).pipe(takeUntilDestroyed(destroyRef)).subscribe(() => {
       if (!this.busy() && !this.loading() && this.cursor === 0 && this.loaded()) this.load(0, true);
@@ -93,6 +120,7 @@ export class AlertsComponent {
       next: page => {
         if (version !== this.requestVersion || workspaceId !== this.workspace.current()?.id) return;
         this.page.set(page); this.loaded.set(true); this.loading.set(false);
+        this.focusRequestedIncident();
       },
       error: err => {
         if (version !== this.requestVersion || workspaceId !== this.workspace.current()?.id) return;
@@ -103,7 +131,52 @@ export class AlertsComponent {
   refresh(): void { this.load(); this.loadRotators(); }
   selectSection(tab: string): void {
     const section = this.sections.find(section => 'alerts-' + section.id === tab);
-    if (section) this.activeSection.set(section.id);
+    if (section) {
+      this.activeSection.set(section.id);
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {section: section.id === 'rules' ? null : section.id, incident: null},
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
+  }
+  private sectionFromRoute(section: string | null): string {
+    return this.sections.some(candidate => candidate.id === section) ? section! : 'rules';
+  }
+  private focusRequestedIncident(): void {
+    const id = this.requestedIncidentId;
+    if (!id || !this.loaded() || this.loading() || this.error() || this.activeSection() !== 'history') return;
+    const workspaceId = this.workspace.current()?.id;
+    if (this.requestedIncidentWorkspaceId !== undefined && this.requestedIncidentWorkspaceId !== workspaceId) {
+      this.consumeIncidentLink(id);
+      return;
+    }
+    const version = this.requestVersion;
+    this.notificationFocus.schedule({
+      id,
+      selector: `#alert-incident-${id}`,
+      isCurrent: () => this.requestedIncidentId === id && this.requestVersion === version && this.workspace.current()?.id === workspaceId && this.activeSection() === 'history',
+      onMissing: () => {
+        const next = this.page().next_cursor;
+        // The exclusive history cursor can jump straight to this incident.
+        if (next && id < next && this.cursor !== id + 1) this.load(id + 1);
+        else this.consumeIncidentLink(id);
+      },
+      onFocused: () => this.consumeIncidentLink(id),
+    });
+  }
+  private consumeIncidentLink(id: number): void {
+    // Let another click on the same notification replay the highlight.
+    this.requestedIncidentId = null;
+    if (this.route.snapshot.queryParamMap.get('incident') === String(id)) {
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {section: 'history', incident: null},
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
   }
   loadRotators(): void {
     const workspaceId = this.workspace.current()?.id;
