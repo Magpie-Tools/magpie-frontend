@@ -1,5 +1,5 @@
-<div class="admin-plugins-page" appRevealGroup=".admin-context, .plugin-card">
-  <main class="settings-stage">
+<main class="admin-plugins-page" aria-label="Plugins" appRevealGroup=".admin-context, .plugin-panel">
+  <div class="settings-stage">
     <header class="admin-context">
       <div class="admin-context__copy">
         <span class="context-icon"
@@ -9,93 +9,103 @@
       </div>
     </header>
 
-    <section class="plugin-grid" aria-label="Available plugins">
-      @for (plugin of plugins; track plugin.id) {
-        <article
-          class="plugin-card"
-          [class.is-disabled]="!isPluginEnabled(plugin.id)"
-          [class.needs-attention]="isPluginIncomplete(plugin.id)"
-          [hlmTooltip]="getPluginIncompleteReason(plugin.id) ?? ''"
-        >
-          <div class="plugin-card__topline">
-            <div class="plugin-card__identity">
-              <span class="plugin-logo-shell">
-                <img
-                  [src]="plugin.logo"
-                  [alt]="plugin.name + ' logo'"
-                  class="plugin-logo"
-                />
-              </span>
-              <h2 class="plugin-card__title">{{ plugin.name }}</h2>
-            </div>
-          </div>
-
-          <div class="plugin-card__copy">
-            <p>{{ plugin.description }}</p>
-          </div>
-
-          <div class="capability-list" aria-label="Plugin capabilities">
-            @for (capability of plugin.capabilities; track capability) {
-              <span
-                ><i class="icon icon-check" aria-hidden="true"></i
-                >{{ capability }}</span
-              >
-            }
-          </div>
-
-          @if (getPluginIncompleteReason(plugin.id); as incompleteReason) {
-            <div class="attention-note">
-              <i class="icon icon-circle-alert" aria-hidden="true"></i>
-              <span>{{ incompleteReason }}</span>
-            </div>
-          } @else {
-            <div class="configuration-state">
-              <i
-                [class]="
-                  isPluginConfigured(plugin.id)
-                    ? 'icon icon-lock'
-                    : 'icon icon-key'
-                "
-                aria-hidden="true"
-              ></i>
-              {{
-                isPluginConfigured(plugin.id)
-                  ? "Credentials configured"
-                  : "Credentials not configured"
-              }}
-            </div>
-          }
-
-          <footer class="plugin-card__footer">
-            <a
-              class="configure-link"
-              [routerLink]="plugin.route"
-              [attr.aria-label]="'Configure ' + plugin.name"
-            >
-              Configure plugin
-              <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
-            </a>
-
-            <label class="plugin-toggle-label" [for]="plugin.id + '-enabled'">
-              <span>Use plugin</span>
-              <hlm-switch
-                [inputId]="plugin.id + '-enabled'"
-                [ngModel]="isPluginEnabled(plugin.id)"
-                [ngModelOptions]="{ standalone: true }"
-                [disabled]="!settings() || isPluginTogglePending(plugin.id)"
-                [aria-label]="'Toggle ' + plugin.name"
-                class="plugin-switch-control"
-                (checkedChange)="togglePlugin(plugin.id, $event)"
-              />
-            </label>
-          </footer>
-        </article>
-      }
-    </section>
-
-    <p class="instant-note">
-      <i class="icon icon-bolt" aria-hidden="true"></i>Plugin switches apply
-      immediately. Open a plugin to manage its credentials and operating policy.
+    <p class="policy-note">
+      <i class="icon icon-bolt" aria-hidden="true"></i>
+      Plugin switches apply immediately. Open a plugin to manage its credentials and operating policy.
     </p>
-  </main>
-</div>
+
+    <section class="plugin-panel" aria-labelledby="plugins-title">
+      <header class="section-heading">
+        <div class="card-heading">
+          <span class="card-icon"><i class="icon icon-layout-grid" aria-hidden="true"></i></span>
+          <h2 id="plugins-title">Available plugins</h2>
+        </div>
+      </header>
+
+      <div class="plugin-list">
+        @for (plugin of plugins; track plugin.id) {
+          <article
+            class="plugin-card"
+            [attr.aria-labelledby]="plugin.id + '-title'"
+            [class.is-disabled]="!isPluginEnabled(plugin.id)"
+            [class.needs-attention]="isPluginIncomplete(plugin.id)"
+            [hlmTooltip]="getPluginIncompleteReason(plugin.id) ?? ''"
+          >
+            <div class="plugin-card__topline">
+              <div class="plugin-card__identity">
+                <span class="plugin-logo-shell">
+                  <img
+                    [src]="plugin.logo"
+                    [alt]="plugin.name + ' logo'"
+                    class="plugin-logo"
+                  />
+                </span>
+                <h3 class="plugin-card__title" [id]="plugin.id + '-title'">{{ plugin.name }}</h3>
+              </div>
+            </div>
+
+            <div class="plugin-card__copy">
+              <p>{{ plugin.description }}</p>
+            </div>
+
+            <div class="capability-list" aria-label="Plugin capabilities">
+              @for (capability of plugin.capabilities; track capability) {
+                <span
+                  ><i class="icon icon-check" aria-hidden="true"></i
+                  >{{ capability }}</span
+                >
+              }
+            </div>
+
+            @if (getPluginIncompleteReason(plugin.id); as incompleteReason) {
+              <div class="attention-note">
+                <i class="icon icon-circle-alert" aria-hidden="true"></i>
+                <span>{{ incompleteReason }}</span>
+              </div>
+            } @else {
+              <div class="configuration-state">
+                <i
+                  [class]="
+                    isPluginConfigured(plugin.id)
+                      ? 'icon icon-lock'
+                      : 'icon icon-key'
+                  "
+                  aria-hidden="true"
+                ></i>
+                {{
+                  isPluginConfigured(plugin.id)
+                    ? "Credentials configured"
+                    : "Credentials not configured"
+                }}
+              </div>
+            }
+
+            <footer class="plugin-card__footer">
+              <a
+                class="configure-link"
+                [routerLink]="plugin.route"
+                [attr.aria-label]="'Configure ' + plugin.name"
+              >
+                Configure plugin
+                <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
+              </a>
+
+              <label class="plugin-toggle-label" [for]="plugin.id + '-enabled'">
+                <span>Enable plugin</span>
+                <hlm-switch
+                  [inputId]="plugin.id + '-enabled'"
+                  [ngModel]="isPluginEnabled(plugin.id)"
+                  [ngModelOptions]="{ standalone: true }"
+                  [disabled]="!settings() || isPluginTogglePending(plugin.id)"
+                  [aria-label]="'Toggle ' + plugin.name"
+                  class="plugin-switch-control"
+                  (checkedChange)="togglePlugin(plugin.id, $event)"
+                />
+              </label>
+            </footer>
+          </article>
+        }
+      </div>
+    </section>
+  </div>
+</main>
