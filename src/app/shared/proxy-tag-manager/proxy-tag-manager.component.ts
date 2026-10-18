@@ -26,6 +26,7 @@ export class ProxyTagManagerComponent {
 
   readonly visible = signal(false);
   readonly saving = signal(false);
+  readonly deleting = signal(false);
   readonly deletingTagId = signal<number | null>(null);
   readonly editingTagId = signal<number | null>(null);
   readonly tagName = signal('');
@@ -118,7 +119,11 @@ export class ProxyTagManagerComponent {
       return;
     }
     this.saving.set(true);
-    this.tagService.delete(tag.id).pipe(finalize(() => this.saving.set(false))).subscribe({
+    this.deleting.set(true);
+    this.tagService.delete(tag.id).pipe(finalize(() => {
+      this.saving.set(false);
+      this.deleting.set(false);
+    })).subscribe({
       next: () => {
         if (this.editingTagId() === tag.id) {
           this.resetEditor();
