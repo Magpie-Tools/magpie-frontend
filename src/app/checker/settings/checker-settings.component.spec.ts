@@ -173,12 +173,11 @@ describe('CheckerSettingsComponent', () => {
   });
 
   it('toggles protocol choices through the card controls', () => {
-    expect(component.selectedProtocolCount).toBe(2);
+    expect(component.settingsForm.value.SOCKS4Protocol).toBeFalse();
 
     component.toggleProtocol('SOCKS4Protocol');
 
     expect(component.settingsForm.value.SOCKS4Protocol).toBeTrue();
-    expect(component.selectedProtocolCount).toBe(3);
     expect(component.settingsForm.dirty).toBeTrue();
   });
 
@@ -244,7 +243,7 @@ describe('CheckerSettingsComponent', () => {
     const protocolButton = fixture.nativeElement.querySelectorAll('.protocol-choice')[1] as HTMLButtonElement;
     protocolButton.click();
     await fixture.whenStable();
-    expect(component.selectedProtocolCount).toBe(2);
+    expect(component.serializeProfiles().rules[0].protocols).toEqual(['http', 'https']);
     expect(protocolButton.getAttribute('aria-pressed')).toBe('true');
     expect(fixture.nativeElement.querySelector('.save-settings-button').disabled).toBeFalse();
   });
@@ -382,7 +381,7 @@ describe('CheckerSettingsComponent with SettingsService', () => {
         }
         await fixture.whenStable();
       }
-      expect(component.selectedProtocolCount).toBe(empty ? 0 : 1);
+      expect(fixture.nativeElement.querySelectorAll('.protocol-choice.is-active').length).toBe(empty ? 0 : 1);
       const saveButton = fixture.nativeElement.querySelector('.save-settings-button') as HTMLButtonElement;
       const fieldset = fixture.nativeElement.querySelector('fieldset') as HTMLFieldSetElement;
       saveButton.click();
@@ -395,13 +394,13 @@ describe('CheckerSettingsComponent with SettingsService', () => {
 
       expect(TestBed.inject(NotificationService).showSuccess).toHaveBeenCalledWith('saved');
       expect(toasterFixture.nativeElement.textContent).toContain('saved');
-      expect(component.selectedProtocolCount).toBe(empty ? 0 : 1);
+      expect(fixture.nativeElement.querySelectorAll('.protocol-choice.is-active').length).toBe(empty ? 0 : 1);
       expect(fieldset.disabled).toBeFalse();
       const protocolButton = fixture.nativeElement.querySelector('.protocol-choice') as HTMLButtonElement;
       expect(protocolButton.matches(':disabled')).toBeFalse();
       protocolButton.click();
       await fixture.whenStable();
-      expect(component.selectedProtocolCount).toBe(empty ? 1 : 2);
+      expect(fixture.nativeElement.querySelectorAll('.protocol-choice.is-active').length).toBe(empty ? 1 : 2);
       expect(protocolButton.getAttribute('aria-pressed')).toBe('true');
       expect(component.settingsForm.dirty).toBeTrue();
       expect(saveButton.disabled).toBeFalse();

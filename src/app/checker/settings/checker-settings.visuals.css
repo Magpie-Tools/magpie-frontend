@@ -98,11 +98,6 @@
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .checker-settings-page .settings-stage .card-count {
-    grid-column: 2;
-    width: fit-content;
-  }
-
   .checker-settings-page .settings-stage .protocol-accordion {
     grid-template-columns: minmax(0, 1fr);
   }

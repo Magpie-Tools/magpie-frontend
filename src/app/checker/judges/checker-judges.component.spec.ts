@@ -99,7 +99,6 @@ describe('CheckerJudgesComponent', () => {
     expect(Array.from(host.querySelectorAll<HTMLInputElement>('input[type="url"]'), input => input.value))
       .toEqual(loadedSettings.judges.map(judge => judge.url));
     expect(host.querySelector<HTMLInputElement>('#judge-regex-1')?.value).toBe('custom');
-    expect(host.querySelector('.card-count')!.textContent).toContain('2 judges');
     expect(host.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBeTrue();
   });
 

@@ -40,9 +40,6 @@
                     Select the protocols Magpie uses to check proxies.
                   </p>
                 </div>
-                <span class="card-count"
-                  >{{ selectedProtocolCount }} active</span
-                >
               </div>
 
               <div
@@ -435,7 +432,6 @@
                     account.
                   </p>
                 </div>
-                <span class="card-count">{{ judges.length }} endpoints</span>
               </div>
               <div formArrayName="judges" class="judge-list" [appVisibleRows]="4.5">
                 @for (judge of judges.controls; track judge; let i = $index) {

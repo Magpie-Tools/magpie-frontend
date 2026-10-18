@@ -70,18 +70,6 @@ app-admin-settings-shell {
     text-transform: uppercase;
   }
 
-  .card-count {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.42rem 0.68rem;
-    border: 1px solid rgba(255, 255, 255, 0.13);
-    border-radius: 999px;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.68rem;
-    white-space: nowrap;
-  }
-
   .settings-grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -104,7 +92,7 @@ app-admin-settings-shell {
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: start;
     gap: 0.9rem;
   }
@@ -127,10 +115,6 @@ app-admin-settings-shell {
       font-size: 0.78rem;
       line-height: 1.5;
     }
-  }
-
-  .card-count {
-    align-self: center;
   }
 
   [hlmInput],
@@ -234,15 +218,6 @@ app-admin-settings-shell {
 
     .settings-card {
       border-radius: 1.05rem;
-    }
-
-    .card-heading {
-      grid-template-columns: auto minmax(0, 1fr);
-    }
-
-    .card-count {
-      width: fit-content;
-      grid-column: 2;
     }
 
     .requeue-button[hlmBtn] {

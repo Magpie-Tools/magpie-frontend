@@ -268,11 +268,6 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     return this.settingsForm.get('judges') as FormArray;
   }
 
-  get selectedProtocolCount(): number {
-    const protocols = this.settingsForm.get('protocols') as FormGroup;
-    return this.protocolOptions.filter(option => !!protocols.get(option.control)?.value).length;
-  }
-
   get checkerCadenceLabel(): string {
     return this.formatTimer('checker_timer');
   }

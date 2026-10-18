@@ -113,7 +113,6 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
   get editingDefault(): boolean { return this.selectedProfile.value === 0; }
   get profileForm(): FormGroup { return this.selectedRule ?? this.settingsForm; }
   get removeMode(): boolean { return this.selectedRule?.get('Mode')?.value === 'remove'; }
-  get selectedProtocolCount(): number { return this.protocolOptions.filter(p => this.profileForm.get(p.control)?.value).length; }
   get transportOptions() { return this.editingDefault ? this.transportProtocolOptions : [{label: 'Inherit', value: null}, ...this.transportProtocolOptions]; }
   get totalAttempts(): number { return Number(this.profileForm.get('Retries')?.value ?? this.settingsForm.get('Retries')?.value ?? 0) + 1; }
   get configuredAttemptWindow(): string {
