@@ -238,7 +238,7 @@
                       <p>@if (workspace.canAdminister()) { Add email, Slack, Discord, or a webhook to receive opening and recovery messages. } @else { An admin or owner can configure delivery for this workspace. }</p>
                     </div>
                   } @else {
-                    <div class="destination-list">
+                    <div class="destination-list" [appVisibleRows]="9.5">
                       @for (item of page().destinations; track item.id) {
                         <article class="destination-row" [class.destination-row--editing]="editingDestinationId === item.id">
                           <span class="channel-icon"><i [class]="'icon ' + channelIcon(item.kind)" aria-hidden="true"></i></span>
