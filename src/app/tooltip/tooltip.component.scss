@@ -1,10 +1,20 @@
 $iconWidth: 15px;
 
+:host {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
 .info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: rgb(171, 171, 171);
   font-size: $iconWidth;
+  line-height: 1;
   width: $iconWidth;
   height: $iconWidth;
   margin-left: 0.5rem;
-  cursor: pointer; // optional, makes it look more interactive
+  cursor: pointer;
 }

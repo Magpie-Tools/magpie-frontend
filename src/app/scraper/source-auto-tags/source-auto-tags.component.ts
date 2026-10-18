@@ -2,11 +2,12 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagSelectorComponent} from '../../shared/proxy-tag-selector/proxy-tag-selector.component';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
+import {TooltipComponent} from '../../tooltip/tooltip.component';
 
 @Component({
   selector: 'app-source-auto-tags',
   standalone: true,
-  imports: [ProxyTagSelectorComponent, ProxyTagManagerComponent],
+  imports: [ProxyTagSelectorComponent, ProxyTagManagerComponent, TooltipComponent],
   templateUrl: './source-auto-tags.component.html',
   styleUrl: './source-auto-tags.component.scss',
 })

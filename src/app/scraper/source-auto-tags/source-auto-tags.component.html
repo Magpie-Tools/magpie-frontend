@@ -1,10 +1,10 @@
 <section class="source-auto-tags" [class.source-auto-tags--compact]="compact" aria-label="Automatic source tags" [attr.aria-busy]="saving">
   <div class="source-auto-tags__copy">
     <span class="source-auto-tags__icon"><i class="icon icon-tags" aria-hidden="true"></i></span>
-    <span>
+    <div class="source-auto-tags__heading">
       <strong>Automatic tags</strong>
-      <small>Future scrapes add these tags. Existing proxy tags stay.</small>
-    </span>
+      <app-tooltip text="Future scrapes add these tags. Existing proxy tags stay." />
+    </div>
   </div>
   <div class="source-auto-tags__control">
     <app-proxy-tag-selector
