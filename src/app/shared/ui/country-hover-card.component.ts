@@ -62,7 +62,9 @@ let nextCountryMapId = 0;
                         <path [attr.d]="region.path" />
                       }
                     </g>
+                    <path class="country-hover-card__borders" [attr.d]="map.bordersPath" />
                     <path class="country-hover-card__selected" [attr.d]="map.selectedPath" />
+                    <path class="country-hover-card__selected-border" [attr.d]="map.selectedBorderPath" />
                     <g class="country-hover-card__marker"
                       [attr.transform]="'translate(' + map.marker[0] + ',' + map.marker[1] + ') scale(' + 1 / zoom() + ')'">
                       <circle class="country-hover-card__marker-ring" r="9" />

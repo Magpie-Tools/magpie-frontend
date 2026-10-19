@@ -138,14 +138,21 @@
 
 .country-hover-card__countries {
   fill: rgba(9, 12, 24, 0.55);
+}
+
+.country-hover-card__borders {
+  fill: none;
   stroke: rgba(255, 255, 255, 0.2);
   stroke-width: 0.65;
-
-  path { vector-effect: non-scaling-stroke; }
+  vector-effect: non-scaling-stroke;
 }
 
 .country-hover-card__selected {
   fill: rgba(180, 225, 255, 0.9);
+}
+
+.country-hover-card__selected-border {
+  fill: none;
   stroke: #dbf2ff;
   stroke-width: 1.1;
   vector-effect: non-scaling-stroke;

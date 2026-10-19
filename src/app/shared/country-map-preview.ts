@@ -1,8 +1,22 @@
 import {geoArea, geoCentroid, geoMercator, geoPath} from 'd3-geo';
+import type {MultiLineString} from 'geojson';
 import {CountryFeature, WORLD_FEATURES} from './world-map';
 
 export const COUNTRY_PREVIEW_WIDTH = 360;
 export const COUNTRY_PREVIEW_HEIGHT = 220;
+
+function countryBorders({geometry}: CountryFeature): MultiLineString {
+  return {
+    type: 'MultiLineString',
+    coordinates: geometry.type === 'Polygon' ? geometry.coordinates
+      : geometry.type === 'MultiPolygon' ? geometry.coordinates.flat() : [],
+  };
+}
+
+const WORLD_BORDERS: MultiLineString = {
+  type: 'MultiLineString',
+  coordinates: WORLD_FEATURES.flatMap(country => countryBorders(country).coordinates),
+};
 
 export function buildCountryMapPreview(country: CountryFeature) {
   let focus = country.geometry;
@@ -31,7 +45,10 @@ export function buildCountryMapPreview(country: CountryFeature) {
   const worldWidth = 2 * Math.PI * scale;
   return {
     countries: WORLD_FEATURES.map(feature => ({name: feature.properties.name, path: path(feature)})),
+    // Stroke the original rings as lines so projection cuts never become borders.
+    bordersPath: path(WORLD_BORDERS),
     selectedPath: country.geometry.type === 'Point' ? null : path(country),
+    selectedBorderPath: path(countryBorders(country)),
     marker,
     focusLocation: center,
     worldWidth,
