@@ -131,6 +131,22 @@ describe('ScrapeSourceDetailComponent', () => {
     expect(fixture.nativeElement.querySelector('.scrape-error').textContent).toContain('HTTP 503');
   });
 
+  it('shows the next scrape and provider delay separately from the last result', () => {
+    component.detail.update(detail => detail ? {
+      ...detail,
+      last_scrape_status: 'error',
+      last_scrape_error: 'source returned HTTP 429',
+      next_scrape_at: '2026-10-21T12:00:00Z',
+      scrape_schedule_reason: 'Provider requested a delay with Retry-After',
+    } : null);
+    fixture.detectChanges();
+    const facts = fixture.nativeElement.querySelector('.fact-list').textContent;
+    expect(facts).toContain('Next scrape');
+    expect(facts).toContain('2026');
+    expect(facts).toContain('Provider requested a delay with Retry-After');
+    expect(fixture.nativeElement.querySelector('.source-scrape-status').textContent).toContain('Scrape failed');
+  });
+
   it('uses the same typography and height for all proxy toolbar buttons', () => {
     const toolbar: HTMLElement = fixture.nativeElement.querySelector('.toolbar-actions');
     const tagButton = toolbar.querySelector('app-proxy-tag-manager > button') as HTMLButtonElement;

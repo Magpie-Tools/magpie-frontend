@@ -71,6 +71,17 @@
               }
               <div class="fact-list">
                 <div class="detail-item">
+                  <span class="label">Next scrape</span>
+                  <span class="value">{{ detail()?.next_scrape_at
+                    ? (detail()?.next_scrape_at | date: "medium") : "Pending" }}</span>
+                </div>
+                @if (detail()?.scrape_schedule_reason) {
+                  <div class="detail-item">
+                    <span class="label">Schedule</span>
+                    <span class="value">{{ detail()?.scrape_schedule_reason }}</span>
+                  </div>
+                }
+                <div class="detail-item">
                   <span class="label">Linked proxies</span>
                   <span class="value">{{ totalProxies | number }}</span>
                 </div>

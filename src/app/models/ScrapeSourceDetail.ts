@@ -14,6 +14,8 @@ export interface ScrapeSourceDetail {
   last_scrape_status?: string;
   last_scrape_error?: string;
   last_scrape_proxy_count?: number;
+  next_scrape_at?: string | null;
+  scrape_schedule_reason?: string;
   id: number;
   url: string;
   added_at: string;
