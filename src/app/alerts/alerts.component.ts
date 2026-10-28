@@ -16,6 +16,7 @@ import {SelectComponent} from '../shared/ui/select.component';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
 import {RevealGroupDirective} from '../shared/reveal-group.directive';
 import {NotificationFocusService, parseNotificationTargetId} from '../shared/notification-focus.service';
+import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
 
 const emptyPage = (): AlertsPage => ({rules: [], destinations: [], incidents: [], deliveries: [], next_cursor: 0});
 const emptyRule = () => ({name: '', rotator_id: null as number | null, metric: 'usable_routes' as AlertMetric, threshold: null as number | null, enabled: true, destination_ids: [] as number[]});
@@ -24,7 +25,7 @@ const emptyDestination = () => ({name: '', kind: 'email' as AlertChannel, enable
 @Component({
   selector: 'app-alerts', standalone: true,
   providers: [NotificationFocusService],
-  imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, VisibleRowsDirective, RevealGroupDirective],
+  imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, VisibleRowsDirective, RevealGroupDirective, PageLoadErrorComponent],
   templateUrl: './alerts.component.html', styleUrl: './alerts.component.scss',
 })
 export class AlertsComponent {
@@ -123,7 +124,11 @@ export class AlertsComponent {
       },
       error: err => {
         if (version !== this.requestVersion || workspaceId !== this.workspace.current()?.id) return;
-        this.error.set(this.errorMessage(err)); this.loading.set(false);
+        const message = this.loaded()
+          ? 'Could not refresh alerts. Showing the last loaded alert rules and incident history.'
+          : 'Alert rules and incident history are unavailable.';
+        this.error.set(`${message} ${this.errorMessage(err, 'Check the backend connection and try again.')}`);
+        this.loading.set(false);
       },
     });
   }
@@ -351,8 +356,8 @@ export class AlertsComponent {
       },
     });
   }
-  private errorMessage(err: unknown): string {
+  private errorMessage(err: unknown, fallback = 'Could not load or save alerts. Try again.'): string {
     const response = err as {error?: {error?: string; message?: string}};
-    return response?.error?.error ?? response?.error?.message ?? 'Could not load or save alerts. Try again.';
+    return response?.error?.error || response?.error?.message || fallback;
   }
 }

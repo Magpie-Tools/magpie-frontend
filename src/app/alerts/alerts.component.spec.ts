@@ -1,5 +1,6 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {signal} from '@angular/core';
+import {HttpErrorResponse} from '@angular/common/http';
 import {By} from '@angular/platform-browser';
 import {BrnHoverCard, BrnHoverCardContentService} from '@spartan-ng/brain/hover-card';
 import {of, Subject, throwError} from 'rxjs';
@@ -321,6 +322,77 @@ describe('AlertsComponent', () => {
     current.set({id: 8, name: 'Second'} as Workspace); fixture.detectChanges();
     old.next({...page, rules: [{...rule, name: 'Old workspace rule'}]}); old.complete(); fixture.detectChanges();
     expect(component.page().rules[0].name).toBe('Second workspace rule');
+  });
+
+  it('waits for alert data before claiming rules and history are available', () => {
+    const request = new Subject<AlertsPage>();
+    api.load.and.returnValue(request);
+    api.rotators.and.returnValue(throwError(() => new HttpErrorResponse({status: 0})));
+    current.set({...workspace, id: 8});
+    fixture.detectChanges();
+
+    expect(component.rotatorsError()).toBeTrue();
+    expect(component.loading()).toBeTrue();
+    expect(fixture.nativeElement.querySelector('.inline-notice--warning')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('can still be viewed');
+
+    request.next(page);
+    request.complete();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.inline-notice--warning')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Minimum routes');
+  });
+
+  for (const status of [0, 503]) {
+    it(`shows an alert load error and retries both requests after backend failure ${status}`, () => {
+      const failure = new HttpErrorResponse({status, error: status === 503 ? {error: 'Service temporarily unavailable.'} : null});
+      api.load.and.returnValue(throwError(() => failure));
+      api.rotators.and.returnValue(throwError(() => new HttpErrorResponse({status})));
+      current.set({...workspace, id: 8});
+      fixture.detectChanges();
+
+      expect(component.loaded()).toBeFalse();
+      expect(component.loading()).toBeFalse();
+      const error = fixture.nativeElement.querySelector('app-page-load-error');
+      expect(error).not.toBeNull();
+      expect(error?.textContent).toContain('Alert rules and incident history are unavailable');
+      if (status === 503) expect(error?.textContent).toContain('Service temporarily unavailable.');
+      expect(fixture.nativeElement.querySelector('.inline-notice--warning')).toBeNull();
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      expect(fixture.nativeElement.textContent).not.toContain('No alert rules yet');
+      expect(fixture.nativeElement.textContent).not.toContain('can still be viewed');
+
+      api.load.and.returnValue(of({...page, incidents: [incident(9)]}));
+      api.rotators.and.returnValue(of([]));
+      const pageLoads = api.load.calls.count();
+      const metadataLoads = api.rotators.calls.count();
+      error?.querySelector('button').click();
+      fixture.detectChanges();
+
+      expect(api.load.calls.count()).toBe(pageLoads + 1);
+      expect(api.rotators.calls.count()).toBe(metadataLoads + 1);
+      expect(component.loaded()).toBeTrue();
+      expect(fixture.nativeElement.querySelector('app-page-load-error')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.inline-notice--warning')).toBeNull();
+      expect(fixture.nativeElement.textContent).toContain('Minimum routes');
+      expect(fixture.nativeElement.querySelector('#alert-incident-9')).not.toBeNull();
+    });
+  }
+
+  it('keeps previously loaded rules and history available when the backend goes offline', () => {
+    page = {...page, incidents: [incident(9)]};
+    component.load();
+    api.load.and.returnValue(throwError(() => new HttpErrorResponse({status: 0})));
+    api.rotators.and.returnValue(throwError(() => new HttpErrorResponse({status: 0})));
+    component.refresh();
+    fixture.detectChanges();
+
+    expect(component.loaded()).toBeTrue();
+    expect(component.loading()).toBeFalse();
+    expect(fixture.nativeElement.querySelector('.inline-notice--error').textContent).toContain('Showing the last loaded alert rules and incident history');
+    expect(fixture.nativeElement.querySelector('.inline-notice--warning')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Minimum routes');
+    expect(fixture.nativeElement.querySelector('#alert-incident-9')).not.toBeNull();
   });
 
   it('shows rules and history while rotator metadata is slow or unavailable', () => {

@@ -9,7 +9,6 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 export class InventoryPageShellComponent {
   @Input() embedded = false;
   @Input() showPageHeading = true;
-  @Input() searchScope = 'Searches all pages';
   @Input() pageIcon = '';
   @Input() pageTitle = '';
   @Input() pageDescription = '';

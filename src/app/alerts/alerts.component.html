@@ -17,14 +17,14 @@
       </div>
     </header>
 
-    @if (error()) {
+    @if (error() && loaded()) {
       <div class="inline-notice inline-notice--error" role="alert">
         <i class="icon icon-circle-alert" aria-hidden="true"></i>
         <p>{{ error() }}</p>
         <button type="button" class="button button--quiet button--compact" (click)="load(cursor)" [disabled]="busy() || loading()">Retry</button>
       </div>
     }
-    @if (rotatorsError()) {
+    @if (rotatorsError() && loaded() && !error()) {
       <div class="inline-notice inline-notice--warning" role="status">
         <i class="icon icon-triangle-alert" aria-hidden="true"></i>
         <p>Rotator details are unavailable. Alert rules and incident history can still be viewed.</p>
@@ -50,6 +50,16 @@
               @for (_ of [1, 2, 3, 4]; track $index) { <hlm-skeleton class="skeleton-field" /> }
             </section>
           </div>
+        </div>
+      }
+
+      @if (error() && !loaded()) {
+        <div class="loading-stage__content" animate.enter="loading-stage__enter">
+          <app-page-load-error
+            title="Alerts could not be loaded"
+            [message]="error()"
+            (retry)="refresh()"
+          />
         </div>
       }
 

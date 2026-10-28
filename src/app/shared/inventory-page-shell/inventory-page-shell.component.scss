@@ -383,12 +383,6 @@ p { margin: 0; }
   }
 }
 
-.search-scope {
-  color: rgba(255, 255, 255, 0.34);
-  font-size: 0.59rem;
-  white-space: nowrap;
-}
-
 .inventory-card {
   overflow: hidden;
 }
@@ -491,7 +485,6 @@ p { margin: 0; }
 
   .inventory-card__heading { flex-direction: column; }
   .search-bar { grid-template-columns: auto minmax(0, 1fr) auto; }
-  .search-scope { display: none; }
 }
 
 @container inventory-page (max-width: 520px) {
