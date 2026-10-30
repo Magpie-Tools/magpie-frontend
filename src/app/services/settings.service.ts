@@ -188,9 +188,10 @@ export class SettingsService {
 
   saveGlobalSettings(formData: any): Observable<any> {
     const payload = this.transformGlobalSettings(formData);
-    this.settings = payload;
-    this.settingsSubject.next(this.settings);
-    return this.http.saveGlobalSettings(payload);
+    return this.http.saveGlobalSettings(payload).pipe(tap(() => {
+      this.settings = payload;
+      this.settingsSubject.next(this.settings);
+    }));
   }
 
   private transformGlobalSettings(formData: any): GlobalSettings {
@@ -346,7 +347,15 @@ export class SettingsService {
       last_checked_at: abuseIPDBForm.last_checked_at ?? current?.plugins?.abuseipdb?.last_checked_at ?? null,
       last_error: abuseIPDBForm.last_error ?? current?.plugins?.abuseipdb?.last_error ?? ''
     };
-    const plugins: GlobalSettings['plugins'] = { geolite, abuseipdb };
+    const ipgeoForm = formData.plugins?.ipgeolocation ?? {};
+    const ipgeolocation: NonNullable<GlobalSettings['plugins']['ipgeolocation']> = {
+      enabled: ipgeoForm.enabled ?? current?.plugins?.ipgeolocation?.enabled ?? false,
+      api_key: ipgeoForm.api_key ?? current?.plugins?.ipgeolocation?.api_key ?? '',
+      include_security: ipgeoForm.include_security ?? current?.plugins?.ipgeolocation?.include_security ?? false,
+      daily_credit_limit: ipgeoForm.daily_credit_limit ?? current?.plugins?.ipgeolocation?.daily_credit_limit ?? 300,
+      cache_hours: ipgeoForm.cache_hours ?? current?.plugins?.ipgeolocation?.cache_hours ?? 168
+    };
+    const plugins: GlobalSettings['plugins'] = { geolite, abuseipdb, ipgeolocation };
 
     /* ---------- final shape ---------- */
     return { protocols, checker, scraper, proxy_limits, plugins, blacklist_sources, blacklist_timer, website_blacklist };

@@ -96,6 +96,15 @@ describe('AdminPluginsComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('lists IPGeolocation.io and flags a missing key when enabled', () => {
+    expect(component.plugins.some(plugin => plugin.id === 'ipgeolocation')).toBeTrue();
+    component.settings.set({...defaultSettings, plugins: {...defaultSettings.plugins, ipgeolocation: {
+      enabled: true, api_key: '', include_security: false, daily_credit_limit: 300, cache_hours: 168
+    }}});
+    expect(component.getPluginIncompleteReason('ipgeolocation')).toContain('missing an API key');
+    expect(component.isPluginEnabled('ipgeolocation')).toBeTrue();
+  });
+
   it('warns when GeoLite is enabled without a MaxMind license key', () => {
     expect(component.isPluginIncomplete('geolite')).toBeTrue();
     expect(component.getPluginIncompleteReason('geolite')).toBe('GeoLite is enabled but missing a MaxMind license key.');

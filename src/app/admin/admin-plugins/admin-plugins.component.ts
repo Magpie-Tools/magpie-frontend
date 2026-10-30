@@ -28,7 +28,7 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
     {
       id: 'geolite',
       name: 'GeoLite',
-      logo: 'https://media.licdn.com/dms/image/v2/C560BAQHAOUxYoh2u1Q/company-logo_200_200/company-logo_200_200/0/1671072899861/maxmind_logo?e=2147483647&v=beta&t=WWP-k6AqK1YM0ePQFUi28aEUGjpcuLPSsdKdCSS1940',
+      logo: 'https://www.google.com/s2/favicons?domain=maxmind.com&sz=64',
       route: '/plugins/geolite',
       icon: 'icon icon-map-pin',
       description: 'Enrich every proxy with country, city, and network data from MaxMind.',
@@ -37,18 +37,28 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
     {
       id: 'abuseipdb',
       name: 'AbuseIPDB',
-      logo: 'https://www.abuseipdb.com/favicon.ico',
+      logo: 'https://www.google.com/s2/favicons?domain=abuseipdb.com&sz=64',
       route: '/plugins/abuseipdb',
       icon: 'icon icon-shield',
       description: 'Add community abuse intelligence to proxy reputation scoring.',
       capabilities: ['IP reputation', 'Quota tracking', 'Age policy']
+    },
+    {
+      id: 'ipgeolocation',
+      name: 'IPGeolocation.io',
+      logo: 'https://www.google.com/s2/favicons?domain=ipgeolocation.io&sz=64',
+      route: '/plugins/ipgeolocation',
+      icon: 'icon icon-globe',
+      description: 'Look up network types and location, with optional proxy and VPN intelligence.',
+      capabilities: ['Network classification', 'Shared IP cache', 'Credit budget']
     }
   ];
 
   settings = signal<GlobalSettings | undefined>(undefined);
   pluginStates = computed(() => ({
     geolite: this.settings()?.plugins?.geolite?.enabled ?? false,
-    abuseipdb: this.settings()?.plugins?.abuseipdb?.enabled ?? false
+    abuseipdb: this.settings()?.plugins?.abuseipdb?.enabled ?? false,
+    ipgeolocation: this.settings()?.plugins?.ipgeolocation?.enabled ?? false
   }));
   pendingPluginIds = signal<ReadonlySet<string>>(new Set());
   private destroy$ = new Subject<void>();
@@ -75,6 +85,9 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
   }
 
   isPluginConfigured(pluginId: string): boolean {
+    if (pluginId === 'ipgeolocation') {
+      return !!this.settings()?.plugins?.ipgeolocation?.api_key?.trim();
+    }
     if (pluginId === 'geolite') {
       return !!this.settings()?.plugins?.geolite?.api_key?.trim();
     }
@@ -85,6 +98,9 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
   }
 
   isPluginEnabled(pluginId: string): boolean {
+    if (pluginId === 'ipgeolocation') {
+      return this.pluginStates().ipgeolocation;
+    }
     if (pluginId === 'geolite') {
       return this.pluginStates().geolite;
     }
@@ -103,6 +119,12 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
   }
 
   getPluginIncompleteReason(pluginId: string): string | null {
+    if (pluginId === 'ipgeolocation') {
+      const ipgeo = this.settings()?.plugins?.ipgeolocation;
+      if (ipgeo?.enabled && !ipgeo.api_key?.trim()) {
+        return 'IPGeolocation.io is enabled but missing an API key.';
+      }
+    }
     if (pluginId === 'geolite') {
       const geolite = this.settings()?.plugins?.geolite;
       if (geolite?.enabled && !geolite.api_key?.trim()) {
@@ -125,7 +147,7 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (pluginId !== 'geolite' && pluginId !== 'abuseipdb') {
+    if (pluginId !== 'geolite' && pluginId !== 'abuseipdb' && pluginId !== 'ipgeolocation') {
       return;
     }
 
@@ -134,9 +156,7 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
     this.setPluginEnabled(pluginId, nextEnabled);
     this.setPluginPending(pluginId, true);
 
-    const pluginsPayload = pluginId === 'geolite'
-      ? { geolite: { enabled: nextEnabled } }
-      : { abuseipdb: { enabled: nextEnabled } };
+    const pluginsPayload = { [pluginId]: { enabled: nextEnabled } };
 
     this.settingsService.saveGlobalSettings({ plugins: pluginsPayload }).subscribe({
       next: () => {
@@ -154,6 +174,13 @@ export class AdminPluginsComponent implements OnInit, OnDestroy {
 
   private setPluginEnabled(pluginId: string, enabled: boolean): void {
     const current = this.settings();
+    if (current && pluginId === 'ipgeolocation') {
+      this.settings.set({...current, plugins: {...current.plugins, ipgeolocation: {
+        api_key: '', include_security: false, daily_credit_limit: 300, cache_hours: 168,
+        ...current.plugins.ipgeolocation, enabled
+      }}});
+      return;
+    }
     if (!current || (pluginId !== 'geolite' && pluginId !== 'abuseipdb')) {
       return;
     }

@@ -20,4 +20,15 @@ export interface ProxyDetail {
   tags?: ProxyTag[];
   state?: ManagedProxyState;
   pause_reason?: string;
+  ipgeolocation?: {
+    checked_at: string; expires_at: string; fresh: boolean;
+    result: {
+      ip: string;
+      company: {name: string; type: string};
+      network: {connection_type: string};
+      asn: {as_number: string; organization: string; type: string};
+      security?: {is_proxy?: boolean | null; is_vpn?: boolean | null; is_tor?: boolean | null; is_residential_proxy?: boolean | null;
+        proxy_confidence_score?: number | null; proxy_last_seen: string; proxy_provider_names: string[]};
+    };
+  };
 }

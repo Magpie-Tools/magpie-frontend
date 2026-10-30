@@ -1,9 +1,32 @@
-import {of, Subject} from 'rxjs';
+import {of, Subject, throwError} from 'rxjs';
 import {SettingsService} from './settings.service';
 import {HttpService} from './http.service';
 import {UserService} from './authorization/user.service';
 import {NotificationService} from './notification-service.service';
 import {UserSettings} from '../models/UserSettings';
+
+describe('SettingsService IPGeolocation.io policy', () => {
+  let service: SettingsService;
+  let http: jasmine.SpyObj<HttpService>;
+  const plugin = {enabled: true, api_key: 'saved-key', include_security: true, daily_credit_limit: 30, cache_hours: 24};
+  beforeEach(() => {
+    spyOn(UserService, 'isLoggedIn').and.returnValue(false);
+    spyOn(UserService, 'isAdmin').and.returnValue(false);
+    http = jasmine.createSpyObj<HttpService>('HttpService', ['saveGlobalSettings']);
+    http.saveGlobalSettings.and.returnValue(of({message: 'Saved'}));
+    service = new SettingsService(http, {role$: of(null)} as unknown as UserService, {} as NotificationService);
+    service.saveGlobalSettings({plugins: {ipgeolocation: plugin}}).subscribe();
+  });
+  it('preserves plugin credentials and budget when saving other global settings', () => {
+    service.saveGlobalSettings({plugins: {geolite: {enabled: true}}}).subscribe();
+    expect(http.saveGlobalSettings.calls.mostRecent().args[0].plugins.ipgeolocation).toEqual(plugin);
+  });
+  it('does not advertise a new configuration when persistence fails', () => {
+    http.saveGlobalSettings.and.returnValue(throwError(() => new Error('offline')));
+    service.saveGlobalSettings({plugins: {ipgeolocation: {enabled: false}}}).subscribe({error: () => {}});
+    expect(service.getGlobalSettings()?.plugins.ipgeolocation).toEqual(plugin);
+  });
+});
 
 describe('SettingsService failure action', () => {
   let service: SettingsService;
