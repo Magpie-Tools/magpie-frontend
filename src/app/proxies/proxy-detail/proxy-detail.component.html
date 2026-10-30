@@ -196,6 +196,22 @@
                   <span class="label">Estimated type</span>
                   <span class="value capitalize">{{ detail()?.estimated_type || "Unknown" }}</span>
                 </div>
+                @if (detail()?.ipgeolocation; as geo) {
+                  <div class="detail-item"><span class="label">IPGeolocation.io</span><span class="value">{{ geo.fresh ? 'Cached' : 'Expired' }} · {{ geo.checked_at | date:'short' }}</span></div>
+                  <div class="detail-item"><span class="label">Provider network type</span><span class="value">{{ geo.result.network.connection_type || geo.result.company.type || geo.result.asn.type || 'Unknown' }}</span></div>
+                  @if (geo.result.company.name || geo.result.asn.organization) {
+                    <div class="detail-item"><span class="label">Network operator</span><span class="value">{{ geo.result.company.name || geo.result.asn.organization }} {{ geo.result.asn.as_number }}</span></div>
+                  }
+                  @if (geo.result.security; as security) {
+                    <div class="detail-item"><span class="label">Observed services</span><span class="value">Proxy: {{ security.is_proxy === true ? 'Yes' : security.is_proxy === false ? 'No' : 'Unknown' }} · VPN: {{ security.is_vpn === true ? 'Yes' : security.is_vpn === false ? 'No' : 'Unknown' }} · Tor: {{ security.is_tor === true ? 'Yes' : security.is_tor === false ? 'No' : 'Unknown' }}</span></div>
+                    @if (security.proxy_confidence_score !== null && security.proxy_confidence_score !== undefined) {
+                      <div class="detail-item"><span class="label">Proxy detection confidence</span><span class="value">{{ security.proxy_confidence_score }} / 100</span></div>
+                    }
+                    @if (security.proxy_provider_names.length) {
+                      <div class="detail-item"><span class="label">Observed proxy providers</span><span class="value">{{ security.proxy_provider_names.join(', ') }}</span></div>
+                    }
+                  }
+                }
                 <div class="detail-item">
                   <span class="label">Anonymity</span>
                   <span class="value capitalize">{{ latestStatistic?.anonymity_level || "Unknown" }}</span>

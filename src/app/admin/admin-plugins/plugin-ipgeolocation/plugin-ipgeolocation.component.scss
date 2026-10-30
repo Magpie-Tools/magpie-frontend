@@ -1,0 +1,71 @@
+.plugin-ipgeolocation-page {
+  width: 100%;
+  padding: 0.35rem 0 1.5rem;
+  overflow-x: hidden;
+  container: plugin-abuseipdb / inline-size;
+}
+
+.settings-stage { padding: clamp(0.8rem, 1.75vw, 1.5rem); }
+.settings-grid { align-items: start; }
+.settings-card { padding: 1.25rem; border-radius: 1.1rem; }
+.settings-card--access { grid-column: span 7; }
+.settings-card--quota { grid-column: span 5; }
+.card-heading { gap: 0.65rem; }
+.card-icon { width: 2.1rem; height: 2.1rem; border-radius: 0.65rem; }
+.field-group { gap: 0.4rem; margin-top: 1rem; }
+.field-group > small { line-height: 1.5; }
+.policy-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+
+.security-policy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.8rem;
+  cursor: pointer;
+}
+.security-policy span { display: flex; flex-direction: column; gap: 0.2rem; }
+.security-policy strong { font-size: 0.78rem; }
+.security-policy small { color: var(--card-muted); font-size: 0.68rem; line-height: 1.5; }
+.security-policy hlm-switch { flex-shrink: 0; }
+
+.lookup-pricing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  color: var(--card-muted);
+  font-size: 0.7rem;
+}
+.provider-link { color: var(--theme-primary-200); }
+.quota-visual { margin-top: 1rem; padding: 0.85rem; }
+.lookup-times { margin: 0.75rem 0 0; }
+.lookup-times > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 0.7rem;
+}
+.lookup-times dt { color: var(--card-muted); }
+.lookup-times dd { margin: 0; color: rgba(255, 255, 255, 0.78); font-variant-numeric: tabular-nums; }
+.lookup-help { margin-top: 0.9rem; color: var(--card-muted); font-size: 0.7rem; line-height: 1.6; }
+.lookup-help summary { width: fit-content; cursor: pointer; color: rgba(255, 255, 255, 0.75); }
+.lookup-help summary:focus-visible { outline: 2px solid var(--theme-primary-300); outline-offset: 0.2rem; }
+.lookup-help p { margin: 0.6rem 0 0; }
+
+@container plugin-abuseipdb (max-width: 940px) {
+  .settings-card--access,
+  .settings-card--quota { grid-column: 1 / -1; }
+}
+
+@container plugin-abuseipdb (max-width: 480px) {
+  .policy-fields { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}

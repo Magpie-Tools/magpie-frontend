@@ -62,6 +62,7 @@ export interface GlobalSettings {
   };
 
   plugins: {
+    ipgeolocation?: IPGeolocationPluginSettings;
     geolite: {
       enabled: boolean;
       api_key: string;
@@ -95,4 +96,21 @@ export interface GlobalSettings {
 
   blacklist_sources: string[];
   website_blacklist: string[];
+}
+
+export interface IPGeolocationPluginSettings {
+  enabled: boolean;
+  api_key: string;
+  include_security: boolean;
+  daily_credit_limit: number;
+  cache_hours: number;
+}
+
+export interface IPGeolocationStatus {
+  used_credits: number;
+  daily_credit_limit: number;
+  reset_at: string;
+  next_request_at?: string | null;
+  last_checked_at?: string | null;
+  last_error: string;
 }

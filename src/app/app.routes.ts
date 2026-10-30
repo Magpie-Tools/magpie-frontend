@@ -18,6 +18,7 @@ import {AdminScraperComponent} from './admin/admin-scraper/admin-scraper.compone
 import {AdminPluginsComponent} from './admin/admin-plugins/admin-plugins.component';
 import {PluginGeoliteComponent} from './admin/admin-plugins/plugin-geolite/plugin-geolite.component';
 import {PluginAbuseIPDBComponent} from './admin/admin-plugins/plugin-abuseipdb/plugin-abuseipdb.component';
+import {PluginIPGeolocationComponent} from './admin/admin-plugins/plugin-ipgeolocation/plugin-ipgeolocation.component';
 import {AdminBlacklistComponent} from './admin/admin-blacklist/admin-blacklist.component';
 import {ScraperComponent} from './scraper/scraper.component';
 import {ScrapeSourceDetailComponent} from './scraper/scrape-source-detail/scrape-source-detail.component';
@@ -41,6 +42,7 @@ export const routes: Routes = [
   {path: 'plugins', component: AdminPluginsComponent, canActivate: authGuard, data: {requiresAdmin: true}},
   {path: 'plugins/geolite', component: PluginGeoliteComponent, canActivate: authGuard, data: {requiresAdmin: true}},
   {path: 'plugins/abuseipdb', component: PluginAbuseIPDBComponent, canActivate: authGuard, data: {requiresAdmin: true}},
+  {path: 'plugins/ipgeolocation', component: PluginIPGeolocationComponent, canActivate: authGuard, data: {requiresAdmin: true}},
   {path: 'global/plugins', redirectTo: 'plugins', pathMatch: 'full'},
   {path: 'global/other', redirectTo: 'plugins', pathMatch: 'full'},
 

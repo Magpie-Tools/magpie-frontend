@@ -273,6 +273,10 @@ export class HttpService {
     return this.http.get<GlobalSettings>(this.apiUrl + '/global/settings');
   }
 
+  getIPGeolocationStatus() {
+    return this.http.get<import('../models/GlobalSettings').IPGeolocationStatus>(`${this.apiUrl}/plugins/ipgeolocation/status`);
+  }
+
   getUserSettings() {
     return this.http.get<UserSettings>(this.apiUrl + '/user/settings');
   }

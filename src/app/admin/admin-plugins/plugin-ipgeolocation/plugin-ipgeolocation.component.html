@@ -1,0 +1,73 @@
+<div class="plugin-ipgeolocation-page" appRevealGroup=".admin-context, .settings-card, .save-dock">
+  <form class="settings-stage" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <header class="admin-context">
+      <div class="admin-context__copy">
+        <a routerLink="/plugins" class="back-link" aria-label="Back to plugins"><i class="icon icon-arrow-left" aria-hidden="true"></i></a>
+        <span class="plugin-mark"><img src="https://www.google.com/s2/favicons?domain=ipgeolocation.io&amp;sz=64" alt="IPGeolocation.io logo" /></span>
+        <div><h1>IPGeolocation.io</h1><p>Cached IP location and network data.</p></div>
+      </div>
+      <label class="master-toggle" for="ipgeo-enabled"><span><strong>{{ form.controls.enabled.value ? 'Enabled' : 'Disabled' }}</strong><small>IP intelligence</small></span>
+        <hlm-switch inputId="ipgeo-enabled" formControlName="enabled" aria-label="Toggle IPGeolocation.io plugin" />
+      </label>
+    </header>
+    <div class="settings-grid">
+      <section class="settings-card settings-card--access">
+        <div class="card-heading"><span class="card-icon"><i class="icon icon-key" aria-hidden="true"></i></span><div><h2>API settings</h2><p>Network classification requires a paid plan.</p></div></div>
+        <div class="field-group"><label for="ipgeo-key">API key</label>
+          <app-password inputId="ipgeo-key" formControlName="api_key" autocomplete="off" placeholder="Enter your API key" showLabel="Show API key" hideLabel="Hide API key" />
+        </div>
+        <div class="policy-fields">
+          <div class="field-group"><label for="ipgeo-budget">Daily credit budget</label>
+            <input hlmInput id="ipgeo-budget" type="number" min="1" max="100000" step="1" formControlName="daily_credit_limit" aria-describedby="ipgeo-budget-help" />
+            <small id="ipgeo-budget-help">1 to 100,000 credits · resets at 00:00 UTC</small>
+          </div>
+          <div class="field-group"><label for="ipgeo-cache">Cache duration in hours</label>
+            <input hlmInput id="ipgeo-cache" type="number" min="1" max="720" step="1" formControlName="cache_hours" aria-describedby="ipgeo-cache-help" />
+            <small id="ipgeo-cache-help">1 to 720 hours · shared per IP</small>
+          </div>
+        </div>
+        <label class="security-policy" for="ipgeo-security"><span><strong>Security intelligence</strong><small>Proxy, VPN and Tor signals. Requires security API access.</small></span>
+          <hlm-switch inputId="ipgeo-security" formControlName="include_security" aria-label="Include security intelligence" />
+        </label>
+        <div class="lookup-pricing">
+          <span>{{ form.controls.include_security.value ? '3 credits' : '1 credit' }} per lookup</span>
+          <a class="provider-link" href="https://ipgeolocation.io/documentation/credits-usage.html" target="_blank" rel="noopener noreferrer">Credit rules <i class="icon icon-arrow-up-right" aria-hidden="true"></i></a>
+        </div>
+        @if (invalid() && form.dirty) { <p class="error-note" role="alert">Enter a key and valid whole-number limits. Security requires at least 3 daily credits.</p> }
+      </section>
+      <section class="settings-card settings-card--quota">
+        <div class="card-heading">
+          <span class="card-icon"><i class="icon icon-chart-no-axes-column" aria-hidden="true"></i></span>
+          <div><h2>Lookup activity</h2><p>Magpie's daily credit budget.</p></div>
+        </div>
+        @if (status(); as info) {
+          <div class="quota-visual">
+            <div class="quota-scale" role="progressbar" aria-label="Daily credit budget used"
+              aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="quotaUsagePercent()">
+              <span [style.width.%]="quotaUsagePercent()"></span>
+            </div>
+            <div class="quota-legend">
+              <span>{{ quotaUsagePercent() }}% used today</span><strong>{{ creditsRemaining() }} credits remaining</strong>
+            </div>
+          </div>
+          <dl class="lookup-times">
+            <div><dt>Budget resets</dt><dd>{{ timestamp(info.reset_at) }}</dd></div>
+            <div><dt>Last lookup</dt><dd>{{ timestamp(info.last_checked_at) }}</dd></div>
+            <div><dt>Next eligible</dt><dd>{{ info.next_request_at ? timestamp(info.next_request_at) : 'Ready' }}</dd></div>
+          </dl>
+          @if (info.last_error) { <div class="error-note" role="alert"><div><strong>Latest lookup failed</strong><span>{{ info.last_error }}</span></div></div> }
+        }
+        @if (statusError()) { <p class="error-note" role="alert">{{ statusError() }}</p> }
+        <details class="lookup-help">
+          <summary>How lookups work</summary>
+          <p>Only public IPs from active proxies are looked up. Routes on the same IP share cached results. Fresh provider data overrides local estimates; missing fields keep them.</p>
+          <p>Credits are reserved before requests. Requests with unknown billing still count toward the daily budget.</p>
+        </details>
+      </section>
+    </div>
+    <app-admin-settings-save-dock [dirty]="form.dirty" [invalid]="invalid() || saving()"
+      dirtyTitle="Unsaved changes" dirtyDescription="Save to apply your settings."
+      pristineTitle="IPGeolocation.io is up to date" pristineDescription="Activity refreshes every minute."
+      [saveLabel]="saving() ? 'Saving…' : 'Save settings'" />
+  </form>
+</div>
