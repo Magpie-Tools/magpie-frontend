@@ -8,7 +8,6 @@ import {lucideChevronsUpDown} from '@ng-icons/lucide';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {UserService} from "../services/authorization/user.service";
 
-import {ThemeService} from '../services/theme.service';
 import {gsap} from 'gsap';
 
 @Component({
@@ -32,8 +31,7 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   private motionContext?: gsap.Context;
 
   constructor(protected user: UserService,
-              private elementRef: ElementRef,
-              protected themeService: ThemeService,) {}
+              private elementRef: ElementRef) {}
 
   ngOnInit() {
     this.updateNavigationItems();
@@ -117,18 +115,6 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
       clearTimeout(this.adminRefreshTimer);
     }
     this.motionContext?.revert();
-  }
-
-  protected getSrcPath() {
-    const start = "/assets/logo/magpie-light-";
-    if (this.themeService.theme() === 'purple') {
-      return start + "purple.svg";
-    } else if (this.themeService.theme() === 'blue') {
-      return start + "blue.svg";
-    } else if (this.themeService.theme() === 'red') {
-      return start + "red.svg";
-    }
-    return start + 'green.svg';
   }
 }
 

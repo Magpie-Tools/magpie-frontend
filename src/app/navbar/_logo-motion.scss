@@ -1,0 +1,57 @@
+// Navbar logo hover animation: the wings beat twice while the bird bobs up on each downstroke.
+
+.navbar-brand__bird,
+.navbar-brand__wing {
+  transform-box: view-box;
+}
+
+// Wing roots, where each wing meets the body.
+.navbar-brand__wing {
+  transform-origin: 270px 267px;
+}
+
+.navbar-brand__wing--far {
+  --wing-fold-angle: -8deg;
+  --wing-fold-scale: 0.65;
+  transform-origin: 372px 191px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .navbar-brand:is(:hover, :focus-visible) {
+    .navbar-brand__bird {
+      animation: logo-flap-bob 1300ms ease-in-out;
+    }
+
+    .navbar-brand__wing {
+      animation: logo-wing-flap 650ms ease-in-out 2;
+    }
+
+    .navbar-brand__wing--far {
+      animation-delay: 60ms;
+    }
+  }
+}
+
+@keyframes logo-wing-flap {
+  0%, 100% {
+    transform: rotate(0deg) scaleY(1);
+  }
+
+  35% {
+    transform: rotate(var(--wing-fold-angle, -12deg)) scaleY(var(--wing-fold-scale, 0.55));
+  }
+
+  72% {
+    transform: rotate(3deg) scaleY(1.03);
+  }
+}
+
+@keyframes logo-flap-bob {
+  0%, 50%, 100% {
+    transform: translateY(0);
+  }
+
+  20%, 70% {
+    transform: translateY(-14px);
+  }
+}

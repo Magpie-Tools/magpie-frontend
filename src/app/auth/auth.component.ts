@@ -2,8 +2,6 @@ import {HlmCardImports} from '@spartan-ng/helm/card';
 import {Component, Input, ViewEncapsulation} from '@angular/core';
 import {RouterLink} from '@angular/router';
 
-import {ThemeService} from '../services/theme.service';
-
 @Component({
   selector: 'app-auth',
   standalone: true,
@@ -14,6 +12,4 @@ import {ThemeService} from '../services/theme.service';
 })
 export class AuthComponent {
   @Input({required: true}) title = '';
-
-  constructor(protected readonly themeService: ThemeService) {}
 }
