@@ -901,7 +901,6 @@
 <app-dialog
   [visible]="!!removalTarget()"
   (visibleChange)="!$event && removalTarget.set(null)"
-  [dismissableMask]="!removingMember()"
   [closable]="!removingMember()"
   [panelStyle]="{ width: '30rem' }"
 >
@@ -944,7 +943,6 @@
 <app-dialog
   [visible]="!!ownershipChange()"
   (visibleChange)="!$event && ownershipChange.set(null)"
-  [dismissableMask]="true"
   [panelStyle]="{ width: '32rem' }"
 >
   <ng-template #dialogHeader
@@ -992,7 +990,6 @@
 <app-dialog
   [visible]="!!revokeTarget()"
   (visibleChange)="!$event && revokeTarget.set(null)"
-  [dismissableMask]="!revokingInvitation()"
   [closable]="!revokingInvitation()"
   [panelStyle]="{ width: '30rem' }"
 >

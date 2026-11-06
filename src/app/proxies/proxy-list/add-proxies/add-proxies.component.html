@@ -113,7 +113,6 @@
 <app-dialog
   [visible]="detailsVisible()"
   (visibleChange)="detailsVisible.set($event)"
-  [dismissableMask]="true"
   styleClass="proxy-upload-details-dialog"
   (onShow)="animateDialog('proxy-upload-details-dialog')"
   [panelStyle]="{ width: '34rem' }"
