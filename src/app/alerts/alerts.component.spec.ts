@@ -240,10 +240,93 @@ describe('AlertsComponent', () => {
 
   it('lets operators edit rules while keeping destinations read-only', () => {
     canAdminister.set(false); fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('form[aria-label="Alert rule"]')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('form[aria-label="Alert destination"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-action="new-rule"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-action="new-destination"]')).toBeNull();
     component.editDestination(page.destinations[0]); expect(component.editingDestinationId).toBeNull();
+    expect(component.destinationDialogOpen()).toBeFalse();
+    component.newRule(); expect(component.ruleDialogOpen()).toBeTrue();
+    component.newDestinationFromRule(); expect(component.destinationDialogOpen()).toBeFalse(); expect(component.ruleDialogOpen()).toBeTrue();
     component.rule = {...rule}; component.saveRule(); expect(api.saveRule).toHaveBeenCalled();
+  });
+
+  it('creates and edits rules in a dialog and discards the draft when it is dismissed', async () => {
+    fixture.detectChanges();
+    expect(document.querySelector('form[aria-label="Alert rule"]')).toBeNull();
+    (fixture.nativeElement.querySelector('[data-action="new-rule"]') as HTMLButtonElement).click();
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(component.ruleDialogOpen()).toBeTrue();
+    expect(document.querySelector('form[aria-label="Alert rule"]')).not.toBeNull();
+    expect(document.querySelector('.alert-dialog__title')?.textContent).toContain('New alert rule');
+    component.rule.threshold = 10;
+    component.ruleDialogVisibilityChanged(false);
+    expect(component.ruleDialogOpen()).toBeFalse(); expect(component.rule.threshold).toBeNull();
+
+    component.editRule(rule); fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.alert-dialog__title')?.textContent).toContain('Edit alert rule');
+    component.saveRule();
+    expect(api.saveRule).toHaveBeenCalledWith(1, jasmine.objectContaining({name: 'Minimum routes'}));
+    expect(component.ruleDialogOpen()).toBeFalse(); expect(component.editingRuleId).toBeNull();
+  });
+
+  it('names a rule after its condition when the name is blank', () => {
+    api.rotators.and.returnValue(of([{id: 12, name: 'Production pool', protocol: 'http'}])); component.loadRotators();
+    component.newRule();
+    expect(component.canSaveRule()).toBeFalse();
+    component.changeMetric('success_rate'); component.rule.threshold = 120;
+    expect(component.thresholdError()).toContain('0 to 100'); expect(component.canSaveRule()).toBeFalse();
+    component.rule.threshold = 95; component.rule.rotator_id = 12;
+    expect(component.suggestedRuleName()).toBe('Success rate below 95% · Production pool');
+    expect(component.canSaveRule()).toBeTrue();
+    component.saveRule();
+    expect(api.saveRule).toHaveBeenCalledWith(null, jasmine.objectContaining({name: 'Success rate below 95% · Production pool', metric: 'success_rate', threshold: 95, rotator_id: 12}));
+    component.newRule(); component.rule.threshold = 5; component.rule.rotator_id = 12;
+    component.rotators.set([{id: 12, name: 'é'.repeat(200), protocol: 'http'}]);
+    expect(new TextEncoder().encode(component.suggestedRuleName()).length).toBeLessThanOrEqual(120);
+  });
+
+  it('keeps the rule draft while creating a destination and selects the new destination', () => {
+    const created = {...page.destinations[0], id: 5, name: 'Pager', kind: 'discord' as const};
+    api.saveDestination.and.returnValue(of(created));
+    component.newRule(); component.rule.threshold = 20; component.rule.destination_ids = [2];
+    component.newDestinationFromRule();
+    expect(component.ruleDialogOpen()).toBeFalse(); expect(component.destinationDialogOpen()).toBeTrue(); expect(component.resumesRule()).toBeTrue();
+    component.ruleDialogVisibilityChanged(false);
+    expect(component.rule.threshold).toBe(20);
+    component.changeChannel('discord'); component.destination.target = 'https://discord.com/api/webhooks/1/token';
+    component.saveDestination();
+    expect(api.saveDestination).toHaveBeenCalledWith(null, jasmine.objectContaining({name: 'Discord channel', kind: 'discord', target: 'https://discord.com/api/webhooks/1/token'}));
+    expect(component.destinationDialogOpen()).toBeFalse(); expect(component.ruleDialogOpen()).toBeTrue(); expect(component.resumesRule()).toBeFalse();
+    expect(component.rule.threshold).toBe(20); expect(component.rule.destination_ids).toEqual([2, 5]);
+
+    component.newDestinationFromRule(); component.cancelDestination();
+    expect(component.ruleDialogOpen()).toBeTrue(); expect(component.rule.destination_ids).toEqual([2, 5]);
+  });
+
+  it('checks destination targets before saving', () => {
+    component.newDestination();
+    expect(component.targetError()).toBe('Required.'); expect(component.canSaveDestination()).toBeFalse();
+    component.destination.target = 'ops@'; expect(component.targetError()).toContain('email address');
+    component.destination.target = 'ops@example.com'; expect(component.targetError()).toBe('');
+    expect(component.suggestedDestinationName()).toBe('ops@example.com');
+    component.changeChannel('slack'); component.destination.target = 'https://example.com/services/x';
+    expect(component.targetError()).toContain('hooks.slack.com'); component.saveDestination(); expect(api.saveDestination).not.toHaveBeenCalled();
+    component.destination.target = 'https://hooks.slack.com/services/T/B/x'; expect(component.targetError()).toBe('');
+    component.changeChannel('discord'); component.destination.target = 'https://discord.com/api/webhooks/1/x#frag';
+    expect(component.targetError()).toContain('fragment');
+    component.changeChannel('webhook'); component.destination.target = 'https://alerts.example.com/hook';
+    expect(component.suggestedDestinationName()).toBe('Webhook · alerts.example.com');
+    component.saveDestination();
+    expect(api.saveDestination).toHaveBeenCalledWith(null, {name: 'Webhook · alerts.example.com', kind: 'webhook', enabled: true, target: 'https://alerts.example.com/hook'});
+  });
+
+  it('confirms deletion in a dialog and keeps it open with the error when deletion fails', () => {
+    api.deleteDestination.and.returnValue(throwError(() => new HttpErrorResponse({status: 409, error: {error: 'Destination is busy.'}})));
+    component.requestDelete('destination', 2, 'Ops');
+    expect(component.ruleNamesUsingDestination(2)).toBe('Minimum routes');
+    component.deleteConfirmed();
+    expect(component.confirmDelete()).not.toBeNull(); expect(component.formError()).toBe('Destination is busy.'); expect(component.error()).toBe('');
+    api.deleteDestination.and.returnValue(of(undefined)); component.deleteConfirmed();
+    expect(component.confirmDelete()).toBeNull();
   });
 
   it('shows only attached destinations, including disabled and missing entries, on keyboard focus', async () => {
@@ -310,7 +393,7 @@ describe('AlertsComponent', () => {
     component.editDestination({...page.destinations[0], kind: 'discord', mention_mode: 'role', mention_id: '165511591545143296'});
     component.destination.mention_id = '18446744073709551616'; expect(component.validMention()).toBeFalse(); component.saveDestination(); expect(api.saveDestination).not.toHaveBeenCalled();
     component.destination.mention_id = '123> @everyone'; expect(component.validMention()).toBeFalse();
-    component.changeChannel('slack'); component.destination.mention_mode = 'user_group'; component.destination.mention_id = 'SAZ94GDB8'; expect(component.validMention()).toBeTrue();
+    component.newDestination(); component.changeChannel('slack'); component.destination.mention_mode = 'user_group'; component.destination.mention_id = 'SAZ94GDB8'; expect(component.validMention()).toBeTrue();
     component.destination.mention_id = 'missing-prefix'; expect(component.validMention()).toBeFalse();
     expect(component.mentionOptions().map(option => option.value)).toContain('channel');
     expect(component.mentionOptions().map(option => option.value)).not.toContain('role');
@@ -437,7 +520,7 @@ describe('AlertsComponent', () => {
   it('preserves a rule scope in the form when metadata is unavailable', async () => {
     api.rotators.and.returnValue(throwError(() => ({status: 500}))); component.loadRotators();
     component.editRule({...rule, rotator_id: 12}); fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
-    const scope = fixture.nativeElement.querySelector('app-select[name="scope"] [data-slot="select-trigger"]') as HTMLElement;
+    const scope = document.querySelector('app-select[name="scope"] [data-slot="select-trigger"]') as HTMLElement;
     expect(scope.textContent).toContain('Rotator #12'); expect(component.rule.rotator_id).toBe(12);
     component.saveRule(); expect(api.saveRule).toHaveBeenCalledWith(1, jasmine.objectContaining({rotator_id: 12}));
   });
