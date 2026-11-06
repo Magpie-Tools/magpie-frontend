@@ -38,12 +38,17 @@
             <i [class]="getStatusIcon(check.status)" aria-hidden="true"></i>
           </span>
           <div class="history-row__route">
-            <strong>{{ check.ip }}</strong>
+            @let address = splitAddress(check.ip);
+            <strong class="history-row__address" [title]="check.ip"
+              ><span class="history-row__host">{{ address.host }}</span
+              >@if (address.port) {<span class="history-row__port">:{{ address.port }}</span>}</strong
+            >
             <span>
               @if (check.date; as date) {
-                {{ date | date: "MMM dd, yyyy" }}
+                {{ date | date }}
+              } @else {
+                {{ check.time }}
               }
-              {{ check.time }}
             </span>
           </div>
           <span class="history-row__latency">{{
@@ -59,7 +64,7 @@
       ></span>
       <p>
         No proxy checks yet. Refresh after the checker processes its first
-        routes.
+        proxies.
       </p>
     </div>
   }

@@ -24,7 +24,7 @@
   min-width: 0;
   align-items: center;
 
-  label { color: rgba(255, 255, 255, .9); font-size: .76rem; font-weight: 590; cursor: pointer; }
+  label { color: rgba(255, 255, 255, .9); font-size: 0.84rem; font-weight: 590; cursor: pointer; }
   app-tooltip { display: inline-flex; flex-shrink: 0; align-items: center; }
 }
 
@@ -43,7 +43,7 @@
 }
 
 .fetch-mode__control { display: flex; flex-shrink: 0; align-items: center; gap: .6rem; }
-.fetch-mode__state { color: rgba(255, 255, 255, .46); font-size: .6rem; }
+.fetch-mode__state { color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; }
 
 :host ::ng-deep {
   brn-switch { --p-toggleswitch-width: 2.25rem; --p-toggleswitch-height: 1.25rem; --p-toggleswitch-handle-size: .85rem; }

@@ -28,6 +28,12 @@
 :root {
   color-scheme: dark;
 
+  /* Reputation colours, shared by charts, badges and bars. */
+  --reputation-good: #22c55e;
+  --reputation-neutral: #facc15;
+  --reputation-poor: #ef4444;
+  --reputation-unknown: #94a3b8;
+
   --layer-noise: 4000;
 
   --theme-primary-50:  #e3f2ec;
@@ -280,8 +286,8 @@
 .signal-dialog__key,
 .structured-row__label,
 .meta-label {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
   font-weight: 620;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -297,7 +303,7 @@
   border-radius: 0.58rem;
   background: rgba(148, 163, 184, 0.12);
   color: rgba(255, 255, 255, 0.78);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
 }
 
 .signal-dialog__value--json,
@@ -320,7 +326,7 @@
   background: rgba(0, 0, 0, 0.28);
   color: rgba(255, 255, 255, 0.76);
   font-family: "Geist Mono", "SFMono-Regular", Consolas, monospace;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
@@ -328,7 +334,7 @@
 
 .signal-dialog__sentiment {
   color: inherit;
-  font-size: 0.52rem;
+  font-size: 0.6875rem;
   font-weight: 650;
   letter-spacing: 0.08em;
   opacity: 0.8;
@@ -366,7 +372,7 @@
 
 .structured-row__value {
   color: rgba(255, 255, 255, 0.78);
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   line-height: 1.45;
   word-break: break-word;
 }
@@ -377,7 +383,7 @@
   border: 1px dashed rgba(255, 255, 255, 0.1);
   border-radius: 0.72rem;
   color: rgba(222, 215, 222, 0.59);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   text-align: center;
 }
 
@@ -394,7 +400,7 @@
 
 .meta-value {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   text-align: right;
   word-break: break-word;
 }
@@ -415,7 +421,7 @@
   border-radius: 0.72rem;
   background: rgba(248, 113, 113, 0.1);
   color: #fecaca;
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
 }
 
 .stat-response-dialog__body mark {
@@ -519,4 +525,106 @@ app-select [data-slot="select-trigger"] > ng-icon { flex-shrink: 0; }
 @media (prefers-reduced-motion: reduce) {
   .table-progress::after { width: 100%; animation: none; }
   .data-table tbody { transition: none; }
+}
+
+/* Simple data tables stack each row into a labelled card when their container is narrow. */
+.stack-table-container { container: stack-table / inline-size; }
+@container stack-table (max-width: 560px) {
+  .stack-table, .stack-table tbody { display: block; width: 100%; min-width: 0 !important; }
+  .stack-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .stack-table tbody > tr {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem 0.75rem;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .stack-table tbody > tr > td {
+    display: flex;
+    min-width: 0;
+    max-width: none !important;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0 !important;
+    border: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+  .stack-table td[data-label]::before {
+    content: attr(data-label);
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.75rem;
+  }
+  .stack-table td.stack-wide,
+  .stack-table td[colspan] { grid-column: 1 / -1; }
+}
+
+/* Shortcut to a form that sits below a long list on phones; side-by-side layouts don't need it. */
+.jump-to-form { display: none !important; }
+@media (max-width: 48rem) { .jump-to-form { display: inline-flex !important; } }
+
+/* Phones: the column picker and filters open as near-full-screen sheets so they have room in either placement. */
+@media (max-width: 48rem) {
+  .column-picker-popover,
+  .phone-sheet-popover {
+    position: fixed !important;
+    inset: 0.75rem 0.75rem auto !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 1.5rem) !important;
+  }
+
+  /* CDK offsets the pane with a transform, which would make it the sheet's containing block. */
+  .cdk-overlay-pane:has(> :is(.column-picker-popover, .phone-sheet-popover)) { transform: none !important; }
+}
+
+/* Touch and phone layouts: keep interactive targets at least 44px without changing desktop density. */
+@media (pointer: coarse), (max-width: 48rem) {
+  .topbar-icon-button { min-width: 2.75rem !important; min-height: 2.75rem !important; }
+  .workspace-switcher select { min-height: 2.75rem !important; }
+  .tool-button,
+  .toolbar-action [hlmBtn],
+  .inventory-summary__clear { min-height: 2.75rem !important; }
+  .proxy-actions-trigger,
+  .source-actions-trigger { min-width: 2.75rem !important; min-height: 2.75rem !important; }
+  .navbar-item,
+  .nav-cluster > summary { min-height: 2.75rem; }
+  .rotator-actions :is(.icon-action, .text-action),
+  .button--compact,
+  .icon-button { min-width: 2.75rem !important; min-height: 2.75rem !important; }
+  .rotator-actions { gap: 0.5rem !important; }
+
+  /* Every control in page content, overlays, and dialogs is at least 44px tall. */
+  :is(main, .cdk-overlay-container) :is(
+    button:not([role="checkbox"]):not([role="switch"]):not(.info-icon):not(.country-trigger),
+    [hlmBtn], select, input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    [data-slot="select-trigger"], [role="tab"], summary, a.configure-link, a.archive-link, a.back-button,
+    a[target="_blank"]:not(.source-title)
+  ) {
+    min-height: 2.75rem !important;
+  }
+
+  /* The masked credentials row stays one compact line; its buttons keep the 44px height. */
+  :is(main, .cdk-overlay-container) button:not([role="checkbox"]):not([role="switch"]):not(.country-trigger):not(.auth-credentials button) {
+    min-width: 2.75rem !important;
+  }
+
+  /* Icon-only controls become 44px squares. */
+  :is(main, .cdk-overlay-container) :is(button, a)[aria-label]:not(.auth-credentials button):is(:has(> i:only-child), :has(> svg:only-child), :has(> ng-icon:only-child)) {
+    min-width: 2.75rem !important;
+  }
+
+  /* Checkboxes, switches, and info icons stay visually small; an invisible halo enlarges the tap area. */
+  :is(button[role="checkbox"], button[role="switch"], .info-icon) { position: relative; }
+  :is(button[role="checkbox"], button[role="switch"], .info-icon)::after {
+    content: "";
+    position: absolute;
+    inset: -0.875rem;
+  }
 }

@@ -163,10 +163,17 @@
             <strong>{{ workspace.subscription.plan_code | titlecase }}</strong>
             <span>{{ workspace.subscription.status | titlecase }} subscription</span>
           </div>
+          <!-- Allowance rows only mean something when the workspace has a route limit. -->
           <dl class="plan-highlights">
-            <div><dt>Included routes</dt><dd>{{ workspace.capacity.included_routes | number }}</dd></div>
-            <div><dt>Additional routes</dt><dd>{{ workspace.capacity.additional_routes | number }}</dd></div>
-            <div><dt>Included operators</dt><dd>{{ workspace.subscription.included_operators | number }}</dd></div>
+            @if (workspace.capacity.activation_limit === null) {
+              <div><dt>Active route limit</dt><dd>No limit</dd></div>
+            } @else {
+              <div><dt>Included routes</dt><dd>{{ workspace.capacity.included_routes | number }}</dd></div>
+              <div><dt>Additional routes</dt><dd>{{ workspace.capacity.additional_routes | number }}</dd></div>
+            }
+            @if (workspace.subscription.included_operators > 0) {
+              <div><dt>Included operators</dt><dd>{{ workspace.subscription.included_operators | number }}</dd></div>
+            }
           </dl>
           <div class="plan-accordions">
             <details>

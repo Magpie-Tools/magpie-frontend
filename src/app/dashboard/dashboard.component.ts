@@ -1,6 +1,7 @@
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
 import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
-import {Component, Inject, LOCALE_ID, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, Inject, LOCALE_ID, OnDestroy, OnInit, computed, inject, signal} from '@angular/core';
+import {WorkspaceService} from '../services/workspace.service';
 import {DecimalPipe} from '@angular/common';
 import {Subject} from 'rxjs';
 import {finalize, takeUntil} from 'rxjs/operators';
@@ -64,6 +65,46 @@ type FastestAliveSortDirection = 'fastest-right' | 'fastest-left';
 
 const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirection';
 
+
+/**
+ * Categorical colours for countries. Reds, oranges and yellows are left out because they mean
+ * "Poor" and "Neutral" elsewhere on the dashboard. Hues repeat in 200/400/600 shades.
+ */
+const COUNTRY_PALETTE = [
+  '#60a5fa', '#2dd4bf', '#c084fc', '#f472b6', '#a3e635', '#e2e8f0',
+  '#2563eb', '#0d9488', '#9333ea', '#db2777', '#65a30d', '#bae6fd',
+  '#99f6e4', '#e9d5ff', '#fbcfe8', '#d9f99d',
+];
+const UNKNOWN_COUNTRY_COLOR = '#64748b';
+
+/** The most common proxy countries get fixed, distinct palette slots. */
+const COUNTRY_SLOTS: Readonly<Record<string, number>> = {
+  'United States': 0, 'Germany': 1, 'United Kingdom': 2, 'Netherlands': 3, 'France': 4, 'Canada': 5,
+  'Singapore': 6, 'Japan': 7, 'Russia': 8, 'Brazil': 9, 'India': 10, 'Hong Kong': 11,
+  'Australia': 12, 'Austria': 13, 'Poland': 14, 'Sweden': 15,
+};
+
+/**
+ * A colour that depends only on the country itself, so sorting and countries entering or leaving
+ * the chart never recolour it. Common countries have distinct fixed colours; others hash into the
+ * palette (and may share a colour; every country also has its own labelled column).
+ */
+export function countryColor(country: string): string {
+  const slot = COUNTRY_SLOTS[country];
+  if (slot !== undefined) {
+    return COUNTRY_PALETTE[slot];
+  }
+  let hash = 0;
+  for (let index = 0; index < country.length; index++) {
+    hash = ((hash * 31) + country.charCodeAt(index)) >>> 0;
+  }
+  return COUNTRY_PALETTE[hash % COUNTRY_PALETTE.length];
+}
+
+export function assignCountryColors(countries: readonly string[]): Map<string, string> {
+  return new Map(countries.map(country => [country, countryColor(country)] as const));
+}
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -84,6 +125,17 @@ const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirecti
 export class DashboardComponent implements OnInit, OnDestroy {
   dashboardInfo = signal<DashboardStatus>({ loading: false, loaded: false });
 
+  readonly kpiComparison = signal<{alive: string; scraped: string}>({alive: '', scraped: ''});
+  private readonly workspaces = inject(WorkspaceService);
+  /** Live lifecycle split of the stored total, from the current workspace's capacity. */
+  readonly totalProxiesCaption = computed(() => {
+    const capacity = this.workspaces.current()?.capacity;
+    if (!capacity) return '';
+    const inactive = Math.max(0, capacity.stored_routes - capacity.active_routes);
+    return `${this.numberFormatter.format(capacity.active_routes)} active · ${this.numberFormatter.format(inactive)} paused or archived`;
+  });
+  readonly inventoryRange = signal('');
+  readonly inventorySummary = signal('');
   conversionRate = signal<SparklineMetric>({ value: 0, history: [] });
   avgOrderValue = signal<SparklineMetric>({ value: 0, history: [] });
   orderQuantity = signal<SparklineMetric>({ value: 0, history: [] });
@@ -242,14 +294,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.conversionRate.set({
       value: aliveValue,
       history: aliveSeries.slice(0, -1),
-      displayValue: aliveValue.toLocaleString()
+      displayValue: this.numberFormatter.format(aliveValue)
     });
 
-    const totalSeries = (proxyHistory ?? []).map((entry) => entry.count);
+    // Inventory history counts active routes only, so it cannot serve as a trend for the stored total.
     this.avgOrderValue.set({
       value: proxyCount,
-      history: totalSeries,
-      displayValue: proxyCount.toLocaleString()
+      history: [],
+      displayValue: this.numberFormatter.format(proxyCount)
     });
 
     const scrapedSeries = this.extractSnapshotCounts(snapshots?.scraped);
@@ -258,8 +310,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.orderQuantity.set({
       value: scrapedValue,
       history: scrapedSeries.slice(0, -1),
-      displayValue: scrapedValue.toLocaleString()
+      displayValue: this.numberFormatter.format(scrapedValue)
     });
+
+    // Each trend compares the latest value with the previous recorded sample.
+    const previousRecordedAt = (entries: Array<{recordedAt?: string}> | undefined, offset: number) =>
+      this.parseDate(entries?.[entries.length - offset]?.recordedAt);
+    this.kpiComparison.set({
+      alive: this.formatComparison(previousRecordedAt(snapshots?.alive, 2)),
+      scraped: this.formatComparison(previousRecordedAt(snapshots?.scraped, 2)),
+    });
+  }
+
+  private formatComparison(date: Date | null): string {
+    if (!date) return '';
+    const minutes = Math.max(1, Math.round((Date.now() - date.getTime()) / 60000));
+    if (minutes < 60) return `vs ${minutes} min ago`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 48) return `vs ${hours} h ago`;
+    return `vs ${new Intl.DateTimeFormat(this.localeId, {day: '2-digit', month: '2-digit'}).format(date)}`;
   }
 
   private extractSnapshotCounts(entries: ProxySnapshotEntry[] | undefined): number[] {
@@ -409,10 +478,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       };
     });
 
+    const colorByCountry = assignCountryColors(
+      countryOrder.map(entry => entry.country).filter(country => this.normalizeCountryBreakdownName(country) !== 'Unknown'),
+    );
     const countryLegend = countryOrder.map((entry) => ({
       country: entry.country,
       count: entry.count,
-      color: this.resolveCountryColor(entry.country)
+      color: colorByCountry.get(entry.country) ?? UNKNOWN_COUNTRY_COLOR,
     }));
 
     this.fastestAliveCountryLegend.set(countryLegend);
@@ -422,6 +494,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       countryLegend.map(entry => entry.country),
       countryLegend.map(entry => entry.color),
       value => this.numberFormatter.format(value),
+      typeof window !== 'undefined' && !!window.matchMedia?.('(max-width: 48rem)').matches,
+      this.localeId,
     ));
   }
 
@@ -513,23 +587,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return 'unknown';
   }
 
-  private resolveCountryColor(country: string): string {
-    const normalized = this.normalizeCountryBreakdownName(country);
-    if (normalized === 'Unknown') {
-      return '#94a3b8';
-    }
-
-    let hash = 0;
-    for (let index = 0; index < normalized.length; index++) {
-      hash = ((hash * 31) + normalized.charCodeAt(index)) >>> 0;
-    }
-
-    const hue = hash % 360;
-    const saturation = 66 + (hash % 18);
-    const lightness = 50 + (hash % 12);
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-  }
-
   private updateAnonymitySummary(entries: JudgeValidProxy[]): void {
     const totals = entries.reduce(
       (acc, entry) => {
@@ -598,6 +655,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.reputationChart.set(buildReputationChart(
       labels.map((label, index) => ({label, value: values[index], color: REPUTATION_COLORS[index]})),
       value => this.numberFormatter.format(value),
+      this.localeId,
     ));
   }
 
@@ -615,12 +673,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const effectiveLimit = typeof limit === 'number' && Number.isFinite(limit) && limit >= 0 ? limit : null;
 
-    const labelFormatter = new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const labelFormatter = new Intl.DateTimeFormat(this.localeId, {dateStyle: 'medium', timeStyle: 'short'});
+    const dayFormatter = new Intl.DateTimeFormat(this.localeId, {day: '2-digit', month: '2-digit'});
 
     const entries = parsed.length ? parsed : [{timestamp: null, count: 0}];
     const points = entries.map((entry, index) => {
@@ -628,13 +682,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return {
         index,
         label: entry.timestamp ? labelFormatter.format(entry.timestamp) : this.proxyLineI18n.noDataLabel,
+        axisLabel: entry.timestamp ? dayFormatter.format(entry.timestamp) : undefined,
         count: entry.count,
         gained: Math.max(delta, 0),
         lost: Math.max(-delta, 0),
       };
     });
     this.inventoryLimit.set(effectiveLimit);
+    this.updateInventoryCaption(parsed);
     this.inventoryChart.set(buildInventoryChart(points, effectiveLimit, this.proxyLineI18n, value => this.numberFormatter.format(value)));
+  }
+
+  private updateInventoryCaption(entries: Array<{timestamp: Date; count: number}>): void {
+    if (!entries.length) {
+      this.inventoryRange.set('');
+      this.inventorySummary.set('No inventory history has been recorded yet.');
+      return;
+    }
+    const day = new Intl.DateTimeFormat(this.localeId, {day: '2-digit', month: '2-digit'});
+    const first = entries[0];
+    const last = entries[entries.length - 1];
+    const from = day.format(first.timestamp);
+    const to = day.format(last.timestamp);
+    this.inventoryRange.set(from === to ? from : `${from} – ${to}`);
+    const peak = Math.max(...entries.map(entry => entry.count));
+    this.inventorySummary.set(
+      `Active proxies (not paused or archived) went from ${this.numberFormatter.format(first.count)} on ${from} to ` +
+      `${this.numberFormatter.format(last.count)} on ${to}, peaking at ${this.numberFormatter.format(peak)}.`,
+    );
   }
 
   get inventoryLegend(): Array<{label: string; color: string; dashed?: boolean}> {
@@ -663,10 +738,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private resolveProxyLineI18n(_localeId: string): ProxyLineI18n {
     return {
-      title: 'Proxies per Hour (Last 7 Days)',
+      title: 'Proxy inventory',
       proxiesLabel: 'Proxies',
-      limitLabel: 'Proxy Limit',
-      noDataLabel: 'No Data',
+      limitLabel: 'Proxy limit',
+      noDataLabel: 'No data',
       tooltipProxiesLabel: 'Proxies',
       tooltipGainedLabel: 'Gained',
       tooltipLostLabel: 'Lost',

@@ -42,7 +42,7 @@
 }
 
 .filter-section__caption {
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   color: rgba(148, 163, 184, 0.86);
   margin-bottom: 0.75rem;
 }
@@ -85,10 +85,8 @@
   border: 0;
   background: transparent;
   color: rgba(226, 232, 240, 0.9);
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   cursor: pointer;
   transition: color 160ms ease-out, opacity 160ms ease-out;
 }
@@ -123,12 +121,10 @@
 
 .filter-label {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: rgba(226, 232, 240, 0.9);
   margin-bottom: 0.35rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .filter-section .grid {

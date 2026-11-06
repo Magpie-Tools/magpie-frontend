@@ -11,7 +11,8 @@ export type BulkActionScope = 'all' | 'selected';
   styleUrl: './bulk-scope-selector.component.scss',
 })
 export class BulkScopeSelectorComponent {
-  @Input() scope: BulkActionScope = 'all';
+  /** `null` means the user has not chosen a scope yet. */
+  @Input() scope: BulkActionScope | null = 'all';
   @Input() radioName = 'bulkActionScope';
   @Input() allInputId = 'bulkActionAll';
   @Input() selectedInputId = 'bulkActionSelected';

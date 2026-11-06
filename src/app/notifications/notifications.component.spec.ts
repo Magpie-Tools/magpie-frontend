@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { NotificationsComponent } from './notifications.component';
+import { NotificationsComponent, releasePreview } from './notifications.component';
 import { ReleaseFeed, ReleaseNote, UpdateNotificationService } from '../services/update-notification.service';
 import {provideRouter, Router} from '@angular/router';
 import {signal} from '@angular/core';
@@ -139,5 +139,13 @@ describe('NotificationsComponent', () => {
     expect(component.selectedRelease()).toBeNull();
     await router.navigateByUrl('/?release=42');
     expect(component.releaseDialogVisible()).toBeTrue();
+  });
+
+  it('previews release notes as plain text without boilerplate headings', () => {
+    expect(releasePreview("## What's Changed\n* Faster checks by [the team](https://example.com) in **#12**\n- Export button"))
+      .toBe('Faster checks by the team in #12 · Export button');
+    expect(releasePreview('Set `DB_USERNAME=admin` and **DB_PASSWORD**=admin, *then* restart'))
+      .toBe('Set DB_USERNAME=admin and DB_PASSWORD=admin, then restart');
+    expect(releasePreview('   ')).toBe('No changelog text provided.');
   });
 });

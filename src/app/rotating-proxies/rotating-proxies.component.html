@@ -13,13 +13,171 @@
       </div>
     </header>
 
+    <section class="fleet-section" aria-labelledby="fleet-title" [attr.aria-busy]="loading()">
+      <div class="fleet-heading">
+        <div class="card-heading">
+          <span class="card-icon"
+            ><i class="icon icon-network" aria-hidden="true"></i
+          ></span>
+          <div class="card-heading__copy">
+            <h2 id="fleet-title">Your rotating proxies</h2>
+          </div>
+        </div>
+        <div class="fleet-actions">
+          <span class="fleet-count">
+            @if (!hasLoaded()) {
+              Loading
+            } @else {
+              {{ rotatingProxies().length }} total
+            }
+          </span>
+          <button
+            type="button"
+            class="refresh-button"
+            [disabled]="loading()"
+            (click)="loadInitialData()"
+          >
+            <i
+              class="icon"
+              [class.icon-refresh-cw]="!loading()"
+              [class.icon-loader-circle]="loading()"
+              [class.icon-spin]="loading()"
+              aria-hidden="true"
+            ></i>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      @if (loading() && !hasLoaded()) {
+        <div class="rotator-list" role="status" aria-label="Loading rotating proxies">
+          @for (row of skeletonRows; track $index) {
+            <article class="rotator-card skeleton-card" aria-hidden="true">
+              <div class="skeleton-line">
+                <hlm-skeleton
+                  [style.width]="'55%'"
+                  [style.height]="'1rem'"
+                /><hlm-skeleton
+                  [style.width]="'20%'"
+                  [style.height]="'1rem'"
+                />
+              </div>
+              <hlm-skeleton [style.width]="'45%'" [style.height]="'0.75rem'" />
+              <hlm-skeleton [style.width]="'60%'" [style.height]="'2rem'" />
+            </article>
+          }
+        </div>
+      } @else if (!rotatingProxies().length) {
+        <div class="empty-state">
+          <span class="state-icon"
+            ><i class="icon icon-refresh-cw" aria-hidden="true"></i
+          ></span>
+          <div>
+            <strong>No rotating proxies yet</strong
+            ><span
+              >@if (workspaces.canOperate()) {
+                Create a listener route above to start serving healthy proxies.
+              } @else {
+                An operator or admin can create rotating proxies for this workspace.
+              }</span
+            >
+          </div>
+        </div>
+      } @else {
+        <div class="rotator-list" role="region" aria-label="Rotating proxy list" tabindex="0">
+          @for (proxy of rotatingProxies(); track proxy.id) {
+            <article class="rotator-card">
+              <header class="rotator-card__header">
+                <div class="rotator-identity">
+                  <span class="rotator-icon"><i class="icon icon-network" aria-hidden="true"></i></span>
+                  <div>
+                    <h3 [title]="proxy.name">{{ proxy.name }}</h3>
+                    <span class="rotator-status" [class.rotator-status--healthy]="proxy.alive_proxy_count > 0" [class.rotator-status--warning]="proxy.alive_proxy_count === 0">
+                      <span class="status-dot" aria-hidden="true"></span>
+                      {{ proxy.alive_proxy_count | number }} healthy {{ proxy.alive_proxy_count === 1 ? 'proxy' : 'proxies' }}
+                    </span>
+                  </div>
+                </div>
+              </header>
+              <div class="rotator-endpoint">
+                <span class="rotator-endpoint__protocol">{{ (proxy.listen_protocol || proxy.protocol || 'http') | uppercase }}</span>
+                <code class="rotator-endpoint__address" [title]="rotatorEndpoint(proxy)">{{ rotatorEndpoint(proxy) }}</code>
+                <button
+                  type="button"
+                  class="icon-action rotator-endpoint__copy"
+                  [attr.aria-label]="'Copy endpoint of ' + proxy.name"
+                  [hlmTooltip]="copiedEndpointId() === proxy.id ? 'Copied' : 'Copy endpoint'"
+                  (click)="copyEndpoint(proxy)"
+                >
+                  <i class="icon" [class.icon-check]="copiedEndpointId() === proxy.id" [class.icon-copy]="copiedEndpointId() !== proxy.id" aria-hidden="true"></i>
+                </button>
+              </div>
+
+              <footer class="rotator-actions">
+                <button
+                  type="button"
+                  class="text-action"
+                  (click)="showRotatorDetails(proxy)"
+                  [disabled]="isRotating(proxy.id)"
+                  [attr.aria-label]="'View connection for ' + proxy.name"
+                >
+                  View connection
+                  <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
+                </button>
+                <div>
+                  <button
+                    type="button"
+                    class="icon-action icon-action--rotate"
+                    [attr.aria-label]="'Rotate ' + proxy.name"
+                    [hlmTooltip]="
+                      isRotating(proxy.id) ? 'Rotating' : 'Rotate now'
+                    "
+                    (click)="rotate(proxy)"
+                    [disabled]="isRotating(proxy.id)"
+                  >
+                    <i
+                      class="icon"
+                      [class.icon-refresh-cw]="!isRotating(proxy.id)"
+                      [class.icon-loader-circle]="isRotating(proxy.id)"
+                      [class.icon-spin]="isRotating(proxy.id)"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                  @if (workspaces.canOperate()) {
+                    <button
+                      type="button"
+                      class="icon-action icon-action--danger"
+                      [attr.aria-label]="'Delete ' + proxy.name"
+                      hlmTooltip="Delete rotator"
+                      (click)="deleteProxy(proxy)"
+                      [disabled]="isRotating(proxy.id)"
+                    >
+                      <i class="icon icon-trash" aria-hidden="true"></i>
+                    </button>
+                  }
+                </div>
+              </footer>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
     @if (workspaces.canOperate()) {
       <form
         class="composer-form"
         [formGroup]="createForm"
         (ngSubmit)="createRotator()"
-        aria-label="Create rotator"
+        aria-labelledby="composer-title"
       >
+        <div class="composer-heading">
+          <span class="card-icon"><i class="icon icon-plus" aria-hidden="true"></i></span>
+          <div>
+            <h2 id="composer-title">Create a rotating proxy</h2>
+            <p>Choose where clients connect, which proxies serve traffic, and who may use the endpoint.</p>
+          </div>
+        </div>
+
         @if (noDefaultProtocolsEnabled()) {
           <div class="form-alert" role="status">
             <i class="icon icon-circle-alert" aria-hidden="true"></i>
@@ -234,6 +392,7 @@
                   >Uptime filter</label
                 >
                 <div class="uptime-controls">
+                  <label class="sr-only" for="uptimeFilterType">Uptime comparison</label>
                   <app-select
                     inputId="uptimeFilterType"
                     [options]="uptimeFilterTypeOptions"
@@ -428,142 +587,6 @@
       </section>
     }
 
-    <section class="fleet-section" aria-labelledby="fleet-title" [attr.aria-busy]="loading()">
-      <div class="fleet-heading">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-network" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2 id="fleet-title">Your rotating proxies</h2>
-          </div>
-        </div>
-        <div class="fleet-actions">
-          <span class="fleet-count">
-            @if (!hasLoaded()) {
-              Loading
-            } @else {
-              {{ rotatingProxies().length }} total
-            }
-          </span>
-          <button
-            type="button"
-            class="refresh-button"
-            [disabled]="loading()"
-            (click)="loadInitialData()"
-          >
-            <i
-              class="icon"
-              [class.icon-refresh-cw]="!loading()"
-              [class.icon-loader-circle]="loading()"
-              [class.icon-spin]="loading()"
-              aria-hidden="true"
-            ></i>
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      @if (loading() && !hasLoaded()) {
-        <div class="rotator-list" role="status" aria-label="Loading rotating proxies">
-          @for (row of skeletonRows; track $index) {
-            <article class="rotator-card skeleton-card" aria-hidden="true">
-              <div class="skeleton-line">
-                <hlm-skeleton
-                  [style.width]="'55%'"
-                  [style.height]="'1rem'"
-                /><hlm-skeleton
-                  [style.width]="'20%'"
-                  [style.height]="'1rem'"
-                />
-              </div>
-              <hlm-skeleton [style.width]="'45%'" [style.height]="'0.75rem'" />
-              <hlm-skeleton [style.width]="'60%'" [style.height]="'2rem'" />
-            </article>
-          }
-        </div>
-      } @else if (!rotatingProxies().length) {
-        <div class="empty-state">
-          <span class="state-icon"
-            ><i class="icon icon-refresh-cw" aria-hidden="true"></i
-          ></span>
-          <div>
-            <strong>No rotating proxies yet</strong
-            ><span
-              >@if (workspaces.canOperate()) {
-                Create a listener route above to start serving healthy proxies.
-              } @else {
-                An operator or admin can create rotating proxies for this workspace.
-              }</span
-            >
-          </div>
-        </div>
-      } @else {
-        <div class="rotator-list" role="region" aria-label="Rotating proxy list" tabindex="0">
-          @for (proxy of rotatingProxies(); track proxy.id) {
-            <article class="rotator-card">
-              <header class="rotator-card__header">
-                <div class="rotator-identity">
-                  <span class="rotator-icon"><i class="icon icon-network" aria-hidden="true"></i></span>
-                  <div>
-                    <h3 [title]="proxy.name">{{ proxy.name }}</h3>
-                    <span class="rotator-status" [class.rotator-status--healthy]="proxy.alive_proxy_count > 0" [class.rotator-status--warning]="proxy.alive_proxy_count === 0">
-                      <span class="status-dot" aria-hidden="true"></span>
-                      {{ proxy.alive_proxy_count | number }} healthy {{ proxy.alive_proxy_count === 1 ? 'proxy' : 'proxies' }}
-                    </span>
-                  </div>
-                </div>
-              </header>
-
-              <footer class="rotator-actions">
-                <button
-                  type="button"
-                  class="text-action"
-                  (click)="showRotatorDetails(proxy)"
-                  [disabled]="isRotating(proxy.id)"
-                  [attr.aria-label]="'View connection for ' + proxy.name"
-                >
-                  View connection
-                  <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
-                </button>
-                <div>
-                  <button
-                    type="button"
-                    class="icon-action icon-action--rotate"
-                    [attr.aria-label]="'Rotate ' + proxy.name"
-                    [hlmTooltip]="
-                      isRotating(proxy.id) ? 'Rotating' : 'Rotate now'
-                    "
-                    (click)="rotate(proxy)"
-                    [disabled]="isRotating(proxy.id)"
-                  >
-                    <i
-                      class="icon"
-                      [class.icon-refresh-cw]="!isRotating(proxy.id)"
-                      [class.icon-loader-circle]="isRotating(proxy.id)"
-                      [class.icon-spin]="isRotating(proxy.id)"
-                      aria-hidden="true"
-                    ></i>
-                  </button>
-                  @if (workspaces.canOperate()) {
-                    <button
-                      type="button"
-                      class="icon-action icon-action--danger"
-                      [attr.aria-label]="'Delete ' + proxy.name"
-                      hlmTooltip="Delete rotator"
-                      (click)="deleteProxy(proxy)"
-                      [disabled]="isRotating(proxy.id)"
-                    >
-                      <i class="icon icon-trash" aria-hidden="true"></i>
-                    </button>
-                  }
-                </div>
-              </footer>
-            </article>
-          }
-        </div>
-      }
-    </section>
   </section>
 </main>
 
@@ -790,7 +813,7 @@
           </dl>
         </section>
       </div>
-      <p class="rotator-dialog__created">Created <time [attr.datetime]="rotator.created_at">{{ rotator.created_at | date: "medium" }}</time></p>
+      <p class="rotator-dialog__created">Created <time [attr.datetime]="rotator.created_at">{{ rotator.created_at | date }}</time></p>
     </div>
   } @else {
     <div class="empty-details">

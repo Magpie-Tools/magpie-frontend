@@ -1,4 +1,6 @@
-import {ChangeDetectorRef, Component, computed, OnDestroy, OnInit, signal} from '@angular/core';
+import {formatDate} from '@angular/common';
+import {TIMESTAMP_FORMAT} from '../../../shared/date-formats';
+import {ChangeDetectorRef, Component, computed, OnDestroy, OnInit, signal, inject, LOCALE_ID} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {HlmInput} from '@spartan-ng/helm/input';
@@ -21,6 +23,7 @@ import {IPGeolocationStatus} from '../../../models/GlobalSettings';
   styleUrls: ['../plugin-abuseipdb/plugin-abuseipdb.component.scss', './plugin-ipgeolocation.component.scss']
 })
 export class PluginIPGeolocationComponent implements OnInit, OnDestroy {
+  private readonly locale = inject(LOCALE_ID);
   private destroy$ = new Subject<void>();
   status = signal<IPGeolocationStatus | null>(null);
   quotaUsagePercent = computed(() => {
@@ -93,6 +96,6 @@ export class PluginIPGeolocationComponent implements OnInit, OnDestroy {
   }
 
   timestamp(value?: string | null): string {
-    return value ? new Date(value).toLocaleString() : 'Never';
+    return value ? formatDate(value, TIMESTAMP_FORMAT, this.locale) : 'Never';
   }
 }

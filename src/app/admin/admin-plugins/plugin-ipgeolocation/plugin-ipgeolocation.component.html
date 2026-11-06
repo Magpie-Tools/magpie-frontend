@@ -60,7 +60,7 @@
         @if (statusError()) { <p class="error-note" role="alert">{{ statusError() }}</p> }
         <details class="lookup-help">
           <summary>How lookups work</summary>
-          <p>Only public IPs from active proxies are looked up. Routes on the same IP share cached results. Fresh provider data overrides local estimates; missing fields keep them.</p>
+          <p>Only public IPs from active proxies are looked up. Proxies on the same IP share cached results. Fresh provider data overrides local estimates; missing fields keep them.</p>
           <p>Credits are reserved before requests. Requests with unknown billing still count toward the daily budget.</p>
         </details>
       </section>

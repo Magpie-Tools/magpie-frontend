@@ -141,9 +141,9 @@ export class ProcesingPopupComponent implements OnInit, OnChanges, OnDestroy, Af
   private initializeMessages(): void {
     this.messages = [
       `Validating ${this.item}.`,
-      'Normalizing route formats.',
+      'Normalizing proxy formats.',
       'Removing duplicate entries.',
-      'Preparing routes for the checker.',
+      'Preparing proxies for the checker.',
       'Finalizing the import.',
     ];
     this.currentMessageIndex = 0;

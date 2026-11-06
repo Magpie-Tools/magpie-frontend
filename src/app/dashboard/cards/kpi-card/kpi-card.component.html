@@ -12,6 +12,8 @@
           hlmBadge
           class="metric-card__trend"
           [ngClass]="getChipClass(resolvedChange)"
+          [attr.title]="comparisonLabel ? 'Change ' + comparisonLabel : null"
+          [attr.aria-label]="'Change ' + formatChange(resolvedChange) + (comparisonLabel ? ' ' + comparisonLabel : '')"
         >
           <i
             class="icon"
@@ -24,6 +26,11 @@
     </div>
 
     <strong class="metric-card__value">{{ displayValue ?? value }}</strong>
+    @if (resolvedChange !== null && comparisonLabel) {
+      <span class="metric-card__comparison">{{ comparisonLabel }}</span>
+    } @else if (caption) {
+      <span class="metric-card__comparison">{{ caption }}</span>
+    }
 
     @if (sparklinePoints.length > 1) {
       <div class="metric-card__visual">

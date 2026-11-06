@@ -160,7 +160,7 @@
                         </div>
                         <dl class="rule-measurements">
                           <div><dt>Latest value</dt><dd class="latest-value">@if (item.last_value !== null) { {{ item.last_value | number:'1.0-2' }}<span>{{ unit(item.metric) }}</span> } @else { <span>Unknown</span> }</dd></div>
-                          <div><dt>Last evaluated</dt><dd>@if (item.last_evaluated_at) { <time [attr.datetime]="item.last_evaluated_at">{{ item.last_evaluated_at | date:'medium' }}</time> } @else { Waiting for evaluation }</dd></div>
+                          <div><dt>Last evaluated</dt><dd>@if (item.last_evaluated_at) { <time [attr.datetime]="item.last_evaluated_at">{{ item.last_evaluated_at | date }}</time> } @else { Waiting for evaluation }</dd></div>
                         </dl>
                         <p class="card-note">{{ measurementScope(item) }}</p>
                         @if (item.unknown_reason && item.status === 'unknown') { <p class="rule-notice"><i class="icon icon-info" aria-hidden="true"></i>{{ item.unknown_reason }}</p> }
@@ -297,8 +297,8 @@
                           <dl class="incident-measurements">
                             <div><dt>Opening value</dt><dd>{{ incident.opening_value | number:'1.0-2' }}{{ unit(incident.metric) }}</dd></div>
                             @if (incident.closing_value !== null) { <div><dt>Closing value</dt><dd>{{ incident.closing_value | number:'1.0-2' }}{{ unit(incident.metric) }}</dd></div> }
-                            <div><dt>Opened</dt><dd><time [attr.datetime]="incident.opened_at">{{ incident.opened_at | date:'medium' }}</time></dd></div>
-                            @if (incident.closed_at) { <div><dt>Closed</dt><dd><time [attr.datetime]="incident.closed_at">{{ incident.closed_at | date:'medium' }}</time></dd></div> }
+                            <div><dt>Opened</dt><dd><time [attr.datetime]="incident.opened_at">{{ incident.opened_at | date }}</time></dd></div>
+                            @if (incident.closed_at) { <div><dt>Closed</dt><dd><time [attr.datetime]="incident.closed_at">{{ incident.closed_at | date }}</time></dd></div> }
                           </dl>
                           <ul class="deliveries" aria-label="Message deliveries">
                             @for (delivery of page().deliveries; track delivery.id) {

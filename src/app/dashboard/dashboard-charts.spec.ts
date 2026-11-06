@@ -1,6 +1,6 @@
 import {createChartScene} from '@tanstack/charts';
 import type {ChartTooltipContentContext, SceneNode} from '@tanstack/charts';
-import {buildInventoryChart, buildLatencyChart, buildMetricChart, buildReputationChart, CHART_LIMIT_COLOR, CHART_SERIES_COLOR, InventoryLabels, LatencyPoint} from './dashboard-charts';
+import {buildInventoryChart, buildLatencyChart, buildMetricChart, buildReputationChart, CHART_LIMIT_COLOR, CHART_SERIES_COLOR, InventoryLabels, inventoryTickIndexes, LatencyPoint} from './dashboard-charts';
 
 const tooltipContext: ChartTooltipContentContext = {
   pinned: false, xLabel: '', yLabel: '', formatX: String, formatY: String,
@@ -69,7 +69,7 @@ describe('Spartan dashboard chart definitions', () => {
     if ('content' in chart.tooltip) expect(chart.tooltip.content!([scene.points[2]], tooltipContext)).toEqual({
       title: '#3 192.0.2.3:8080', rows: [
         {label: 'Latency', value: '90 ms'}, {label: 'Country', value: 'France'},
-        {label: 'Reputation', value: 'Bad, score 70.0'},
+        {label: 'Reputation', value: 'Poor, score 70,0'},
       ],
     });
   });
@@ -81,6 +81,16 @@ describe('Spartan dashboard chart definitions', () => {
     const scene = createChartScene(chart, {width: 600, height: 288});
     const point = scene.points.find(point => point.markId === 'reputation' && point.datum.label === 'Good')!;
     expect(point.color).toBe('#22c55e');
-    if ('format' in chart.tooltip) expect(chart.tooltip.format!(point, tooltipContext)).toBe('Good: 1.200 (75.0%)');
+    if ('format' in chart.tooltip) expect(chart.tooltip.format!(point, tooltipContext)).toBe('Good: 1.200 (75,0%)');
+  });
+
+  it('labels long inventory histories with at most eight daily ticks', () => {
+    const points = Array.from({length: 30 * 24}, (_, index) => ({
+      index, label: `hour ${index}`, axisLabel: `day ${Math.floor(index / 24)}`, count: index, gained: 1, lost: 0,
+    }));
+    const ticks = inventoryTickIndexes(points);
+    expect(ticks.length).toBeLessThanOrEqual(8);
+    expect(ticks.every(index => index % 24 === 0)).toBeTrue();
+    expect(inventoryTickIndexes(points.slice(0, 5))).toEqual([0, 1, 2, 3, 4]);
   });
 });

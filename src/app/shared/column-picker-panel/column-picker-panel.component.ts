@@ -3,7 +3,7 @@ import {HlmBadge} from '@spartan-ng/helm/badge';
 import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmPopoverDescription, HlmPopoverHeader, HlmPopoverTitle} from '@spartan-ng/helm/popover';
 import {CdkDrag, CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal} from '@angular/core';
+import {afterNextRender, Component, DestroyRef, ElementRef, EventEmitter, inject, Injector, Input, OnChanges, Output, SimpleChanges, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 
 export interface ColumnPickerItem {
@@ -17,6 +17,7 @@ export interface ColumnPickerItem {
   selector: 'app-column-picker-panel',
   standalone: true,
   imports: [HlmButton, HlmBadge, HlmInput, HlmPopoverHeader, HlmPopoverTitle, HlmPopoverDescription, FormsModule, DragDropModule],
+  host: {'(window:resize)': 'measureAvailableHeight()'},
   templateUrl: './column-picker-panel.component.html',
   styleUrl: './column-picker-panel.component.scss'
 })
@@ -33,6 +34,66 @@ export class ColumnPickerPanelComponent implements OnChanges {
 
   editorColumns = signal<string[]>([]);
   search = signal('');
+  /** Space the overlay actually offers in its current placement, so header and footer stay on screen. */
+  readonly availableHeight = signal<number | null>(null);
+  /** Announces keyboard reordering for screen readers. */
+  readonly moveAnnouncement = signal('');
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly injector = inject(Injector);
+
+  constructor() {
+    // The overlay is positioned after the first render; measure on the following frame and
+    // again whenever CDK resizes the bounding box (for example when it flips above the trigger).
+    afterNextRender(() => {
+      const box = this.overlayBoundingBox();
+      const observer = box ? new ResizeObserver(() => this.measureAvailableHeight()) : undefined;
+      if (box) observer!.observe(box);
+      this.destroyObserver = () => observer?.disconnect();
+      requestAnimationFrame(() => this.measureAvailableHeight());
+    });
+    inject(DestroyRef).onDestroy(() => this.destroyObserver?.());
+  }
+
+  private destroyObserver?: () => void;
+
+  measureAvailableHeight(): void {
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia?.('(max-width: 48rem)').matches) {
+      // Phones show the picker as a fixed sheet inset 0.75rem from every edge (see styles.css).
+      this.availableHeight.set(Math.floor(window.innerHeight - 26));
+      return;
+    }
+    const host = this.host.nativeElement as HTMLElement;
+    const rect = host.getBoundingClientRect();
+    const box = this.overlayBoundingBox()?.getBoundingClientRect();
+    // Below the trigger: space down to the viewport edge. Above it: CDK's bounding box ends at the trigger.
+    const belowSpace = window.innerHeight - Math.max(rect.top, 0) - 12;
+    const boxSpace = box ? box.height - 12 : belowSpace;
+    this.availableHeight.set(Math.max(200, Math.floor(Math.min(belowSpace, boxSpace))));
+  }
+
+  private overlayBoundingBox(): HTMLElement | null {
+    return (this.host.nativeElement as HTMLElement).closest<HTMLElement>('.cdk-overlay-connected-position-bounding-box');
+  }
+
+  /** Keyboard alternative to dragging: moves a visible column one position and keeps focus on it. */
+  moveColumn(id: string, delta: -1 | 1): void {
+    if (this.columnSearchActive()) return;
+    const columns = [...this.editorColumns()];
+    const from = columns.indexOf(id);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= columns.length) return;
+    moveItemInArray(columns, from, to);
+    this.editorColumns.set(columns);
+    const label = this.columnById.get(id)?.label ?? id;
+    this.moveAnnouncement.set(`${label} moved to position ${to + 1} of ${columns.length}.`);
+    afterNextRender(() => {
+      const host = this.host.nativeElement as HTMLElement;
+      const same = host.querySelector<HTMLButtonElement>(`[data-move-id="${id}"][data-move-dir="${delta}"]`);
+      const other = host.querySelector<HTMLButtonElement>(`[data-move-id="${id}"][data-move-dir="${-delta}"]`);
+      (same && !same.disabled ? same : other)?.focus();
+    }, {injector: this.injector});
+  }
 
   private columnById = new Map<string, ColumnPickerItem>();
 
