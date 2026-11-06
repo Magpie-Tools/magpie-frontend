@@ -319,11 +319,6 @@ export class ScrapeSourceListComponent implements OnInit, OnDestroy {
     this.selectedScrapeSources = [...this.selection.selected];
   }
 
-  clearSelection(): void {
-    this.selection.clear();
-    this.selectedScrapeSources = [];
-  }
-
   refreshList(): void {
     this.selection.clear();
     this.selectedScrapeSources = [];

@@ -30,15 +30,9 @@ export class FastestAliveProxiesCardComponent {
   readonly reputationLegend = [
     { label: 'Good', className: 'shape-dot shape-dot--good' },
     { label: 'Neutral', className: 'shape-dot shape-dot--neutral' },
-    { label: 'Poor', className: 'shape-dot shape-dot--bad' },
+    { label: 'Bad', className: 'shape-dot shape-dot--bad' },
     { label: 'Unknown', className: 'shape-dot shape-dot--unknown' }
   ];
-
-  get chartSummary(): string {
-    const countries = [...this.countryLegend].sort((a, b) => b.count - a.count).slice(0, 3)
-      .map(entry => `${entry.country} ${entry.count}`).join(', ');
-    return countries ? `${this.proxyCount} proxies plotted. Most routes: ${countries}.` : '';
-  }
 
   get titleSuffix(): string {
     if (this.proxyCount <= 0) {

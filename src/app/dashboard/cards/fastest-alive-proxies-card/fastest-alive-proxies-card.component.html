@@ -31,7 +31,6 @@
 
           <div
             class="fastest-alive-card__shape-legend"
-            role="group"
             aria-label="Reputation shape legend"
           >
             @for (entry of reputationLegend; track entry.label) {
@@ -49,7 +48,7 @@
   @if (proxyCount > 0) {
     <div class="fastest-alive-card__body">
       <div class="fastest-alive-card__chart">
-        <app-chart [definition]="chart" label="Alive proxy latency by country and reputation" [summary]="chartSummary" />
+        <app-chart [definition]="chart" label="Alive proxy latency by country and reputation" />
       </div>
 
       <aside
@@ -58,7 +57,7 @@
       >
         <div class="country-legend__heading">
           <span>Country</span>
-          <span>Proxies</span>
+          <span>Routes</span>
         </div>
         @for (entry of countryLegend; track entry.country) {
           <div class="country-key">

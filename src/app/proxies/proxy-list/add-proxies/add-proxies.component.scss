@@ -35,8 +35,8 @@
   gap: 0.08rem;
 
   > span {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.42);
+    font-size: 0.58rem;
     font-weight: 620;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -77,14 +77,14 @@
 
   h3 {
     color: rgba(255, 255, 255, 0.9);
-    font-size: 0.84rem;
+    font-size: 0.76rem;
     font-weight: 590;
   }
 
   p {
     margin-top: 0.18rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.42);
+    font-size: 0.63rem;
     line-height: 1.45;
   }
 }
@@ -131,8 +131,8 @@
   }
 
   div { display: grid; gap: 0.12rem; }
-  strong { color: rgba(255, 255, 255, 0.9); font-size: 0.84rem; }
-  small { color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; }
+  strong { color: rgba(255, 255, 255, 0.9); font-size: 0.78rem; }
+  small { color: rgba(255, 255, 255, 0.4); font-size: 0.61rem; }
 }
 
 .upload-details__grid {
@@ -152,16 +152,16 @@
   }
 
   dt,
-  dd { margin: 0; font-size: 0.75rem; }
-  dt { color: rgba(255, 255, 255, 0.62); }
+  dd { margin: 0; font-size: 0.63rem; }
+  dt { color: rgba(255, 255, 255, 0.42); }
   dd { color: rgba(255, 255, 255, 0.84); font-weight: 620; }
 }
 
 .upload-details__note,
 .upload-details__empty {
   margin: 0;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.61rem;
 }
 
 .upload-details__note {
@@ -201,7 +201,7 @@
   width: 2.15rem;
   height: 2.15rem;
   border-radius: 0.68rem;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.42);
 }
 
 ::ng-deep .proxy-upload-details-dialog [data-slot="dialog-close"]:hover {

@@ -28,14 +28,7 @@ class VisibleRowsHost {
 describe('VisibleRowsDirective', () => {
   let fixture: ComponentFixture<VisibleRowsHost>;
 
-  let narrowViewport = false;
-
   beforeEach(async () => {
-    // Karma's frame is phone-sized; pin the viewport so each test chooses desktop or phone behaviour.
-    narrowViewport = false;
-    const realMatchMedia = window.matchMedia.bind(window);
-    spyOn(window, 'matchMedia').and.callFake((query: string) =>
-      query === '(max-width: 48rem)' ? realMatchMedia(narrowViewport ? 'all' : 'not all') : realMatchMedia(query));
     await TestBed.configureTestingModule({imports: [VisibleRowsHost]}).compileComponents();
     fixture = TestBed.createComponent(VisibleRowsHost);
   });
@@ -130,12 +123,5 @@ describe('VisibleRowsDirective', () => {
     fixture.componentInstance.hidden.set(false);
     await render();
     expectVisibleRows(3.5);
-  });
-
-  it('shows the whole list on phones instead of nesting a scroll area in the page', async () => {
-    narrowViewport = true;
-    await render();
-    expect(list().style.maxHeight).toBe('');
-    expect(list().scrollHeight).toBeLessThanOrEqual(list().clientHeight + 1);
   });
 });

@@ -5,7 +5,7 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs/operators';
 import {NgIcon, provideIcons} from '@ng-icons/core';
 import {lucideChevronsUpDown} from '@ng-icons/lucide';
-import {Router, RouterLink, RouterLinkActive} from '@angular/router';
+import {RouterLink, RouterLinkActive} from '@angular/router';
 import {UserService} from "../services/authorization/user.service";
 
 import {gsap} from 'gsap';
@@ -30,17 +30,8 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   private adminRefreshTimer?: ReturnType<typeof setTimeout>;
   private motionContext?: gsap.Context;
 
-  private readonly router = inject(Router);
-
   constructor(protected user: UserService,
               private elementRef: ElementRef) {}
-
-  /** Expand a group while one of its pages is open, so the sidebar always shows the current location. */
-  isGroupActive(group: NavigationItem): boolean {
-    return (group.items ?? []).some(item => !!item.routerLink && this.router.isActive(item.routerLink, {
-      paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored',
-    }));
-  }
 
   ngOnInit() {
     this.updateNavigationItems();
@@ -77,17 +68,17 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
         visible: UserService.isAdmin(),
         items: [
           {
-            label: 'Global checker',
+            label: 'Global Checker',
             icon: 'icon icon-sliders-horizontal',
             routerLink: '/global/checker'
           },
           {
-            label: 'Global scraper',
+            label: 'Global Scraper',
             icon: 'icon icon-cloud-download',
             routerLink: '/global/scraper'
           },
           {
-            label: 'Global blacklist',
+            label: 'Global Blacklist',
             icon: 'icon icon-ban',
             routerLink: '/global/blacklist'
           },

@@ -1,4 +1,4 @@
-<app-auth title="Create account">
+<app-auth title="Register">
   <form
     [formGroup]="registerForm"
     (ngSubmit)="onRegister()"
@@ -73,12 +73,12 @@
       hlmBtn
       variant="default"
     >
-      Create account
+      Register
     </button>
 
     <p class="switch-link text-center mt-2">
       Already have an account?
-      <a routerLink="/login" class="auth-inline-link">Sign in</a>
+      <a routerLink="/login" class="text-blue-500 hover:underline">Login</a>
     </p>
   </form>
 </app-auth>

@@ -1,11 +1,9 @@
 import {HlmButton} from '@spartan-ng/helm/button';
 import {HlmCardImports} from '@spartan-ng/helm/card';
-import {Component, EventEmitter, inject, Input, LOCALE_ID, Output} from '@angular/core';
-import {formatNumber} from '@angular/common';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 import {NgStyle, DatePipe} from '@angular/common';
 import {ProxyCheck} from '../../../models/ProxyCheck';
-import {splitHostPort} from '../../../shared/proxy-address';
 
 @Component({
   selector: 'app-proxy-history-card',
@@ -15,14 +13,11 @@ import {splitHostPort} from '../../../shared/proxy-address';
   styleUrl: './proxy-history-card.component.scss'
 })
 export class ProxyHistoryCardComponent {
-  @Input() title = 'Recent checks';
+  @Input() title = 'Proxy History';
   @Input() history: ProxyCheck[] = [];
   @Input() styleClass = 'dashboard-card history-card';
   @Input() refreshing = false;
   @Output() refresh = new EventEmitter<void>();
-
-  protected readonly splitAddress = splitHostPort;
-  private readonly locale = inject(LOCALE_ID);
 
   onRefreshClick(): void {
     if (this.refreshing) {
@@ -59,6 +54,6 @@ export class ProxyHistoryCardComponent {
   }
 
   formatLatency(latency?: number): string {
-    return latency ? `${formatNumber(latency, this.locale)} ms` : '-';
+    return latency ? `${latency} ms` : '-';
   }
 }

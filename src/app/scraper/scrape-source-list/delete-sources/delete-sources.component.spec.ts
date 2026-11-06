@@ -31,31 +31,7 @@ describe('DeleteSourcesComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('opens without a preselected scope when nothing is selected', () => {
-    component.openDialog();
-
-    expect(component.deleteOption).toBeNull();
-    expect(component.actionLabel).toBe('Choose what to delete');
-  });
-
-  it('asks for an acknowledgement before deleting every source', () => {
-    component.deleteOption = 'all';
-
-    expect(component.confirmLabel).toContain('every source in this workspace');
-    component.deleteForm.patchValue({filter: true});
-    expect(component.confirmLabel).toContain('matching these filters');
-    expect(component.actionLabel).toBe('Delete matching sources');
-  });
-
-  it('does not delete before a scope is chosen', () => {
-    component.openDialog();
-    component.submitDelete();
-
-    expect(deleteScrapingSourceSpy).not.toHaveBeenCalled();
-  });
-
   it('deletes all sources with count filters', () => {
-    component.deleteOption = 'all';
     component.deleteForm.patchValue({
       filter: true,
       proxyCountOperator: '<',

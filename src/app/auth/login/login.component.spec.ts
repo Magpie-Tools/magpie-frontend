@@ -143,7 +143,7 @@ describe('LoginComponent', () => {
 
     component.onLogin();
 
-    expect(showErrorSpy).toHaveBeenCalledWith('Sign-in failed: Too many login attempts. Please try again later.');
+    expect(showErrorSpy).toHaveBeenCalledWith('Login failed: Too many login attempts. Please try again later.');
   });
 
   it('should fall back to a friendly network error message', () => {
@@ -160,7 +160,7 @@ describe('LoginComponent', () => {
 
     component.onLogin();
 
-    expect(showErrorSpy).toHaveBeenCalledWith('Sign-in failed: Unable to reach the server');
+    expect(showErrorSpy).toHaveBeenCalledWith('Login failed: Unable to reach the server');
     expect(getUserProfileSpy).not.toHaveBeenCalled();
   });
 });

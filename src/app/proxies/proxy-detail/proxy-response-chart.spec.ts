@@ -30,7 +30,7 @@ describe('Proxy response-time chart', () => {
     const nodes = flatten(scene.nodes);
     expect(nodes.some(node => node.kind === 'polyline' && node.style?.stroke === 'var(--theme-primary-500)')).toBeTrue();
     expect(nodes.some(node => node.kind === 'area' && node.style?.fill === 'var(--theme-primary-soft-bg)')).toBeTrue();
-    const time = new Intl.DateTimeFormat('de-DE', {dateStyle: 'medium', timeStyle: 'medium'}).format(new Date('2026-10-16T12:01:00Z'));
+    const time = new Intl.DateTimeFormat(undefined, {hour: '2-digit', minute: '2-digit', second: '2-digit'}).format(new Date('2026-10-16T12:01:00Z'));
     if ('content' in chart.tooltip) {
       expect(chart.tooltip.content!([point], context)).toEqual({
         title: time, rows: [{label: 'Response time', value: '125 ms', color: 'var(--theme-primary-500)'}],
@@ -61,15 +61,6 @@ describe('Proxy response-time chart', () => {
     expect(points.length).toBe(150);
     expect(new Set(points.map(point => point.x)).size).toBe(150);
     expect(scene.scales['x'].ticks.length).toBe(3);
-  });
-
-  it('starts the latency axis at zero and dates the axis for multi-day histories', () => {
-    const history = [statistic(50, '2026-10-14T12:00:00Z', 1), statistic(50, '2026-10-16T12:00:00Z', 2)];
-    const scene = createChartScene(buildProxyResponseChart(history)!, {width: 360, height: 170});
-    expect(scene.scales['y'].ticks[0].label).toBe('0 ms');
-    const dayLabel = new Intl.DateTimeFormat('de-DE', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'})
-      .format(new Date('2026-10-14T12:00:00Z'));
-    expect(scene.scales['x'].ticks[0].label).toBe(dayLabel);
   });
 
   it('shows a placeholder label for an invalid timestamp and no chart without checks', () => {

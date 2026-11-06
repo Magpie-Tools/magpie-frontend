@@ -52,7 +52,7 @@
   border: 1px solid currentColor;
   border-radius: 0.58rem;
   background: color-mix(in srgb, currentColor 9%, transparent);
-  font-size: 0.8125rem;
+  font-size: 0.68rem;
 }
 
 .history-row__route {
@@ -67,26 +67,21 @@
   white-space: nowrap;
 }
 
-/* Only the host truncates; the port stays visible so routes on one host stay distinguishable. */
-.history-row__route strong.history-row__address { display: flex; }
-.history-row__route .history-row__host { display: block; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; color: inherit; font-size: inherit; }
-.history-row__route .history-row__port { display: inline; flex: 0 0 auto; margin: 0; overflow: visible; color: inherit; font-size: inherit; }
-
 .history-row__route strong {
   color: rgba(255, 255, 255, 0.79);
-  font-size: 0.75rem;
+  font-size: 0.67rem;
   font-weight: 570;
 }
 
 .history-row__route span {
   margin-top: 0.17rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 0.55rem;
 }
 
 .history-row__latency {
   color: rgba(255, 255, 255, 0.56);
-  font-size: 0.75rem;
+  font-size: 0.62rem;
   font-variant-numeric: tabular-nums;
 }
 

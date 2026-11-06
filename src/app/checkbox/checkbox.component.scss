@@ -1,31 +1,8 @@
 @use "sass:color";
 
-/* Keep the native input focusable and announced; the label draws the visible control. */
 .checkbox-wrapper-46 input[type="checkbox"] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
-
-.checkbox-wrapper-46 {
-  position: relative;
-}
-
-.checkbox-wrapper-46 .inp-cbx:focus-visible + .cbx {
-  outline: 2px solid var(--ring, var(--theme-primary-300));
-  outline-offset: 2px;
-}
-
-.checkbox-wrapper-46 .inp-cbx:disabled + .cbx {
-  cursor: not-allowed;
-  opacity: 0.55;
+  display: none;
+  visibility: hidden;
 }
 
 .checkbox-wrapper-46 .cbx {

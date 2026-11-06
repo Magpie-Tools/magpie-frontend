@@ -26,7 +26,7 @@
   min-height: 2.2rem;
   padding: 0.35rem 0.7rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.36);
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -59,7 +59,7 @@
   border-radius: 50%;
   background: rgba(var(--theme-primary-500-rgb), 0.1);
   color: var(--theme-primary-200);
-  font-size: 0.8125rem;
+  font-size: 0.69rem;
   font-weight: 620;
 }
 
@@ -87,7 +87,7 @@
 
 .workspace-page .identity-cell > div > span {
   margin-top: 0.2rem;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.36);
   font-size: 0.8rem;
 }
 

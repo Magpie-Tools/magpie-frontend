@@ -38,10 +38,9 @@
     }
   }
 
-  /* Shape as well as colour: filled = alive, ring = dead, dashed ring = unknown. */
   &.dead {
-    border: 2px solid var(--proxy-dead);
-    background-color: transparent;
+    background-color: var(--proxy-dead);
+    opacity: 0.85;
   }
 }
 
@@ -97,7 +96,7 @@
   border-radius: .45rem;
   background: rgba(148, 163, 184, .08);
   color: rgba(226, 232, 240, .8);
-  font-size: 0.8125rem;
+  font-size: .72rem;
   cursor: pointer;
 }
 
@@ -125,7 +124,7 @@
   border: 1px solid rgba(148, 163, 184, .3);
   border-radius: 999px;
   padding: .18rem .45rem;
-  font-size: 0.75rem;
+  font-size: .62rem;
   font-weight: 700;
   letter-spacing: .05em;
   text-transform: uppercase;
@@ -220,6 +219,7 @@
 }
 
 .reputation-cell {
+  min-width: 140px;
   white-space: nowrap;
 }
 
@@ -244,7 +244,7 @@
   gap: 0.35rem;
   padding: 0.2rem 0.65rem;
   border-radius: 9999px;
-  font-size: 0.84rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -367,179 +367,4 @@
   min-width: 12rem;
 }
 
-.status-dot.unknown { border: 2px dashed var(--muted-foreground); background: transparent; }
-
-/* Bound wide cells so the default columns fit at 1280–1440px with the sidebar open. */
-:host { container: proxy-table / inline-size; }
-
-.copy-cell { max-width: clamp(11rem, 17vw, 16rem); }
-.copy-cell .copy-value { justify-content: flex-start; text-align: left; }
-.copy-value { overflow: hidden; }
-.copy-value__text { overflow: hidden; text-overflow: ellipsis; }
-.copy-value__text--address { display: inline-flex; min-width: 0; max-width: 100%; }
-.copy-value__host { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Chromium breaks at <wbr> even under nowrap; the break points only apply to phone cards. */
-.copy-value__host wbr { display: none; }
-.copy-value__port { flex: 0 0 auto; }
-/* A fixed width lets the tag selector fit as many chips as the cell holds, then show "+N". */
-.proxy-tags-cell { width: 11rem; min-width: 11rem; max-width: 11rem; }
-.latest-check-cell { white-space: nowrap; }
-
-.status-indicator { display: inline-flex; align-items: center; gap: 0.4rem; }
-.status-text { display: none; }
-
-/* The status column holds only the indicator, so its header keeps just the sort control. */
-.status-head-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-:host ::ng-deep .data-table :is(th.status-column, td.status-cell) { width: 2.75rem; }
-
-:host ::ng-deep .data-table :is(td.proxy-actions-cell, th.actions-column) {
-  position: sticky;
-  right: 0;
-  z-index: 1;
-  background: #0b0b0e !important;
-  box-shadow: inset 1px 0 rgba(255, 255, 255, 0.07), -14px 0 16px -12px rgba(0, 0, 0, 0.85);
-}
-
-:host ::ng-deep .data-table tbody > tr:is(:hover, [data-state="selected"]) > td.proxy-actions-cell {
-  background: linear-gradient(rgba(var(--theme-primary-500-rgb), 0.08), rgba(var(--theme-primary-500-rgb), 0.08)), #0b0b0e !important;
-}
-
-/*
- * Phones: each route becomes a compact card. Line 1: select, address, status, actions.
- * Then the remaining fields in three columns (label above value); tags span the card.
- */
-@container proxy-table (max-width: 640px) {
-  .status-head-label { position: static; width: auto; height: auto; clip-path: none; }
-  .status-text { display: inline; }
-
-  :host ::ng-deep .data-table {
-    table, thead, tbody { display: block; width: 100%; }
-
-    /* Sort chips wrap so every sortable field stays visible (no hidden sideways scroll). */
-    thead > tr {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.65rem 0.75rem;
-    }
-
-    thead > tr > th { display: none; }
-
-    thead > tr > th:is(.select-column, [aria-sort]) {
-      display: inline-flex;
-      flex: 0 0 auto;
-      width: auto !important;
-      min-height: 2.75rem;
-      align-items: center;
-      padding: 0 0.7rem !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      border-radius: 999px !important;
-    }
-
-    /*
-     * One three-column grid per card keeps field labels aligned across rows and cards.
-     * Select and actions sit absolutely on the address line.
-     */
-    tbody > tr {
-      position: relative;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      align-items: start;
-      gap: 0.55rem 0.75rem;
-      padding: 0.8rem 0.75rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    }
-
-    /* The whole card carries the hover/selected tint; cells stay transparent so it never breaks into patches. */
-    tbody > tr > td { background: transparent !important; }
-    tbody > tr[data-state="selected"] { background: rgba(var(--theme-primary-500-rgb), 0.1); }
-
-    tbody > tr > td {
-      display: flex;
-      min-width: 0;
-      max-width: none;
-      width: auto !important;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.15rem;
-      order: 4;
-      padding: 0 !important;
-      border: 0 !important;
-      border-radius: 0 !important;
-      white-space: normal;
-    }
-
-    tbody > tr > td[data-label]::before {
-      content: attr(data-label);
-      color: rgba(255, 255, 255, 0.62);
-      font-size: 0.75rem;
-    }
-
-    td.select-cell { position: absolute; top: 0.8rem; left: 0.75rem; display: flex; min-height: 2.75rem; justify-content: center; }
-
-    td.identity-cell {
-      min-height: 2.75rem;
-      grid-column: 1 / -1;
-      justify-content: center;
-      order: 1;
-      padding: 0 3rem 0 2.25rem !important;
-      font-size: 0.875rem;
-      font-weight: 600;
-
-      &::before { display: none; }
-
-      .copy-value { justify-content: flex-start; text-align: left; }
-      /* Cards show the whole address, breaking only at the <wbr> points after ".", ":", "-" and "/". */
-      .copy-value__text--address { display: inline; }
-      .copy-value__host { white-space: normal; overflow: visible; overflow-wrap: break-word; }
-      .copy-value__host wbr { display: inline; }
-    }
-
-    td.identity-cell ~ td.identity-cell {
-      min-height: 0;
-      grid-column: auto;
-      order: 4;
-      padding: 0 !important;
-      font-size: inherit;
-      font-weight: inherit;
-    }
-
-    td.status-cell { order: 3; }
-
-    td.proxy-actions-cell {
-      position: absolute;
-      top: 0.8rem;
-      right: 0.5rem;
-      background: transparent !important;
-      box-shadow: none;
-
-      &::before { display: none; }
-
-      .proxy-actions-trigger { width: 2.75rem; height: 2.75rem; }
-    }
-
-    td.proxy-tags-cell { grid-column: 1 / -1; min-width: 0; order: 5; }
-    td.proxy-tags-cell > app-proxy-tag-selector { width: 100%; max-width: none; }
-    td.latest-check-cell { white-space: normal; }
-
-    /* Badges fit one column: tighter tracking and padding than the desktop table. */
-    td.reputation-cell :is(.reputation-badge, .lifecycle-state) { max-width: 100%; padding: 0.22rem 0.4rem; letter-spacing: 0.02em; }
-
-    td[colspan] { grid-column: 1 / -1; align-items: center; }
-  }
-}
-
-@media (hover: hover) {
-  @container proxy-table (max-width: 640px) {
-    :host ::ng-deep .data-table tbody > tr:not([data-state="selected"]):hover { background: rgba(var(--theme-primary-500-rgb), 0.05); }
-  }
-}
+.status-dot.unknown { background: var(--muted-foreground); opacity: .55; }

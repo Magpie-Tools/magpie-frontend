@@ -1,12 +1,6 @@
 :host {
   display: block;
-  container: pagination / inline-size;
 }
-
-:host ::ng-deep .pagination-size select {
-  min-width: 8.5rem;
-}
-
 
 .table-pagination {
   display: flex;
@@ -17,8 +11,8 @@
   padding: 0.62rem 0.72rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.022);
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.65rem;
 }
 
 .page-jump {
@@ -102,39 +96,4 @@
   .icon {
     font-size: 0.65rem;
   }
-}
-
-/* Narrow tables: stack the summary, the page buttons, and page jump; first/last stay in page jump. */
-@container pagination (max-width: 560px) {
-  .table-pagination {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.6rem;
-  }
-
-  /* Previous and Next share the full width; the page-size select spans it. */
-  .pagination-controls {
-    display: grid;
-    width: 100%;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .pagination-size { grid-column: 1 / -1; }
-
-  :host ::ng-deep .pagination-size :is(hlm-native-select, select) { width: 100%; }
-
-  .pagination-edge { display: none; }
-
-  :host ::ng-deep .pagination-controls [hlmBtn] { min-height: 2.75rem; }
-
-  .page-jump {
-    margin-inline-start: 0;
-    padding-inline-start: 0;
-    border-inline-start: 0;
-  }
-
-  .page-jump__input,
-  .page-jump__submit { height: 2.75rem; }
-
-  .page-jump__scroll-toggle { width: 2.75rem; height: 2.75rem; }
 }

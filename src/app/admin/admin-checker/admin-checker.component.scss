@@ -91,7 +91,7 @@
   gap: 0.25rem;
 
   strong { color: #fff; font-size: 0.88rem; font-weight: 580; }
-  small { max-height: 0; overflow: hidden; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; line-height: 1.35; opacity: 0; transform: translateY(0.35rem); transition: 0.3s ease; }
+  small { max-height: 0; overflow: hidden; color: rgba(255, 255, 255, 0.48); font-size: 0.67rem; line-height: 1.35; opacity: 0; transform: translateY(0.35rem); transition: 0.3s ease; }
 }
 
 .protocol-choice__state {
@@ -101,8 +101,8 @@
   padding: 0.28rem 0.46rem;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 999px;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.62rem;
 }
 
 .cadence-summary,
@@ -118,7 +118,7 @@
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.025);
 
-  span { color: rgba(255, 255, 255, 0.62); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  span { color: rgba(255, 255, 255, 0.46); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
   strong { color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; font-weight: 580; }
 }
 
@@ -145,7 +145,7 @@
   align-items: center;
   gap: 0.42rem;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.8125rem;
+  font-size: 0.72rem;
   font-weight: 560;
 }
 
@@ -173,7 +173,7 @@
   &:focus-within { border-color: rgba(var(--theme-primary-300-rgb), 0.55); box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13); }
 
   input { flex: 1 1 auto; min-width: 0; border: 0 !important; background: transparent !important; box-shadow: none !important; }
-  span { flex: 0 0 auto; padding: 0 0.75rem; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; }
+  span { flex: 0 0 auto; padding: 0 0.75rem; color: rgba(255, 255, 255, 0.37); font-size: 0.62rem; }
 }
 
 .performance-summary {
@@ -181,8 +181,8 @@
 
   > strong { color: var(--theme-primary-200); font-size: 1.65rem; letter-spacing: -0.05em; }
   p { display: flex; flex-direction: column; margin: 0; }
-  p span { color: rgba(255, 255, 255, 0.66); font-size: 0.8125rem; font-weight: 580; }
-  small { margin-top: 0.15rem; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; }
+  p span { color: rgba(255, 255, 255, 0.66); font-size: 0.68rem; font-weight: 580; }
+  small { margin-top: 0.15rem; color: rgba(255, 255, 255, 0.4); font-size: 0.63rem; }
 }
 
 .decision-list {
@@ -216,9 +216,9 @@
 .decision-row__copy {
   min-width: 0;
 
-  strong { color: rgba(255, 255, 255, 0.88); font-size: 0.84rem; font-weight: 580; }
-  p { margin: 0.18rem 0; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; line-height: 1.4; }
-  span { color: var(--theme-primary-300); font-size: 0.72rem; }
+  strong { color: rgba(255, 255, 255, 0.88); font-size: 0.77rem; font-weight: 580; }
+  p { margin: 0.18rem 0; color: rgba(255, 255, 255, 0.45); font-size: 0.66rem; line-height: 1.4; }
+  span { color: var(--theme-primary-300); font-size: 0.6rem; }
 }
 
 .stacked-fields {
@@ -262,8 +262,8 @@
   height: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 0.65rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.68rem;
 }
 
 .icon-button,
@@ -298,7 +298,7 @@
   border-radius: 0.78rem;
   background: rgba(var(--theme-primary-500-rgb), 0.07);
   color: var(--theme-primary-200);
-  font-size: 0.8125rem;
+  font-size: 0.7rem;
   font-weight: 570;
 
   &:hover { border-color: rgba(var(--theme-primary-300-rgb), 0.5); background: rgba(var(--theme-primary-500-rgb), 0.13); transform: translateY(-2px); }
@@ -348,15 +348,15 @@
 
 .ip-content { position: relative; z-index: 1; }
 .ip-field { margin-top: 1.8rem; }
-.field-hint { margin: 0; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; line-height: 1.45; }
+.field-hint { margin: 0; color: rgba(255, 255, 255, 0.42); font-size: 0.66rem; line-height: 1.45; }
 
 .ip-path {
   display: flex;
   align-items: center;
   gap: 0.65rem;
   margin-top: 1rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 0.65rem;
 
   span { display: inline-flex; align-items: center; gap: 0.35rem; color: rgba(255, 255, 255, 0.58); }
   span:last-child { color: var(--theme-primary-200); }

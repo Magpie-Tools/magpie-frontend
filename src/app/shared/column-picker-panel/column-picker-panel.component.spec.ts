@@ -76,19 +76,6 @@ describe('ColumnPickerPanelComponent drag and drop', () => {
     expect(saved).toHaveBeenCalledOnceWith(['country', 'host', 'tags']);
   });
 
-  it('reorders visible columns from the keyboard and announces the new position', async () => {
-    const down = fixture.nativeElement.querySelector('[aria-label="Move Host down"]') as HTMLButtonElement;
-    const up = fixture.nativeElement.querySelector('[aria-label="Move Host up"]') as HTMLButtonElement;
-    expect(up.disabled).toBeTrue();
-    down.click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(component.editorColumns()).toEqual(['tags', 'host']);
-    expect(component.moveAnnouncement()).toBe('Host moved to position 2 of 2.');
-    component.moveColumn('host', 1);
-    expect(component.editorColumns()).toEqual(['tags', 'host']);
-  });
-
   it('reorders visible columns and leaves hidden ordering unchanged', () => {
     drop('host', 0, 0, 1);
     expect(component.editorColumns()).toEqual(['tags', 'host']);

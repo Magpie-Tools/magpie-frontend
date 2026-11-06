@@ -40,14 +40,14 @@ input[type="file"] {
 
   h3 {
     color: rgba(255, 255, 255, 0.9);
-    font-size: 0.84rem;
+    font-size: 0.76rem;
     font-weight: 590;
   }
 
   p {
     margin-top: 0.18rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.42);
+    font-size: 0.63rem;
     line-height: 1.45;
   }
 }
@@ -132,8 +132,8 @@ input[type="file"] {
     position: absolute;
     right: 0.72rem;
     bottom: 0.68rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.56rem;
   }
 }
 
@@ -173,8 +173,8 @@ input[type="file"] {
   .import-summary > p {
     max-width: 13rem;
     margin: 0.35rem 0 0;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 0.63rem;
     line-height: 1.5;
   }
 
@@ -211,17 +211,8 @@ input[type="file"] {
 
   .import-summary__label {
     margin-top: 0.25rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
-  }
-
-  .import-summary__note {
-    max-width: 16rem;
-    margin: 0.45rem 0 0;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.84rem;
-    line-height: 1.45;
-    text-align: center;
+    color: rgba(255, 255, 255, 0.42);
+    font-size: 0.62rem;
   }
 
   .import-summary__stats {
@@ -243,10 +234,10 @@ input[type="file"] {
     dt,
     dd {
       margin: 0;
-      font-size: 0.72rem;
+      font-size: 0.61rem;
     }
 
-    dt { color: rgba(255, 255, 255, 0.62); }
+    dt { color: rgba(255, 255, 255, 0.4); }
     dd { color: rgba(255, 255, 255, 0.76); font-weight: 600; }
   }
 
@@ -258,7 +249,7 @@ input[type="file"] {
     border-radius: 0.7rem;
     background: rgba(255, 255, 255, 0.035);
     color: rgba(255, 255, 255, 0.68);
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     box-shadow: none;
   }
 

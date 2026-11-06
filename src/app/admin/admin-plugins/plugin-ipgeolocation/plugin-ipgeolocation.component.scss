@@ -28,8 +28,8 @@
   cursor: pointer;
 }
 .security-policy span { display: flex; flex-direction: column; gap: 0.2rem; }
-.security-policy strong { font-size: 0.84rem; }
-.security-policy small { color: var(--card-muted); font-size: 0.8125rem; line-height: 1.5; }
+.security-policy strong { font-size: 0.78rem; }
+.security-policy small { color: var(--card-muted); font-size: 0.68rem; line-height: 1.5; }
 .security-policy hlm-switch { flex-shrink: 0; }
 
 .lookup-pricing {
@@ -40,7 +40,7 @@
   gap: 0.5rem;
   margin-top: 0.85rem;
   color: var(--card-muted);
-  font-size: 0.8125rem;
+  font-size: 0.7rem;
 }
 .provider-link { color: var(--theme-primary-200); }
 .quota-visual { margin-top: 1rem; padding: 0.85rem; }
@@ -52,11 +52,11 @@
   gap: 0.25rem 0.75rem;
   padding: 0.65rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  font-size: 0.8125rem;
+  font-size: 0.7rem;
 }
 .lookup-times dt { color: var(--card-muted); }
 .lookup-times dd { margin: 0; color: rgba(255, 255, 255, 0.78); font-variant-numeric: tabular-nums; }
-.lookup-help { margin-top: 0.9rem; color: var(--card-muted); font-size: 0.8125rem; line-height: 1.6; }
+.lookup-help { margin-top: 0.9rem; color: var(--card-muted); font-size: 0.7rem; line-height: 1.6; }
 .lookup-help summary { width: fit-content; cursor: pointer; color: rgba(255, 255, 255, 0.75); }
 .lookup-help summary:focus-visible { outline: 2px solid var(--theme-primary-300); outline-offset: 0.2rem; }
 .lookup-help p { margin: 0.6rem 0 0; }

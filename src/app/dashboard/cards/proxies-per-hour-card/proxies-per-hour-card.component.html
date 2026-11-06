@@ -7,25 +7,19 @@
         ></span>
         <div class="dashboard-card__copy">
           <h2 class="dashboard-card__title">{{ title }}</h2>
-          <p class="dashboard-card__subtitle">Active proxies (not paused or archived), recorded hourly.</p>
         </div>
       </div>
-      @if (range) {
-        <span class="chart-state"
-          ><span aria-hidden="true"></span>{{ range }}</span
-        >
-      }
+      <span class="chart-state"
+        ><span aria-hidden="true"></span>7-day window</span
+      >
     </div>
   </div>
   <div class="dashboard-card__body throughput-card__body">
-    <app-chart [definition]="chart" [label]="title" [summary]="summary" />
+    <app-chart [definition]="chart" [label]="title" />
   </div>
-  <!-- A legend only helps when the proxy limit adds a second series. -->
-  @if (legend.length > 1) {
-    <div class="inventory-legend" aria-label="Inventory chart legend">
-      @for (entry of legend; track entry.label) {
-        <span><i [style.border-color]="entry.color" [class.is-dashed]="entry.dashed" aria-hidden="true"></i>{{ entry.label }}</span>
-      }
-    </div>
-  }
+  <div class="inventory-legend" aria-label="Inventory chart legend">
+    @for (entry of legend; track entry.label) {
+      <span><i [style.border-color]="entry.color" [class.is-dashed]="entry.dashed" aria-hidden="true"></i>{{ entry.label }}</span>
+    }
+  </div>
 </section>

@@ -5,17 +5,9 @@
       class="h-screen overflow-hidden flex"
       [class.sidebar-collapsed]="!layout.sidebarOpen()"
     >
-      <a class="skip-link" href="#main-content" [attr.inert]="workspaceInert() ? '' : null" (click)="focusMain($event)">Skip to content</a>
-
       <app-navbar
-        id="app-sidebar"
         class="h-full overflow-hidden transition-[width,transform] duration-200 ease-in-out shrink-0"
         [style.width.px]="layout.sidebarOpen() ? 240 : 0"
-        [attr.inert]="layout.sidebarOpen() ? null : ''"
-        [attr.role]="isMobile() ? 'dialog' : null"
-        [attr.aria-modal]="isMobile() && layout.sidebarOpen() ? 'true' : null"
-        [attr.aria-label]="isMobile() ? 'Navigation' : null"
-        (keydown)="trapDrawerFocus($event)"
       >
       </app-navbar>
 
@@ -23,16 +15,15 @@
         <button
           type="button"
           class="sidebar-scrim"
-          aria-label="Close navigation"
-          tabindex="-1"
+          aria-label="Close sidebar"
           (click)="layout.setSidebar(false)"
         ></button>
       }
 
-      <div class="app-workspace flex-1 min-w-0 flex flex-col" [attr.inert]="workspaceInert() ? '' : null">
+      <div class="app-workspace flex-1 min-w-0 flex flex-col">
         <app-topbar></app-topbar>
 
-        <main id="main-content" tabindex="-1" class="px-3 md:px-5 pb-5 pt-2 flex-1 overflow-y-auto">
+        <main class="px-5 pb-5 pt-2 flex-1 overflow-y-auto">
           <router-outlet></router-outlet>
         </main>
       </div>

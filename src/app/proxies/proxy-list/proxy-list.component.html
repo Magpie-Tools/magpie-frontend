@@ -1,29 +1,26 @@
 <app-inventory-page-shell
   pageIcon="icon icon-server"
-  pageTitle="Proxies"
+  pageTitle="Managed proxies"
   [combinedCard]="true"
   toolbarAriaLabel="Proxy tools"
   [searchTerm]="searchTerm()"
   searchPlaceholder="Search host, port, country, status, reputation, or tag"
   searchAriaLabel="Search proxies"
   resultIcon="icon icon-layout-grid"
-  resultTitle="Proxies"
+  resultTitle="Proxy routes"
   [showResultHeading]="false"
   [selectedCount]="selectedProxies().length"
-  itemNoun="proxies"
-  itemNounSingular="proxy"
   [totalItems]="totalItems()"
   [hasLoaded]="hasLoaded()"
   [loading]="isLoading()"
-  loadingLabel="Loading proxies"
+  loadingLabel="Loading routes"
   [activeFilters]="hasActiveFilters()"
-  emptyTitle="No proxies yet"
-  filteredEmptyTitle="No matching proxies"
-  emptyDescription="Use Add proxies above to import the first proxies into this workspace."
+  emptyTitle="No proxy routes yet"
+  filteredEmptyTitle="No matching proxy routes"
+  emptyDescription="Use Add proxies above to import the first routes into this workspace."
   (searchTermChange)="onSearchTermChange($event)"
   (clearSearch)="clearSearch()"
   (clearFilters)="clearFilters()"
-  (clearSelection)="clearSelection()"
 >
   <ng-container inventory-actions>
     <app-proxy-tag-manager
@@ -62,7 +59,7 @@
         {{ filterButtonLabel() }}
       </button>
       <hlm-popover-content *hlmPopoverPortal
-        class="phone-sheet-popover w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
+        class="w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
         aria-label="Filters">
         <app-proxy-filter-panel
           [form]="filterForm"
@@ -93,7 +90,7 @@
         Columns
       </button>
       <hlm-popover-content *hlmPopoverPortal
-        class="column-picker-popover w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-hidden rounded-xl p-0 gap-0"
+        class="w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-hidden rounded-xl p-0 gap-0"
         aria-label="Columns">
         <app-column-picker-panel
           [columns]="columnPickerColumns()"
@@ -117,7 +114,6 @@
         <app-delete-proxies
           class="toolbar-action toolbar-action--delete"
           [allProxies]="dataSource()"
-          [totalCount]="totalItems()"
           [selectedProxies]="selectedProxies()"
           (proxiesDeleted)="onProxiesDeleted()"
         ></app-delete-proxies>

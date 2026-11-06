@@ -26,16 +26,16 @@ export const SCRAPE_SOURCE_LIST_COLUMN_DEFINITIONS: readonly ScrapeSourceListCol
   },
   {
     id: 'proxy_count',
-    label: 'Proxy count',
+    label: 'Proxy Count',
     sortField: 'proxy_count',
-    example: '12.345',
+    example: '12,345',
     skeletonWidth: '3rem',
   },
   {
     id: 'alive_count',
-    label: 'Alive proxies',
+    label: 'Alive Proxies',
     sortField: 'alive_count',
-    example: '8.742',
+    example: '8,742',
     skeletonWidth: '3rem',
   },
   {
@@ -47,14 +47,14 @@ export const SCRAPE_SOURCE_LIST_COLUMN_DEFINITIONS: readonly ScrapeSourceListCol
   },
   {
     id: 'robots_check',
-    label: 'Robots check',
+    label: 'Robots Check',
     example: 'Check robots.txt',
     skeletonWidth: '7.5rem',
   },
   {
     id: 'scrape_now',
-    label: 'Scrape now',
-    example: 'Scrape now',
+    label: 'Scrape Now',
+    example: 'Queue',
     skeletonWidth: '5rem',
   },
   {

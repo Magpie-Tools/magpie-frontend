@@ -3,8 +3,7 @@
     <button
       type="button"
       class="topbar-icon-button topbar-menu-button"
-      aria-label="Toggle navigation"
-      aria-controls="app-sidebar"
+      aria-label="Toggle sidebar"
       [attr.aria-expanded]="layout.sidebarOpen()"
       (click)="layout.toggleSidebar()"
     >
@@ -17,10 +16,12 @@
           <a class="topbar-breadcrumb__link" [routerLink]="item.routerLink">{{
             item.label
           }}</a>
-        } @else if (!last) {
-          <span class="topbar-breadcrumb__group">{{ item.label }}</span>
         } @else {
-          <span class="topbar-breadcrumb__current" aria-current="page" [attr.title]="item.label">{{ item.label }}</span>
+          <span
+            class="topbar-breadcrumb__current"
+            [attr.aria-current]="last ? 'page' : null"
+            >{{ item.label }}</span
+          >
         }
         @if (!last) {
           <i
@@ -98,7 +99,7 @@
                           <span class="notification-item__unread" aria-hidden="true"></span>
                           <span class="sr-only">Unread</span>
                         }
-                        <time [attr.datetime]="item.occurredAt" [title]="(item.occurredAt | date:'full') ?? ''">{{ item.occurredAt | date }}</time>
+                        <time [attr.datetime]="item.occurredAt" [title]="(item.occurredAt | date:'full') ?? ''">{{ item.occurredAt | date:'MMM d, HH:mm' }}</time>
                       </span>
                       <strong>{{ item.title }}</strong>
                       <span class="notification-item__description">{{ item.description }}</span>

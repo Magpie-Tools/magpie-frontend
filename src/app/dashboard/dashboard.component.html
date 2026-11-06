@@ -96,7 +96,6 @@
                 [value]="conversionRate().value"
                 [displayValue]="conversionRate().value | number"
                 [chartValues]="conversionRate().history"
-                [comparisonLabel]="kpiComparison().alive"
               >
               </app-kpi-card>
 
@@ -107,7 +106,6 @@
                 [value]="avgOrderValue().value"
                 [displayValue]="avgOrderValue().value | number"
                 [chartValues]="avgOrderValue().history"
-                [caption]="totalProxiesCaption()"
               >
               </app-kpi-card>
 
@@ -118,7 +116,6 @@
                 [value]="orderQuantity().value"
                 [displayValue]="orderQuantity().value | number"
                 [chartValues]="orderQuantity().history"
-                [comparisonLabel]="kpiComparison().scraped"
               >
               </app-kpi-card>
 
@@ -127,8 +124,6 @@
                 [title]="proxiesPerHourTitle"
                 [chart]="inventoryChart()"
                 [legend]="inventoryLegend"
-                [range]="inventoryRange()"
-                [summary]="inventorySummary()"
               >
               </app-proxies-per-hour-card>
 

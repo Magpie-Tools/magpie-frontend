@@ -23,14 +23,14 @@
   }
 
   .inventory-table thead > tr > th {
-    padding: 0.68rem 0.6rem;
+    padding: 0.68rem 0.75rem;
     border: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.085);
     background: rgba(255, 255, 255, 0.022);
-    color: rgba(255, 255, 255, 0.66);
-    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 0.55rem;
     font-weight: 640;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     white-space: nowrap;
   }
@@ -59,12 +59,12 @@
   }
 
   .inventory-table tbody > tr > td {
-    padding: 0.68rem 0.6rem;
+    padding: 0.68rem 0.75rem;
     border: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     background: transparent;
-    color: rgba(255, 255, 255, 0.82);
-    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.63rem;
   }
 
   .inventory-table tbody > tr:not([data-state="selected"]):hover > td {
@@ -106,7 +106,7 @@
     border-radius: 0.56rem;
     background: rgba(255, 255, 255, 0.03);
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.72rem;
+    font-size: 0.61rem;
     font-weight: 590;
   }
 
@@ -127,11 +127,9 @@
     color: #fff;
   }
 
-  /* Shape and colour both encode health: filled = alive, ring = dead, dashed ring = unknown. */
   .inventory-table .status-dot {
-    width: 0.62rem;
-    height: 0.62rem;
-    flex: 0 0 auto;
+    width: 0.4rem;
+    height: 0.4rem;
     animation: none;
 
     &.alive {
@@ -141,24 +139,14 @@
       &::after { display: none; }
     }
 
-    &.dead {
-      border: 2px solid #f06d76;
-      background: transparent;
-      opacity: 1;
-    }
-
-    &.unknown {
-      border: 2px dashed #94a3b8;
-      background: transparent;
-      opacity: 1;
-    }
+    &.dead { background: #f06d76; }
   }
 
   .inventory-table .reputation-badge,
   .inventory-table .lifecycle-state {
     gap: 0.3rem;
     padding: 0.28rem 0.52rem;
-    font-size: 0.6875rem;
+    font-size: 0.52rem;
     font-weight: 650;
     letter-spacing: 0.07em;
   }
@@ -168,6 +156,6 @@
   }
 
   .inventory-table .copy-value {
-    font-size: 0.8125rem;
+    font-size: 0.63rem;
   }
 }
