@@ -11,16 +11,15 @@
   headingTooltip="Delete proxies in bulk with optional filters and status selections. This action cannot be undone."
   tone="danger"
   introIcon="icon icon-lock"
-  introTitle="Deleted proxies cannot be restored"
+  introTitle="Deleted routes cannot be restored"
   introDescription="Review the scope before continuing. Filters apply only when they are enabled below."
   [selectedCount]="selectedProxies.length"
   footerNote="This action cannot be undone."
-  [actionLabel]="actionLabel"
-  [confirmLabel]="confirmLabel"
+  actionLabel="Delete proxies"
   actionIcon="icon icon-trash"
   [cancelDisabled]="isDeleting"
   [actionDisabled]="
-    isDeleting || !deleteOption || (deleteOption === 'selected' && !canDeleteSelected())
+    isDeleting || (deleteOption === 'selected' && !canDeleteSelected())
   "
   [actionLoading]="isDeleting"
   (openRequested)="openDialog()"
@@ -33,7 +32,7 @@
       <div>
         <h3 id="delete-scope-title">Proxies to delete</h3>
         <p>
-          Delete the selected proxies or every proxy that matches the optional
+          Delete the highlighted routes or every route that matches the optional
           filters.
         </p>
       </div>
@@ -43,10 +42,10 @@
       radioName="deleteOption"
       allInputId="deleteAll"
       selectedInputId="deleteSelected"
-      [allTitle]="allScopeTitle"
-      allDescription="Delete every proxy in this workspace, or only those matching the filters below."
+      allTitle="All proxies"
+      allDescription="Delete every proxy you own that matches the filters below."
       selectedTitle="Selected proxies"
-      selectedDescription="Delete only the proxies selected in the table."
+      selectedDescription="Delete only the routes highlighted in the table."
       [selectedDisabled]="!canDeleteSelected()"
       accentColor="var(--theme-primary-400)"
     ></app-bulk-scope-selector>

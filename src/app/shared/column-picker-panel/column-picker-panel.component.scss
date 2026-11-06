@@ -7,7 +7,7 @@
 .column-picker {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
-  max-height: min(74dvh, 42rem, var(--picker-available-height, 100dvh));
+  max-height: min(74dvh, 42rem);
   overflow: hidden;
   color: var(--popover-foreground);
 }
@@ -32,7 +32,7 @@
 
   p {
     margin: 0;
-    font-size: 0.84rem;
+    font-size: 0.75rem;
     line-height: 1.5;
   }
 }
@@ -65,7 +65,7 @@
 .column-picker__search-hint,
 .column-picker__footer-hint {
   color: var(--muted-foreground);
-  font-size: 0.8125rem;
+  font-size: 0.7rem;
 }
 
 .column-picker__content {
@@ -105,19 +105,19 @@
 
   h4 {
     margin: 0;
-    font-size: 0.84rem;
+    font-size: 0.75rem;
     font-weight: 550;
   }
 
   [hlmBadge] {
     padding-inline: 0.4rem;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-variant-numeric: tabular-nums;
   }
 }
 
 .column-picker__section-header button {
-  font-size: 0.8125rem;
+  font-size: 0.7rem;
   color: var(--muted-foreground);
 }
 
@@ -177,7 +177,7 @@
 }
 
 .column-picker__label {
-  font-size: 0.84rem;
+  font-size: 0.75rem;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
@@ -187,13 +187,13 @@
   padding: 0 0.3rem;
   border-color: rgba(var(--theme-primary-300-rgb), 0.25);
   color: var(--theme-primary-200);
-  font-size: 0.6875rem;
+  font-size: 0.55rem;
 }
 
 .column-picker__example {
   overflow: hidden;
   color: var(--muted-foreground);
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -216,7 +216,7 @@
   opacity: 0.35;
 }
 
-.column-picker__controls { display: flex; flex-shrink: 0; gap: 0.15rem; }
+.column-picker__controls { display: flex; }
 
 .column-picker__empty {
   display: grid;
@@ -224,7 +224,7 @@
   place-content: center;
   padding: 1rem;
   color: var(--muted-foreground);
-  font-size: 0.84rem;
+  font-size: 0.75rem;
   text-align: center;
 }
 
@@ -252,7 +252,7 @@
 .column-picker__row.cdk-drag-placeholder { opacity: 0.25; }
 
 @media (max-width: 600px) {
-  .column-picker { max-height: var(--picker-available-height, 80dvh); }
+  .column-picker { max-height: min(80dvh, 42rem); }
 
   .column-picker__header { padding: 1rem 1rem 0; }
   .column-picker__toolbar { padding: 0.85rem 1rem; }

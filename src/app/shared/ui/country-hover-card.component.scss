@@ -61,7 +61,7 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.65rem;
-  font-size: 0.84rem;
+  font-size: 0.75rem;
 
   i { color: var(--theme-primary-200); }
   strong {
@@ -108,7 +108,7 @@
   background: rgba(255, 255, 255, 0.03);
   color: rgba(255, 255, 255, 0.7);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.6rem;
   cursor: pointer;
 
   &:hover:not(:disabled),

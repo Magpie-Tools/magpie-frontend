@@ -17,7 +17,6 @@
         <div class="profile-field">
           <label class="field-label" for="checker-profile">Settings for</label>
           <app-select inputId="checker-profile" [options]="profileOptions" [formControl]="selectedProfile" optionLabel="label" optionValue="value"></app-select>
-          @if (editingDefault) { <p class="field-hint" id="checker-profile-hint">Default applies to every proxy. Tags can adjust these settings.</p> }
         </div>
         <div class="profile-actions">
           <hlm-popover align="end" sideOffset="8" [state]="priorityOpen() ? 'open' : 'closed'" (stateChanged)="onPriorityStateChanged($event)">
@@ -70,7 +69,7 @@
             <button type="button" hlmBtn [disabled]="!workspaces.canOperate()" (click)="addRule()">Add checker rule</button>
           }
         </div>
-      }
+      } @else { <p class="field-hint">Default applies to every proxy. Tags can adjust these settings.</p> }
     </section>
     <div class="settings-grid">
       @if (editingDefault || selectedRule) {

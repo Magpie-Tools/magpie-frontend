@@ -1,4 +1,3 @@
-import {formatPercent} from '../../../shared/number-utils';
 import {HlmCardImports} from '@spartan-ng/helm/card';
 import {HlmBadge} from '@spartan-ng/helm/badge';
 import {ChartComponent} from '../../../shared/ui/chart.component';
@@ -20,10 +19,6 @@ export class KpiCardComponent implements OnChanges {
   @Input() icon = 'icon icon-chart-no-axes-combined';
   @Input() value: number | string = 0;
   @Input() change?: number | null;
-  /** What the trend compares against, such as "vs 10 min ago". */
-  @Input() comparisonLabel = '';
-  /** Secondary fact shown under the value when there is no trend, such as "800 active". */
-  @Input() caption = '';
   @Input() styleClass = 'dashboard-card metric-card';
   @Input() displayValue?: string | null;
   @Input() changeSuffix = '%';
@@ -35,8 +30,8 @@ export class KpiCardComponent implements OnChanges {
   private readonly numberFormatter: Intl.NumberFormat;
   private readonly percentFormatter: Intl.NumberFormat;
 
-  constructor(@Inject(LOCALE_ID) private readonly locale: string) {
-    const normalizedLocale = locale || 'en-US';
+  constructor(@Inject(LOCALE_ID) localeId: string) {
+    const normalizedLocale = localeId || 'en-US';
     this.numberFormatter = new Intl.NumberFormat(normalizedLocale);
     this.percentFormatter = new Intl.NumberFormat(normalizedLocale, {
       style: 'percent',
@@ -85,7 +80,7 @@ export class KpiCardComponent implements OnChanges {
     }
 
     if (this.changeSuffix === '%') {
-      return formatPercent(change, this.locale);
+      return this.percentFormatter.format(change / 100);
     }
 
     return `${this.numberFormatter.format(change)}${this.changeSuffix}`;

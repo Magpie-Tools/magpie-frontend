@@ -10,8 +10,6 @@
   resultTitle="Source registry"
   [showResultHeading]="false"
   [selectedCount]="selectedScrapeSources.length"
-  itemNoun="sources"
-  itemNounSingular="source"
   [totalItems]="totalItems()"
   [hasLoaded]="hasLoaded()"
   [loading]="loading()"
@@ -19,11 +17,10 @@
   [activeFilters]="hasActiveFilters()"
   emptyTitle="No scrape sources yet"
   filteredEmptyTitle="No matching scrape sources"
-  emptyDescription="Use Add sources above to give the scraper its first websites."
+  emptyDescription="Use Add Sources above to give the scraper its first websites."
   (searchTermChange)="onSearchTermChange($event)"
   (clearSearch)="clearSearch()"
   (clearFilters)="clearFilters()"
-  (clearSelection)="clearSelection()"
 >
   <ng-container inventory-actions>
     <button
@@ -55,7 +52,7 @@
         {{ filterButtonLabel() }}
       </button>
       <hlm-popover-content *hlmPopoverPortal
-        class="phone-sheet-popover w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
+        class="w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
         aria-label="Filters">
         <app-scrape-source-filter-panel
           [form]="filterForm"
@@ -80,7 +77,7 @@
         Columns
       </button>
       <hlm-popover-content *hlmPopoverPortal
-        class="column-picker-popover w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-hidden rounded-xl p-0 gap-0"
+        class="w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-hidden rounded-xl p-0 gap-0"
         aria-label="Columns">
         <app-column-picker-panel
           [columns]="columnPickerColumns"
@@ -104,7 +101,6 @@
         <app-delete-sources
           class="toolbar-action toolbar-action--delete"
           [allSources]="scrapeSources()"
-          [totalCount]="totalItems()"
           [selectedSources]="selectedScrapeSources"
           (sourcesDeleted)="onScrapeSourcesDeleted()"
         ></app-delete-sources>
@@ -133,7 +129,7 @@
       <table hlmTable>
         <thead hlmTHead>
           <tr hlmTr>
-            <th hlmTh class="select-column" style="width: 3rem">
+            <th hlmTh style="width: 3rem">
               <hlm-checkbox
                 aria-label="Select all sources on this page"
                 [ngModel]="isAllSelected()"
@@ -199,11 +195,7 @@
                     column.id === 'url' ? 'url-cell' : '',
                   ]"
                 >
-                  @if (column.id === 'actions') {
-                    <span class="sr-only">{{ column.label }}</span>
-                  } @else {
-                    {{ column.label }}
-                  }
+                  {{ column.label }}
                 </th>
               }
             }
@@ -287,7 +279,7 @@
               "
               (click)="toggleSelection(source)"
             >
-              <td hlmTd class="select-cell" (click)="$event.stopPropagation()">
+              <td hlmTd (click)="$event.stopPropagation()">
                 <hlm-checkbox
                   [aria-label]="'Select source ' + source.url"
                   [ngModel]="selection.isSelected(source)"
@@ -300,7 +292,7 @@
               ) {
                 @switch (column.id) {
                   @case ("url") {
-                    <td hlmTd [attr.data-label]="column.label" class="url-cell column-url">
+                    <td hlmTd class="url-cell column-url">
                       <a
                         [href]="source.url"
                         target="_blank"
@@ -332,17 +324,17 @@
                     </td>
                   }
                   @case ("proxy_count") {
-                    <td hlmTd [attr.data-label]="column.label" class="text-center column-proxy_count">
+                    <td hlmTd class="text-center column-proxy_count">
                       {{ source.proxy_count | number }}
                     </td>
                   }
                   @case ("alive_count") {
-                    <td hlmTd [attr.data-label]="column.label" class="text-center column-alive_count">
+                    <td hlmTd class="text-center column-alive_count">
                       {{ source.alive_count | number }}
                     </td>
                   }
                   @case ("health") {
-                    <td hlmTd [attr.data-label]="column.label" class="text-center health-td column-health">
+                    <td hlmTd class="text-center health-td column-health">
                       <app-health-bar-cell
                         [aliveCount]="source.alive_count"
                         [deadCount]="source.dead_count"
@@ -352,7 +344,7 @@
                     </td>
                   }
                   @case ("robots_check") {
-                    <td hlmTd [attr.data-label]="column.label" class="text-center column-robots_check">
+                    <td hlmTd class="text-center column-robots_check">
                       <button
                         size="sm"
                         class="ui-button-outlined ui-button-secondary"
@@ -376,7 +368,7 @@
                   }
                   @case ("scrape_now") {
                     <td
-                      hlmTd [attr.data-label]="column.label"
+                      hlmTd
                       class="text-center column-scrape_now"
                       (click)="$event.stopPropagation()"
                     >
@@ -402,7 +394,7 @@
                     </td>
                   }
                   @case ("actions") {
-                    <td hlmTd [attr.data-label]="column.label" class="text-center column-actions" (click)="$event.stopPropagation()">
+                    <td hlmTd class="text-center column-actions" (click)="$event.stopPropagation()">
                       <button
                         type="button"
                         class="source-actions-trigger"
@@ -448,7 +440,7 @@
                   }
                   @case ("actions_buttons") {
                     <td
-                      hlmTd [attr.data-label]="column.label"
+                      hlmTd
                       class="text-center column-actions_buttons"
                       (click)="$event.stopPropagation()"
                     >

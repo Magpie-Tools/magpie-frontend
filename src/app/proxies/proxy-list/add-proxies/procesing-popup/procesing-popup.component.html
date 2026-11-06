@@ -21,7 +21,7 @@
     </div>
 
     @if (status === "processing") {
-      <span class="popup-eyebrow">Adding proxies</span>
+      <span class="popup-eyebrow">Adding routes</span>
       <h2>Processing your import</h2>
       <div [@textAnimation]="textState" class="message">
         {{ currentMessage }}
@@ -32,7 +32,7 @@
     @if (status === "success") {
       <span class="popup-eyebrow">Import complete</span>
       <h2>{{ count }} {{ item }} added</h2>
-      <p>The new proxies are queued and ready for checking.</p>
+      <p>The new routes are queued and ready for checking.</p>
     }
 
     @if (status === "error") {

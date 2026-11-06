@@ -19,7 +19,7 @@
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.025);
 
-  span { color: rgba(255, 255, 255, 0.62); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  span { color: rgba(255, 255, 255, 0.46); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
   strong { color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; font-weight: 580; }
 }
 
@@ -46,7 +46,7 @@
   align-items: center;
   gap: 0.42rem;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.8125rem;
+  font-size: 0.72rem;
   font-weight: 560;
 }
 
@@ -61,23 +61,21 @@
 
 .enforcement-path {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   margin-top: 2rem;
 }
 
 .enforcement-step {
   display: flex;
   min-width: 0;
-  flex: 1 1 0;
   flex-direction: column;
   align-items: center;
   gap: 0.55rem;
   text-align: center;
 
   > div { display: flex; flex-direction: column; gap: 0.12rem; }
-  strong { color: rgba(255, 255, 255, 0.76); font-size: 0.8125rem; font-weight: 570; }
-  /* Captions wrap inside their step so neighbouring steps never overlap. */
-  small { color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; line-height: 1.35; text-wrap: balance; }
+  strong { color: rgba(255, 255, 255, 0.76); font-size: 0.68rem; font-weight: 570; }
+  small { color: rgba(255, 255, 255, 0.37); font-size: 0.58rem; white-space: nowrap; }
 }
 
 .enforcement-node {
@@ -100,11 +98,10 @@
 }
 
 .enforcement-line {
-  flex: 0 1 2rem;
-  min-width: 0.75rem;
+  flex: 1 1 auto;
+  min-width: 1.4rem;
   height: 1px;
-  /* Align with the centre of the 2.8rem nodes now that steps grow with wrapped captions. */
-  margin: 1.4rem 0.35rem 0;
+  margin: 0 0.45rem 2.25rem;
   background: linear-gradient(90deg, rgba(var(--theme-primary-300-rgb), 0.35), rgba(248, 113, 113, 0.25));
 }
 
@@ -195,8 +192,8 @@
   height: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 0.65rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.68rem;
 }
 
 .icon-button,
@@ -229,7 +226,7 @@
   border-radius: 0.78rem;
   background: rgba(var(--theme-primary-500-rgb), 0.07);
   color: var(--theme-primary-200);
-  font-size: 0.8125rem;
+  font-size: 0.7rem;
   font-weight: 570;
 
   &:hover { border-color: rgba(var(--theme-primary-300-rgb), 0.5); background: rgba(var(--theme-primary-500-rgb), 0.13); transform: translateY(-2px); }
@@ -237,8 +234,8 @@
 
 .entry-note {
   margin: 0.75rem 0 0;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.64rem;
   line-height: 1.5;
 }
 

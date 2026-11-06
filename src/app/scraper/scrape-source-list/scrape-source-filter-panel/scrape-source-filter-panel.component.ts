@@ -1,4 +1,3 @@
-import {ZeroAsEmptyDirective} from '../../../shared/zero-as-empty.directive';
 import {HlmButton} from '@spartan-ng/helm/button';
 import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
@@ -10,7 +9,7 @@ import {NgClass} from '@angular/common';
 @Component({
   selector: 'app-scrape-source-filter-panel',
   standalone: true,
-  imports: [HlmButton, HlmInput, HlmCheckbox, SelectComponent, ZeroAsEmptyDirective,
+  imports: [HlmButton, HlmInput, HlmCheckbox, SelectComponent,
     ReactiveFormsModule,
     NgClass,
 

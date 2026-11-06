@@ -9,6 +9,7 @@ import {ResetPasswordComponent} from './auth/reset-password/reset-password.compo
 import {AuthGuardService} from './services/authorization/auth-guard.service';
 import {AccountComponent} from './account/account.component';
 import {AuthLoginGuardService} from './services/authorization/auth-login-guard.service';
+import {AddProxiesComponent} from './proxies/proxy-list/add-proxies/add-proxies.component';
 import {CheckerJudgesComponent} from './checker/judges/checker-judges.component';
 import {CheckerSettingsComponent} from './checker/settings/checker-settings.component';
 import {RotatingProxiesComponent} from './rotating-proxies/rotating-proxies.component';
@@ -30,10 +31,10 @@ const authGuard = [AuthGuardService];
 const loginGuard = [AuthLoginGuardService];
 
 export const routes: Routes = [
-  {path: 'register', component: RegisterComponent, canActivate: loginGuard, title: 'Create account · Magpie'},
-  {path: 'login', component: LoginComponent, canActivate: loginGuard, title: 'Sign in · Magpie'},
-  {path: 'forgot-password', component: ForgotPasswordComponent, title: 'Forgot password · Magpie'},
-  {path: 'reset-password', component: ResetPasswordComponent, title: 'Reset password · Magpie'},
+  {path: 'register', component: RegisterComponent, canActivate: loginGuard},
+  {path: 'login', component: LoginComponent, canActivate: loginGuard},
+  {path: 'forgot-password', component: ForgotPasswordComponent},
+  {path: 'reset-password', component: ResetPasswordComponent},
 
   {path: 'global/checker', component: AdminCheckerComponent, canActivate: authGuard, data: {requiresAdmin: true}},
   {path: 'global/scraper', component: AdminScraperComponent, canActivate: authGuard, data: {requiresAdmin: true}},
@@ -49,8 +50,7 @@ export const routes: Routes = [
   {path: 'workspace', component: WorkspaceComponent, canActivate: authGuard, data: {title: 'Workspace'}},
   {path: 'alerts', component: AlertsComponent, canActivate: authGuard, data: {title: 'Alerts'}},
   {path: 'invitations', component: WorkspaceInvitationsComponent, canActivate: authGuard, data: {title: 'Invitations'}},
-  // Proxies are added from the dialog on the proxy list; keep old links working.
-  {path: 'addProxies', redirectTo: 'proxies', pathMatch: 'full'},
+  {path: 'addProxies', component: AddProxiesComponent, canActivate: authGuard},
   {path: 'rotating', component: RotatingProxiesComponent, canActivate: authGuard},
   {path: 'proxies', component: ProxiesComponent, canActivate: authGuard},
   {path: 'proxies/:id', component: ProxyDetailComponent, canActivate: authGuard},

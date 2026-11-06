@@ -54,9 +54,7 @@ export class VisibleRowsDirective implements AfterViewInit, OnChanges, OnDestroy
     const list = this.elementRef.nativeElement;
     const firstRow = this.rows[0];
     const lastRow = this.rows[this.rows.length - 1];
-    // Phones avoid a scroll area nested inside the scrolling page; the list shows in full.
-    const narrow = typeof window !== 'undefined' && window.matchMedia?.('(max-width: 48rem)').matches;
-    if (narrow || !firstRow || !lastRow || this.rowCount <= this.visibleRows || lastRow.offsetHeight === 0) {
+    if (!firstRow || !lastRow || this.rowCount <= this.visibleRows || lastRow.offsetHeight === 0) {
       list.style.removeProperty('max-height');
       return;
     }

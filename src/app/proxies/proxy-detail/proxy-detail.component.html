@@ -15,43 +15,37 @@
         </a>
         <div>
           @if (detail(); as proxy) {
-            <!-- Reads as one host:port line: host and port are inline copy targets (the host truncates,
-                 the port never does) and one icon copies the full address. -->
-            <h1 class="endpoint-title" [attr.aria-label]="'Proxy ' + proxyAddress(proxy)" [attr.title]="proxyAddress(proxy)">
+            <h1 class="endpoint-title">
               <button
                 type="button"
-                class="endpoint-copy-target endpoint-copy-target--host"
+                class="endpoint-copy-target"
                 (click)="copyIp()"
-                [attr.aria-label]="'Copy host ' + proxy.ip"
+                [attr.aria-label]="'Copy IP ' + proxy.ip"
                 [class.endpoint-copy--copied]="copiedField() === 'ip'"
-                [hlmTooltip]="copiedField() === 'ip' ? 'Copied host' : 'Copy host'"
-              >{{ proxyHost(proxy) }}</button><span class="endpoint-separator" aria-hidden="true">:</span><button
+                [hlmTooltip]="copiedField() === 'ip' ? 'Copied' : 'Click to copy'"
+              >
+                <span>{{ proxy.ip }}</span>
+                <i class="icon" [ngClass]="copiedField() === 'ip' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
+              </button>
+              <span class="endpoint-separator" aria-hidden="true">:</span>
+              <button
                 type="button"
-                class="endpoint-copy-target endpoint-copy-target--port"
+                class="endpoint-copy-target"
                 (click)="copyPort()"
                 [attr.aria-label]="'Copy port ' + proxy.port"
                 [class.endpoint-copy--copied]="copiedField() === 'port'"
-                [hlmTooltip]="copiedField() === 'port' ? 'Copied port' : 'Copy port'"
-              >{{ proxy.port }}</button>
-              <!-- Narrow cards: one button whose text wraps only at <wbr> points, so the port stays with the host. -->
-              <button
-                type="button"
-                class="endpoint-copy-target endpoint-copy-target--wrapped"
-                (click)="copyFullAddress()"
-                [attr.aria-label]="'Copy ' + proxyAddress(proxy)"
-                [class.endpoint-copy--copied]="copiedField() === 'address'"
-              >@for (part of proxyHostParts(proxy); track $index) {{{ part }}@if (!$last) {<wbr />}}:{{ proxy.port }}&nbsp;<i
-                  class="icon endpoint-copy-target__icon"
-                  [ngClass]="copiedField() === 'address' ? 'icon-check' : 'icon-copy'"
-                  aria-hidden="true"
-                ></i></button>
+                [hlmTooltip]="copiedField() === 'port' ? 'Copied' : 'Click to copy'"
+              >
+                <span>{{ proxy.port }}</span>
+                <i class="icon" [ngClass]="copiedField() === 'port' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
+              </button>
               <button
                 type="button"
                 class="endpoint-copy-all"
                 (click)="copyFullAddress()"
-                aria-label="Copy host and port"
+                aria-label="Copy IP and port"
                 [class.endpoint-copy--copied]="copiedField() === 'address'"
-                [hlmTooltip]="copiedField() === 'address' ? 'Copied' : 'Copy host:port'"
+                [hlmTooltip]="copiedField() === 'address' ? 'Copied' : 'Click to copy'"
               >
                 <i class="icon" [ngClass]="copiedField() === 'address' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
               </button>
@@ -184,7 +178,7 @@
                 </div>
                 <span class="check-summary__time">{{
                   latest?.created_at
-                    ? (latest?.created_at | date)
+                    ? (latest?.created_at | date: "medium")
                     : "No check results yet"
                 }}</span>
               </div>
@@ -203,7 +197,7 @@
                   <span class="value capitalize">{{ detail()?.estimated_type || "Unknown" }}</span>
                 </div>
                 @if (detail()?.ipgeolocation; as geo) {
-                  <div class="detail-item"><span class="label">IPGeolocation.io</span><span class="value">{{ geo.fresh ? 'Cached' : 'Expired' }} · {{ geo.checked_at | date }}</span></div>
+                  <div class="detail-item"><span class="label">IPGeolocation.io</span><span class="value">{{ geo.fresh ? 'Cached' : 'Expired' }} · {{ geo.checked_at | date:'short' }}</span></div>
                   <div class="detail-item"><span class="label">Provider network type</span><span class="value">{{ geo.result.network.connection_type || geo.result.company.type || geo.result.asn.type || 'Unknown' }}</span></div>
                   @if (geo.result.company.name || geo.result.asn.organization) {
                     <div class="detail-item"><span class="label">Network operator</span><span class="value">{{ geo.result.company.name || geo.result.asn.organization }} {{ geo.result.asn.as_number }}</span></div>
@@ -321,7 +315,7 @@
                   <div class="health-summary__response">
                     <span>Latest</span>
                     <strong>
-                      {{ latestStatistic ? (latestStatistic.response_time | number) : "—" }}
+                      {{ latestStatistic?.response_time ?? "—" }}
                       @if (latestStatistic) {
                         <small>ms</small>
                       }
@@ -393,8 +387,6 @@
                       </button>
                     }
                   </div>
-                } @else if (reputationOverall) {
-                  <p>No per-protocol breakdown available.</p>
                 } @else {
                   <p>No reputation data yet.</p>
                 }
@@ -414,39 +406,43 @@
               <h2 id="history-title">Check history</h2>
             </div>
           </div>
-          <span class="entry-count">{{ statistics().length }} recent checks</span>
+          <span class="entry-count">{{ statistics().length }} entries</span>
         </div>
 
-        <div class="history-table stack-table-container">
+        <div class="history-table">
           @if (isLoadingStatistics()) {
             <div class="card-loading"><app-loading></app-loading></div>
           } @else {
-            <div #historyTable class="data-table" [attr.aria-busy]="false">
+            <div class="data-table" [attr.aria-busy]="false">
               <div hlmTableContainer class="table-scroll">
-                <table hlmTable class="proxy-stat-table stack-table" role="table">
-                  <thead hlmTHead role="rowgroup">
-                    <tr hlmTr role="row">
-                      <th hlmTh role="columnheader">Checked at</th>
-                      <th hlmTh role="columnheader">Status</th>
-                      <th hlmTh role="columnheader">Response</th>
-                      <th hlmTh role="columnheader">Attempt</th>
-                      <th hlmTh role="columnheader">Protocol</th>
-                      <th hlmTh role="columnheader">Anonymity</th>
-                      <th hlmTh role="columnheader">Judge</th>
-                      <th hlmTh role="columnheader"><span class="sr-only">Judge response</span></th>
+                <table hlmTable class="proxy-stat-table">
+                  <thead hlmTHead>
+                    <tr hlmTr>
+                      <th hlmTh>Checked at</th>
+                      <th hlmTh>Status</th>
+                      <th hlmTh>Response</th>
+                      <th hlmTh>Attempt</th>
+                      <th hlmTh>Protocol</th>
+                      <th hlmTh>Anonymity</th>
+                      <th hlmTh>Judge</th>
                     </tr>
                   </thead>
-                  <tbody hlmTBody role="rowgroup">
-                    @for (row of pagedStatistics(); track row.id ?? $index) {
-                      <!-- Rows stay table rows; the View button is the keyboard control, row click is a mouse shortcut. -->
+                  <tbody hlmTBody>
+                    @for (row of statistics(); track row.id ?? $index) {
                       <tr
                         hlmTr
                         class="proxy-stat-row"
-                        role="row"
+                        role="button"
+                        tabindex="0"
+                        title="View judge response body"
                         (click)="openStatisticResponse(row)"
+                        (keydown.enter)="openStatisticResponse(row)"
+                        (keydown.space)="
+                          openStatisticResponse(row); $event.preventDefault()
+                        "
                       >
-                        <td hlmTd role="cell" data-label="Checked at" class="stack-wide">{{ row.created_at | date }}</td>
-                        <td hlmTd role="cell" data-label="Status">
+                        <td hlmTd>{{ row.created_at | date: "medium" }}</td>
+                        <td hlmTd>
                           <span class="table-status">
                             <span
                               class="status-dot status-dot--small"
@@ -455,40 +451,27 @@
                             {{ row.alive ? "Alive" : "Dead" }}
                           </span>
                         </td>
-                        <td hlmTd role="cell" data-label="Response">{{ row.response_time | number }} ms</td>
-                        <td hlmTd role="cell" data-label="Attempt">{{ row.attempt + 1 }}</td>
-                        <td hlmTd role="cell" data-label="Protocol" [title]="row.timeout ? row.timeout + ' ms timeout, ' + (row.retries ?? 0) + ' retries' : 'Legacy check without settings attribution'">
-                          {{ row.protocol ? (row.protocol | uppercase) : "Unknown" }}@if (row.transport) { / {{ row.transport | uppercase }} }
+                        <td hlmTd>{{ row.response_time }} ms</td>
+                        <td hlmTd>{{ row.attempt + 1 }}</td>
+                        <td hlmTd class="capitalize" [title]="row.timeout ? row.timeout + ' ms timeout, ' + (row.retries ?? 0) + ' retries' : 'Legacy check without settings attribution'">
+                          {{ row.protocol || "Unknown" }}@if (row.transport) { / {{ row.transport | uppercase }} }
                           @if (row.current === false) {<small class="history-settings-note">{{ row.config_key ? 'Previous settings' : 'Legacy settings' }}</small>}
                         </td>
-                        <td hlmTd role="cell" data-label="Anonymity" class="capitalize">
+                        <td hlmTd class="capitalize">
                           {{ row.anonymity_level || "Unknown" }}
                         </td>
                         <td
                           hlmTd
-                          role="cell"
-                          data-label="Judge"
-                          class="judge-cell stack-wide"
+                          class="judge-cell"
                           [title]="row.judge || 'Unknown'"
                         >
                           {{ row.judge || "Unknown" }}
                         </td>
-                        <td hlmTd role="cell" class="history-action-cell stack-wide">
-                          <button
-                            type="button"
-                            class="action-button"
-                            [attr.aria-label]="'View judge response for the check at ' + (row.created_at | date)"
-                            (click)="$event.stopPropagation(); openStatisticResponse(row)"
-                          >
-                            View
-                            <i class="icon icon-chevron-right" aria-hidden="true"></i>
-                          </button>
-                        </td>
                       </tr>
                     }
-                    @if (statistics().length === 0) {
+                    @if (!false && statistics().length === 0) {
                       <tr hlmTr>
-                        <td hlmTd colspan="8" class="empty-table">
+                        <td hlmTd colspan="7" class="empty-table">
                           No check history recorded yet.
                         </td>
                       </tr>
@@ -496,17 +479,6 @@
                   </tbody>
                 </table>
               </div>
-              @if (statistics().length > historyRowOptions[0]) {
-                <app-pagination
-                  [first]="historyFirst()"
-                  [rows]="historyRows()"
-                  [totalRecords]="statistics().length"
-                  [rowsPerPageOptions]="historyRowOptions"
-                  pageScrollTargetStorageKey="magpie-proxy-history-page-scroll-target"
-                  (pageScrollTargetChange)="historyScrollTarget = $event"
-                  (pageChange)="onHistoryPage($event)"
-                />
-              }
             </div>
           }
         </div>
@@ -620,7 +592,7 @@
       <div class="stat-response-dialog__meta">
         <div class="meta-row">
           <span class="meta-label">Checked</span>
-          <span class="meta-value">{{ stat.created_at | date }}</span>
+          <span class="meta-value">{{ stat.created_at | date: "medium" }}</span>
         </div>
         <div class="meta-row">
           <span class="meta-label">Judge</span>

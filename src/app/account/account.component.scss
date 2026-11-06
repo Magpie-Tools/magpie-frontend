@@ -57,7 +57,7 @@ p {
   p {
     margin-top: 0.28rem;
     color: var(--card-muted);
-    font-size: 0.8125rem;
+    font-size: 0.72rem;
   }
 }
 
@@ -83,8 +83,8 @@ p {
 }
 
 .context-eyebrow {
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 0.61rem;
   font-weight: 620;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -93,7 +93,7 @@ p {
 .account-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  
+  grid-auto-flow: dense;
   gap: 0.9rem;
 }
 
@@ -156,7 +156,7 @@ p {
     max-width: 36rem;
     margin-top: 0.32rem;
     color: var(--card-muted);
-    font-size: 0.84rem;
+    font-size: 0.75rem;
     line-height: 1.5;
   }
 }
@@ -247,13 +247,13 @@ p {
 
   strong {
     color: rgba(255, 255, 255, 0.88);
-    font-size: 0.84rem;
+    font-size: 0.74rem;
     font-weight: 580;
   }
 
   small {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.36);
+    font-size: 0.58rem;
   }
 }
 
@@ -267,7 +267,7 @@ p {
   margin-top: auto;
   padding-top: 1.4rem;
   color: var(--theme-primary-200);
-  font-size: 0.84rem;
+  font-size: 0.74rem;
   line-height: 1.45;
   text-align: center;
 
@@ -293,7 +293,7 @@ p {
 
   label {
     color: rgba(255, 255, 255, 0.72);
-    font-size: 0.8125rem;
+    font-size: 0.68rem;
     font-weight: 560;
   }
 }
@@ -310,7 +310,7 @@ p {
 
 .field-error {
   color: #e9a5a5;
-  font-size: 0.75rem;
+  font-size: 0.64rem;
 }
 
 .password-feedback {
@@ -325,12 +325,12 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.62rem;
 
   strong {
     color: var(--theme-primary-200);
-    font-size: 0.72rem;
+    font-size: 0.61rem;
     font-weight: 580;
   }
 }
@@ -350,8 +350,8 @@ p {
   padding: 0.42rem 0.55rem;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 999px;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.58rem;
   transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 
   i {
@@ -394,8 +394,8 @@ p {
   }
 
   p {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.62rem;
   }
 }
 
@@ -412,7 +412,7 @@ p {
   border-radius: 0.75rem;
   color: #fff;
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: 0.69rem;
   font-weight: 580;
   cursor: pointer;
   transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
@@ -520,8 +520,8 @@ p {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: start;
     gap: 0.52rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.65rem;
     line-height: 1.45;
   }
 
@@ -539,7 +539,7 @@ p {
 
   > span {
     color: rgba(239, 156, 156, 0.66);
-    font-size: 0.75rem;
+    font-size: 0.62rem;
   }
 }
 
@@ -581,7 +581,7 @@ p {
 
 .dialog-copy {
   color: rgba(255, 255, 255, 0.58);
-  font-size: 0.8125rem;
+  font-size: 0.72rem;
   line-height: 1.55;
 }
 
@@ -594,7 +594,7 @@ p {
   border-radius: 0.8rem;
   background: rgba(127, 29, 29, 0.08);
   color: rgba(239, 174, 174, 0.72);
-  font-size: 0.75rem;
+  font-size: 0.66rem;
 }
 
 .dialog-actions {
@@ -622,7 +622,7 @@ p {
       background: rgba(255, 255, 255, 0.035);
       color: rgba(255, 255, 255, 0.88);
       font: inherit;
-      font-size: 0.8125rem;
+      font-size: 0.72rem;
       box-shadow: none;
       transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 
@@ -643,7 +643,7 @@ p {
     }
 
     app-password button {
-      color: rgba(255, 255, 255, 0.62);
+      color: rgba(255, 255, 255, 0.42);
     }
   }
 

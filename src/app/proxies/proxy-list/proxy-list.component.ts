@@ -347,11 +347,6 @@ export class ProxyListComponent implements OnInit, OnDestroy {
     this.selectedProxies.set([...this.selection.selected]);
   }
 
-  clearSelection(): void {
-    this.selection.clear();
-    this.selectedProxies.set([]);
-  }
-
   onProxiesDeleted(): void {
     this.selection.clear();
     this.selectedProxies.set([]);
@@ -601,7 +596,7 @@ export class ProxyListComponent implements OnInit, OnDestroy {
         }
         this.workspaces.refresh().subscribe();
         this.notification.showSuccess(
-          state === 'active' ? 'Proxy activated' : state === 'paused' ? 'Proxy paused' : 'Proxy archived',
+          state === 'active' ? 'Proxy route activated' : state === 'paused' ? 'Proxy route paused' : 'Proxy route archived',
         );
       },
       error: err => {

@@ -26,7 +26,7 @@
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.025);
 
-  span { color: rgba(255, 255, 255, 0.62); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  span { color: rgba(255, 255, 255, 0.46); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
   strong { color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; font-weight: 580; }
 }
 
@@ -55,7 +55,7 @@
   align-items: center;
   gap: 0.42rem;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.8125rem;
+  font-size: 0.72rem;
   font-weight: 560;
 }
 
@@ -91,7 +91,7 @@
   }
 
   input[type="number"] { flex: 1 1 auto; min-width: 0; }
-  > span { flex: 0 0 auto; padding: 0 0.75rem; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; }
+  > span { flex: 0 0 auto; padding: 0 0.75rem; color: rgba(255, 255, 255, 0.37); font-size: 0.62rem; }
 }
 
 .performance-summary {
@@ -99,8 +99,8 @@
 
   > strong { color: var(--theme-primary-200); font-size: 1.65rem; letter-spacing: -0.05em; }
   p { display: flex; flex-direction: column; margin: 0; }
-  p span { color: rgba(255, 255, 255, 0.66); font-size: 0.8125rem; font-weight: 580; }
-  small { margin-top: 0.15rem; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; }
+  p span { color: rgba(255, 255, 255, 0.66); font-size: 0.68rem; font-weight: 580; }
+  small { margin-top: 0.15rem; color: rgba(255, 255, 255, 0.4); font-size: 0.63rem; }
 }
 
 .decision-list {
@@ -150,9 +150,9 @@
 .decision-row__copy {
   min-width: 0;
 
-  strong { color: rgba(255, 255, 255, 0.88); font-size: 0.84rem; font-weight: 580; }
-  p { margin: 0.18rem 0; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; line-height: 1.4; }
-  span { color: var(--theme-primary-300); font-size: 0.72rem; }
+  strong { color: rgba(255, 255, 255, 0.88); font-size: 0.77rem; font-weight: 580; }
+  p { margin: 0.18rem 0; color: rgba(255, 255, 255, 0.45); font-size: 0.66rem; line-height: 1.4; }
+  span { color: var(--theme-primary-300); font-size: 0.6rem; }
 }
 
 .process-rail {
@@ -174,8 +174,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.62rem;
     white-space: nowrap;
   }
 
@@ -212,8 +212,8 @@
   cursor: pointer;
 
   > span { display: flex; flex-direction: column; gap: 0.18rem; }
-  strong { color: rgba(255, 255, 255, 0.78); font-size: 0.8125rem; font-weight: 560; }
-  small { color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; }
+  strong { color: rgba(255, 255, 255, 0.78); font-size: 0.7rem; font-weight: 560; }
+  small { color: rgba(255, 255, 255, 0.4); font-size: 0.62rem; }
 }
 
 .settings-card--sources {
@@ -242,7 +242,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.035);
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .source-flow__node--active {
@@ -260,11 +260,11 @@
 
 .source-note {
   margin: 1.2rem 0 0;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.68rem;
   line-height: 1.55;
 
-  code { color: rgba(255, 255, 255, 0.65); font-size: 0.75rem; }
+  code { color: rgba(255, 255, 255, 0.65); font-size: 0.64rem; }
 }
 
 .scrape-site-list {
@@ -293,8 +293,8 @@
   height: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 0.65rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.68rem;
 }
 
 .icon-button,
@@ -327,7 +327,7 @@
   border-radius: 0.78rem;
   background: rgba(var(--theme-primary-500-rgb), 0.07);
   color: var(--theme-primary-200);
-  font-size: 0.8125rem;
+  font-size: 0.7rem;
   font-weight: 570;
 
   &:hover { border-color: rgba(var(--theme-primary-300-rgb), 0.5); background: rgba(var(--theme-primary-500-rgb), 0.13); transform: translateY(-2px); }

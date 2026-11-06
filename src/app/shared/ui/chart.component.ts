@@ -15,12 +15,10 @@ export type AppChartDefinition = ChartDefinition<unknown, ChartValue, ChartValue
 export class ChartComponent {
   readonly definition = input.required<AppChartDefinition>();
   readonly label = input.required<string>();
-  /** Optional text alternative that states what the chart shows. */
-  readonly summary = input('');
   private readonly size = signal<{width?: number; height: number}>({height: 320});
   readonly options = computed(() => ({
     definition: this.definition(),
-    ariaLabel: this.summary() ? `${this.label()}. ${this.summary()}` : this.label(),
+    ariaLabel: this.label(),
     ...this.size(),
   }));
 

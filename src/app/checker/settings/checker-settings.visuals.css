@@ -30,7 +30,7 @@
   border-radius: 999px;
   background: rgba(var(--theme-primary-500-rgb), 0.1);
   color: var(--theme-primary-200);
-  font-size: 0.72rem;
+  font-size: 0.56rem;
 }
 
 @container checker-settings (max-width: 1040px) {
@@ -98,25 +98,13 @@
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  /* Two compact protocol tiles per row keep retries and timeout within reach. */
   .checker-settings-page .settings-stage .protocol-accordion {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .checker-settings-page .settings-stage .protocol-choice,
   .checker-settings-page .settings-stage .protocol-choice.is-active {
-    min-height: 5rem;
-    padding: 0.75rem;
-  }
-
-  .checker-settings-page .settings-stage .protocol-choice__copy small,
-  .checker-settings-page .settings-stage .protocol-choice.is-active .protocol-choice__copy small {
-    display: none;
-  }
-
-  .checker-settings-page .settings-stage .settings-card {
-    padding: 1rem;
+    min-height: 6.8rem;
   }
 
   .checker-settings-page .settings-stage .decision-row {

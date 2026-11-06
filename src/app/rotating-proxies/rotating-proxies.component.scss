@@ -59,7 +59,7 @@ dl {
   p {
     margin-top: 0.28rem;
     color: var(--card-muted);
-    font-size: 0.8125rem;
+    font-size: 0.72rem;
   }
 }
 
@@ -87,8 +87,8 @@ dl {
 }
 
 .context-eyebrow {
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 0.61rem;
   font-weight: 620;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -144,7 +144,7 @@ dl {
     max-width: 38rem;
     margin-top: 0.32rem;
     color: var(--card-muted);
-    font-size: 0.84rem;
+    font-size: 0.75rem;
     line-height: 1.5;
   }
 }
@@ -157,7 +157,7 @@ dl {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
   color: var(--card-muted);
-  font-size: 0.8125rem;
+  font-size: 0.68rem;
   white-space: nowrap;
 }
 
@@ -173,7 +173,7 @@ dl {
   border-radius: 0.78rem;
   background: rgba(121, 78, 16, 0.11);
   color: rgba(250, 219, 168, 0.78);
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   line-height: 1.45;
 
   i {
@@ -198,6 +198,7 @@ dl {
 .route-stage {
   display: flex;
   min-width: 0;
+  min-height: 15rem;
   flex: 1 1 0;
   flex-direction: column;
   padding: 1rem;
@@ -234,8 +235,8 @@ dl {
 
   p {
     margin-top: 0.2rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 0.61rem;
     line-height: 1.45;
   }
 }
@@ -243,6 +244,7 @@ dl {
 .stage-fields {
   display: grid;
   gap: 0.75rem;
+  margin-top: auto;
   padding-top: 1rem;
 }
 
@@ -271,19 +273,19 @@ dl {
   align-items: center;
   gap: 0.35rem;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 0.75rem;
+  font-size: 0.66rem;
   font-weight: 560;
 }
 
 .field-hint,
 .field-error {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.59rem;
   line-height: 1.4;
 }
 
 .field-hint {
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.36);
 }
 
 .field-error {
@@ -306,7 +308,7 @@ app-select {
     border: 1px solid rgba(var(--theme-primary-300-rgb), 0.2);
     border-radius: 999px;
     color: var(--theme-primary-200);
-    font-size: 0.6875rem;
+    font-size: 0.52rem;
   }
 }
 
@@ -358,7 +360,7 @@ app-select {
 
 .uptime-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  grid-template-columns: minmax(9.5rem, 0.9fr) minmax(7rem, 1.1fr);
   gap: 0.5rem;
 }
 
@@ -374,8 +376,8 @@ app-select {
     position: absolute;
     top: 50%;
     right: 0.72rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.62rem;
     transform: translateY(-50%);
     pointer-events: none;
   }
@@ -401,13 +403,13 @@ app-select {
 
   strong {
     color: rgba(255, 255, 255, 0.72);
-    font-size: 0.75rem;
+    font-size: 0.66rem;
     font-weight: 570;
   }
 
   small {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.34);
+    font-size: 0.56rem;
   }
 
   input {
@@ -465,8 +467,8 @@ app-select {
   display: inline-flex;
   align-items: center;
   gap: 0.48rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.63rem;
 
   i {
     color: var(--theme-primary-300);
@@ -494,15 +496,15 @@ app-select {
   }
 
   dt {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.53rem;
   }
 
   dd {
     margin: 0.18rem 0 0;
     overflow: hidden;
     color: rgba(255, 255, 255, 0.62);
-    font-size: 0.72rem;
+    font-size: 0.59rem;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -539,7 +541,7 @@ app-select {
   border-color: rgba(var(--theme-primary-300-rgb), 0.4);
   border-radius: 0.75rem;
   background: linear-gradient(135deg, var(--theme-primary-600), var(--theme-primary-800));
-  font-size: 0.8125rem;
+  font-size: 0.68rem;
   font-weight: 580;
   box-shadow: 0 10px 22px rgba(var(--theme-primary-500-rgb), 0.16);
 
@@ -564,7 +566,7 @@ app-select {
   p {
     margin-top: 0.25rem;
     color: var(--card-muted);
-    font-size: 0.75rem;
+    font-size: 0.66rem;
   }
 }
 
@@ -595,7 +597,7 @@ app-select {
   border-radius: 0.75rem;
   background: rgba(255, 255, 255, 0.035);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.75rem;
+  font-size: 0.65rem;
 
   &:not(:disabled):hover {
     border-color: rgba(255, 255, 255, 0.22);
@@ -676,7 +678,7 @@ app-select {
   align-items: center;
   gap: 0.35rem;
   margin-top: 0.25rem;
-  font-size: 0.75rem;
+  font-size: 0.62rem;
   line-height: 1.4;
 }
 
@@ -716,7 +718,7 @@ app-select {
   border-radius: 0.6rem;
   background: rgba(255, 255, 255, 0.035);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.75rem;
+  font-size: 0.62rem;
   font-weight: 550;
 
   i {
@@ -943,31 +945,3 @@ app-select {
     transform: none;
   }
 }
-
-/* The create form follows the rotator list and introduces itself. */
-.composer-form { margin-top: 0.9rem; }
-
-.composer-heading {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: 0.85rem;
-  margin-bottom: 0.9rem;
-
-  h2 {
-    color: rgba(255, 255, 255, 0.96);
-    font-size: 1rem;
-    font-weight: 580;
-    letter-spacing: -0.025em;
-  }
-
-  p {
-    margin-top: 0.3rem;
-    color: rgba(255, 255, 255, 0.64);
-    font-size: 0.84rem;
-    line-height: 1.5;
-  }
-}
-
-/* The selected transport shows its name only; "Default" stays in the option list. */
-:host ::ng-deep [data-slot="select-trigger"] .transport-option > span { display: none; }

@@ -27,12 +27,10 @@
     margin-right: 0;
   }
 
-  .auth-wordmark {
+  .auth-logo h5 {
     color: #fff;
     font-size: 1.5rem;
-    letter-spacing: 0.42em;
-    margin-inline-start: 0.42em;
-    text-transform: uppercase;
+    letter-spacing: 3px;
     text-shadow: 0 0 10px var(--theme-primary-shadow);
   }
 
@@ -44,26 +42,6 @@
     box-shadow: 0 4px 10px var(--theme-primary-shadow);
     color: #fff;
     text-align: center;
-  }
-
-  .auth-card form {
-    text-align: left;
-  }
-
-  .auth-form-error {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    margin: 0;
-    padding: 0.7rem 0.8rem;
-    border: 1px solid rgba(248, 113, 113, 0.4);
-    border-radius: 0.6rem;
-    background: rgba(127, 29, 29, 0.22);
-    color: #fecaca;
-    font-size: 0.875rem;
-    line-height: 1.45;
-
-    i { margin-top: 0.15rem; }
   }
 
   [hlmInput] {

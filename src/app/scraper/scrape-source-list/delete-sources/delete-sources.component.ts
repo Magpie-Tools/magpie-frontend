@@ -1,5 +1,4 @@
-import {Component, EventEmitter, inject, Input, LOCALE_ID, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {formatNumber} from '@angular/common';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CheckboxComponent} from '../../../checkbox/checkbox.component';
 import {HttpService} from '../../../services/http.service';
@@ -35,15 +34,12 @@ type DeleteSourcesFormDefaults = {
 })
 export class DeleteSourcesComponent implements OnChanges {
   @Input() selectedSources: ScrapeSourceInfo[] = [];
-  /** Total records in the workspace, not just the loaded page. */
-  @Input() totalCount: number | null = null;
   @Input() allSources: ScrapeSourceInfo[] = [];
   @Output() sourcesDeleted = new EventEmitter<void>();
 
   dialogVisible = false;
-  private readonly locale = inject(LOCALE_ID);
   isDeleting = false;
-  deleteOption: 'all' | 'selected' | null = null;
+  deleteOption: 'all' | 'selected' = 'all';
   deleteForm: FormGroup;
 
   private readonly defaultFormValues: DeleteSourcesFormDefaults = {
@@ -85,7 +81,7 @@ export class DeleteSourcesComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedSources'] && this.deleteOption === 'selected' && !this.canDeleteSelected()) {
-      this.deleteOption = null;
+      this.deleteOption = 'all';
     }
   }
 
@@ -95,35 +91,8 @@ export class DeleteSourcesComponent implements OnChanges {
       return;
     }
 
-    // Deleting everything must be an explicit choice, so nothing is preselected without a selection.
-    this.deleteOption = this.canDeleteSelected() ? 'selected' : null;
+    this.deleteOption = this.canDeleteSelected() ? 'selected' : 'all';
     this.dialogVisible = true;
-  }
-
-  get filtersEnabled(): boolean {
-    return Boolean(this.deleteForm.get('filter')?.value);
-  }
-
-  get allScopeTitle(): string {
-    const total = this.totalCount;
-    if (this.filtersEnabled) return 'All matching sources';
-    return total !== null && total >= 0 ? `All sources (${formatNumber(total, this.locale)})` : 'All sources';
-  }
-
-  get confirmLabel(): string {
-    if (this.deleteOption !== 'all') return '';
-    return this.filtersEnabled
-      ? 'I understand that every source matching these filters will be permanently deleted.'
-      : 'I understand that every source in this workspace will be permanently deleted.';
-  }
-
-  get actionLabel(): string {
-    if (this.deleteOption === 'selected') {
-      const count = this.selectedSources.length;
-      return `Delete ${formatNumber(count, this.locale)} selected ${count === 1 ? 'source' : 'sources'}`;
-    }
-    if (this.deleteOption === 'all') return this.filtersEnabled ? 'Delete matching sources' : 'Delete all sources';
-    return 'Choose what to delete';
   }
 
   closeDialog(): void {
@@ -143,9 +112,6 @@ export class DeleteSourcesComponent implements OnChanges {
   }
 
   submitDelete(): void {
-    if (!this.deleteOption) {
-      return;
-    }
     if (this.deleteOption === 'selected' && !this.canDeleteSelected()) {
       this.notification.showError('No scrape sources selected for deletion.');
       return;
@@ -184,7 +150,7 @@ export class DeleteSourcesComponent implements OnChanges {
 
   private resetFormState(): void {
     this.deleteForm.reset(this.defaultFormValues);
-    this.deleteOption = null;
+    this.deleteOption = 'all';
     this.isDeleting = false;
   }
 
