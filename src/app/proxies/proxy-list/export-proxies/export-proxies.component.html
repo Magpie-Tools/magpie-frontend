@@ -11,7 +11,7 @@
   headingTooltip="Export proxies with optional filters, output formats, and status selections."
   introIcon="icon icon-file-output"
   introTitle="Build an export file"
-  introDescription="Choose the route scope and define the exact fields written to each line."
+  introDescription="Choose which proxies to export and the exact fields written to each line."
   [selectedCount]="selectedProxies.length"
   footerNote="The export downloads as a plain-text file."
   actionLabel="Export file"
@@ -33,7 +33,7 @@
       <div>
         <h3 id="export-scope-title">Proxies to export</h3>
         <p>
-          Export the current selection or all routes available to this
+          Export the current selection or all proxies available to this
           workspace.
         </p>
       </div>
@@ -46,7 +46,7 @@
       allTitle="All proxies"
       allDescription="Export every proxy currently available."
       selectedTitle="Selected proxies"
-      selectedDescription="Export only the routes highlighted in the table."
+      selectedDescription="Export only the proxies selected in the table."
       [selectedDisabled]="!canExportSelected()"
     ></app-bulk-scope-selector>
   </section>
@@ -57,7 +57,7 @@
         <div>
           <h3>Filters</h3>
           <p>
-            Enable filters if the chosen scope still contains routes you do not
+            Enable filters if the chosen scope still contains proxies you do not
             need.
           </p>
         </div>

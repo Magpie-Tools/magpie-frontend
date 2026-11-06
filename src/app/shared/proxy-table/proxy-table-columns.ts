@@ -33,12 +33,12 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
     id: 'alive',
     label: 'Status',
     sortField: 'alive',
-    example: 'alive',
+    example: 'Alive',
     skeletonWidth: '0.9rem',
   },
   {
     id: 'health_overall',
-    label: 'Overall Health',
+    label: 'Overall health',
     sortField: 'health_overall',
     tooltip: 'Health ratio across all checks',
     example: '82%',
@@ -46,7 +46,7 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
   },
   {
     id: 'health_http',
-    label: 'HTTP Health',
+    label: 'HTTP health',
     sortField: 'health_http',
     tooltip: 'Health ratio for HTTP checks',
     example: '79%',
@@ -54,7 +54,7 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
   },
   {
     id: 'health_https',
-    label: 'HTTPS Health',
+    label: 'HTTPS health',
     sortField: 'health_https',
     tooltip: 'Health ratio for HTTPS checks',
     example: '85%',
@@ -62,7 +62,7 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
   },
   {
     id: 'health_socks4',
-    label: 'SOCKS4 Health',
+    label: 'SOCKS4 health',
     sortField: 'health_socks4',
     tooltip: 'Health ratio for SOCKS4 checks',
     example: '68%',
@@ -70,7 +70,7 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
   },
   {
     id: 'health_socks5',
-    label: 'SOCKS5 Health',
+    label: 'SOCKS5 health',
     sortField: 'health_socks5',
     tooltip: 'Health ratio for SOCKS5 checks',
     example: '71%',
@@ -86,6 +86,7 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
   {
     id: 'ip_port',
     label: 'Host:Port',
+    required: true,
     sortField: 'ip_port',
     example: 'gateway.provider.example:8080',
     skeletonWidth: '10rem',
@@ -99,7 +100,7 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
   },
   {
     id: 'response_time',
-    label: 'Time',
+    label: 'Latency',
     sortField: 'response_time',
     tooltip: 'Response Time',
     example: '120 ms',
@@ -110,14 +111,14 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
     label: 'Type',
     sortField: 'estimated_type',
     tooltip: 'Estimated Type',
-    example: 'HTTP',
+    example: 'Datacenter',
     skeletonWidth: '5rem',
   },
   {
     id: 'country',
     label: 'Country',
     sortField: 'country',
-    example: 'US',
+    example: 'Germany',
     skeletonWidth: '6rem',
   },
   {
@@ -131,20 +132,20 @@ export const PROXY_TABLE_COLUMN_DEFINITIONS: readonly ProxyTableColumnDefinition
     id: 'reputation',
     label: 'Reputation',
     sortField: 'reputation',
-    example: 'Good (82)',
+    example: 'Good 82',
     skeletonWidth: '3.5rem',
   },
   {
     id: 'latest_check',
-    label: 'Last Check',
+    label: 'Last check',
     sortField: 'latest_check',
-    example: '2026-02-20 10:30',
+    example: '05.11.2026, 15:47',
     skeletonWidth: '6rem',
   },
   {
     id: 'check_now',
-    label: 'Check Now',
-    example: 'Queue',
+    label: 'Check now',
+    example: 'Check now',
     skeletonWidth: '4.75rem',
   },
   {
@@ -212,6 +213,13 @@ export function normalizeProxyTableColumns(value: unknown): ProxyTableColumnId[]
 
   if (normalized.length === 0) {
     return [...DEFAULT_PROXY_TABLE_COLUMNS];
+  }
+
+  // Host:Port identifies each row (and titles phone cards), so saved layouts always include it.
+  if (!seen.has('ip_port')) {
+    const statusIndex = normalized.indexOf('alive');
+    normalized.splice(statusIndex >= 0 ? statusIndex + 1 : 0, 0, 'ip_port');
+    seen.add('ip_port');
   }
 
   if (!seen.has('tags')) {

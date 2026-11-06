@@ -71,6 +71,26 @@
               </button>
             }
           </div>
+
+          @if (!showResultHeading) {
+            <div class="inventory-summary" [class.inventory-summary--selected]="selectedCount > 0">
+              <span class="inventory-summary__count" role="status" aria-live="polite">
+                @if (selectedCount > 0) {
+                  <strong>{{ selectedCount | number }} selected</strong>
+                  <span class="inventory-summary__of">of {{ totalItems | number }} {{ nounFor(totalItems) }}</span>
+                } @else if (hasLoaded) {
+                  {{ totalItems | number }} {{ nounFor(totalItems) }}@if (isFiltered) { {{ totalItems === 1 ? 'matches' : 'match' }} the current search or filters}
+                } @else {
+                  {{ loadingLabel }}
+                }
+              </span>
+              @if (selectedCount > 0) {
+                <button type="button" class="inventory-summary__clear" (click)="clearSelection.emit()">
+                  Clear selection
+                </button>
+              }
+            </div>
+          }
         </section>
 
         <ng-content select="[inventory-overlays]"></ng-content>
@@ -105,7 +125,7 @@
               @if (selectedCount > 0) {
                 {{ selectedCount }} selected
               } @else if (hasLoaded) {
-                {{ totalItems.toLocaleString() }} total
+                {{ totalItems | number }} total
               } @else {
                 {{ loadingLabel }}
               }

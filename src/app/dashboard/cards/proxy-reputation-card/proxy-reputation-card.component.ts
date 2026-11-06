@@ -32,6 +32,10 @@ export class ProxyReputationCardComponent {
     { key: 'unknown', title: 'Unknown' }
   ];
 
+  get chartSummary(): string {
+    return this.entries.map(entry => `${entry.title} ${entry.value} (${Math.round(entry.percentage)}%)`).join(', ');
+  }
+
   get total(): number {
     if (!this.breakdown) {
       return 0;

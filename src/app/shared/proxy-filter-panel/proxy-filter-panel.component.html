@@ -36,7 +36,7 @@
     <div class="filter-panel__body-main">
       <div class="filter-column filter-column--left">
         <div class="filter-section filter-section--top">
-          <div class="filter-section__title">Protocol Alive</div>
+          <div class="filter-section__title">Alive on protocol</div>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div class="flex items-center justify-center">
               <div class="filter-checkbox-row">
@@ -92,24 +92,28 @@
         <div class="filter-grid mt-2.5">
           <div>
             <label for="filterTimeout" class="filter-label"
-              >Max Timeout (ms)</label
+              >Max timeout (ms)</label
             >
             <input
               hlmInput
               type="number"
               id="filterTimeout"
               formControlName="maxTimeout"
+                appZeroAsEmpty
+                placeholder="No limit"
               [min]="0"
               class="w-full bg-gray-800 text-white border-gray-700 theme-focus"
             />
           </div>
           <div>
-            <label for="filterRetries" class="filter-label">Max Retries</label>
+            <label for="filterRetries" class="filter-label">Max retries</label>
             <input
               hlmInput
               type="number"
               id="filterRetries"
               formControlName="maxRetries"
+                appZeroAsEmpty
+                placeholder="No limit"
               [min]="0"
               class="w-full bg-gray-800 text-white border-gray-700 theme-focus"
             />
@@ -168,7 +172,7 @@
         <div class="filter-grid">
           <div>
             <label for="filterStatus" class="filter-label"
-              >Overall Status</label
+              >Overall status</label
             >
             <app-select
               formControlName="proxyStatus"
@@ -236,20 +240,25 @@
 
     <div class="filter-health">
       <div
+        [id]="healthContentId"
         class="filter-health__content"
         [ngClass]="{ 'filter-health__content--open': healthFiltersExpanded() }"
+        [attr.inert]="healthFiltersExpanded() ? null : ''"
+        [attr.aria-hidden]="healthFiltersExpanded() ? null : 'true'"
       >
         <div class="filter-health__inner">
           <div class="filter-health-grid">
             <div>
               <label for="filterMinHealthOverall" class="filter-label"
-                >Overall Health</label
+                >Overall health</label
               >
               <input
                 hlmInput
                 type="number"
                 id="filterMinHealthOverall"
                 formControlName="minHealthOverall"
+                appZeroAsEmpty
+                placeholder="Any"
                 [min]="0"
                 [max]="100"
                 class="w-full bg-gray-800 text-white border-gray-700 theme-focus"
@@ -257,13 +266,15 @@
             </div>
             <div>
               <label for="filterMinHealthHttp" class="filter-label"
-                >HTTP Health</label
+                >HTTP health</label
               >
               <input
                 hlmInput
                 type="number"
                 id="filterMinHealthHttp"
                 formControlName="minHealthHttp"
+                appZeroAsEmpty
+                placeholder="Any"
                 [min]="0"
                 [max]="100"
                 class="w-full bg-gray-800 text-white border-gray-700 theme-focus"
@@ -271,13 +282,15 @@
             </div>
             <div>
               <label for="filterMinHealthHttps" class="filter-label"
-                >HTTPS Health</label
+                >HTTPS health</label
               >
               <input
                 hlmInput
                 type="number"
                 id="filterMinHealthHttps"
                 formControlName="minHealthHttps"
+                appZeroAsEmpty
+                placeholder="Any"
                 [min]="0"
                 [max]="100"
                 class="w-full bg-gray-800 text-white border-gray-700 theme-focus"
@@ -285,13 +298,15 @@
             </div>
             <div>
               <label for="filterMinHealthSocks4" class="filter-label"
-                >SOCKS4 Health</label
+                >SOCKS4 health</label
               >
               <input
                 hlmInput
                 type="number"
                 id="filterMinHealthSocks4"
                 formControlName="minHealthSocks4"
+                appZeroAsEmpty
+                placeholder="Any"
                 [min]="0"
                 [max]="100"
                 class="w-full bg-gray-800 text-white border-gray-700 theme-focus"
@@ -299,13 +314,15 @@
             </div>
             <div>
               <label for="filterMinHealthSocks5" class="filter-label"
-                >SOCKS5 Health</label
+                >SOCKS5 health</label
               >
               <input
                 hlmInput
                 type="number"
                 id="filterMinHealthSocks5"
                 formControlName="minHealthSocks5"
+                appZeroAsEmpty
+                placeholder="Any"
                 [min]="0"
                 [max]="100"
                 class="w-full bg-gray-800 text-white border-gray-700 theme-focus"
@@ -318,11 +335,12 @@
       <button
         type="button"
         class="filter-health__toggle"
+        [attr.aria-controls]="healthContentId"
         [attr.aria-expanded]="healthFiltersExpanded()"
         (click)="toggleHealthFilters()"
       >
         <span class="filter-health__toggle-label">
-          More Filters
+          More filters
           @if (activeHealthFilterCount() > 0) {
             <span class="filter-health__toggle-count"
               >({{ activeHealthFilterCount() }})</span

@@ -59,6 +59,17 @@
     }
 
     <ng-content></ng-content>
+
+    @if (confirmLabel) {
+      <label class="bulk-dialog-confirm" [class.bulk-dialog-confirm--danger]="tone === 'danger'">
+        <input
+          type="checkbox"
+          [checked]="confirmed"
+          (change)="confirmed = $any($event.target).checked"
+        />
+        <span>{{ confirmLabel }}</span>
+      </label>
+    }
   </div>
 
   <ng-template #dialogFooter>
@@ -83,7 +94,7 @@
           "
           (click)="actionRequested.emit()"
           hlmBtn
-          [disabled]="actionDisabled || actionLoading"
+          [disabled]="actionBlocked"
           variant="default"
         >
           @if (actionLoading) {

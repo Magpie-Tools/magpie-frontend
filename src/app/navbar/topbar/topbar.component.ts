@@ -1,7 +1,10 @@
 import {DatePipe} from '@angular/common';
 import {AfterViewInit, Component, computed, DestroyRef, effect, ElementRef, inject, signal, OnDestroy, OnInit, untracked} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {NavigationEnd, Router, RouterLink} from '@angular/router';
+import {NavigationEnd, NavigationStart, Router, RouterLink} from '@angular/router';
+import {Title} from '@angular/platform-browser';
+import {buildDocumentTitle, buildTopbarBreadcrumbs} from './breadcrumbs';
+import {BreadcrumbService} from '../../services/breadcrumb.service';
 import {HlmPopoverImports} from '@spartan-ng/helm/popover';
 import { filter } from 'rxjs/operators';
 import {Subscription} from 'rxjs';
@@ -16,46 +19,10 @@ import {buildNotificationFeed} from './notification-feed';
 import {NotificationReadService} from '../../services/notification-read.service';
 import {gsap} from 'gsap';
 
-export interface TopbarBreadcrumb {
-  label: string;
-  routerLink?: string;
-}
+export {buildTopbarBreadcrumbs} from './breadcrumbs';
+export type {TopbarBreadcrumb} from './breadcrumbs';
 
-const ROUTE_LABELS: Readonly<Record<string, string>> = {
-  addProxies: 'Add proxies',
-  abuseipdb: 'AbuseIPDB',
-  geolite: 'GeoLite',
-};
-
-export function buildTopbarBreadcrumbs(url: string): TopbarBreadcrumb[] {
-  const path = url.split(/[?#]/, 1)[0];
-  const rawSegments = path.split('/').filter(Boolean).map(segment => segment.split(';', 1)[0]);
-  if (rawSegments.length === 0) {
-    return [{label: 'Dashboard'}];
-  }
-
-  return rawSegments.map((rawSegment, index) => {
-    const segment = decodeURIComponent(rawSegment);
-    const isProxyDetailRoot = index === 0 && segment === 'proxies' && rawSegments.length > 1;
-    const label = isProxyDetailRoot ? 'Proxy' : formatRouteLabel(segment);
-    const isLast = index === rawSegments.length - 1;
-    return {
-      label,
-      ...(isLast ? {} : {routerLink: '/' + rawSegments.slice(0, index + 1).join('/')}),
-    };
-  });
-}
-
-function formatRouteLabel(segment: string): string {
-  const configured = ROUTE_LABELS[segment];
-  if (configured) {
-    return configured;
-  }
-  return segment
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/-/g, ' ')
-    .replace(/^\w/, character => character.toUpperCase());
-}
+const pathOf = (url: string) => url.split(/[?#]/, 1)[0];
 
 @Component({
   selector: 'app-topbar',
@@ -69,7 +36,10 @@ function formatRouteLabel(segment: string): string {
   styleUrls: ['./topbar.component.scss']
 })
 export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
-  breadcrumbs = signal<TopbarBreadcrumb[]>([{label: 'Dashboard'}]);
+  private readonly currentUrl = signal('/');
+  private readonly breadcrumbService = inject(BreadcrumbService);
+  private readonly title = inject(Title);
+  readonly breadcrumbs = computed(() => buildTopbarBreadcrumbs(this.currentUrl(), this.breadcrumbService.detailLabel()));
   readonly notificationsState = signal<'open' | 'closed'>('closed');
   readonly alertIncidents = signal<AlertIncident[]>([]);
   readonly releases = signal<ReleaseNote[]>([]);
@@ -118,13 +88,18 @@ export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
       const ids = this.recentNotifications().map(item => item.id);
       untracked(() => this.notificationReads.load(ids));
     });
+    effect(() => this.title.setTitle(buildDocumentTitle(this.breadcrumbs())));
   }
 
   ngOnInit() {
-    const set = () => this.breadcrumbs.set(buildTopbarBreadcrumbs(this.router.url));
-    set();
-    this.sub = this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
-      set();
+    this.currentUrl.set(this.router.url);
+    this.sub = this.router.events.pipe(filter(e => e instanceof NavigationStart || e instanceof NavigationEnd)).subscribe(event => {
+      if (event instanceof NavigationStart) {
+        // A detail page names itself after loading; drop the previous page's name.
+        if (pathOf(event.url) !== pathOf(this.router.url)) this.breadcrumbService.setDetailLabel(null);
+        return;
+      }
+      this.currentUrl.set(this.router.url);
       this.notificationsState.set('closed');
     });
     this.workspaces.load().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({

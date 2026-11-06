@@ -108,7 +108,7 @@
     max-width: 34rem;
     margin: 0.34rem 0 0;
     color: var(--card-muted);
-    font-size: 0.78rem;
+    font-size: 0.84rem;
     line-height: 1.5;
   }
 }
@@ -128,14 +128,16 @@
 .flow-step {
   display: flex;
   min-width: 0;
+  flex: 1 1 0;
   flex-direction: column;
   align-items: center;
   gap: 0.55rem;
   text-align: center;
 
   > div { display: flex; flex-direction: column; gap: 0.12rem; }
-  strong { color: rgba(255, 255, 255, 0.76); font-size: 0.68rem; font-weight: 570; }
-  small { color: rgba(255, 255, 255, 0.37); font-size: 0.56rem; white-space: nowrap; }
+  strong { color: rgba(255, 255, 255, 0.76); font-size: 0.8125rem; font-weight: 570; }
+  /* Captions wrap inside their step so neighbouring steps never overlap. */
+  small { color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; line-height: 1.35; text-wrap: balance; }
 }
 
 .flow-node {
@@ -158,8 +160,8 @@
 }
 
 .flow-line {
-  flex: 1 1 auto;
-  min-width: 1rem;
+  flex: 0 1 2rem;
+  min-width: 0.75rem;
   height: 1px;
   margin: 1.38rem 0.35rem 0;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(var(--theme-primary-300-rgb), 0.36));
@@ -227,7 +229,7 @@
   }
 
   strong { color: rgba(255, 255, 255, 0.86); font-size: 1.15rem; font-weight: 590; }
-  span { color: rgba(255, 255, 255, 0.4); font-size: 0.6rem; }
+  span { color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; }
 }
 
 .validation-note {
@@ -243,7 +245,7 @@
   background: rgba(255, 255, 255, 0.02);
 
   i { margin-top: 0.1rem; color: var(--theme-primary-300); font-size: 0.72rem; }
-  p { margin: 0; color: rgba(255, 255, 255, 0.42); font-size: 0.63rem; line-height: 1.5; }
+  p { margin: 0; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; line-height: 1.5; }
   strong { color: rgba(255, 255, 255, 0.7); font-weight: 580; }
 }
 
@@ -270,7 +272,7 @@
   border-radius: 0.78rem;
   background: rgba(var(--theme-primary-500-rgb), 0.07);
   color: var(--theme-primary-200);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   font-weight: 570;
   transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 
@@ -321,8 +323,8 @@
   height: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 0.65rem;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.8125rem;
 }
 
 .judge-fields {
@@ -344,14 +346,14 @@
   align-items: center;
   gap: 0.42rem;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 560;
 }
 
 .field-hint {
   margin: 0;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.75rem;
   line-height: 1.45;
 
   code { color: rgba(255, 255, 255, 0.65); }
@@ -364,7 +366,7 @@
   border-radius: 999px;
   background: rgba(216, 168, 201, 0.07);
   color: rgba(232, 194, 220, 0.76);
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   white-space: nowrap;
 
   &.is-default { border-color: rgba(var(--theme-primary-300-rgb), 0.25); background: rgba(var(--theme-primary-500-rgb), 0.08); color: var(--theme-primary-200); }
@@ -398,7 +400,7 @@
     border-radius: 0.82rem;
     background: rgba(255, 255, 255, 0.035);
     color: rgba(255, 255, 255, 0.88);
-    font-size: 0.76rem;
+    font-size: 0.84rem;
     box-shadow: none;
 
     &::placeholder { color: rgba(255, 255, 255, 0.28); }

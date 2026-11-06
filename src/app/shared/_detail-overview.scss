@@ -30,7 +30,7 @@
     margin-left: auto;
     text-align: right;
     color: var(--detail-muted);
-    font-size: 0.62rem;
+    font-size: 0.75rem;
   }
 }
 
@@ -53,8 +53,8 @@
 }
 
 .label {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.52rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.6875rem;
   font-weight: 620;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -63,7 +63,7 @@
 .value {
   min-width: 0;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   font-weight: 540;
 
   &--truncate {

@@ -79,8 +79,8 @@
   align-items: center;
   gap: 0.5rem;
   overflow-x: auto;
-  color: rgba(255, 255, 255, 0.42);
-  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.8125rem;
   font-weight: 530;
   scrollbar-width: none;
   white-space: nowrap;
@@ -89,10 +89,20 @@
 }
 
 .topbar-breadcrumb__link,
-.topbar-breadcrumb__current { flex: 0 0 auto; }
+.topbar-breadcrumb__current {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar-breadcrumb__group {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.62);
+}
 
 .topbar-breadcrumb__link {
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.62);
   text-decoration: none;
   transition: color 0.18s ease;
 
@@ -102,7 +112,7 @@
 .topbar-breadcrumb__current {
   color: rgba(255, 255, 255, 0.92);
   font-family: "Outfit Variable", "Geist Variable", sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 590;
   letter-spacing: -0.015em;
 }
@@ -144,7 +154,7 @@
   background: var(--theme-primary-500);
   color: #fff;
   box-shadow: 0 0 0.8rem var(--theme-primary-shadow);
-  font-size: 0.52rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   line-height: 1;
 }
@@ -190,8 +200,8 @@
 
   p {
     margin: 0.3rem 0 0;
-    color: rgba(255, 255, 255, 0.48);
-    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 }
@@ -206,7 +216,7 @@
   border: 0;
   border-radius: 0.5rem;
   background: transparent;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 0.8rem;
   cursor: pointer;
 
@@ -222,7 +232,7 @@
   padding: 0.7rem 1rem;
   background: rgba(245, 158, 11, 0.06);
   color: #fbbf24;
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
 
   > i { flex: 0 0 auto; }
@@ -292,7 +302,7 @@
   strong {
     overflow: hidden;
     color: rgba(255, 255, 255, 0.9);
-    font-size: 0.77rem;
+    font-size: 0.84rem;
     font-weight: 580;
     line-height: 1.45;
     text-overflow: ellipsis;
@@ -305,8 +315,8 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.43);
-  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
 
   > span { font-weight: 560; }
   time { flex: 0 0 auto; margin-left: auto; }
@@ -329,8 +339,8 @@
 
 .notification-item__description {
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.48);
-  font-size: 0.66rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.75rem;
   line-height: 1.5;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -348,7 +358,7 @@
 
   > i { margin-bottom: 0.3rem; color: rgba(255, 255, 255, 0.3); font-size: 1.5rem; }
   strong { font-size: 0.8rem; font-weight: 550; }
-  > span { color: rgba(255, 255, 255, 0.48); font-size: 0.7rem; line-height: 1.6; }
+  > span { color: rgba(255, 255, 255, 0.62); font-size: 0.8125rem; line-height: 1.6; }
 }
 
 .notification-panel__footer {
@@ -363,19 +373,19 @@
 .notification-panel__invitations {
   padding: 0.85rem 1rem;
   color: var(--theme-primary-200) !important;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 550;
 
   > i:last-child { margin-left: auto; font-size: 0.55rem; }
 }
 
-.notification-panel__pending { color: rgba(255, 255, 255, 0.43); font-size: 0.62rem; font-weight: 450; }
+.notification-panel__pending { color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; font-weight: 450; }
 
 .notification-panel__links {
   display: flex;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 
-  a { flex: 1; justify-content: center; padding: 0.7rem; color: rgba(255, 255, 255, 0.5); font-size: 0.65rem; }
+  a { flex: 1; justify-content: center; padding: 0.7rem; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; }
   a + a { border-left: 1px solid rgba(255, 255, 255, 0.06); }
   i { font-size: 0.6rem; }
 }
@@ -443,7 +453,7 @@
   background: transparent;
   color: #fff;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 620;
   letter-spacing: -0.01em;
   line-height: 1.3;
@@ -457,8 +467,8 @@
 }
 
 .workspace-switcher--loading {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.75rem;
 }
 
 .workspace-switcher__skeleton {
@@ -507,7 +517,14 @@
   .topbar__navigation { gap: 0.5rem; }
 
   .topbar-breadcrumb__link,
+  .topbar-breadcrumb__group,
   .topbar-breadcrumb__separator { display: none; }
+
+  .topbar-breadcrumb__current {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   .workspace-switcher {
     min-width: 7rem;

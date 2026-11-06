@@ -12,3 +12,10 @@
   margin-inline-start: auto;
   grid-column: 1 / -1;
 }
+
+/* Phones: the toolbar wraps; Add leads it and Delete comes last. */
+@container inventory-page (max-width: 520px) {
+  .proxy-mutation-actions { display: contents; }
+  .toolbar-action--add { order: -1; }
+  .toolbar-action--delete { order: 99; }
+}

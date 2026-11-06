@@ -110,7 +110,7 @@ describe('Inventory sidebar navigation', () => {
       expect(headingEntrance).toBeInstanceOf(CSSAnimation);
       expect(getComputedStyle(heading).transform).not.toBe('none');
       expect(getComputedStyle(grid).transform).not.toBe('none');
-      expect(heading.querySelector('h1')!.textContent).toContain(route === 'proxies' ? 'Managed proxies' : 'Scrape sources');
+      expect(heading.querySelector('h1')!.textContent).toContain(route === 'proxies' ? 'Proxies' : 'Scrape sources');
       for (const target of [heading, toolbar, grid]) {
         expect(getComputedStyle(target).opacity).toBe('1');
         expect(getComputedStyle(target).visibility).toBe('visible');

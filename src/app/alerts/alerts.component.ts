@@ -244,6 +244,13 @@ export class AlertsComponent {
     return rule.status === 'healthy' ? 'healthy' : 'neutral';
   }
   unit(metric: AlertMetric): string { return metric === 'success_rate' ? '%' : metric === 'latency_ms' ? ' ms' : ''; }
+  /** Phones stack the form below the list; jump straight to its first field. */
+  jumpToField(id: string): void {
+    const field = document.getElementById(id);
+    field?.scrollIntoView({block: 'center'});
+    field?.focus({preventScroll: true});
+  }
+
   editRule(rule: AlertRule): void {
     if (!this.workspace.canOperate()) return;
     this.activeSection.set('rules');

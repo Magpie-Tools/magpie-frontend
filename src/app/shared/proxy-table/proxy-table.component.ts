@@ -7,11 +7,14 @@ import {HlmTableImports} from '@spartan-ng/helm/table';
 import {PaginationComponent} from '../ui/pagination.component';
 import {PageScrollTarget, scrollTableToPageTarget} from '../table-pagination';
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
+  inject,
+  LOCALE_ID,
   Input,
   OnChanges,
   OnDestroy,
@@ -19,7 +22,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import {NgClass} from '@angular/common';
+import {DecimalPipe, NgClass} from '@angular/common';
 import {SelectionModel} from '@angular/cdk/collections';
 
 import {FormsModule} from '@angular/forms';
@@ -27,7 +30,9 @@ import {ProxyInfo} from '../../models/ProxyInfo';
 import {ProxyReputation} from '../../models/ProxyReputation';
 import {ClipboardService} from '../../services/clipboard.service';
 import {HealthBarCellComponent} from '../health-bar-cell/health-bar-cell.component';
-import {formatHostPort} from '../proxy-address';
+import {addressBreakParts, formatHostPort, splitHostPort} from '../proxy-address';
+import {formatDate} from '@angular/common';
+import {TIMESTAMP_FORMAT} from '../date-formats';
 import {ProxyTag} from '../../models/ProxyTag';
 import {ProxyTagSelectorComponent} from '../proxy-tag-selector/proxy-tag-selector.component';
 import {ManagedProxyState} from '../../models/Workspace';
@@ -54,6 +59,7 @@ type ProxyRow = ProxyInfo & { __meta?: ProxyRowMeta };
   standalone: true,
   imports: [HlmDropdownMenuImports, HlmCheckbox, HlmSkeleton, HlmTooltip, HlmTableImports, PaginationComponent,
     NgClass,
+    DecimalPipe,
     FormsModule,
 
     HealthBarCellComponent,
@@ -68,10 +74,7 @@ export class ProxyTableComponent implements OnChanges, OnDestroy {
 
   private _proxies: ProxyRow[] = [];
   private _columns: ProxyTableColumnId[] = [...DEFAULT_PROXY_TABLE_COLUMNS];
-  private readonly dateFormatter = new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  });
+  private readonly locale = inject(LOCALE_ID);
 
   @Input()
   set proxies(value: ProxyInfo[]) {
@@ -132,11 +135,27 @@ export class ProxyTableComponent implements OnChanges, OnDestroy {
   pageScrollTarget: PageScrollTarget = 'top';
   private copyFeedbackTimeout?: ReturnType<typeof setTimeout>;
   private pendingPageScroll = false;
+  /** True while the table renders rows as phone cards (matches the 640px container query). */
+  cardLayout = false;
+  private sizeObserver?: ResizeObserver;
 
   constructor(
     private cdr: ChangeDetectorRef,
     private clipboardService: ClipboardService,
-  ) {}
+    host: ElementRef<HTMLElement>,
+  ) {
+    afterNextRender(() => {
+      this.sizeObserver = new ResizeObserver(entries => {
+        const width = entries[0]?.contentRect.width ?? 0;
+        const cardLayout = width > 0 && width <= 640;
+        if (cardLayout !== this.cardLayout) {
+          this.cardLayout = cardLayout;
+          this.cdr.markForCheck();
+        }
+      });
+      this.sizeObserver.observe(host.nativeElement);
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['page']) {
@@ -159,6 +178,7 @@ export class ProxyTableComponent implements OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.sizeObserver?.disconnect();
     if (this.copyFeedbackTimeout) {
       clearTimeout(this.copyFeedbackTimeout);
     }
@@ -301,6 +321,11 @@ export class ProxyTableComponent implements OnChanges, OnDestroy {
     return formatHostPort(proxy.ip, proxy.port);
   }
 
+  /** Host part of the address (IPv6 in brackets), split at readable line-break points. */
+  hostParts(proxy: ProxyInfo): string[] {
+    return addressBreakParts(splitHostPort(this.formatProxyAddress(proxy)).host);
+  }
+
   private decorateProxies(): void {
     if (!this._proxies.length) {
       return;
@@ -357,7 +382,7 @@ export class ProxyTableComponent implements OnChanges, OnDestroy {
     if (!Number.isFinite(date.getTime())) {
       return '—';
     }
-    return this.dateFormatter.format(date);
+    return formatDate(date, TIMESTAMP_FORMAT, this.locale);
   }
 
   private getPrimaryReputation(proxy: ProxyInfo): ProxyReputation | null {

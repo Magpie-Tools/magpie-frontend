@@ -1,3 +1,4 @@
+import {formatDecimal, formatPercent} from '../shared/number-utils';
 import {areaY, barX, d3Curve, defineChart, dot, lineY} from '@tanstack/charts';
 import type {ChartMark, SceneNode} from '@tanstack/charts';
 import {scaleLinear} from '@tanstack/charts/scales/linear';
@@ -7,15 +8,26 @@ import {curveMonotoneX} from 'd3-shape';
 
 const chartTheme = {...HLM_CHART_THEME, grid: 'rgba(148, 163, 184, 0.15)'};
 const smoothCurve = d3Curve(curveMonotoneX);
-export const REPUTATION_COLORS = ['#22c55e', '#f97316', '#ef4444', '#94a3b8'];
+/** Good, Neutral, Poor, Unknown — the same tokens as --reputation-* in styles.css. */
+export const REPUTATION_COLORS = ['#22c55e', '#facc15', '#ef4444', '#94a3b8'];
 
 export interface MetricPoint { index: number; value: number; }
 export interface InventoryPoint {
   index: number;
   label: string;
+  /** Short axis label, such as the day. Points of the same day share it. */
+  axisLabel?: string;
   count: number;
   gained: number;
   lost: number;
+}
+
+/** One tick per day (or per point for short series), thinned to at most `maxTicks` horizontal labels. */
+export function inventoryTickIndexes(points: readonly InventoryPoint[], maxTicks = 8): number[] {
+  if (points.length <= maxTicks) return points.map(point => point.index);
+  const starts = points.filter((point, i) => i === 0 || point.axisLabel !== points[i - 1].axisLabel).map(point => point.index);
+  const step = Math.max(1, Math.ceil(starts.length / maxTicks));
+  return starts.filter((_, i) => i % step === 0);
 }
 export interface InventoryLabels {
   proxiesLabel: string;
@@ -56,11 +68,14 @@ export function buildInventoryChart(points: InventoryPoint[], limit: number | nu
   return defineChart({
     marks: [
       areaY(points, {id: 'inventory-fill', x: 'index', y: 'count', fill: '#3b82f6', fillOpacity: 0.2, curve: smoothCurve}),
-      lineY(points, {id: 'inventory', x: 'index', y: 'count', stroke: '#3b82f6', strokeWidth: 2, points: true, curve: smoothCurve}),
+      lineY(points, {id: 'inventory', x: 'index', y: 'count', stroke: '#3b82f6', strokeWidth: 2, points: points.length <= 48, curve: smoothCurve}),
       lineY(limitPoints, {id: 'limit', x: 'index', y: 'count', stroke: '#f59e0b', strokeWidth: 2, strokeDasharray: '5 5'}),
     ],
     scales: {
-      x: {scale: scaleLinear, axis: {ticks: {values: points.map(point => point.index), format: value => points[Math.round(value)]?.label ?? ''}, tickLabels: {rotate: points.length > 10 ? -35 : 0}}},
+      x: {scale: scaleLinear, axis: {ticks: {values: inventoryTickIndexes(points), format: value => {
+        const point = points[Math.round(value)];
+        return point?.axisLabel ?? point?.label ?? '';
+      }}}},
       y: {scale: () => scaleLinear().domain([0, max]), nice: true, grid: true, axis: {ticks: {format}}},
     },
     theme: chartTheme,
@@ -107,7 +122,7 @@ function reputationDots(points: LatencyPoint[]): ChartMark<LatencyPoint, number,
   }};
 }
 
-export function buildLatencyChart(points: LatencyPoint[], countries: string[], colors: string[], format: (value: number) => string) {
+export function buildLatencyChart(points: LatencyPoint[], countries: string[], colors: string[], format: (value: number) => string, compact = false, locale = 'de-DE') {
   const max = Math.max(1, ...points.map(point => point.y));
   return defineChart({
     marks: [reputationDots(points)],
@@ -117,7 +132,8 @@ export function buildLatencyChart(points: LatencyPoint[], countries: string[], c
           const label = countries[Math.round(value) - 1] ?? '';
           return label.length > 12 ? `${label.slice(0, 11)}...` : label;
         }},
-        tickLabels: {rotate: countries.length > 10 ? -35 : 0},
+        // Narrow charts stand labels upright so every country stays labelled.
+        tickLabels: {rotate: compact && countries.length > 4 ? -90 : countries.length > 10 ? -35 : 0, thin: !compact},
       }},
       y: {scale: () => scaleLinear().domain([0, max]), nice: true, grid: true, axis: {label: 'Response time (ms)', ticks: {format: value => `${format(value)} ms`}}},
     },
@@ -126,17 +142,17 @@ export function buildLatencyChart(points: LatencyPoint[], countries: string[], c
     tooltip: hlmChartTooltip<LatencyPoint, number, number>({content: focused => {
       const point = focused[0]?.datum;
       if (!point) return {rows: []};
-      const reputation = point.reputation === 'bad' ? 'Bad' : point.reputation.charAt(0).toUpperCase() + point.reputation.slice(1);
+      const reputation = point.reputation === 'bad' ? 'Poor' : point.reputation.charAt(0).toUpperCase() + point.reputation.slice(1);
       return {title: `#${point.rank} ${point.proxy}`, rows: [
         {label: 'Latency', value: `${format(point.y)} ms`},
         {label: 'Country', value: point.country},
-        {label: 'Reputation', value: `${reputation}, score ${point.reputationScore.toFixed(1)}`},
+        {label: 'Reputation', value: `${reputation}, score ${formatDecimal(point.reputationScore, locale)}`},
       ]};
     }}),
   });
 }
 
-export function buildReputationChart(points: ReputationPoint[], format: (value: number) => string) {
+export function buildReputationChart(points: ReputationPoint[], format: (value: number) => string, locale = 'de-DE') {
   const total = points.reduce((sum, point) => sum + point.value, 0);
   return defineChart({
     marks: [
@@ -151,7 +167,7 @@ export function buildReputationChart(points: ReputationPoint[], format: (value: 
     theme: chartTheme,
     tooltip: hlmChartTooltip<ReputationPoint, number, string>({format: point => {
       const value = point.datum.value;
-      return `${point.datum.label}: ${format(value)} (${total > 0 ? (value / total * 100).toFixed(1) : '0.0'}%)`;
+      return `${point.datum.label}: ${format(value)} (${formatPercent(total > 0 ? value / total * 100 : 0, locale)})`;
     }}),
   });
 }

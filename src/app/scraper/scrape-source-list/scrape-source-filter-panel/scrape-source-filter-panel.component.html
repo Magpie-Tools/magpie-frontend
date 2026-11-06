@@ -62,12 +62,13 @@
     <div class="filter-panel__vertical-divider" aria-hidden="true"></div>
 
     <div class="filter-section">
-      <div class="filter-section__title">Source Counts</div>
+      <div class="filter-section__title">Source counts</div>
       <div class="filter-count-stack">
         <div class="filter-count-row">
           <label for="sourceFilterProxyCount" class="filter-count-label"
-            >Proxy Count</label
+            >Proxy count</label
           >
+          <label class="sr-only" for="sourceFilterProxyCountOperator">Proxy count comparison</label>
           <app-select
             formControlName="proxyCountOperator"
             [options]="countOperatorOptions"
@@ -81,6 +82,8 @@
             type="number"
             id="sourceFilterProxyCount"
             formControlName="proxyCount"
+                appZeroAsEmpty
+                placeholder="Any"
             [min]="0"
             class="filter-count-input w-full bg-gray-800 text-white border-gray-700 theme-focus"
           />
@@ -88,8 +91,9 @@
 
         <div class="filter-count-row">
           <label for="sourceFilterAliveCount" class="filter-count-label"
-            >Alive Proxy Count</label
+            >Alive proxies</label
           >
+          <label class="sr-only" for="sourceFilterAliveCountOperator">Alive proxies comparison</label>
           <app-select
             formControlName="aliveCountOperator"
             [options]="countOperatorOptions"
@@ -103,6 +107,8 @@
             type="number"
             id="sourceFilterAliveCount"
             formControlName="aliveCount"
+                appZeroAsEmpty
+                placeholder="Any"
             [min]="0"
             class="filter-count-input w-full bg-gray-800 text-white border-gray-700 theme-focus"
           />

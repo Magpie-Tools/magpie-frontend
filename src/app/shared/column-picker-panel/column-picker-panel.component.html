@@ -1,8 +1,8 @@
-<div class="column-picker">
+<div class="column-picker" [style.--picker-available-height.px]="availableHeight()">
   <div class="column-picker__header">
     <div class="column-picker__header-copy" hlmPopoverHeader>
       <h3 hlmPopoverTitle>Table columns</h3>
-      <p hlmPopoverDescription>Choose which columns appear and arrange their order.</p>
+      <p hlmPopoverDescription>Choose which columns appear. Drag rows or use the arrow buttons to change their order.</p>
     </div>
     <button
       size="sm"
@@ -73,6 +73,7 @@
             >
               <div class="column-picker__row-main">
                 <span class="column-picker__drag-handle" cdkDragHandle
+                  aria-hidden="true"
                   [title]="column.required ? 'Drag to reorder' : 'Drag to reorder or hide'">
                   <i class="icon icon-menu" aria-hidden="true"></i>
                 </span>
@@ -91,6 +92,32 @@
                 </div>
               </div>
               <div class="column-picker__controls">
+                <button
+                  [disabled]="columnSearchActive() || $first"
+                  [attr.aria-label]="'Move ' + column.label + ' up'"
+                  [attr.data-move-id]="column.id"
+                  data-move-dir="-1"
+                  size="icon-sm"
+                  (click)="moveColumn(column.id, -1)"
+                  hlmBtn
+                  type="button"
+                  variant="ghost"
+                >
+                  <i class="icon icon-arrow-up" aria-hidden="true"></i>
+                </button>
+                <button
+                  [disabled]="columnSearchActive() || $last"
+                  [attr.aria-label]="'Move ' + column.label + ' down'"
+                  [attr.data-move-id]="column.id"
+                  data-move-dir="1"
+                  size="icon-sm"
+                  (click)="moveColumn(column.id, 1)"
+                  hlmBtn
+                  type="button"
+                  variant="ghost"
+                >
+                  <i class="icon icon-arrow-down" aria-hidden="true"></i>
+                </button>
                 <button
                   [disabled]="visibleColumnCount() <= 1 || column.required"
                   [attr.aria-label]="'Hide ' + column.label"
@@ -185,7 +212,7 @@
   </div>
 
   <div class="column-picker__footer">
-    <span class="column-picker__footer-hint">Drag to reorder or move between lists.</span>
+    <span class="column-picker__footer-hint">Drag or use the arrow buttons to reorder; drag between lists to show or hide.</span>
     <div class="column-picker__footer-actions">
       <button
         size="sm"
@@ -213,4 +240,5 @@
       </button>
     </div>
   </div>
+  <p class="sr-only" aria-live="polite">{{ moveAnnouncement() }}</p>
 </div>

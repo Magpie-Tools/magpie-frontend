@@ -24,14 +24,14 @@ app-admin-settings-save-dock {
 
     strong {
       color: rgba(255, 255, 255, 0.82);
-      font-size: 0.72rem;
+      font-size: 0.8125rem;
       font-weight: 580;
     }
 
     p {
       margin: 0.12rem 0 0;
-      color: rgba(255, 255, 255, 0.38);
-      font-size: 0.63rem;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 0.75rem;
     }
   }
 
@@ -71,7 +71,7 @@ app-admin-settings-save-dock {
     min-height: 2.7rem;
     padding: 0.72rem 1rem;
     border-radius: 0.8rem;
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
     font-weight: 580;
     transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
