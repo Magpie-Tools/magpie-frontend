@@ -33,7 +33,8 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/ui-styles/ui-styles.scss"
             ],
             "scripts": []
           },
@@ -97,7 +98,8 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/ui-styles/ui-styles.scss"
             ],
             "scripts": []
           }

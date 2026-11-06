@@ -1,0 +1,678 @@
+// Page-level vocabulary shared by the settings, workspace, alert, release, plugin,
+// rotator, and auth screens. Components repeat the same class names in their own
+// scoped styles, so one global rule per name restyles every page that uses it.
+// Everything reads the --ui-* tokens that _console.scss defines.
+
+$stages: '.settings-stage, .workspace-stage, .invitation-stage, .rotating-stage, .notifications-stage, .account-stage, .alerts-stage';
+
+$contexts: '.account-context, .admin-context, .checker-context, .alerts-context, .rotating-context, .notifications-context, .invitation-context, .workspace-context';
+
+// Top-level panels.
+$cards: '.settings-card, .account-card, .alert-panel, .workspace-card, .notification-card, .invitation-card, .accepted-notice, .detail-card, .read-only-card, .policy-card, .route-stage, .fleet-section, .summary-dock, .plugin-panel, .page-load-error, .page-error, .export-card, .delete-card';
+
+// Boxes nested inside panels.
+$inner: '.theme-choice, .password-feedback, .entry-row, .protocol-choice, .decision-row, .judge-row, .scrape-site-row, .performance-summary, .cadence-summary, .limit-summary, .cleanup-threshold, .empty-state, .state-card, .release-card, .invitation-row, .plugin-card, .meta-card, .destination-choice, .destination-row, .master-toggle, .policy-note, .guide-note, .inline-notice, .error-note, .form-alert, .import-source, .import-summary, .filter-panel, .column-picker__section, .bulk-scope-option, .dialog-section, .plan-accordions details, .list-empty--bordered, .quota-visual, .age-policy, .credential-state, .security-policy, .fetch-mode, .process-rail, .incident-content, .dialog-warning, .connection-panel, .rotator-card, .rule-card, .tag-manager__panel, .bulk-dialog-intro, .country-hover-card, .destination-hover-card, .import-tags, .import-textarea-shell textarea';
+
+// Decorative icon tiles.
+$icon-tiles: '.protocol-choice__icon, .decision-row__icon, .decision-icon, .section-icon, .meta-icon, .metric-icon, .channel-icon, .dialog-icon, .error-icon, .age-policy__icon, .credential-state__icon, .fetch-mode__icon, .rotator-icon, .accepted-icon, .page-load-error__icon, .bulk-dialog-heading__icon, .proxy-dialog-heading__icon, .bulk-dialog-intro__icon, .notification-item__icon, .state-icon, .stage-icon, .tag-manager__state-icon, .tag-manager__card-icon, .empty-inventory__icon, .judge-index, .entry-index';
+
+// Text inputs and select triggers. Wrappers that frame a bare input are listed too.
+$fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger"], [data-slot="native-select"], .number-with-unit, .input-with-unit, .country-search';
+
+@mixin skin-pages {
+  // ------------------------------------------------------------ scaffolding
+  #{$stages} {
+    width: 100%;
+    max-width: var(--ui-page-max);
+    padding: var(--ui-page-pad);
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  app-admin-settings-shell,
+  .account-page,
+  .alerts-page,
+  .workspace-page,
+  .rotating-proxies-page,
+  .notifications-page,
+  .invitation-page,
+  .source-detail-page,
+  .checker-settings-page,
+  .checker-judges-page {
+    padding: 0;
+  }
+
+  #{$contexts} {
+    margin-bottom: var(--ui-gap);
+    padding: 0;
+    border: 0;
+    gap: 12px;
+  }
+
+  :is(#{$contexts}) .context-icon { display: none; }
+
+  :is(#{$contexts}) h1 {
+    margin: 0;
+    color: var(--ui-text);
+    font-family: var(--ui-font-heading);
+    font-size: var(--ui-h1);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  :is(#{$contexts}) p {
+    margin-top: 2px;
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-sm);
+  }
+
+  .context-eyebrow {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-xs);
+    font-weight: 500;
+    letter-spacing: var(--ui-label-tracking);
+    text-transform: var(--ui-label-case);
+  }
+
+  .plugin-mark,
+  .workspace-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--ui-radius-sm);
+  }
+
+  .back-link {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+    color: var(--ui-text-2);
+  }
+
+  .settings-grid,
+  .account-grid,
+  .invitation-grid,
+  .policy-grid,
+  .alerts-grid,
+  .workspace-grid,
+  .notifications-grid {
+    gap: var(--ui-gap);
+  }
+
+  // ------------------------------------------------------------------ panels
+  #{$cards} {
+    padding: var(--ui-pad);
+    border: 1px solid var(--ui-line);
+    border-radius: var(--ui-radius);
+    background: var(--ui-panel);
+    box-shadow: none;
+    color: var(--ui-text-2);
+    animation: none;
+
+    &::before,
+    &::after {
+      // Corner glows and grid textures.
+      background-image: none;
+      opacity: 0;
+    }
+  }
+
+  #{$inner} {
+    border-color: var(--ui-line-soft);
+    border-radius: var(--ui-radius-sm);
+    box-shadow: none;
+  }
+
+  #{$icon-tiles} {
+    border-color: var(--ui-line);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+    box-shadow: none;
+  }
+
+  // Panel headings: the icon tile steps aside and the title row gets the skin's type.
+  .card-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    > * { min-width: 0; }
+    > .card-icon { display: none; }
+    > .card-icon + * { flex: 1 1 auto; }
+  }
+
+  .card-heading h2,
+  .card-heading__copy h2,
+  .stage-heading h2,
+  .stage-heading h3,
+  .policy-heading h2,
+  .policy-heading h3,
+  .detail-card__heading h2,
+  .detail-card__heading h3 {
+    margin: 0;
+    color: var(--ui-text);
+    font-family: var(--ui-title-font, var(--ui-font-heading));
+    font-size: var(--ui-title-fs);
+    font-weight: var(--ui-title-weight);
+    letter-spacing: var(--ui-title-tracking);
+    text-transform: var(--ui-title-case);
+  }
+
+  .card-heading p,
+  .card-heading__copy p,
+  .stage-heading p,
+  .policy-heading p {
+    margin-top: 3px;
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-sm);
+    line-height: 1.45;
+  }
+
+  .stage-heading .stage-icon,
+  .policy-heading .stage-icon,
+  .policy-heading .card-icon,
+  .detail-card__heading .card-icon {
+    display: none;
+  }
+
+  // Scrape source detail: the overview card pads its own columns.
+  .source-dashboard { padding: 0; }
+
+  .source-overview,
+  .source-insights .health-summary,
+  .source-insights .reputation-summary {
+    padding: var(--ui-pad);
+  }
+
+  .source-insights { border-left-color: var(--ui-line); }
+
+  .scrape-error {
+    font-size: var(--ui-fs-sm);
+    border-radius: var(--ui-radius-sm);
+  }
+
+  // Sticky save bar under settings forms.
+  .save-dock {
+    padding: 10px 12px 10px 16px;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius);
+    background: var(--ui-dock-bg, var(--ui-panel));
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
+    backdrop-filter: none;
+  }
+
+  .save-state strong {
+    color: var(--ui-text);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
+
+  .save-state p {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-xs);
+  }
+
+  .save-state__dot { box-shadow: none; }
+
+  // Release history on the releases page.
+  .archive-intro .card-icon { display: none; }
+
+  .archive-intro h2 {
+    margin-top: 0;
+    color: var(--ui-text);
+    font-family: var(--ui-title-font, var(--ui-font-heading));
+    font-size: var(--ui-title-fs);
+    font-weight: var(--ui-title-weight);
+    letter-spacing: var(--ui-title-tracking);
+    text-transform: var(--ui-title-case);
+  }
+
+  .archive-intro p {
+    margin-top: 4px;
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-sm);
+  }
+
+  .archive-total { margin-top: 10px; }
+
+  .archive-list { border-top-color: var(--ui-line); }
+
+  .archive-row {
+    padding: 12px 0;
+    border-bottom-color: var(--ui-line-soft);
+  }
+
+  .archive-index {
+    color: var(--ui-text-3);
+    font-family: var(--ui-font-mono);
+    font-size: var(--ui-fs-xs);
+  }
+
+  .archive-copy strong,
+  .archive-copy h3 {
+    color: var(--ui-text);
+    font-size: var(--ui-fs);
+  }
+
+  .archive-preview {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-sm);
+  }
+
+  .archive-link,
+  .release-card,
+  .archive-total {
+    border-radius: var(--ui-radius-sm);
+  }
+
+  // ------------------------------------------------------------- form fields
+  .field-label,
+  .field-group > label,
+  .form-field > label {
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs-sm);
+    font-weight: 500;
+  }
+
+  .field-hint,
+  .field-help,
+  .form-hint {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-xs);
+  }
+
+  main,
+  .app-dialog-panel,
+  .auth-shell {
+    :is(#{$fields}) {
+      min-height: var(--ui-control-h);
+      border: 1px solid var(--ui-line-strong);
+      border-radius: var(--ui-radius-sm);
+      background: var(--ui-field-bg);
+      box-shadow: none;
+      color: var(--ui-text);
+      font-family: var(--ui-font);
+      font-size: var(--ui-fs);
+
+      &::placeholder { color: var(--ui-text-3); }
+    }
+
+    textarea {
+      font-family: var(--ui-font-mono);
+      font-size: var(--ui-fs-sm);
+    }
+
+    :is(#{$fields}):focus,
+    :is(#{$fields}):focus-within {
+      border-color: var(--theme-primary-400);
+      box-shadow: 0 0 0 1px var(--theme-primary-400);
+      outline: 0;
+    }
+
+    [data-slot="select-trigger"] > span {
+      padding-block: 0;
+      font-size: var(--ui-fs);
+    }
+
+    :is(.number-with-unit, .input-with-unit) input,
+    :is(.number-with-unit, .input-with-unit) input:focus,
+    .country-search input {
+      min-height: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    brn-checkbox {
+      border-color: var(--ui-line-strong);
+      border-radius: var(--ui-check-radius, 3px);
+      background: var(--ui-field-bg);
+    }
+
+    [data-checked] brn-checkbox,
+    brn-checkbox[data-state="checked"] {
+      border-color: var(--theme-primary-400);
+      background: var(--theme-primary-500);
+    }
+  }
+
+  // "Enabled" toggle chips (app-checkbox) on settings and plugin pages.
+  .checkbox-wrapper-46 .cbx {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--ui-control-h);
+    padding: 0 12px;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-btn-bg);
+    box-shadow: none;
+    color: var(--ui-text);
+    font-family: var(--ui-font);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+
+    &:hover { background: var(--ui-hover); }
+
+    span { margin: 0; }
+    span:last-child { padding-left: 0; }
+
+    span:first-child {
+      width: 14px;
+      height: 14px;
+      border-color: var(--ui-line-strong);
+      border-radius: var(--ui-check-radius, 3px);
+      background: var(--ui-field-bg);
+    }
+
+    span:first-child svg {
+      top: 1px;
+      left: 0;
+    }
+  }
+
+  .checkbox-wrapper-46 .cbx:hover span:first-child { border-color: var(--theme-primary-400); }
+
+  .checkbox-wrapper-46 .inp-cbx:checked + .cbx span:first-child {
+    border-color: var(--theme-primary-500);
+    background: var(--theme-primary-500);
+  }
+
+  // -------------------------------------------------------------------- tabs
+  [data-slot="tabs-list"] {
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--ui-line);
+    border-radius: var(--ui-radius);
+    background: var(--ui-tabs-bg);
+  }
+
+  [data-slot="tabs-trigger"] {
+    min-height: 28px;
+    padding: 0 12px;
+    border-radius: var(--ui-radius-sm);
+    color: var(--ui-text-2);
+    font-family: var(--ui-font);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+
+    &[data-state="active"] {
+      background: var(--ui-tab-active-bg);
+      color: var(--ui-text);
+      box-shadow: none;
+    }
+
+    &:not([data-state="active"]):hover {
+      background: var(--ui-hover);
+      color: var(--ui-text);
+    }
+  }
+
+  // ------------------------------------------------------------------ buttons
+  // Plain Spartan buttons without a component class. :where() keeps these below every
+  // class-based button rule in this file and in the base layer.
+  main,
+  .app-dialog-panel,
+  hlm-popover-content {
+    :where([hlmBtn]) {
+      border-radius: var(--ui-radius-sm);
+      box-shadow: none;
+      font-family: var(--ui-font);
+      font-size: var(--ui-fs);
+      font-weight: 500;
+    }
+
+    :where([hlmBtn][variant="outline"]) {
+      min-height: var(--ui-control-h);
+      height: var(--ui-control-h);
+      gap: 6px;
+      padding: 0 12px;
+      border-color: var(--ui-line-strong);
+      background: var(--ui-btn-bg);
+      color: var(--ui-text);
+
+      &:hover:not(:disabled),
+      &.is-active {
+        background: var(--ui-hover);
+        color: var(--ui-text);
+      }
+
+      i,
+      .icon { font-size: 12px; }
+    }
+  }
+
+  .button,
+  .action-button,
+  .add-button,
+  .create-button[hlmBtn],
+  .refresh-button,
+  .retry-button,
+  .requeue-button[hlmBtn],
+  .save-button[hlmBtn],
+  .save-settings-button,
+  .dialog-button[hlmBtn],
+  .source-button[hlmBtn],
+  .tag-manager__button,
+  .ui-button-outlined,
+  .ui-button-secondary {
+    min-height: var(--ui-control-h);
+    height: auto;
+    gap: 6px;
+    padding: 0 12px;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-btn-bg);
+    box-shadow: none;
+    color: var(--ui-text);
+    font-family: var(--ui-font);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+    transform: none;
+
+    &:hover:not(:disabled) {
+      border-color: var(--ui-line-strong);
+      background: var(--ui-hover);
+      color: var(--ui-text);
+      transform: none;
+    }
+
+    i,
+    .icon { font-size: 12px; }
+  }
+
+  .button--compact { min-height: 28px; padding: 0 10px; font-size: var(--ui-fs-sm); }
+
+  .button--quiet {
+    border-color: transparent;
+    background: transparent;
+    color: var(--ui-text-2);
+  }
+
+  .button--primary,
+  .save-button[hlmBtn],
+  .save-settings-button,
+  .create-button[hlmBtn],
+  .tag-manager__button--primary,
+  .ui-button-success,
+  .auth-shell [hlmBtn] {
+    border-color: var(--ui-primary-bg);
+    background: var(--ui-primary-bg);
+    box-shadow: none;
+    color: var(--ui-primary-fg);
+
+    i,
+    .icon { color: var(--ui-primary-fg); }
+
+    &:hover:not(:disabled) {
+      border-color: var(--ui-primary-hover);
+      background: var(--ui-primary-hover);
+      color: var(--ui-primary-fg);
+    }
+  }
+
+  .button--danger,
+  .requeue-button[hlmBtn],
+  .tag-manager__button--danger {
+    border-color: rgba(248, 113, 113, 0.3);
+    background: var(--ui-danger-bg);
+    color: var(--ui-danger-fg);
+
+    &:hover:not(:disabled) {
+      border-color: rgba(248, 113, 113, 0.5);
+      background: var(--ui-danger-bg);
+      color: var(--ui-danger-fg);
+    }
+  }
+
+  .icon-button,
+  .icon-action,
+  .tag-manager__icon-button,
+  .search-clear {
+    border-radius: var(--ui-radius-sm);
+    transform: none;
+  }
+
+  .icon-button,
+  .icon-action {
+    border-color: var(--ui-line);
+    background: var(--ui-inset);
+  }
+
+  // Badges and pills.
+  .cadence-badge,
+  .entry-count,
+  .count-badge,
+  .tab-count,
+  .status-pill,
+  .rotator-status {
+    border-radius: var(--ui-badge-radius);
+    font-size: var(--ui-fs-xs);
+  }
+
+  // ------------------------------------------------------- dialogs & overlays
+  .app-dialog-panel {
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius);
+    background: var(--ui-panel);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+    color: var(--ui-text-2);
+    font-family: var(--ui-font);
+  }
+
+  .app-dialog-panel .app-dialog-header {
+    padding: 14px 48px 14px 18px;
+    border-bottom: 1px solid var(--ui-line);
+    background: transparent;
+  }
+
+  .app-dialog-panel [hlmDialogTitle],
+  .app-dialog-panel .app-dialog-header h2 {
+    color: var(--ui-text);
+    font-family: var(--ui-font-heading);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .app-dialog-panel .app-dialog-body { padding: 18px; background: transparent; }
+
+  .app-dialog-panel .app-dialog-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--ui-line);
+    background: transparent;
+  }
+
+  .app-dialog-panel [data-slot="dialog-close"] {
+    border-radius: var(--ui-radius-sm);
+  }
+
+  [data-slot="popover-content"],
+  hlm-popover-content,
+  hlm-dropdown-menu,
+  .notification-panel,
+  .app-select-overlay {
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius);
+    background: var(--ui-panel);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    color: var(--ui-text-2);
+    font-family: var(--ui-font);
+  }
+
+  hlm-dropdown-menu [hlmDropdownMenuItem],
+  .account-menu__item,
+  .app-select-overlay hlm-select-item {
+    border-radius: var(--ui-radius-sm);
+    font-size: var(--ui-fs);
+  }
+
+  .notification-item { border-radius: var(--ui-radius-sm); }
+
+  .notification-panel__header h2 {
+    font-size: var(--ui-title-fs);
+    font-family: var(--ui-title-font, var(--ui-font-heading));
+    text-transform: var(--ui-title-case);
+  }
+
+  // ---------------------------------------------------------------------- auth
+  .auth-shell {
+    background: var(--ui-bg);
+    font-family: var(--ui-font);
+
+    .auth-logo {
+      margin-bottom: 24px;
+      animation: none;
+    }
+
+    .auth-logo img { height: 56px; }
+
+    .auth-logo h5 {
+      color: var(--ui-text);
+      font-family: 'Outfit Variable', var(--ui-font);
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-shadow: none;
+    }
+
+    .auth-card {
+      padding: 28px;
+      border: 1px solid var(--ui-line);
+      border-radius: var(--ui-radius);
+      background: var(--ui-panel);
+      box-shadow: none;
+      color: var(--ui-text-2);
+      text-align: left;
+    }
+
+    .auth-card > h2 {
+      color: var(--ui-text);
+      font-family: var(--ui-font-heading);
+      font-size: 18px;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    label {
+      color: var(--ui-text-2);
+      font-size: var(--ui-fs-sm);
+    }
+
+    [hlmBtn] {
+      height: 38px;
+      margin-top: 8px;
+      border-radius: var(--ui-radius-sm);
+      font-size: var(--ui-fs);
+      font-weight: 600;
+    }
+
+    .switch-link {
+      color: var(--ui-text-3);
+      font-size: var(--ui-fs-sm);
+      text-align: center;
+    }
+  }
+}

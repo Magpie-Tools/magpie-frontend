@@ -31,7 +31,7 @@ import {
   FastestAliveProxyCountryLegend
 } from './cards/fastest-alive-proxies-card/fastest-alive-proxies-card.component';
 import {formatHostPort} from '../shared/proxy-address';
-import {buildInventoryChart, buildLatencyChart, buildReputationChart, REPUTATION_COLORS} from './dashboard-charts';
+import {buildInventoryChart, buildLatencyChart, buildReputationChart, CHART_LIMIT_COLOR, CHART_SERIES_COLOR, REPUTATION_COLORS} from './dashboard-charts';
 import type {AppChartDefinition} from '../shared/ui/chart.component';
 import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
@@ -639,8 +639,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get inventoryLegend(): Array<{label: string; color: string; dashed?: boolean}> {
     return [
-      {label: this.proxyLineI18n.proxiesLabel, color: '#3b82f6'},
-      ...(this.inventoryLimit() === null ? [] : [{label: this.proxyLineI18n.limitLabel, color: '#f59e0b', dashed: true}]),
+      {label: this.proxyLineI18n.proxiesLabel, color: CHART_SERIES_COLOR},
+      ...(this.inventoryLimit() === null ? [] : [{label: this.proxyLineI18n.limitLabel, color: CHART_LIMIT_COLOR, dashed: true}]),
     ];
   }
 

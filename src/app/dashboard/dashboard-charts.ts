@@ -5,7 +5,11 @@ import {scaleBand} from '@tanstack/charts/scales/band';
 import {hlmChartTooltip, HLM_CHART_THEME} from '@spartan-ng/helm/chart';
 import {curveMonotoneX} from 'd3-shape';
 
-const chartTheme = {...HLM_CHART_THEME, grid: 'rgba(148, 163, 184, 0.15)'};
+// The Console skin (src/ui-styles) retunes chart colors through these custom properties.
+export const CHART_SERIES_COLOR = 'var(--ui-chart-series, #3b82f6)';
+export const CHART_LIMIT_COLOR = 'var(--ui-chart-limit, #f59e0b)';
+const CHART_DOT_STROKE = 'var(--ui-chart-dot-stroke, #0f172a)';
+const chartTheme = {...HLM_CHART_THEME, grid: 'var(--ui-chart-grid, rgba(148, 163, 184, 0.15))'};
 const smoothCurve = d3Curve(curveMonotoneX);
 export const REPUTATION_COLORS = ['#22c55e', '#f97316', '#ef4444', '#94a3b8'];
 
@@ -55,9 +59,9 @@ export function buildInventoryChart(points: InventoryPoint[], limit: number | nu
   const max = Math.max(1, ...points.map(point => point.count), limit ?? 0);
   return defineChart({
     marks: [
-      areaY(points, {id: 'inventory-fill', x: 'index', y: 'count', fill: '#3b82f6', fillOpacity: 0.2, curve: smoothCurve}),
-      lineY(points, {id: 'inventory', x: 'index', y: 'count', stroke: '#3b82f6', strokeWidth: 2, points: true, curve: smoothCurve}),
-      lineY(limitPoints, {id: 'limit', x: 'index', y: 'count', stroke: '#f59e0b', strokeWidth: 2, strokeDasharray: '5 5'}),
+      areaY(points, {id: 'inventory-fill', x: 'index', y: 'count', fill: CHART_SERIES_COLOR, fillOpacity: 0.2, curve: smoothCurve}),
+      lineY(points, {id: 'inventory', x: 'index', y: 'count', stroke: CHART_SERIES_COLOR, strokeWidth: 2, points: true, curve: smoothCurve}),
+      lineY(limitPoints, {id: 'limit', x: 'index', y: 'count', stroke: CHART_LIMIT_COLOR, strokeWidth: 2, strokeDasharray: '5 5'}),
     ],
     scales: {
       x: {scale: scaleLinear, axis: {ticks: {values: points.map(point => point.index), format: value => points[Math.round(value)]?.label ?? ''}, tickLabels: {rotate: points.length > 10 ? -35 : 0}}},
@@ -72,10 +76,10 @@ export function buildInventoryChart(points: InventoryPoint[], limit: number | nu
       return {
         title: point.label,
         rows: [
-          {label: labels.tooltipProxiesLabel, value: format(point.count), color: '#3b82f6'},
+          {label: labels.tooltipProxiesLabel, value: format(point.count), color: CHART_SERIES_COLOR},
           {label: labels.tooltipGainedLabel, value: format(point.gained)},
           {label: labels.tooltipLostLabel, value: format(point.lost)},
-          ...(limit === null ? [] : [{label: labels.tooltipLimitLabel, value: format(limit), color: '#f59e0b'}]),
+          ...(limit === null ? [] : [{label: labels.tooltipLimitLabel, value: format(limit), color: CHART_LIMIT_COLOR}]),
         ],
       };
     }}),
@@ -84,7 +88,7 @@ export function buildInventoryChart(points: InventoryPoint[], limit: number | nu
 
 /** Keeps the existing reputation shapes while using TanStack's scale and focus handling. */
 function reputationDots(points: LatencyPoint[]): ChartMark<LatencyPoint, number, number> {
-  const mark = dot(points, {id: 'latency', x: 'x', y: 'y', key: 'proxy', color: 'country', r: 6, stroke: '#0f172a', strokeWidth: 1.5});
+  const mark = dot(points, {id: 'latency', x: 'x', y: 'y', key: 'proxy', color: 'country', r: 6, stroke: CHART_DOT_STROKE, strokeWidth: 1.5});
   const shape = (node: SceneNode): SceneNode => {
     if (node.kind === 'group') return {...node, children: node.children.map(shape)};
     if (node.kind !== 'dot' || !node.interaction?.point) return node;
@@ -141,7 +145,7 @@ export function buildReputationChart(points: ReputationPoint[], format: (value: 
   return defineChart({
     marks: [
       barX(points, {id: 'reputation-stems', x: 'value', y: 'label', color: 'label', fillOpacity: 0.35, maxThickness: 8, radius: 4}),
-      dot(points, {id: 'reputation', x: 'value', y: 'label', color: 'label', r: 9, stroke: '#0f172a', strokeWidth: 2}),
+      dot(points, {id: 'reputation', x: 'value', y: 'label', color: 'label', r: 9, stroke: CHART_DOT_STROKE, strokeWidth: 2}),
     ],
     scales: {
       x: {scale: () => scaleLinear().domain([0, Math.max(1, ...points.map(point => point.value))]), nice: true, grid: true, axis: {ticks: {format}}},

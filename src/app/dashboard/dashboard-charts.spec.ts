@@ -1,6 +1,6 @@
 import {createChartScene} from '@tanstack/charts';
 import type {ChartTooltipContentContext, SceneNode} from '@tanstack/charts';
-import {buildInventoryChart, buildLatencyChart, buildMetricChart, buildReputationChart, InventoryLabels, LatencyPoint} from './dashboard-charts';
+import {buildInventoryChart, buildLatencyChart, buildMetricChart, buildReputationChart, CHART_LIMIT_COLOR, CHART_SERIES_COLOR, InventoryLabels, LatencyPoint} from './dashboard-charts';
 
 const tooltipContext: ChartTooltipContentContext = {
   pinned: false, xLabel: '', yLabel: '', formatX: String, formatY: String,
@@ -35,10 +35,10 @@ describe('Spartan dashboard chart definitions', () => {
     const limitPoint = scene.points.find(point => point.markId === 'limit' && point.datum.index === 1)!;
     const expected = {
       title: 'Oct 02', rows: [
-        {label: 'Proxies', value: '1.200', color: '#3b82f6'},
+        {label: 'Proxies', value: '1.200', color: CHART_SERIES_COLOR},
         {label: 'Gained', value: '0'},
         {label: 'Lost', value: '200'},
-        {label: 'Limit', value: '2.000', color: '#f59e0b'},
+        {label: 'Limit', value: '2.000', color: CHART_LIMIT_COLOR},
       ],
     };
     if ('content' in chart.tooltip) {

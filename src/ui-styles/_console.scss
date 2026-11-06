@@ -1,0 +1,299 @@
+@use 'base';
+@use 'pages';
+
+// Console: the website's editorial language applied to the app. Flat graphite frames,
+// hairline borders, Geist for values and Geist Mono for captions, labels, and addresses,
+// with a compact sidebar and top bar.
+//
+// index.html sets <html data-ui="console">. Angular adds its scoping attribute to every
+// compound of a component selector, so the repeated :root plus the attribute keep these
+// overrides ahead of deep component selectors without !important.
+
+html:root:root:root:root[data-ui="console"] {
+  --ui-bg: #191919;
+  --ui-sidebar: #111113;
+  --ui-topbar: #111113;
+  --ui-panel: #131315;
+  --ui-inset: rgba(255, 255, 255, 0.025);
+  --ui-hover: rgba(255, 255, 255, 0.05);
+  --ui-row-hover: rgba(255, 255, 255, 0.025);
+  --ui-line: rgba(255, 255, 255, 0.09);
+  --ui-line-soft: rgba(255, 255, 255, 0.055);
+  --ui-line-strong: rgba(255, 255, 255, 0.16);
+  --ui-text: #ecf0f3;
+  --ui-text-2: #a6aeb6;
+  --ui-text-3: rgba(236, 240, 243, 0.42);
+
+  --ui-font: 'Geist Variable', 'Segoe UI', sans-serif;
+  --ui-font-mono: 'Geist Mono Variable', 'SFMono-Regular', Consolas, monospace;
+  --ui-font-heading: 'Geist Variable', 'Segoe UI', sans-serif;
+  --ui-fs: 13px;
+  --ui-fs-sm: 12px;
+  --ui-fs-xs: 11px;
+  --ui-h1: 22px;
+  --ui-detail-title: 24px;
+
+  --ui-radius: 10px;
+  --ui-radius-sm: 7px;
+  --ui-badge-radius: 4px;
+  --ui-sidebar-w: 208px;
+  --ui-topbar-h: 44px;
+  --ui-page-max: 1560px;
+  --ui-page-pad: 28px 32px 48px;
+  --ui-gap: 16px;
+  --ui-pad: 16px 18px;
+  --ui-pad-x: 18px;
+  --ui-control-h: 32px;
+
+  --ui-head-pad: 14px 18px 0;
+  --ui-head-line: transparent;
+  --ui-head-bg: transparent;
+  --ui-title-fs: 12px;
+  --ui-title-font: var(--ui-font-mono);
+  --ui-title-weight: 450;
+  --ui-title-tracking: 0;
+  --ui-title-case: lowercase;
+
+  --ui-label-fs: 11px;
+  --ui-label-tracking: 0;
+  --ui-label-case: lowercase;
+
+  --ui-th-pad: 10px 14px;
+  --ui-th-bg: transparent;
+  --ui-th-color: rgba(236, 240, 243, 0.42);
+  --ui-th-fs: 11.5px;
+  --ui-th-tracking: 0;
+  --ui-th-case: lowercase;
+  --ui-td-pad: 9px 14px;
+
+  --ui-chart-series: var(--theme-primary-300);
+  --ui-chart-grid: rgba(255, 255, 255, 0.06);
+  --ui-chart-dot-stroke: #131315;
+
+  --ui-field-bg: rgba(255, 255, 255, 0.02);
+  --ui-tabs-bg: transparent;
+  --ui-tab-active-bg: rgba(255, 255, 255, 0.08);
+  --ui-btn-bg: transparent;
+  --ui-primary-bg: #f9f3f0;
+  --ui-primary-fg: #111113;
+  --ui-primary-hover: #ffffff;
+  --ui-danger-bg: transparent;
+  --ui-danger-fg: #f4a3a3;
+
+  @include base.skin-base;
+  @include pages.skin-pages;
+
+  // ---------------------------------------------------------------- shell
+  .navbar-brand {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .navbar-brand__mark,
+  .navbar-brand__mark svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .navbar-brand__copy strong {
+    font-family: 'Outfit Variable', var(--ui-font);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-scroll { padding: 8px 6px 12px; }
+
+  .navbar-item,
+  .nav-cluster > summary {
+    min-height: 30px;
+    padding: 0 8px;
+    gap: 10px;
+    font-size: 13px;
+  }
+
+  .navbar-item--nested {
+    min-height: 28px;
+    font-size: 12.5px;
+  }
+
+  .nav-cluster__items { margin-left: 15px; }
+
+  .navbar-item.active {
+    border: 0;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--ui-text);
+    box-shadow: none;
+
+    &::after { display: none; }
+    .navbar-item__icon { color: var(--theme-primary-200); }
+  }
+
+  .account-trigger {
+    border-color: var(--ui-line);
+    border-radius: var(--ui-radius-sm);
+    background: transparent;
+  }
+
+  .topbar-breadcrumb,
+  .topbar-breadcrumb__current {
+    font-family: var(--ui-font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: lowercase;
+  }
+
+  .topbar-breadcrumb__current { color: var(--ui-text-2); }
+
+  .topbar { padding: 0 10px 0 6px; }
+
+  .topbar-icon-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .workspace-switcher__select { min-height: 26px; }
+
+  // --------------------------------------------------------------- headings
+  .dashboard-context__copy h1,
+  .inventory-context__copy h1 {
+    font-size: 24px;
+    letter-spacing: -0.03em;
+  }
+
+  .dashboard-card__icon,
+  .history-card .card-icon { display: none; }
+
+  .dashboard-card__title,
+  .overview-title,
+  .health-summary__heading h2,
+  .reputation-summary__heading h2,
+  .history-card .card-heading__copy h2,
+  .route-card .label,
+  .chart-state,
+  .entry-count,
+  .check-summary__time {
+    font-family: var(--ui-font-mono);
+  }
+
+  .dashboard-card__title,
+  .overview-title,
+  .health-summary__heading h2,
+  .reputation-summary__heading h2,
+  .history-card .card-heading__copy h2 {
+    color: var(--ui-text-2);
+  }
+
+  .chart-state > span { display: none; }
+
+  // ------------------------------------------------------------------ KPIs
+  .metric-card .dashboard-card__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "label trend"
+      "value value"
+      "spark spark";
+    row-gap: 6px;
+    padding: 14px 18px 0;
+  }
+
+  .metric-card__topline { display: contents; }
+
+  .metric-card__heading {
+    grid-area: label;
+    font-family: var(--ui-font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ui-text-3);
+    text-transform: lowercase;
+
+    .dashboard-card__icon { display: none; }
+  }
+
+  .metric-card__trend[hlmBadge] {
+    grid-area: trend;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-family: var(--ui-font-mono);
+    font-weight: 400;
+  }
+
+  .metric-card__value {
+    grid-area: value;
+    margin-top: 0;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+
+  .metric-card__visual {
+    position: relative;
+    grid-area: spark;
+    inset: auto;
+    height: 30px;
+    margin: 0 -18px;
+    opacity: 0.55;
+    mask-image: none;
+  }
+
+  // -------------------------------------------------------------- history
+  .history-row__route strong,
+  .history-row__latency {
+    font-family: var(--ui-font-mono);
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  // ------------------------------------------------------------- inventory
+  .toolbar-action--delete [hlmBtn] {
+    border-color: rgba(248, 113, 113, 0.28);
+    background: transparent;
+    color: #f4a3a3;
+
+    .icon { color: #f4a3a3; }
+  }
+
+  .tool-button,
+  .toolbar-action:not(.toolbar-action--add, .toolbar-action--delete) [hlmBtn] {
+    background: transparent;
+  }
+
+  .search-bar { background: transparent; }
+
+  .inventory-table .copy-value,
+  .inventory-table .copy-value__text {
+    font-family: var(--ui-font-mono);
+    font-size: 12px;
+  }
+
+  .inventory-table tbody > tr > td { font-variant-numeric: tabular-nums; }
+
+  .inventory-table .reputation-badge,
+  .route-card .reputation-badge,
+  .managed-state-pill {
+    border: 0;
+    font-family: var(--ui-font-mono);
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: lowercase;
+  }
+
+  .proxy-tag-chip {
+    font-family: var(--ui-font-mono);
+    font-size: 11px;
+  }
+
+  // ----------------------------------------------------------------- detail
+  .detail-context__copy h1 { font-weight: 500; }
+
+  .route-card .value { font-family: var(--ui-font); }
+
+  .history-table tbody > tr > td {
+    font-family: var(--ui-font-mono);
+    font-size: 12px;
+  }
+
+  .external-link-chip { font-family: var(--ui-font-mono); }
+}
