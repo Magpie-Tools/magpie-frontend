@@ -587,7 +587,8 @@
   }
 
   // ----------------------------------------------------------------- tables
-  .inventory-table .data-table {
+  .inventory-table .data-table,
+  .scrape-source-table.data-table {
     border: 0;
     border-radius: 0;
     background: transparent;
