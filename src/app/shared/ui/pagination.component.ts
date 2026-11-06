@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmNativeSelectImports } from '@spartan-ng/helm/native-select';
 import { HlmTooltip } from '@spartan-ng/helm/tooltip';
@@ -13,20 +14,21 @@ export interface TablePageEvent {
 }
 @Component({
   selector: 'app-pagination',
-  imports: [HlmButton, HlmNativeSelectImports, HlmTooltip, FormsModule],
+  imports: [HlmButton, HlmNativeSelectImports, HlmTooltip, FormsModule, DecimalPipe],
   styleUrl: './pagination.component.scss',
   template: `
     <nav class="table-pagination" aria-label="Table pagination">
       <span role="status"
-        >{{ totalRecords === 0 ? 0 : first + 1 }}–{{ last }} of
-        {{ totalRecords }}</span
+        >{{ (totalRecords === 0 ? 0 : first + 1) | number }}–{{ last | number }} of
+        {{ totalRecords | number }}</span
       >
-      <div class="flex items-center gap-2">
+      <div class="pagination-controls flex items-center gap-2">
         <button
           hlmBtn
           type="button"
           variant="outline"
           size="sm"
+          class="pagination-edge"
           aria-label="First page"
           [disabled]="disabled || first <= 0"
           (click)="go(0)"
@@ -60,13 +62,14 @@ export interface TablePageEvent {
           type="button"
           variant="outline"
           size="sm"
+          class="pagination-edge"
           aria-label="Last page"
           [disabled]="disabled || last >= totalRecords"
           (click)="go((pages - 1) * rows)"
         >
           »
         </button>
-        <label class="flex items-center gap-2"
+        <label class="pagination-size flex items-center gap-2"
           ><span class="sr-only">Rows per page</span
           ><hlm-native-select
             [ngModel]="rows"
@@ -95,7 +98,7 @@ export interface TablePageEvent {
           [(ngModel)]="pageJumpValue"
           [attr.aria-describedby]="pageJumpTotalId"
         />
-        <span class="page-jump__total" [id]="pageJumpTotalId">of {{ pages }}</span>
+        <span class="page-jump__total" [id]="pageJumpTotalId">of {{ pages | number }}</span>
         <button type="submit" class="page-jump__submit" [disabled]="disabled || pages <= 1">Go</button>
         <button
           type="button"

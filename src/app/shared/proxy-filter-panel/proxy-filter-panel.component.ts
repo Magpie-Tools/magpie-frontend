@@ -1,3 +1,4 @@
+import {ZeroAsEmptyDirective} from '../zero-as-empty.directive';
 import {HlmButton} from '@spartan-ng/helm/button';
 import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
@@ -12,7 +13,7 @@ import {ProxyTag} from '../../models/ProxyTag';
 @Component({
   selector: 'app-proxy-filter-panel',
   standalone: true,
-  imports: [HlmButton, HlmInput, HlmCheckbox, SelectComponent,
+  imports: [HlmButton, HlmInput, HlmCheckbox, SelectComponent, ZeroAsEmptyDirective,
     ReactiveFormsModule,
     FormsModule,
 
@@ -37,6 +38,8 @@ export class ProxyFilterPanelComponent {
   @Output() clear = new EventEmitter<void>();
 
   protected readonly healthFiltersExpanded = signal(false);
+  private static nextId = 0;
+  protected readonly healthContentId = `filter-health-content-${ProxyFilterPanelComponent.nextId++}`;
 
   toggleHealthFilters(): void {
     this.healthFiltersExpanded.update(value => !value);

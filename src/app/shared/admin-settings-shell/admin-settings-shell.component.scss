@@ -43,7 +43,7 @@ app-admin-settings-shell {
     p {
       margin: 0.25rem 0 0;
       color: var(--card-muted);
-      font-size: 0.76rem;
+      font-size: 0.84rem;
     }
   }
 
@@ -63,8 +63,8 @@ app-admin-settings-shell {
   }
 
   .context-eyebrow {
-    color: rgba(255, 255, 255, 0.47);
-    font-size: 0.62rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.75rem;
     font-weight: 620;
     letter-spacing: 0.13em;
     text-transform: uppercase;
@@ -112,7 +112,7 @@ app-admin-settings-shell {
       max-width: 34rem;
       margin: 0.34rem 0 0;
       color: var(--card-muted);
-      font-size: 0.78rem;
+      font-size: 0.84rem;
       line-height: 1.5;
     }
   }
@@ -126,7 +126,7 @@ app-admin-settings-shell {
     border-radius: 0.82rem;
     background: rgba(255, 255, 255, 0.035);
     color: rgba(255, 255, 255, 0.88);
-    font-size: 0.76rem;
+    font-size: 0.84rem;
     box-shadow: none;
 
     // Labels forward :hover to their associated control in the browser.
@@ -156,7 +156,7 @@ app-admin-settings-shell {
     display: flex;
     align-items: center;
     padding: 0.65rem 0.72rem;
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
   }
 
   [hlmInput]:disabled,
@@ -179,7 +179,7 @@ app-admin-settings-shell {
     min-height: 2.7rem;
     padding: 0.72rem 1rem;
     border-radius: 0.8rem;
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
     font-weight: 580;
     transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }

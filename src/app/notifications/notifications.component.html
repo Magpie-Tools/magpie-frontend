@@ -44,7 +44,7 @@
               ><i class="icon icon-inbox" aria-hidden="true"></i
             ></span>
             <div class="card-heading__copy">
-              <h2 id="overview-title">Unread releases</h2>
+              <h2 id="overview-title">Read status</h2>
               <p>
                 Your read status follows your account across browsers.
               </p>
@@ -114,7 +114,7 @@
             <span>Backend version</span>
             <strong>{{ buildVersionLabel() }}</strong>
             @if (buildTimestamp()) {
-              <small>Built {{ buildTimestamp() | date: "medium" }}</small>
+              <small>Built {{ buildTimestamp() | date }}</small>
             } @else {
               <small>Build time unavailable</small>
             }
@@ -180,9 +180,7 @@
                         >Published
                         {{ release.publishedAt | date: "mediumDate" }}</small
                       >
-                      <span>{{
-                        release.body || "No changelog text provided."
-                      }}</span>
+                      <span>{{ releasePreview(release.body) }}</span>
                     </span>
                     <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
                   </button>
@@ -258,7 +256,7 @@
                           (release.title || release.tagName)
                         "
                       >
-                        {{ release.body || "No changelog text provided." }}
+                        {{ releasePreview(release.body) }}
                       </button>
                     </div>
                     <a
@@ -305,7 +303,7 @@
       </div>
       @if (selectedRelease()?.publishedAt) {
         <div class="release-dialog__meta">
-          Published {{ selectedRelease()?.publishedAt | date: "medium" }}
+          Published {{ selectedRelease()?.publishedAt | date }}
         </div>
       }
     </div>

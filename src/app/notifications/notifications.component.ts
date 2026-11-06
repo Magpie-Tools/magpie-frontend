@@ -28,6 +28,31 @@ const RELEASE_SECTION_HEADINGS = new Set([
   'notes'
 ]);
 
+/**
+ * Plain-text preview of a changelog: drops boilerplate headings ("What's Changed"),
+ * list markers, link targets and paired emphasis markers, and joins items with " · ".
+ * Underscores inside words (DB_USERNAME) are kept.
+ */
+export function releasePreview(body: string | null | undefined): string {
+  const items = (body ?? '')
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line && !/^#{1,6}\s*(what'?s changed|changes|changelog|added|fixed)\s*:?$/i.test(line))
+    .map(line => line
+      .replace(/^#{1,6}\s+/, '')
+      .replace(/^[-*+]\s+/, '')
+      .replace(/^\d+\.\s+/, '')
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/(\*\*|__)(?=\S)(.+?)(?<=\S)\1/g, '$2')
+      .replace(/(^|[^\w*])\*(?=\S)([^*]+?)(?<=\S)\*(?!\w)/g, '$1$2')
+      .replace(/~~(?=\S)(.+?)(?<=\S)~~/g, '$1')
+      .trim())
+    .filter(Boolean);
+  return items.length ? items.join(' · ') : 'No changelog text provided.';
+}
+
 function looksLikeMarkdown(body: string): boolean {
   return /(^|\n)\s{0,3}(#{1,6}\s|[-*+]\s|\d+\.\s|```|> )/.test(body) || /\[[^\]]+\]\([^)]+\)/.test(body);
 }
@@ -107,6 +132,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     const parsed = new Date(builtAt);
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   });
+  protected readonly releasePreview = releasePreview;
   readonly selectedReleaseMarkdown = computed(() => {
     const release = this.selectedRelease();
     const body = normalizeReleaseBodyToMarkdown(release?.body?.trim() || 'No changelog text provided.');

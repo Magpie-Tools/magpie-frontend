@@ -34,7 +34,7 @@
   align-items: center;
   gap: 0.52rem;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   font-weight: 570;
 }
 
@@ -93,11 +93,19 @@
   gap: 0.24rem;
   border: 1px solid currentColor;
   border-radius: 999px;
-  font-size: 0.53rem;
+  font-size: 0.6875rem;
   font-weight: 620;
   line-height: 1.35rem;
 }
 
 :host ::ng-deep .metric-card__trend .icon {
   font-size: 0.5rem;
+}
+
+.metric-card__comparison {
+  position: relative;
+  z-index: 2;
+  margin-top: 0.1rem;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 0.75rem;
 }

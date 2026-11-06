@@ -138,7 +138,7 @@ describe('ProxyListComponent', () => {
     expect(request.observed).toBeTrue();
     expect(component.isLoading()).toBeTrue();
     expect(component.hasLoaded()).toBeFalse();
-    expect(element.querySelector('h1')!.textContent).toContain('Managed proxies');
+    expect(element.querySelector('h1')!.textContent).toContain('Proxies');
     expect(getComputedStyle(toolbar).visibility).toBe('visible');
     expect(getComputedStyle(toolbar).opacity).toBe('1');
     expect(getComputedStyle(grid).opacity).toBe('1');

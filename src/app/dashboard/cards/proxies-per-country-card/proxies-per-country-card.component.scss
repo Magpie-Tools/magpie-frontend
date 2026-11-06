@@ -78,8 +78,8 @@
   justify-content: space-between;
   gap: 1rem;
   margin-top: 0.65rem;
-  color: rgba(255, 255, 255, 0.34);
-  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
 }
 
 .map-caption span {
@@ -135,7 +135,7 @@
   align-items: center;
   gap: 0.6rem;
   color: rgba(255, 255, 255, 0.76);
-  font-size: 0.67rem;
+  font-size: 0.75rem;
   font-weight: 560;
 }
 
@@ -170,15 +170,15 @@
 
 .country-row__value strong {
   color: rgba(255, 255, 255, 0.78);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 590;
   font-variant-numeric: tabular-nums;
 }
 
 .country-row__value span {
   margin-top: 0.12rem;
-  color: rgba(255, 255, 255, 0.32);
-  font-size: 0.53rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.6875rem;
 }
 
 .country-more {
@@ -207,7 +207,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 0.75rem;
   background: #171719;
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .country-search input {
@@ -217,7 +217,7 @@
   background: transparent;
   color: rgba(255, 255, 255, 0.84);
   font: inherit;
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
 }
 
 .country-search:focus-within {

@@ -9,14 +9,14 @@
     class="table-scroll"
     tabindex="0"
     role="region"
-    aria-label="Proxy table, scroll horizontally to view more columns"
+    aria-label="Proxy table"
     [style.max-height]="virtualScroll ? (scrollHeight ?? '60vh') : null"
   >
-    <table hlmTable>
-      <thead hlmTHead>
-        <tr hlmTr>
+    <table hlmTable role="table">
+      <thead hlmTHead role="rowgroup">
+        <tr hlmTr role="row">
           @if (selectionEnabled) {
-            <th hlmTh style="width: 3rem">
+            <th hlmTh role="columnheader" class="select-column" style="width: 3rem">
               <hlm-checkbox
                 aria-label="Select all proxies on this page"
                 [ngModel]="isAllSelected"
@@ -30,6 +30,8 @@
             @if (sortable && column.sortField) {
               <th
                 hlmTh
+                role="columnheader"
+                [class.status-column]="column.id === 'alive'"
                 [attr.aria-sort]="
                   sortField === column.sortField
                     ? sortOrder === 1
@@ -44,7 +46,11 @@
                   class="table-sort"
                   (click)="sortColumn(column.sortField!)"
                 >
-                  {{ column.label }}
+                  @if (column.id === 'alive') {
+                    <span class="status-head-label">{{ column.label }}</span>
+                  } @else {
+                    {{ column.label }}
+                  }
                   <svg
                     class="table-sort__icon"
                     aria-hidden="true"
@@ -68,14 +74,23 @@
                 </button>
               </th>
             } @else {
-              <th hlmTh [hlmTooltip]="column.tooltip ?? ''">
-                {{ column.label }}
+              <th
+                hlmTh
+                role="columnheader"
+                [hlmTooltip]="column.tooltip ?? ''"
+                [class.actions-column]="column.id === 'actions' || column.id === 'actions_buttons'"
+              >
+                @if (column.id === 'actions') {
+                  <span class="sr-only">{{ column.label }}</span>
+                } @else {
+                  {{ column.label }}
+                }
               </th>
             }
           }
         </tr>
       </thead>
-      <tbody hlmTBody>
+      <tbody hlmTBody role="rowgroup">
         @if (loading) {
           @if (!hasLoaded) {
             @for (_ of skeletonRows; track $index) {
@@ -137,13 +152,14 @@
         @for (proxy of proxies; track proxy.id) {
           <tr
             hlmTr
+            role="row"
             [attr.data-state]="
               selectionModel?.isSelected(proxy) ? 'selected' : null
             "
             (click)="selectionEnabled ? onToggleSelection(proxy) : null"
           >
             @if (selectionEnabled) {
-              <td hlmTd (click)="$event.stopPropagation()">
+              <td hlmTd role="cell" class="select-cell" (click)="$event.stopPropagation()">
                 <hlm-checkbox
                   [aria-label]="'Select proxy ' + formatProxyAddress(proxy)"
                   [ngModel]="selectionModel?.isSelected(proxy)"
@@ -158,14 +174,18 @@
             ) {
               @switch (column.id) {
                 @case ("alive") {
-                  <td hlmTd>
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="status-cell">
                     @if (managedState(proxy) === "active") {
-                      <div
-                        class="status-dot"
-                        [ngClass]="proxy.health_known === false ? 'unknown' : proxy.alive ? 'alive' : 'dead'"
-                        [attr.aria-label]="proxy.health_known === false ? 'Unknown' : proxy.alive ? 'Alive' : 'Dead'"
-                        [hlmTooltip]="proxy.health_known === false ? 'Unknown' : proxy.alive ? 'Alive' : 'Dead'"
-                      ></div>
+                      <span class="status-indicator">
+                        <span
+                          class="status-dot"
+                          role="img"
+                          [ngClass]="proxy.health_known === false ? 'unknown' : proxy.alive ? 'alive' : 'dead'"
+                          [attr.aria-label]="proxy.health_known === false ? 'Unknown' : proxy.alive ? 'Alive' : 'Dead'"
+                          [hlmTooltip]="proxy.health_known === false ? 'Unknown' : proxy.alive ? 'Alive' : 'Dead'"
+                        ></span>
+                        <span class="status-text" aria-hidden="true">{{ proxy.health_known === false ? 'Unknown' : proxy.alive ? 'Alive' : 'Dead' }}</span>
+                      </span>
                     } @else {
                       <span
                         class="lifecycle-state"
@@ -181,7 +201,7 @@
                   </td>
                 }
                 @case ("health_overall") {
-                  <td hlmTd class="text-center health-td">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="text-center health-td">
                     <app-health-bar-cell
                       [aliveCount]="proxy.health?.overall ?? 0"
                       [deadCount]="healthDeadPercent(proxy.health?.overall)"
@@ -195,7 +215,7 @@
                   </td>
                 }
                 @case ("health_http") {
-                  <td hlmTd class="text-center health-td">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="text-center health-td">
                     <app-health-bar-cell
                       [aliveCount]="proxy.health?.http ?? 0"
                       [deadCount]="healthDeadPercent(proxy.health?.http)"
@@ -209,7 +229,7 @@
                   </td>
                 }
                 @case ("health_https") {
-                  <td hlmTd class="text-center health-td">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="text-center health-td">
                     <app-health-bar-cell
                       [aliveCount]="proxy.health?.https ?? 0"
                       [deadCount]="healthDeadPercent(proxy.health?.https)"
@@ -223,7 +243,7 @@
                   </td>
                 }
                 @case ("health_socks4") {
-                  <td hlmTd class="text-center health-td">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="text-center health-td">
                     <app-health-bar-cell
                       [aliveCount]="proxy.health?.socks4 ?? 0"
                       [deadCount]="healthDeadPercent(proxy.health?.socks4)"
@@ -237,7 +257,7 @@
                   </td>
                 }
                 @case ("health_socks5") {
-                  <td hlmTd class="text-center health-td">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="text-center health-td">
                     <app-health-bar-cell
                       [aliveCount]="proxy.health?.socks5 ?? 0"
                       [deadCount]="healthDeadPercent(proxy.health?.socks5)"
@@ -251,7 +271,7 @@
                   </td>
                 }
                 @case ("ip") {
-                  <td hlmTd class="copy-cell">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="copy-cell identity-cell">
                     <button
                       type="button"
                       class="copy-value"
@@ -273,19 +293,21 @@
                   </td>
                 }
                 @case ("ip_port") {
-                  <td hlmTd class="copy-cell">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="copy-cell identity-cell">
                     <button
                       type="button"
                       class="copy-value"
                       [class.copy-value--copied]="isCopied(proxy, 'ip_port')"
                       [hlmTooltip]="
-                        isCopied(proxy, 'ip_port') ? 'Copied' : 'Click to copy'
+                        isCopied(proxy, 'ip_port') ? 'Copied' : 'Copy ' + formatProxyAddress(proxy)
                       "
                       (click)="copyProxyValue($event, proxy, 'ip_port')"
                     >
-                      <span class="copy-value__text">{{
-                        formatProxyAddress(proxy)
-                      }}</span>
+                      <!-- Only the host truncates; the port always stays visible. -->
+                      <span class="copy-value__text copy-value__text--address"
+                        ><span class="copy-value__host">@for (part of hostParts(proxy); track $index) {{{ part }}@if (!$last) {<wbr />}}</span
+                        ><span class="copy-value__port">:{{ proxy.port }}</span></span
+                      >
                       <i
                         class="icon"
                         [ngClass]="
@@ -299,7 +321,7 @@
                   </td>
                 }
                 @case ("port") {
-                  <td hlmTd class="copy-cell">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="copy-cell">
                     <button
                       type="button"
                       class="copy-value"
@@ -321,17 +343,17 @@
                   </td>
                 }
                 @case ("response_time") {
-                  <td hlmTd>{{ proxy.response_time }} ms</td>
+                  <td hlmTd role="cell" [attr.data-label]="column.label">{{ proxy.response_time | number }} ms</td>
                 }
                 @case ("estimated_type") {
-                  <td hlmTd>{{ proxy.estimated_type }}</td>
+                  <td hlmTd role="cell" [attr.data-label]="column.label">{{ proxy.estimated_type }}</td>
                 }
                 @case ("country") {
-                  <td hlmTd>{{ proxy.country }}</td>
+                  <td hlmTd role="cell" [attr.data-label]="column.label">{{ proxy.country }}</td>
                 }
                 @case ("tags") {
                   <td
-                    hlmTd
+                    hlmTd role="cell" [attr.data-label]="column.label"
                     class="proxy-tags-cell"
                     (click)="$event.stopPropagation()"
                   >
@@ -341,13 +363,14 @@
                       [saving]="isSavingProxyTags(proxy.id)"
                       [disabled]="!tagEditingEnabled"
                       [compact]="true"
+                      [fitToWidth]="true"
                       (selectionChange)="onTagSelectionChange(proxy, $event)"
                       (manageTags)="manageTags.emit()"
                     ></app-proxy-tag-selector>
                   </td>
                 }
                 @case ("reputation") {
-                  <td hlmTd class="reputation-cell">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="reputation-cell">
                     @if (proxy.__meta?.hasReputation) {
                       <span [ngClass]="proxy.__meta?.reputationBadgeClass">
                         <span>{{ proxy.__meta?.reputationLabel }}</span>
@@ -361,12 +384,12 @@
                   </td>
                 }
                 @case ("latest_check") {
-                  <td hlmTd class="w-[170px]">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="latest-check-cell">
                     {{ proxy.__meta?.latestCheckLabel ?? "—" }}
                   </td>
                 }
                 @case ("check_now") {
-                  <td hlmTd>
+                  <td hlmTd role="cell" [attr.data-label]="column.label">
                     <button
                       type="button"
                       class="proxy-check-button"
@@ -387,7 +410,7 @@
                   </td>
                 }
                 @case ("actions_buttons") {
-                  <td hlmTd class="proxy-actions-cell">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="proxy-actions-cell">
                     @if (lifecycleEnabled) {
                       <button
                         type="button"
@@ -417,7 +440,7 @@
                         <button
                           type="button"
                           class="proxy-archive-button"
-                          title="Archive route"
+                          title="Archive proxy"
                           [disabled]="isChangingLifecycle(proxy.id)"
                           (click)="onLifecycleChange($event, proxy, 'archived')"
                         >
@@ -436,7 +459,7 @@
                   </td>
                 }
                 @case ("actions") {
-                  <td hlmTd class="proxy-actions-cell" (click)="$event.stopPropagation()">
+                  <td hlmTd role="cell" [attr.data-label]="column.label" class="proxy-actions-cell" (click)="$event.stopPropagation()">
                     <button
                       type="button"
                       class="proxy-actions-trigger"

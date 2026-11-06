@@ -1,5 +1,6 @@
 import {CommonModule} from '@angular/common';
-import {Component, Input} from '@angular/core';
+import {Component, Input, inject, LOCALE_ID} from '@angular/core';
+import {formatDecimal} from '../number-utils';
 
 type HealthTone = 'healthy' | 'mixed' | 'unhealthy' | 'empty';
 
@@ -193,11 +194,13 @@ export class HealthBarCellComponent {
     return Math.max(0, value);
   }
 
+  private readonly locale = inject(LOCALE_ID);
+
   private formatValue(value: number): string {
     if (this.valueDecimals <= 0) {
       return `${Math.round(value)}${this.valueSuffix}`;
     }
-    const rounded = Math.round(value * Math.pow(10, this.valueDecimals)) / Math.pow(10, this.valueDecimals);
-    return `${rounded.toFixed(this.valueDecimals)}${this.valueSuffix}`;
+    const digits = this.valueDecimals;
+    return `${formatDecimal(value, this.locale, digits)}${this.valueSuffix}`;
   }
 }

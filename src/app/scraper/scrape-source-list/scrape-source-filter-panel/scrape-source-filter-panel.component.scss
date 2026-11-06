@@ -43,7 +43,7 @@
   height: 0.95rem;
   line-height: 1;
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   color: rgba(226, 232, 240, 0.9);
   cursor: pointer;
   letter-spacing: 0.02em;
@@ -64,7 +64,7 @@
 .filter-count-label {
   justify-self: end;
   color: #cbd5e1;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 600;
   text-align: right;
 }
@@ -85,12 +85,15 @@
     height: 1px;
   }
 
+  /* Label above; comparison and value share one row. */
   .filter-count-row {
-    grid-template-columns: 1fr 4.25rem;
+    grid-template-columns: 5rem minmax(0, 1fr);
   }
 
-  .filter-count-input {
+  .filter-count-label {
     grid-column: 1 / -1;
+    justify-self: start;
+    text-align: left;
   }
 }
 

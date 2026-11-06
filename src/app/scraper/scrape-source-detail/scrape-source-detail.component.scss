@@ -101,8 +101,9 @@ input {
   }
 }
 
+// Inline so the link's ellipsis can show; it becomes inline-block only while scrolling.
 .source-title__text {
-  display: inline-block;
+  display: inline;
   // Include the glyph padding in the text width used by the URL scroll animation.
   padding-inline: 0.08em;
 }
@@ -112,6 +113,7 @@ input {
     text-overflow: clip;
 
     .source-title__text {
+      display: inline-block;
       animation: source-url-scroll var(--url-scroll-duration) linear infinite alternate;
     }
   }
@@ -203,7 +205,7 @@ input {
   gap: .45rem;
   margin-top: .75rem;
   color: #e8a0a6;
-  font-size: .63rem;
+  font-size: 0.75rem;
   line-height: 1.6;
   overflow-wrap: anywhere;
 
@@ -269,7 +271,7 @@ input {
   align-items: center;
   gap: .35rem;
   color: var(--detail-muted);
-  font-size: .63rem;
+  font-size: 0.75rem;
 
   &::before {
     content: '';
@@ -292,7 +294,7 @@ input {
   > p {
     margin-top: .65rem;
     color: var(--detail-muted);
-    font-size: .63rem;
+    font-size: 0.75rem;
   }
 }
 
@@ -302,7 +304,7 @@ input {
   em {
     margin-left: .12rem;
     color: var(--detail-muted);
-    font-size: .6rem;
+    font-size: 0.72rem;
     font-style: normal;
     letter-spacing: 0;
   }
@@ -316,7 +318,7 @@ input {
   border-radius: 999px;
   background: rgba(34, 197, 94, .075);
   color: #bbf7d0;
-  font-size: .52rem;
+  font-size: 0.6875rem;
   font-weight: 650;
   letter-spacing: .07em;
   text-transform: uppercase;
@@ -349,7 +351,7 @@ input {
   gap: .65rem;
   min-height: 1.5rem;
   color: var(--detail-muted);
-  font-size: .63rem;
+  font-size: 0.75rem;
 
   strong { min-width: 3ch; color: rgba(255, 255, 255, .82); font-weight: 540; text-align: right; }
 }
@@ -364,7 +366,7 @@ input {
 }
 
 .progress-bar__fill--good { background: var(--health-alive); }
-.progress-bar__fill--neutral { background: #e2ba55; }
+.progress-bar__fill--neutral { background: var(--reputation-neutral); }
 .progress-bar__fill--poor { background: var(--health-dead); }
 .progress-bar__fill--unknown { background: var(--health-unknown); }
 

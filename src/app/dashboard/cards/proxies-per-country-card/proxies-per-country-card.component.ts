@@ -82,7 +82,7 @@ const COUNTRY_CODE_OVERRIDES: Record<string, string> = {
 @Component({
   selector: 'app-proxies-per-country-card',
   standalone: true,
-  imports: [HlmCardImports, DialogComponent, ChartComponent, FormsModule],
+  imports: [HlmCardImports, DialogComponent, ChartComponent, FormsModule, DecimalPipe],
   providers: [DecimalPipe],
   templateUrl: './proxies-per-country-card.component.html',
   styleUrl: './proxies-per-country-card.component.scss'

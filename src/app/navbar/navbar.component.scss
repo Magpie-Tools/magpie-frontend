@@ -104,8 +104,8 @@
 .nav-section__title {
   margin: 0 0 0.38rem;
   padding: 0 0.55rem;
-  color: rgba(255, 255, 255, 0.32);
-  font-size: 0.57rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
   font-weight: 650;
   letter-spacing: 0.12em;
   line-height: 1.7;
@@ -123,7 +123,7 @@
   border: 1px solid transparent;
   border-radius: 0.78rem;
   color: rgba(255, 255, 255, 0.57);
-  font-size: 0.71rem;
+  font-size: 0.8125rem;
   font-weight: 540;
   line-height: 1.2;
   text-decoration: none;
@@ -233,7 +233,7 @@
 
 .navbar-item--nested {
   min-height: 2.35rem;
-  font-size: 0.67rem;
+  font-size: 0.75rem;
 
   .navbar-item__icon {
     width: 1.55rem;
@@ -285,7 +285,7 @@
   border-radius: 50%;
   background: rgba(var(--theme-primary-500-rgb), 0.12);
   color: var(--theme-primary-200);
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
 }
 
 .account-trigger__copy {
@@ -293,21 +293,21 @@
 
   strong {
     color: rgba(255, 255, 255, 0.85);
-    font-size: 0.68rem;
+    font-size: 0.8125rem;
     font-weight: 590;
   }
 
   small {
     overflow: hidden;
-    color: rgba(255, 255, 255, 0.35);
-    font-size: 0.54rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.6875rem;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 }
 
 .account-trigger__more {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 1rem;
 }
 
@@ -339,8 +339,8 @@
   strong { font-size: 0.8rem; font-weight: 590; }
   small {
     overflow: hidden;
-    color: rgba(255, 255, 255, 0.48);
-    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.8125rem;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -365,7 +365,7 @@
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   font-weight: 450;
   text-align: left;
   text-decoration: none;

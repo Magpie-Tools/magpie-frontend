@@ -1,9 +1,11 @@
+import {formatDate} from '@angular/common';
+import {TIMESTAMP_FORMAT} from '../../../shared/date-formats';
 import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
 import {HlmSwitch} from '@spartan-ng/helm/switch';
 import {SelectComponent} from '../../../shared/ui/select.component';
 import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
 import {PasswordComponent} from '../../../shared/ui/password.component';
-import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal, inject, LOCALE_ID} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Subject} from 'rxjs';
@@ -29,6 +31,7 @@ import {RevealGroupDirective} from '../../../shared/reveal-group.directive';
   styleUrl: './plugin-geolite.component.scss'
 })
 export class PluginGeoliteComponent implements OnInit, OnDestroy {
+  private readonly locale = inject(LOCALE_ID);
   readonly daysList = dayOptions;
   readonly hoursList = hourOptions;
   readonly minutesList = minuteOptions;
@@ -196,6 +199,6 @@ export class PluginGeoliteComponent implements OnInit, OnDestroy {
       return timestamp;
     }
 
-    return parsed.toLocaleString();
+    return formatDate(parsed, TIMESTAMP_FORMAT, this.locale);
   }
 }

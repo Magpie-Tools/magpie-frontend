@@ -1,8 +1,10 @@
+import {formatDate} from '@angular/common';
+import {TIMESTAMP_FORMAT} from '../../../shared/date-formats';
 import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmSwitch} from '@spartan-ng/helm/switch';
 import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
 import {PasswordComponent} from '../../../shared/ui/password.component';
-import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal, inject, LOCALE_ID} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Subject, interval} from 'rxjs';
@@ -27,6 +29,7 @@ import {RevealGroupDirective} from '../../../shared/reveal-group.directive';
   styleUrl: './plugin-abuseipdb.component.scss'
 })
 export class PluginAbuseIPDBComponent implements OnInit, OnDestroy {
+  private readonly locale = inject(LOCALE_ID);
   form: FormGroup;
   pluginEnabled = signal(false);
   quotaLimit = signal<number | null>(null);
@@ -166,6 +169,6 @@ export class PluginAbuseIPDBComponent implements OnInit, OnDestroy {
       return timestamp;
     }
 
-    return parsed.toLocaleString();
+    return formatDate(parsed, TIMESTAMP_FORMAT, this.locale);
   }
 }

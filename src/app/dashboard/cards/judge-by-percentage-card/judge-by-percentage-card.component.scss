@@ -23,8 +23,8 @@
 }
 
 .judge-summary span {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.75rem;
 }
 
 .judge-segments {
@@ -77,21 +77,21 @@
   min-width: 0;
   overflow: hidden;
   color: rgba(255, 255, 255, 0.68);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .judge-row__count {
-  color: rgba(255, 255, 255, 0.34);
-  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
 }
 
 .judge-row strong {
   min-width: 2.2rem;
   color: rgba(255, 255, 255, 0.76);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 590;
   text-align: right;
   font-variant-numeric: tabular-nums;
