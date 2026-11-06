@@ -18,7 +18,8 @@ const defaultSettings: GlobalSettings = {
     save_responses: true,
     retries: 2,
     timeout: 7500,
-    checker_timer: timer(),
+    monthly_checks_per_workspace: 1500000,
+    unlimited_monthly_checks: false,
     judges_threads: 1,
     judges_timeout: 1000,
     judges: [],
@@ -35,7 +36,8 @@ const defaultSettings: GlobalSettings = {
     retries: 1,
     timeout: 1000,
     respect_robots_txt: true,
-    scraper_timer: timer(),
+    monthly_scrapes_per_workspace: 3000,
+    unlimited_monthly_scrapes: false,
     scrape_sites: []
   },
   proxy_limits: {

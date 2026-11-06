@@ -162,6 +162,97 @@ dl { margin: 0; }
 .identity-card { grid-column: span 7; }
 .create-card { grid-column: span 5; }
 .access-card { grid-column: 1 / -1; }
+.allowance-card { grid-column: 1 / -1; }
+
+.allowance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.allowance-meter {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.allowance-meter__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--card-muted);
+  font-size: 0.8rem;
+}
+
+.allowance-tags { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.35rem; }
+.allowance-tag--unlimited { border-color: rgba(var(--theme-primary-300-rgb), 0.42); color: var(--theme-primary-300); }
+.allowance-tag {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  font-size: 0.7rem;
+}
+
+.allowance-cadence {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.8rem;
+}
+
+.allowance-cadence--stopped { color: #f0b37e; }
+
+.allowance-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0;
+  color: #f0b37e;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.cadence-editor {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.4rem;
+
+  .card-note,
+  .inline-error { margin: 0; }
+}
+
+.cadence-editor__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cadence-editor__every { color: var(--card-muted); font-size: 0.8rem; }
+.cadence-editor__value { width: 6rem; }
+.cadence-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+
+.allowance-admin {
+  display: grid;
+  grid-template-columns: auto minmax(0, 18rem) auto minmax(0, 18rem) auto;
+  align-items: center;
+  gap: 0.6rem 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--card-border);
+
+  .card-note { grid-column: 1 / -1; margin: 0; }
+}
+.allowance-admin__field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+
+  .text-input { flex: 1 1 auto; min-width: 0; }
+  .checkbox-field { flex: 0 0 auto; }
+}
 .access-card > .data-list, .access-card > .inline-error { margin-top: 1.25rem; }
 
 .card-heading {
@@ -360,6 +451,8 @@ dl { margin: 0; }
 
 @container workspace-page (max-width: 760px) {
   .workspace-stage { border-radius: 1.25rem; }
+  .allowance-grid { grid-template-columns: minmax(0, 1fr); }
+  .allowance-admin { grid-template-columns: minmax(0, 1fr); }
   .workspace-context { align-items: flex-start; flex-wrap: wrap; }
   .capacity-card,
   .plan-card,

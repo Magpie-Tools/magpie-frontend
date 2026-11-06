@@ -41,7 +41,38 @@ describe('WorkspaceComponent', () => {
       included_operators: 3,
       statistics_retention_days: 30,
       minimum_check_interval_seconds: 60,
+      monthly_checks: 0,
+      monthly_scrapes: 0,
+      unlimited_checks: false,
+      unlimited_scrapes: false,
       cancel_at_period_end: false,
+    },
+    allowances: {
+      unlimited_checks: false,
+      unlimited_scrapes: false,
+      needs_check_interval: false,
+      needs_scrape_interval: false,
+      monthly_checks: 1500000,
+      used_checks: 375000,
+      checks_per_cycle: 750,
+      check_interval_seconds: 5400,
+      checks_exhausted: false,
+      monthly_scrapes: 3000,
+      used_scrapes: 3000,
+      scrapes_per_cycle: 4,
+      scrape_interval_seconds: 0,
+      scrapes_exhausted: true,
+      requested_check_interval_seconds: 0,
+      requested_scrape_interval_seconds: 0,
+      minimum_check_interval_seconds: 60,
+      minimum_scrape_interval_seconds: 900,
+      projected_monthly_checks: 1500000,
+      projected_monthly_scrapes: 0,
+      inherits_checks: true,
+      inherits_scrapes: true,
+      period_start: '2026-11-01T00:00:00Z',
+      period_end: '2026-12-01T00:00:00Z',
+      computed_at: '2026-11-12T08:00:00Z',
     },
     created_at: '2026-08-01T00:00:00Z',
   };
@@ -75,6 +106,7 @@ describe('WorkspaceComponent', () => {
       'revokeWorkspaceInvitation',
       'renameWorkspace',
       'createWorkspace',
+      'updateWorkspaceCadence',
     ]);
     http.getWorkspaceMembers.and.returnValue(of([owner, operator]));
     http.getWorkspaceInvitations.and.returnValue(of([]));
@@ -98,6 +130,7 @@ describe('WorkspaceComponent', () => {
             current: signal(workspace),
             loading: signal(false),
             canAdminister,
+            canOperate: signal(true),
             isOwner,
             load: () => of([workspace]),
             refresh: () => of([workspace]),
@@ -209,6 +242,88 @@ describe('WorkspaceComponent', () => {
     expect(panel('settings').hidden).toBeTrue();
     expect(panel('members').querySelector('.invite-form')).not.toBeNull();
     expect(fixture.nativeElement.querySelectorAll('.plan-accordions details[open]').length).toBe(0);
+  });
+
+  it('shows allowance usage and the derived cadence on the overview', () => {
+    const [checks, scrapes] = component.allowanceMeters();
+    expect(checks.percent).toBe(25);
+    expect(checks.cadence).toBe('Each proxy is checked every 1.5 hours.');
+    expect(scrapes.exhausted).toBeTrue();
+    expect(scrapes.cadence).toContain('Allowance used. Scrapes resume on');
+    const card = panel('overview').querySelector('.allowance-card') as HTMLElement;
+    expect(card).not.toBeNull();
+    expect(card.querySelectorAll('.allowance-meter').length).toBe(2);
+    // Only instance administrators may change a workspace's allowances.
+    expect(card.querySelector('.allowance-admin')).toBeNull();
+  });
+
+  it('warns while editing a fixed interval that needs more than the allowance', () => {
+    expect(component.cadenceDrafts.checks.mode).toBe('automatic');
+    expect(component.cadenceWarning('checks')).toBeNull();
+
+    // 750 checks per cycle every 10 minutes is about 3.24M checks a month.
+    component.cadenceDrafts.checks = {mode: 'fixed', value: 10, unit: 'minutes'};
+    expect(component.cadenceError('checks')).toBeNull();
+    expect(component.cadenceWarning('checks')).toContain('more than the allowance of 1,500,000');
+    expect(component.cadenceWarning('checks')).toContain('Checks stop when the allowance is used up.');
+
+    // Every 2 hours fits: about 270,000 checks a month.
+    component.cadenceDrafts.checks = {mode: 'fixed', value: 2, unit: 'hours'};
+    expect(component.cadenceWarning('checks')).toBeNull();
+
+    component.cadenceDrafts.checks = {mode: 'fixed', value: 30, unit: 'minutes'};
+    component.cadenceDrafts.scrapes = {mode: 'fixed', value: 5, unit: 'minutes'};
+    expect(component.cadenceError('scrapes')).toContain('15 minutes');
+    fixture.detectChanges();
+    expect(panel('overview').querySelector('.cadence-actions button')?.hasAttribute('disabled')).toBeTrue();
+  });
+
+  it('saves fixed intervals and surfaces server warnings', () => {
+    http.updateWorkspaceCadence.and.returnValue(of({
+      check_interval_seconds: 600,
+      scrape_interval_seconds: 0,
+      warnings: ['This interval needs about 3240000 checks a month'],
+    }));
+    component.cadenceDrafts.checks = {mode: 'fixed', value: 10, unit: 'minutes'};
+    component.saveCadence();
+    expect(http.updateWorkspaceCadence).toHaveBeenCalledWith({check_interval_seconds: 600, scrape_interval_seconds: 0});
+    expect(notification.showWarn).toHaveBeenCalledWith('This interval needs about 3240000 checks a month');
+  });
+
+  it('requires a fixed interval for a workspace without a monthly limit', () => {
+    const service = TestBed.inject(WorkspaceService);
+    (service.current as ReturnType<typeof signal<Workspace | null>>).set({
+      ...workspace,
+      subscription: {...workspace.subscription, unlimited_checks: true},
+      allowances: {
+        ...workspace.allowances,
+        unlimited_checks: true,
+        needs_check_interval: true,
+        inherits_checks: false,
+        used_checks: 90_000_000,
+        check_interval_seconds: 3600,
+      },
+    });
+    component.syncCurrentWorkspace();
+    fixture.detectChanges();
+
+    const [checks] = component.allowanceMeters();
+    expect(checks.unlimited).toBeTrue();
+    expect(checks.runOutWarning).toBeNull();
+    expect(checks.cadence).toBe('No monthly limit. Until you choose an interval, each proxy is checked every hour.');
+    // The editor starts on the hourly interval and offers to save it.
+    expect(component.cadenceDrafts.checks).toEqual({mode: 'fixed', value: 1, unit: 'hours'});
+    expect(component.cadenceChanged()).toBeTrue();
+    const meter = panel('overview').querySelector('.allowance-meter') as HTMLElement;
+    expect(meter.querySelector('.capacity-progress')).toBeNull();
+    expect(meter.querySelector('.allowance-tag--unlimited')?.textContent).toContain('No limit');
+    expect((meter.querySelector('option[value="automatic"]') as HTMLOptionElement).disabled).toBeTrue();
+    // No allowance, so no over-allowance warning even at the fastest interval.
+    component.cadenceDrafts.checks = {mode: 'fixed', value: 1, unit: 'minutes'};
+    expect(component.cadenceWarning('checks')).toBeNull();
+    component.cadenceDrafts.checks = {mode: 'automatic', value: 1, unit: 'hours'};
+    expect(component.cadenceError('checks')).toContain('choose a fixed interval');
+
   });
 
   it('keeps the workspace tab strip at the compact global-tab height', () => {

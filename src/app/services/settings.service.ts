@@ -214,12 +214,10 @@ export class SettingsService {
       retries:         formData.retries              ?? current?.checker?.retries              ?? 2,
       timeout:         formData.timeout              ?? current?.checker?.timeout              ?? 7500,
 
-      checker_timer: {
-        days:    formData?.checker_timer?.days    ?? current?.checker?.checker_timer?.days    ?? 0,
-        hours:   formData?.checker_timer?.hours   ?? current?.checker?.checker_timer?.hours   ?? 6,
-        minutes: formData?.checker_timer?.minutes ?? current?.checker?.checker_timer?.minutes ?? 0,
-        seconds: formData?.checker_timer?.seconds ?? current?.checker?.checker_timer?.seconds ?? 0
-      },
+      monthly_checks_per_workspace:
+        formData.monthly_checks_per_workspace ?? current?.checker?.monthly_checks_per_workspace ?? 1500000,
+      unlimited_monthly_checks:
+        formData.unlimited_monthly_checks ?? current?.checker?.unlimited_monthly_checks ?? false,
 
       judges_threads: formData.judges_threads      ?? current?.checker?.judges_threads      ?? 3,
       judges_timeout: formData.judges_timeout      ?? current?.checker?.judges_timeout      ?? 5000,
@@ -274,12 +272,10 @@ export class SettingsService {
       timeout:         formData.scraper_timeout         ?? current?.scraper?.timeout         ?? 7500,
       respect_robots_txt: formData.scraper_respect_robots_txt ?? current?.scraper?.respect_robots_txt ?? true,
 
-      scraper_timer: {
-        days:    formData?.scraper_timer?.days    ?? current?.scraper?.scraper_timer?.days    ?? 0,
-        hours:   formData?.scraper_timer?.hours   ?? current?.scraper?.scraper_timer?.hours   ?? 9,
-        minutes: formData?.scraper_timer?.minutes ?? current?.scraper?.scraper_timer?.minutes ?? 0,
-        seconds: formData?.scraper_timer?.seconds ?? current?.scraper?.scraper_timer?.seconds ?? 0
-      },
+      monthly_scrapes_per_workspace:
+        formData.monthly_scrapes_per_workspace ?? current?.scraper?.monthly_scrapes_per_workspace ?? 3000,
+      unlimited_monthly_scrapes:
+        formData.unlimited_monthly_scrapes ?? current?.scraper?.unlimited_monthly_scrapes ?? false,
 
       scrape_sites: scrapeSites
     };

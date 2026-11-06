@@ -13,12 +13,10 @@ export interface GlobalSettings {
     save_responses: boolean;
     retries: number;
     timeout: number;
-    checker_timer: {
-      days: number;
-      hours: number;
-      minutes: number;
-      seconds: number;
-    };
+    /** Monthly checks of every workspace without its own allowance. */
+    monthly_checks_per_workspace: number;
+    /** No default limit; inheriting workspaces must choose a fixed interval. */
+    unlimited_monthly_checks: boolean;
     judges_threads: number;
     judges_timeout: number;
     judges: {
@@ -44,12 +42,10 @@ export interface GlobalSettings {
     retries: number;
     timeout: number;
 
-    scraper_timer: {
-      days: number;
-      hours: number;
-      minutes: number;
-      seconds: number;
-    };
+    /** Monthly scrapes of every workspace without its own allowance. */
+    monthly_scrapes_per_workspace: number;
+    /** No default limit; inheriting workspaces must choose a fixed interval. */
+    unlimited_monthly_scrapes: boolean;
     respect_robots_txt: boolean;
 
     scrape_sites: string[];
