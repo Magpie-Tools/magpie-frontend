@@ -1,5 +1,7 @@
 # Stage 1: build the Angular application
-FROM node:20-alpine AS build
+# The compiled assets are the same on every architecture, so build them on the
+# native build platform instead of emulating npm under QEMU for each target.
+FROM --platform=$BUILDPLATFORM node:20-alpine AS build
 
 WORKDIR /app
 COPY package*.json ./
