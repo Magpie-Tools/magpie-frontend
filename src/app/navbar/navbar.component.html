@@ -61,7 +61,7 @@
 
     @for (group of menuItems; track group.label) {
       @if (group.visible !== false) {
-        <details class="nav-cluster" [open]="group.expanded === true || isGroupActive(group)">
+        <details class="nav-cluster" [open]="isGroupOpen(group)" (toggle)="onGroupToggle(group, $event)">
           <summary>
             <span class="nav-cluster__identity">
               <span class="navbar-item__icon"
