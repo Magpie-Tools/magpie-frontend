@@ -208,6 +208,75 @@ html:root:root:root:root[data-ui="console"] {
     font-weight: 500;
   }
 
+  // ---------------------------------------------------------------- settings
+  // Panel headings bring their icon back as an accent tile, so each section is easy to
+  // find while scanning a long settings page.
+  .card-heading > .card-icon,
+  :is(.stage-heading, .policy-heading) > :is(.stage-icon, .card-icon),
+  .detail-card__heading .card-icon {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-accent-bg);
+    box-shadow: none;
+    color: var(--ui-accent);
+    font-size: 15px;
+
+    + * { flex: 1 1 auto; }
+  }
+
+  .card-heading > .card-icon--danger {
+    background: rgba(239, 68, 68, 0.14);
+    color: #f87171;
+  }
+
+  // Selected protocols, enabled options, and chosen cards take a tinted frame, and their
+  // icon tile switches to the accent.
+  :is(.protocol-choice, .decision-row, .limit-summary, .theme-choice).is-active,
+  .choice-card--selected,
+  .destination-choice--selected,
+  .bulk-scope-option--active,
+  .rule-card--active {
+    border-color: rgba(var(--theme-primary-500-rgb), 0.5);
+    background: rgba(var(--theme-primary-500-rgb), 0.08);
+  }
+
+  :is(.protocol-choice, .decision-row).is-active
+    :is(.protocol-choice__icon, .decision-row__icon) {
+    border-color: transparent;
+    background: var(--ui-accent-bg);
+    color: var(--ui-accent);
+  }
+
+  .protocol-choice.is-active .protocol-choice__copy strong,
+  .decision-row.is-active .decision-row__copy strong {
+    color: var(--ui-text);
+  }
+
+  // Computed summaries: the headline value reads in the accent.
+  .performance-summary,
+  .cadence-summary {
+    border-color: rgba(var(--theme-primary-500-rgb), 0.3);
+    background: rgba(var(--theme-primary-500-rgb), 0.06);
+  }
+
+  .performance-summary > strong,
+  .performance-summary__value,
+  .cadence-summary strong {
+    color: var(--ui-accent);
+  }
+
+  // Checked "Enabled" chips pick up the theme too.
+  .checkbox-wrapper-46 .inp-cbx:checked + .cbx {
+    border-color: rgba(var(--theme-primary-500-rgb), 0.5);
+    background: rgba(var(--theme-primary-500-rgb), 0.1);
+    color: var(--ui-accent);
+  }
+
   // ------------------------------------------------------------------ KPIs
   .metric-card .dashboard-card__body {
     display: grid;
