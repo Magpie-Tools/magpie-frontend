@@ -13,7 +13,6 @@ import {AlertsService} from '../services/alerts.service';
 import {WorkspaceService} from '../services/workspace.service';
 import {NotificationService} from '../services/notification-service.service';
 import {SelectComponent} from '../shared/ui/select.component';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 import {NotificationFocusService, parseNotificationTargetId} from '../shared/notification-focus.service';
 import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
 import {DialogComponent} from '../shared/ui/dialog.component';
@@ -34,7 +33,7 @@ const emptyDestination = () => ({name: '', kind: 'email' as AlertChannel, enable
 @Component({
   selector: 'app-alerts', standalone: true,
   providers: [NotificationFocusService],
-  imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, RevealGroupDirective, PageLoadErrorComponent, DialogComponent, TooltipComponent],
+  imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, PageLoadErrorComponent, DialogComponent, TooltipComponent],
   templateUrl: './alerts.component.html', styleUrl: './alerts.component.scss',
 })
 export class AlertsComponent {

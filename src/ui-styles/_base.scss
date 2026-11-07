@@ -240,12 +240,6 @@
 
   .inventory-context__copy p:empty { display: none; }
 
-  // Entrance motion reads as decoration on a data screen.
-  .inventory-context,
-  .inventory-grid--combined {
-    animation: none;
-  }
-
   // ---------------------------------------------------------------- panels
   .dashboard-grid {
     gap: var(--ui-gap);

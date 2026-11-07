@@ -15,7 +15,6 @@ import {filter, take, takeUntil} from 'rxjs/operators';
 import {NotificationService} from '../../services/notification-service.service';
 import {GlobalSettings} from '../../models/GlobalSettings';
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
-import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
 import {AdminSettingsHeaderComponent} from '../../shared/admin-settings-shell/admin-settings-header.component';
 import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/admin-settings-save-dock.component';
@@ -25,8 +24,6 @@ import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/
   standalone: true,
   imports: [HlmButton, HlmInput, HlmCheckbox, HlmTooltip, HlmTabsImports, SelectComponent, ConfirmDialogComponent,
     ReactiveFormsModule,
-
-    RevealGroupDirective,
     AdminSettingsShellComponent,
     AdminSettingsHeaderComponent,
     AdminSettingsSaveDockComponent,

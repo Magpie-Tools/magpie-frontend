@@ -8,7 +8,6 @@ import {By} from '@angular/platform-browser';
 import {HttpService} from '../../services/http.service';
 import {ProxyDetail} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
-import {gsap} from 'gsap';
 import {CountryHoverCardComponent} from '../../shared/ui/country-hover-card.component';
 
 describe('ProxyDetailComponent', () => {
@@ -216,9 +215,6 @@ describe('ProxyDetailComponent', () => {
     fixture.detectChanges();
 
     await fixture.whenStable();
-    // Compare bounds after the page has finished scaling into place.
-    const header = fixture.nativeElement.querySelector('.detail-context');
-    gsap.getTweensOf(header).forEach(entrance => entrance.progress(1));
 
     const auth = fixture.nativeElement.querySelector('.auth-credentials') as HTMLElement;
     auth.style.width = '160px';

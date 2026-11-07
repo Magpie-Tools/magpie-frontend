@@ -9,16 +9,12 @@ import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
 import {NotificationService} from '../../services/notification-service.service';
 
-import {RevealGroupDirective} from '../../shared/reveal-group.directive';
-
 @Component({
   selector: 'app-admin-plugins',
   standalone: true,
   imports: [HlmSwitch, HlmTooltip,
     RouterLink,
     FormsModule,
-
-    RevealGroupDirective
   ],
   templateUrl: './admin-plugins.component.html',
   styleUrl: './admin-plugins.component.scss'

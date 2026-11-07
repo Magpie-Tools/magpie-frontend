@@ -15,7 +15,6 @@ import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
 import {NotificationService} from '../../../services/notification-service.service';
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../../shared/duration-options';
-import {RevealGroupDirective} from '../../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-plugin-geolite',
@@ -24,8 +23,6 @@ import {RevealGroupDirective} from '../../../shared/reveal-group.directive';
     AdminSettingsSaveDockComponent,
     RouterLink,
     ReactiveFormsModule,
-
-    RevealGroupDirective
   ],
   templateUrl: './plugin-geolite.component.html',
   styleUrl: './plugin-geolite.component.scss'

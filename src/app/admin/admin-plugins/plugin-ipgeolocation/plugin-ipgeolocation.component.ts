@@ -9,7 +9,6 @@ import {Subject, interval} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
 import {PasswordComponent} from '../../../shared/ui/password.component';
-import {RevealGroupDirective} from '../../../shared/reveal-group.directive';
 import {SettingsService} from '../../../services/settings.service';
 import {HttpService} from '../../../services/http.service';
 import {NotificationService} from '../../../services/notification-service.service';
@@ -18,7 +17,7 @@ import {IPGeolocationStatus} from '../../../models/GlobalSettings';
 @Component({
   selector: 'app-plugin-ipgeolocation', standalone: true,
   imports: [ReactiveFormsModule, RouterLink, HlmInput, HlmSwitch, PasswordComponent,
-    AdminSettingsSaveDockComponent, RevealGroupDirective],
+    AdminSettingsSaveDockComponent],
   templateUrl: './plugin-ipgeolocation.component.html',
   styleUrls: ['../plugin-abuseipdb/plugin-abuseipdb.component.scss', './plugin-ipgeolocation.component.scss']
 })

@@ -10,7 +10,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { marked } from 'marked';
 import { BuildInfo, ReleaseNote, UpdateNotificationService } from '../services/update-notification.service';
 import { LoadingComponent } from '../ui-elements/loading/loading.component';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 import {NotificationReadService} from '../services/notification-read.service';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -97,7 +96,7 @@ function normalizeReleaseBodyToMarkdown(body: string): string {
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [DialogComponent, PageLoadErrorComponent, CommonModule, DatePipe, LoadingComponent, RevealGroupDirective],
+  imports: [DialogComponent, PageLoadErrorComponent, CommonModule, DatePipe, LoadingComponent],
   host: {
     '(window:focus)': 'refreshReadStatus()',
     '(document:visibilitychange)': 'onVisibilityChange()',

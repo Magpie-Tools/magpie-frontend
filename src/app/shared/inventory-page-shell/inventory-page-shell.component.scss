@@ -89,28 +89,6 @@ p { margin: 0; }
   gap: 0.9rem;
 }
 
-// Let the browser play the entrance independently of requests and JS animation ticks.
-.inventory-context,
-.inventory-grid--combined,
-.inventory-grid:not(.inventory-grid--combined) .inventory-toolbar,
-.inventory-grid:not(.inventory-grid--combined) .inventory-card {
-  animation: inventory-enter 650ms cubic-bezier(0.165, 0.84, 0.44, 1) backwards;
-  animation-delay: var(--inventory-enter-delay, 0ms);
-}
-
-.inventory-context + .inventory-grid {
-  --inventory-enter-delay: 55ms;
-}
-
-.inventory-grid:not(.inventory-grid--combined) .inventory-card {
-  animation-delay: calc(var(--inventory-enter-delay, 0ms) + 55ms);
-}
-
-@keyframes inventory-enter {
-  from { transform: translateY(20px) scale(0.99); }
-  to { transform: none; }
-}
-
 .inventory-toolbar,
 .inventory-card,
 .inventory-grid--combined {
@@ -568,11 +546,6 @@ p { margin: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .inventory-context,
-  .inventory-grid--combined,
-  .inventory-grid:not(.inventory-grid--combined) .inventory-toolbar,
-  .inventory-grid:not(.inventory-grid--combined) .inventory-card { animation: none; }
-
   ::ng-deep .tool-button,
   .button { transition: none; }
 }

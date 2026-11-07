@@ -12,12 +12,11 @@ import {UserSettings} from '../../models/UserSettings';
 import {Subject} from 'rxjs';
 import {filter, takeUntil} from 'rxjs/operators';
 import {WorkspaceService} from '../../services/workspace.service';
-import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-checker-judges',
   standalone: true,
-  imports: [HlmInput, AdminSettingsSaveDockComponent, ReactiveFormsModule, TooltipComponent, VisibleRowsDirective, RevealGroupDirective],
+  imports: [HlmInput, AdminSettingsSaveDockComponent, ReactiveFormsModule, TooltipComponent, VisibleRowsDirective],
   templateUrl: './checker-judges.component.html',
   styleUrls: ['./checker-judges.component.scss']
 })

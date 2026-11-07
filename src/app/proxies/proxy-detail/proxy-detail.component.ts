@@ -23,7 +23,6 @@ import {ProxyTagSelectorComponent} from '../../shared/proxy-tag-selector/proxy-t
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
-import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 import {PaginationComponent, TablePageEvent} from '../../shared/ui/pagination.component';
 import {PageScrollTarget, scrollTableToPageTarget} from '../../shared/table-pagination';
 import {BreadcrumbService} from '../../services/breadcrumb.service';
@@ -54,13 +53,11 @@ interface ReputationSignalStructuredItem {
   imports: [HlmTooltip, HlmTableImports, DialogComponent, ChartComponent, CountryHoverCardComponent,
     CommonModule,
     RouterLink,
-
     LoadingComponent,
     DatePipe,
     NgClass,
     ProxyTagSelectorComponent,
     ProxyTagManagerComponent,
-    RevealGroupDirective,
     PaginationComponent,
   ],
   templateUrl: './proxy-detail.component.html',

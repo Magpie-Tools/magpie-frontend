@@ -10,7 +10,6 @@ import {WorkspaceInvitation, WorkspaceInvitationAcceptance} from '../models/Work
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceInvitationService} from '../services/workspace-invitation.service';
 import {WorkspaceService} from '../services/workspace.service';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
 import {NotificationFocusService, parseNotificationTargetId} from '../shared/notification-focus.service';
 
@@ -18,7 +17,7 @@ import {NotificationFocusService, parseNotificationTargetId} from '../shared/not
   selector: 'app-workspace-invitations',
   standalone: true,
   providers: [NotificationFocusService],
-  imports: [HlmSkeleton, HlmTooltip, RevealGroupDirective, VisibleRowsDirective, CommonModule, DatePipe, TitleCasePipe],
+  imports: [HlmSkeleton, HlmTooltip, VisibleRowsDirective, CommonModule, DatePipe, TitleCasePipe],
   templateUrl: './workspace-invitations.component.html',
   styleUrl: './workspace-invitations.component.scss',
 })

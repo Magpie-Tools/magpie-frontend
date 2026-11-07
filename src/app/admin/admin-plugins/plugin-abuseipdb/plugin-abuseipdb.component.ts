@@ -13,7 +13,6 @@ import {filter, startWith, takeUntil} from 'rxjs/operators';
 import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
 import {NotificationService} from '../../../services/notification-service.service';
-import {RevealGroupDirective} from '../../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-plugin-abuseipdb',
@@ -22,8 +21,6 @@ import {RevealGroupDirective} from '../../../shared/reveal-group.directive';
     AdminSettingsSaveDockComponent,
     RouterLink,
     ReactiveFormsModule,
-
-    RevealGroupDirective
   ],
   templateUrl: './plugin-abuseipdb.component.html',
   styleUrl: './plugin-abuseipdb.component.scss'

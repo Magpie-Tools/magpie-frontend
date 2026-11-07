@@ -21,7 +21,6 @@ import {TooltipComponent} from '../tooltip/tooltip.component';
 
 import {formatHostPort} from '../shared/proxy-address';
 import {WorkspaceService} from '../services/workspace.service';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 type RotatorInstanceOption = {
   label: string;
@@ -35,11 +34,8 @@ type RotatorInstanceOption = {
   imports: [HlmButton, HlmInput, HlmSkeleton, HlmTooltip, SelectComponent, DialogComponent,
     CommonModule,
     ReactiveFormsModule,
-
     DatePipe,
-
     TooltipComponent,
-    RevealGroupDirective,
   ],
   templateUrl: './rotating-proxies.component.html',
   styleUrl: './rotating-proxies.component.scss'

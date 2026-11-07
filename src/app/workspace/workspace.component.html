@@ -1,8 +1,4 @@
-<main
-  class="workspace-page"
-  appRevealGroup=".workspace-context, .workspace-card, .page-error"
-  [revealReady]="!!workspaces.current() || !!workspaceError()"
->
+<main class="workspace-page">
   @if (workspaceError()) {
     <section class="page-error" role="alert">
       <span class="error-icon"

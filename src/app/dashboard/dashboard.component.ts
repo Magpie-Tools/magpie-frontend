@@ -33,7 +33,6 @@ import {
 import {formatHostPort} from '../shared/proxy-address';
 import {buildInventoryChart, buildLatencyChart, buildReputationChart, CHART_LIMIT_COLOR, CHART_SERIES_COLOR, REPUTATION_COLORS} from './dashboard-charts';
 import type {AppChartDefinition} from '../shared/ui/chart.component';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 interface SparklineMetric {
   value: number;
@@ -64,12 +63,10 @@ type FastestAliveSortDirection = 'fastest-right' | 'fastest-left';
 
 const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirection';
 
-
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   imports: [HlmSkeleton,
-    RevealGroupDirective,
     PageLoadErrorComponent,
     DecimalPipe,
     KpiCardComponent,
