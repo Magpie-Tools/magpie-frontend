@@ -2,8 +2,8 @@
 @use 'pages';
 
 // Console: a traditional dark dashboard. Near-black surfaces with flat graphite panels,
-// sentence-case sans headings, a warm yellow accent for navigation state and hints, and
-// filled primary buttons in the workspace theme colour. Geist Mono is kept for data
+// sentence-case sans headings, a theme-coloured accent for navigation state and hints,
+// and filled primary buttons in the workspace theme colour. Geist Mono is kept for data
 // such as hosts, ports, and timings.
 //
 // index.html sets <html data-ui="console">. Angular adds its scoping attribute to every
@@ -25,10 +25,10 @@ html:root:root:root:root[data-ui="console"] {
   --ui-text-2: #a3a3a3;
   --ui-text-3: #858585;
 
-  // Navigation state, section tabs, and inline hints.
-  --ui-accent: #fcd452;
-  --ui-accent-soft: rgba(252, 212, 82, 0.1);
-  --ui-success: #22c55e;
+  // Navigation state, section tabs, and inline hints. The darkest theme shade fills the
+  // highlight and a light shade of the same theme colours its text and icons.
+  --ui-accent: var(--theme-primary-200);
+  --ui-accent-bg: var(--theme-primary-900);
 
   --ui-font: 'Geist Variable', 'Segoe UI', sans-serif;
   --ui-font-mono: 'Geist Mono Variable', 'SFMono-Regular', Consolas, monospace;
@@ -134,10 +134,10 @@ html:root:root:root:root[data-ui="console"] {
 
   .nav-cluster__items { margin-left: 18px; }
 
-  // The current page reads in the accent colour, like a highlighted menu entry.
+  // The current page sits on the accent highlight.
   .navbar-item.active {
     border: 0;
-    background: var(--ui-hover);
+    background: var(--ui-accent-bg);
     color: var(--ui-accent);
     box-shadow: none;
 
@@ -188,7 +188,7 @@ html:root:root:root:root[data-ui="console"] {
   // --------------------------------------------------------------------- tabs
   [data-slot="tabs-trigger"][data-state="active"],
   .settings-section-tabs [data-slot="tabs-trigger"][data-state="active"] {
-    background: var(--ui-tab-active-bg);
+    background: var(--ui-accent-bg);
     color: var(--ui-accent);
   }
 
@@ -237,16 +237,11 @@ html:root:root:root:root[data-ui="console"] {
       width: 28px;
       height: 28px;
       border-radius: var(--ui-radius-sm);
-      background: rgba(var(--kpi-rgb, var(--theme-primary-300-rgb)), 0.12);
-      color: rgb(var(--kpi-rgb, var(--theme-primary-300-rgb)));
+      background: var(--ui-accent-bg);
+      color: var(--ui-accent);
       font-size: 14px;
     }
   }
-
-  // Alive, total, and scraped proxies each get their own tint.
-  .dashboard-grid__kpi:nth-of-type(1) { --kpi-rgb: 34, 197, 94; }
-  .dashboard-grid__kpi:nth-of-type(2) { --kpi-rgb: var(--theme-primary-300-rgb); }
-  .dashboard-grid__kpi:nth-of-type(3) { --kpi-rgb: 252, 212, 82; }
 
   .metric-card__trend[hlmBadge] {
     grid-area: trend;
