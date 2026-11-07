@@ -400,18 +400,6 @@
 
 :host ::ng-deep .data-table :is(th.status-column, td.status-cell) { width: 2.75rem; }
 
-:host ::ng-deep .data-table :is(td.proxy-actions-cell, th.actions-column) {
-  position: sticky;
-  right: 0;
-  z-index: 1;
-  background: #0b0b0e !important;
-  box-shadow: inset 1px 0 rgba(255, 255, 255, 0.07), -14px 0 16px -12px rgba(0, 0, 0, 0.85);
-}
-
-:host ::ng-deep .data-table tbody > tr:is(:hover, [data-state="selected"]) > td.proxy-actions-cell {
-  background: linear-gradient(rgba(var(--theme-primary-500-rgb), 0.08), rgba(var(--theme-primary-500-rgb), 0.08)), #0b0b0e !important;
-}
-
 /*
  * Phones: each route becomes a compact card. Line 1: select, address, status, actions.
  * Then the remaining fields in three columns (label above value); tags span the card.
@@ -519,9 +507,6 @@
       position: absolute;
       top: 0.8rem;
       right: 0.5rem;
-      background: transparent !important;
-      box-shadow: none;
-
       &::before { display: none; }
 
       .proxy-actions-trigger { width: 2.75rem; height: 2.75rem; }

@@ -276,15 +276,6 @@
 
 :host { container: source-table / inline-size; }
 
-/* Keep row actions visible while the table scrolls sideways. */
-:host ::ng-deep .scrape-source-table :is(td, th):is(.column-actions, .column-actions_buttons) {
-  position: sticky;
-  right: 0;
-  z-index: 1;
-  background: #0b0b0e !important;
-  box-shadow: inset 1px 0 rgba(255, 255, 255, 0.07), -14px 0 16px -12px rgba(0, 0, 0, 0.85);
-}
-
 /* Phones: each source becomes a card with its URL and actions on the first line. */
 @container source-table (max-width: 640px) {
   :host ::ng-deep .scrape-source-table {
@@ -347,7 +338,7 @@
     }
     td.column-url .scrape-url { display: inline; }
     td.column-url :is(.scrape-url-start, .scrape-url-end) { white-space: normal; overflow-wrap: break-word; }
-    td.column-actions { position: absolute; top: 0.8rem; right: 0.5rem; background: transparent !important; box-shadow: none; &::before { display: none; } }
+    td.column-actions { position: absolute; top: 0.8rem; right: 0.5rem; &::before { display: none; } }
     td.column-health > * { width: 100%; }
     td[colspan] { grid-column: 1 / -1; align-items: center; }
   }

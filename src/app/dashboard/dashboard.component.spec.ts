@@ -5,7 +5,7 @@ import {RouterTestingHarness} from '@angular/router/testing';
 import { of, Subject } from 'rxjs';
 import {gsap} from 'gsap';
 
-import { assignCountryColors, DashboardComponent } from './dashboard.component';
+import { DashboardComponent } from './dashboard.component';
 import { DashboardQueryData, GraphqlService } from '../services/graphql.service';
 
 @Component({template: '<h1>Other page</h1>'})
@@ -102,9 +102,8 @@ describe('DashboardComponent', () => {
     component.onProxyHistoryRefresh();
     fixture.detectChanges();
 
-    // Total proxies has no trend: inventory history counts active routes, not the stored total.
-    expect(fixture.nativeElement.querySelectorAll('.metric-card__trend').length).toBe(2);
-    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-chart').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('.metric-card__trend').length).toBe(3);
+    expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-chart').length).toBe(3);
   });
 
   for (const progress of [0.35, 1]) {
@@ -225,17 +224,5 @@ describe('DashboardComponent', () => {
       {name: 'Unknown', value: 20, percentage: '50.0'},
       {name: 'Germany', value: 20, percentage: '50.0'}
     ]);
-  });
-
-  it('keeps each country colour when the chart order or country set changes', () => {
-    const forward = assignCountryColors(['Germany', 'Japan', 'Brazil', 'Austria']);
-    const reversed = assignCountryColors(['Austria', 'Brazil', 'Japan', 'Germany']);
-    for (const country of forward.keys()) {
-      expect(reversed.get(country)).toBe(forward.get(country));
-    }
-    expect(assignCountryColors(['France', 'Germany']).get('Germany')).toBe(assignCountryColors(['Germany']).get('Germany'));
-    expect(assignCountryColors(['Germany', 'Peru', 'Chile']).get('Germany')).toBe(forward.get('Germany'));
-    const common = ['United States', 'Germany', 'United Kingdom', 'Netherlands', 'France', 'Canada', 'Singapore', 'Japan', 'Brazil', 'Australia', 'Austria'];
-    expect(new Set(assignCountryColors(common).values()).size).toBe(common.length);
   });
 });

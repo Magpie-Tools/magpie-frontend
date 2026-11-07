@@ -1,4 +1,4 @@
-import {formatDecimal, formatPercent} from '../shared/number-utils';
+import {formatPercent} from '../shared/number-utils';
 import {areaY, barX, d3Curve, defineChart, dot, lineY} from '@tanstack/charts';
 import type {ChartMark, SceneNode} from '@tanstack/charts';
 import {scaleLinear} from '@tanstack/charts/scales/linear';
@@ -126,7 +126,7 @@ function reputationDots(points: LatencyPoint[]): ChartMark<LatencyPoint, number,
   }};
 }
 
-export function buildLatencyChart(points: LatencyPoint[], countries: string[], colors: string[], format: (value: number) => string, compact = false, locale = 'de-DE') {
+export function buildLatencyChart(points: LatencyPoint[], countries: string[], colors: string[], format: (value: number) => string) {
   const max = Math.max(1, ...points.map(point => point.y));
   return defineChart({
     marks: [reputationDots(points)],
@@ -136,8 +136,7 @@ export function buildLatencyChart(points: LatencyPoint[], countries: string[], c
           const label = countries[Math.round(value) - 1] ?? '';
           return label.length > 12 ? `${label.slice(0, 11)}...` : label;
         }},
-        // Narrow charts stand labels upright so every country stays labelled.
-        tickLabels: {rotate: compact && countries.length > 4 ? -90 : countries.length > 10 ? -35 : 0, thin: !compact},
+        tickLabels: {rotate: countries.length > 10 ? -35 : 0},
       }},
       y: {scale: () => scaleLinear().domain([0, max]), nice: true, grid: true, axis: {label: 'Response time (ms)', ticks: {format: value => `${format(value)} ms`}}},
     },
@@ -146,11 +145,11 @@ export function buildLatencyChart(points: LatencyPoint[], countries: string[], c
     tooltip: hlmChartTooltip<LatencyPoint, number, number>({content: focused => {
       const point = focused[0]?.datum;
       if (!point) return {rows: []};
-      const reputation = point.reputation === 'bad' ? 'Poor' : point.reputation.charAt(0).toUpperCase() + point.reputation.slice(1);
+      const reputation = point.reputation === 'bad' ? 'Bad' : point.reputation.charAt(0).toUpperCase() + point.reputation.slice(1);
       return {title: `#${point.rank} ${point.proxy}`, rows: [
         {label: 'Latency', value: `${format(point.y)} ms`},
         {label: 'Country', value: point.country},
-        {label: 'Reputation', value: `${reputation}, score ${formatDecimal(point.reputationScore, locale)}`},
+        {label: 'Reputation', value: `${reputation}, score ${point.reputationScore.toFixed(1)}`},
       ]};
     }}),
   });

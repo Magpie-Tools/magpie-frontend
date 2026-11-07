@@ -44,6 +44,8 @@
   flex-direction: column;
   align-self: stretch;
   gap: 0.15rem;
+  max-height: 22rem;
+  overflow-y: auto;
   padding: 0.7rem;
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 0.9rem;
@@ -55,21 +57,23 @@
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.1rem 0.1rem 0.55rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.52rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-/* Legend keys are plain labels, styled unlike the clickable sort button beside them. */
 .shape-key {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   min-height: 2.1rem;
-  padding: 0.38rem 0.3rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.72rem;
+  padding: 0.38rem 0.52rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 0.66rem;
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.58rem;
   white-space: nowrap;
 }
 
@@ -106,7 +110,7 @@
   min-height: 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.72rem;
+  font-size: 0.61rem;
 }
 
 .country-key__swatch {
@@ -122,7 +126,7 @@
 }
 
 .country-key__count {
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.34);
   font-variant-numeric: tabular-nums;
 }
 
@@ -156,6 +160,5 @@
 
 @media (max-width: 640px) {
   .fastest-alive-card__chart { min-height: 18rem; }
-  .fastest-alive-card__tools,
-  .fastest-alive-card__shape-legend { flex-wrap: wrap; gap: 0.4rem; }
+  .shape-key { display: none; }
 }

@@ -78,13 +78,8 @@
                 hlmTh
                 role="columnheader"
                 [hlmTooltip]="column.tooltip ?? ''"
-                [class.actions-column]="column.id === 'actions' || column.id === 'actions_buttons'"
               >
-                @if (column.id === 'actions') {
-                  <span class="sr-only">{{ column.label }}</span>
-                } @else {
-                  {{ column.label }}
-                }
+                {{ column.label }}
               </th>
             }
           }

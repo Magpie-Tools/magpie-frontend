@@ -69,7 +69,7 @@ describe('Spartan dashboard chart definitions', () => {
     if ('content' in chart.tooltip) expect(chart.tooltip.content!([scene.points[2]], tooltipContext)).toEqual({
       title: '#3 192.0.2.3:8080', rows: [
         {label: 'Latency', value: '90 ms'}, {label: 'Country', value: 'France'},
-        {label: 'Reputation', value: 'Poor, score 70,0'},
+        {label: 'Reputation', value: 'Bad, score 70.0'},
       ],
     });
   });

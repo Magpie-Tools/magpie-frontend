@@ -199,11 +199,7 @@
                     column.id === 'url' ? 'url-cell' : '',
                   ]"
                 >
-                  @if (column.id === 'actions') {
-                    <span class="sr-only">{{ column.label }}</span>
-                  } @else {
-                    {{ column.label }}
-                  }
+                  {{ column.label }}
                 </th>
               }
             }
