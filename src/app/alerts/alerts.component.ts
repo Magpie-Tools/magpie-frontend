@@ -34,7 +34,7 @@ const emptyDestination = () => ({name: '', kind: 'email' as AlertChannel, enable
   selector: 'app-alerts', standalone: true,
   providers: [NotificationFocusService],
   imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, PageLoadErrorComponent, DialogComponent, TooltipComponent],
-  templateUrl: './alerts.component.html', styleUrl: './alerts.component.scss',
+  templateUrl: './alerts.component.html', styleUrls: ['./alerts.component.scss', './alerts-incidents.component.scss', './alerts-dialogs.component.scss'],
 })
 export class AlertsComponent {
   private readonly notificationFocus = inject(NotificationFocusService);

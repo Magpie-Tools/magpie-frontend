@@ -1,5 +1,4 @@
 @use '../shared/loading-stage' as loading;
-@use '../shared/notification-highlight' as notification;
 
 @include loading.loading-stage;
 
@@ -243,26 +242,6 @@ input[type=checkbox]:disabled { cursor: not-allowed; }
 .inline-notice--warning { border-color: rgba(231, 184, 108, 0.25); background: rgba(121, 78, 16, 0.11); color: #e7c77d; }
 .metadata-status { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem; color: var(--card-muted); font-size: 0.8125rem; }
 
-.incident-list { margin-top: 1.5rem; }
-.incident { position: relative; display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 0.8rem; padding-bottom: 1.5rem; scroll-margin-block: 1.5rem; outline: none; }
-.incident:not(:last-child)::before { content: ''; position: absolute; top: 2rem; bottom: 0; left: calc(1rem - 0.5px); width: 1px; background: rgba(255, 255, 255, 0.1); }
-.incident-marker { display: flex; width: 2rem; height: 2rem; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 50%; background: rgba(255, 255, 255, 0.035); color: var(--card-muted); font-size: 0.9rem; }
-.incident--open .incident-marker { border-color: rgba(239, 167, 167, 0.22); background: rgba(132, 43, 43, 0.12); color: #efa7a7; }
-.incident-content { min-width: 0; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.85rem; background: rgba(255, 255, 255, 0.025); }
-.incident--open .incident-content { border-color: rgba(239, 167, 167, 0.2); }
-.incident--highlighted .incident-content { @include notification.glow; }
-.incident-condition { display: flex; flex-wrap: wrap; gap: 0.35rem 0.65rem; margin-top: 0.9rem; font-size: 0.8125rem; }
-.incident-measurements { display: flex; flex-wrap: wrap; gap: 0.8rem 2rem; margin-top: 0.9rem; }
-.deliveries { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
-.deliveries:has(li) { margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
-.delivery-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem; padding: 0.3rem 0; }
-.delivery-row > i { flex: 0 0 auto; color: var(--card-muted); font-size: 0.8rem; }
-.delivery-copy { display: flex; min-width: 8rem; flex: 1 1 8rem; flex-direction: column; gap: 0.2rem; font-size: 0.8125rem; }
-.delivery-copy strong { color: rgba(255, 255, 255, 0.8); font-weight: 500; overflow-wrap: anywhere; }
-.delivery-copy > span { color: var(--card-muted); font-size: 0.75rem; }
-.delivery-error { display: block; margin-top: 0.2rem; color: #efa7a7; overflow-wrap: anywhere; }
-.history-pagination { display: flex; justify-content: flex-end; padding-top: 0.9rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
-
 // ------------------------------------------------------------ getting started
 .getting-started {
   margin-top: 1.25rem;
@@ -304,126 +283,6 @@ input[type=checkbox]:disabled { cursor: not-allowed; }
 .setup-step__note { color: var(--ui-text-3, var(--card-muted)); font-size: var(--ui-fs-xs, 0.65rem); }
 .empty-state .button { margin-top: 0.4rem; }
 
-// --------------------------------------------------------------- dialogs
-// Dialog content renders in the overlay container, outside .alerts-stage, so it
-// declares the variables the shared field styles read.
-.alert-dialog__title { color: var(--ui-text, #fff); }
-.alert-form {
-  --card-muted: var(--ui-text-3, rgba(222, 215, 222, 0.59));
-  display: grid;
-  gap: 1.1rem;
-  color: var(--ui-text-2, rgba(255, 255, 255, 0.8));
-  font-size: var(--ui-fs, 0.75rem);
-
-  > .inline-notice { margin-bottom: 0; }
-  p { margin: 0; }
-  strong { color: var(--ui-text, #fff); font-weight: 550; }
-}
-.alert-form.confirmation { gap: 0.6rem; }
-.form-step { display: grid; min-width: 0; gap: 0.6rem; }
-.form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1.25rem; }
-.alert-form > .form-step + .form-step, .alert-form > .form-step + .form-row, .alert-form > .form-row + .form-step {
-  padding-top: 1.1rem;
-  border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
-}
-.form-step__heading .optional-label { margin-left: 0; }
-.form-step__heading {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  min-height: 1.75rem;
-
-  h3 { margin: 0; color: var(--ui-text, #fff); font-size: var(--ui-fs, 0.8rem); font-weight: 550; letter-spacing: 0; }
-  h3 label { cursor: default; }
-}
-.form-step__action { margin-left: auto; }
-
-.choice-grid { display: grid; gap: 0.5rem; }
-.choice-grid--metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.choice-grid--channels { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.choice-card {
-  position: relative;
-  display: grid;
-  min-width: 0;
-  align-content: start;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
-  border-radius: var(--ui-radius-sm, 0.7rem);
-  background: var(--ui-inset, rgba(255, 255, 255, 0.02));
-  cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-
-  // The native radio stays focusable and announced, but the card is the visual control.
-  input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: inherit; }
-  > i { color: var(--ui-text-3, var(--card-muted)); font-size: 0.9rem; }
-  strong { display: block; color: var(--ui-text, rgba(255, 255, 255, 0.9)); font-size: var(--ui-fs-sm, 0.74rem); font-weight: 550; }
-  small { display: block; margin-top: 0.15rem; color: var(--ui-text-3, var(--card-muted)); font-size: var(--ui-fs-xs, 0.64rem); line-height: 1.4; }
-
-  &:hover { border-color: var(--ui-line-strong, rgba(255, 255, 255, 0.2)); background: var(--ui-hover, rgba(255, 255, 255, 0.04)); }
-  &:has(input:focus-visible) { outline: 2px solid var(--theme-primary-300); outline-offset: 2px; }
-}
-.choice-card--selected,
-.choice-card--selected:hover {
-  border-color: rgba(var(--theme-primary-300-rgb), 0.6);
-  background: rgba(var(--theme-primary-500-rgb), 0.09);
-  > i { color: var(--theme-primary-200); }
-}
-.choice-card--compact { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.55rem; padding: 0.6rem 0.7rem; }
-.choice-card--compact small { display: none; }
-.choice-card:has(input:disabled) { cursor: not-allowed; }
-.choice-card--locked { opacity: 0.4; }
-
-.threshold-sentence {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
-  margin-top: 0.35rem;
-
-  label { color: var(--ui-text, rgba(255, 255, 255, 0.88)); font-size: var(--ui-fs, 0.78rem); }
-}
-.input-with-suffix, .input-with-action { position: relative; display: flex; min-width: 0; align-items: center; }
-.input-with-suffix { width: 10rem; }
-.input-with-action { width: 100%; }
-.input-with-suffix [hlmInput] { padding-right: 3.75rem; font-variant-numeric: tabular-nums; }
-.input-with-action [hlmInput] { padding-right: 2.5rem; }
-.input-suffix {
-  position: absolute;
-  right: 0.7rem;
-  color: var(--ui-text-3, var(--card-muted));
-  font-family: var(--ui-font-mono, inherit);
-  font-size: var(--ui-fs-xs, 0.65rem);
-  pointer-events: none;
-}
-.input-with-suffix--invalid [hlmInput], [hlmInput][aria-invalid="true"] { border-color: rgba(239, 167, 167, 0.55); }
-.input-action {
-  position: absolute;
-  right: 0.3rem;
-  display: inline-flex;
-  width: 1.9rem;
-  height: 1.9rem;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: var(--ui-radius-sm, 0.5rem);
-  background: transparent;
-  color: var(--ui-text-3, var(--card-muted));
-  cursor: pointer;
-
-  &:hover:not(:disabled) { background: var(--ui-hover, rgba(255, 255, 255, 0.06)); color: var(--ui-text, #fff); }
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
-}
-.field-hint--error { color: #efa7a7; }
-.field-hint--box { padding: 0.7rem 0.8rem; border: 1px dashed var(--ui-line-strong, rgba(255, 255, 255, 0.16)); border-radius: var(--ui-radius-sm, 0.65rem); }
-.form-step .fields { margin: 0.25rem 0 0; }
-.form-step .enable-control { margin-top: 0.25rem; }
-.form-step .field-group > label { display: flex; align-items: baseline; gap: 0.25rem; }
-.form-note--top { margin-top: 0; }
-.check--inline { margin-top: 0.35rem; }
-.destination-picker { min-width: 0; margin: 0; padding: 0; border: 0; }
-.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.5rem; }
-
 .skeleton-tabs { width: min(100%, 26rem); height: 2.9rem; margin-bottom: 1rem; border-radius: 0.9rem; }
 .skeleton-panel { display: grid; gap: 1rem; }
 .skeleton-title { width: 50%; height: 1.5rem; }
@@ -454,23 +313,10 @@ input[type=checkbox]:disabled { cursor: not-allowed; }
   .rule-measurements { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 0.65rem; }
   .inline-notice { flex-wrap: wrap; }
   .inline-notice > .button, .inline-notice > .actions { width: 100%; }
-  .incident { grid-template-columns: 1.5rem minmax(0, 1fr); gap: 0.5rem; }
-  .incident-marker { width: 1.5rem; height: 1.5rem; font-size: 0.8125rem; }
-  .incident:not(:last-child)::before { top: 1.5rem; left: calc(0.75rem - 0.5px); }
-  .incident-content { padding: 0.85rem; }
-}
-
-@media (max-width: 640px) {
-  .form-row { grid-template-columns: minmax(0, 1fr); }
-  .choice-grid--metrics { grid-template-columns: minmax(0, 1fr); }
-  .choice-grid--metrics .choice-card { grid-template-columns: auto minmax(0, 1fr); align-items: center; }
-  .choice-grid--channels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .input-with-suffix { width: 100%; }
-  .dialog-actions .button { flex: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .button, .icon-button, .alert-panel, .rule-card, .choice-card, .destination-choice { transition: none; }
+  .button, .icon-button, .alert-panel, .rule-card, .destination-choice { transition: none; }
   .button:hover { transform: none; }
   .is-spinning { animation: none; }
 }

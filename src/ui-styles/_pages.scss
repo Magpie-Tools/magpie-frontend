@@ -338,6 +338,46 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
     }
   }
 
+  // Native checkboxes draw like the Spartan ones, instead of the browser's accent-color box,
+  // which renders the light theme shades far too bright. The toggle chips hide theirs.
+  input[type="checkbox"]:not(.inp-cbx) {
+    appearance: none;
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-check-radius, 4px);
+    background: var(--ui-field-bg) center / 12px 12px no-repeat;
+    vertical-align: middle;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+
+    &:hover:not(:disabled) { border-color: var(--theme-primary-400); }
+
+    &:checked {
+      border-color: var(--theme-primary-400);
+      background-color: var(--theme-primary-500);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--theme-primary-300);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .bulk-dialog-confirm--danger input[type="checkbox"]:checked {
+    border-color: #f87171;
+    background-color: #dc2626;
+  }
+
   // "Enabled" toggle chips (app-checkbox) on settings and plugin pages.
   .checkbox-wrapper-46 .cbx {
     display: inline-flex;
