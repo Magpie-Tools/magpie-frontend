@@ -145,11 +145,24 @@ html:root:root:root:root[data-ui="console"] {
     .navbar-item__icon { color: var(--ui-accent); }
   }
 
+  // The account sits in the sidebar footer like a nav row, without a card of its own.
   .account-trigger {
-    border-color: var(--ui-line);
+    min-height: 0;
+    padding: 6px 10px;
+    border: 0;
     border-radius: var(--ui-radius-sm);
     background: transparent;
+
+    &:hover,
+    &[aria-expanded="true"] {
+      border: 0;
+      background: var(--ui-hover);
+      transform: none;
+    }
   }
+
+  .account-trigger__copy strong { color: var(--ui-text); }
+  .account-trigger__copy small { color: var(--ui-text-3); }
 
   .topbar { padding: 0 16px 0 10px; }
 
