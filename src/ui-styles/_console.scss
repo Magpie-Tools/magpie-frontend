@@ -1,131 +1,148 @@
 @use 'base';
 @use 'pages';
 
-// Console: the website's editorial language applied to the app. Flat graphite frames,
-// hairline borders, Geist for values and Geist Mono for captions, labels, and addresses,
-// with a compact sidebar and top bar.
+// Console: a traditional dark dashboard. Near-black surfaces with flat graphite panels,
+// sentence-case sans headings, a warm yellow accent for navigation state and hints, and
+// filled primary buttons in the workspace theme colour. Geist Mono is kept for data
+// such as hosts, ports, and timings.
 //
 // index.html sets <html data-ui="console">. Angular adds its scoping attribute to every
 // compound of a component selector, so the repeated :root plus the attribute keep these
 // overrides ahead of deep component selectors without !important.
 
 html:root:root:root:root[data-ui="console"] {
-  --ui-bg: #191919;
-  --ui-sidebar: #111113;
-  --ui-topbar: #111113;
-  --ui-panel: #131315;
-  --ui-inset: rgba(255, 255, 255, 0.025);
-  --ui-hover: rgba(255, 255, 255, 0.05);
-  --ui-row-hover: rgba(255, 255, 255, 0.025);
-  --ui-line: rgba(255, 255, 255, 0.09);
-  --ui-line-soft: rgba(255, 255, 255, 0.055);
-  --ui-line-strong: rgba(255, 255, 255, 0.16);
-  --ui-text: #ecf0f3;
-  --ui-text-2: #a6aeb6;
-  --ui-text-3: rgba(236, 240, 243, 0.42);
+  --ui-bg: #101010;
+  --ui-sidebar: #101010;
+  --ui-topbar: #101010;
+  --ui-panel: #161616;
+  --ui-inset: #1b1b1b;
+  --ui-hover: #222222;
+  --ui-row-hover: rgba(255, 255, 255, 0.03);
+  --ui-line: #242424;
+  --ui-line-soft: #1f1f1f;
+  --ui-line-strong: #2e2e2e;
+  --ui-text: #f5f5f5;
+  --ui-text-2: #a3a3a3;
+  --ui-text-3: #858585;
+
+  // Navigation state, section tabs, and inline hints.
+  --ui-accent: #fcd452;
+  --ui-accent-soft: rgba(252, 212, 82, 0.1);
+  --ui-success: #22c55e;
 
   --ui-font: 'Geist Variable', 'Segoe UI', sans-serif;
   --ui-font-mono: 'Geist Mono Variable', 'SFMono-Regular', Consolas, monospace;
   --ui-font-heading: 'Geist Variable', 'Segoe UI', sans-serif;
-  --ui-fs: 13px;
-  --ui-fs-sm: 12px;
-  --ui-fs-xs: 11px;
-  --ui-h1: 22px;
+  --ui-fs: 14px;
+  --ui-fs-sm: 13px;
+  --ui-fs-xs: 12px;
+  --ui-h1: 28px;
   --ui-detail-title: 24px;
 
-  --ui-radius: 10px;
-  --ui-radius-sm: 7px;
+  --ui-radius: 8px;
+  --ui-radius-sm: 6px;
   --ui-badge-radius: 4px;
-  --ui-sidebar-w: 208px;
-  --ui-topbar-h: 44px;
+  --ui-sidebar-w: 220px;
+  --ui-topbar-h: 48px;
   --ui-page-max: 1560px;
   --ui-page-pad: 28px 32px 48px;
   --ui-gap: 16px;
-  --ui-pad: 16px 18px;
-  --ui-pad-x: 18px;
-  --ui-control-h: 32px;
+  --ui-pad: 18px 20px;
+  --ui-pad-x: 20px;
+  --ui-control-h: 34px;
 
-  --ui-head-pad: 14px 18px 0;
+  --ui-head-pad: 16px 20px 0;
   --ui-head-line: transparent;
   --ui-head-bg: transparent;
-  --ui-title-fs: 12px;
-  --ui-title-font: var(--ui-font-mono);
-  --ui-title-weight: 450;
-  --ui-title-tracking: 0;
-  --ui-title-case: lowercase;
+  --ui-title-fs: 16px;
+  --ui-title-font: var(--ui-font-heading);
+  --ui-title-weight: 650;
+  --ui-title-tracking: -0.01em;
+  --ui-title-case: none;
 
-  --ui-label-fs: 11px;
+  --ui-label-fs: 12px;
   --ui-label-tracking: 0;
-  --ui-label-case: lowercase;
+  --ui-label-case: none;
 
-  --ui-th-pad: 10px 14px;
+  --ui-th-pad: 11px 14px;
   --ui-th-bg: transparent;
-  --ui-th-color: rgba(236, 240, 243, 0.42);
-  --ui-th-fs: 11.5px;
+  --ui-th-color: var(--ui-text-2);
+  --ui-th-fs: 12.5px;
   --ui-th-tracking: 0;
-  --ui-th-case: lowercase;
-  --ui-td-pad: 9px 14px;
+  --ui-th-case: none;
+  --ui-td-pad: 10px 14px;
 
   --ui-chart-series: var(--theme-primary-300);
   --ui-chart-grid: rgba(255, 255, 255, 0.06);
-  --ui-chart-dot-stroke: #131315;
+  --ui-chart-dot-stroke: #161616;
 
-  --ui-field-bg: rgba(255, 255, 255, 0.02);
+  --ui-field-bg: #1b1b1b;
   --ui-tabs-bg: transparent;
-  --ui-tab-active-bg: rgba(255, 255, 255, 0.08);
-  --ui-btn-bg: transparent;
-  --ui-primary-bg: #f9f3f0;
-  --ui-primary-fg: #111113;
-  --ui-primary-hover: #ffffff;
+  --ui-tab-active-bg: #242424;
+  --ui-btn-bg: #1f1f1f;
+  --ui-primary-bg: var(--theme-primary-600);
+  --ui-primary-fg: #ffffff;
+  --ui-primary-hover: var(--theme-primary-500);
   --ui-danger-bg: transparent;
-  --ui-danger-fg: #f4a3a3;
+  --ui-danger-fg: #f87171;
 
   @include base.skin-base;
   @include pages.skin-pages;
 
   // ---------------------------------------------------------------- shell
   .navbar-brand {
-    gap: 8px;
-    padding: 0 12px;
+    gap: 10px;
+    padding: 0 16px;
   }
 
   .navbar-brand__mark,
   .navbar-brand__mark svg {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
 
   .navbar-brand__copy strong {
-    font-family: 'Outfit Variable', var(--ui-font);
-    font-size: 14px;
-    letter-spacing: 0.02em;
+    font-family: var(--ui-font);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
-  .nav-scroll { padding: 8px 6px 12px; }
+  .nav-scroll { padding: 12px 10px 16px; }
 
   .navbar-item,
   .nav-cluster > summary {
-    min-height: 30px;
-    padding: 0 8px;
-    gap: 10px;
-    font-size: 13px;
+    min-height: 36px;
+    padding: 0 10px;
+    gap: 12px;
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
+
+  .navbar-item__icon {
+    width: 17px;
+    height: 17px;
+    color: var(--ui-text-2);
+    font-size: 15px;
   }
 
   .navbar-item--nested {
-    min-height: 28px;
-    font-size: 12.5px;
+    min-height: 32px;
+    font-size: var(--ui-fs-sm);
   }
 
-  .nav-cluster__items { margin-left: 15px; }
+  .nav-cluster__items { margin-left: 18px; }
 
+  // The current page reads in the accent colour, like a highlighted menu entry.
   .navbar-item.active {
     border: 0;
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--ui-text);
+    background: var(--ui-hover);
+    color: var(--ui-accent);
     box-shadow: none;
 
     &::after { display: none; }
-    .navbar-item__icon { color: var(--theme-primary-200); }
+    .navbar-item__icon { color: var(--ui-accent); }
   }
 
   .account-trigger {
@@ -134,56 +151,62 @@ html:root:root:root:root[data-ui="console"] {
     background: transparent;
   }
 
-  .topbar-breadcrumb,
-  .topbar-breadcrumb__current {
-    font-family: var(--ui-font-mono);
-    font-size: 12px;
-    font-weight: 400;
-    text-transform: lowercase;
-  }
+  .topbar { padding: 0 16px 0 10px; }
 
-  .topbar-breadcrumb__current { color: var(--ui-text-2); }
+  .topbar-breadcrumb__current { color: var(--ui-text); }
 
-  .topbar { padding: 0 10px 0 6px; }
-
-  .topbar-icon-button {
-    width: 28px;
-    height: 28px;
-  }
-
-  .workspace-switcher__select { min-height: 26px; }
+  .workspace-switcher__select { min-height: 30px; }
 
   // --------------------------------------------------------------- headings
   .dashboard-context__copy h1,
-  .inventory-context__copy h1 {
-    font-size: 24px;
-    letter-spacing: -0.03em;
+  .inventory-context__copy h1,
+  :is(.account-context, .admin-context, .checker-context, .alerts-context, .rotating-context, .notifications-context, .invitation-context, .workspace-context) h1 {
+    font-size: var(--ui-h1);
+    font-weight: 700;
+    letter-spacing: -0.025em;
   }
 
   .dashboard-card__icon,
   .history-card .card-icon { display: none; }
 
-  .dashboard-card__title,
-  .overview-title,
-  .health-summary__heading h2,
-  .reputation-summary__heading h2,
-  .history-card .card-heading__copy h2,
-  .route-card .label,
+  .route-card .value,
   .chart-state,
-  .entry-count,
-  .check-summary__time {
-    font-family: var(--ui-font-mono);
+  .entry-count {
+    font-family: var(--ui-font);
   }
 
-  .dashboard-card__title,
-  .overview-title,
-  .health-summary__heading h2,
-  .reputation-summary__heading h2,
-  .history-card .card-heading__copy h2 {
-    color: var(--ui-text-2);
-  }
+  .check-summary__time { font-family: var(--ui-font-mono); }
 
   .chart-state > span { display: none; }
+
+  // Inline hints and info buttons pick up the accent, so help is easy to spot.
+  .info-icon,
+  .info-icon .icon-info {
+    color: var(--ui-accent);
+  }
+
+  // --------------------------------------------------------------------- tabs
+  [data-slot="tabs-trigger"][data-state="active"],
+  .settings-section-tabs [data-slot="tabs-trigger"][data-state="active"] {
+    background: var(--ui-tab-active-bg);
+    color: var(--ui-accent);
+  }
+
+  .settings-section-tabs [data-slot="tabs-list"] {
+    padding: 3px;
+    border-color: var(--ui-line);
+    border-radius: var(--ui-radius);
+    background: transparent;
+  }
+
+  .settings-section-tabs [data-slot="tabs-trigger"] {
+    padding: 0 12px;
+    min-height: 30px;
+    border-radius: var(--ui-radius-sm);
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
 
   // ------------------------------------------------------------------ KPIs
   .metric-card .dashboard-card__body {
@@ -193,38 +216,51 @@ html:root:root:root:root[data-ui="console"] {
       "label trend"
       "value value"
       "spark spark";
-    row-gap: 6px;
-    padding: 14px 18px 0;
+    row-gap: 8px;
+    padding: 16px 20px 0;
   }
 
   .metric-card__topline { display: contents; }
 
   .metric-card__heading {
     grid-area: label;
-    font-family: var(--ui-font-mono);
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--ui-text-3);
-    text-transform: lowercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+    font-weight: 500;
 
-    .dashboard-card__icon { display: none; }
+    .dashboard-card__icon {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--ui-radius-sm);
+      background: rgba(var(--kpi-rgb, var(--theme-primary-300-rgb)), 0.12);
+      color: rgb(var(--kpi-rgb, var(--theme-primary-300-rgb)));
+      font-size: 14px;
+    }
   }
+
+  // Alive, total, and scraped proxies each get their own tint.
+  .dashboard-grid__kpi:nth-of-type(1) { --kpi-rgb: 34, 197, 94; }
+  .dashboard-grid__kpi:nth-of-type(2) { --kpi-rgb: var(--theme-primary-300-rgb); }
+  .dashboard-grid__kpi:nth-of-type(3) { --kpi-rgb: 252, 212, 82; }
 
   .metric-card__trend[hlmBadge] {
     grid-area: trend;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    font-family: var(--ui-font-mono);
-    font-weight: 400;
+    align-self: center;
+    font-weight: 600;
   }
 
   .metric-card__value {
     grid-area: value;
     margin-top: 0;
+    color: var(--ui-text);
     font-size: 32px;
-    font-weight: 600;
-    letter-spacing: -0.035em;
+    font-weight: 700;
+    letter-spacing: -0.03em;
     line-height: 1.1;
   }
 
@@ -233,8 +269,8 @@ html:root:root:root:root[data-ui="console"] {
     grid-area: spark;
     inset: auto;
     height: 30px;
-    margin: 0 -18px;
-    opacity: 0.55;
+    margin: 0 -20px;
+    opacity: 0.7;
     mask-image: none;
   }
 
@@ -242,30 +278,25 @@ html:root:root:root:root[data-ui="console"] {
   .history-row__route strong,
   .history-row__latency {
     font-family: var(--ui-font-mono);
-    font-size: 12px;
+    font-size: var(--ui-fs-sm);
     font-weight: 400;
   }
 
   // ------------------------------------------------------------- inventory
   .toolbar-action--delete [hlmBtn] {
-    border-color: rgba(248, 113, 113, 0.28);
+    border-color: rgba(248, 113, 113, 0.3);
     background: transparent;
-    color: #f4a3a3;
+    color: var(--ui-danger-fg);
 
-    .icon { color: #f4a3a3; }
+    .icon { color: var(--ui-danger-fg); }
   }
 
-  .tool-button,
-  .toolbar-action:not(.toolbar-action--add, .toolbar-action--delete) [hlmBtn] {
-    background: transparent;
-  }
-
-  .search-bar { background: transparent; }
+  .search-bar { background: var(--ui-field-bg); }
 
   .inventory-table .copy-value,
   .inventory-table .copy-value__text {
     font-family: var(--ui-font-mono);
-    font-size: 12px;
+    font-size: var(--ui-fs-sm);
   }
 
   .inventory-table tbody > tr > td { font-variant-numeric: tabular-nums; }
@@ -274,26 +305,14 @@ html:root:root:root:root[data-ui="console"] {
   .route-card .reputation-badge,
   .managed-state-pill {
     border: 0;
-    font-family: var(--ui-font-mono);
-    font-weight: 500;
-    letter-spacing: 0;
-    text-transform: lowercase;
-  }
-
-  .proxy-tag-chip {
-    font-family: var(--ui-font-mono);
-    font-size: 11px;
+    font-weight: 600;
   }
 
   // ----------------------------------------------------------------- detail
-  .detail-context__copy h1 { font-weight: 500; }
-
-  .route-card .value { font-family: var(--ui-font); }
+  .detail-context__copy h1 { font-weight: 600; }
 
   .history-table tbody > tr > td {
     font-family: var(--ui-font-mono);
-    font-size: 12px;
+    font-size: var(--ui-fs-sm);
   }
-
-  .external-link-chip { font-family: var(--ui-font-mono); }
 }
