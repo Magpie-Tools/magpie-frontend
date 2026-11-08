@@ -132,6 +132,18 @@ describe('TopbarComponent', () => {
     expect(TestBed.inject(Router).url).toBe('/alerts?section=history&incident=2');
   });
 
+  it('marks every unread notification as read from the panel header', async () => {
+    unread.set(new Set(['invitation-1', 'alert-2']));
+    fixture.detectChanges();
+    const panel = await openNotifications();
+    expect(panel.querySelector('.notification-panel__count')?.textContent?.trim()).toBe('2 new');
+    panel.querySelector<HTMLButtonElement>('.notification-panel__mark-read')!.click();
+    fixture.detectChanges();
+    expect(reads.markRead.calls.allArgs()).toEqual([['invitation-1'], ['alert-2']]);
+    expect(panel.querySelector('.notification-panel__mark-read')).toBeNull();
+    expect(component.notificationsState()).toBe('open');
+  });
+
   it('hides the badge when all five recent notifications are read and keeps their links', async () => {
     unread.set(new Set());
     fixture.detectChanges();

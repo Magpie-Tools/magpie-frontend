@@ -1,7 +1,7 @@
 import {AlertIncident} from '../../models/Alert';
 import {WorkspaceInvitation} from '../../models/Workspace';
 import {ReleaseNote} from '../../services/update-notification.service';
-import {buildNotificationFeed} from './notification-feed';
+import {buildNotificationFeed, formatNotificationAge} from './notification-feed';
 
 describe('buildNotificationFeed', () => {
   const invitation = (id: number, created_at: string) => ({
@@ -66,5 +66,39 @@ describe('buildNotificationFeed', () => {
     const feed = buildNotificationFeed([invitation(1, at)], [incident(1, at)], [release(1, at)]);
     expect(new Set(feed.map(item => item.id)).size).toBe(3);
     expect(buildNotificationFeed([], [], [])).toEqual([]);
+  });
+
+  it('marks open alerts as critical and describes resolved ones', () => {
+    const open = {...incident(1, '2026-10-17T10:00:00Z'), closed_at: null} as AlertIncident;
+    const [openItem, closedItem] = buildNotificationFeed([], [open, incident(2, '2026-10-17T09:00:00Z')], []);
+    expect(openItem.tone).toBe('critical');
+    expect(openItem.description).toBe('Production · Open');
+    expect(closedItem.tone).toBe('neutral');
+    expect(closedItem.description).toBe('Production · Resolved');
+  });
+
+  it('names untitled releases after their tag without repeating it', () => {
+    const untitled = {...release(4, '2026-10-17T10:00:00Z'), title: ''} as ReleaseNote;
+    const [item] = buildNotificationFeed([], [], [untitled]);
+    expect(item.title).toBe('Magpie v4.0.0');
+    expect(item.description).toBe('New release');
+  });
+});
+
+describe('formatNotificationAge', () => {
+  const now = Date.parse('2026-10-17T12:00:00Z');
+
+  it('uses short relative ages for the last week', () => {
+    expect(formatNotificationAge('2026-10-17T11:59:30Z', now)).toBe('now');
+    expect(formatNotificationAge('2026-10-17T11:55:00Z', now)).toBe('5m');
+    expect(formatNotificationAge('2026-10-17T09:00:00Z', now)).toBe('3h');
+    expect(formatNotificationAge('2026-10-11T12:00:00Z', now)).toBe('6d');
+  });
+
+  it('falls back to a calendar date for older events and ignores bad input', () => {
+    expect(formatNotificationAge('2026-09-01T12:00:00Z', now)).not.toMatch(/\d+[mhd]$/);
+    expect(formatNotificationAge('2025-09-01T12:00:00Z', now)).toContain('2025');
+    expect(formatNotificationAge('not a date', now)).toBe('');
+    expect(formatNotificationAge('2026-10-17T12:05:00Z', now)).toBe('now');
   });
 });

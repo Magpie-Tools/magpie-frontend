@@ -15,7 +15,7 @@ import {WorkspaceInvitationService} from '../../services/workspace-invitation.se
 import {AlertsService} from '../../services/alerts.service';
 import {ReleaseNote, UpdateNotificationService} from '../../services/update-notification.service';
 import {AlertIncident} from '../../models/Alert';
-import {buildNotificationFeed} from './notification-feed';
+import {buildNotificationFeed, formatNotificationAge} from './notification-feed';
 import {NotificationReadService} from '../../services/notification-read.service';
 import {gsap} from 'gsap';
 
@@ -41,6 +41,8 @@ export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly title = inject(Title);
   readonly breadcrumbs = computed(() => buildTopbarBreadcrumbs(this.currentUrl(), this.breadcrumbService.detailLabel()));
   readonly notificationsState = signal<'open' | 'closed'>('closed');
+  /** Reference time for row ages; refreshed whenever the panel opens. */
+  private readonly notificationClock = signal(Date.now());
   readonly alertIncidents = signal<AlertIncident[]>([]);
   readonly releases = signal<ReleaseNote[]>([]);
   readonly alertsLoading = signal(false);
@@ -133,7 +135,20 @@ export class TopbarComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onNotificationsStateChange(state: 'open' | 'closed'): void {
     this.notificationsState.set(state);
-    if (state === 'open') this.refreshNotifications();
+    if (state === 'open') {
+      this.notificationClock.set(Date.now());
+      this.refreshNotifications();
+    }
+  }
+
+  ageOf(occurredAt: string): string {
+    return formatNotificationAge(occurredAt, this.notificationClock());
+  }
+
+  markAllNotificationsRead(): void {
+    for (const item of this.recentNotifications()) {
+      if (this.notificationReads.isUnread(item.id)) this.notificationReads.markRead(item.id);
+    }
   }
 
   refreshNotifications(refreshAlerts = true): void {
