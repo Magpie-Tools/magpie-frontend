@@ -627,6 +627,12 @@ a {
   white-space: nowrap;
 }
 
+/* The check time closes each row, flush with the table's right edge. */
+.checked-at-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
 .empty-table {
   height: 7rem;
   color: var(--detail-muted) !important;

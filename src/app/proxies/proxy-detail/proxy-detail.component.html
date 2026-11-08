@@ -422,13 +422,13 @@
                 <table hlmTable class="proxy-stat-table">
                   <thead hlmTHead>
                     <tr hlmTr>
-                      <th hlmTh>Checked at</th>
                       <th hlmTh>Status</th>
                       <th hlmTh>Response</th>
                       <th hlmTh>Attempt</th>
                       <th hlmTh>Protocol</th>
                       <th hlmTh>Anonymity</th>
                       <th hlmTh>Judge</th>
+                      <th hlmTh class="checked-at-cell">Checked at</th>
                     </tr>
                   </thead>
                   <tbody hlmTBody>
@@ -445,7 +445,6 @@
                           openStatisticResponse(row); $event.preventDefault()
                         "
                       >
-                        <td hlmTd>{{ row.created_at | date }}</td>
                         <td hlmTd>
                           <span class="table-status">
                             <span
@@ -471,6 +470,7 @@
                         >
                           {{ row.judge || "Unknown" }}
                         </td>
+                        <td hlmTd class="checked-at-cell">{{ row.created_at | date }}</td>
                       </tr>
                     }
                     @if (statistics().length === 0) {
