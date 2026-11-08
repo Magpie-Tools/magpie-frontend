@@ -93,6 +93,10 @@ function normalizeReleaseBodyToMarkdown(body: string): string {
   return output.join('\n');
 }
 
+function normalizeTag(tag: string | null | undefined): string {
+  return (tag ?? '').trim().replace(/^v/i, '').toLowerCase();
+}
+
 @Component({
   selector: 'app-notifications',
   standalone: true,
@@ -118,6 +122,22 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   readonly newReleaseCount = computed(() => this.newReleases().length);
   readonly totalReleaseCount = computed(() => this.allReleases().length);
   readonly buildVersionLabel = computed(() => this.backendBuild()?.buildVersion || 'dev');
+  /** Where the installed build sits in the release feed, which lists the newest release first. */
+  readonly buildStatus = computed<{label: string; tone: 'current' | 'behind' | 'unknown'}>(() => {
+    const installed = normalizeTag(this.backendBuild()?.buildVersion);
+    if (!installed || installed === 'dev') {
+      return {label: 'Development build', tone: 'unknown'};
+    }
+
+    const behind = this.allReleases().findIndex(release => normalizeTag(release.tagName) === installed);
+    if (behind === 0) {
+      return {label: 'Up to date', tone: 'current'};
+    }
+    if (behind > 0) {
+      return {label: `${behind} release${behind === 1 ? '' : 's'} behind`, tone: 'behind'};
+    }
+    return {label: 'Unpublished build', tone: 'unknown'};
+  });
   readonly archiveCountLabel = computed(() => {
     const count = this.totalReleaseCount();
     return `${count} release${count === 1 ? '' : 's'} in archive`;

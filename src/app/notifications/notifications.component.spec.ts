@@ -60,6 +60,23 @@ describe('NotificationsComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('reports where the installed build sits in the release feed', () => {
+    const older: ReleaseNote = {...release, id: 41, tagName: 'v2.3.0'};
+    component.allReleases.set([release, older]);
+
+    component.backendBuild.set({buildVersion: 'v2.4.0', builtAt: 'unknown'});
+    expect(component.buildStatus()).toEqual({label: 'Up to date', tone: 'current'});
+
+    component.backendBuild.set({buildVersion: '2.3.0', builtAt: 'unknown'});
+    expect(component.buildStatus()).toEqual({label: '1 release behind', tone: 'behind'});
+
+    component.backendBuild.set({buildVersion: 'dev', builtAt: 'unknown'});
+    expect(component.buildStatus()).toEqual({label: 'Development build', tone: 'unknown'});
+
+    component.backendBuild.set({buildVersion: 'v9.9.9-rc1', builtAt: 'unknown'});
+    expect(component.buildStatus()).toEqual({label: 'Unpublished build', tone: 'unknown'});
+  });
+
   it('renders the release overview and archive', () => {
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
 

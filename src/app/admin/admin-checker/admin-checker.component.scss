@@ -304,63 +304,9 @@
   &:hover { border-color: rgba(var(--theme-primary-300-rgb), 0.5); background: rgba(var(--theme-primary-500-rgb), 0.13); transform: translateY(-2px); }
 }
 
-.settings-card--ip {
-  display: grid;
-  grid-template-columns: minmax(18rem, 0.7fr) minmax(0, 1.3fr);
-  gap: clamp(2rem, 5vw, 5rem);
-  align-items: center;
-  min-height: 26rem;
-}
-
-.ip-visual {
-  position: relative;
-  z-index: 1;
-  width: min(20rem, 100%);
-  aspect-ratio: 1;
-  justify-self: center;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(203, 164, 193, 0.2), rgba(var(--theme-primary-500-rgb), 0.08) 28%, transparent 65%);
-}
-
-.ip-visual__orbit {
-  position: absolute;
-  inset: 8%;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 50%;
-
-  &::before { content: ""; position: absolute; top: 12%; right: 12%; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--theme-primary-300); box-shadow: 0 0 1.2rem var(--theme-primary-shadow); }
-}
-
-.ip-visual__orbit--inner { inset: 27%; border-color: rgba(var(--theme-primary-300-rgb), 0.3); }
-
-.ip-visual__core {
-  position: absolute;
-  inset: 39%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 50%;
-  background: rgba(8, 8, 10, 0.75);
-  color: var(--theme-primary-200);
-  box-shadow: 0 0 3rem rgba(205, 158, 191, 0.3);
-}
-
-.ip-content { position: relative; z-index: 1; }
+.ip-content { position: relative; z-index: 1; max-width: 44rem; }
 .ip-field { margin-top: 1.8rem; }
 .field-hint { margin: 0; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; line-height: 1.45; }
-
-.ip-path {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-top: 1rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.75rem;
-
-  span { display: inline-flex; align-items: center; gap: 0.35rem; color: rgba(255, 255, 255, 0.58); }
-  span:last-child { color: var(--theme-primary-200); }
-}
 
 @container admin-checker (max-width: 1040px) {
   .settings-card--protocols,
@@ -383,8 +329,6 @@
   .settings-card--judge-performance,
   .settings-card--judge-cadence { grid-column: 1 / -1; }
 
-  .settings-card--ip { grid-template-columns: minmax(0, 1fr); min-height: auto; }
-  .ip-visual { width: min(15rem, 68vw); }
   .judge-row { grid-template-columns: auto minmax(0, 1fr) auto; }
   .judge-row .field-group:nth-of-type(2) { grid-column: 2; }
   .icon-button { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
@@ -401,8 +345,6 @@
   .judge-index { display: none; }
   .judge-row .field-group:nth-of-type(2) { grid-column: 1; }
   .icon-button { grid-column: 2; grid-row: 1 / span 2; }
-  .ip-path { align-items: flex-start; flex-direction: column; }
-  .ip-path > i { transform: rotate(90deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {

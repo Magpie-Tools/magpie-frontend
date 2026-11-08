@@ -100,21 +100,31 @@
             </div>
           </div>
 
-          <div class="build-visual" aria-hidden="true">
-            <span class="build-orbit build-orbit--outer"></span>
-            <span class="build-orbit build-orbit--inner"></span>
-            <span class="build-core"><i class="icon icon-server"></i></span>
+          <div class="build-summary">
+            <strong class="build-version">{{ buildVersionLabel() }}</strong>
+            <div>
+              <span>Installed backend</span>
+              @if (buildTimestamp()) {
+                <small>Built {{ buildTimestamp() | date }}</small>
+              } @else {
+                <small>Build time unavailable</small>
+              }
+            </div>
           </div>
 
-          <div class="build-details">
-            <span>Backend version</span>
-            <strong>{{ buildVersionLabel() }}</strong>
-            @if (buildTimestamp()) {
-              <small>Built {{ buildTimestamp() | date }}</small>
-            } @else {
-              <small>Build time unavailable</small>
-            }
-          </div>
+          <dl class="version-pair build-pair">
+            <div>
+              <dt>Latest available</dt>
+              <dd>{{ latestTag() || "No releases yet" }}</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd class="build-status" [attr.data-tone]="buildStatus().tone">
+                <span class="build-status__dot" aria-hidden="true"></span
+                >{{ buildStatus().label }}
+              </dd>
+            </div>
+          </dl>
         </section>
 
         <section

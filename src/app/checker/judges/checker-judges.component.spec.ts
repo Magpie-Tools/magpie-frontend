@@ -117,15 +117,4 @@ describe('CheckerJudgesComponent', () => {
     }));
     expect(TestBed.inject(NotificationService).showSuccess).toHaveBeenCalledWith('saved');
   });
-
-  it('keeps judge flow captions from overlapping in a narrow card', async () => {
-    await fixture.whenStable();
-    const flow = fixture.nativeElement.querySelector('.judge-flow') as HTMLElement;
-    flow.style.width = '300px';
-    const captions = Array.from(flow.querySelectorAll<HTMLElement>('small')).map(caption => caption.getBoundingClientRect());
-    expect(captions.length).toBe(3);
-    for (let index = 1; index < captions.length; index++) {
-      expect(captions[index - 1].right).toBeLessThanOrEqual(captions[index].left + 0.5);
-    }
-  });
 });

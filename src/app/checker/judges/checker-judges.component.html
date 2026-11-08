@@ -22,41 +22,6 @@
           </div>
         </div>
 
-        <div class="judge-flow" aria-label="Judge verification flow">
-          <div class="flow-step">
-            <span class="flow-node"
-              ><i class="icon icon-server" aria-hidden="true"></i
-            ></span>
-            <div><strong>Proxy</strong><small>Routes the request</small></div>
-          </div>
-          <span class="flow-line" aria-hidden="true"></span>
-          <div class="flow-step">
-            <span class="flow-node"
-              ><i class="icon icon-globe" aria-hidden="true"></i
-            ></span>
-            <div>
-              <strong>Judge</strong><small>Returns connection data</small>
-            </div>
-          </div>
-          <span class="flow-line" aria-hidden="true"></span>
-          <div class="flow-step">
-            <span class="flow-node flow-node--active"
-              ><i class="icon icon-check" aria-hidden="true"></i
-            ></span>
-            <div>
-              <strong>Verify</strong><small>Matches headers or regex</small>
-            </div>
-          </div>
-        </div>
-
-        <div class="judge-orbit" aria-hidden="true">
-          <span class="judge-orbit__ring judge-orbit__ring--outer"></span>
-          <span class="judge-orbit__ring judge-orbit__ring--inner"></span>
-          <span class="judge-orbit__core"
-            ><i class="icon icon-badge-check"></i
-          ></span>
-        </div>
-
         <div class="flow-summary">
           <div>
             <strong>{{ configuredJudgeCount }}</strong

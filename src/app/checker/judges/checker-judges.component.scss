@@ -114,107 +114,17 @@
 }
 
 .settings-card--flow {
-  min-height: 39rem;
-}
-
-.judge-flow {
-  position: relative;
-  z-index: 1;
   display: flex;
-  align-items: flex-start;
-  margin-top: 2rem;
-}
-
-.flow-step {
-  display: flex;
-  min-width: 0;
-  flex: 1 1 0;
   flex-direction: column;
-  align-items: center;
-  gap: 0.55rem;
-  text-align: center;
-
-  > div { display: flex; flex-direction: column; gap: 0.12rem; }
-  strong { color: rgba(255, 255, 255, 0.76); font-size: 0.8125rem; font-weight: 570; }
-  /* Captions wrap inside their step so neighbouring steps never overlap. */
-  small { color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; line-height: 1.35; text-wrap: balance; }
 }
 
-.flow-node {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.8rem;
-  height: 2.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.035);
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.flow-node--active {
-  border-color: rgba(var(--theme-primary-300-rgb), 0.34);
-  background: rgba(var(--theme-primary-500-rgb), 0.12);
-  color: var(--theme-primary-200);
-  box-shadow: 0 0 1.5rem rgba(var(--theme-primary-500-rgb), 0.14);
-}
-
-.flow-line {
-  flex: 0 1 2rem;
-  min-width: 0.75rem;
-  height: 1px;
-  margin: 1.38rem 0.35rem 0;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(var(--theme-primary-300-rgb), 0.36));
-}
-
-.judge-orbit {
-  position: relative;
-  z-index: 1;
-  width: min(14rem, 80%);
-  aspect-ratio: 1;
-  margin: 1.6rem auto;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(203, 164, 193, 0.18), rgba(var(--theme-primary-500-rgb), 0.06) 28%, transparent 68%);
-}
-
-.judge-orbit__ring {
-  position: absolute;
-  inset: 7%;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 50%;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 12%;
-    right: 12%;
-    width: 0.48rem;
-    height: 0.48rem;
-    border-radius: 50%;
-    background: var(--theme-primary-300);
-    box-shadow: 0 0 1rem var(--theme-primary-shadow);
-  }
-}
-
-.judge-orbit__ring--inner { inset: 26%; border-color: rgba(var(--theme-primary-300-rgb), 0.28); }
-
-.judge-orbit__core {
-  position: absolute;
-  inset: 39%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.28);
-  border-radius: 50%;
-  background: rgba(8, 16, 14, 0.72);
-  color: var(--theme-primary-200);
-  box-shadow: 0 0 2.5rem rgba(var(--theme-primary-500-rgb), 0.2);
-}
-
+// The counts and the note settle at the foot of the card, beside the end of the editor.
 .flow-summary {
   position: relative;
   z-index: 1;
   display: grid;
+  margin-top: auto;
+  padding-top: 1.5rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.6rem;
 
@@ -423,8 +333,6 @@
   .settings-stage { border-radius: 1.25rem; }
   .settings-card--flow,
   .settings-card--editor { grid-column: 1 / -1; }
-  .settings-card--flow { min-height: auto; }
-  .judge-orbit { display: none; }
   .editor-heading { flex-direction: column; }
   .add-button { align-self: flex-end; }
 }
@@ -432,9 +340,6 @@
 @container checker-judges (max-width: 560px) {
   .settings-stage { padding: 0.8rem; }
   .settings-card { border-radius: 1.05rem; }
-  .judge-flow { align-items: flex-start; flex-direction: column; }
-  .flow-step { flex-direction: row; text-align: left; }
-  .flow-line { width: 1px; min-width: 1px; height: 1rem; margin: 0.2rem 0 0.2rem 1.4rem; }
   .judge-row { grid-template-columns: minmax(0, 1fr) auto; min-height: auto; }
   .judge-index { display: none; }
   .judge-fields { grid-column: 1; }

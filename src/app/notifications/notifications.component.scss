@@ -65,8 +65,7 @@ dl {
 
 .context-icon,
 .card-icon,
-.state-icon,
-.build-core {
+.state-icon {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
@@ -205,7 +204,8 @@ dl {
   }
 }
 
-.unread-summary {
+.unread-summary,
+.build-summary {
   position: relative;
   z-index: 1;
   display: flex;
@@ -332,87 +332,45 @@ dl {
 }
 
 .build-card {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.build-visual {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  min-height: 9.2rem;
-  place-items: center;
-  margin-top: 0.65rem;
+// Shares the read-status layout: a headline value, then the latest/status pair.
+.build-summary { margin-bottom: 1.55rem; }
+
+.build-version {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.98);
+  font-family: var(--ui-font-mono, ui-monospace, monospace);
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 560;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.build-orbit {
-  position: absolute;
-  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.18);
+// Pushed to the foot of the card, however tall the read-status card beside it grows.
+.build-pair { margin-top: auto; }
+
+.build-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: inherit;
+}
+
+.build-status__dot {
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
   border-radius: 50%;
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: -0.18rem;
-    width: 0.36rem;
-    height: 0.36rem;
-    border-radius: 50%;
-    background: var(--theme-primary-300);
-    box-shadow: 0 0 0.8rem var(--theme-primary-shadow);
-  }
+  background: var(--ui-text-3, #858585);
 }
 
-.build-orbit--outer {
-  width: 8rem;
-  height: 8rem;
-}
-
-.build-orbit--inner {
-  width: 5.6rem;
-  height: 5.6rem;
-  transform: rotate(115deg);
-}
-
-.build-core {
-  width: 3.2rem;
-  height: 3.2rem;
-  border-radius: 1rem;
-  background: linear-gradient(145deg, rgba(var(--theme-primary-500-rgb), 0.24), rgba(255, 255, 255, 0.04));
-  box-shadow: 0 0 2.4rem rgba(var(--theme-primary-500-rgb), 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.07);
-}
-
-.build-details {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: baseline;
-  gap: 0.22rem 0.7rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-
-  span,
-  small {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.72rem;
-  }
-
-  strong {
-    justify-self: end;
-    overflow: hidden;
-    color: rgba(255, 255, 255, 0.86);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.8125rem;
-    font-weight: 580;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  small {
-    grid-column: 1 / -1;
-  }
-}
+.build-status[data-tone="current"] .build-status__dot { background: #4ade80; }
+.build-status[data-tone="behind"] .build-status__dot { background: #fbbf24; }
 
 .section-heading {
   position: relative;
