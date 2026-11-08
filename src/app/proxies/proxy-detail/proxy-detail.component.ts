@@ -4,7 +4,7 @@ import {DialogComponent} from '../../shared/ui/dialog.component';
 import {ChartComponent} from '../../shared/ui/chart.component';
 import {buildProxyResponseChart} from './proxy-response-chart';
 import {CountryHoverCardComponent} from '../../shared/ui/country-hover-card.component';
-import {Component, ElementRef, Injector, LOCALE_ID, OnDestroy, OnInit, ViewChild, afterNextRender, computed, effect, inject, signal} from '@angular/core';
+import {Component, LOCALE_ID, OnDestroy, OnInit, computed, effect, inject, signal} from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
@@ -23,8 +23,6 @@ import {ProxyTagSelectorComponent} from '../../shared/proxy-tag-selector/proxy-t
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
-import {PaginationComponent, TablePageEvent} from '../../shared/ui/pagination.component';
-import {PageScrollTarget, scrollTableToPageTarget} from '../../shared/table-pagination';
 import {BreadcrumbService} from '../../services/breadcrumb.service';
 
 type CopyField = 'ip' | 'port' | 'address' | 'username' | 'password' | 'combined' | 'credentialAddress';
@@ -58,7 +56,6 @@ interface ReputationSignalStructuredItem {
     NgClass,
     ProxyTagSelectorComponent,
     ProxyTagManagerComponent,
-    PaginationComponent,
   ],
   templateUrl: './proxy-detail.component.html',
   styleUrls: ['./proxy-detail-reputation.component.scss', './proxy-detail.component.scss']
@@ -69,17 +66,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   statistics = signal<ProxyStatistic[]>([]);
   private readonly locale = inject(LOCALE_ID);
   readonly responseTimeChart = computed(() => buildProxyResponseChart(this.statistics(), this.detail()?.latest_statistic, this.locale));
-  readonly historyRowOptions = [10, 25, 50, 100];
-  readonly historyFirst = signal(0);
-  // Phones stack each check into a card, so they start with a shorter page.
-  readonly historyRows = signal(
-    typeof window !== 'undefined' && window.matchMedia?.('(max-width: 48rem)').matches ? 10 : 25);
-  readonly pagedStatistics = computed(() =>
-    this.statistics().slice(this.historyFirst(), this.historyFirst() + this.historyRows()));
   private readonly breadcrumbs = inject(BreadcrumbService);
-  private readonly injector = inject(Injector);
-  @ViewChild('historyTable') private historyTable?: ElementRef<HTMLElement>;
-  historyScrollTarget: PageScrollTarget = 'top';
 
   isLoadingDetail = signal(true);
   isLoadingStatistics = signal(true);
@@ -136,14 +123,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   proxyHost(proxy: ProxyDetail): string {
     const address = this.proxyAddress(proxy);
     return address.slice(0, address.length - String(proxy.port).length - 1);
-  }
-
-  onHistoryPage(event: TablePageEvent): void {
-    this.historyRows.set(event.rows ?? this.historyRowOptions[0]);
-    this.historyFirst.set(event.first ?? 0);
-    // Honour the pagination's "scroll to top / stay at bottom" preference, as the proxy list does.
-    afterNextRender(() => scrollTableToPageTarget(this.historyTable?.nativeElement, this.historyScrollTarget),
-      {injector: this.injector});
   }
 
   ngOnInit(): void {
@@ -1071,7 +1050,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     const sub = this.http.getProxyStatistics(id, { limit: 150 }).subscribe({
       next: stats => {
         this.statistics.set(stats);
-        this.historyFirst.set(0);
         this.isLoadingStatistics.set(false);
       },
       error: err => {

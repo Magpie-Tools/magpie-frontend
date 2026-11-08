@@ -62,15 +62,6 @@ describe('ProxyDetailComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('pages long check histories instead of rendering every row', () => {
-    const rows = Array.from({length: 60}, (_, index) => ({id: index + 1, alive: true, protocol: 'http', attempt: 0,
-      response_time: 10, judge: 'judge', anonymity_level: 'elite', created_at: new Date().toISOString()}));
-    component.statistics.set(rows);
-    expect(component.pagedStatistics().length).toBe(component.historyRows());
-    component.onHistoryPage({first: 50, rows: 25});
-    expect(component.pagedStatistics().map(row => row.id)).toEqual(rows.slice(50).map(row => row.id));
-  });
-
   it('passes the current proxy country to the map hover card', () => {
     component.detail.update(detail => detail ? {...detail, country: 'Germany'} : detail);
     fixture.detectChanges();

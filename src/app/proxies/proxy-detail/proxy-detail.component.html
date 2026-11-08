@@ -410,39 +410,43 @@
               <h2 id="history-title">Check history</h2>
             </div>
           </div>
-          <span class="entry-count">{{ statistics().length }} recent checks</span>
+          <span class="entry-count">{{ statistics().length }} entries</span>
         </div>
 
-        <div class="history-table stack-table-container">
+        <div class="history-table">
           @if (isLoadingStatistics()) {
             <div class="card-loading"><app-loading></app-loading></div>
           } @else {
-            <div #historyTable class="data-table" [attr.aria-busy]="false">
+            <div class="data-table" [attr.aria-busy]="false">
               <div hlmTableContainer class="table-scroll">
-                <table hlmTable class="proxy-stat-table stack-table" role="table">
-                  <thead hlmTHead role="rowgroup">
-                    <tr hlmTr role="row">
-                      <th hlmTh role="columnheader">Checked at</th>
-                      <th hlmTh role="columnheader">Status</th>
-                      <th hlmTh role="columnheader">Response</th>
-                      <th hlmTh role="columnheader">Attempt</th>
-                      <th hlmTh role="columnheader">Protocol</th>
-                      <th hlmTh role="columnheader">Anonymity</th>
-                      <th hlmTh role="columnheader">Judge</th>
-                      <th hlmTh role="columnheader"><span class="sr-only">Judge response</span></th>
+                <table hlmTable class="proxy-stat-table">
+                  <thead hlmTHead>
+                    <tr hlmTr>
+                      <th hlmTh>Checked at</th>
+                      <th hlmTh>Status</th>
+                      <th hlmTh>Response</th>
+                      <th hlmTh>Attempt</th>
+                      <th hlmTh>Protocol</th>
+                      <th hlmTh>Anonymity</th>
+                      <th hlmTh>Judge</th>
                     </tr>
                   </thead>
-                  <tbody hlmTBody role="rowgroup">
-                    @for (row of pagedStatistics(); track row.id ?? $index) {
-                      <!-- Rows stay table rows; the View button is the keyboard control, row click is a mouse shortcut. -->
+                  <tbody hlmTBody>
+                    @for (row of statistics(); track row.id ?? $index) {
                       <tr
                         hlmTr
                         class="proxy-stat-row"
-                        role="row"
+                        role="button"
+                        tabindex="0"
+                        title="View judge response body"
                         (click)="openStatisticResponse(row)"
+                        (keydown.enter)="openStatisticResponse(row)"
+                        (keydown.space)="
+                          openStatisticResponse(row); $event.preventDefault()
+                        "
                       >
-                        <td hlmTd role="cell" data-label="Checked at" class="stack-wide">{{ row.created_at | date }}</td>
-                        <td hlmTd role="cell" data-label="Status">
+                        <td hlmTd>{{ row.created_at | date }}</td>
+                        <td hlmTd>
                           <span class="table-status">
                             <span
                               class="status-dot status-dot--small"
@@ -451,40 +455,27 @@
                             {{ row.alive ? "Alive" : "Dead" }}
                           </span>
                         </td>
-                        <td hlmTd role="cell" data-label="Response">{{ row.response_time | number }} ms</td>
-                        <td hlmTd role="cell" data-label="Attempt">{{ row.attempt + 1 }}</td>
-                        <td hlmTd role="cell" data-label="Protocol" [title]="row.timeout ? row.timeout + ' ms timeout, ' + (row.retries ?? 0) + ' retries' : 'Legacy check without settings attribution'">
+                        <td hlmTd>{{ row.response_time | number }} ms</td>
+                        <td hlmTd>{{ row.attempt + 1 }}</td>
+                        <td hlmTd [title]="row.timeout ? row.timeout + ' ms timeout, ' + (row.retries ?? 0) + ' retries' : 'Legacy check without settings attribution'">
                           {{ row.protocol ? (row.protocol | uppercase) : "Unknown" }}@if (row.transport) { / {{ row.transport | uppercase }} }
                           @if (row.current === false) {<small class="history-settings-note">{{ row.config_key ? 'Previous settings' : 'Legacy settings' }}</small>}
                         </td>
-                        <td hlmTd role="cell" data-label="Anonymity" class="capitalize">
+                        <td hlmTd class="capitalize">
                           {{ row.anonymity_level || "Unknown" }}
                         </td>
                         <td
                           hlmTd
-                          role="cell"
-                          data-label="Judge"
-                          class="judge-cell stack-wide"
+                          class="judge-cell"
                           [title]="row.judge || 'Unknown'"
                         >
                           {{ row.judge || "Unknown" }}
-                        </td>
-                        <td hlmTd role="cell" class="history-action-cell stack-wide">
-                          <button
-                            type="button"
-                            class="action-button"
-                            [attr.aria-label]="'View judge response for the check at ' + (row.created_at | date)"
-                            (click)="$event.stopPropagation(); openStatisticResponse(row)"
-                          >
-                            View
-                            <i class="icon icon-chevron-right" aria-hidden="true"></i>
-                          </button>
                         </td>
                       </tr>
                     }
                     @if (statistics().length === 0) {
                       <tr hlmTr>
-                        <td hlmTd colspan="8" class="empty-table">
+                        <td hlmTd colspan="7" class="empty-table">
                           No check history recorded yet.
                         </td>
                       </tr>
@@ -492,17 +483,6 @@
                   </tbody>
                 </table>
               </div>
-              @if (statistics().length > historyRowOptions[0]) {
-                <app-pagination
-                  [first]="historyFirst()"
-                  [rows]="historyRows()"
-                  [totalRecords]="statistics().length"
-                  [rowsPerPageOptions]="historyRowOptions"
-                  pageScrollTargetStorageKey="magpie-proxy-history-page-scroll-target"
-                  (pageScrollTargetChange)="historyScrollTarget = $event"
-                  (pageChange)="onHistoryPage($event)"
-                />
-              }
             </div>
           }
         </div>

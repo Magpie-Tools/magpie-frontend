@@ -557,44 +557,6 @@ app-select [data-slot="select-trigger"] > ng-icon { flex-shrink: 0; }
   .data-table tbody { transition: none; }
 }
 
-/* Simple data tables stack each row into a labelled card when their container is narrow. */
-.stack-table-container { container: stack-table / inline-size; }
-@container stack-table (max-width: 560px) {
-  .stack-table, .stack-table tbody { display: block; width: 100%; min-width: 0 !important; }
-  .stack-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .stack-table tbody > tr {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.45rem 0.75rem;
-    padding: 0.75rem 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  }
-  .stack-table tbody > tr > td {
-    display: flex;
-    min-width: 0;
-    max-width: none !important;
-    flex-direction: column;
-    gap: 0.15rem;
-    padding: 0 !important;
-    border: 0 !important;
-    white-space: normal !important;
-    overflow-wrap: anywhere;
-  }
-  .stack-table td[data-label]::before {
-    content: attr(data-label);
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
-  }
-  .stack-table td.stack-wide,
-  .stack-table td[colspan] { grid-column: 1 / -1; }
-}
-
 /* Shortcut to a form that sits below a long list on phones; side-by-side layouts don't need it. */
 .jump-to-form { display: none !important; }
 @media (max-width: 48rem) { .jump-to-form { display: inline-flex !important; } }
