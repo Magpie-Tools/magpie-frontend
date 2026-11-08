@@ -304,6 +304,9 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
       font-size: var(--ui-fs-sm);
     }
 
+    // The shared control height above would shrink the import dialogs' textarea to one line.
+    .import-textarea-shell textarea { min-height: 13rem; }
+
     :is(#{$fields}):focus,
     :is(#{$fields}):focus-within {
       border-color: var(--theme-primary-400);
