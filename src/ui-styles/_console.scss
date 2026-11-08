@@ -213,7 +213,10 @@ html:root:root:root:root[data-ui="console"] {
     color: var(--ui-accent);
   }
 
+  // The base list is a fixed h-9, which leaves 28px inside the border and padding, less
+  // than the 30px trigger below, so the active pill spilled out of the frame.
   .settings-section-tabs [data-slot="tabs-list"] {
+    height: auto;
     padding: 3px;
     border-color: var(--ui-line);
     border-radius: var(--ui-radius);
