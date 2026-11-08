@@ -414,8 +414,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const countryLegend = countryOrder.map((entry) => ({
       country: entry.country,
-      count: entry.count,
-      color: this.resolveCountryColor(entry.country)
+      count: entry.count
     }));
 
     this.fastestAliveCountryLegend.set(countryLegend);
@@ -423,7 +422,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.latencyChart.set(buildLatencyChart(
       points,
       countryLegend.map(entry => entry.country),
-      countryLegend.map(entry => entry.color),
       value => this.numberFormatter.format(value),
     ));
   }
@@ -514,23 +512,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return 'bad';
     }
     return 'unknown';
-  }
-
-  private resolveCountryColor(country: string): string {
-    const normalized = this.normalizeCountryBreakdownName(country);
-    if (normalized === 'Unknown') {
-      return '#94a3b8';
-    }
-
-    let hash = 0;
-    for (let index = 0; index < normalized.length; index++) {
-      hash = ((hash * 31) + normalized.charCodeAt(index)) >>> 0;
-    }
-
-    const hue = hash % 360;
-    const saturation = 66 + (hash % 18);
-    const lightness = 50 + (hash % 12);
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }
 
   private updateAnonymitySummary(entries: JudgeValidProxy[]): void {

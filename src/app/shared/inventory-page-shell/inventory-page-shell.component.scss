@@ -284,7 +284,7 @@ p { margin: 0; }
   }
 
   .toolbar-action--delete [hlmBtn] {
-    border-color: rgba(248, 113, 113, 0.25);
+    border-color: color-mix(in srgb, var(--status-bad) 25%, transparent);
     background: rgba(127, 29, 29, 0.12);
     color: rgba(239, 174, 174, 0.78);
 
@@ -292,7 +292,7 @@ p { margin: 0; }
 
     &:hover:not(:disabled),
     &:focus-visible {
-      border-color: rgba(248, 113, 113, 0.4);
+      border-color: color-mix(in srgb, var(--status-bad) 40%, transparent);
       background: rgba(127, 29, 29, 0.22);
       color: #f5b5b5;
 

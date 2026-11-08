@@ -1,7 +1,7 @@
 import {HlmCardImports} from '@spartan-ng/helm/card';
 import {HlmBadge} from '@spartan-ng/helm/badge';
 import {ChartComponent} from '../../../shared/ui/chart.component';
-import {buildMetricChart, MetricPoint} from '../../dashboard-charts';
+import {buildMetricChart, CHART_SERIES_COLOR, MetricPoint} from '../../dashboard-charts';
 import type {AppChartDefinition} from '../../../shared/ui/chart.component';
 import {Component, Inject, Input, LOCALE_ID, OnChanges, SimpleChanges} from '@angular/core';
 
@@ -48,26 +48,27 @@ export class KpiCardComponent implements OnChanges {
 
   getChipClass(change: number): string {
     if (change > 2) {
-      return '!bg-green-500/20 !text-green-400';
+      return '!bg-(--status-good-soft) !text-(--status-good-fg)';
     }
 
     if (change < -2) {
-      return '!bg-red-500/20 !text-red-400';
+      return '!bg-(--status-bad-soft) !text-(--status-bad-fg)';
     }
 
-    return '!bg-blue-500/20 !text-blue-400';
+    // A flat trend is not a status, so it stays grey.
+    return '!bg-white/5 !text-neutral-400';
   }
 
   getChangeColorClass(change: number): string {
     if (change > 2) {
-      return 'text-green-400';
+      return 'text-(--status-good-fg)';
     }
 
     if (change < -2) {
-      return 'text-red-400';
+      return 'text-(--status-bad-fg)';
     }
 
-    return 'text-blue-400';
+    return 'text-neutral-400';
   }
 
   getChangeIcon(change: number): string {
@@ -159,14 +160,15 @@ export class KpiCardComponent implements OnChanges {
 
   private getTrendColor(change: number): string {
     if (change > 2) {
-      return '#4ade80';
+      return 'var(--status-good, #46c995)';
     }
 
     if (change < -2) {
-      return '#f87171';
+      return 'var(--status-bad, #e0464e)';
     }
 
-    return '#60a5fa';
+    // A flat trend is not a status, so it takes the theme's series colour.
+    return CHART_SERIES_COLOR;
   }
 
 }

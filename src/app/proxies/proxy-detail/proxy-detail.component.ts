@@ -61,7 +61,7 @@ interface ReputationSignalStructuredItem {
     PaginationComponent,
   ],
   templateUrl: './proxy-detail.component.html',
-  styleUrl: './proxy-detail.component.scss'
+  styleUrls: ['./proxy-detail-reputation.component.scss', './proxy-detail.component.scss']
 })
 export class ProxyDetailComponent implements OnInit, OnDestroy {
   proxyId = signal<number | undefined>(undefined);

@@ -23,7 +23,7 @@
 
 // Keep the destructive cue local to the warning icon and final action.
 .bulk-dialog-heading--danger .bulk-dialog-heading__icon {
-  border-color: rgba(248, 113, 113, 0.28);
+  border-color: color-mix(in srgb, var(--status-bad) 28%, transparent);
   background: rgba(127, 29, 29, 0.13);
   color: #f4a7a7;
 }
@@ -183,10 +183,10 @@
   }
 
   .bulk-dialog-confirm--danger {
-    border-color: rgba(248, 113, 113, 0.38);
-    background: rgba(248, 113, 113, 0.07);
+    border-color: color-mix(in srgb, var(--status-bad) 38%, transparent);
+    background: color-mix(in srgb, var(--status-bad) 7%, transparent);
 
-    input { accent-color: #ef4444; }
+    input { accent-color: var(--status-bad); }
   }
 
   .filter-disabled-copy {
@@ -288,13 +288,13 @@
   }
 
   .bulk-action-dialog .dialog-button--danger[hlmBtn] {
-    border-color: rgba(239, 68, 68, 0.42);
+    border-color: color-mix(in srgb, var(--status-bad) 42%, transparent);
     background: rgba(127, 29, 29, 0.52);
-    color: #fecaca;
+    color: var(--status-bad-fg);
   }
 
   .bulk-action-dialog .dialog-button--danger[hlmBtn]:hover:not(:disabled) {
-    border-color: rgba(248, 113, 113, 0.62);
+    border-color: color-mix(in srgb, var(--status-bad) 62%, transparent);
     background: rgba(153, 27, 27, 0.68);
     color: #fff1f2;
   }

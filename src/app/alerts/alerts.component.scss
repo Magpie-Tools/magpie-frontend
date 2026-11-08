@@ -127,7 +127,7 @@ h1, h2, h3, p, dl, dd { margin: 0; }
 h3 { color: rgba(255, 255, 255, 0.9); font-size: 0.84rem; font-weight: 580; letter-spacing: -0.015em; overflow-wrap: anywhere; }
 .scope-label { display: block; margin-top: 0.25rem; color: var(--card-muted); font-size: 0.8125rem; overflow-wrap: anywhere; }
 .badge { display: inline-flex; flex: 0 0 auto; max-width: 100%; align-items: center; gap: 0.35rem; padding: 0.3rem 0.5rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.45rem; background: rgba(255, 255, 255, 0.04); color: var(--card-muted); font-size: 0.75rem; line-height: 1.4; }
-.badge--healthy { border-color: rgba(132, 203, 161, 0.18); background: rgba(81, 157, 111, 0.08); color: #a4dfb9; }
+.badge--healthy { border-color: color-mix(in srgb, var(--status-good) 18%, transparent); background: color-mix(in srgb, var(--status-good) 8%, transparent); color: var(--status-good-fg); }
 .badge--warning { border-color: rgba(231, 184, 108, 0.2); background: rgba(121, 78, 16, 0.1); color: #e7c77d; }
 .badge--danger { border-color: rgba(239, 167, 167, 0.2); background: rgba(132, 43, 43, 0.14); color: #efa7a7; }
 .status-dot { width: 0.3rem; height: 0.3rem; flex: 0 0 auto; border-radius: 50%; background: currentColor; }
@@ -214,10 +214,10 @@ input[type=checkbox]:disabled { cursor: not-allowed; }
 .button--primary:not(:disabled):hover { border-color: rgba(var(--theme-primary-200-rgb), 0.6); transform: translateY(-1px); box-shadow: 0 14px 28px rgba(var(--theme-primary-500-rgb), 0.24); }
 .button--quiet { border-color: rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.035); color: rgba(255, 255, 255, 0.7); }
 .button--quiet:not(:disabled):hover { border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.07); color: #fff; }
-.button--danger { border-color: rgba(248, 113, 113, 0.32); background: rgba(132, 43, 43, 0.95); color: #fff; }
+.button--danger { border-color: color-mix(in srgb, var(--status-bad) 32%, transparent); background: rgba(132, 43, 43, 0.95); color: #fff; }
 .button--danger:not(:disabled):hover { background: rgba(158, 51, 51, 0.98); }
 .icon-button { width: 2.15rem; height: 2.15rem; border-color: rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.025); color: var(--card-muted); }
-.icon-button--danger:not(:disabled):hover { border-color: rgba(248, 113, 113, 0.25); background: rgba(132, 43, 43, 0.12); color: #efa7a7; }
+.icon-button--danger:not(:disabled):hover { border-color: color-mix(in srgb, var(--status-bad) 25%, transparent); background: rgba(132, 43, 43, 0.12); color: #efa7a7; }
 .button:disabled, .icon-button:disabled { opacity: 0.4; cursor: not-allowed; }
 .button:focus-visible, .icon-button:focus-visible, input[type=checkbox]:focus-visible, summary:focus-visible, .input-action:focus-visible { outline: 2px solid var(--theme-primary-300); outline-offset: 3px; }
 
@@ -274,7 +274,7 @@ input[type=checkbox]:disabled { cursor: not-allowed; }
   font-family: var(--ui-font-mono, inherit);
   font-size: var(--ui-fs-xs, 0.65rem);
 }
-.setup-step--done .setup-step__marker { border-color: rgba(132, 203, 161, 0.35); background: rgba(81, 157, 111, 0.12); color: #a4dfb9; }
+.setup-step--done .setup-step__marker { border-color: color-mix(in srgb, var(--status-good) 35%, transparent); background: color-mix(in srgb, var(--status-good) 12%, transparent); color: var(--status-good-fg); }
 .setup-step__copy {
   min-width: 0;
   strong { display: block; color: var(--ui-text, rgba(255, 255, 255, 0.9)); font-size: var(--ui-fs, 0.78rem); font-weight: 550; }

@@ -73,7 +73,7 @@
 }
 
 .popup-content--error {
-  border-color: rgba(248, 113, 113, 0.22);
+  border-color: color-mix(in srgb, var(--status-bad) 22%, transparent);
 }
 
 app-star-background {
@@ -114,11 +114,11 @@ app-star-background {
 }
 
 .popup-content--error .popup-status-icon {
-  border-color: rgba(248, 113, 113, 0.16);
+  border-color: color-mix(in srgb, var(--status-bad) 16%, transparent);
   background: rgba(127, 29, 29, 0.04);
 
   &::before {
-    border-color: rgba(248, 113, 113, 0.26);
+    border-color: color-mix(in srgb, var(--status-bad) 26%, transparent);
     background: rgba(127, 29, 29, 0.14);
   }
 

@@ -185,12 +185,12 @@ app-admin-settings-shell {
   }
 
   .requeue-button[hlmBtn] {
-    border-color: rgba(248, 113, 113, 0.24);
+    border-color: color-mix(in srgb, var(--status-bad) 24%, transparent);
     background: rgba(127, 29, 29, 0.12);
     color: #f2b0b0;
 
     &:hover:not(:disabled) {
-      border-color: rgba(248, 113, 113, 0.44);
+      border-color: color-mix(in srgb, var(--status-bad) 44%, transparent);
       background: rgba(127, 29, 29, 0.2);
       transform: translateY(-2px);
     }

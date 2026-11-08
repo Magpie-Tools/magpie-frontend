@@ -12,8 +12,15 @@ export const CHART_LIMIT_COLOR = 'var(--ui-chart-limit, #f59e0b)';
 const CHART_DOT_STROKE = 'var(--ui-chart-dot-stroke, #0f172a)';
 const chartTheme = {...HLM_CHART_THEME, grid: 'var(--ui-chart-grid, rgba(148, 163, 184, 0.15))'};
 const smoothCurve = d3Curve(curveMonotoneX);
-/** Good, Neutral, Poor, Unknown — the same tokens as --reputation-* in styles.css. */
-export const REPUTATION_COLORS = ['#22c55e', '#facc15', '#ef4444', '#94a3b8'];
+/** Good, Neutral, Poor, Unknown — read from the --reputation-* tokens in styles.css. */
+export const REPUTATION_COLORS = [
+  'var(--reputation-good, #46c995)',
+  'var(--reputation-neutral, #d9a82e)',
+  'var(--reputation-poor, #e0464e)',
+  'var(--reputation-unknown, #8e959e)',
+];
+/** Reputation buckets used by latency points, in REPUTATION_COLORS order. */
+export const REPUTATION_KEYS = ['good', 'neutral', 'bad', 'unknown'];
 
 export interface MetricPoint { index: number; value: number; }
 export interface InventoryPoint {
@@ -103,7 +110,7 @@ export function buildInventoryChart(points: InventoryPoint[], limit: number | nu
 
 /** Keeps the existing reputation shapes while using TanStack's scale and focus handling. */
 function reputationDots(points: LatencyPoint[]): ChartMark<LatencyPoint, number, number> {
-  const mark = dot(points, {id: 'latency', x: 'x', y: 'y', key: 'proxy', color: 'country', r: 6, stroke: CHART_DOT_STROKE, strokeWidth: 1.5});
+  const mark = dot(points, {id: 'latency', x: 'x', y: 'y', key: 'proxy', color: 'reputation', r: 6, stroke: CHART_DOT_STROKE, strokeWidth: 1.5});
   const shape = (node: SceneNode): SceneNode => {
     if (node.kind === 'group') return {...node, children: node.children.map(shape)};
     if (node.kind !== 'dot' || !node.interaction?.point) return node;
@@ -126,7 +133,11 @@ function reputationDots(points: LatencyPoint[]): ChartMark<LatencyPoint, number,
   }};
 }
 
-export function buildLatencyChart(points: LatencyPoint[], countries: string[], colors: string[], format: (value: number) => string) {
+/**
+ * Country is already the x position, so color carries reputation (doubling the shape)
+ * instead of repeating the country with a second, arbitrary hue.
+ */
+export function buildLatencyChart(points: LatencyPoint[], countries: string[], format: (value: number) => string) {
   const max = Math.max(1, ...points.map(point => point.y));
   return defineChart({
     marks: [reputationDots(points)],
@@ -140,7 +151,7 @@ export function buildLatencyChart(points: LatencyPoint[], countries: string[], c
       }},
       y: {scale: () => scaleLinear().domain([0, max]), nice: true, grid: true, axis: {label: 'Response time (ms)', ticks: {format: value => `${format(value)} ms`}}},
     },
-    color: {domain: countries, range: colors},
+    color: {domain: REPUTATION_KEYS, range: REPUTATION_COLORS},
     theme: chartTheme,
     tooltip: hlmChartTooltip<LatencyPoint, number, number>({content: focused => {
       const point = focused[0]?.datum;

@@ -3,7 +3,7 @@
 }
 
 .filter-panel {
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid color-mix(in srgb, var(--ink-muted) 20%, transparent);
   border-radius: 0.75rem;
   background: rgba(20, 20, 20, 0.92);
   padding: 1rem 1.1rem;
@@ -41,7 +41,7 @@
 
 .filter-panel__subtitle {
   font-size: 0.84rem;
-  color: rgba(148, 163, 184, 0.9);
+  color: color-mix(in srgb, var(--ink-muted) 90%, transparent);
   margin-top: 0.2rem;
   max-width: 26rem;
 }
@@ -54,7 +54,7 @@
 
 .filter-panel__divider {
   height: 1px;
-  background: rgba(148, 163, 184, 0.2);
+  background: color-mix(in srgb, var(--ink-muted) 20%, transparent);
   margin: 0.2rem 0 0.85rem;
 }
 
@@ -96,7 +96,7 @@
     width: 0.95rem;
     height: 0.95rem;
     border-radius: 0.25rem;
-    border-color: rgba(148, 163, 184, 0.4);
+    border-color: color-mix(in srgb, var(--ink-muted) 40%, transparent);
   }
 
   .filter-checkbox brn-checkbox ng-icon {

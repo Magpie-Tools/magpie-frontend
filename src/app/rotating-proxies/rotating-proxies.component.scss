@@ -681,7 +681,7 @@ app-select {
 }
 
 .rotator-status--healthy {
-  color: #a4dfb9;
+  color: var(--status-good-fg);
 }
 
 .rotator-status--warning {

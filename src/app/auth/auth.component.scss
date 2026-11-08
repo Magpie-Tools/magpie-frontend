@@ -56,10 +56,10 @@
     gap: 0.5rem;
     margin: 0;
     padding: 0.7rem 0.8rem;
-    border: 1px solid rgba(248, 113, 113, 0.4);
+    border: 1px solid color-mix(in srgb, var(--status-bad) 40%, transparent);
     border-radius: 0.6rem;
     background: rgba(127, 29, 29, 0.22);
-    color: #fecaca;
+    color: var(--status-bad-fg);
     font-size: 0.875rem;
     line-height: 1.45;
 

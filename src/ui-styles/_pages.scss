@@ -374,7 +374,7 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
   }
 
   .bulk-dialog-confirm--danger input[type="checkbox"]:checked {
-    border-color: #f87171;
+    border-color: var(--status-bad);
     background-color: #dc2626;
   }
 
@@ -556,12 +556,12 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
   .button--danger,
   .requeue-button[hlmBtn],
   .tag-manager__button--danger {
-    border-color: rgba(248, 113, 113, 0.3);
+    border-color: color-mix(in srgb, var(--status-bad) 30%, transparent);
     background: var(--ui-danger-bg);
     color: var(--ui-danger-fg);
 
     &:hover:not(:disabled) {
-      border-color: rgba(248, 113, 113, 0.5);
+      border-color: color-mix(in srgb, var(--status-bad) 50%, transparent);
       background: var(--ui-danger-bg);
       color: var(--ui-danger-fg);
     }

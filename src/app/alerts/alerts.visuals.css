@@ -53,7 +53,7 @@
 .destination-hover-card__list strong { color: rgba(255, 255, 255, 0.88); font-size: 0.8125rem; font-weight: 500; overflow-wrap: anywhere; }
 .destination-hover-card__list li > div > span { color: rgba(222, 215, 222, 0.59); font-size: 0.75rem; }
 .destination-hover-card__status { flex: 0 0 auto; padding: 0.22rem 0.4rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.4rem; background: rgba(255, 255, 255, 0.04); color: rgba(222, 215, 222, 0.59); font-size: 0.72rem; }
-.destination-hover-card__status--enabled { border-color: rgba(132, 203, 161, 0.18); background: rgba(81, 157, 111, 0.08); color: #a4dfb9; }
+.destination-hover-card__status--enabled { border-color: color-mix(in srgb, var(--status-good) 18%, transparent); background: color-mix(in srgb, var(--status-good) 8%, transparent); color: var(--status-good-fg); }
 
 @container alerts-page (max-width: 600px) {
   .alerts-tabs [data-slot="tabs-list"] { display: grid; width: 100%; height: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }

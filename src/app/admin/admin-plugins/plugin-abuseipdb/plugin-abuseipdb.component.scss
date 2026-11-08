@@ -84,7 +84,7 @@
 .meta-card small { color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; }
 .meta-card strong { overflow: hidden; color: rgba(255, 255, 255, 0.72); font-size: 0.75rem; font-weight: 570; text-overflow: ellipsis; white-space: nowrap; }
 
-.error-note { display: flex; align-items: flex-start; gap: 0.65rem; margin-top: 0.75rem; padding: 0.8rem; border: 1px solid rgba(248, 113, 113, 0.24); border-radius: 0.82rem; background: rgba(127, 29, 29, 0.12); color: #f2a3a3; }
+.error-note { display: flex; align-items: flex-start; gap: 0.65rem; margin-top: 0.75rem; padding: 0.8rem; border: 1px solid color-mix(in srgb, var(--status-bad) 24%, transparent); border-radius: 0.82rem; background: rgba(127, 29, 29, 0.12); color: #f2a3a3; }
 .error-note div { display: flex; flex-direction: column; gap: 0.12rem; }
 .error-note strong { font-size: 0.8125rem; font-weight: 590; }
 .error-note span { color: rgba(254, 202, 202, 0.7); font-size: 0.75rem; line-height: 1.45; }

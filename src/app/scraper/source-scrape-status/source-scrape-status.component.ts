@@ -25,7 +25,7 @@ import {scrapeStatusLabel} from '../../models/ScrapeSourceStatus';
       background: #8a94a3;
     }
     [data-status="success"] .scrape-status__dot {
-      background: #25cf7a;
+      background: var(--status-good);
       box-shadow: 0 0 .7rem rgba(37, 207, 122, .5);
     }
     [data-status="error"] .scrape-status__dot { background: #f06d76; }

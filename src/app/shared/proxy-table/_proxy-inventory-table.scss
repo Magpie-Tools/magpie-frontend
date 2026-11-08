@@ -135,8 +135,8 @@
     animation: none;
 
     &.alive {
-      background: #25cf7a;
-      box-shadow: 0 0 0.7rem rgba(37, 207, 122, 0.5);
+      background: var(--status-good);
+      box-shadow: 0 0 0.7rem color-mix(in srgb, var(--status-good) 50%, transparent);
 
       &::after { display: none; }
     }
@@ -148,7 +148,7 @@
     }
 
     &.unknown {
-      border: 2px dashed #94a3b8;
+      border: 2px dashed var(--ink-muted);
       background: transparent;
       opacity: 1;
     }

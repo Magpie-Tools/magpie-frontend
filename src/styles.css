@@ -28,11 +28,41 @@
 :root {
   color-scheme: dark;
 
+  /*
+   * Status colours: the one source for alive/dead dots, reputation badges, health bars,
+   * charts, and error or warning states. Stepped for the dark surface rather than taken
+   * from Tailwind's light-UI 500s, so they read clearly without glowing. Good leans
+   * emerald so it sits beside the theme accent instead of competing with it, and good and
+   * bad differ in lightness as well as hue (worst colour-blind ΔE 11.1 across all pairs).
+   * The -fg steps are for text on a tinted status background (≥ 10:1 on the panel).
+   * Status always ships with a label, icon, or shape too, never colour alone.
+   */
+  --status-good: #46c995;
+  --status-good-fg: #b5ecd0;
+  --status-warn: #d9a82e;
+  --status-warn-fg: #f6dc98;
+  --status-bad: #e0464e;
+  --status-bad-text: #ee6b6f; /* red text on the panel (5.7:1) where the mark step is too dark */
+  --status-bad-fg: #fcc4c4;
+
+  /* Muted ink for secondary marks, borders, and "unknown". */
+  --ink-muted: #8f8f8f;
+
+  /* Tinted fill (-soft) and border (-line) steps for status chips and callouts. */
+  --status-good-soft: color-mix(in srgb, var(--status-good) 8%, transparent);
+  --status-good-line: color-mix(in srgb, var(--status-good) 30%, transparent);
+  --status-warn-soft: color-mix(in srgb, var(--status-warn) 8%, transparent);
+  --status-warn-line: color-mix(in srgb, var(--status-warn) 30%, transparent);
+  --status-bad-soft: color-mix(in srgb, var(--status-bad) 8%, transparent);
+  --status-bad-line: color-mix(in srgb, var(--status-bad) 30%, transparent);
+  --ink-muted-soft: color-mix(in srgb, var(--ink-muted) 8%, transparent);
+  --ink-muted-line: color-mix(in srgb, var(--ink-muted) 28%, transparent);
+
   /* Reputation colours, shared by charts, badges and bars. */
-  --reputation-good: #22c55e;
-  --reputation-neutral: #facc15;
-  --reputation-poor: #ef4444;
-  --reputation-unknown: #94a3b8;
+  --reputation-good: var(--status-good);
+  --reputation-neutral: var(--status-warn);
+  --reputation-poor: var(--status-bad);
+  --reputation-unknown: var(--ink-muted);
 
   --layer-noise: 4000;
 
@@ -301,7 +331,7 @@
   gap: 0.45rem;
   padding: 0.3rem 0.56rem;
   border-radius: 0.58rem;
-  background: rgba(148, 163, 184, 0.12);
+  background: color-mix(in srgb, var(--ink-muted) 12%, transparent);
   color: rgba(255, 255, 255, 0.78);
   font-size: 0.8125rem;
 }
@@ -346,9 +376,9 @@
   align-self: flex-end;
 }
 
-.signal-value--positive { background: rgba(34, 197, 94, 0.12); color: #bbf7d0; }
-.signal-value--neutral { background: rgba(250, 204, 21, 0.11); color: #fef08a; }
-.signal-value--negative { background: rgba(248, 113, 113, 0.12); color: #fecaca; }
+.signal-value--positive { background: color-mix(in srgb, var(--status-good) 12%, transparent); color: var(--status-good-fg); }
+.signal-value--neutral { background: color-mix(in srgb, var(--status-warn) 11%, transparent); color: var(--status-warn-fg); }
+.signal-value--negative { background: color-mix(in srgb, var(--status-bad) 12%, transparent); color: var(--status-bad-fg); }
 
 .signal-structured-list {
   display: grid;
@@ -417,16 +447,16 @@
 
 .stat-response-dialog__error {
   padding: 0.85rem;
-  border: 1px solid rgba(248, 113, 113, 0.3);
+  border: 1px solid color-mix(in srgb, var(--status-bad) 30%, transparent);
   border-radius: 0.72rem;
-  background: rgba(248, 113, 113, 0.1);
-  color: #fecaca;
+  background: color-mix(in srgb, var(--status-bad) 10%, transparent);
+  color: var(--status-bad-fg);
   font-size: 0.8125rem;
 }
 
 .stat-response-dialog__body mark {
   border-radius: 0.16rem;
-  background: rgba(250, 204, 21, 0.35);
+  background: color-mix(in srgb, var(--status-warn) 35%, transparent);
   color: #fff7c2;
 }
 
@@ -461,7 +491,7 @@ body {
   --muted-foreground: #a6aeb6;
   --accent: #30353a;
   --accent-foreground: #fff;
-  --destructive: #f87171;
+  --destructive: var(--status-bad-text);
   --border: #ffffff20;
   --input: #ffffff26;
   --ring: var(--theme-primary-300);

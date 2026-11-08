@@ -396,7 +396,7 @@
 .account-menu__item--danger {
   &:hover,
   &:focus-visible {
-    background: rgba(248, 113, 113, 0.1);
+    background: color-mix(in srgb, var(--status-bad) 10%, transparent);
     color: #f0aaaa;
   }
 }

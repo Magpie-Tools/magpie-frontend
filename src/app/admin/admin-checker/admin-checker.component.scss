@@ -287,7 +287,7 @@
 
 .icon-button--remove {
   color: #f2a3a3;
-  &:hover { border-color: rgba(248, 113, 113, 0.45); background: rgba(127, 29, 29, 0.18); transform: translateY(-2px); }
+  &:hover { border-color: color-mix(in srgb, var(--status-bad) 45%, transparent); background: rgba(127, 29, 29, 0.18); transform: translateY(-2px); }
 }
 
 .add-button {

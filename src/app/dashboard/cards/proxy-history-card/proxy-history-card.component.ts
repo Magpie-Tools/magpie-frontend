@@ -48,13 +48,13 @@ export class ProxyHistoryCardComponent {
   getStatusColor(status: string): string {
     switch (status) {
       case 'working':
-        return '#10b981';
+        return 'var(--status-good, #46c995)';
       case 'failed':
-        return '#ef4444';
+        return 'var(--status-bad, #e0464e)';
       case 'timeout':
-        return '#f59e0b';
+        return 'var(--status-warn, #d9a82e)';
       default:
-        return '#6b7280';
+        return 'var(--ink-muted, #8e959e)';
     }
   }
 

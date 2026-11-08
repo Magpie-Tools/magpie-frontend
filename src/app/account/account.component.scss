@@ -455,7 +455,7 @@ p {
 }
 
 .button--danger {
-  border-color: rgba(248, 113, 113, 0.38);
+  border-color: color-mix(in srgb, var(--status-bad) 38%, transparent);
   background: rgba(132, 43, 43, 0.95);
   color: #fff;
 
@@ -472,7 +472,7 @@ p {
 
 .card-icon--danger,
 .dialog-icon {
-  border-color: rgba(248, 113, 113, 0.24);
+  border-color: color-mix(in srgb, var(--status-bad) 24%, transparent);
   background: rgba(127, 29, 29, 0.12);
   color: #eba0a0;
 }
@@ -500,7 +500,7 @@ p {
   }
 
   .danger-boundary__end {
-    border-color: rgba(248, 113, 113, 0.26);
+    border-color: color-mix(in srgb, var(--status-bad) 26%, transparent);
     background: rgba(127, 29, 29, 0.12);
     color: #eba0a0;
   }
@@ -590,7 +590,7 @@ p {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  border: 1px solid rgba(248, 113, 113, 0.18);
+  border: 1px solid color-mix(in srgb, var(--status-bad) 18%, transparent);
   border-radius: 0.8rem;
   background: rgba(127, 29, 29, 0.08);
   color: rgba(239, 174, 174, 0.72);
@@ -648,9 +648,9 @@ p {
   }
 
   .password-input--danger [hlmInput]:focus {
-    border-color: rgba(248, 113, 113, 0.55);
+    border-color: color-mix(in srgb, var(--status-bad) 55%, transparent);
     background: rgba(127, 29, 29, 0.08);
-    box-shadow: 0 0 0 0.18rem rgba(239, 68, 68, 0.1);
+    box-shadow: 0 0 0 0.18rem color-mix(in srgb, var(--status-bad) 10%, transparent);
   }
 }
 

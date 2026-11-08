@@ -369,8 +369,8 @@ dl {
   background: var(--ui-text-3, #858585);
 }
 
-.build-status[data-tone="current"] .build-status__dot { background: #4ade80; }
-.build-status[data-tone="behind"] .build-status__dot { background: #fbbf24; }
+.build-status[data-tone="current"] .build-status__dot { background: var(--status-good); }
+.build-status[data-tone="behind"] .build-status__dot { background: var(--status-warn); }
 
 .section-heading {
   position: relative;

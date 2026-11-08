@@ -1,6 +1,6 @@
 import {createChartScene} from '@tanstack/charts';
 import type {ChartTooltipContentContext, SceneNode} from '@tanstack/charts';
-import {buildInventoryChart, buildLatencyChart, buildMetricChart, buildReputationChart, CHART_LIMIT_COLOR, CHART_SERIES_COLOR, InventoryLabels, inventoryTickIndexes, LatencyPoint} from './dashboard-charts';
+import {buildInventoryChart, buildLatencyChart, buildMetricChart, buildReputationChart, CHART_LIMIT_COLOR, CHART_SERIES_COLOR, InventoryLabels, REPUTATION_COLORS, inventoryTickIndexes, LatencyPoint} from './dashboard-charts';
 
 const tooltipContext: ChartTooltipContentContext = {
   pinned: false, xLabel: '', yLabel: '', formatX: String, formatY: String,
@@ -55,16 +55,16 @@ describe('Spartan dashboard chart definitions', () => {
     expect(scene.points.every(point => Number.isFinite(point.x) && Number.isFinite(point.y))).toBeTrue();
   });
 
-  it('preserves country colors, reputation shapes, and proxy tooltip details', () => {
+  it('colors latency points by reputation, keeps shapes, and keeps proxy tooltip details', () => {
     const data: LatencyPoint[] = ['good', 'neutral', 'bad', 'unknown'].map((reputation, index) => ({
       x: index < 2 ? 1 : 2, y: 50 + index * 20, rank: index + 1, proxy: `192.0.2.${index + 1}:8080`,
       country: index < 2 ? 'Germany' : 'France', reputation, reputationScore: 70,
     }));
-    const chart = buildLatencyChart(data, ['Germany', 'France'], ['#00ff00', '#0000ff'], format);
+    const chart = buildLatencyChart(data, ['Germany', 'France'], format);
     const scene = createChartScene(chart, {width: 600, height: 352});
     const nodes = flatten(scene.nodes).filter(node => 'interaction' in node && node.interaction?.point?.markId === 'latency');
     expect(nodes.map(node => node.kind)).toEqual(['dot', 'area', 'area', 'area']);
-    expect(scene.points.map(point => point.color)).toEqual(['#00ff00', '#00ff00', '#0000ff', '#0000ff']);
+    expect(scene.points.map(point => point.color)).toEqual(REPUTATION_COLORS);
     expect(scene.scales['x'].ticks.map(tick => tick.label)).toEqual(['Germany', 'France']);
     if ('content' in chart.tooltip) expect(chart.tooltip.content!([scene.points[2]], tooltipContext)).toEqual({
       title: '#3 192.0.2.3:8080', rows: [

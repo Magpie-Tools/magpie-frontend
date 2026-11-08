@@ -89,7 +89,7 @@ input[type="file"] {
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(248, 113, 113, 0.24);
+  border: 1px solid color-mix(in srgb, var(--status-bad) 24%, transparent);
   border-radius: 0.7rem;
   background: rgba(127, 29, 29, 0.1);
   color: rgba(248, 178, 178, 0.78);
@@ -97,9 +97,9 @@ input[type="file"] {
   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 
   &:hover {
-    border-color: rgba(248, 113, 113, 0.42);
+    border-color: color-mix(in srgb, var(--status-bad) 42%, transparent);
     background: rgba(127, 29, 29, 0.2);
-    color: #fecaca;
+    color: var(--status-bad-fg);
   }
 }
 

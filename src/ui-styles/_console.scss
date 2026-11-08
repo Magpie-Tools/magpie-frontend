@@ -11,19 +11,22 @@
 // overrides ahead of deep component selectors without !important.
 
 html:root:root:root:root[data-ui="console"] {
-  --ui-bg: #101010;
-  --ui-sidebar: #101010;
-  --ui-topbar: #101010;
-  --ui-panel: #161616;
-  --ui-inset: #1b1b1b;
-  --ui-hover: #222222;
+  // Neutral greys with no hue. Surfaces step up in lightness as they come forward (page,
+  // panel, inset, hover), with enough difference between the page and a panel that cards
+  // separate without shadows.
+  --ui-bg: #0c0c0c;
+  --ui-sidebar: var(--ui-bg);
+  --ui-topbar: var(--ui-bg);
+  --ui-panel: #171717;
+  --ui-inset: #1c1c1c;
+  --ui-hover: #242424;
   --ui-row-hover: rgba(255, 255, 255, 0.03);
-  --ui-line: #242424;
-  --ui-line-soft: #1f1f1f;
-  --ui-line-strong: #2e2e2e;
+  --ui-line: #262626;
+  --ui-line-soft: #202020;
+  --ui-line-strong: #313131;
   --ui-text: #f5f5f5;
-  --ui-text-2: #a3a3a3;
-  --ui-text-3: #858585;
+  --ui-text-2: #a6a6a6;
+  --ui-text-3: #878787;
 
   // Navigation state, section tabs, and inline hints. The darkest theme shade fills the
   // highlight and a light shade of the same theme colours its text and icons.
@@ -74,17 +77,22 @@ html:root:root:root:root[data-ui="console"] {
 
   --ui-chart-series: var(--theme-primary-300);
   --ui-chart-grid: rgba(255, 255, 255, 0.06);
-  --ui-chart-dot-stroke: #161616;
+  --ui-chart-dot-stroke: var(--ui-panel);
 
-  --ui-field-bg: #1b1b1b;
+  // Country map: one-hue ramp from the inset surface up to a light theme shade.
+  --ui-map-empty: var(--ui-inset);
+  --ui-map-low: color-mix(in oklab, var(--theme-primary-700) 35%, var(--ui-inset));
+  --ui-map-high: var(--theme-primary-200);
+
+  --ui-field-bg: var(--ui-inset);
   --ui-tabs-bg: transparent;
-  --ui-tab-active-bg: #242424;
+  --ui-tab-active-bg: var(--ui-hover);
   --ui-btn-bg: #1f1f1f;
   --ui-primary-bg: var(--theme-primary-600);
   --ui-primary-fg: #ffffff;
   --ui-primary-hover: var(--theme-primary-500);
   --ui-danger-bg: transparent;
-  --ui-danger-fg: #f87171;
+  --ui-danger-fg: var(--status-bad-text);
 
   @include base.skin-base;
   @include pages.skin-pages;
@@ -221,34 +229,44 @@ html:root:root:root:root[data-ui="console"] {
     font-weight: 500;
   }
 
-  // ---------------------------------------------------------------- settings
-  // Panel headings bring their icon back as an accent tile, so each section is easy to
-  // find while scanning a long settings page.
-  .card-heading > .card-icon,
-  :is(.stage-heading, .policy-heading) > :is(.stage-icon, .card-icon),
-  .detail-card__heading .card-icon {
-    display: inline-grid;
-    flex: none;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border: 0;
-    border-radius: var(--ui-radius-sm);
-    background: var(--ui-accent-bg);
-    box-shadow: none;
-    color: var(--ui-accent);
-    font-size: 15px;
-
-    + * { flex: 1 1 auto; }
+  // ---------------------------------------------------------- decorative icons
+  // Icons stay where they do a job: buttons and links, status (alive, error, done, the
+  // password checklist), info tooltips, empty states, navigation, and per-row icons that
+  // change with the item (alert metric, destination kind). Icons that only decorate a
+  // heading, repeat an option's label, repeat on every row, or draw a diagram beside text
+  // that already says the same thing are hidden. Every panel used to carry one, so none
+  // of them helped a reader find anything, and the green tiles were most of the colour
+  // noise on settings pages.
+  .card-icon,
+  .stage-icon,
+  .metric-card__heading .dashboard-card__icon,
+  .protocol-choice__icon,
+  .decision-row__icon,
+  .decision-icon,
+  .age-policy__icon,
+  .meta-icon,
+  .rotator-icon,
+  .source-auto-tags__icon,
+  .cleanup-threshold__topline > .icon,
+  .appearance-note > .icon,
+  .consequence-list .icon,
+  .failure-path,
+  .danger-boundary,
+  .access-visual,
+  .route-arrow,
+  .tag-manager__card-icon,
+  [data-slot="tabs-trigger"] > i.icon,
+  summary > span:first-child > i.icon:first-child {
+    display: none;
   }
 
-  .card-heading > .card-icon--danger {
-    background: rgba(239, 68, 68, 0.14);
-    color: #f87171;
-  }
+  // Space the icons used to hold closes up: protocol cards shrink to their label and
+  // state, and the deletion consequences read as plain lines below the description.
+  .protocol-choice { min-height: 0; }
+  .consequence-list { margin-top: 16px; }
+  .consequence-list li { display: block; }
 
-  // Selected protocols, enabled options, and chosen cards take a tinted frame, and their
-  // icon tile switches to the accent.
+  // Selected protocols, enabled options, and chosen cards take a tinted frame.
   :is(.protocol-choice, .decision-row, .limit-summary, .theme-choice).is-active,
   .choice-card--selected,
   .destination-choice--selected,
@@ -256,13 +274,6 @@ html:root:root:root:root[data-ui="console"] {
   .rule-card--active {
     border-color: rgba(var(--theme-primary-500-rgb), 0.5);
     background: rgba(var(--theme-primary-500-rgb), 0.08);
-  }
-
-  :is(.protocol-choice, .decision-row).is-active
-    :is(.protocol-choice__icon, .decision-row__icon) {
-    border-color: transparent;
-    background: var(--ui-accent-bg);
-    color: var(--ui-accent);
   }
 
   .protocol-choice.is-active .protocol-choice__copy strong,
@@ -322,17 +333,6 @@ html:root:root:root:root[data-ui="console"] {
     color: var(--ui-text-2);
     font-size: var(--ui-fs);
     font-weight: 500;
-
-    .dashboard-card__icon {
-      display: inline-grid;
-      place-items: center;
-      width: 28px;
-      height: 28px;
-      border-radius: var(--ui-radius-sm);
-      background: var(--ui-accent-bg);
-      color: var(--ui-accent);
-      font-size: 14px;
-    }
   }
 
   .metric-card__trend[hlmBadge] {
@@ -371,7 +371,7 @@ html:root:root:root:root[data-ui="console"] {
 
   // ------------------------------------------------------------- inventory
   .toolbar-action--delete [hlmBtn] {
-    border-color: rgba(248, 113, 113, 0.3);
+    border-color: color-mix(in srgb, var(--status-bad) 30%, transparent);
     background: transparent;
     color: var(--ui-danger-fg);
 

@@ -21,7 +21,7 @@ export class BulkScopeSelectorComponent {
   @Input() selectedTitle = 'Selected';
   @Input() selectedDescription = '';
   @Input() selectedDisabled = false;
-  @Input() accentColor = '#1cbb57';
+  @Input() accentColor = 'var(--status-good)';
 
   @Output() scopeChange = new EventEmitter<BulkActionScope>();
 
