@@ -125,7 +125,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   proxyHistoryRefreshing = signal(false);
   readonly kpiSkeletons = Array.from({ length: 3 });
   readonly historySkeletons = Array.from({ length: 6 });
-  readonly countrySkeletons = Array.from({ length: 5 });
+  readonly judgeSkeletons = Array.from({ length: 5 });
+  readonly legendSkeletons = Array.from({ length: 7 });
+  readonly reputationSkeletons = Array.from({ length: 4 });
+  readonly chartLines = Array.from({ length: 5 });
 
   constructor(
     private graphqlService: GraphqlService,

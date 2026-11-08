@@ -138,38 +138,167 @@ p {
 .dashboard-grid__latency { grid-column: 1 / -1; }
 .dashboard-grid__reputation { grid-column: 1 / -1; }
 
-.dashboard-skeleton-card {
+// ------------------------------------------------------------- skeleton
+// Mirrors the loaded cards: the same grid spans, flat panels, header rows, and chart
+// gridlines, so the page does not jump when data arrives. Bones are short, quiet bars.
+
+.skeleton-card {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 1.1rem;
-  padding: clamp(1.2rem, 2vw, 1.55rem);
-  border: 1px solid var(--dashboard-border);
-  border-radius: 1.25rem;
-  background: rgba(8, 8, 10, 0.82);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.09));
+  border-radius: var(--ui-radius, 8px);
+  background: var(--ui-panel, #161616);
 }
 
-.dashboard-skeleton-card--metric { grid-column: span 4; min-height: 12rem; }
-.dashboard-skeleton-card--wide { grid-column: span 8; min-height: 28rem; }
-.dashboard-skeleton-card--narrow { grid-column: span 4; min-height: 28rem; }
-.dashboard-skeleton-card--country { grid-column: span 7; min-height: 24rem; }
-.dashboard-skeleton-card--judge { grid-column: span 5; min-height: 24rem; }
-
-.skeleton-line {
+.skeleton-head {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
+  gap: 12px;
+  padding: var(--ui-head-pad, 16px 20px 0);
 }
 
-.dashboard-skeleton-list {
+.skeleton-head__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-head__tools {
+  display: flex;
+  gap: 6px;
+}
+
+.skeleton-body {
   display: flex;
   flex: 1;
+  min-width: 0;
   flex-direction: column;
-  gap: 0.72rem;
+  padding: var(--ui-pad, 18px 20px);
 }
 
-:host ::ng-deep .dashboard-skeleton hlm-skeleton {
-  background-color: rgba(255, 255, 255, 0.075);
+.bone {
+  flex: none;
+  height: 10px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.bone--title { width: 11rem; height: 14px; }
+.bone--subtitle { width: 18rem; max-width: 100%; height: 10px; }
+.bone--short { width: 8rem; }
+.bone--long { width: 14rem; max-width: 100%; }
+.bone--subtitle.bone--long { width: 26rem; }
+.bone--meta { width: 6rem; }
+.bone--control { width: 3.2rem; height: 28px; border-radius: var(--ui-radius-sm, 6px); }
+.bone--control.bone--wide { width: 6.5rem; }
+.bone--icon-button { width: 28px; height: 28px; border-radius: var(--ui-radius-sm, 6px); }
+.bone--tile { width: 28px; height: 28px; border-radius: var(--ui-radius-sm, 6px); }
+.bone--label { width: 6.5rem; height: 12px; }
+.bone--pill { width: 3rem; height: 20px; margin-left: auto; border-radius: var(--ui-radius-sm, 6px); }
+.bone--value { width: 7.5rem; height: 30px; margin-top: 10px; }
+.bone--axis { width: 1.8rem; height: 8px; }
+.bone--host { width: 9rem; max-width: 100%; height: 11px; }
+.bone--date { width: 5rem; height: 9px; }
+.bone--number { width: 2.8rem; height: 11px; }
+.bone--count { width: 1.6rem; height: 9px; }
+.bone--name { width: 7rem; max-width: 100%; height: 11px; }
+.bone--dot { width: 8px; height: 8px; border-radius: 50%; }
+.bone--total { width: 6rem; height: 28px; }
+.bone--bar { width: 100%; height: 0.55rem; margin: 14px 0 6px; border-radius: 999px; }
+
+// KPI tiles: label row, value, and a sparkline strip along the bottom edge.
+.skeleton-kpi {
+  padding: 16px 20px 0;
+  overflow: hidden;
+}
+
+.skeleton-kpi__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skeleton-kpi__spark {
+  height: 30px;
+  margin: 8px -20px 0;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.035), transparent);
+}
+
+// Chart areas: horizontal gridlines with a short axis label on each.
+.skeleton-chart {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.skeleton-chart__line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--ui-chart-grid, rgba(255, 255, 255, 0.06));
+  }
+}
+
+.skeleton-body--throughput { flex: none; height: 24rem; }
+
+.skeleton-frame {
+  border: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
+  border-radius: var(--ui-radius-sm, 6px);
+}
+
+.skeleton-frame--map { flex: 1; min-height: 20rem; }
+.skeleton-frame--latency { min-height: 22rem; padding: 16px; }
+.skeleton-frame--reputation { min-height: 17rem; padding: 16px; }
+
+.skeleton-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(10rem, 13rem);
+  gap: var(--ui-gap, 16px);
+}
+
+.skeleton-split--reputation { grid-template-columns: minmax(0, 1.1fr) minmax(12rem, 0.9fr); }
+
+.skeleton-legend {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 14px;
+}
+
+// List rows share the loaded cards' heights and dividers.
+.skeleton-row {
+  display: grid;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.065));
+}
+
+.skeleton-row__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-row--history { grid-template-columns: auto minmax(0, 1fr) auto; min-height: 3.2rem; }
+.skeleton-row--judge { grid-template-columns: auto minmax(0, 1fr) auto; min-height: 2.65rem; }
+.skeleton-row--legend { grid-template-columns: auto minmax(0, 1fr) auto; min-height: 2rem; }
+.skeleton-row--reputation { grid-template-columns: auto minmax(0, 1fr) auto; min-height: 3rem; }
+
+.skeleton-legend .skeleton-row:first-child { border-top: 0; }
+
+.skeleton-judge__summary {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 @container dashboard-page (max-width: 980px) {
@@ -180,12 +309,6 @@ p {
   .dashboard-grid__countries,
   .dashboard-grid__judges,
   .dashboard-grid__reputation { grid-column: 1 / -1; }
-
-  .dashboard-skeleton-card--metric { grid-column: span 6; }
-  .dashboard-skeleton-card--wide,
-  .dashboard-skeleton-card--narrow,
-  .dashboard-skeleton-card--country,
-  .dashboard-skeleton-card--judge { grid-column: 1 / -1; }
 }
 
 @container dashboard-page (max-width: 620px) {
@@ -195,6 +318,8 @@ p {
   .dashboard-context__identity { align-items: flex-start; }
   .dashboard-context__copy p { line-height: 1.5; }
   .dashboard-grid__kpi,
-  .dashboard-grid__kpi:nth-of-type(3),
-  .dashboard-skeleton-card--metric { grid-column: 1 / -1; }
+  .dashboard-grid__kpi:nth-of-type(3) { grid-column: 1 / -1; }
+  .skeleton-body--throughput { height: 19rem; }
+  .skeleton-split,
+  .skeleton-split--reputation { grid-template-columns: minmax(0, 1fr); }
 }
