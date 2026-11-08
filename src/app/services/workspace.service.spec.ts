@@ -91,6 +91,25 @@ describe('WorkspaceService', () => {
     window.localStorage.removeItem('magpie-workspace-id');
   });
 
+  it('reloads cached workspaces once they are older than the requested max age', () => {
+    const first = workspace(1, 'First');
+    const updated = {...first, name: 'Updated'};
+    getWorkspaces.and.returnValues(of([first]), of([updated]));
+    const now = Date.now();
+    const clock = spyOn(Date, 'now').and.returnValue(now);
+
+    service.load().subscribe();
+    service.load(false, 60_000).subscribe();
+    expect(getWorkspaces).toHaveBeenCalledTimes(1);
+
+    clock.and.returnValue(now + 61_000);
+    service.load().subscribe();
+    expect(getWorkspaces).toHaveBeenCalledTimes(1);
+    service.load(false, 60_000).subscribe();
+    expect(getWorkspaces).toHaveBeenCalledTimes(2);
+    expect(service.current()?.name).toBe('Updated');
+  });
+
   it('loads the new account workspaces after the session is reset', () => {
     const firstAccount = workspace(1, 'First account');
     const secondAccount = workspace(2, 'Second account');

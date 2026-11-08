@@ -3,7 +3,9 @@ import {HlmTabs, HlmTabsList, HlmTabsTrigger, HlmTabsContent} from '@spartan-ng/
 import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {DialogComponent} from '../shared/ui/dialog.component';
 import {CommonModule, DatePipe, DecimalPipe, TitleCasePipe} from '@angular/common';
-import {Component, OnInit, computed, signal} from '@angular/core';
+import {Component, DestroyRef, OnInit, computed, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {interval} from 'rxjs';
 import {FormsModule} from '@angular/forms';
 
 import {finalize, switchMap} from 'rxjs/operators';
@@ -24,6 +26,12 @@ import {formatApproximateDuration} from '../shared/cadence-format';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
 
 type WorkspaceSection = 'overview' | 'members' | 'settings';
+
+/**
+ * How long workspace data, including metered allowance usage, may be shown
+ * before the page reloads it. The backend recomputes cadence every minute.
+ */
+export const WORKSPACE_USAGE_MAX_AGE_MS = 60_000;
 
 type InvitationRole = WorkspaceInvitation['role'];
 
@@ -197,13 +205,23 @@ export class WorkspaceComponent implements OnInit {
     private readonly notification: NotificationService,
   ) {}
 
+  private readonly destroyRef = inject(DestroyRef);
+
   ngOnInit(): void {
     this.loadWorkspace();
+    // Usage and cadence change while the page is open. Reload them in the
+    // background without resetting drafts the user is editing.
+    interval(WORKSPACE_USAGE_MAX_AGE_MS).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+      this.workspaces.load(false, WORKSPACE_USAGE_MAX_AGE_MS).subscribe({error: () => undefined});
+    });
   }
 
   loadWorkspace(force = false): void {
     this.workspaceError.set(null);
-    this.workspaces.load(force).subscribe({
+    this.workspaces.load(force, WORKSPACE_USAGE_MAX_AGE_MS).subscribe({
       next: () => this.syncCurrentWorkspace(),
       error: error => this.workspaceError.set(this.errorMessage(error)),
     });

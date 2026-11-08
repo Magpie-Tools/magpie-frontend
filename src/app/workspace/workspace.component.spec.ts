@@ -9,7 +9,7 @@ import {
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
-import {WorkspaceComponent} from './workspace.component';
+import {WORKSPACE_USAGE_MAX_AGE_MS, WorkspaceComponent} from './workspace.component';
 
 describe('WorkspaceComponent', () => {
   let component: WorkspaceComponent;
@@ -324,6 +324,28 @@ describe('WorkspaceComponent', () => {
     component.cadenceDrafts.checks = {mode: 'automatic', value: 1, unit: 'hours'};
     expect(component.cadenceError('checks')).toContain('choose a fixed interval');
 
+  });
+
+  it('reloads usage in the background without discarding interval drafts', () => {
+    jasmine.clock().install();
+    try {
+      const service = TestBed.inject(WorkspaceService);
+      const load = spyOn(service, 'load').and.returnValue(of([workspace]));
+      const background = TestBed.createComponent(WorkspaceComponent);
+      background.detectChanges();
+      background.componentInstance.cadenceDrafts.checks = {mode: 'fixed', value: 10, unit: 'minutes'};
+      load.calls.reset();
+
+      jasmine.clock().tick(WORKSPACE_USAGE_MAX_AGE_MS);
+      expect(load).toHaveBeenCalledOnceWith(false, WORKSPACE_USAGE_MAX_AGE_MS);
+      expect(background.componentInstance.cadenceDrafts.checks).toEqual({mode: 'fixed', value: 10, unit: 'minutes'});
+
+      background.destroy();
+      jasmine.clock().tick(WORKSPACE_USAGE_MAX_AGE_MS);
+      expect(load).toHaveBeenCalledTimes(1);
+    } finally {
+      jasmine.clock().uninstall();
+    }
   });
 
   it('keeps the workspace tab strip at the compact global-tab height', () => {
