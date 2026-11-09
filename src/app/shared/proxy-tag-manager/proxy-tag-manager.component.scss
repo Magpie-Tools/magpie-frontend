@@ -1,420 +1,281 @@
+// The tag manager follows the alert dialogs (alerts-dialogs.component.scss): flat sections
+// with a small heading, split by a rule, and the actions in the footer. The Console skin
+// supplies the field, button, and hint colours, so this file is mostly layout.
 :host {
   display: block;
-  color: #f7f5f7;
-  font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
-}
-
-.proxy-dialog-heading,
-.tag-manager__heading {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.85rem;
-}
-
-.proxy-dialog-heading strong {
-  color: rgba(255, 255, 255, 0.98);
-  font-size: 1.35rem;
-  font-weight: 580;
-  letter-spacing: -0.045em;
-  line-height: 1.2;
-}
-
-.proxy-dialog-heading__icon,
-.tag-manager__card-icon,
-.tag-manager__state-icon {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.045);
-  color: var(--theme-primary-200);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.proxy-dialog-heading__icon {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 0.9rem;
-  background: linear-gradient(145deg, rgba(var(--theme-primary-500-rgb), 0.2), rgba(202, 153, 190, 0.12));
-  font-size: 1rem;
 }
 
 .tag-manager {
-  --card-border: rgba(239, 229, 237, 0.15);
-  --card-muted: rgba(222, 215, 222, 0.59);
-  container: tag-manager / inline-size;
-  padding: 1.25rem;
-}
-
-.tag-manager h3,
-.tag-manager p { margin: 0; }
-
-.tag-manager .tag-manager__policy {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  padding: 0.8rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 0.85rem;
-  background: rgba(var(--theme-primary-500-rgb), 0.035);
-  color: var(--card-muted);
-  font-size: 0.8125rem;
-  line-height: 1.6;
-
-  i { flex: 0 0 auto; margin-top: 0.25rem; color: var(--theme-primary-300); }
-}
-
-.tag-manager__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(19rem, 1fr);
-  align-items: start;
-  gap: 0.9rem;
+  color: var(--ui-text-2, rgba(255, 255, 255, 0.8));
+  font-size: var(--ui-fs, 0.8125rem);
 }
 
-.tag-manager__panel {
+.tag-form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.form-step {
+  display: grid;
   min-width: 0;
-  padding: 1.25rem;
-  border: 1px solid var(--card-border);
-  border-radius: 1rem;
-  background: rgba(8, 8, 10, 0.82);
-  transition: border-color 0.2s ease;
-
-  &:focus-within { border-color: rgba(var(--theme-primary-300-rgb), 0.3); }
-}
-
-.tag-manager__section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.tag-manager__heading h3 {
-  color: rgba(255, 255, 255, 0.96);
-  font-size: 1rem;
-  font-weight: 580;
-  letter-spacing: -0.025em;
-}
-
-.tag-manager__card-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.8rem;
-  font-size: 0.9rem;
-}
-
-.tag-manager__count {
-  flex: 0 0 auto;
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--card-muted);
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.tag-manager__list {
-  display: grid;
   gap: 0.6rem;
-  margin: 1.25rem 0 0;
-  padding: 0;
-  list-style: none;
-  overscroll-behavior-y: contain;
 }
 
-.tag-manager__row {
+.form-step + .form-step {
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
+}
+
+.form-step__heading {
   display: flex;
-  min-width: 0;
+  min-height: 1.75rem;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.85rem;
-  background: rgba(255, 255, 255, 0.025);
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  gap: 0.55rem;
 
-  &:hover { border-color: rgba(255, 255, 255, 0.2); }
+  h3 {
+    margin: 0;
+    color: var(--ui-text, #fff);
+    font-size: var(--ui-fs, 0.8rem);
+    font-weight: 550;
+    letter-spacing: 0;
+  }
+
+  h3 label { cursor: default; }
 }
 
-.tag-manager__row--editing {
-  border-color: rgba(var(--theme-primary-300-rgb), 0.4);
-  background: rgba(var(--theme-primary-500-rgb), 0.055);
+.form-step__action {
+  margin-left: auto;
 }
 
-.tag-manager__row--deleting { border-color: rgba(239, 167, 167, 0.24); }
-
-.tag-manager__identity {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  align-items: center;
-  gap: 0.65rem;
+.field-hint {
+  margin: 0;
+  color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+  font-size: var(--ui-fs-xs, 0.72rem);
+  line-height: 1.45;
 }
 
-.tag-manager__tag-icon {
+.field-hint--box {
+  padding: 0.7rem 0.8rem;
+  border: 1px dashed var(--ui-line-strong, rgba(255, 255, 255, 0.16));
+  border-radius: var(--ui-radius-sm, 0.6rem);
+}
+
+.tag-count {
+  padding: 0 0.4rem;
+  border-radius: var(--ui-badge-radius, 0.3rem);
+  background: var(--ui-inset, rgba(255, 255, 255, 0.05));
+  color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+  font-family: var(--ui-font-mono, inherit);
+  font-size: var(--ui-fs-xs, 0.7rem);
+  line-height: 1.5;
+}
+
+.button {
   display: inline-flex;
-  width: 2.15rem;
-  height: 2.15rem;
-  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  border: 1px solid color-mix(in srgb, var(--tag-color) 30%, transparent);
-  border-radius: 0.7rem;
-  background: color-mix(in srgb, var(--tag-color) 10%, transparent);
-  color: color-mix(in srgb, var(--tag-color) 75%, white);
-  font-size: 0.8rem;
+  gap: 0.4rem;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: 2px;
+  }
 }
 
-.tag-manager__identity-copy { min-width: 0; }
+// ------------------------------------------------------------------ list view
+.tag-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: var(--ui-radius-sm, 0.6rem);
+  list-style: none;
 
-.tag-manager__name {
+  li + li { border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06)); }
+}
+
+// Each row opens the tag in the form view, so the whole row is the button.
+.tag-row {
+  display: grid;
+  width: 100%;
+  min-height: 2.6rem;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover { background: var(--ui-hover, rgba(255, 255, 255, 0.04)); }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: -2px;
+  }
+
+  &:hover .tag-row__chevron,
+  &:focus-visible .tag-row__chevron { color: var(--ui-text-2, rgba(255, 255, 255, 0.8)); }
+}
+
+.tag-row__swatch {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: var(--tag-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tag-color) 22%, transparent);
+}
+
+.tag-row__name {
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.8rem;
-  font-weight: 550;
+  color: var(--ui-text, #fff);
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.tag-manager__hex {
-  margin-top: 0.2rem;
-  color: var(--card-muted);
-  font: 0.65rem "Geist Mono", "SFMono-Regular", Consolas, monospace;
+.tag-row__hex,
+.tag-preview__hex {
+  color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+  font-family: var(--ui-font-mono, inherit);
+  font-size: var(--ui-fs-xs, 0.7rem);
 }
 
-.tag-manager__fields {
-  display: grid;
-  gap: 1rem;
-  margin-top: 1.25rem;
+.tag-row__chevron {
+  color: var(--ui-text-3, rgba(255, 255, 255, 0.4));
+  font-size: 0.7rem;
 }
 
-.tag-manager__field {
-  display: grid;
-  min-width: 0;
-  gap: 0.4rem;
-
-  label { color: rgba(255, 255, 255, 0.72); font-size: 0.8125rem; font-weight: 550; }
-
-  input[type="text"] {
-    width: 100%;
-    min-height: 2.65rem;
-    padding: 0.65rem 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.13);
-    border-radius: 0.75rem;
-    background: rgba(255, 255, 255, 0.035);
-    color: rgba(255, 255, 255, 0.88);
-    font: inherit;
-    font-size: 0.84rem;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-    &::placeholder { color: rgba(222, 215, 222, 0.62); }
-    &:hover { border-color: rgba(255, 255, 255, 0.23); }
-    &:focus { border-color: rgba(var(--theme-primary-300-rgb), 0.55); box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13); }
-    &:disabled { cursor: not-allowed; opacity: 0.4; }
-  }
-}
-
-.tag-manager__color-control {
+// ------------------------------------------------------------------ form view
+.color-picker {
   display: flex;
-  min-height: 2.65rem;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.035);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
 
-  &:hover { border-color: rgba(255, 255, 255, 0.23); }
-  &:focus-within { border-color: rgba(var(--theme-primary-300-rgb), 0.55); box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.13); }
-  &.is-disabled { opacity: 0.4; }
+.color-swatch {
+  position: relative;
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--tag-color, transparent) 60%, var(--ui-line-strong, rgba(255, 255, 255, 0.2)));
+  border-radius: 999px;
+  background: var(--tag-color, var(--ui-inset, rgba(255, 255, 255, 0.05)));
+  cursor: pointer;
+
+  &:hover { transform: scale(1.06); }
+
+  &:focus-visible,
+  &:has(input:focus-visible) {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: 2px;
+  }
+
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+
+.color-swatch--selected {
+  box-shadow: 0 0 0 2px var(--ui-panel, #171717), 0 0 0 4px var(--ui-text, #fff);
+}
+
+// The custom swatch wraps a native colour input; the input fills it invisibly.
+.color-swatch--custom {
+  border-style: dashed;
+  color: var(--ui-text-2, rgba(255, 255, 255, 0.8));
+  font-size: 0.7rem;
 
   input {
-    width: 2rem;
-    height: 1.65rem;
-    flex: 0 0 auto;
-    padding: 0;
-    border: 0;
-    border-radius: 0.35rem;
-    background: transparent;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
     cursor: pointer;
-
-    &::-webkit-color-swatch-wrapper { padding: 0; }
-    &::-webkit-color-swatch { border: 0; border-radius: 0.35rem; }
-    &::-moz-color-swatch { border: 0; border-radius: 0.35rem; }
-    &:disabled { cursor: not-allowed; }
   }
 
-  > span { color: rgba(255, 255, 255, 0.72); font: 0.72rem "Geist Mono", "SFMono-Regular", Consolas, monospace; }
-  > i { margin-left: auto; color: var(--card-muted); font-size: 0.85rem; }
+  i { pointer-events: none; }
 }
 
-.tag-manager__preview {
+.color-swatch--custom.color-swatch--selected i {
+  color: #fff;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.6));
+}
+
+.tag-preview {
   display: flex;
-  min-width: 0;
-  min-height: 3.25rem;
   align-items: center;
-  justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.65rem 0.75rem;
-  border: 1px dashed rgba(255, 255, 255, 0.12);
-  border-radius: 0.75rem;
-
-  > span:first-child { color: var(--card-muted); font-size: 0.75rem; }
 }
 
-.tag-manager__chip {
+.tag-chip {
   display: inline-flex;
-  min-width: 0;
+  max-width: 100%;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--tag-color) 48%, transparent);
+  gap: 0.4rem;
+  padding: 0.15rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--tag-color) 45%, transparent);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--tag-color) 13%, transparent);
-  color: #e5e7eb;
-  font-size: 0.8125rem;
+  background: color-mix(in srgb, var(--tag-color) 14%, transparent);
+  color: var(--ui-text, #fff);
+  font-size: var(--ui-fs-sm, 0.75rem);
+  vertical-align: middle;
 }
 
-.tag-manager__swatch { width: 0.4rem; height: 0.4rem; flex: 0 0 auto; border-radius: 50%; background: var(--tag-color); }
-.tag-manager__chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.tag-manager__editor-actions,
-.tag-manager__row-actions {
-  display: flex;
+.tag-chip__swatch {
+  width: 0.45rem;
+  height: 0.45rem;
   flex: 0 0 auto;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.4rem;
+  border-radius: 999px;
+  background: var(--tag-color);
 }
 
-.tag-manager__editor-actions {
-  margin-top: 1.2rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.tag-manager__button,
-.tag-manager__icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  border: 1px solid transparent;
-  border-radius: 0.75rem;
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 550;
-  cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
-  &:focus-visible { outline: 2px solid var(--theme-primary-300); outline-offset: 3px; }
-}
-
-.tag-manager__button { min-height: 2.55rem; padding: 0.58rem 0.85rem; white-space: nowrap; }
-.tag-manager__button--compact { min-height: 2.15rem; padding: 0.4rem 0.65rem; font-size: 0.75rem; }
-.tag-manager__button--primary { border-color: rgba(var(--theme-primary-300-rgb), 0.4); background: linear-gradient(135deg, var(--theme-primary-600), var(--theme-primary-800)); color: #fff; box-shadow: 0 10px 22px rgba(var(--theme-primary-500-rgb), 0.16); }
-.tag-manager__button--primary:not(:disabled):hover { border-color: rgba(var(--theme-primary-200-rgb), 0.6); transform: translateY(-1px); box-shadow: 0 14px 28px rgba(var(--theme-primary-500-rgb), 0.24); }
-.tag-manager__button--quiet { border-color: rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.035); color: rgba(255, 255, 255, 0.7); }
-.tag-manager__button--quiet:not(:disabled):hover { border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.07); color: #fff; }
-.tag-manager__button--danger { border-color: color-mix(in srgb, var(--status-bad) 32%, transparent); background: rgba(132, 43, 43, 0.95); color: #fff; }
-.tag-manager__button--danger:not(:disabled):hover { background: rgba(158, 51, 51, 0.98); }
-.tag-manager__icon-button { width: 2.15rem; height: 2.15rem; border-color: rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.025); color: var(--card-muted); }
-.tag-manager__icon-button:not(:disabled):hover { border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.07); color: #fff; }
-.tag-manager__icon-button--danger:not(:disabled):hover { border-color: color-mix(in srgb, var(--status-bad) 25%, transparent); background: rgba(132, 43, 43, 0.12); color: #efa7a7; }
-
-.tag-manager__delete-confirm {
-  display: grid;
-  width: 100%;
-  gap: 0.65rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(239, 167, 167, 0.15);
-  color: #efa7a7;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-}
-
-.tag-manager__empty {
-  display: flex;
-  min-height: 19rem;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.7rem;
-  padding: 2rem 0.5rem;
-  text-align: center;
-
-  strong { color: rgba(255, 255, 255, 0.9); font-size: 0.84rem; font-weight: 580; }
-  p { max-width: 18rem; color: var(--card-muted); font-size: 0.8125rem; line-height: 1.6; }
-}
-
-.tag-manager__state-icon { width: 3rem; height: 3rem; margin-bottom: 0.25rem; border-radius: 1rem; font-size: 1.1rem; }
-
-::ng-deep .proxy-tag-manager-dialog.app-dialog-panel {
+.tag-chip__name {
   overflow: hidden;
-  border: 1px solid rgba(239, 229, 237, 0.15);
-  border-radius: 1.2rem;
-  background: #09090b;
-  color: #f7f5f7;
-  font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
-  box-shadow: 0 32px 86px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-::ng-deep .proxy-tag-manager-dialog .app-dialog-header {
-  padding: 1.25rem 4rem 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-  background: transparent;
+// ---------------------------------------------------------------- delete view
+.tag-delete {
+  display: grid;
+  gap: 0.6rem;
+
+  p { margin: 0; }
 }
 
-::ng-deep .proxy-tag-manager-dialog .app-dialog-body { padding: 0; background: transparent; color: inherit; }
-
-::ng-deep .proxy-tag-manager-dialog [data-slot="dialog-close"] {
-  top: 1.5rem;
-  right: 1.25rem;
-  width: 2.3rem;
-  height: 2.3rem;
-  border-radius: 0.75rem;
-  color: rgba(222, 215, 222, 0.59);
-
-  &:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
-  &:focus-visible { outline: 2px solid var(--theme-primary-300); outline-offset: 3px; }
+// --------------------------------------------------------------------- footer
+.tag-manager__actions {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
-@container tag-manager (max-width: 720px) {
-  .tag-manager__layout { grid-template-columns: minmax(0, 1fr); }
-  .tag-manager__empty { min-height: 11rem; }
+// Delete sits apart on the left, away from the save action. The Console skin colours it.
+.tag-manager__delete {
+  margin-right: auto;
 }
 
-@media (max-width: 520px) {
-  .proxy-dialog-heading { gap: 0.65rem; }
-  .proxy-dialog-heading strong { font-size: 1.15rem; }
-  .proxy-dialog-heading__icon { width: 2.5rem; height: 2.5rem; border-radius: 0.8rem; }
-  .tag-manager { padding: 0.8rem; }
-  .tag-manager__panel { padding: 1rem; }
-  .tag-manager__heading { gap: 0.6rem; }
-  .tag-manager__heading h3 { font-size: 0.9rem; }
-  .tag-manager__row { padding: 0.7rem; gap: 0.5rem; }
-  .tag-manager__editor-actions .tag-manager__button { flex: 1; }
-
-  ::ng-deep .proxy-tag-manager-dialog .app-dialog-header { padding: 1rem 3.5rem 1rem 1rem; }
-  ::ng-deep .proxy-tag-manager-dialog [data-slot="dialog-close"] { top: 1.1rem; right: 0.8rem; }
+@media (max-width: 480px) {
+  .tag-row__hex { display: none; }
+  .tag-row { grid-template-columns: auto minmax(0, 1fr) auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tag-manager__panel,
-  .tag-manager__row,
-  .tag-manager__field input,
-  .tag-manager__color-control,
-  .tag-manager__button,
-  .tag-manager__icon-button { transition: none; }
-  .tag-manager__button:hover { transform: none; }
-  .icon-spin { animation: none; }
+  .color-swatch:hover { transform: none; }
 }

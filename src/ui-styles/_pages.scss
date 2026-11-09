@@ -11,10 +11,10 @@ $contexts: '.account-context, .admin-context, .checker-context, .alerts-context,
 $cards: '.settings-card, .account-card, .alert-panel, .workspace-card, .notification-card, .invitation-card, .accepted-notice, .detail-card, .read-only-card, .policy-card, .route-stage, .fleet-section, .summary-dock, .plugin-panel, .page-load-error, .page-error, .export-card, .delete-card';
 
 // Boxes nested inside panels.
-$inner: '.theme-choice, .password-feedback, .entry-row, .protocol-choice, .decision-row, .judge-row, .scrape-site-row, .performance-summary, .cadence-summary, .limit-summary, .cleanup-threshold, .empty-state, .state-card, .release-card, .invitation-row, .plugin-card, .meta-card, .destination-choice, .destination-row, .master-toggle, .policy-note, .guide-note, .inline-notice, .error-note, .form-alert, .filter-panel, .column-picker__section, .bulk-scope-option, .dialog-section, .plan-accordions details, .list-empty--bordered, .quota-visual, .age-policy, .credential-state, .security-policy, .fetch-mode, .source-auto-tags, .incident-content, .dialog-warning, .connection-panel, .rotator-card, .rule-card, .tag-manager__panel, .bulk-dialog-intro, .country-hover-card, .destination-hover-card';
+$inner: '.theme-choice, .password-feedback, .entry-row, .protocol-choice, .decision-row, .judge-row, .scrape-site-row, .performance-summary, .cadence-summary, .limit-summary, .cleanup-threshold, .empty-state, .state-card, .release-card, .invitation-row, .plugin-card, .meta-card, .destination-choice, .destination-row, .master-toggle, .policy-note, .guide-note, .inline-notice, .error-note, .form-alert, .filter-panel, .column-picker__section, .bulk-scope-option, .dialog-section, .plan-accordions details, .list-empty--bordered, .quota-visual, .age-policy, .credential-state, .security-policy, .fetch-mode, .source-auto-tags, .incident-content, .dialog-warning, .connection-panel, .rotator-card, .rule-card, .bulk-dialog-intro, .country-hover-card, .destination-hover-card';
 
 // Decorative icon tiles.
-$icon-tiles: '.protocol-choice__icon, .decision-row__icon, .decision-icon, .section-icon, .meta-icon, .metric-icon, .channel-icon, .dialog-icon, .error-icon, .age-policy__icon, .credential-state__icon, .fetch-mode__icon, .source-auto-tags__icon, .rotator-icon, .accepted-icon, .page-load-error__icon, .bulk-dialog-heading__icon, .proxy-dialog-heading__icon, .bulk-dialog-intro__icon, .state-icon, .stage-icon, .tag-manager__state-icon, .tag-manager__card-icon, .empty-inventory__icon, .judge-index, .entry-index';
+$icon-tiles: '.protocol-choice__icon, .decision-row__icon, .decision-icon, .section-icon, .meta-icon, .metric-icon, .channel-icon, .dialog-icon, .error-icon, .age-policy__icon, .credential-state__icon, .fetch-mode__icon, .source-auto-tags__icon, .rotator-icon, .accepted-icon, .page-load-error__icon, .bulk-dialog-heading__icon, .bulk-dialog-intro__icon, .state-icon, .stage-icon, .empty-inventory__icon, .judge-index, .entry-index';
 
 // Text inputs and select triggers. Wrappers that frame a bare input are listed too.
 $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger"], [data-slot="native-select"], .number-with-unit, .input-with-unit, .country-search';
@@ -498,7 +498,6 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
   .save-settings-button,
   .dialog-button[hlmBtn],
   .source-button[hlmBtn],
-  .tag-manager__button,
   .ui-button-outlined,
   .ui-button-secondary {
     min-height: var(--ui-control-h);
@@ -536,12 +535,19 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
     color: var(--ui-text-2);
   }
 
+  // The tag manager's Delete is a quiet button in the danger colour.
+  .button--quiet.tag-manager__delete {
+    color: var(--ui-danger-fg);
+
+    i,
+    .icon { color: var(--ui-danger-fg); }
+  }
+
   .button--primary,
   :is(.proxy-add-dialog, .scrape-source-add-dialog) .dialog-button--primary[hlmBtn],
   .save-button[hlmBtn],
   .save-settings-button,
   .create-button[hlmBtn],
-  .tag-manager__button--primary,
   .ui-button-success,
   .auth-shell [hlmBtn] {
     border-color: var(--ui-primary-bg);
@@ -561,8 +567,7 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
 
   .button--danger,
   :is(.delete-proxies-dialog, .delete-sources-dialog) .dialog-button--danger[hlmBtn],
-  .requeue-button[hlmBtn],
-  .tag-manager__button--danger {
+  .requeue-button[hlmBtn] {
     border-color: color-mix(in srgb, var(--status-bad) 30%, transparent);
     background: var(--ui-danger-bg);
     color: var(--ui-danger-fg);
@@ -576,7 +581,6 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
 
   .icon-button,
   .icon-action,
-  .tag-manager__icon-button,
   .search-clear {
     border-radius: var(--ui-radius-sm);
     transform: none;
