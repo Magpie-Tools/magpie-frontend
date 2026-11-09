@@ -7,13 +7,8 @@
   triggerStyleClass="ui-button-danger"
   [triggerDisabled]="!hasAnySources()"
   headingTitle="Delete scrape sources"
-  headingIcon="icon icon-triangle-alert"
-  headingTooltip="Delete scrape sources in bulk with an optional filter. This action cannot be undone."
+  width="40rem"
   tone="danger"
-  introIcon="icon icon-lock"
-  introTitle="Deleted sources cannot be restored"
-  [selectedCount]="selectedSources.length"
-  footerNote="This action cannot be undone."
   [actionLabel]="actionLabel"
   [confirmLabel]="confirmLabel"
   actionIcon="icon icon-trash"
@@ -27,16 +22,10 @@
   (actionRequested)="submitDelete()"
   (hidden)="onDialogHide()"
 >
-  <section class="dialog-section" aria-labelledby="delete-source-scope-title">
-    <div class="section-heading">
-      <div>
-        <h3 id="delete-source-scope-title">Sources to delete</h3>
-        <p>
-          Delete the highlighted sources or every source that matches the
-          optional filters.
-        </p>
-      </div>
-    </div>
+  <section class="form-step" aria-labelledby="delete-source-scope-title">
+    <header class="form-step__heading">
+      <h3 id="delete-source-scope-title">Sources to delete</h3>
+    </header>
     <app-bulk-scope-selector
       [(scope)]="deleteOption"
       radioName="deleteSourceOption"
@@ -44,43 +33,36 @@
       selectedInputId="deleteSelectedSources"
       [allTitle]="allScopeTitle"
       allDescription="Delete every scrape source in this workspace, or only those matching the filters below."
-      selectedTitle="Selected sources"
+      [selectedTitle]="'Selected sources (' + selectedSources.length + ')'"
       selectedDescription="Delete only the sources highlighted in the table."
       [selectedDisabled]="!canDeleteSelected()"
       accentColor="var(--theme-primary-400)"
     ></app-bulk-scope-selector>
   </section>
 
-  <div [formGroup]="deleteForm">
-    <section class="dialog-section delete-card">
-      <div class="section-heading section-heading--split">
-        <div>
-          <h3>Filters</h3>
-          <p>
-            Enable filters to narrow the chosen scope before sources are
-            removed.
-          </p>
-        </div>
-        <app-checkbox
-          label="Enable filters"
-          formControlName="filter"
-        ></app-checkbox>
-      </div>
+  <section class="form-step" [formGroup]="deleteForm" aria-labelledby="delete-source-scope-title-filters">
+    <header class="form-step__heading">
+      <h3 id="delete-source-scope-title-filters">Filters</h3>
+      <span class="optional-label">Optional</span>
+      <app-checkbox
+        class="form-step__action"
+        label="Enable filters"
+        formControlName="filter"
+      ></app-checkbox>
+    </header>
 
-      @if (deleteForm.get("filter")?.value) {
-        <app-scrape-source-filter-panel
-          class="delete-filter-panel"
-          [form]="deleteForm"
-          [floating]="false"
-          [showHeader]="false"
-          (clear)="clearDeleteFilters()"
-        ></app-scrape-source-filter-panel>
-      } @else {
-        <div class="filter-disabled-copy">
-          <i class="icon icon-filter-x" aria-hidden="true"></i> No additional
-          filters will be applied.
-        </div>
-      }
-    </section>
-  </div>
+    @if (deleteForm.get("filter")?.value) {
+      <app-scrape-source-filter-panel
+        class="delete-filter-panel"
+        [form]="deleteForm"
+        [floating]="false"
+        [showHeader]="false"
+        (clear)="clearDeleteFilters()"
+      ></app-scrape-source-filter-panel>
+    } @else {
+      <p class="field-hint">
+        No filters. Everything in the chosen scope is deleted.
+      </p>
+    }
+  </section>
 </app-bulk-action-dialog>

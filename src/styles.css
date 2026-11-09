@@ -526,6 +526,11 @@ app-select [data-slot="select-trigger"] > ng-icon { flex-shrink: 0; }
 
 /* Keep actions visible while long forms and filter lists scroll inside the body. */
 [data-slot="dialog-content"].app-dialog-panel { display: flex; flex-direction: column; overflow: hidden; gap: 0; }
+/* The CDK centres a dialog in afterNextRender, which this zoneless app runs on the next tick.
+   Without a later tick (a dialog opened while a request is pending) it stays in the top-left
+   corner, so centre app dialogs from the first frame. The CDK writes the same values later. */
+.cdk-global-overlay-wrapper:has(> .cdk-overlay-pane .app-dialog-panel) { justify-content: center; align-items: center; }
+.cdk-global-overlay-wrapper:has(> .cdk-overlay-pane .app-dialog-panel) > .cdk-overlay-pane { position: static; }
 
 /* Shared table refresh indicator. Absolute positioning keeps rows in place. */
 .table-progress {

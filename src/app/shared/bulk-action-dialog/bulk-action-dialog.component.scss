@@ -189,6 +189,66 @@
     input { accent-color: var(--status-bad); }
   }
 
+  // Flat sections, as in the alert dialogs: a small heading over the content, with a rule
+  // between sections instead of a box around each one. Used by the delete dialogs.
+  .bulk-dialog-body:has(> .form-step) {
+    gap: 1.1rem;
+  }
+
+  .bulk-dialog-body .form-step {
+    display: grid;
+    min-width: 0;
+    gap: 0.6rem;
+  }
+
+  .bulk-dialog-body > .form-step + .form-step {
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
+  }
+
+  .bulk-dialog-body .form-step__heading {
+    display: flex;
+    min-height: 1.75rem;
+    align-items: center;
+    gap: 0.55rem;
+
+    h3 {
+      margin: 0;
+      color: var(--ui-text, #fff);
+      font-size: var(--ui-fs, 0.8rem);
+      font-weight: 550;
+      letter-spacing: 0;
+    }
+
+    .optional-label {
+      color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+      font-size: var(--ui-fs-xs, 0.75rem);
+      font-weight: 400;
+    }
+  }
+
+  .bulk-dialog-body .form-step__action {
+    margin-left: auto;
+  }
+
+  .bulk-dialog-body .form-step .field-hint {
+    margin: 0;
+    color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+    font-size: var(--ui-fs-xs, 0.72rem);
+    line-height: 1.45;
+  }
+
+  // The acknowledgement becomes a plain checkbox row closing the form.
+  .bulk-dialog-body:has(> .form-step) > .bulk-dialog-confirm {
+    padding: 1.1rem 0 0;
+    border: 0;
+    border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
+    border-radius: 0;
+    background: transparent;
+    color: var(--ui-text-2, rgba(255, 255, 255, 0.8));
+    font-size: var(--ui-fs-sm, 0.8125rem);
+  }
+
   .filter-disabled-copy {
     display: flex;
     align-items: center;

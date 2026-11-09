@@ -11,7 +11,6 @@ import {ProxyTagService} from '../../../services/proxy-tag.service';
 import {ProxyTagSelectorComponent} from '../../../shared/proxy-tag-selector/proxy-tag-selector.component';
 import {ProxyTagManagerComponent} from '../../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {ProxyTag} from '../../../models/ProxyTag';
-import {animateDialogSections} from '../../../shared/dialog-motion';
 import {BulkActionDialogComponent} from '../../../shared/bulk-action-dialog/bulk-action-dialog.component';
 import {ImportDialogContentComponent} from '../../../shared/import-dialog-content/import-dialog-content.component';
 
@@ -111,10 +110,6 @@ export class AddProxiesComponent {
     this.tagService.load().subscribe({
       error: err => this.notification.showError('Could not load proxy tags: ' + this.getUploadErrorMessage(err)),
     });
-  }
-
-  animateDialog(dialogClass: string): void {
-    animateDialogSections(dialogClass);
   }
 
   closeDialog(): void {

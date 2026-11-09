@@ -77,7 +77,6 @@
     [item]="'proxies'"
     [showDetailsButton]="hasUploadDetails()"
     [autoCloseOnSuccess]="!hasUploadDetails()"
-    [hideOverlay]="detailsVisible()"
     (closed)="onPopupClose()"
     (detailsRequested)="openDetails()"
   ></app-procesing-popup>
@@ -87,72 +86,54 @@
   [visible]="detailsVisible()"
   (visibleChange)="detailsVisible.set($event)"
   styleClass="proxy-upload-details-dialog"
-  (onShow)="animateDialog('proxy-upload-details-dialog')"
   [panelStyle]="{ width: '34rem' }"
 >
-  <ng-template #dialogHeader>
-    <div class="proxy-dialog-heading">
-      <span class="proxy-dialog-heading__icon"
-        ><i class="icon icon-chart-no-axes-column" aria-hidden="true"></i
-      ></span>
-      <div class="proxy-dialog-heading__copy">
-        <span>Import report</span>
-        <strong>Upload details</strong>
-      </div>
-    </div>
-  </ng-template>
+  <ng-template #dialogHeader>Upload details</ng-template>
 
-  <div class="proxy-dialog-body upload-details">
-    @if (uploadDetails()) {
-      <div class="upload-details__summary">
-        <span>{{ addedProxyCount() }}</span>
+  <div class="upload-details">
+    @if (uploadDetails(); as details) {
+      <section class="upload-details__summary">
+        <span class="upload-details__count">{{ addedProxyCount() }}</span>
         <div>
-          <strong>Proxies added</strong
-          ><small
-            >Processed in
-            {{ formatDuration(uploadDetails()?.processingMs) }}</small
-          >
+          <strong>{{ addedProxyCount() === 1 ? 'Proxy' : 'Proxies' }} added</strong>
+          <small>Processed in {{ formatDuration(details.processingMs) }}</small>
         </div>
-      </div>
+      </section>
       <dl class="upload-details__grid">
         <div>
           <dt>Total entries</dt>
-          <dd>{{ uploadDetails()?.submittedCount }}</dd>
+          <dd>{{ details.submittedCount }}</dd>
         </div>
         <div>
           <dt>Parsed valid</dt>
-          <dd>{{ uploadDetails()?.parsedCount }}</dd>
+          <dd>{{ details.parsedCount }}</dd>
         </div>
         <div>
           <dt>Blacklisted</dt>
-          <dd>{{ uploadDetails()?.blacklistedCount }}</dd>
+          <dd>{{ details.blacklistedCount }}</dd>
         </div>
         <div>
           <dt>Invalid address</dt>
-          <dd>
-            {{
-              uploadDetails()?.invalidAddressCount ??
-                uploadDetails()?.invalidIpCount
-            }}
-          </dd>
+          <dd>{{ details.invalidAddressCount ?? details.invalidIpCount }}</dd>
         </div>
         <div>
           <dt>Invalid port</dt>
-          <dd>{{ uploadDetails()?.invalidPortCount }}</dd>
+          <dd>{{ details.invalidPortCount }}</dd>
         </div>
         <div>
           <dt>Invalid format</dt>
-          <dd>{{ uploadDetails()?.invalidFormatCount }}</dd>
+          <dd>{{ details.invalidFormatCount }}</dd>
         </div>
       </dl>
-      <p class="upload-details__note">
-        <i class="icon icon-info" aria-hidden="true"></i> Blank lines and
-        whitespace are excluded from these counts.
-      </p>
+      <p class="field-hint">Blank lines and whitespace are excluded from these counts.</p>
     } @else {
-      <div class="upload-details__empty">
-        No details are available for this upload.
-      </div>
+      <p class="field-hint upload-details__empty">No details are available for this upload.</p>
     }
   </div>
+
+  <ng-template #dialogFooter>
+    <div class="upload-details__actions">
+      <button type="button" class="button button--primary" (click)="detailsVisible.set(false)">Close</button>
+    </div>
+  </ng-template>
 </app-dialog>

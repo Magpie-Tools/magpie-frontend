@@ -529,8 +529,8 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
   .button--compact { min-height: 28px; padding: 0 10px; font-size: var(--ui-fs-sm); }
 
   .button--quiet,
-  // The import dialogs follow the alert dialogs, whose Cancel has no frame.
-  :is(.proxy-add-dialog, .scrape-source-add-dialog) .dialog-button--quiet[hlmBtn] {
+  // The import and delete dialogs follow the alert dialogs, whose Cancel has no frame.
+  :is(.proxy-add-dialog, .scrape-source-add-dialog, .delete-proxies-dialog, .delete-sources-dialog) .dialog-button--quiet[hlmBtn] {
     border-color: transparent;
     background: transparent;
     color: var(--ui-text-2);
@@ -560,6 +560,7 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
   }
 
   .button--danger,
+  :is(.delete-proxies-dialog, .delete-sources-dialog) .dialog-button--danger[hlmBtn],
   .requeue-button[hlmBtn],
   .tag-manager__button--danger {
     border-color: color-mix(in srgb, var(--status-bad) 30%, transparent);
