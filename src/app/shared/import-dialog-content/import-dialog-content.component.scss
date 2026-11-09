@@ -1,286 +1,169 @@
+// Mirrors the section layout of the alert destination dialog (alerts-dialogs.component.scss):
+// flat sections with a small heading, split by a rule. The Console skin supplies the
+// field, button, and hint colours, so only layout lives here.
 :host {
   display: grid;
-  gap: 0.85rem;
+  gap: 1.1rem;
+  color: var(--ui-text-2, rgba(255, 255, 255, 0.8));
+  font-size: var(--ui-fs, 0.75rem);
 }
 
 input[type="file"] {
   display: none;
 }
 
-.import-dialog-grid {
+.form-step {
   display: grid;
-  grid-template-columns: minmax(0, 8fr) minmax(14rem, 4fr);
-  grid-auto-flow: dense;
-  gap: 0.85rem;
-}
-
-.import-source,
-.import-summary {
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, 0.105);
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.028);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  gap: 0.6rem;
 }
 
-.import-source {
-  display: grid;
-  gap: 0.85rem;
-  padding: 1rem;
+.form-step + .form-step {
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
 }
 
-.section-heading {
+.form-step__heading {
   display: flex;
-  min-width: 0;
+  min-height: 1.75rem;
   align-items: center;
-  gap: 0.68rem;
-
-  h3,
-  p { margin: 0; }
+  gap: 0.55rem;
 
   h3 {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.84rem;
-    font-weight: 590;
-  }
-
-  p {
-    margin-top: 0.18rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
-    line-height: 1.45;
+    margin: 0;
+    color: var(--ui-text, #fff);
+    font-size: var(--ui-fs, 0.8rem);
+    font-weight: 550;
+    letter-spacing: 0;
   }
 }
 
-.section-icon {
-  display: inline-flex;
-  width: 2.15rem;
-  height: 2.15rem;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.22);
-  border-radius: 0.68rem;
-  background: rgba(var(--theme-primary-500-rgb), 0.09);
-  color: var(--theme-primary-200);
-  font-size: 0.72rem;
+.form-step__action {
+  margin-left: auto;
+}
+
+.optional-label {
+  color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+  font-size: var(--ui-fs-xs, 0.75rem);
+  font-weight: 400;
+}
+
+.field-hint {
+  margin: 0;
+  color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+  font-size: var(--ui-fs-xs, 0.72rem);
+  line-height: 1.45;
 }
 
 .source-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .source-action {
   display: flex;
-  min-width: 0;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.15rem;
 }
 
-.source-button[hlmBtn] {
-  min-width: 0;
-  flex: 1;
-  height: var(--ui-control-h, 2rem);
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 0.4rem;
-  padding: 0 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 0.6rem;
-  background: rgba(255, 255, 255, 0.035);
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.65rem;
-  font-weight: 500;
-  box-shadow: none;
+  white-space: nowrap;
+  cursor: pointer;
 
-  &:hover:not(:disabled) {
-    border-color: rgba(var(--theme-primary-300-rgb), 0.28);
-    background: rgba(var(--theme-primary-500-rgb), 0.07);
-    color: rgba(255, 255, 255, 0.9);
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: 2px;
   }
 }
 
 .source-clear {
   display: inline-flex;
-  width: var(--ui-control-h, 2rem);
-  height: var(--ui-control-h, 2rem);
-  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 1.75rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(248, 113, 113, 0.24);
-  border-radius: var(--ui-radius-sm, 0.6rem);
-  background: rgba(127, 29, 29, 0.1);
-  color: rgba(248, 178, 178, 0.78);
-  font-size: 0.75rem;
+  border: 0;
+  border-radius: var(--ui-radius-sm, 0.5rem);
+  background: transparent;
+  color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+  font-size: 0.7rem;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 
   &:hover {
-    border-color: rgba(248, 113, 113, 0.42);
-    background: rgba(127, 29, 29, 0.2);
-    color: #fecaca;
+    background: var(--ui-hover, rgba(255, 255, 255, 0.06));
+    color: var(--ui-text, #fff);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: 2px;
   }
 }
 
-.import-textarea-shell {
-  position: relative;
+.import-textarea {
+  width: 100%;
+  min-height: 13rem;
+  resize: vertical;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.6rem;
+  background: rgba(4, 4, 6, 0.58);
+  color: rgba(255, 255, 255, 0.82);
+  font: 0.7rem/1.6 "Geist Mono", "SFMono-Regular", Consolas, monospace;
+  outline: none;
 
-  textarea {
-    width: 100%;
-    min-height: 13rem;
-    resize: vertical;
-    padding: 0.82rem 0.85rem 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 0.82rem;
-    background: rgba(4, 4, 6, 0.58);
-    color: rgba(255, 255, 255, 0.82);
-    font: 0.7rem/1.6 "Geist Mono", "SFMono-Regular", Consolas, monospace;
-    outline: none;
-    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  &::placeholder { color: rgba(255, 255, 255, 0.25); }
 
-    &::placeholder { color: rgba(255, 255, 255, 0.25); }
-
-    &:focus {
-      border-color: rgba(var(--theme-primary-300-rgb), 0.5);
-      background: rgba(var(--theme-primary-500-rgb), 0.035);
-      box-shadow: 0 0 0 0.18rem rgba(var(--theme-primary-500-rgb), 0.1);
-    }
-  }
-
-  > span {
-    position: absolute;
-    right: 0.72rem;
-    bottom: 0.68rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.72rem;
-  }
+  &:focus { border-color: rgba(var(--theme-primary-300-rgb), 0.5); }
 }
 
-.import-summary {
-  position: relative;
+// The parent projects a <dl> of counts. It reads as one line of label and value pairs
+// split by thin rules, so the live totals sit under the input without another box.
+:host ::ng-deep .import-stats dl {
   display: flex;
-  min-height: 20rem;
-  overflow: hidden;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1.15rem;
-  text-align: center;
+  flex-wrap: wrap;
+  row-gap: 0.35rem;
+  margin: 0;
 
-  &::after {
-    content: "";
-    position: absolute;
-    right: -4rem;
-    bottom: -4rem;
-    width: 10rem;
-    height: 10rem;
-    border: 1px solid rgba(var(--theme-primary-300-rgb), 0.1);
-    border-radius: 50%;
-    box-shadow: 0 0 0 1.6rem rgba(var(--theme-primary-500-rgb), 0.025);
-    pointer-events: none;
-  }
-}
+  > div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0 0.75rem;
+    border-left: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
 
-:host ::ng-deep {
-  .import-summary > strong {
-    margin-top: 0.85rem;
-    color: rgba(255, 255, 255, 0.84);
-    font-size: 0.85rem;
-    font-weight: 590;
-  }
-
-  .import-summary > p {
-    max-width: 13rem;
-    margin: 0.35rem 0 0;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
-    line-height: 1.5;
-  }
-
-  .import-summary__visual {
-    position: relative;
-    display: grid;
-    width: 5rem;
-    height: 5rem;
-    place-items: center;
-    border: 1px solid rgba(var(--theme-primary-300-rgb), 0.12);
-    border-radius: 50%;
-    background: rgba(var(--theme-primary-500-rgb), 0.025);
-
-    > span {
-      display: grid;
-      width: 2.7rem;
-      height: 2.7rem;
-      place-items: center;
-      border: 1px solid rgba(var(--theme-primary-300-rgb), 0.24);
-      border-radius: 0.82rem;
-      background: rgba(var(--theme-primary-500-rgb), 0.09);
-      color: var(--theme-primary-200);
+    &:first-child {
+      padding-left: 0;
+      border-left: 0;
     }
   }
 
-  .import-summary__count {
-    margin-top: 0.8rem;
-    color: rgba(255, 255, 255, 0.96);
-    font-size: 2.4rem;
-    font-weight: 560;
-    letter-spacing: -0.06em;
-    line-height: 1;
+  dt,
+  dd {
+    margin: 0;
+    font-size: var(--ui-fs-xs, 0.72rem);
   }
 
-  .import-summary__label {
-    margin-top: 0.25rem;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
+  dt { color: var(--ui-text-3, rgba(255, 255, 255, 0.55)); }
+
+  dd {
+    color: var(--ui-text, rgba(255, 255, 255, 0.9));
+    font-family: var(--ui-font-mono, inherit);
+    font-variant-numeric: tabular-nums;
   }
-
-  .import-summary__note {
-    max-width: 16rem;
-    margin: 0.45rem 0 0;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.84rem;
-    line-height: 1.45;
-    text-align: center;
-  }
-
-  .import-summary__stats {
-    z-index: 1;
-    display: grid;
-    width: 100%;
-    gap: 0.38rem;
-    margin: 0.9rem 0 0;
-
-    div {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-      padding-top: 0.38rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.07);
-    }
-
-    dt,
-    dd {
-      margin: 0;
-      font-size: 0.72rem;
-    }
-
-    dt { color: rgba(255, 255, 255, 0.62); }
-    dd { color: rgba(255, 255, 255, 0.76); font-weight: 600; }
-  }
-
 }
 
-@media (max-width: 760px) {
-  .import-dialog-grid { grid-template-columns: 1fr; }
-  .import-summary { min-height: 14rem; }
-}
-
-@media (max-width: 560px) {
-  .source-actions { grid-template-columns: 1fr; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .source-clear,
-  .import-textarea-shell textarea { transition: none; }
+@media (max-width: 480px) {
+  .form-step__heading { flex-wrap: wrap; }
+  .form-step__action { margin-left: 0; }
 }

@@ -217,9 +217,11 @@
       font-size: 0.72rem;
     }
 
+    // Without a note the actions still sit on the right, as in the other dialogs.
     > div {
       display: flex;
       gap: 0.45rem;
+      margin-left: auto;
     }
   }
 

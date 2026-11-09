@@ -25,11 +25,15 @@
       class="bulk-dialog-heading"
       [class.bulk-dialog-heading--danger]="tone === 'danger'"
     >
-      <span class="bulk-dialog-heading__icon"
-        ><i [class]="headingIcon" aria-hidden="true"></i
-      ></span>
+      @if (headingIcon) {
+        <span class="bulk-dialog-heading__icon"
+          ><i [class]="headingIcon" aria-hidden="true"></i
+        ></span>
+      }
       <div class="bulk-dialog-heading__copy">
-        <span>{{ headingEyebrow }}</span>
+        @if (headingEyebrow) {
+          <span>{{ headingEyebrow }}</span>
+        }
         <strong>{{ headingTitle }}</strong>
       </div>
       @if (headingTooltip) {
@@ -73,8 +77,10 @@
 
   <ng-template #dialogFooter>
     <div class="bulk-dialog-footer">
-      <span>{{ footerNote }}</span>
-      <div>
+      @if (footerNote) {
+        <span>{{ footerNote }}</span>
+      }
+      <div class="bulk-dialog-footer__actions">
         <button
           type="button"
           [disabled]="cancelDisabled"

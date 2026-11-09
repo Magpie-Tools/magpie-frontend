@@ -2,15 +2,12 @@
   [visible]="dialogVisible()"
   (visibleChange)="dialogVisible.set($event)"
   dialogClass="proxy-add-dialog"
+  width="38rem"
   triggerLabel="Add proxies"
   triggerIcon="icon icon-plus"
   headingTitle="Add proxies"
-  headingIcon="icon icon-plus"
-  [headingTooltip]="'Hostname: gateway.provider.example:8080\nIPv4: 192.0.2.1:8080\nIPv6: [2001:db8::1]:8080\nAuth: user:pass@host:port\nAuth: host:port:user:pass'"
-  footerNote="Imports are queued for checking after validation."
-  actionLabel="Add proxies to queue"
-  actionIcon="icon icon-arrow-right"
-  actionIconPos="right"
+  actionLabel="Add proxies"
+  actionIcon="icon icon-check"
   [actionDisabled]="!file() && !proxyTextarea() && !clipboardProxies()"
   (openRequested)="openDialog()"
   (cancelRequested)="closeDialog()"
@@ -18,12 +15,13 @@
   (hidden)="onDialogHide()"
 >
   <app-import-dialog-content
-    inputTitle="Proxy input"
-    inputDescription="Paste proxies, choose a text file, or enter one proxy per line."
+    inputTitle="Proxies"
+    inputHint="One proxy per line as host:port, user:pass@host:port, or host:port:user:pass. Put IPv6 addresses in brackets. Invalid lines are skipped and reported after the import."
+    optionsTitle="Tags"
+    [optionsOptional]="true"
     [textareaValue]="proxyTextarea()"
     [textareaPlaceholder]="'gateway.provider.example:8080\n192.0.2.1:8080\n[2001:db8::1]:8080\nuser:pass@host:port'"
     textareaLabel="Proxies"
-    lineHint="One proxy per line"
     [clipboardPresent]="!!clipboardProxies()"
     [filePresent]="file() !== undefined"
     (textareaValueChange)="onTextareaChange($event)"
@@ -32,23 +30,26 @@
     (fileSelected)="onFileSelected($event)"
     (fileClearRequested)="onFileClear()"
   >
-    <section
-      import-prefix
-      class="import-tags"
-      aria-labelledby="import-tags-title"
-    >
-      <div class="import-tags__copy">
-        <span class="section-icon"
-          ><i class="icon icon-tags" aria-hidden="true"></i
-        ></span>
-        <div>
-          <h3 id="import-tags-title">Tags</h3>
-          <p>
-            Selected tags are added without replacing tags on proxies you already
-            own.
-          </p>
-        </div>
+    <dl import-summary>
+      <div>
+        <dt>Entries</dt>
+        <dd>{{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}</dd>
       </div>
+      <div>
+        <dt>Unique</dt>
+        <dd>{{ getUniqueProxiesCount() }}</dd>
+      </div>
+      <div>
+        <dt>With auth</dt>
+        <dd>{{ getProxiesWithAuthCount() }}</dd>
+      </div>
+      <div>
+        <dt>Without auth</dt>
+        <dd>{{ getProxiesWithoutAuthCount() }}</dd>
+      </div>
+    </dl>
+
+    <div import-options class="import-tags">
       <app-proxy-tag-selector
         [availableTags]="tagService.tags()"
         [selectedTags]="selectedTags()"
@@ -57,44 +58,15 @@
         (selectionChange)="onTagSelectionChange($event)"
         (manageTags)="importTagManager.open()"
       ></app-proxy-tag-selector>
+      <p class="field-hint">
+        Added to the imported proxies. Tags on proxies you already own are kept.
+      </p>
       <app-proxy-tag-manager
         #importTagManager
         [showTrigger]="false"
         (tagsChanged)="pruneSelectedTags()"
       ></app-proxy-tag-manager>
-    </section>
-
-    <ng-container import-summary>
-      <div class="import-summary__visual">
-        <span><i class="icon icon-server" aria-hidden="true"></i></span>
-      </div>
-      @if (getProxiesWithoutAuthCount() + getProxiesWithAuthCount() > 0) {
-        <div class="import-summary__count">
-          {{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}
-        </div>
-        <div class="import-summary__label">Entries provided</div>
-        <p class="import-summary__note">Each line is validated when you add it; invalid lines are skipped and reported.</p>
-        <dl class="import-summary__stats">
-          <div>
-            <dt>Unique</dt>
-            <dd>{{ getUniqueProxiesCount() }}</dd>
-          </div>
-          <div>
-            <dt>With authentication</dt>
-            <dd>{{ getProxiesWithAuthCount() }}</dd>
-          </div>
-          <div>
-            <dt>Without authentication</dt>
-            <dd>{{ getProxiesWithoutAuthCount() }}</dd>
-          </div>
-        </dl>
-      } @else {
-        <strong>No proxies yet</strong>
-        <p>
-          Your import summary will appear here as soon as you add proxy data.
-        </p>
-      }
-    </ng-container>
+    </div>
   </app-import-dialog-content>
 </app-bulk-action-dialog>
 
