@@ -27,6 +27,9 @@ import {ProxyTag, ProxyTagAssignmentResponse, ProxyTagWriteRequest} from '../mod
 import {
   ManagedProxyState,
   Workspace,
+  WorkspaceAllowanceUpdateRequest,
+  WorkspaceCadenceUpdateRequest,
+  WorkspaceCadenceUpdateResponse,
   WorkspaceInvitation,
   WorkspaceInvitationAcceptance,
   WorkspaceInvitationCreateRequest,
@@ -94,6 +97,17 @@ export class HttpService {
 
   renameWorkspace(workspaceId: number, name: string) {
     return this.http.patch<void>(`${this.apiUrl}/workspaces/${workspaceId}`, {name});
+  }
+
+  /** Operator: choose fixed intervals for the selected workspace (0 = automatic). */
+  updateWorkspaceCadence(payload: WorkspaceCadenceUpdateRequest) {
+    return this.http.put<WorkspaceCadenceUpdateResponse>(`${this.apiUrl}/workspace/cadence`, payload);
+  }
+
+  /** Admin only: set one workspace's own allowances (0 inherits the instance default). */
+  updateWorkspaceAllowances(workspaceId: number, payload: WorkspaceAllowanceUpdateRequest) {
+    return this.http.put<WorkspaceAllowanceUpdateRequest & {workspace_id: number}>(
+      `${this.apiUrl}/global/workspaces/${workspaceId}/allowances`, payload);
   }
 
   selectWorkspace(workspaceId: number) {

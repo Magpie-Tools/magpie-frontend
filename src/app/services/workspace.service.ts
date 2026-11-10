@@ -17,6 +17,7 @@ export class WorkspaceService {
   readonly isOwner = computed(() => this.current()?.role === 'owner');
 
   private loadRequest?: Observable<Workspace[]>;
+  private loadedAt = 0;
   private readonly sessionReset = new Subject<void>();
   private sessionVersion = 0;
   private loadRequestId = 0;
@@ -26,8 +27,14 @@ export class WorkspaceService {
     private readonly invitations: WorkspaceInvitationService,
   ) {}
 
-  load(force = false): Observable<Workspace[]> {
-    if (!force && this.workspaces().length > 0) {
+  /**
+   * Returns the cached workspaces, loading them when there are none, when
+   * forced, or when they are older than maxAgeMs. Pages that show metered
+   * usage pass a max age so allowances and cadence do not stay stale.
+   */
+  load(force = false, maxAgeMs = Number.POSITIVE_INFINITY): Observable<Workspace[]> {
+    const fresh = Date.now() - this.loadedAt < maxAgeMs;
+    if (!force && fresh && this.workspaces().length > 0) {
       return of(this.workspaces());
     }
     if (!force && this.loadRequest) {
@@ -44,6 +51,7 @@ export class WorkspaceService {
           return;
         }
         this.workspaces.set(workspaces);
+        this.loadedAt = Date.now();
         this.setInitialWorkspace(workspaces);
       }),
       finalize(() => {
@@ -84,6 +92,7 @@ export class WorkspaceService {
     this.loadRequestId += 1;
     this.sessionReset.next();
     this.loadRequest = undefined;
+    this.loadedAt = 0;
     this.loading.set(false);
     this.workspaces.set([]);
     this.current.set(null);

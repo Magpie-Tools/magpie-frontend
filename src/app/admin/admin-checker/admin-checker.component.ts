@@ -6,7 +6,8 @@ import {SelectComponent} from '../../shared/ui/select.component';
 import {ConfirmDialogComponent} from '../../shared/ui/confirm-dialog.component';
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {CheckboxComponent} from "../../checkbox/checkbox.component";
-import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {formatApproximateDuration} from "../../shared/cadence-format";
 
 import {TooltipComponent} from "../../tooltip/tooltip.component";
 import {SettingsService} from '../../services/settings.service';
@@ -120,12 +121,8 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
         socks4: [false],
         socks5: [false],
       }),
-      checker_timer: this.fb.group({
-        days: [0],
-        hours: [1],
-        minutes: [0],
-        seconds: [0]
-      }),
+      monthly_checks_per_workspace: [1500000, [Validators.required, Validators.min(1)]],
+      unlimited_monthly_checks: [false],
       judges_threads: [3],
       judges_timeout: [5000],
       judge_timer: this.fb.group({
@@ -159,12 +156,8 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
       save_responses: checkerSettings.save_responses ?? true,
       retries: checkerSettings.retries,
       timeout: checkerSettings.timeout,
-      checker_timer: {
-        days: checkerSettings.checker_timer.days,
-        hours: checkerSettings.checker_timer.hours,
-        minutes: checkerSettings.checker_timer.minutes,
-        seconds: checkerSettings.checker_timer.seconds
-      },
+      monthly_checks_per_workspace: checkerSettings.monthly_checks_per_workspace ?? 1500000,
+      unlimited_monthly_checks: checkerSettings.unlimited_monthly_checks ?? false,
       iplookup: checkerSettings.ip_lookup,
       judges_threads: checkerSettings.judges_threads,
       judges_timeout: checkerSettings.judges_timeout,
@@ -268,8 +261,26 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     return this.settingsForm.get('judges') as FormArray;
   }
 
-  get checkerCadenceLabel(): string {
-    return this.formatTimer('checker_timer');
+  get unlimitedMonthlyChecks(): boolean {
+    return this.settingsForm.get('unlimited_monthly_checks')?.value === true;
+  }
+
+  get monthlyChecksLabel(): string {
+    if (this.unlimitedMonthlyChecks) {
+      return 'No limit';
+    }
+    const value = Number(this.settingsForm.get('monthly_checks_per_workspace')?.value ?? 0);
+    return Number.isFinite(value) && value > 0 ? `${Math.round(value).toLocaleString()} checks` : 'Not set';
+  }
+
+  /** Example cadence for 1,000 proxies on one protocol in a 30-day month. */
+  get checkerCadenceExample(): string {
+    const value = Number(this.settingsForm.get('monthly_checks_per_workspace')?.value ?? 0);
+    if (!Number.isFinite(value) || value <= 0) {
+      return '';
+    }
+    const seconds = Math.max(60, (30 * 24 * 3600 * 1000) / value);
+    return `For example, 1,000 proxies on one protocol are checked about ${formatApproximateDuration(seconds)}.`;
   }
 
   get judgeCadenceLabel(): string {
@@ -381,3 +392,4 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     return parts.length ? parts.join(' ') : 'Continuous';
   }
 }
+
