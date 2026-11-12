@@ -8,11 +8,13 @@ import {By} from '@angular/platform-browser';
 import {HttpService} from '../../services/http.service';
 import {ProxyDetail} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
+import {ProxyStatisticHours} from '../../models/ProxyStatisticHour';
 import {CountryHoverCardComponent} from '../../shared/ui/country-hover-card.component';
 
 describe('ProxyDetailComponent', () => {
   let component: ProxyDetailComponent;
   let fixture: ComponentFixture<ProxyDetailComponent>;
+  let hourlyStatistics: jasmine.Spy;
 
   beforeEach(async () => {
     const detail: ProxyDetail = {
@@ -29,7 +31,9 @@ describe('ProxyDetailComponent', () => {
       latest_statistic: null,
     };
 
+    hourlyStatistics = jasmine.createSpy('getProxyStatisticHours').and.returnValue(of({since: new Date().toISOString(), hours: []} as ProxyStatisticHours));
     const httpServiceStub = {
+      getProxyStatisticHours: hourlyStatistics,
       getProxyDetail: jasmine.createSpy('getProxyDetail').and.returnValue(of(detail)),
       getProxyStatistics: jasmine.createSpy('getProxyStatistics').and.returnValue(of([] as ProxyStatistic[])),
       getProxyTags: jasmine.createSpy('getProxyTags').and.returnValue(of([])),
@@ -78,12 +82,14 @@ describe('ProxyDetailComponent', () => {
     expect(summary.textContent).toContain('No check results yet');
   });
 
-  it('shows the empty trend and renders a responsive SVG when a latest check arrives', async () => {
+  it('shows the empty trend and renders a responsive SVG when hourly results arrive', async () => {
     expect(fixture.nativeElement.querySelector('.mini-chart').textContent).toContain('No response-time trend yet.');
-    component.detail.update(detail => detail ? {...detail, latest_statistic: {
-      id: 10, response_time: 120, created_at: '2026-10-16T12:01:00Z',
-      alive: true, attempt: 1, protocol: 'http', anonymity_level: 'elite', judge: 'https://judge.example',
-    }} : detail);
+    const since = new Date(Date.now() - 2 * 3_600_000);
+    since.setMinutes(0, 0, 0);
+    component.statisticHours.set({since: since.toISOString(), hours: [
+      {hour: since.toISOString(), checks: 4, failed: 1, avg_response_time: 120},
+      {hour: new Date(since.getTime() + 3_600_000).toISOString(), checks: 4, failed: 0, avg_response_time: 180},
+    ]});
     fixture.detectChanges();
     for (let frame = 0; frame < 4; frame++) {
       await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
@@ -234,4 +240,89 @@ describe('ProxyDetailComponent', () => {
     expect(summary.querySelector('.status-dot.unknown')).not.toBeNull();
   });
 
+  it('loads three days of hourly results and reloads when the range changes', () => {
+    expect(hourlyStatistics).toHaveBeenCalledWith(1, 72);
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('.range-switch__option')) as HTMLButtonElement[];
+    expect(buttons.map(button => button.textContent?.trim())).toEqual(['24h', '3d', '7d']);
+    expect(buttons[1].getAttribute('aria-pressed')).toBe('true');
+
+    buttons[2].click();
+    fixture.detectChanges();
+
+    expect(hourlyStatistics).toHaveBeenCalledWith(1, 168);
+    expect(buttons[2].getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('shows the availability grid and the window totals', () => {
+    const now = new Date();
+    const since = new Date(now.getTime() - 2 * 3_600_000);
+    since.setMinutes(0, 0, 0);
+    component.statisticHours.set({since: since.toISOString(), hours: [
+      {hour: since.toISOString(), checks: 4, failed: 0, avg_response_time: 100},
+      {hour: new Date(since.getTime() + 3_600_000).toISOString(), checks: 4, failed: 4, avg_response_time: 0},
+    ]});
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelectorAll('.availability-cell').length % 24).toBe(0);
+    expect(element.querySelector('.availability-cell--failed')).not.toBeNull();
+    expect(element.querySelector('.availability-cell--current')).not.toBeNull();
+    const stats = element.querySelector('.availability-stats')!.textContent!.replace(/\s+/g, ' ');
+    expect(stats).toContain('Average 100 ms');
+    expect(stats).toContain('Success rate 50 %');
+  });
+  it('opens an hour card on hover and closes it when the pointer leaves', () => {
+    const since = new Date(Date.now() - 2 * 3_600_000);
+    since.setMinutes(0, 0, 0);
+    component.statisticHours.set({since: since.toISOString(), hours: [
+      {hour: since.toISOString(), checks: 3, failed: 2, avg_response_time: 4082},
+    ]});
+    fixture.detectChanges();
+
+    const cell = fixture.nativeElement.querySelector('.availability-cell--partial') as HTMLElement;
+    cell.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+
+    const card = document.querySelector('.availability-card') as HTMLElement;
+    expect(card).not.toBeNull();
+    const text = card.textContent!.replace(/\s+/g, ' ');
+    expect(text).toContain('Checks3');
+    expect(text).toContain('Failed2');
+    expect(text).toContain('Average4,082ms');
+    expect(text).toContain('33% success');
+
+    cell.dispatchEvent(new MouseEvent('mouseleave'));
+    fixture.detectChanges();
+    expect(document.querySelector('.availability-card')).toBeNull();
+  });
+  it('labels the access band and keeps tags on the wide track', () => {
+    const access = fixture.nativeElement.querySelector('[aria-labelledby="access-title"]') as HTMLElement;
+    expect(access.querySelector('h3')!.textContent).toContain('Access');
+    expect(access.querySelector('.overview-band__wide')!.textContent).toContain('Tags');
+  });
+
+  it('shows IPGeolocation findings in their own band only when they exist', () => {
+    expect(fixture.nativeElement.querySelector('[aria-labelledby="intel-title"]')).toBeNull();
+
+    component.detail.update(detail => detail ? {...detail, ipgeolocation: {
+      checked_at: '2026-11-07T18:08:00Z', expires_at: '2026-12-07T18:08:00Z', fresh: true,
+      result: {
+        ip: '127.0.0.1',
+        company: {name: '', type: ''},
+        network: {connection_type: ''},
+        asn: {as_number: 'AS203273', organization: 'NetCrafters OU', type: ''},
+        security: {is_proxy: true, is_vpn: false, is_tor: false, proxy_confidence_score: 80, proxy_last_seen: '', proxy_provider_names: []},
+      },
+    }} : detail);
+    fixture.detectChanges();
+
+    const intel = fixture.nativeElement.querySelector('[aria-labelledby="intel-title"]') as HTMLElement;
+    const text = intel.textContent!.replace(/\s+/g, ' ');
+    expect(text).toContain('IPGeolocation.io');
+    expect(text).toContain('Cached');
+    expect(text).toContain('NetCrafters OU AS203273');
+    expect(text).toContain('80 / 100');
+    const network = fixture.nativeElement.querySelector('[aria-labelledby="network-title"]') as HTMLElement;
+    expect(network.textContent).not.toContain('Network operator');
+  });
 });

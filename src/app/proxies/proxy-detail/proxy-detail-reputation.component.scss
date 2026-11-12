@@ -44,51 +44,6 @@
   }
 }
 
-.reputation-summary {
-  min-width: 0;
-  padding: clamp(1.1rem, 2vw, 1.6rem);
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
-}
-
-.reputation-summary__heading {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-
-  .reputation-summary__score {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-  }
-
-  h2 {
-    margin-bottom: 0.4rem;
-    color: rgba(255, 255, 255, 0.92);
-    font-size: 0.95rem;
-    font-weight: 590;
-    letter-spacing: -0.025em;
-  }
-
-  strong {
-    color: #fff;
-    font-size: 1.45rem;
-    font-weight: 630;
-    letter-spacing: -0.05em;
-  }
-
-  em {
-    margin-left: 0.12rem;
-    color: var(--detail-muted);
-    font-size: 0.6875rem;
-    font-style: normal;
-    letter-spacing: 0;
-  }
-
-  .icon-button {
-    margin-left: auto;
-  }
-}
-
 .reputation-badge {
   padding: 0.28rem 0.52rem;
 

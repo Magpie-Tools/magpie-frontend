@@ -15,6 +15,7 @@ import {DeleteAccount} from '../models/DeleteAccount';
 import {ProxyDetail} from '../models/ProxyDetail';
 import {ProxyStatistic} from '../models/ProxyStatistic';
 import {ProxyStatisticResponseDetail} from '../models/ProxyStatisticResponseDetail';
+import {ProxyStatisticHours} from '../models/ProxyStatisticHour';
 import {RotatingProxy, CreateRotatingProxy, RotatingProxyNext, RotatingProxyInstance} from '../models/RotatingProxy';
 import {map} from 'rxjs/operators';
 import {DeleteSettings} from '../models/DeleteSettings';
@@ -222,6 +223,13 @@ export class HttpService {
 
     return this.http.get<{statistics: ProxyStatistic[]}>(`${this.apiUrl}/proxies/${proxyId}/statistics`, { params })
       .pipe(map(res => res?.statistics ?? []));
+  }
+
+  /** Checks grouped into UTC hours for the window of `hours` (1–168) ending now. */
+  getProxyStatisticHours(proxyId: number, hours: number) {
+    const params = new HttpParams().set('hours', hours.toString());
+    return this.http.get<ProxyStatisticHours>(`${this.apiUrl}/proxies/${proxyId}/statistics/hourly`, { params })
+      .pipe(map(res => ({since: res?.since ?? '', hours: res?.hours ?? []})));
   }
 
   getProxyStatisticResponseBody(proxyId: number, statisticId: number) {

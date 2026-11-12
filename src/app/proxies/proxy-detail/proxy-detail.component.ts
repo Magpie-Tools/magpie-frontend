@@ -2,7 +2,9 @@ import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {HlmTableImports} from '@spartan-ng/helm/table';
 import {DialogComponent} from '../../shared/ui/dialog.component';
 import {ChartComponent} from '../../shared/ui/chart.component';
-import {buildProxyResponseChart} from './proxy-response-chart';
+import {buildProxyHourlyChart} from './proxy-response-chart';
+import {AVAILABILITY_RANGES, AvailabilityCell, AvailabilityRange, buildAvailabilityGrid, summarizeAvailability} from './proxy-availability';
+import {CdkConnectedOverlay, ConnectedPosition} from '@angular/cdk/overlay';
 import {CountryHoverCardComponent} from '../../shared/ui/country-hover-card.component';
 import {Component, LOCALE_ID, OnDestroy, OnInit, computed, effect, inject, signal} from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
@@ -11,6 +13,7 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ProxyDetail} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
+import {ProxyStatisticHours} from '../../models/ProxyStatisticHour';
 import {ProxyReputation} from '../../models/ProxyReputation';
 import {HttpService} from '../../services/http.service';
 import {Subscription} from 'rxjs';
@@ -48,7 +51,7 @@ interface ReputationSignalStructuredItem {
 @Component({
   selector: 'app-proxy-detail',
   standalone: true,
-  imports: [HlmTooltip, HlmTableImports, DialogComponent, ChartComponent, CountryHoverCardComponent,
+  imports: [HlmTooltip, HlmTableImports, CdkConnectedOverlay, DialogComponent, ChartComponent, CountryHoverCardComponent,
     CommonModule,
     RouterLink,
     LoadingComponent,
@@ -58,14 +61,31 @@ interface ReputationSignalStructuredItem {
     ProxyTagManagerComponent,
   ],
   templateUrl: './proxy-detail.component.html',
-  styleUrls: ['./proxy-detail-reputation.component.scss', './proxy-detail.component.scss']
+  styleUrls: ['./proxy-detail-reputation.component.scss', './proxy-detail.component.scss', './proxy-detail-overview.component.scss']
 })
 export class ProxyDetailComponent implements OnInit, OnDestroy {
   proxyId = signal<number | undefined>(undefined);
   detail = signal<ProxyDetail | null>(null);
   statistics = signal<ProxyStatistic[]>([]);
   private readonly locale = inject(LOCALE_ID);
-  readonly responseTimeChart = computed(() => buildProxyResponseChart(this.statistics(), this.detail()?.latest_statistic, this.locale));
+  readonly availabilityRanges = AVAILABILITY_RANGES;
+  availabilityRange = signal<AvailabilityRange>(72);
+  statisticHours = signal<ProxyStatisticHours | null>(null);
+  isLoadingStatisticHours = signal(true);
+  readonly responseTimeChart = computed(() => buildProxyHourlyChart(this.statisticHours(), this.availabilityRange(), this.locale));
+  readonly availabilityGrid = computed(() => {
+    const data = this.statisticHours();
+    return data ? buildAvailabilityGrid(data, new Date(), this.locale) : [];
+  });
+  readonly availabilitySummary = computed(() => summarizeAvailability(this.statisticHours()?.hours ?? []));
+  readonly availabilityHourLabels = ['00', '06', '12', '18', '23'];
+  private statisticHoursSubscription?: Subscription;
+  /** The availability cell under the pointer and the element its hover card attaches to. */
+  hoveredAvailability = signal<{cell: AvailabilityCell; origin: HTMLElement} | null>(null);
+  readonly availabilityCardPositions: ConnectedPosition[] = [
+    {originX: 'center', originY: 'top', overlayX: 'center', overlayY: 'bottom', offsetY: -8},
+    {originX: 'center', originY: 'bottom', overlayX: 'center', overlayY: 'top', offsetY: 8},
+  ];
   private readonly breadcrumbs = inject(BreadcrumbService);
 
   isLoadingDetail = signal(true);
@@ -144,6 +164,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       this.proxyId.set(id);
       this.loadProxyDetail(id);
       this.loadProxyStatistics(id);
+      this.loadStatisticHours(id);
     });
 
     this.subscriptions.add(sub);
@@ -152,6 +173,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     clearTimeout(this.copyFeedbackTimeout);
     this.responseBodySubscription?.unsubscribe();
+    this.statisticHoursSubscription?.unsubscribe();
     this.subscriptions.unsubscribe();
   }
 
@@ -1043,6 +1065,62 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       datacenter: 0.4,
     };
     return map[value] ?? 0.6;
+  }
+
+  setAvailabilityRange(range: AvailabilityRange): void {
+    const id = this.proxyId();
+    if (range === this.availabilityRange()) return;
+    this.availabilityRange.set(range);
+    if (id) this.loadStatisticHours(id);
+  }
+
+  showAvailabilityCard(cell: AvailabilityCell, event: Event): void {
+    if (cell.state === 'outside') return;
+    this.hoveredAvailability.set({cell, origin: event.currentTarget as HTMLElement});
+  }
+
+  hideAvailabilityCard(cell: AvailabilityCell): void {
+    if (this.hoveredAvailability()?.cell === cell) this.hoveredAvailability.set(null);
+  }
+
+  availabilitySpeed(cell: AvailabilityCell): string | null {
+    switch (cell.state) {
+      case 'fast': return 'Among the fastest hours in this period';
+      case 'medium': return 'Typical speed for this period';
+      case 'slow': return 'Among the slowest hours in this period';
+      default: return null;
+    }
+  }
+
+  availabilitySuccessPercent(cell: AvailabilityCell): number {
+    return cell.checks ? Math.round(((cell.checks - cell.failed) / cell.checks) * 100) : 0;
+  }
+
+  /** Stroke length of the reputation ring for a circle of circumference 100. */
+  reputationRingDash(rep?: ProxyReputation | null): string {
+    const percent = this.reputationScorePercent(rep);
+    return `${percent} ${100 - percent}`;
+  }
+
+  reputationRingClass(label?: string | null): string {
+    return 'reputation-ring__value ' + this.progressFillClass(label).replace('progress-bar__fill', 'reputation-ring__value');
+  }
+
+  private loadStatisticHours(id: number): void {
+    this.statisticHoursSubscription?.unsubscribe();
+    this.isLoadingStatisticHours.set(true);
+    this.statisticHoursSubscription = this.http.getProxyStatisticHours(id, this.availabilityRange()).subscribe({
+      next: data => {
+        this.statisticHours.set(data);
+        this.isLoadingStatisticHours.set(false);
+      },
+      error: err => {
+        this.statisticHours.set(null);
+        this.isLoadingStatisticHours.set(false);
+        const message = err?.error?.error ?? err?.message ?? 'Failed to load hourly proxy statistics';
+        this.notification.showError(message);
+      }
+    });
   }
 
   private loadProxyStatistics(id: number): void {
