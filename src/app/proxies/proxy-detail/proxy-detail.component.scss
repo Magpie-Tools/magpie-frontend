@@ -185,18 +185,6 @@ a {
   padding: 0;
 }
 
-.overview-layout {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-auto-flow: dense;
-}
-
-.route-facts {
-  min-width: 0;
-  grid-column: span 6;
-  padding: clamp(1.1rem, 2vw, 1.6rem);
-}
-
 .card-heading {
   display: grid;
   min-width: 0;
@@ -342,87 +330,6 @@ a {
     color: #fff;
     outline: 0;
   }
-}
-
-.route-insights {
-  min-width: 0;
-  grid-column: span 6;
-  border-left: 1px solid rgba(255, 255, 255, 0.09);
-  background: rgba(255, 255, 255, 0.012);
-}
-
-.health-summary {
-  padding: clamp(1.1rem, 2vw, 1.6rem);
-}
-
-.health-summary__heading {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-
-  h2 {
-    margin-top: 0.08rem;
-    color: rgba(255, 255, 255, 0.92);
-    font-size: 0.95rem;
-    font-weight: 590;
-    letter-spacing: -0.025em;
-  }
-}
-
-.health-summary__response {
-  display: flex;
-  align-items: flex-end;
-  flex-direction: column;
-
-  > span {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.6875rem;
-  }
-
-  strong {
-    color: #fff;
-    font-size: 1.35rem;
-    font-weight: 620;
-    letter-spacing: -0.045em;
-
-    small {
-      margin-left: 0.12rem;
-      color: var(--detail-muted);
-      font-size: 0.6875rem;
-      letter-spacing: 0;
-    }
-  }
-}
-
-.mini-chart {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: center;
-  min-height: 7.5rem;
-  margin-top: 0.85rem;
-  overflow: hidden;
-
-  app-chart {
-    display: block;
-    width: 100%;
-    height: 7.5rem;
-  }
-
-  > span {
-    color: var(--detail-muted);
-    font-size: 0.6875rem;
-  }
-}
-
-.access-summary {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .compact-field {
@@ -710,25 +617,6 @@ a {
   }
 }
 
-@container proxy-detail (max-width: 980px) {
-  .route-facts,
-  .route-insights {
-    grid-column: 1 / -1;
-  }
-
-  .route-insights {
-    display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(16rem, 0.75fr);
-    border-top: 1px solid rgba(255, 255, 255, 0.09);
-    border-left: 0;
-  }
-
-  .reputation-summary {
-    border-top: 0;
-    border-left: 1px solid rgba(255, 255, 255, 0.09);
-  }
-}
-
 @container proxy-detail (max-width: 680px) {
   .detail-context {
     align-items: flex-start;
@@ -770,15 +658,6 @@ a {
     width: 100%;
   }
 
-  .route-insights {
-    display: block;
-  }
-
-  .reputation-summary {
-    border-top: 1px solid rgba(255, 255, 255, 0.09);
-    border-left: 0;
-  }
-
   .history-card__heading {
     flex-direction: column;
   }
@@ -799,8 +678,7 @@ a {
     padding: 0.75rem;
   }
 
-  .fact-list,
-  .access-summary {
+  .fact-list {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -818,10 +696,6 @@ a {
     .action-button {
       flex: 1 1 auto;
     }
-  }
-
-  .reputation-summary__heading {
-    flex-wrap: wrap;
   }
 }
 

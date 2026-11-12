@@ -164,59 +164,160 @@
         @if (isLoadingDetail()) {
           <div class="card-loading"><app-loading></app-loading></div>
         } @else {
-          <div class="overview-layout">
-            <section class="route-facts" aria-labelledby="route-overview-title">
-              <h2 id="route-overview-title" class="overview-title">Overview</h2>
-
-              @let latest = latestStatistic;
-              <div class="check-summary">
-                <div class="check-summary__result">
-                  <span
-                    class="status-dot"
-                    [ngClass]="latest ? (latest.alive ? 'alive' : 'dead') : 'unknown'"
-                    aria-hidden="true"
-                  ></span>
-                  <strong>{{ latest ? (latest.alive ? "Alive" : "Dead") : "Not checked" }}</strong>
+          @let latest = latestStatistic;
+          <div class="overview-hero">
+            <section class="overview-health" aria-labelledby="route-overview-title">
+              <h2 id="route-overview-title" class="sr-only">Overview</h2>
+              <div class="overview-health__heading">
+                <div class="check-summary">
+                  <div class="check-summary__result">
+                    <span
+                      class="status-dot"
+                      [ngClass]="latest ? (latest.alive ? 'alive' : 'dead') : 'unknown'"
+                      aria-hidden="true"
+                    ></span>
+                    <strong>{{ latest ? (latest.alive ? "Alive" : "Dead") : "Not checked" }}</strong>
+                  </div>
+                  <span class="check-summary__time">{{
+                    latest?.created_at
+                      ? (latest?.created_at | date)
+                      : "No check results yet"
+                  }}</span>
                 </div>
-                <span class="check-summary__time">{{
-                  latest?.created_at
-                    ? (latest?.created_at | date)
-                    : "No check results yet"
-                }}</span>
+                <div class="range-switch" role="group" aria-label="Time range">
+                  @for (range of availabilityRanges; track range.hours) {
+                    <button
+                      type="button"
+                      class="range-switch__option"
+                      [class.range-switch__option--active]="availabilityRange() === range.hours"
+                      [attr.aria-pressed]="availabilityRange() === range.hours"
+                      (click)="setAvailabilityRange(range.hours)"
+                    >{{ range.label }}</button>
+                  }
+                </div>
               </div>
 
-              <div class="fact-list">
+              <div class="mini-chart" aria-label="Average response time per hour">
+                @if (isLoadingStatisticHours()) {
+                  <app-loading></app-loading>
+                } @else if (responseTimeChart(); as chart) {
+                  <app-chart [definition]="chart" label="Average response time per hour" />
+                } @else {
+                  <span>No response-time trend yet.</span>
+                }
+              </div>
+            </section>
+
+            <aside class="overview-availability" aria-labelledby="availability-title">
+              <h2 id="availability-title">Availability</h2>
+              @if (isLoadingStatisticHours() && !availabilityGrid().length) {
+                <div class="availability-loading"><app-loading></app-loading></div>
+              } @else {
+                <div #availabilityGridEl class="availability-grid" [class.availability-grid--loading]="isLoadingStatisticHours()">
+                  @for (day of availabilityGrid(); track day.key) {
+                    <span class="availability-grid__day">{{ day.label }}</span>
+                    @for (cell of day.cells; track cell.hour) {
+                      <span
+                        class="availability-cell"
+                        [ngClass]="'availability-cell--' + cell.state"
+                        [class.availability-cell--current]="cell.current"
+                        [class.availability-cell--hovered]="hoveredAvailability()?.cell === cell"
+                        [attr.aria-label]="cell.state === 'outside' ? null : cell.label"
+                        (mouseenter)="showAvailabilityCard(cell, $event)"
+                        (mouseleave)="hideAvailabilityCard(cell)"
+                      ></span>
+                    }
+                  }
+                  <span aria-hidden="true"></span>
+                  <div class="availability-grid__hours" aria-hidden="true">
+                    @for (hour of availabilityHourLabels; track hour) {
+                      <span>{{ hour }}</span>
+                    }
+                  </div>
+                </div>
+                <ng-template
+                  cdkConnectedOverlay
+                  [cdkConnectedOverlayOrigin]="hoveredAvailability()?.origin ?? availabilityGridEl"
+                  [cdkConnectedOverlayOpen]="!!hoveredAvailability()"
+                  [cdkConnectedOverlayPositions]="availabilityCardPositions"
+                  [cdkConnectedOverlayPush]="true"
+                  [cdkConnectedOverlayViewportMargin]="12"
+                  cdkConnectedOverlayPanelClass="availability-hover-pane"
+                >
+                  @if (hoveredAvailability(); as hovered) {
+                    @let cell = hovered.cell;
+                    <div class="availability-card" aria-hidden="true">
+                      <strong class="availability-card__heading">{{ cell.range }}</strong>
+                      @if (cell.checks) {
+                        <div class="availability-card__stats">
+                          <div><span>Checks</span><strong>{{ cell.checks | number }}</strong></div>
+                          <div><span>Failed</span><strong [class.availability-card__bad]="cell.failed > 0">{{ cell.failed | number }}</strong></div>
+                          <div>
+                            <span>Average</span>
+                            <strong>{{ cell.averageResponseTime !== null ? (cell.averageResponseTime | number) : "—" }}@if (cell.averageResponseTime !== null) {<small>ms</small>}</strong>
+                          </div>
+                        </div>
+                        <div class="availability-card__success">
+                          <span class="availability-card__bar"><span [style.width.%]="availabilitySuccessPercent(cell)"></span></span>
+                          <span>{{ availabilitySuccessPercent(cell) }}% success</span>
+                        </div>
+                        @if (availabilitySpeed(cell); as speed) {
+                          <p class="availability-card__note">{{ speed }}</p>
+                        }
+                      } @else {
+                        <p class="availability-card__note">The proxy was not checked during this hour.</p>
+                      }
+                    </div>
+                  }
+                </ng-template>
+              }
+              <div class="availability-legend" aria-hidden="true">
+                <span>Faster</span>
+                <i class="availability-cell--fast"></i><i class="availability-cell--medium"></i><i class="availability-cell--slow"></i>
+                <span>Slower</span>
+                <span class="availability-legend__gap">Some failed</span><i class="availability-cell--partial"></i>
+                <span class="availability-legend__gap">All failed</span><i class="availability-cell--failed"></i>
+                <span class="availability-legend__gap">No checks</span><i class="availability-cell--empty"></i>
+              </div>
+
+              @let summary = availabilitySummary();
+              <div class="availability-stats">
+                <div>
+                  <span class="label">Latest</span>
+                  <strong>
+                    {{ latest ? (latest.response_time | number) : "—" }}
+                    @if (latest) {<small>ms</small>}
+                  </strong>
+                </div>
+                <div>
+                  <span class="label">Average</span>
+                  <strong>
+                    {{ summary.averageResponseTime !== null ? (summary.averageResponseTime | number) : "—" }}
+                    @if (summary.averageResponseTime !== null) {<small>ms</small>}
+                  </strong>
+                </div>
+                <div>
+                  <span class="label">Success rate</span>
+                  <strong>
+                    {{ summary.successRate !== null ? summary.successRate : "—" }}
+                    @if (summary.successRate !== null) {<small>%</small>}
+                  </strong>
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          <div class="overview-columns">
+            <section class="overview-column" aria-labelledby="network-title">
+              <h3 id="network-title">Network</h3>
+              <div class="fact-stack">
                 <div class="detail-item">
                   <span class="label">Country</span>
                   <app-country-hover-card class="value capitalize" [country]="detail()?.country" />
                 </div>
                 <div class="detail-item">
-                  <span class="label">Check protocol</span>
-                  <span class="value">{{ latest?.protocol || "Unknown" | uppercase }}@if (latest?.transport) { / {{ latest?.transport | uppercase }} }</span>
-                </div>
-                <div class="detail-item">
                   <span class="label">Estimated type</span>
                   <span class="value capitalize">{{ detail()?.estimated_type || "Unknown" }}</span>
-                </div>
-                @if (detail()?.ipgeolocation; as geo) {
-                  <div class="detail-item"><span class="label">IPGeolocation.io</span><span class="value">{{ geo.fresh ? 'Cached' : 'Expired' }} · {{ geo.checked_at | date }}</span></div>
-                  <div class="detail-item"><span class="label">Provider network type</span><span class="value">{{ geo.result.network.connection_type || geo.result.company.type || geo.result.asn.type || 'Unknown' }}</span></div>
-                  @if (geo.result.company.name || geo.result.asn.organization) {
-                    <div class="detail-item"><span class="label">Network operator</span><span class="value">{{ geo.result.company.name || geo.result.asn.organization }} {{ geo.result.asn.as_number }}</span></div>
-                  }
-                  @if (geo.result.security; as security) {
-                    <div class="detail-item"><span class="label">Observed services</span><span class="value">Proxy: {{ security.is_proxy === true ? 'Yes' : security.is_proxy === false ? 'No' : 'Unknown' }} · VPN: {{ security.is_vpn === true ? 'Yes' : security.is_vpn === false ? 'No' : 'Unknown' }} · Tor: {{ security.is_tor === true ? 'Yes' : security.is_tor === false ? 'No' : 'Unknown' }}</span></div>
-                    @if (security.proxy_confidence_score !== null && security.proxy_confidence_score !== undefined) {
-                      <div class="detail-item"><span class="label">Proxy detection confidence</span><span class="value">{{ security.proxy_confidence_score }} / 100</span></div>
-                    }
-                    @if (security.proxy_provider_names.length) {
-                      <div class="detail-item"><span class="label">Observed proxy providers</span><span class="value">{{ security.proxy_provider_names.join(', ') }}</span></div>
-                    }
-                  }
-                }
-                <div class="detail-item">
-                  <span class="label">Anonymity</span>
-                  <span class="value capitalize">{{ latestStatistic?.anonymity_level || "Unknown" }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Added</span>
@@ -225,6 +326,20 @@
                       ? (detail()?.created_at | date: "mediumDate")
                       : "Unknown"
                   }}</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="overview-column" aria-labelledby="connection-title">
+              <h3 id="connection-title">Connection</h3>
+              <div class="fact-stack">
+                <div class="detail-item">
+                  <span class="label">Check protocol</span>
+                  <span class="value">{{ latest?.protocol || "Unknown" | uppercase }}@if (latest?.transport) { / {{ latest?.transport | uppercase }} }</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Anonymity</span>
+                  <span class="value capitalize">{{ latestStatistic?.anonymity_level || "Unknown" }}</span>
                 </div>
                 <div class="detail-item">
                   <span class="label">Latest judge</span>
@@ -236,167 +351,172 @@
                   </span>
                 </div>
               </div>
-
-              <div class="access-summary">
-                <div class="compact-field">
-                  <span class="label">Authentication</span>
-                  @if (authenticationCredentials; as credentials) {
-                    <div class="auth-credentials">
-                      <button
-                        type="button"
-                        class="copy-value"
-                        [class.copy-value--copied]="copiedField() === 'username'"
-                        (click)="copyAuthValue('username')"
-                        [hlmTooltip]="copiedField() === 'username' ? 'Copied' : 'Click to copy'"
-                        aria-label="Copy username"
-                      >
-                        <span class="copy-value__text">{{ credentials.username }}</span>
-                        <i class="icon" [ngClass]="copiedField() === 'username' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
-                      </button>
-                      <span class="value-separator">:</span>
-                      <button
-                        type="button"
-                        class="copy-value"
-                        [class.copy-value--copied]="copiedField() === 'password'"
-                        (click)="copyAuthValue('password')"
-                        [hlmTooltip]="copiedField() === 'password' ? 'Copied' : 'Click to copy'"
-                        aria-label="Copy password"
-                      >
-                        <span class="copy-value__text">{{ credentials.password }}</span>
-                        <i class="icon" [ngClass]="copiedField() === 'password' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
-                      </button>
-                      <button
-                        type="button"
-                        class="copy-value copy-value--all"
-                        [class.copy-value--copied]="copiedField() === 'combined'"
-                        (click)="copyAuthValue('combined')"
-                        [hlmTooltip]="copiedField() === 'combined' ? 'Copied' : 'Click to copy'"
-                        aria-label="Copy credentials"
-                      >
-                        <i class="icon" [ngClass]="copiedField() === 'combined' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
-                      </button>
-                    </div>
-                  } @else {
-                    <span class="value">{{ authenticationDisplay }}</span>
-                  }
-                </div>
-
-                <div class="compact-field compact-field--tags">
-                  <span class="label">Tags</span>
-                  <div class="value">
-                    <app-proxy-tag-selector
-                      [availableTags]="tagService.tags()"
-                      [selectedTags]="detail()?.tags ?? []"
-                      [saving]="savingTags()"
-                      [disabled]="!workspaces.canOperate()"
-                      [compact]="false"
-                      [maxVisibleTags]="5"
-                      [fitToWidth]="true"
-                      (selectionChange)="updateTags($event)"
-                      (manageTags)="detailTagManager.open()"
-                    ></app-proxy-tag-selector>
-                    <app-proxy-tag-manager
-                      #detailTagManager
-                      [showTrigger]="false"
-                      (tagsChanged)="onTagCatalogChanged()"
-                    ></app-proxy-tag-manager>
-                  </div>
-                </div>
-              </div>
             </section>
 
-            <aside
-              class="route-insights"
-              aria-label="Proxy performance and reputation"
-            >
-              <section class="health-summary">
-                <div class="health-summary__heading">
-                  <div>
-                    <h2>Response time</h2>
-                  </div>
-                  <div class="health-summary__response">
-                    <span>Latest</span>
-                    <strong>
-                      {{ latestStatistic ? (latestStatistic.response_time | number) : "—" }}
-                      @if (latestStatistic) {
-                        <small>ms</small>
-                      }
-                    </strong>
-                  </div>
-                </div>
-
-                <div class="mini-chart" aria-label="Recent response-time trend">
-                  @if (isLoadingStatistics()) {
-                    <app-loading></app-loading>
-                  } @else if (responseTimeChart(); as chart) {
-                    <app-chart [definition]="chart" label="Recent response-time trend" />
-                  } @else {
-                    <span>No response-time trend yet.</span>
+            <section class="overview-column reputation-summary" aria-labelledby="reputation-title">
+              <h3 id="reputation-title">
+                Reputation
+                @if (reputationOverall; as overall) {
+                  @if (hasSignals(overall)) {
+                    <button
+                      type="button"
+                      class="icon-button"
+                      (click)="openSignalsDialog(overall)"
+                      title="View reputation signals"
+                    >
+                      <i class="icon icon-sparkles" aria-hidden="true"></i>
+                    </button>
                   }
-                </div>
-              </section>
-
-              <section class="reputation-summary">
-                <div class="reputation-summary__heading">
-                  <div class="reputation-summary__score">
-                    <h2>Reputation</h2>
-                    @if (reputationOverall; as overall) {
-                      <strong
-                        >{{ reputationScoreDisplay(overall)
-                        }}<em>/100</em></strong
-                      >
-                    } @else {
-                      <strong>—</strong>
-                    }
+                }
+              </h3>
+              @if (reputationOverall; as overall) {
+                <div class="reputation-overview">
+                  <div class="reputation-ring">
+                    <svg viewBox="0 0 36 36" aria-hidden="true">
+                      <circle class="reputation-ring__track" cx="18" cy="18" r="15.5" pathLength="100" />
+                      <circle
+                        [ngClass]="reputationRingClass(overall.label)"
+                        cx="18" cy="18" r="15.5" pathLength="100"
+                        [attr.stroke-dasharray]="reputationRingDash(overall)"
+                      />
+                    </svg>
+                    <strong [attr.aria-label]="reputationScoreDisplay(overall) + ' out of 100'">{{ reputationScoreDisplay(overall) }}</strong>
                   </div>
-                  @if (reputationOverall; as overall) {
+                  <div class="reputation-overview__copy">
                     <span [ngClass]="reputationBadgeClass(overall.label)">
                       {{ overall.label || "Unknown" | titlecase }}
                     </span>
-                    @if (hasSignals(overall)) {
-                      <button
-                        type="button"
-                        class="icon-button"
-                        (click)="openSignalsDialog(overall)"
-                        title="View reputation signals"
-                      >
-                        <i class="icon icon-sparkles" aria-hidden="true"></i>
-                      </button>
-                    }
+                    <span>Out of 100@if (reputationProtocols.length) {, across {{ reputationProtocols.length }} {{ reputationProtocols.length === 1 ? "protocol" : "protocols" }}}</span>
+                  </div>
+                </div>
+              }
+              @if (reputationProtocols.length > 0) {
+                <div class="protocol-list">
+                  @for (
+                    protocol of reputationProtocols;
+                    track protocol.kind
+                  ) {
+                    <button
+                      type="button"
+                      class="protocol-row"
+                      [disabled]="!hasSignals(protocol)"
+                      (click)="openSignalsDialog(protocol)"
+                    >
+                      <span>{{ protocol.kind | uppercase }}</span>
+                      <span class="reputation-meter">
+                        <span
+                          [ngClass]="progressFillClass(protocol.label)"
+                          [style.width.%]="reputationScorePercent(protocol)"
+                        ></span>
+                      </span>
+                      <strong>{{ reputationScoreDisplay(protocol) }}</strong>
+                    </button>
                   }
                 </div>
-
-                @if (reputationProtocols.length > 0) {
-                  <div class="protocol-list">
-                    @for (
-                      protocol of reputationProtocols;
-                      track protocol.kind
-                    ) {
-                      <button
-                        type="button"
-                        class="protocol-row"
-                        [disabled]="!hasSignals(protocol)"
-                        (click)="openSignalsDialog(protocol)"
-                      >
-                        <span>{{ protocol.kind | uppercase }}</span>
-                        <span class="reputation-meter">
-                          <span
-                            [ngClass]="progressFillClass(protocol.label)"
-                            [style.width.%]="reputationScorePercent(protocol)"
-                          ></span>
-                        </span>
-                        <strong>{{ reputationScoreDisplay(protocol) }}</strong>
-                      </button>
-                    }
-                  </div>
-                } @else if (reputationOverall) {
-                  <p>No per-protocol breakdown available.</p>
-                } @else {
-                  <p>No reputation data yet.</p>
-                }
-              </section>
-            </aside>
+              } @else if (reputationOverall) {
+                <p>No per-protocol breakdown available.</p>
+              } @else {
+                <p>No reputation data yet.</p>
+              }
+            </section>
           </div>
+
+          @if (detail()?.ipgeolocation; as geo) {
+            <section class="overview-band overview-band--tint" aria-labelledby="intel-title">
+              <div class="overview-band__side">
+                <h3 id="intel-title">IP intelligence</h3>
+                <span>IPGeolocation.io</span>
+                <span>{{ geo.fresh ? "Cached" : "Expired" }} {{ geo.checked_at | date }}</span>
+              </div>
+              <div class="overview-band__body">
+                <div class="detail-item"><span class="label">Provider network type</span><span class="value">{{ geo.result.network.connection_type || geo.result.company.type || geo.result.asn.type || 'Unknown' }}</span></div>
+                @if (geo.result.company.name || geo.result.asn.organization) {
+                  <div class="detail-item"><span class="label">Network operator</span><span class="value">{{ geo.result.company.name || geo.result.asn.organization }} {{ geo.result.asn.as_number }}</span></div>
+                }
+                @if (geo.result.security; as security) {
+                  <div class="detail-item"><span class="label">Observed services</span><span class="value">Proxy: {{ security.is_proxy === true ? 'Yes' : security.is_proxy === false ? 'No' : 'Unknown' }} · VPN: {{ security.is_vpn === true ? 'Yes' : security.is_vpn === false ? 'No' : 'Unknown' }} · Tor: {{ security.is_tor === true ? 'Yes' : security.is_tor === false ? 'No' : 'Unknown' }}</span></div>
+                  @if (security.proxy_confidence_score !== null && security.proxy_confidence_score !== undefined) {
+                    <div class="detail-item"><span class="label">Proxy detection confidence</span><span class="value">{{ security.proxy_confidence_score }} / 100</span></div>
+                  }
+                  @if (security.proxy_provider_names.length) {
+                    <div class="detail-item"><span class="label">Observed proxy providers</span><span class="value">{{ security.proxy_provider_names.join(', ') }}</span></div>
+                  }
+                }
+              </div>
+            </section>
+          }
+
+          <section class="overview-band" aria-labelledby="access-title">
+            <div class="overview-band__side">
+              <h3 id="access-title">Access</h3>
+            </div>
+            <div class="overview-band__body">
+              <div class="compact-field">
+                <span class="label">Authentication</span>
+                @if (authenticationCredentials; as credentials) {
+                  <div class="auth-credentials">
+                    <button
+                      type="button"
+                      class="copy-value"
+                      [class.copy-value--copied]="copiedField() === 'username'"
+                      (click)="copyAuthValue('username')"
+                      [hlmTooltip]="copiedField() === 'username' ? 'Copied' : 'Click to copy'"
+                      aria-label="Copy username"
+                    >
+                      <span class="copy-value__text">{{ credentials.username }}</span>
+                      <i class="icon" [ngClass]="copiedField() === 'username' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
+                    </button>
+                    <span class="value-separator">:</span>
+                    <button
+                      type="button"
+                      class="copy-value"
+                      [class.copy-value--copied]="copiedField() === 'password'"
+                      (click)="copyAuthValue('password')"
+                      [hlmTooltip]="copiedField() === 'password' ? 'Copied' : 'Click to copy'"
+                      aria-label="Copy password"
+                    >
+                      <span class="copy-value__text">{{ credentials.password }}</span>
+                      <i class="icon" [ngClass]="copiedField() === 'password' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="copy-value copy-value--all"
+                      [class.copy-value--copied]="copiedField() === 'combined'"
+                      (click)="copyAuthValue('combined')"
+                      [hlmTooltip]="copiedField() === 'combined' ? 'Copied' : 'Click to copy'"
+                      aria-label="Copy credentials"
+                    >
+                      <i class="icon" [ngClass]="copiedField() === 'combined' ? 'icon-check' : 'icon-copy'" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                } @else {
+                  <span class="value">{{ authenticationDisplay }}</span>
+                }
+              </div>
+
+              <div class="compact-field compact-field--tags overview-band__wide">
+                <span class="label">Tags</span>
+                <div class="value">
+                  <app-proxy-tag-selector
+                    [availableTags]="tagService.tags()"
+                    [selectedTags]="detail()?.tags ?? []"
+                    [saving]="savingTags()"
+                    [disabled]="!workspaces.canOperate()"
+                    [compact]="false"
+                    [maxVisibleTags]="5"
+                    [fitToWidth]="true"
+                    (selectionChange)="updateTags($event)"
+                    (manageTags)="detailTagManager.open()"
+                  ></app-proxy-tag-selector>
+                  <app-proxy-tag-manager
+                    #detailTagManager
+                    [showTrigger]="false"
+                    (tagsChanged)="onTagCatalogChanged()"
+                  ></app-proxy-tag-manager>
+                </div>
+              </div>
+            </div>
+          </section>
         }
       </section>
 
