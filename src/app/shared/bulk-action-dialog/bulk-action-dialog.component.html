@@ -15,7 +15,6 @@
   [visible]="visible"
   autoFocus="first-heading"
   (visibleChange)="visibleChange.emit($event)"
-  [dismissableMask]="true"
   [styleClass]="styleClass"
   (onShow)="onShow()"
   (onHide)="hidden.emit()"
@@ -26,11 +25,15 @@
       class="bulk-dialog-heading"
       [class.bulk-dialog-heading--danger]="tone === 'danger'"
     >
-      <span class="bulk-dialog-heading__icon"
-        ><i [class]="headingIcon" aria-hidden="true"></i
-      ></span>
+      @if (headingIcon) {
+        <span class="bulk-dialog-heading__icon"
+          ><i [class]="headingIcon" aria-hidden="true"></i
+        ></span>
+      }
       <div class="bulk-dialog-heading__copy">
-        <span>{{ headingEyebrow }}</span>
+        @if (headingEyebrow) {
+          <span>{{ headingEyebrow }}</span>
+        }
         <strong>{{ headingTitle }}</strong>
       </div>
       @if (headingTooltip) {
@@ -59,12 +62,25 @@
     }
 
     <ng-content></ng-content>
+
+    @if (confirmLabel) {
+      <label class="bulk-dialog-confirm" [class.bulk-dialog-confirm--danger]="tone === 'danger'">
+        <input
+          type="checkbox"
+          [checked]="confirmed"
+          (change)="confirmed = $any($event.target).checked"
+        />
+        <span>{{ confirmLabel }}</span>
+      </label>
+    }
   </div>
 
   <ng-template #dialogFooter>
     <div class="bulk-dialog-footer">
-      <span>{{ footerNote }}</span>
-      <div>
+      @if (footerNote) {
+        <span>{{ footerNote }}</span>
+      }
+      <div class="bulk-dialog-footer__actions">
         <button
           type="button"
           [disabled]="cancelDisabled"
@@ -83,7 +99,7 @@
           "
           (click)="actionRequested.emit()"
           hlmBtn
-          [disabled]="actionDisabled || actionLoading"
+          [disabled]="actionBlocked"
           variant="default"
         >
           @if (actionLoading) {

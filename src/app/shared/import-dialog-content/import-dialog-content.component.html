@@ -1,35 +1,22 @@
-<ng-content select="[import-prefix]"></ng-content>
-
-<div class="import-dialog-grid">
-  <section class="import-source" aria-labelledby="import-input-title">
-    <div class="section-heading">
-      <span class="section-icon"
-        ><i class="icon icon-align-left" aria-hidden="true"></i
-      ></span>
-      <div>
-        <h3 id="import-input-title">{{ inputTitle }}</h3>
-        <p>{{ inputDescription }}</p>
-      </div>
-    </div>
-
-    <div class="source-actions">
+<section class="form-step" aria-labelledby="import-input-title">
+  <header class="form-step__heading">
+    <h3 id="import-input-title">{{ inputTitle }}</h3>
+    <div class="form-step__action source-actions">
       <div class="source-action">
         <button
           type="button"
+          class="button button--quiet button--compact"
           [disabled]="clipboardPresent"
-          class="source-button"
           (click)="pasteRequested.emit()"
-          hlmBtn
-          variant="default"
         >
-          <i class="icon icon-clipboard" aria-hidden="true"></i>Paste from
-          clipboard
+          <i class="icon icon-clipboard" aria-hidden="true"></i>Paste
         </button>
         @if (clipboardPresent) {
           <button
             type="button"
             class="source-clear"
             aria-label="Clear clipboard data"
+            title="Clear clipboard data"
             (click)="clipboardClearRequested.emit()"
           >
             <i class="icon icon-x" aria-hidden="true"></i>
@@ -40,14 +27,11 @@
       <div class="source-action">
         <button
           type="button"
+          class="button button--quiet button--compact"
           [disabled]="filePresent"
-          class="source-button"
           (click)="fileInput.click()"
-          hlmBtn
-          variant="default"
         >
-          <i class="icon icon-file-input" aria-hidden="true"></i>Import from
-          file
+          <i class="icon icon-file-input" aria-hidden="true"></i>Import file
         </button>
         <input
           type="file"
@@ -60,6 +44,7 @@
             type="button"
             class="source-clear"
             aria-label="Clear imported file"
+            title="Clear imported file"
             (click)="fileClearRequested.emit()"
           >
             <i class="icon icon-x" aria-hidden="true"></i>
@@ -67,20 +52,30 @@
         }
       </div>
     </div>
+  </header>
 
-    <div class="import-textarea-shell">
-      <textarea
-        maxlength="109999"
-        [placeholder]="textareaPlaceholder"
-        [ngModel]="textareaValue"
-        (ngModelChange)="textareaValueChange.emit($event)"
-        [attr.aria-label]="textareaLabel"
-      ></textarea>
-      <span>{{ lineHint }}</span>
-    </div>
-  </section>
+  <textarea
+    class="import-textarea"
+    maxlength="109999"
+    [placeholder]="textareaPlaceholder"
+    [ngModel]="textareaValue"
+    (ngModelChange)="textareaValueChange.emit($event)"
+    [attr.aria-label]="textareaLabel"
+    aria-describedby="import-input-hint"
+  ></textarea>
+  <p id="import-input-hint" class="field-hint">{{ inputHint }}</p>
 
-  <aside class="import-summary" aria-label="Import summary">
+  <div class="import-stats" aria-live="polite">
     <ng-content select="[import-summary]"></ng-content>
-  </aside>
-</div>
+  </div>
+</section>
+
+<section class="form-step" aria-labelledby="import-options-title">
+  <header class="form-step__heading">
+    <h3 id="import-options-title">{{ optionsTitle }}</h3>
+    @if (optionsOptional) {
+      <span class="optional-label">Optional</span>
+    }
+  </header>
+  <ng-content select="[import-options]"></ng-content>
+</section>

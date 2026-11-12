@@ -80,9 +80,9 @@
                     <span>{{ c.name }}</span>
                   </div>
                   <div class="country-row__value">
-                    <strong>{{ c.percentage }}%</strong>
+                    <strong>{{ c.percentage | number: "1.1-1" }}%</strong>
                     @if (c.value !== undefined) {
-                      <span>{{ c.value }} proxies</span>
+                      <span>{{ c.value | number }} {{ c.value === 1 ? "proxy" : "proxies" }}</span>
                     }
                   </div>
                 </div>
@@ -107,7 +107,7 @@
         ><i class="icon icon-globe" aria-hidden="true"></i
       ></span>
       <p>
-        Country distribution will appear after checked routes include location
+        Country distribution will appear after checked proxies include location
         data.
       </p>
     </div>
@@ -117,7 +117,6 @@
     header="All countries"
     styleClass="dashboard-country-dialog"
     [(visible)]="showAllCountries"
-    [dismissableMask]="true"
     [panelStyle]="{ width: '32rem', maxWidth: 'calc(100vw - 2rem)' }"
   >
     <div class="all-countries-list">
@@ -144,9 +143,9 @@
                 <span>{{ c.name }}</span>
               </div>
               <div class="country-row__value">
-                <strong>{{ c.percentage }}%</strong>
+                <strong>{{ c.percentage | number: "1.1-1" }}%</strong>
                 @if (c.value !== undefined) {
-                  <span>{{ c.value }} proxies</span>
+                  <span>{{ c.value | number }} {{ c.value === 1 ? "proxy" : "proxies" }}</span>
                 }
               </div>
             </div>

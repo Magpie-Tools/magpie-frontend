@@ -1,7 +1,4 @@
-<app-admin-settings-shell
-  class="admin-blacklist-page"
-  appRevealGroup=".admin-context, .settings-card, .save-dock"
->
+<app-admin-settings-shell class="admin-blacklist-page">
   <form [formGroup]="form" class="settings-stage" (ngSubmit)="onSubmit()">
     <app-admin-settings-header
       icon="icon icon-ban"
@@ -65,58 +62,6 @@
               optionValue="value"
             ></app-select>
           </div>
-        </div>
-      </section>
-
-      <section class="settings-card settings-card--enforcement">
-        <div class="enforcement-copy">
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i class="icon icon-shield" aria-hidden="true"></i
-            ></span>
-            <div class="card-heading__copy">
-              <h2>Blacklist enforcement</h2>
-              <p>
-                A refresh checks every managed proxy and stops blocked hosts
-                from entering the system again.
-              </p>
-            </div>
-          </div>
-
-          <div class="enforcement-path" aria-label="Blacklist enforcement path">
-            <div class="enforcement-step">
-              <span class="enforcement-node"
-                ><i class="icon icon-download" aria-hidden="true"></i
-              ></span>
-              <div>
-                <strong>Download</strong><small>Fetch every source</small>
-              </div>
-            </div>
-            <span class="enforcement-line" aria-hidden="true"></span>
-            <div class="enforcement-step">
-              <span class="enforcement-node"
-                ><i class="icon icon-search" aria-hidden="true"></i
-              ></span>
-              <div>
-                <strong>Match</strong><small>Compare IPs and CIDRs</small>
-              </div>
-            </div>
-            <span class="enforcement-line" aria-hidden="true"></span>
-            <div class="enforcement-step">
-              <span class="enforcement-node enforcement-node--danger"
-                ><i class="icon icon-x" aria-hidden="true"></i
-              ></span>
-              <div>
-                <strong>Purge</strong><small>Remove matching proxies</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="enforcement-visual" aria-hidden="true">
-          <span class="enforcement-orbit enforcement-orbit--outer"></span>
-          <span class="enforcement-orbit enforcement-orbit--inner"></span>
-          <span class="enforcement-core"><i class="icon icon-ban"></i></span>
         </div>
       </section>
 
@@ -220,10 +165,24 @@
           <button type="button" class="add-button" (click)="addBlockedSite()">
             <i class="icon icon-plus" aria-hidden="true"></i>Add website
           </button>
-          <p class="entry-note">
-            Blocked hosts cannot act as judges, scrape sources, or blacklist
-            feeds.
-          </p>
+          <ul class="entry-notes">
+            <li>
+              Blocking <code>example.com</code> also blocks every subdomain,
+              such as <code>api.example.com</code>.
+            </li>
+            <li>
+              Magpie never contacts a blocked host, including through scraper
+              redirects.
+            </li>
+            <li>
+              Saving removes judges and scrape sources on blocked hosts from
+              every workspace.
+            </li>
+            <li>
+              Global judges, scrape sources, blacklist feeds, and the IP lookup
+              URL cannot use a blocked host.
+            </li>
+          </ul>
         </div>
       </section>
     </div>

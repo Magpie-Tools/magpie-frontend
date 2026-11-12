@@ -48,12 +48,16 @@ export function buildCountryMapProjection(
   return {projection, frame};
 }
 
+/**
+ * One-hue sequential ramp in the workspace theme colour (the skin sets the stops).
+ * Countries without proxies stay on the empty fill, and any country with proxies starts
+ * a visible step above it so a single route still shows on the map.
+ */
 export function countryMapColor(value: number): string {
   const clamped = Math.min(1, Math.max(0, value));
-  const start = [9, 12, 24];
-  const end = [180, 225, 255];
-  const channel = (index: number) => Math.round(start[index] + (end[index] - start[index]) * clamped);
-  return `rgba(${channel(0)}, ${channel(1)}, ${channel(2)}, ${0.55 + clamped * 0.4})`;
+  if (clamped === 0) return 'var(--ui-map-empty, rgba(9, 12, 24, 0.55))';
+  const share = Math.round((0.12 + clamped * 0.88) * 100);
+  return `color-mix(in oklab, var(--ui-map-high, rgb(180, 225, 255)) ${share}%, var(--ui-map-low, rgb(9, 12, 24)))`;
 }
 
 export function buildCountryMapChart(

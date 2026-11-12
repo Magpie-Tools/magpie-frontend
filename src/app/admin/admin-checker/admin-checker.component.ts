@@ -17,7 +17,6 @@ import {NotificationService} from '../../services/notification-service.service';
 import {Subject} from 'rxjs';
 
 import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
-import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 import {VisibleRowsDirective} from '../../shared/visible-rows.directive';
 import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
 import {AdminSettingsHeaderComponent} from '../../shared/admin-settings-shell/admin-settings-header.component';
@@ -31,8 +30,6 @@ import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/
     FormsModule,
     ReactiveFormsModule,
     TooltipComponent,
-
-    RevealGroupDirective,
     VisibleRowsDirective,
     AdminSettingsShellComponent,
     AdminSettingsHeaderComponent,

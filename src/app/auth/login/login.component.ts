@@ -3,7 +3,7 @@ import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
 import {getHttpErrorMessage} from '../../shared/http-error';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, model, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, inject, model, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
@@ -36,6 +36,11 @@ export class LoginComponent implements OnDestroy {
   rememberPass = model(false);
   shouldRemember = false;
   autoLoginChecking = signal(false);
+  readonly submitting = signal(false);
+  readonly submitAttempted = signal(false);
+  /** Last sign-in failure, shown in the form until the user edits a field. */
+  readonly submitError = signal<string | null>(null);
+  private readonly host = inject(ElementRef<HTMLElement>);
   private autoLoginTimeoutId?: ReturnType<typeof setTimeout>;
   private autoLoginIntervalId?: ReturnType<typeof setInterval>;
 
@@ -50,10 +55,11 @@ export class LoginComponent implements OnDestroy {
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required]],
     });
 
     this.rememberPass.subscribe(res => (this.shouldRemember = res));
+    this.loginForm.valueChanges.subscribe(() => this.submitError.set(null));
 
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
     const isBrowser = typeof window !== 'undefined';
@@ -74,12 +80,39 @@ export class LoginComponent implements OnDestroy {
     this.clearAutoLoginTimers();
   }
 
+  showError(name: 'email' | 'password'): boolean {
+    const control = this.loginForm.get(name);
+    return !!control && control.invalid && (control.touched || this.submitAttempted());
+  }
+
+  errorMessage(name: 'email' | 'password'): string {
+    const control = this.loginForm.get(name);
+    if (name === 'email') {
+      return control?.hasError('required') ? 'Enter your email address.' : 'Enter a valid email address, such as name@example.com.';
+    }
+    return 'Enter your password.';
+  }
+
   onLogin() {
+    if (this.submitting()) {
+      return;
+    }
+    this.submitAttempted.set(true);
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      const firstInvalid = (['email', 'password'] as const).find(name => this.loginForm.get(name)?.invalid);
+      setTimeout(() => (this.host.nativeElement as HTMLElement).querySelector<HTMLElement>(`#${firstInvalid}`)?.focus());
+      return;
+    }
+
     const { email, password } = this.loginForm.value;
     const user: User = { email, password };
 
+    this.submitting.set(true);
+    this.submitError.set(null);
     this.http.loginUser(user).subscribe({
       next: (response) => {
+        this.submitting.set(false);
         saveAuthToken(response.token, this.shouldRemember);
         AuthInterceptor.setToken(response.token);
         this.workspaces.reset();
@@ -98,8 +131,11 @@ export class LoginComponent implements OnDestroy {
         this.router.navigateByUrl(target);
       },
       error: (err: HttpErrorResponse) => {
+        this.submitting.set(false);
         UserService.setLoggedIn(false);
-        this.notification.showError(`Login failed: ${getHttpErrorMessage(err)}`);
+        const message = `Sign-in failed: ${getHttpErrorMessage(err)}`;
+        this.submitError.set(message);
+        this.notification.showError(message);
       },
     });
   }

@@ -3,16 +3,28 @@
     <app-loading></app-loading>
   </div>
 } @else {
-  <app-auth title="Login">
+  <app-auth title="Sign in">
     <form
       [formGroup]="loginForm"
       (ngSubmit)="onLogin()"
       class="flex flex-col gap-4"
+      novalidate
     >
       <!-- Email -->
       <div class="flex flex-col gap-1">
         <label for="email">Email</label>
-        <input id="email" type="email" hlmInput formControlName="email" />
+        <input
+          id="email"
+          type="email"
+          hlmInput
+          formControlName="email"
+          autocomplete="username"
+          [attr.aria-invalid]="showError('email') ? 'true' : null"
+          [attr.aria-describedby]="showError('email') ? 'email-error' : null"
+        />
+        @if (showError('email')) {
+          <p id="email-error" class="field-error">{{ errorMessage('email') }}</p>
+        }
       </div>
 
       <!-- Password -->
@@ -23,7 +35,13 @@
           type="password"
           hlmInput
           formControlName="password"
+          autocomplete="current-password"
+          [attr.aria-invalid]="showError('password') ? 'true' : null"
+          [attr.aria-describedby]="showError('password') ? 'password-error' : null"
         />
+        @if (showError('password')) {
+          <p id="password-error" class="field-error">{{ errorMessage('password') }}</p>
+        }
       </div>
 
       <!-- Remember login -->
@@ -41,14 +59,33 @@
         >
       </div>
 
-      <button type="submit" class="w-full" hlmBtn variant="default">
-        Login
+      @if (submitError(); as error) {
+        <p class="auth-form-error" role="alert">
+          <i class="icon icon-circle-alert" aria-hidden="true"></i>
+          <span>{{ error }}</span>
+        </p>
+      }
+
+      <button
+        type="submit"
+        class="w-full"
+        hlmBtn
+        variant="default"
+        [disabled]="submitting()"
+        [attr.aria-busy]="submitting()"
+      >
+        @if (submitting()) {
+          <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
+          Signing in…
+        } @else {
+          Sign in
+        }
       </button>
 
       <p class="switch-link text-center mt-2">
         Don't have an account?
-        <a routerLink="/register" class="text-blue-500 hover:underline"
-          >Register</a
+        <a routerLink="/register" class="auth-inline-link"
+          >Create one</a
         >
       </p>
     </form>

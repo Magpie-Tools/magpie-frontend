@@ -1,8 +1,4 @@
-<main
-  class="source-detail-page"
-  appRevealGroup=".detail-context, .detail-card"
-  [revealReady]="!isLoading()"
->
+<main class="source-detail-page">
   <section class="detail-stage">
     <header class="detail-context">
       <div class="detail-context__copy">
@@ -61,7 +57,7 @@
                     [status]="detail()?.last_scrape_status" />
                 </div>
                 <span class="check-summary__time">{{ detail()?.last_scraped_at
-                  ? (detail()?.last_scraped_at | date: "medium") : "Not scraped yet" }}</span>
+                  ? (detail()?.last_scraped_at | date) : "Not scraped yet" }}</span>
               </div>
               @if (detail()?.last_scrape_error) {
                 <p class="scrape-error">
@@ -73,7 +69,7 @@
                 <div class="detail-item">
                   <span class="label">Next scrape</span>
                   <span class="value">{{ detail()?.next_scrape_at
-                    ? (detail()?.next_scrape_at | date: "medium") : "Pending" }}</span>
+                    ? (detail()?.next_scrape_at | date) : "Pending" }}</span>
                 </div>
                 @if (detail()?.scrape_schedule_reason) {
                   <div class="detail-item">
@@ -97,7 +93,7 @@
                 <div class="detail-item">
                   <span class="label">Last proxy added</span>
                   <span class="value">{{ detail()?.last_proxy_added_at
-                    ? (detail()?.last_proxy_added_at | date: "medium") : "Never" }}</span>
+                    ? (detail()?.last_proxy_added_at | date) : "Never" }}</span>
                 </div>
               </div>
               <section class="source-settings" aria-label="Source settings">
@@ -237,15 +233,17 @@
         [searchTerm]="proxySearchTerm()"
         searchPlaceholder="Search host, port, country, status, reputation, or tag"
         searchAriaLabel="Search proxies"
-        resultTitle="Proxy routes"
+        resultTitle="Proxies"
         [showResultHeading]="false"
+        itemNoun="proxies"
+        itemNounSingular="proxy"
         [totalItems]="proxyTotal()"
         [hasLoaded]="proxyHasLoaded()"
         [loading]="proxyLoading()"
-        loadingLabel="Loading routes"
+        loadingLabel="Loading proxies"
         [activeFilters]="hasActiveFilters()"
-        emptyTitle="No proxy routes yet"
-        filteredEmptyTitle="No matching proxy routes"
+        emptyTitle="No proxies yet"
+        filteredEmptyTitle="No matching proxies"
         emptyDescription="No proxies are linked to this source yet."
         (searchTermChange)="onProxySearchTermChange($event)"
         (clearSearch)="onProxySearchTermChange('')"
@@ -288,7 +286,7 @@
               {{ filterButtonLabel() }}
             </button>
             <hlm-popover-content *hlmPopoverPortal
-              class="w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
+              class="phone-sheet-popover w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-0 gap-0"
               aria-label="Filters">
               <app-proxy-filter-panel
                 [form]="filterForm"
@@ -319,7 +317,7 @@
               Columns
             </button>
             <hlm-popover-content *hlmPopoverPortal
-              class="w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-hidden rounded-xl p-0 gap-0"
+              class="column-picker-popover w-[min(720px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-hidden rounded-xl p-0 gap-0"
               aria-label="Columns">
               <app-column-picker-panel
                 [columns]="proxyTableColumnDefinitions"

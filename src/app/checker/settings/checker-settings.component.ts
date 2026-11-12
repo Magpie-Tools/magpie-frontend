@@ -17,12 +17,11 @@ import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag
 import {Subject} from 'rxjs';
 import {filter, finalize, takeUntil} from 'rxjs/operators';
 import {WorkspaceService} from '../../services/workspace.service';
-import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 
 @Component({
   selector: 'app-checker-settings',
   standalone: true,
-  imports: [HlmButton, HlmInput, SelectComponent, ReactiveFormsModule, CheckboxComponent, ProxyTagManagerComponent, TooltipComponent, HlmBadge, HlmPopoverImports, DragDropModule, RevealGroupDirective],
+  imports: [HlmButton, HlmInput, SelectComponent, ReactiveFormsModule, CheckboxComponent, ProxyTagManagerComponent, TooltipComponent, HlmBadge, HlmPopoverImports, DragDropModule],
   templateUrl: './checker-settings.component.html',
   styleUrls: ['./checker-settings.component.scss']
 })

@@ -1,8 +1,4 @@
-<main
-  class="invitation-page"
-  appRevealGroup=".invitation-context, .accepted-notice, .invitation-card"
-  [revealReady]="!invitations.loading()"
->
+<main class="invitation-page">
   <div class="invitation-stage">
     <header class="invitation-context">
       <div class="invitation-context__copy">
@@ -51,30 +47,23 @@
           <h2 id="guide-title">Joining a workspace</h2>
         </div>
 
-        <div class="decision-flow" aria-label="Invitation decision flow">
-          <div class="flow-step">
-            <span class="flow-node"
-              ><i class="icon icon-mail" aria-hidden="true"></i
-            ></span>
-            <div>
-              <strong>Review</strong><small>Check access and inviter</small>
-            </div>
+        <dl class="fact-list">
+          <div>
+            <dt>Accept</dt>
+            <dd>
+              Adds the workspace to your switcher. You stay where you are until
+              you open it.
+            </dd>
           </div>
-          <span class="flow-line" aria-hidden="true"></span>
-          <div class="flow-step">
-            <span class="flow-node"
-              ><i class="icon icon-check" aria-hidden="true"></i
-            ></span>
-            <div><strong>Accept</strong><small>Add the workspace</small></div>
+          <div>
+            <dt>Decline</dt>
+            <dd>Removes the invitation from your inbox.</dd>
           </div>
-          <span class="flow-line" aria-hidden="true"></span>
-          <div class="flow-step">
-            <span class="flow-node"
-              ><i class="icon icon-external-link" aria-hidden="true"></i
-            ></span>
-            <div><strong>Open</strong><small>Switch when ready</small></div>
+          <div>
+            <dt>Expiry</dt>
+            <dd>Accept before the date shown under Expires.</dd>
           </div>
-        </div>
+        </dl>
 
         <div class="guide-note">
           <i class="icon icon-shield" aria-hidden="true"></i
@@ -145,7 +134,7 @@
           </div>
         } @else if (invitations.invitations().length === 0) {
           <div class="empty-state">
-            <span class="empty-orbit" aria-hidden="true"
+            <span class="empty-icon" aria-hidden="true"
               ><i class="icon icon-inbox"></i
             ></span>
             <strong>Your invitation inbox is clear</strong>
@@ -200,7 +189,7 @@
                   </div>
                   <div>
                     <dt>Expires</dt>
-                    <dd>{{ invitation.expires_at | date: "medium" }}</dd>
+                    <dd>{{ invitation.expires_at | date }}</dd>
                   </div>
                 </dl>
 

@@ -59,14 +59,13 @@ dl {
   p {
     margin-top: 0.28rem;
     color: var(--card-muted);
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
   }
 }
 
 .context-icon,
 .card-icon,
-.state-icon,
-.build-core {
+.state-icon {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
@@ -86,8 +85,8 @@ dl {
 }
 
 .context-eyebrow {
-  color: rgba(255, 255, 255, 0.46);
-  font-size: 0.61rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
   font-weight: 620;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -112,15 +111,15 @@ dl {
   }
 
   small {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 0.56rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.72rem;
   }
 
   strong {
     overflow: hidden;
     color: rgba(255, 255, 255, 0.84);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.68rem;
+    font-size: 0.8125rem;
     font-weight: 580;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -200,12 +199,13 @@ dl {
     max-width: 36rem;
     margin-top: 0.32rem;
     color: var(--card-muted);
-    font-size: 0.75rem;
+    font-size: 0.84rem;
     line-height: 1.5;
   }
 }
 
-.unread-summary {
+.unread-summary,
+.build-summary {
   position: relative;
   z-index: 1;
   display: flex;
@@ -222,12 +222,12 @@ dl {
 
   span {
     color: rgba(255, 255, 255, 0.75);
-    font-size: 0.76rem;
+    font-size: 0.84rem;
   }
 
   small {
-    color: rgba(255, 255, 255, 0.38);
-    font-size: 0.62rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.75rem;
   }
 }
 
@@ -258,8 +258,8 @@ dl {
   }
 
   dt {
-    color: rgba(255, 255, 255, 0.38);
-    font-size: 0.61rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.72rem;
   }
 
   dd {
@@ -267,7 +267,7 @@ dl {
     overflow: hidden;
     color: rgba(255, 255, 255, 0.8);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.68rem;
+    font-size: 0.8125rem;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -286,7 +286,7 @@ dl {
   border-radius: 0.75rem;
   color: #fff;
   font: inherit;
-  font-size: 0.69rem;
+  font-size: 0.8125rem;
   font-weight: 580;
   cursor: pointer;
   transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
@@ -332,87 +332,45 @@ dl {
 }
 
 .build-card {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.build-visual {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  min-height: 9.2rem;
-  place-items: center;
-  margin-top: 0.65rem;
+// Shares the read-status layout: a headline value, then the latest/status pair.
+.build-summary { margin-bottom: 1.55rem; }
+
+.build-version {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.98);
+  font-family: var(--ui-font-mono, ui-monospace, monospace);
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 560;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.build-orbit {
-  position: absolute;
-  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.18);
+// Pushed to the foot of the card, however tall the read-status card beside it grows.
+.build-pair { margin-top: auto; }
+
+.build-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: inherit;
+}
+
+.build-status__dot {
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
   border-radius: 50%;
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: -0.18rem;
-    width: 0.36rem;
-    height: 0.36rem;
-    border-radius: 50%;
-    background: var(--theme-primary-300);
-    box-shadow: 0 0 0.8rem var(--theme-primary-shadow);
-  }
+  background: var(--ui-text-3, #858585);
 }
 
-.build-orbit--outer {
-  width: 8rem;
-  height: 8rem;
-}
-
-.build-orbit--inner {
-  width: 5.6rem;
-  height: 5.6rem;
-  transform: rotate(115deg);
-}
-
-.build-core {
-  width: 3.2rem;
-  height: 3.2rem;
-  border-radius: 1rem;
-  background: linear-gradient(145deg, rgba(var(--theme-primary-500-rgb), 0.24), rgba(255, 255, 255, 0.04));
-  box-shadow: 0 0 2.4rem rgba(var(--theme-primary-500-rgb), 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.07);
-}
-
-.build-details {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: baseline;
-  gap: 0.22rem 0.7rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-
-  span,
-  small {
-    color: rgba(255, 255, 255, 0.39);
-    font-size: 0.61rem;
-  }
-
-  strong {
-    justify-self: end;
-    overflow: hidden;
-    color: rgba(255, 255, 255, 0.86);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.7rem;
-    font-weight: 580;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  small {
-    grid-column: 1 / -1;
-  }
-}
+.build-status[data-tone="current"] .build-status__dot { background: var(--status-good); }
+.build-status[data-tone="behind"] .build-status__dot { background: var(--status-warn); }
 
 .section-heading {
   position: relative;
@@ -432,14 +390,14 @@ dl {
   border-radius: 999px;
   background: rgba(var(--theme-primary-500-rgb), 0.08);
   color: var(--theme-primary-200);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
 .section-count--muted {
   border-color: rgba(255, 255, 255, 0.11);
   background: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .empty-state,
@@ -484,26 +442,26 @@ dl {
 
   strong {
     color: rgba(255, 255, 255, 0.82);
-    font-size: 0.74rem;
+    font-size: 0.84rem;
     font-weight: 580;
   }
 
   span {
-    color: rgba(255, 255, 255, 0.42);
-    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.75rem;
     line-height: 1.45;
   }
 }
 
+// A wrapping grid shows every unread release; nothing hides past the right edge.
 .release-accordion {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
   gap: 0.65rem;
   margin-top: 1.15rem;
-  overflow-x: auto;
   padding: 0.4rem 0.05rem 0.45rem;
-  scrollbar-color: rgba(var(--theme-primary-300-rgb), 0.26) transparent;
 }
 
 .release-card {
@@ -529,8 +487,8 @@ dl {
   > a {
     margin-top: auto;
     padding-top: 0.8rem;
-    color: rgba(255, 255, 255, 0.52);
-    font-size: 0.63rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.75rem;
     text-decoration: none;
 
     &:hover,
@@ -554,7 +512,7 @@ dl {
   align-items: center;
   padding: 0.24rem 0.46rem;
   border-radius: 999px;
-  font-size: 0.59rem;
+  font-size: 0.72rem;
   font-weight: 590;
   white-space: nowrap;
 }
@@ -569,7 +527,7 @@ dl {
 .release-tag--muted {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.53);
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .release-flag {
@@ -626,16 +584,16 @@ dl {
 
   small {
     margin-top: 0.22rem;
-    color: rgba(255, 255, 255, 0.36);
-    font-size: 0.59rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.72rem;
   }
 
   > span {
     display: -webkit-box;
     margin-top: 0.75rem;
     overflow: hidden;
-    color: rgba(255, 255, 255, 0.48);
-    font-size: 0.66rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.75rem;
     line-height: 1.55;
     white-space: pre-line;
     -webkit-box-orient: vertical;
@@ -662,16 +620,16 @@ dl {
   h2 {
     margin-top: 1.15rem;
     color: rgba(255, 255, 255, 0.96);
-    font-size: clamp(1.5rem, 3.5vw, 2.35rem);
-    font-weight: 570;
-    letter-spacing: -0.05em;
+    font-size: 1rem;
+    font-weight: 580;
+    letter-spacing: -0.025em;
   }
 
   p {
     max-width: 22rem;
     margin-top: 0.65rem;
     color: var(--card-muted);
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     line-height: 1.6;
   }
 }
@@ -705,7 +663,7 @@ dl {
   padding-top: 0.28rem;
   color: rgba(255, 255, 255, 0.24);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.59rem;
+  font-size: 0.72rem;
 }
 
 .archive-copy {
@@ -720,8 +678,8 @@ dl {
 }
 
 .release-date {
-  color: rgba(255, 255, 255, 0.34);
-  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
 }
 
 .archive-preview {
@@ -734,7 +692,7 @@ dl {
   background: transparent;
   color: rgba(255, 255, 255, 0.58);
   font: inherit;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   line-height: 1.55;
   text-align: left;
   white-space: pre-line;
@@ -761,8 +719,8 @@ dl {
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.65rem;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.75rem;
   text-decoration: none;
   transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 

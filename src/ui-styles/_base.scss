@@ -1,0 +1,933 @@
+// Shell, dashboard, proxy list, and proxy detail structure for the skin. The skin in
+// _console.scss sets the --ui-* tokens and includes this mixin inside its root selector.
+
+@mixin tokens-to-spartan {
+  // Spartan overlays (popovers, menus, dialogs) read these, so they follow the skin.
+  --background: var(--ui-bg);
+  --card: var(--ui-panel);
+  --popover: var(--ui-panel);
+  --border: var(--ui-line);
+  --input: var(--ui-line-strong);
+  --muted: var(--ui-inset);
+  --muted-foreground: var(--ui-text-3);
+  --foreground: var(--ui-text);
+  --radius: var(--ui-radius);
+  --font-sans: var(--ui-font);
+}
+
+@mixin skin-base {
+  @include tokens-to-spartan;
+
+  // ---------------------------------------------------------------- shell
+  body {
+    background: var(--ui-bg);
+    font-family: var(--ui-font);
+  }
+
+  body::after { display: none; }
+
+  .app-workspace {
+    background: var(--ui-bg);
+    &::before { display: none; }
+  }
+
+  .app-workspace > main {
+    padding: 0;
+  }
+
+  :not(.sidebar-collapsed) > app-navbar {
+    width: var(--ui-sidebar-w) !important;
+  }
+
+  app-navbar,
+  app-topbar,
+  .navbar,
+  .topbar {
+    font-family: var(--ui-font);
+  }
+
+  .navbar {
+    min-width: var(--ui-sidebar-w);
+    border-right: 1px solid var(--ui-line);
+    background: var(--ui-sidebar);
+    color: var(--ui-text-2);
+    box-shadow: none;
+    &::before { display: none; }
+  }
+
+  .navbar-brand {
+    min-height: var(--ui-topbar-h);
+    margin: 0;
+    padding: 0 16px;
+    gap: 10px;
+    border-bottom: 1px solid var(--ui-line);
+  }
+
+  .navbar-brand__mark,
+  .navbar-brand__mark svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .navbar-brand__copy strong {
+    font-size: 15px;
+  }
+
+  .nav-scroll {
+    padding: 10px 8px 16px;
+  }
+
+  .navbar-item,
+  .nav-cluster > summary {
+    min-height: 34px;
+    gap: 10px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: var(--ui-radius-sm);
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
+
+  .navbar-item:hover,
+  .nav-cluster > summary:hover {
+    background: var(--ui-hover);
+    color: var(--ui-text);
+    transform: none;
+  }
+
+  .navbar-item + .navbar-item { margin-top: 1px; }
+
+  .navbar-item__icon {
+    width: 16px;
+    height: 16px;
+    color: var(--ui-text-3);
+    font-size: 13px;
+  }
+
+  .navbar-item:hover .navbar-item__icon,
+  .nav-cluster > summary:hover .navbar-item__icon {
+    transform: none;
+  }
+
+  .navbar-item--nested {
+    min-height: 32px;
+    font-size: var(--ui-fs);
+
+    .navbar-item__icon {
+      width: 14px;
+      height: 14px;
+      font-size: 12px;
+    }
+  }
+
+  .nav-cluster { margin-top: 6px; }
+  .nav-section--workspace { margin-top: 6px; }
+
+  .nav-cluster__items {
+    margin: 1px 0 0 17px;
+    padding-left: 8px;
+    border-left: 1px solid var(--ui-line);
+  }
+
+  .nav-cluster__chevron { font-size: 10px; }
+
+  .account-section {
+    padding: 8px;
+    border-top: 1px solid var(--ui-line);
+    background: transparent;
+  }
+
+  .topbar {
+    height: var(--ui-topbar-h);
+    padding: 0 16px 0 10px;
+    border-bottom: 1px solid var(--ui-line);
+    background: var(--ui-topbar);
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .topbar-icon-button {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--ui-radius-sm);
+    color: var(--ui-text-2);
+
+    > i { font-size: 14px; }
+
+    &:hover {
+      background: var(--ui-hover);
+      color: var(--ui-text);
+      transform: none;
+    }
+  }
+
+  .topbar-menu-button[aria-expanded="true"] {
+    background: transparent;
+    color: var(--ui-text-2);
+  }
+
+  .topbar-breadcrumb {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs);
+  }
+
+  .topbar-breadcrumb__link { color: var(--ui-text-3); }
+
+  .topbar-breadcrumb__current {
+    color: var(--ui-text);
+    font-family: var(--ui-font);
+    font-size: var(--ui-fs);
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .topbar-breadcrumb__separator { font-size: 9px; }
+
+  .workspace-switcher__select-wrap {
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+    box-shadow: none;
+
+    &:hover { background: var(--ui-hover); }
+  }
+
+  .workspace-switcher__select {
+    min-height: 30px;
+    padding: 4px 28px 4px 10px;
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
+
+  // ------------------------------------------------------- page scaffolding
+  .dashboard-page,
+  .inventory-page,
+  .proxy-detail-page {
+    padding: 0;
+  }
+
+  .dashboard-stage,
+  .inventory-stage,
+  .detail-stage {
+    width: 100%;
+    max-width: var(--ui-page-max);
+    padding: var(--ui-page-pad);
+    overflow: visible;
+  }
+
+  .dashboard-context,
+  .inventory-context {
+    margin-bottom: var(--ui-gap);
+    padding: 0;
+    border: 0;
+  }
+
+  .dashboard-context__icon,
+  .inventory-context .context-icon {
+    display: none;
+  }
+
+  .dashboard-context__copy h1,
+  .inventory-context__copy h1,
+  .inventory-context__copy h2 {
+    font-family: var(--ui-font-heading);
+    font-size: var(--ui-h1);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .inventory-context__copy p:empty { display: none; }
+
+  // ---------------------------------------------------------------- panels
+  .dashboard-grid {
+    gap: var(--ui-gap);
+  }
+
+  .dashboard-card[hlmCard],
+  .metric-card[hlmCard],
+  .inventory-grid--combined,
+  .route-card {
+    border: 1px solid var(--ui-line);
+    border-radius: var(--ui-radius);
+    background: var(--ui-panel);
+    box-shadow: none;
+    color: var(--ui-text-2);
+  }
+
+  .dashboard-card[hlmCard]:focus-within { border-color: var(--ui-line-strong); }
+
+  .dashboard-card__header {
+    align-items: center;
+    padding: var(--ui-head-pad);
+    border-bottom: 1px solid var(--ui-head-line);
+    background: var(--ui-head-bg);
+  }
+
+  .dashboard-card__heading { gap: 8px; }
+
+  .dashboard-card__icon {
+    width: auto;
+    height: auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--ui-text-3);
+    font-size: 13px;
+  }
+
+  .dashboard-card__title {
+    color: var(--ui-text);
+    font-family: var(--ui-font-heading);
+    font-size: var(--ui-title-fs);
+    font-weight: var(--ui-title-weight);
+    letter-spacing: var(--ui-title-tracking);
+    text-transform: var(--ui-title-case);
+  }
+
+  .dashboard-card__subtitle {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-sm);
+  }
+
+  .dashboard-card__body {
+    padding: var(--ui-pad);
+  }
+
+  .dashboard-control {
+    min-height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs-sm);
+    font-weight: 500;
+
+    &:hover:not(:disabled),
+    &.is-active {
+      transform: none;
+    }
+  }
+
+  .history-refresh[hlmBtn] {
+    width: 28px;
+    min-height: 28px;
+    height: 28px;
+  }
+
+  .chart-state {
+    padding: 0;
+    border: 0;
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-xs);
+  }
+
+  .inventory-legend {
+    padding: 0 var(--ui-pad-x) var(--ui-pad-x);
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs-sm);
+  }
+
+  .dashboard-empty__icon {
+    border-radius: var(--ui-radius-sm);
+  }
+
+  .dashboard-empty p {
+    font-size: var(--ui-fs-sm);
+  }
+
+  // KPI tiles
+  .metric-card[hlmCard] { border-radius: var(--ui-radius); }
+
+  .metric-card .dashboard-card__body {
+    min-height: 0;
+    padding: var(--ui-pad);
+  }
+
+  .metric-card__heading {
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
+
+  .metric-card__value {
+    font-family: var(--ui-font-heading);
+    letter-spacing: -0.02em;
+  }
+
+  .metric-card__trend[hlmBadge] {
+    height: 20px;
+    min-height: 20px;
+    padding: 0 6px;
+    border-radius: var(--ui-radius-sm);
+    font-size: var(--ui-fs-xs);
+    line-height: 20px;
+  }
+
+  .metric-card__trend .icon { font-size: 9px; }
+
+  // Inner frames and legends of the larger dashboard cards
+  .map-frame,
+  .fastest-alive-card__chart,
+  .fastest-alive-card__countries,
+  .reputation-card__chart,
+  .reputation-card__details {
+    border-color: var(--ui-line-soft);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inner-bg, transparent);
+  }
+
+  .judge-summary strong {
+    font-family: var(--ui-font-heading);
+    font-size: 30px;
+    letter-spacing: -0.02em;
+  }
+
+  .judge-summary span,
+  .map-caption,
+  .judge-row__count,
+  .country-row__value span,
+  .legend-value,
+  .country-key__count {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-xs);
+  }
+
+  .judge-segments { border-radius: var(--ui-radius-sm); }
+
+  .judge-row__name,
+  .judge-row strong,
+  .country-row__identity,
+  .country-row__value strong,
+  .legend-label,
+  .reputation-card__legend strong,
+  .country-key {
+    font-size: var(--ui-fs-sm);
+  }
+
+  .judge-row__name,
+  .country-row__identity,
+  .legend-label,
+  .country-key__name {
+    color: var(--ui-text-2);
+  }
+
+  .country-legend__heading,
+  .reputation-card__details-heading {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-xs);
+    letter-spacing: var(--ui-label-tracking);
+    text-transform: var(--ui-label-case);
+  }
+
+  .shape-key {
+    min-height: 26px;
+    border-radius: var(--ui-radius-sm);
+    font-size: var(--ui-fs-xs);
+  }
+
+  .country-row { border-radius: var(--ui-radius-sm); }
+  .country-search { border-radius: var(--ui-radius-sm); }
+  .country-search input { font-size: var(--ui-fs); }
+
+  // Proxy history list
+  .history-list {
+    margin-top: 0;
+    padding: 0 var(--ui-pad-x) 6px;
+  }
+
+  .history-row {
+    min-height: 44px;
+    gap: 10px;
+    border-top: 1px solid var(--ui-line-soft);
+  }
+
+  .history-row:first-child { border-top: 0; }
+
+  .history-row:hover {
+    margin-inline: 0;
+    padding-inline: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .history-row__status {
+    width: auto;
+    height: auto;
+    border: 0;
+    background: transparent;
+    font-size: 13px;
+  }
+
+  .history-row__route strong {
+    color: var(--ui-text);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
+
+  .history-row__route span {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-xs);
+  }
+
+  .history-row__latency {
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs-sm);
+  }
+
+  // ------------------------------------------------------------- inventory
+  .inventory-grid--combined .inventory-toolbar {
+    padding: var(--ui-pad);
+    border-bottom: 1px solid var(--ui-line);
+  }
+
+  .inventory-grid--combined .inventory-card {
+    padding: 0;
+    border-radius: 0 0 var(--ui-radius) var(--ui-radius);
+  }
+
+  .toolbar-actions { gap: 6px; }
+  .proxy-mutation-actions { gap: 6px; }
+
+  .tool-button,
+  .toolbar-action [hlmBtn],
+  .button {
+    min-height: var(--ui-control-h);
+    height: var(--ui-control-h);
+    gap: 6px;
+    padding: 0 12px;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+    box-shadow: none;
+    color: var(--ui-text-2);
+    font-family: var(--ui-font);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+
+    i,
+    .icon {
+      color: var(--ui-text-3);
+      font-size: 12px;
+    }
+
+    &:hover:not(:disabled),
+    &.is-active {
+      border-color: var(--ui-line-strong);
+      background: var(--ui-hover);
+      color: var(--ui-text);
+      transform: none;
+
+      i,
+      .icon { color: var(--ui-text); }
+    }
+  }
+
+  .toolbar-action [hlmBtn]:hover:not(:disabled),
+  .toolbar-action [hlmBtn]:focus-visible {
+    border-color: var(--ui-line-strong);
+    background: var(--ui-hover);
+    color: var(--ui-text);
+    transform: none;
+  }
+
+  .toolbar-action--add [hlmBtn],
+  .button--primary {
+    border-color: var(--ui-primary-bg);
+    background: var(--ui-primary-bg);
+    color: var(--ui-primary-fg);
+    box-shadow: none;
+
+    .icon { color: var(--ui-primary-fg); }
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      border-color: var(--ui-primary-hover);
+      background: var(--ui-primary-hover);
+      color: var(--ui-primary-fg);
+      box-shadow: none;
+
+      .icon { color: var(--ui-primary-fg); }
+    }
+  }
+
+  .search-bar {
+    min-height: calc(var(--ui-control-h) + 2px);
+    margin-top: 10px;
+    padding: 0 10px;
+    gap: 8px;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+
+    > .icon-search { font-size: 12px; }
+
+    &:focus-within {
+      border-color: var(--theme-primary-400);
+      background: var(--ui-inset);
+      box-shadow: 0 0 0 1px var(--theme-primary-400);
+    }
+  }
+
+  .inventory-search-input {
+    min-height: var(--ui-control-h);
+    color: var(--ui-text);
+    font-size: var(--ui-fs);
+
+    &::placeholder { color: var(--ui-text-3); }
+  }
+
+  // ----------------------------------------------------------------- tables
+  .inventory-table .data-table,
+  .scrape-source-table.data-table {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .data-table,
+  .data-table .table-scroll,
+  .data-table table,
+  .data-table thead > tr > th,
+  .data-table tbody > tr > td {
+    border-radius: 0 !important;
+  }
+
+  .inventory-table thead > tr > th,
+  .scrape-source-table thead > tr > th,
+  .history-table thead > tr > th {
+    height: auto;
+    padding: var(--ui-th-pad);
+    border: 0;
+    border-bottom: 1px solid var(--ui-line);
+    background: var(--ui-th-bg);
+    color: var(--ui-th-color);
+    font-family: var(--ui-font);
+    font-size: var(--ui-th-fs);
+    font-weight: 600;
+    letter-spacing: var(--ui-th-tracking);
+    text-transform: var(--ui-th-case);
+  }
+
+  .inventory-table tbody > tr > td,
+  .scrape-source-table tbody > tr > td,
+  .history-table tbody > tr > td {
+    padding: var(--ui-td-pad);
+    border: 0;
+    border-bottom: 1px solid var(--ui-line-soft);
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+  }
+
+  .inventory-table tbody > tr:not([data-state="selected"]):hover > td,
+  .scrape-source-table tbody > tr:not([data-state="selected"]):hover > td,
+  .history-table tbody > tr:hover > td {
+    background: var(--ui-row-hover);
+  }
+
+  .inventory-table tbody > tr[data-state="selected"] > td,
+  .scrape-source-table tbody > tr[data-state="selected"] > td {
+    background: rgba(var(--theme-primary-500-rgb), 0.12);
+    color: var(--ui-text);
+  }
+
+  .inventory-table .copy-value,
+  .inventory-table .copy-value__text {
+    font-size: var(--ui-fs);
+  }
+
+  .scrape-source-table .scrape-url {
+    font-size: var(--ui-fs);
+  }
+
+  .scrape-source-table .source-fetch-label,
+  .scrape-source-table .source-scrape-summary {
+    font-size: var(--ui-fs-xs);
+  }
+
+  .scrape-source-table .source-fetch-label { border-radius: var(--ui-badge-radius); }
+
+  .scrape-source-table .source-actions-trigger {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--ui-radius-sm);
+  }
+
+  // The embedded proxy list on a scrape source already sits inside the page padding.
+  .inventory-page--embedded .inventory-stage {
+    max-width: none;
+    padding: 0;
+  }
+
+  .inventory-table .copy-value {
+    padding: 2px 4px;
+    margin-left: -4px;
+    color: var(--ui-text);
+    border-radius: var(--ui-radius-sm);
+  }
+
+  .inventory-table .status-dot {
+    width: 8px;
+    height: 8px;
+
+    &.alive { box-shadow: none; }
+  }
+
+  .inventory-table .reputation-badge,
+  .inventory-table .lifecycle-state {
+    padding: 2px 6px;
+    border-radius: var(--ui-badge-radius);
+    font-size: var(--ui-fs-xs);
+    letter-spacing: 0.04em;
+  }
+
+  // Tags: chips sit in the row like text instead of inside a bordered input.
+  .inventory-table .proxy-tag-selector {
+    min-height: 0;
+    padding: 2px 4px;
+    margin-left: -4px;
+    border-color: transparent;
+    border-radius: var(--ui-radius-sm);
+    background: transparent;
+    font-size: var(--ui-fs-xs);
+
+    &:hover:not(:disabled) {
+      border-color: var(--ui-line-strong);
+      background: var(--ui-hover);
+    }
+  }
+
+  .inventory-table .proxy-actions-trigger {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--ui-radius-sm);
+  }
+
+  // Tag counts are already capped, so chips keep their natural width.
+  .inventory-table .proxy-tag-chip { flex-shrink: 0; }
+
+  .proxy-tag-chip {
+    padding: 1px 7px;
+    border-radius: var(--ui-badge-radius);
+    font-size: var(--ui-fs-xs);
+    line-height: 16px;
+  }
+
+  .proxy-tag-selector__more { font-size: var(--ui-fs-xs); }
+
+  .proxy-tag-selector__edit {
+    font-size: 10px;
+    opacity: 0;
+  }
+
+  .proxy-tag-selector:hover .proxy-tag-selector__edit { opacity: 1; }
+
+  .table-pagination,
+  app-table-pagination {
+    font-size: var(--ui-fs-sm);
+  }
+
+  // ---------------------------------------------------------- proxy detail
+  .detail-context { padding: 0; }
+
+  .back-button {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+    color: var(--ui-text-2);
+
+    i { font-size: 12px; }
+  }
+
+  .detail-context__copy h1,
+  .source-title {
+    color: var(--ui-text);
+    font-family: var(--ui-font-mono);
+    font-size: var(--ui-detail-title);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .endpoint-title { gap: 2px; }
+
+  .endpoint-copy-target {
+    padding: 2px 6px;
+    border-color: transparent;
+    border-radius: var(--ui-radius-sm);
+    background: transparent;
+
+    // The copy-all button and tooltip already signal copying, so the icons step aside.
+    i { display: none; }
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--ui-line-strong);
+      background: var(--ui-hover);
+    }
+  }
+
+  .endpoint-copy-all {
+    width: 28px;
+    height: 28px;
+    margin-left: 6px;
+    border-color: var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+
+    i { font-size: 11px; }
+  }
+
+  .endpoint-separator { color: var(--ui-text-3); }
+
+  .action-button,
+  .icon-button {
+    min-height: var(--ui-control-h);
+    border-color: var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+  }
+
+  .managed-state-pill,
+  .route-card .reputation-badge {
+    border-radius: var(--ui-badge-radius);
+    font-size: var(--ui-fs-xs);
+  }
+
+  .route-utility-bar {
+    margin: 12px 0 var(--ui-gap);
+    padding: 0;
+    border-top: 0;
+  }
+
+  .external-link-chip {
+    min-height: 26px;
+    gap: 6px;
+    padding: 0 8px;
+    border-radius: var(--ui-radius-sm);
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs-sm);
+
+    img { width: 13px; height: 13px; }
+    i { font-size: 9px; }
+  }
+
+  .detail-grid { gap: var(--ui-gap); }
+
+  .route-facts,
+  .health-summary,
+  .reputation-summary {
+    padding: var(--ui-pad);
+  }
+
+  .route-insights {
+    border-left: 1px solid var(--ui-line);
+    background: transparent;
+  }
+
+  .reputation-summary { border-top: 1px solid var(--ui-line); }
+
+  .overview-title,
+  .health-summary__heading h2,
+  .reputation-summary__heading h2,
+  .history-card .card-heading__copy h2 {
+    color: var(--ui-text);
+    font-family: var(--ui-font-heading);
+    font-size: var(--ui-title-fs);
+    font-weight: var(--ui-title-weight);
+    letter-spacing: var(--ui-title-tracking);
+    text-transform: var(--ui-title-case);
+  }
+
+  .check-summary {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--ui-line-soft);
+  }
+
+  .check-summary__result strong {
+    font-size: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .check-summary__time {
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-sm);
+  }
+
+  .fact-list { gap: 14px 16px; padding: 14px 0; }
+
+  .route-card .label {
+    color: var(--ui-text-3);
+    font-size: var(--ui-label-fs);
+    font-weight: 500;
+    letter-spacing: var(--ui-label-tracking);
+    text-transform: var(--ui-label-case);
+  }
+
+  .route-card .value {
+    color: var(--ui-text);
+    font-size: var(--ui-fs);
+    font-weight: 450;
+  }
+
+  .access-summary { border-top: 1px solid var(--ui-line-soft); padding-top: 14px; }
+
+  .health-summary__response > span { color: var(--ui-text-3); font-size: var(--ui-fs-xs); }
+  .health-summary__response strong { font-size: 20px; letter-spacing: -0.01em; }
+  .health-summary__response strong small { font-size: var(--ui-fs-xs); }
+
+  .reputation-summary__heading strong { font-size: 22px; letter-spacing: -0.01em; }
+  .reputation-summary__heading em { font-size: var(--ui-fs-xs); }
+
+  .protocol-row {
+    min-height: 26px;
+    font-size: var(--ui-fs-sm);
+    border-radius: var(--ui-radius-sm);
+
+    strong { font-size: var(--ui-fs-sm); }
+  }
+
+  .history-card { padding: 0; }
+
+  .history-card__heading {
+    align-items: center;
+    padding: var(--ui-head-pad);
+    border-bottom: 1px solid var(--ui-head-line);
+    background: var(--ui-head-bg);
+  }
+
+  .history-card .card-icon {
+    width: auto;
+    height: auto;
+    border: 0;
+    background: transparent;
+    color: var(--ui-text-3);
+  }
+
+  .entry-count {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ui-text-3);
+    font-size: var(--ui-fs-sm);
+  }
+
+  .history-table {
+    margin-top: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .route-card .proxy-tag-selector {
+    border-color: var(--ui-line-strong);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+  }
+}

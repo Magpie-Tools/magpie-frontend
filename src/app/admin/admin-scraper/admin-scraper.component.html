@@ -1,7 +1,4 @@
-<app-admin-settings-shell
-  class="admin-scraper-page"
-  appRevealGroup=".admin-context, .settings-card, .save-dock"
->
+<app-admin-settings-shell class="admin-scraper-page">
   <form
     [formGroup]="settingsForm"
     class="settings-stage"
@@ -250,27 +247,6 @@
                   />
                 </div>
               </div>
-
-              <div class="process-rail" aria-label="Scraper process">
-                <span
-                  ><i class="icon icon-download" aria-hidden="true"></i
-                  >Fetch</span
-                >
-                <i class="icon icon-arrow-right" aria-hidden="true"></i>
-                <span
-                  ><i class="icon icon-code" aria-hidden="true"></i>Parse</span
-                >
-                <i class="icon icon-arrow-right" aria-hidden="true"></i>
-                <span
-                  ><i class="icon icon-filter" aria-hidden="true"></i
-                  >Normalize</span
-                >
-                <i class="icon icon-arrow-right" aria-hidden="true"></i>
-                <span
-                  ><i class="icon icon-database" aria-hidden="true"></i
-                  >Store</span
-                >
-              </div>
             </section>
 
             <section class="settings-card settings-card--limits">
@@ -358,20 +334,6 @@
                       Every new account starts with these proxy source URLs.
                     </p>
                   </div>
-                </div>
-
-                <div class="source-flow" aria-hidden="true">
-                  <span class="source-flow__node"
-                    ><i class="icon icon-globe"></i
-                  ></span>
-                  <span class="source-flow__line"></span>
-                  <span class="source-flow__node"
-                    ><i class="icon icon-cloud-download"></i
-                  ></span>
-                  <span class="source-flow__line"></span>
-                  <span class="source-flow__node source-flow__node--active"
-                    ><i class="icon icon-server"></i
-                  ></span>
                 </div>
 
                 <p class="source-note">

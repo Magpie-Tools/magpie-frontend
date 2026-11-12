@@ -21,7 +21,6 @@ import {TooltipComponent} from '../tooltip/tooltip.component';
 
 import {formatHostPort} from '../shared/proxy-address';
 import {WorkspaceService} from '../services/workspace.service';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 type RotatorInstanceOption = {
   label: string;
@@ -35,11 +34,8 @@ type RotatorInstanceOption = {
   imports: [HlmButton, HlmInput, HlmSkeleton, HlmTooltip, SelectComponent, DialogComponent,
     CommonModule,
     ReactiveFormsModule,
-
     DatePipe,
-
     TooltipComponent,
-    RevealGroupDirective,
   ],
   templateUrl: './rotating-proxies.component.html',
   styleUrl: './rotating-proxies.component.scss'
@@ -77,17 +73,17 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
   readonly reputationOptions = [
     {label: 'Good', value: 'good'},
     {label: 'Neutral', value: 'neutral'},
-    {label: 'Bad', value: 'poor'},
+    {label: 'Poor', value: 'poor'},
   ];
   readonly uptimeFilterTypeOptions = [
-    {label: 'Minimum uptime', value: 'min'},
-    {label: 'Maximum uptime', value: 'max'},
+    {label: 'At least', value: 'min'},
+    {label: 'At most', value: 'max'},
   ];
   private readonly allReputationValues = this.reputationOptions.map(option => option.value);
   private readonly reputationDisplay: Record<string, string> = {
     good: 'Good',
     neutral: 'Neutral',
-    poor: 'Bad',
+    poor: 'Poor',
   };
   readonly skeletonRows = Array.from({ length: 6 });
   private readonly loopbackHost = '127.0.0.1';
@@ -436,6 +432,24 @@ export class RotatingProxiesComponent implements OnInit, OnDestroy {
     }
 
     return `${proxy.listen_port}`;
+  }
+
+  /** Card-level copy of the endpoint, so the address is usable without opening the dialog. */
+  readonly copiedEndpointId = signal<number | null>(null);
+  private endpointCopyTimer?: ReturnType<typeof setTimeout>;
+
+  copyEndpoint(proxy: RotatingProxy): void {
+    const endpoint = this.rotatorEndpoint(proxy);
+    if (!endpoint) return;
+    this.clipboardService.copyText(endpoint).then(copied => {
+      if (!copied) {
+        this.notification.showWarn('Could not copy to clipboard.');
+        return;
+      }
+      this.copiedEndpointId.set(proxy.id);
+      clearTimeout(this.endpointCopyTimer);
+      this.endpointCopyTimer = setTimeout(() => this.copiedEndpointId.set(null), 1400);
+    });
   }
 
   rotatorConnectionString(proxy: RotatingProxy | null | undefined): string {

@@ -1,11 +1,11 @@
 import {HlmDropdownMenuImports} from '@spartan-ng/helm/dropdown-menu';
-import {AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, DestroyRef, ElementRef, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {BreakpointObserver} from '@angular/cdk/layout';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {map} from 'rxjs/operators';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import {filter, map} from 'rxjs/operators';
 import {NgIcon, provideIcons} from '@ng-icons/core';
 import {lucideChevronsUpDown} from '@ng-icons/lucide';
-import {RouterLink, RouterLinkActive} from '@angular/router';
+import {NavigationEnd, Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {UserService} from "../services/authorization/user.service";
 
 import {gsap} from 'gsap';
@@ -30,11 +30,40 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   private adminRefreshTimer?: ReturnType<typeof setTimeout>;
   private motionContext?: gsap.Context;
 
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Labels of the groups that are open. Navigation only ever opens a group; the user closes it. */
+  private readonly openGroups = signal<ReadonlySet<string>>(new Set());
+
   constructor(protected user: UserService,
               private elementRef: ElementRef) {}
 
+  /** Expand a group while one of its pages is open, so the sidebar always shows the current location. */
+  isGroupActive(group: NavigationItem): boolean {
+    return (group.items ?? []).some(item => !!item.routerLink && this.router.isActive(item.routerLink, {
+      paths: 'subset', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored',
+    }));
+  }
+
+  isGroupOpen(group: NavigationItem): boolean {
+    return this.openGroups().has(group.label);
+  }
+
+  /** Keep the user's own expand or collapse, so a later route change does not undo it. */
+  onGroupToggle(group: NavigationItem, event: Event): void {
+    this.setGroupOpen(group.label, (event.target as HTMLDetailsElement).open);
+  }
+
   ngOnInit() {
     this.updateNavigationItems();
+    this.openGroups.set(new Set(this.menuItems.filter(group => group.expanded).map(group => group.label)));
+    this.openActiveGroups();
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => this.openActiveGroups());
 
     this.adminRefreshTimer = setTimeout(() => this.updateNavigationItems(), 1000);
   }
@@ -68,17 +97,17 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
         visible: UserService.isAdmin(),
         items: [
           {
-            label: 'Global Checker',
+            label: 'Global checker',
             icon: 'icon icon-sliders-horizontal',
             routerLink: '/global/checker'
           },
           {
-            label: 'Global Scraper',
+            label: 'Global scraper',
             icon: 'icon icon-cloud-download',
             routerLink: '/global/scraper'
           },
           {
-            label: 'Global Blacklist',
+            label: 'Global blacklist',
             icon: 'icon icon-ban',
             routerLink: '/global/blacklist'
           },
@@ -90,6 +119,27 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
         ]
       }
     ];
+  }
+
+  private openActiveGroups(): void {
+    for (const group of this.menuItems) {
+      if (this.isGroupActive(group)) {
+        this.setGroupOpen(group.label, true);
+      }
+    }
+  }
+
+  private setGroupOpen(label: string, open: boolean): void {
+    if (this.openGroups().has(label) === open) {
+      return;
+    }
+    const next = new Set(this.openGroups());
+    if (open) {
+      next.add(label);
+    } else {
+      next.delete(label);
+    }
+    this.openGroups.set(next);
   }
 
   ngAfterViewInit() {

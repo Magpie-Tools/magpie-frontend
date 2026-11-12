@@ -1,0 +1,406 @@
+@use 'base';
+@use 'pages';
+
+// Console: a traditional dark dashboard. Near-black surfaces with flat graphite panels,
+// sentence-case sans headings, a theme-coloured accent for navigation state and hints,
+// and filled primary buttons in the workspace theme colour. Geist Mono is kept for data
+// such as hosts, ports, and timings.
+//
+// index.html sets <html data-ui="console">. Angular adds its scoping attribute to every
+// compound of a component selector, so the repeated :root plus the attribute keep these
+// overrides ahead of deep component selectors without !important.
+
+html:root:root:root:root[data-ui="console"] {
+  // Neutral greys with no hue. Surfaces step up in lightness as they come forward (page,
+  // panel, inset, hover), with enough difference between the page and a panel that cards
+  // separate without shadows.
+  --ui-bg: #0c0c0c;
+  --ui-sidebar: var(--ui-bg);
+  --ui-topbar: var(--ui-bg);
+  --ui-panel: #171717;
+  --ui-inset: #1c1c1c;
+  --ui-hover: #242424;
+  --ui-row-hover: rgba(255, 255, 255, 0.03);
+  --ui-line: #262626;
+  --ui-line-soft: #202020;
+  --ui-line-strong: #313131;
+  --ui-text: #f5f5f5;
+  --ui-text-2: #a6a6a6;
+  --ui-text-3: #878787;
+
+  // Navigation state, section tabs, and inline hints. The darkest theme shade fills the
+  // highlight and a light shade of the same theme colours its text and icons.
+  --ui-accent: var(--theme-primary-200);
+  --ui-accent-bg: var(--theme-primary-900);
+
+  --ui-font: 'Geist Variable', 'Segoe UI', sans-serif;
+  --ui-font-mono: 'Geist Mono Variable', 'SFMono-Regular', Consolas, monospace;
+  --ui-font-heading: 'Geist Variable', 'Segoe UI', sans-serif;
+  --ui-fs: 14px;
+  --ui-fs-sm: 13px;
+  --ui-fs-xs: 12px;
+  --ui-h1: 28px;
+  --ui-detail-title: 24px;
+
+  --ui-radius: 8px;
+  --ui-radius-sm: 6px;
+  --ui-badge-radius: 4px;
+  --ui-sidebar-w: 220px;
+  --ui-topbar-h: 48px;
+  --ui-page-max: 1560px;
+  --ui-page-pad: 28px 32px 48px;
+  --ui-gap: 16px;
+  --ui-pad: 18px 20px;
+  --ui-pad-x: 20px;
+  --ui-control-h: 34px;
+
+  --ui-head-pad: 16px 20px 0;
+  --ui-head-line: transparent;
+  --ui-head-bg: transparent;
+  --ui-title-fs: 16px;
+  --ui-title-font: var(--ui-font-heading);
+  --ui-title-weight: 650;
+  --ui-title-tracking: -0.01em;
+  --ui-title-case: none;
+
+  --ui-label-fs: 12px;
+  --ui-label-tracking: 0;
+  --ui-label-case: none;
+
+  --ui-th-pad: 11px 14px;
+  --ui-th-bg: transparent;
+  --ui-th-color: var(--ui-text-2);
+  --ui-th-fs: 12.5px;
+  --ui-th-tracking: 0;
+  --ui-th-case: none;
+  --ui-td-pad: 10px 14px;
+
+  --ui-chart-series: var(--theme-primary-300);
+  --ui-chart-grid: rgba(255, 255, 255, 0.06);
+  --ui-chart-dot-stroke: var(--ui-panel);
+
+  // Country map: one-hue ramp from the inset surface up to a light theme shade.
+  --ui-map-empty: var(--ui-inset);
+  --ui-map-low: color-mix(in oklab, var(--theme-primary-700) 35%, var(--ui-inset));
+  --ui-map-high: var(--theme-primary-200);
+
+  --ui-field-bg: var(--ui-inset);
+  --ui-tabs-bg: transparent;
+  --ui-tab-active-bg: var(--ui-hover);
+  --ui-btn-bg: #1f1f1f;
+  --ui-primary-bg: var(--theme-primary-600);
+  --ui-primary-fg: #ffffff;
+  --ui-primary-hover: var(--theme-primary-500);
+  --ui-danger-bg: transparent;
+  --ui-danger-fg: var(--status-bad-text);
+
+  @include base.skin-base;
+  @include pages.skin-pages;
+
+  // ---------------------------------------------------------------- shell
+  .navbar-brand {
+    gap: 10px;
+    padding: 0 16px;
+  }
+
+  .navbar-brand__mark,
+  .navbar-brand__mark svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .navbar-brand__copy strong {
+    font-family: var(--ui-font);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-scroll { padding: 12px 10px 16px; }
+
+  .navbar-item,
+  .nav-cluster > summary {
+    min-height: 36px;
+    padding: 0 10px;
+    gap: 12px;
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
+
+  .navbar-item__icon {
+    width: 17px;
+    height: 17px;
+    color: var(--ui-text-2);
+    font-size: 15px;
+  }
+
+  .navbar-item--nested {
+    min-height: 32px;
+    font-size: var(--ui-fs-sm);
+  }
+
+  .nav-cluster__items { margin-left: 18px; }
+
+  // The current page sits on the accent highlight.
+  .navbar-item.active {
+    border: 0;
+    background: var(--ui-accent-bg);
+    color: var(--ui-accent);
+    box-shadow: none;
+
+    &::after { display: none; }
+    .navbar-item__icon { color: var(--ui-accent); }
+  }
+
+  // The account sits in the sidebar footer like a nav row, without a card of its own.
+  .account-trigger {
+    min-height: 0;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: var(--ui-radius-sm);
+    background: transparent;
+
+    &:hover,
+    &[aria-expanded="true"] {
+      border: 0;
+      background: var(--ui-hover);
+      transform: none;
+    }
+  }
+
+  .account-trigger__copy strong { color: var(--ui-text); }
+  .account-trigger__copy small { color: var(--ui-text-3); }
+
+  .topbar { padding: 0 16px 0 10px; }
+
+  .topbar-breadcrumb__current { color: var(--ui-text); }
+
+  .workspace-switcher__select { min-height: 30px; }
+
+  // --------------------------------------------------------------- headings
+  .dashboard-context__copy h1,
+  .inventory-context__copy h1,
+  :is(.account-context, .admin-context, .checker-context, .alerts-context, .rotating-context, .notifications-context, .invitation-context, .workspace-context) h1 {
+    font-size: var(--ui-h1);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  .dashboard-card__icon,
+  .history-card .card-icon { display: none; }
+
+  .route-card .value,
+  .chart-state,
+  .entry-count {
+    font-family: var(--ui-font);
+  }
+
+  .check-summary__time { font-family: var(--ui-font-mono); }
+
+  .chart-state > span { display: none; }
+
+  // Inline hints and info buttons pick up the accent, so help is easy to spot.
+  .info-icon,
+  .info-icon .icon-info {
+    color: var(--ui-accent);
+  }
+
+  // --------------------------------------------------------------------- tabs
+  [data-slot="tabs-trigger"][data-state="active"],
+  .settings-section-tabs [data-slot="tabs-trigger"][data-state="active"] {
+    background: var(--ui-accent-bg);
+    color: var(--ui-accent);
+  }
+
+  // The base list is a fixed h-9, which leaves 28px inside the border and padding, less
+  // than the 30px trigger below, so the active pill spilled out of the frame.
+  .settings-section-tabs [data-slot="tabs-list"] {
+    height: auto;
+    padding: 3px;
+    border-color: var(--ui-line);
+    border-radius: var(--ui-radius);
+    background: transparent;
+  }
+
+  .settings-section-tabs [data-slot="tabs-trigger"] {
+    padding: 0 12px;
+    min-height: 30px;
+    border-radius: var(--ui-radius-sm);
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
+
+  // ---------------------------------------------------------- decorative icons
+  // Icons stay where they do a job: buttons and links, status (alive, error, done, the
+  // password checklist), info tooltips, empty states, navigation, and per-row icons that
+  // change with the item (alert metric, destination kind). Icons that only decorate a
+  // heading, repeat an option's label, repeat on every row, or draw a diagram beside text
+  // that already says the same thing are hidden. Every panel used to carry one, so none
+  // of them helped a reader find anything, and the green tiles were most of the colour
+  // noise on settings pages.
+  .card-icon,
+  .stage-icon,
+  .metric-card__heading .dashboard-card__icon,
+  .protocol-choice__icon,
+  .decision-row__icon,
+  .decision-icon,
+  .age-policy__icon,
+  .meta-icon,
+  .rotator-icon,
+  .cleanup-threshold__topline > .icon,
+  .appearance-note > .icon,
+  .consequence-list .icon,
+  .failure-path,
+  .danger-boundary,
+  .access-visual,
+  .route-arrow,
+  [data-slot="tabs-trigger"] > i.icon,
+  summary > span:first-child > i.icon:first-child {
+    display: none;
+  }
+
+  // Space the icons used to hold closes up: protocol cards shrink to their label and
+  // state, and the deletion consequences read as plain lines below the description.
+  .protocol-choice { min-height: 0; }
+  .consequence-list { margin-top: 16px; }
+  .consequence-list li { display: block; }
+
+  // Selected protocols, enabled options, and chosen cards take a tinted frame.
+  :is(.protocol-choice, .decision-row, .limit-summary, .theme-choice).is-active,
+  .choice-card--selected,
+  .destination-choice--selected,
+  .bulk-scope-option--active,
+  .rule-card--active {
+    border-color: rgba(var(--theme-primary-500-rgb), 0.5);
+    background: rgba(var(--theme-primary-500-rgb), 0.08);
+  }
+
+  .protocol-choice.is-active .protocol-choice__copy strong,
+  .decision-row.is-active .decision-row__copy strong {
+    color: var(--ui-text);
+  }
+
+  // Computed summaries: the headline value reads in the accent.
+  .performance-summary,
+  .cadence-summary {
+    border-color: rgba(var(--theme-primary-500-rgb), 0.3);
+    background: rgba(var(--theme-primary-500-rgb), 0.06);
+  }
+
+  .performance-summary > strong,
+  .performance-summary__value,
+  .cadence-summary strong {
+    color: var(--ui-accent);
+  }
+
+  // Checked "Enabled" chips pick up the theme too.
+  .checkbox-wrapper-46 .inp-cbx:checked + .cbx {
+    border-color: rgba(var(--theme-primary-500-rgb), 0.5);
+    background: rgba(var(--theme-primary-500-rgb), 0.1);
+    color: var(--ui-accent);
+  }
+
+  // ------------------------------------------------------------ judge counts
+  // The judges summary reads like the other settings summaries.
+  .flow-summary > div {
+    border-color: var(--ui-line);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-inset);
+  }
+
+  .flow-summary strong { color: var(--ui-accent); }
+
+  // ------------------------------------------------------------------ KPIs
+  .metric-card .dashboard-card__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "label trend"
+      "value value"
+      "spark spark";
+    row-gap: 8px;
+    padding: 16px 20px 0;
+  }
+
+  .metric-card__topline { display: contents; }
+
+  .metric-card__heading {
+    grid-area: label;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ui-text-2);
+    font-size: var(--ui-fs);
+    font-weight: 500;
+  }
+
+  .metric-card__trend[hlmBadge] {
+    grid-area: trend;
+    align-self: center;
+    font-weight: 600;
+  }
+
+  .metric-card__value {
+    grid-area: value;
+    margin-top: 0;
+    color: var(--ui-text);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .metric-card__visual {
+    position: relative;
+    grid-area: spark;
+    inset: auto;
+    height: 30px;
+    margin: 0 -20px;
+    opacity: 0.7;
+    mask-image: none;
+  }
+
+  // -------------------------------------------------------------- history
+  .history-row__route strong,
+  .history-row__latency {
+    font-family: var(--ui-font-mono);
+    font-size: var(--ui-fs-sm);
+    font-weight: 400;
+  }
+
+  // ------------------------------------------------------------- inventory
+  .toolbar-action--delete [hlmBtn] {
+    border-color: color-mix(in srgb, var(--status-bad) 30%, transparent);
+    background: transparent;
+    color: var(--ui-danger-fg);
+
+    .icon { color: var(--ui-danger-fg); }
+  }
+
+  .search-bar { background: var(--ui-field-bg); }
+
+  .inventory-table .copy-value,
+  .inventory-table .copy-value__text {
+    font-family: var(--ui-font-mono);
+    font-size: var(--ui-fs-sm);
+  }
+
+  .inventory-table tbody > tr > td { font-variant-numeric: tabular-nums; }
+
+  .inventory-table .reputation-badge,
+  .route-card .reputation-badge,
+  .managed-state-pill {
+    border: 0;
+    font-weight: 600;
+  }
+
+  // ----------------------------------------------------------------- detail
+  .detail-context__copy h1 { font-weight: 600; }
+
+  .history-table tbody > tr > td {
+    font-family: var(--ui-font-mono);
+    font-size: var(--ui-fs-sm);
+  }
+}

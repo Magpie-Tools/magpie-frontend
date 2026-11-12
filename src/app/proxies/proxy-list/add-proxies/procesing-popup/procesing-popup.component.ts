@@ -1,68 +1,77 @@
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, AfterViewInit, ElementRef, Inject} from '@angular/core';
-import {DOCUMENT} from '@angular/common';
-import {animate, style, transition, trigger} from '@angular/animations';
-import {StarBackgroundComponent} from '../../../../ui-elements/star-background/star-background.component';
-
+import {Component, ElementRef, EventEmitter, inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, signal} from '@angular/core';
 
 @Component({
     selector: 'app-procesing-popup',
-    imports: [
-    StarBackgroundComponent
-],
     templateUrl: './procesing-popup.component.html',
     styleUrl: './procesing-popup.component.scss',
-    animations: [
-        trigger('textAnimation', [
-            transition(':increment, :decrement', [
-                style({ opacity: 0, transform: 'translateY(-10px)' }),
-                animate('500ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
-            ]),
-        ]),
-    ]
+    // The host is the popover so it joins the top layer, and so open dialogs leave it out
+    // when they mark the rest of the page aria-hidden.
+    host: {popover: 'manual'},
 })
-export class ProcesingPopupComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
+export class ProcesingPopupComponent implements OnInit, OnChanges, OnDestroy {
   @Input() status: 'processing' | 'success' | 'error' = 'processing';
   @Input() count: number = 0;
   @Input() item: string = "";
+  @Input() successNote = 'Queued for checking.';
   @Input() showDetailsButton = false;
-  @Input() hideOverlay = false;
   @Input() autoCloseOnSuccess = true;
   @Output() closed = new EventEmitter<void>();
   @Output() detailsRequested = new EventEmitter<void>();
 
-  messages: string[] = [];
-  currentMessageIndex = 0;
-  textState = 0;
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  /** A signal, so the rotating message re-renders without another change in the app. */
+  readonly messageIndex = signal(0);
   private messageRotationIntervalId: ReturnType<typeof setInterval> | null = null;
   private autoCloseTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private showTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  /** The item name in the singular when exactly one was added ("1 proxy", "1 scrape source"). */
+  get itemLabel(): string {
+    if (this.count !== 1) return this.item;
+    if (this.item.endsWith('ies')) return this.item.slice(0, -3) + 'y';
+    return this.item.endsWith('s') ? this.item.slice(0, -1) : this.item;
+  }
+
+  get messages(): string[] {
+    return [
+      `Validating ${this.item}.`,
+      'Normalizing proxy formats.',
+      'Removing duplicate entries.',
+      'Preparing proxies for the checker.',
+      'Finalizing the import.',
+    ];
+  }
 
   get currentMessage(): string {
     if (this.status !== 'processing') return '';
-    return this.messages[this.currentMessageIndex];
+    return this.messages[this.messageIndex() % this.messages.length];
   }
 
-  constructor(
-    private elementRef: ElementRef<HTMLElement>,
-    @Inject(DOCUMENT) private document: Document
-  ) {}
+  constructor() {
+    // As a manual popover the popup sits in the browser's top layer above the import dialog
+    // (also a CDK popover) that stays open while the upload runs; a dialog shown later, such
+    // as the upload details, still stacks above it. The popup is created as the upload
+    // starts, and in this zoneless app its view hooks only run on the next tick, which is
+    // the server response. A timeout shows it as soon as Angular has inserted it.
+    this.showTimeoutId = setTimeout(() => {
+      this.showTimeoutId = null;
+      this.showOverlay();
+      if (this.status === 'processing' && this.messageRotationIntervalId === null) {
+        this.startMessageRotation();
+      }
+    });
+  }
 
   ngOnInit() {
-    this.initializeMessages();
-    if (this.status === 'processing') {
+    if (this.status === 'processing' && this.messageRotationIntervalId === null) {
       this.startMessageRotation();
-    }
-  }
-
-  ngAfterViewInit(): void {
-    const host = this.elementRef?.nativeElement;
-    if (host && this.document?.body && host.parentElement !== this.document.body) {
-      this.document.body.appendChild(host);
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['item'] && !changes['item'].firstChange) {
-      this.initializeMessages();
+      this.messageIndex.set(0);
     }
 
     if (changes['status']) {
@@ -96,23 +105,20 @@ export class ProcesingPopupComponent implements OnInit, OnChanges, OnDestroy, Af
   }
 
   ngOnDestroy(): void {
+    const host = this.host.nativeElement;
+    if (host.parentElement === document.body) {
+      host.remove();
+    }
+    if (this.showTimeoutId !== null) {
+      clearTimeout(this.showTimeoutId);
+    }
     this.clearMessageRotation();
     this.clearAutoCloseTimeout();
-    const host = this.elementRef?.nativeElement;
-    if (host?.parentElement === this.document?.body) {
-      this.document.body.removeChild(host);
-    }
   }
 
   startMessageRotation() {
     this.clearMessageRotation();
-
-    if (!this.messages.length) {
-      this.initializeMessages();
-    }
-
-    this.currentMessageIndex = 0;
-    this.textState = 0;
+    this.messageIndex.set(0);
 
     this.messageRotationIntervalId = setInterval(() => {
       if (this.status !== 'processing') {
@@ -120,12 +126,7 @@ export class ProcesingPopupComponent implements OnInit, OnChanges, OnDestroy, Af
         return;
       }
 
-      if (this.messages.length === 0) {
-        return;
-      }
-
-      this.currentMessageIndex = (this.currentMessageIndex + 1) % this.messages.length;
-      this.textState++;
+      this.messageIndex.update(index => index + 1);
     }, 10000);
   }
 
@@ -138,15 +139,20 @@ export class ProcesingPopupComponent implements OnInit, OnChanges, OnDestroy, Af
     this.detailsRequested.emit();
   }
 
-  private initializeMessages(): void {
-    this.messages = [
-      `Validating ${this.item}.`,
-      'Normalizing route formats.',
-      'Removing duplicate entries.',
-      'Preparing routes for the checker.',
-      'Finalizing the import.',
-    ];
-    this.currentMessageIndex = 0;
+  private showOverlay(): void {
+    const host = this.host.nativeElement;
+    if (!host.isConnected || typeof host.showPopover !== 'function') {
+      return;
+    }
+    // Open dialogs hide the existing children of <body> from assistive technology, so the
+    // host moves out of the page content first. Moving a shown popover would close it.
+    if (host.parentElement !== document.body) {
+      document.body.appendChild(host);
+    }
+    if (!host.matches(':popover-open')) {
+      host.showPopover();
+    }
+    host.querySelector<HTMLElement>('.popup-panel')?.focus({preventScroll: true});
   }
 
   private clearMessageRotation(): void {

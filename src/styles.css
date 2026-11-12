@@ -5,6 +5,7 @@
 @import 'tailwindcss/utilities.css';
 
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 @import "@fontsource-variable/outfit";
 @import "./app/checker/settings/checker-settings.visuals.css";
 @import "./app/workspace/workspace.visuals.css";
@@ -26,6 +27,42 @@
 
 :root {
   color-scheme: dark;
+
+  /*
+   * Status colours: the one source for alive/dead dots, reputation badges, health bars,
+   * charts, and error or warning states. Stepped for the dark surface rather than taken
+   * from Tailwind's light-UI 500s, so they read clearly without glowing. Good leans
+   * emerald so it sits beside the theme accent instead of competing with it, and good and
+   * bad differ in lightness as well as hue (worst colour-blind ΔE 11.1 across all pairs).
+   * The -fg steps are for text on a tinted status background (≥ 10:1 on the panel).
+   * Status always ships with a label, icon, or shape too, never colour alone.
+   */
+  --status-good: #46c995;
+  --status-good-fg: #b5ecd0;
+  --status-warn: #d9a82e;
+  --status-warn-fg: #f6dc98;
+  --status-bad: #e0464e;
+  --status-bad-text: #ee6b6f; /* red text on the panel (5.7:1) where the mark step is too dark */
+  --status-bad-fg: #fcc4c4;
+
+  /* Muted ink for secondary marks, borders, and "unknown". */
+  --ink-muted: #8f8f8f;
+
+  /* Tinted fill (-soft) and border (-line) steps for status chips and callouts. */
+  --status-good-soft: color-mix(in srgb, var(--status-good) 8%, transparent);
+  --status-good-line: color-mix(in srgb, var(--status-good) 30%, transparent);
+  --status-warn-soft: color-mix(in srgb, var(--status-warn) 8%, transparent);
+  --status-warn-line: color-mix(in srgb, var(--status-warn) 30%, transparent);
+  --status-bad-soft: color-mix(in srgb, var(--status-bad) 8%, transparent);
+  --status-bad-line: color-mix(in srgb, var(--status-bad) 30%, transparent);
+  --ink-muted-soft: color-mix(in srgb, var(--ink-muted) 8%, transparent);
+  --ink-muted-line: color-mix(in srgb, var(--ink-muted) 28%, transparent);
+
+  /* Reputation colours, shared by charts, badges and bars. */
+  --reputation-good: var(--status-good);
+  --reputation-neutral: var(--status-warn);
+  --reputation-poor: var(--status-bad);
+  --reputation-unknown: var(--ink-muted);
 
   --layer-noise: 4000;
 
@@ -279,8 +316,8 @@
 .signal-dialog__key,
 .structured-row__label,
 .meta-label {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
   font-weight: 620;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -294,9 +331,9 @@
   gap: 0.45rem;
   padding: 0.3rem 0.56rem;
   border-radius: 0.58rem;
-  background: rgba(148, 163, 184, 0.12);
+  background: color-mix(in srgb, var(--ink-muted) 12%, transparent);
   color: rgba(255, 255, 255, 0.78);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
 }
 
 .signal-dialog__value--json,
@@ -319,7 +356,7 @@
   background: rgba(0, 0, 0, 0.28);
   color: rgba(255, 255, 255, 0.76);
   font-family: "Geist Mono", "SFMono-Regular", Consolas, monospace;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
@@ -327,7 +364,7 @@
 
 .signal-dialog__sentiment {
   color: inherit;
-  font-size: 0.52rem;
+  font-size: 0.6875rem;
   font-weight: 650;
   letter-spacing: 0.08em;
   opacity: 0.8;
@@ -339,9 +376,9 @@
   align-self: flex-end;
 }
 
-.signal-value--positive { background: rgba(34, 197, 94, 0.12); color: #bbf7d0; }
-.signal-value--neutral { background: rgba(250, 204, 21, 0.11); color: #fef08a; }
-.signal-value--negative { background: rgba(248, 113, 113, 0.12); color: #fecaca; }
+.signal-value--positive { background: color-mix(in srgb, var(--status-good) 12%, transparent); color: var(--status-good-fg); }
+.signal-value--neutral { background: color-mix(in srgb, var(--status-warn) 11%, transparent); color: var(--status-warn-fg); }
+.signal-value--negative { background: color-mix(in srgb, var(--status-bad) 12%, transparent); color: var(--status-bad-fg); }
 
 .signal-structured-list {
   display: grid;
@@ -365,7 +402,7 @@
 
 .structured-row__value {
   color: rgba(255, 255, 255, 0.78);
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   line-height: 1.45;
   word-break: break-word;
 }
@@ -376,7 +413,7 @@
   border: 1px dashed rgba(255, 255, 255, 0.1);
   border-radius: 0.72rem;
   color: rgba(222, 215, 222, 0.59);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   text-align: center;
 }
 
@@ -393,7 +430,7 @@
 
 .meta-value {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   text-align: right;
   word-break: break-word;
 }
@@ -410,16 +447,16 @@
 
 .stat-response-dialog__error {
   padding: 0.85rem;
-  border: 1px solid rgba(248, 113, 113, 0.3);
+  border: 1px solid color-mix(in srgb, var(--status-bad) 30%, transparent);
   border-radius: 0.72rem;
-  background: rgba(248, 113, 113, 0.1);
-  color: #fecaca;
-  font-size: 0.7rem;
+  background: color-mix(in srgb, var(--status-bad) 10%, transparent);
+  color: var(--status-bad-fg);
+  font-size: 0.8125rem;
 }
 
 .stat-response-dialog__body mark {
   border-radius: 0.16rem;
-  background: rgba(250, 204, 21, 0.35);
+  background: color-mix(in srgb, var(--status-warn) 35%, transparent);
   color: #fff7c2;
 }
 
@@ -454,7 +491,7 @@ body {
   --muted-foreground: #a6aeb6;
   --accent: #30353a;
   --accent-foreground: #fff;
-  --destructive: #f87171;
+  --destructive: var(--status-bad-text);
   --border: #ffffff20;
   --input: #ffffff26;
   --ring: var(--theme-primary-300);
@@ -489,6 +526,11 @@ app-select [data-slot="select-trigger"] > ng-icon { flex-shrink: 0; }
 
 /* Keep actions visible while long forms and filter lists scroll inside the body. */
 [data-slot="dialog-content"].app-dialog-panel { display: flex; flex-direction: column; overflow: hidden; gap: 0; }
+/* The CDK centres a dialog in afterNextRender, which this zoneless app runs on the next tick.
+   Without a later tick (a dialog opened while a request is pending) it stays in the top-left
+   corner, so centre app dialogs from the first frame. The CDK writes the same values later. */
+.cdk-global-overlay-wrapper:has(> .cdk-overlay-pane .app-dialog-panel) { justify-content: center; align-items: center; }
+.cdk-global-overlay-wrapper:has(> .cdk-overlay-pane .app-dialog-panel) > .cdk-overlay-pane { position: static; }
 
 /* Shared table refresh indicator. Absolute positioning keeps rows in place. */
 .table-progress {
@@ -518,4 +560,68 @@ app-select [data-slot="select-trigger"] > ng-icon { flex-shrink: 0; }
 @media (prefers-reduced-motion: reduce) {
   .table-progress::after { width: 100%; animation: none; }
   .data-table tbody { transition: none; }
+}
+
+/* Shortcut to a form that sits below a long list on phones; side-by-side layouts don't need it. */
+.jump-to-form { display: none !important; }
+@media (max-width: 48rem) { .jump-to-form { display: inline-flex !important; } }
+
+/* Phones: the column picker and filters open as near-full-screen sheets so they have room in either placement. */
+@media (max-width: 48rem) {
+  .column-picker-popover,
+  .phone-sheet-popover {
+    position: fixed !important;
+    inset: 0.75rem 0.75rem auto !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 1.5rem) !important;
+  }
+
+  /* CDK offsets the pane with a transform, which would make it the sheet's containing block. */
+  .cdk-overlay-pane:has(> :is(.column-picker-popover, .phone-sheet-popover)) { transform: none !important; }
+}
+
+/* Touch and phone layouts: keep interactive targets at least 44px without changing desktop density. */
+@media (pointer: coarse), (max-width: 48rem) {
+  .topbar-icon-button { min-width: 2.75rem !important; min-height: 2.75rem !important; }
+  .workspace-switcher select { min-height: 2.75rem !important; }
+  .tool-button,
+  .toolbar-action [hlmBtn],
+  .inventory-summary__clear { min-height: 2.75rem !important; }
+  .proxy-actions-trigger,
+  .source-actions-trigger { min-width: 2.75rem !important; min-height: 2.75rem !important; }
+  .navbar-item,
+  .nav-cluster > summary { min-height: 2.75rem; }
+  .rotator-actions :is(.icon-action, .text-action),
+  .button--compact,
+  .icon-button { min-width: 2.75rem !important; min-height: 2.75rem !important; }
+  .rotator-actions { gap: 0.5rem !important; }
+
+  /* Every control in page content, overlays, and dialogs is at least 44px tall. */
+  :is(main, .cdk-overlay-container) :is(
+    button:not([role="checkbox"]):not([role="switch"]):not(.info-icon):not(.country-trigger),
+    [hlmBtn], select, input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    [data-slot="select-trigger"], [role="tab"], summary, a.configure-link, a.archive-link, a.back-button,
+    a[target="_blank"]:not(.source-title)
+  ) {
+    min-height: 2.75rem !important;
+  }
+
+  /* The masked credentials row stays one compact line; its buttons keep the 44px height. */
+  :is(main, .cdk-overlay-container) button:not([role="checkbox"]):not([role="switch"]):not(.country-trigger):not(.auth-credentials button) {
+    min-width: 2.75rem !important;
+  }
+
+  /* Icon-only controls become 44px squares. */
+  :is(main, .cdk-overlay-container) :is(button, a)[aria-label]:not(.auth-credentials button):is(:has(> i:only-child), :has(> svg:only-child), :has(> ng-icon:only-child)) {
+    min-width: 2.75rem !important;
+  }
+
+  /* Checkboxes, switches, and info icons stay visually small; an invisible halo enlarges the tap area. */
+  :is(button[role="checkbox"], button[role="switch"], .info-icon) { position: relative; }
+  :is(button[role="checkbox"], button[role="switch"], .info-icon)::after {
+    content: "";
+    position: absolute;
+    inset: -0.875rem;
+  }
 }

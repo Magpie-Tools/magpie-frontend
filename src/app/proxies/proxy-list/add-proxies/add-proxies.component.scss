@@ -1,221 +1,106 @@
 :host {
   display: block;
-  font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
-}
-
-.proxy-dialog-heading {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.proxy-dialog-heading__icon,
-.section-icon {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.22);
-  background: rgba(var(--theme-primary-500-rgb), 0.09);
-  color: var(--theme-primary-200);
-}
-
-.proxy-dialog-heading__icon {
-  width: 2.65rem;
-  height: 2.65rem;
-  border-radius: 0.82rem;
-  font-size: 0.88rem;
-}
-
-.proxy-dialog-heading__copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.08rem;
-
-  > span {
-    color: rgba(255, 255, 255, 0.42);
-    font-size: 0.58rem;
-    font-weight: 620;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  > strong {
-    color: rgba(255, 255, 255, 0.94);
-    font-size: 0.96rem;
-    font-weight: 590;
-    letter-spacing: -0.025em;
-  }
-}
-
-.proxy-dialog-body {
-  color: rgba(255, 255, 255, 0.78);
+  font-family: var(--ui-font, "Geist Variable", "Segoe UI", sans-serif);
 }
 
 .import-tags {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.85rem 0.95rem;
-  border: 1px solid rgba(255, 255, 255, 0.105);
-  border-radius: 0.92rem;
-  background: rgba(255, 255, 255, 0.028);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  display: grid;
+  gap: 0.6rem;
+
+  .field-hint { margin: 0; }
 }
 
-.import-tags__copy {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.68rem;
-
-  h3,
-  p { margin: 0; }
-
-  h3 {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.76rem;
-    font-weight: 590;
-  }
-
-  p {
-    margin-top: 0.18rem;
-    color: rgba(255, 255, 255, 0.42);
-    font-size: 0.63rem;
-    line-height: 1.45;
-  }
-}
-
-.section-icon {
-  width: 2.15rem;
-  height: 2.15rem;
-  border-radius: 0.68rem;
-  font-size: 0.72rem;
-}
-
+// Upload details follow the alert dialogs: a flat summary, then the counts as ruled
+// rows instead of boxed cards.
 .upload-details {
   display: grid;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: #09090b;
-}
+  gap: 1rem;
+  color: var(--ui-text-2, rgba(255, 255, 255, 0.8));
 
-.upload-details__summary,
-.upload-details__grid > div {
-  border: 1px solid rgba(255, 255, 255, 0.105);
-  background: rgba(255, 255, 255, 0.028);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  .field-hint { margin: 0; }
 }
 
 .upload-details__summary {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem;
-  border-radius: 0.82rem;
+  gap: 0.85rem;
 
-  > span {
-    display: grid;
-    min-width: 3.25rem;
-    height: 3.25rem;
-    place-items: center;
-    border: 1px solid rgba(var(--theme-primary-300-rgb), 0.2);
-    border-radius: 0.78rem;
-    background: rgba(var(--theme-primary-500-rgb), 0.08);
-    color: var(--theme-primary-200);
-    font-size: 1.25rem;
+  div { display: grid; gap: 0.15rem; }
+
+  strong {
+    color: var(--ui-text, #fff);
+    font-size: var(--ui-fs, 0.875rem);
     font-weight: 600;
   }
 
-  div { display: grid; gap: 0.12rem; }
-  strong { color: rgba(255, 255, 255, 0.9); font-size: 0.78rem; }
-  small { color: rgba(255, 255, 255, 0.4); font-size: 0.61rem; }
+  small {
+    color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+    font-size: var(--ui-fs-sm, 0.8125rem);
+  }
+}
+
+.upload-details__count {
+  color: var(--ui-text, #fff);
+  font-family: var(--ui-font-mono, inherit);
+  font-size: 1.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .upload-details__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-flow: dense;
-  gap: 0.5rem;
+  column-gap: 1.5rem;
   margin: 0;
+  border-bottom: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
 
   > div {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.7rem;
-    padding: 0.68rem 0.75rem;
-    border-radius: 0.68rem;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
   }
 
   dt,
-  dd { margin: 0; font-size: 0.63rem; }
-  dt { color: rgba(255, 255, 255, 0.42); }
-  dd { color: rgba(255, 255, 255, 0.84); font-weight: 620; }
-}
+  dd {
+    margin: 0;
+    font-size: var(--ui-fs-sm, 0.8125rem);
+  }
 
-.upload-details__note,
-.upload-details__empty {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.38);
-  font-size: 0.61rem;
-}
+  dt { color: var(--ui-text-2, rgba(255, 255, 255, 0.7)); }
 
-.upload-details__note {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.25rem 0.15rem;
+  dd {
+    color: var(--ui-text, #fff);
+    font-family: var(--ui-font-mono, inherit);
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 .upload-details__empty {
-  padding: 2.5rem 1rem;
+  padding: 1.5rem 0;
   text-align: center;
 }
 
-::ng-deep .proxy-upload-details-dialog.app-dialog-panel,
-::ng-deep .proxy-upload-details-dialog .app-dialog-panel {
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 1.2rem;
-  background: #09090b;
-  color: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 32px 86px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
+.upload-details__actions {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
 
-::ng-deep .proxy-upload-details-dialog .app-dialog-header {
-  padding: 1rem 1.15rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-  background: rgba(12, 12, 14, 0.98);
-}
-
-::ng-deep .proxy-upload-details-dialog .app-dialog-body {
-  background: transparent;
-  color: inherit;
-}
-
-::ng-deep .proxy-upload-details-dialog [data-slot="dialog-close"] {
-  width: 2.15rem;
-  height: 2.15rem;
-  border-radius: 0.68rem;
-  color: rgba(255, 255, 255, 0.42);
-}
-
-::ng-deep .proxy-upload-details-dialog [data-slot="dialog-close"]:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.86);
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
 }
 
 @media (max-width: 560px) {
-  .import-tags {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
   .upload-details__grid {
     grid-template-columns: 1fr;
   }
+
+  .upload-details__actions .button { width: 100%; }
 }

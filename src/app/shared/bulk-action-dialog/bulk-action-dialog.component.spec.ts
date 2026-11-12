@@ -72,4 +72,14 @@ describe('Bulk action dialog focus', () => {
       }
     });
   }
+
+  it('keeps the action disabled until a required acknowledgement is ticked', () => {
+    const dialog = TestBed.createComponent(BulkActionDialogComponent).componentInstance;
+    dialog.confirmLabel = 'I understand';
+    expect(dialog.actionBlocked).toBeTrue();
+    dialog.confirmed = true;
+    expect(dialog.actionBlocked).toBeFalse();
+    dialog.ngOnChanges({confirmLabel: {} as never});
+    expect(dialog.confirmed).toBeFalse();
+  });
 });

@@ -10,7 +10,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { marked } from 'marked';
 import { BuildInfo, ReleaseNote, UpdateNotificationService } from '../services/update-notification.service';
 import { LoadingComponent } from '../ui-elements/loading/loading.component';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 import {NotificationReadService} from '../services/notification-read.service';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -27,6 +26,31 @@ const RELEASE_SECTION_HEADINGS = new Set([
   'breaking changes',
   'notes'
 ]);
+
+/**
+ * Plain-text preview of a changelog: drops boilerplate headings ("What's Changed"),
+ * list markers, link targets and paired emphasis markers, and joins items with " · ".
+ * Underscores inside words (DB_USERNAME) are kept.
+ */
+export function releasePreview(body: string | null | undefined): string {
+  const items = (body ?? '')
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line && !/^#{1,6}\s*(what'?s changed|changes|changelog|added|fixed)\s*:?$/i.test(line))
+    .map(line => line
+      .replace(/^#{1,6}\s+/, '')
+      .replace(/^[-*+]\s+/, '')
+      .replace(/^\d+\.\s+/, '')
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/(\*\*|__)(?=\S)(.+?)(?<=\S)\1/g, '$2')
+      .replace(/(^|[^\w*])\*(?=\S)([^*]+?)(?<=\S)\*(?!\w)/g, '$1$2')
+      .replace(/~~(?=\S)(.+?)(?<=\S)~~/g, '$1')
+      .trim())
+    .filter(Boolean);
+  return items.length ? items.join(' · ') : 'No changelog text provided.';
+}
 
 function looksLikeMarkdown(body: string): boolean {
   return /(^|\n)\s{0,3}(#{1,6}\s|[-*+]\s|\d+\.\s|```|> )/.test(body) || /\[[^\]]+\]\([^)]+\)/.test(body);
@@ -69,10 +93,14 @@ function normalizeReleaseBodyToMarkdown(body: string): string {
   return output.join('\n');
 }
 
+function normalizeTag(tag: string | null | undefined): string {
+  return (tag ?? '').trim().replace(/^v/i, '').toLowerCase();
+}
+
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [DialogComponent, PageLoadErrorComponent, CommonModule, DatePipe, LoadingComponent, RevealGroupDirective],
+  imports: [DialogComponent, PageLoadErrorComponent, CommonModule, DatePipe, LoadingComponent],
   host: {
     '(window:focus)': 'refreshReadStatus()',
     '(document:visibilitychange)': 'onVisibilityChange()',
@@ -94,6 +122,22 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   readonly newReleaseCount = computed(() => this.newReleases().length);
   readonly totalReleaseCount = computed(() => this.allReleases().length);
   readonly buildVersionLabel = computed(() => this.backendBuild()?.buildVersion || 'dev');
+  /** Where the installed build sits in the release feed, which lists the newest release first. */
+  readonly buildStatus = computed<{label: string; tone: 'current' | 'behind' | 'unknown'}>(() => {
+    const installed = normalizeTag(this.backendBuild()?.buildVersion);
+    if (!installed || installed === 'dev') {
+      return {label: 'Development build', tone: 'unknown'};
+    }
+
+    const behind = this.allReleases().findIndex(release => normalizeTag(release.tagName) === installed);
+    if (behind === 0) {
+      return {label: 'Up to date', tone: 'current'};
+    }
+    if (behind > 0) {
+      return {label: `${behind} release${behind === 1 ? '' : 's'} behind`, tone: 'behind'};
+    }
+    return {label: 'Unpublished build', tone: 'unknown'};
+  });
   readonly archiveCountLabel = computed(() => {
     const count = this.totalReleaseCount();
     return `${count} release${count === 1 ? '' : 's'} in archive`;
@@ -107,6 +151,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     const parsed = new Date(builtAt);
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   });
+  protected readonly releasePreview = releasePreview;
   readonly selectedReleaseMarkdown = computed(() => {
     const release = this.selectedRelease();
     const body = normalizeReleaseBodyToMarkdown(release?.body?.trim() || 'No changelog text provided.');

@@ -1,3 +1,4 @@
+import {formatPercent} from '../shared/number-utils';
 import {areaY, barX, d3Curve, defineChart, dot, lineY} from '@tanstack/charts';
 import type {ChartMark, SceneNode} from '@tanstack/charts';
 import {scaleLinear} from '@tanstack/charts/scales/linear';
@@ -5,17 +6,39 @@ import {scaleBand} from '@tanstack/charts/scales/band';
 import {hlmChartTooltip, HLM_CHART_THEME} from '@spartan-ng/helm/chart';
 import {curveMonotoneX} from 'd3-shape';
 
-const chartTheme = {...HLM_CHART_THEME, grid: 'rgba(148, 163, 184, 0.15)'};
+// The Console skin (src/ui-styles) retunes chart colors through these custom properties.
+export const CHART_SERIES_COLOR = 'var(--ui-chart-series, #3b82f6)';
+export const CHART_LIMIT_COLOR = 'var(--ui-chart-limit, #f59e0b)';
+const CHART_DOT_STROKE = 'var(--ui-chart-dot-stroke, #0f172a)';
+const chartTheme = {...HLM_CHART_THEME, grid: 'var(--ui-chart-grid, rgba(148, 163, 184, 0.15))'};
 const smoothCurve = d3Curve(curveMonotoneX);
-export const REPUTATION_COLORS = ['#22c55e', '#f97316', '#ef4444', '#94a3b8'];
+/** Good, Neutral, Poor, Unknown — read from the --reputation-* tokens in styles.css. */
+export const REPUTATION_COLORS = [
+  'var(--reputation-good, #46c995)',
+  'var(--reputation-neutral, #d9a82e)',
+  'var(--reputation-poor, #e0464e)',
+  'var(--reputation-unknown, #8e959e)',
+];
+/** Reputation buckets used by latency points, in REPUTATION_COLORS order. */
+export const REPUTATION_KEYS = ['good', 'neutral', 'bad', 'unknown'];
 
 export interface MetricPoint { index: number; value: number; }
 export interface InventoryPoint {
   index: number;
   label: string;
+  /** Short axis label, such as the day. Points of the same day share it. */
+  axisLabel?: string;
   count: number;
   gained: number;
   lost: number;
+}
+
+/** One tick per day (or per point for short series), thinned to at most `maxTicks` horizontal labels. */
+export function inventoryTickIndexes(points: readonly InventoryPoint[], maxTicks = 8): number[] {
+  if (points.length <= maxTicks) return points.map(point => point.index);
+  const starts = points.filter((point, i) => i === 0 || point.axisLabel !== points[i - 1].axisLabel).map(point => point.index);
+  const step = Math.max(1, Math.ceil(starts.length / maxTicks));
+  return starts.filter((_, i) => i % step === 0);
 }
 export interface InventoryLabels {
   proxiesLabel: string;
@@ -55,12 +78,15 @@ export function buildInventoryChart(points: InventoryPoint[], limit: number | nu
   const max = Math.max(1, ...points.map(point => point.count), limit ?? 0);
   return defineChart({
     marks: [
-      areaY(points, {id: 'inventory-fill', x: 'index', y: 'count', fill: '#3b82f6', fillOpacity: 0.2, curve: smoothCurve}),
-      lineY(points, {id: 'inventory', x: 'index', y: 'count', stroke: '#3b82f6', strokeWidth: 2, points: true, curve: smoothCurve}),
-      lineY(limitPoints, {id: 'limit', x: 'index', y: 'count', stroke: '#f59e0b', strokeWidth: 2, strokeDasharray: '5 5'}),
+      areaY(points, {id: 'inventory-fill', x: 'index', y: 'count', fill: CHART_SERIES_COLOR, fillOpacity: 0.2, curve: smoothCurve}),
+      lineY(points, {id: 'inventory', x: 'index', y: 'count', stroke: CHART_SERIES_COLOR, strokeWidth: 2, points: points.length <= 48, curve: smoothCurve}),
+      lineY(limitPoints, {id: 'limit', x: 'index', y: 'count', stroke: CHART_LIMIT_COLOR, strokeWidth: 2, strokeDasharray: '5 5'}),
     ],
     scales: {
-      x: {scale: scaleLinear, axis: {ticks: {values: points.map(point => point.index), format: value => points[Math.round(value)]?.label ?? ''}, tickLabels: {rotate: points.length > 10 ? -35 : 0}}},
+      x: {scale: scaleLinear, axis: {ticks: {values: inventoryTickIndexes(points), format: value => {
+        const point = points[Math.round(value)];
+        return point?.axisLabel ?? point?.label ?? '';
+      }}}},
       y: {scale: () => scaleLinear().domain([0, max]), nice: true, grid: true, axis: {ticks: {format}}},
     },
     theme: chartTheme,
@@ -72,10 +98,10 @@ export function buildInventoryChart(points: InventoryPoint[], limit: number | nu
       return {
         title: point.label,
         rows: [
-          {label: labels.tooltipProxiesLabel, value: format(point.count), color: '#3b82f6'},
+          {label: labels.tooltipProxiesLabel, value: format(point.count), color: CHART_SERIES_COLOR},
           {label: labels.tooltipGainedLabel, value: format(point.gained)},
           {label: labels.tooltipLostLabel, value: format(point.lost)},
-          ...(limit === null ? [] : [{label: labels.tooltipLimitLabel, value: format(limit), color: '#f59e0b'}]),
+          ...(limit === null ? [] : [{label: labels.tooltipLimitLabel, value: format(limit), color: CHART_LIMIT_COLOR}]),
         ],
       };
     }}),
@@ -84,7 +110,7 @@ export function buildInventoryChart(points: InventoryPoint[], limit: number | nu
 
 /** Keeps the existing reputation shapes while using TanStack's scale and focus handling. */
 function reputationDots(points: LatencyPoint[]): ChartMark<LatencyPoint, number, number> {
-  const mark = dot(points, {id: 'latency', x: 'x', y: 'y', key: 'proxy', color: 'country', r: 6, stroke: '#0f172a', strokeWidth: 1.5});
+  const mark = dot(points, {id: 'latency', x: 'x', y: 'y', key: 'proxy', color: 'reputation', r: 6, stroke: CHART_DOT_STROKE, strokeWidth: 1.5});
   const shape = (node: SceneNode): SceneNode => {
     if (node.kind === 'group') return {...node, children: node.children.map(shape)};
     if (node.kind !== 'dot' || !node.interaction?.point) return node;
@@ -107,7 +133,11 @@ function reputationDots(points: LatencyPoint[]): ChartMark<LatencyPoint, number,
   }};
 }
 
-export function buildLatencyChart(points: LatencyPoint[], countries: string[], colors: string[], format: (value: number) => string) {
+/**
+ * Country is already the x position, so color carries reputation (doubling the shape)
+ * instead of repeating the country with a second, arbitrary hue.
+ */
+export function buildLatencyChart(points: LatencyPoint[], countries: string[], format: (value: number) => string) {
   const max = Math.max(1, ...points.map(point => point.y));
   return defineChart({
     marks: [reputationDots(points)],
@@ -121,7 +151,7 @@ export function buildLatencyChart(points: LatencyPoint[], countries: string[], c
       }},
       y: {scale: () => scaleLinear().domain([0, max]), nice: true, grid: true, axis: {label: 'Response time (ms)', ticks: {format: value => `${format(value)} ms`}}},
     },
-    color: {domain: countries, range: colors},
+    color: {domain: REPUTATION_KEYS, range: REPUTATION_COLORS},
     theme: chartTheme,
     tooltip: hlmChartTooltip<LatencyPoint, number, number>({content: focused => {
       const point = focused[0]?.datum;
@@ -136,12 +166,12 @@ export function buildLatencyChart(points: LatencyPoint[], countries: string[], c
   });
 }
 
-export function buildReputationChart(points: ReputationPoint[], format: (value: number) => string) {
+export function buildReputationChart(points: ReputationPoint[], format: (value: number) => string, locale = 'de-DE') {
   const total = points.reduce((sum, point) => sum + point.value, 0);
   return defineChart({
     marks: [
       barX(points, {id: 'reputation-stems', x: 'value', y: 'label', color: 'label', fillOpacity: 0.35, maxThickness: 8, radius: 4}),
-      dot(points, {id: 'reputation', x: 'value', y: 'label', color: 'label', r: 9, stroke: '#0f172a', strokeWidth: 2}),
+      dot(points, {id: 'reputation', x: 'value', y: 'label', color: 'label', r: 9, stroke: CHART_DOT_STROKE, strokeWidth: 2}),
     ],
     scales: {
       x: {scale: () => scaleLinear().domain([0, Math.max(1, ...points.map(point => point.value))]), nice: true, grid: true, axis: {ticks: {format}}},
@@ -151,7 +181,7 @@ export function buildReputationChart(points: ReputationPoint[], format: (value: 
     theme: chartTheme,
     tooltip: hlmChartTooltip<ReputationPoint, number, string>({format: point => {
       const value = point.datum.value;
-      return `${point.datum.label}: ${format(value)} (${total > 0 ? (value / total * 100).toFixed(1) : '0.0'}%)`;
+      return `${point.datum.label}: ${format(value)} (${formatPercent(total > 0 ? value / total * 100 : 0, locale)})`;
     }}),
   });
 }

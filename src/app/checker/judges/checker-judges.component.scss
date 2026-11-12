@@ -108,111 +108,23 @@
     max-width: 34rem;
     margin: 0.34rem 0 0;
     color: var(--card-muted);
-    font-size: 0.78rem;
+    font-size: 0.84rem;
     line-height: 1.5;
   }
 }
 
 .settings-card--flow {
-  min-height: 39rem;
-}
-
-.judge-flow {
-  position: relative;
-  z-index: 1;
   display: flex;
-  align-items: flex-start;
-  margin-top: 2rem;
-}
-
-.flow-step {
-  display: flex;
-  min-width: 0;
   flex-direction: column;
-  align-items: center;
-  gap: 0.55rem;
-  text-align: center;
-
-  > div { display: flex; flex-direction: column; gap: 0.12rem; }
-  strong { color: rgba(255, 255, 255, 0.76); font-size: 0.68rem; font-weight: 570; }
-  small { color: rgba(255, 255, 255, 0.37); font-size: 0.56rem; white-space: nowrap; }
 }
 
-.flow-node {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.8rem;
-  height: 2.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.035);
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.flow-node--active {
-  border-color: rgba(var(--theme-primary-300-rgb), 0.34);
-  background: rgba(var(--theme-primary-500-rgb), 0.12);
-  color: var(--theme-primary-200);
-  box-shadow: 0 0 1.5rem rgba(var(--theme-primary-500-rgb), 0.14);
-}
-
-.flow-line {
-  flex: 1 1 auto;
-  min-width: 1rem;
-  height: 1px;
-  margin: 1.38rem 0.35rem 0;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(var(--theme-primary-300-rgb), 0.36));
-}
-
-.judge-orbit {
-  position: relative;
-  z-index: 1;
-  width: min(14rem, 80%);
-  aspect-ratio: 1;
-  margin: 1.6rem auto;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(203, 164, 193, 0.18), rgba(var(--theme-primary-500-rgb), 0.06) 28%, transparent 68%);
-}
-
-.judge-orbit__ring {
-  position: absolute;
-  inset: 7%;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 50%;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 12%;
-    right: 12%;
-    width: 0.48rem;
-    height: 0.48rem;
-    border-radius: 50%;
-    background: var(--theme-primary-300);
-    box-shadow: 0 0 1rem var(--theme-primary-shadow);
-  }
-}
-
-.judge-orbit__ring--inner { inset: 26%; border-color: rgba(var(--theme-primary-300-rgb), 0.28); }
-
-.judge-orbit__core {
-  position: absolute;
-  inset: 39%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.28);
-  border-radius: 50%;
-  background: rgba(8, 16, 14, 0.72);
-  color: var(--theme-primary-200);
-  box-shadow: 0 0 2.5rem rgba(var(--theme-primary-500-rgb), 0.2);
-}
-
+// The counts and the note settle at the foot of the card, beside the end of the editor.
 .flow-summary {
   position: relative;
   z-index: 1;
   display: grid;
+  margin-top: auto;
+  padding-top: 1.5rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.6rem;
 
@@ -227,7 +139,7 @@
   }
 
   strong { color: rgba(255, 255, 255, 0.86); font-size: 1.15rem; font-weight: 590; }
-  span { color: rgba(255, 255, 255, 0.4); font-size: 0.6rem; }
+  span { color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; }
 }
 
 .validation-note {
@@ -243,7 +155,7 @@
   background: rgba(255, 255, 255, 0.02);
 
   i { margin-top: 0.1rem; color: var(--theme-primary-300); font-size: 0.72rem; }
-  p { margin: 0; color: rgba(255, 255, 255, 0.42); font-size: 0.63rem; line-height: 1.5; }
+  p { margin: 0; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; line-height: 1.5; }
   strong { color: rgba(255, 255, 255, 0.7); font-weight: 580; }
 }
 
@@ -270,7 +182,7 @@
   border-radius: 0.78rem;
   background: rgba(var(--theme-primary-500-rgb), 0.07);
   color: var(--theme-primary-200);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   font-weight: 570;
   transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 
@@ -321,8 +233,8 @@
   height: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 0.65rem;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.8125rem;
 }
 
 .judge-fields {
@@ -344,14 +256,14 @@
   align-items: center;
   gap: 0.42rem;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 560;
 }
 
 .field-hint {
   margin: 0;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.75rem;
   line-height: 1.45;
 
   code { color: rgba(255, 255, 255, 0.65); }
@@ -364,7 +276,7 @@
   border-radius: 999px;
   background: rgba(216, 168, 201, 0.07);
   color: rgba(232, 194, 220, 0.76);
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   white-space: nowrap;
 
   &.is-default { border-color: rgba(var(--theme-primary-300-rgb), 0.25); background: rgba(var(--theme-primary-500-rgb), 0.08); color: var(--theme-primary-200); }
@@ -387,7 +299,7 @@
 
 .icon-button--remove {
   color: #f2a3a3;
-  &:hover:not(:disabled) { border-color: rgba(248, 113, 113, 0.45); background: rgba(127, 29, 29, 0.18); transform: translateY(-2px); }
+  &:hover:not(:disabled) { border-color: color-mix(in srgb, var(--status-bad) 45%, transparent); background: rgba(127, 29, 29, 0.18); transform: translateY(-2px); }
 }
 
 :host ::ng-deep {
@@ -398,7 +310,7 @@
     border-radius: 0.82rem;
     background: rgba(255, 255, 255, 0.035);
     color: rgba(255, 255, 255, 0.88);
-    font-size: 0.76rem;
+    font-size: 0.84rem;
     box-shadow: none;
 
     &::placeholder { color: rgba(255, 255, 255, 0.28); }
@@ -421,8 +333,6 @@
   .settings-stage { border-radius: 1.25rem; }
   .settings-card--flow,
   .settings-card--editor { grid-column: 1 / -1; }
-  .settings-card--flow { min-height: auto; }
-  .judge-orbit { display: none; }
   .editor-heading { flex-direction: column; }
   .add-button { align-self: flex-end; }
 }
@@ -430,9 +340,6 @@
 @container checker-judges (max-width: 560px) {
   .settings-stage { padding: 0.8rem; }
   .settings-card { border-radius: 1.05rem; }
-  .judge-flow { align-items: flex-start; flex-direction: column; }
-  .flow-step { flex-direction: row; text-align: left; }
-  .flow-line { width: 1px; min-width: 1px; height: 1rem; margin: 0.2rem 0 0.2rem 1.4rem; }
   .judge-row { grid-template-columns: minmax(0, 1fr) auto; min-height: auto; }
   .judge-index { display: none; }
   .judge-fields { grid-column: 1; }

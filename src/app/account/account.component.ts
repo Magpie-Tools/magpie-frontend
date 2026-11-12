@@ -14,13 +14,11 @@ import {DeleteAccount} from '../models/DeleteAccount';
 import {UserService} from '../services/authorization/user.service';
 
 import { passwordMinLength, passwordPolicyMessages, passwordPolicyValidators } from '../auth/password-policy';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 
 @Component({
     selector: 'app-account',
   imports: [DialogComponent, PasswordComponent,
     ReactiveFormsModule,
-    RevealGroupDirective,
   ],
     templateUrl: './account.component.html',
     styleUrls: ['./account.component.scss']

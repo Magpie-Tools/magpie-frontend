@@ -5,7 +5,8 @@ import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
 import {SourceFetchModeComponent} from '../source-fetch-mode/source-fetch-mode.component';
 import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
-import {Component, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, OnDestroy, OnInit, effect, inject, signal} from '@angular/core';
+import {BreadcrumbService} from '../../services/breadcrumb.service';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -49,7 +50,6 @@ import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
 import {SourceAutoTagsComponent} from '../source-auto-tags/source-auto-tags.component';
-import {RevealGroupDirective} from '../../shared/reveal-group.directive';
 
 type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
 
@@ -58,7 +58,6 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
   standalone: true,
   imports: [
     InventoryPageShellComponent,
-    RevealGroupDirective,
     HlmPopoverImports,
     HlmTooltip,
     CommonModule,
@@ -133,6 +132,8 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     this.filterForm = this.fb.group({
       ...createProxyFilterControls(this.defaultFilterValues),
     });
+    const breadcrumbs = inject(BreadcrumbService);
+    effect(() => breadcrumbs.setDetailLabel(sourceBreadcrumbLabel(this.detail()?.url)));
   }
 
   ngOnInit(): void {
@@ -457,7 +458,8 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
 
   prepareUrlScroll(link: HTMLElement): void {
     const text = link.querySelector<HTMLElement>('.source-title__text');
-    const overflow = Math.max(0, (text?.scrollWidth ?? 0) - link.clientWidth);
+    const textWidth = text ? Math.max(text.scrollWidth, text.getBoundingClientRect().width) : 0;
+    const overflow = Math.max(0, textWidth - link.clientWidth);
     link.style.setProperty('--url-scroll-distance', `${-overflow}px`);
     link.style.setProperty('--url-scroll-duration', `${overflow / 40 + 2}s`);
     link.classList.toggle('source-title--overflowing', overflow > 0);
@@ -613,4 +615,17 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     this.displayedColumns.set(normalized.filter(column => column !== 'check_now'));
   }
 
+}
+
+/** A short name for a source URL, such as "example.com/proxies.txt". */
+function sourceBreadcrumbLabel(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    const segments = parsed.pathname.split('/').filter(Boolean);
+    if (segments.length === 0) return parsed.hostname;
+    return `${parsed.hostname}/${segments.length > 1 ? '…/' : ''}${segments.at(-1)}`;
+  } catch {
+    return url;
+  }
 }

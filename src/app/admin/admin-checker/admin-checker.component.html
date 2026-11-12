@@ -1,7 +1,4 @@
-<app-admin-settings-shell
-  class="admin-checker-page"
-  appRevealGroup=".admin-context, .settings-card, .save-dock"
->
+<app-admin-settings-shell class="admin-checker-page">
   <form
     [formGroup]="settingsForm"
     class="settings-stage"
@@ -479,13 +476,6 @@
         <section hlmTabsContent="2">
           <div class="settings-grid settings-grid--ip">
             <section class="settings-card settings-card--ip">
-              <div class="ip-visual" aria-hidden="true">
-                <span class="ip-visual__orbit ip-visual__orbit--outer"></span>
-                <span class="ip-visual__orbit ip-visual__orbit--inner"></span>
-                <span class="ip-visual__core"
-                  ><i class="icon icon-map-pin"></i
-                ></span>
-              </div>
               <div class="ip-content">
                 <div class="card-heading">
                   <span class="card-icon"
@@ -494,8 +484,8 @@
                   <div class="card-heading__copy">
                     <h2>Public IP lookup</h2>
                     <p>
-                      Magpie calls this endpoint at startup to learn the host’s
-                      public IP.
+                      Magpie calls this endpoint at startup and every 15 minutes
+                      to learn the host’s public IP.
                     </p>
                   </div>
                 </div>
@@ -517,20 +507,6 @@
                     Use a stable endpoint that returns one plain-text IP
                     address.
                   </p>
-                </div>
-                <div class="ip-path">
-                  <span
-                    ><i class="icon icon-server" aria-hidden="true"></i>Checker
-                    host</span
-                  ><i class="icon icon-arrow-right" aria-hidden="true"></i>
-                  <span
-                    ><i class="icon icon-globe" aria-hidden="true"></i>Lookup
-                    endpoint</span
-                  ><i class="icon icon-arrow-right" aria-hidden="true"></i>
-                  <span
-                    ><i class="icon icon-check" aria-hidden="true"></i>Public
-                    IP</span
-                  >
                 </div>
               </div>
             </section>

@@ -2,6 +2,7 @@ import {HlmCardImports} from '@spartan-ng/helm/card';
 import {Component, computed, Input} from '@angular/core';
 
 import {DecimalPipe, NgStyle} from '@angular/common';
+import {categoricalColors} from '../../chart-palette';
 
 type TrafficMap = Record<string, number>;
 
@@ -18,20 +19,18 @@ type TrafficMap = Record<string, number>;
 export class JudgeByPercentageCardComponent {
   @Input({ required: true }) data!: TrafficMap;
 
-  /** Cache avoids recomputing colors for keys we already processed. */
-  private colorCache = new Map<string, string>();
-
   // Sorted entries with computed percentage
   entries = computed(() => {
     const items = Object.entries(this.data ?? {});
     const total = items.reduce((s, [, v]) => s + v, 0);
+    const colors = categoricalColors(items.map(([k]) => k));
     const sorted = items.sort(([, a], [, b]) => b - a);
     return sorted.map(([k, v]) => {
       return {
         key: k,
         value: v,
         pct: total > 0 ? (v / total) * 100 : 0,
-        color: this.colorForKey(k),
+        color: colors.get(k)!,
       };
     });
   });
@@ -46,33 +45,4 @@ export class JudgeByPercentageCardComponent {
 
   total = computed(() => Object.values(this.data ?? {}).reduce((s, v) => s + v, 0));
 
-  /**
-   * Generate a saturated but balanced color derived from the provided key.
-   * The hash ensures identical strings always map to the same hue.
-   */
-  private colorForKey(key: string): string {
-    const cached = this.colorCache.get(key);
-    if (cached) {
-      return cached;
-    }
-
-    const hash = this.hashString(key);
-    const hue = hash % 360;
-    const saturation = 65;
-    const lightness = 52;
-    const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-
-    this.colorCache.set(key, color);
-    return color;
-  }
-
-  private hashString(value: string): number {
-    let hash = 0;
-    for (let i = 0; i < value.length; i++) {
-      hash = (hash << 5) - hash + value.charCodeAt(i);
-      hash |= 0; // Convert to 32bit integer
-    }
-
-    return Math.abs(hash);
-  }
 }

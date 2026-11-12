@@ -3,7 +3,6 @@ import {Component} from '@angular/core';
 import {provideRouter} from '@angular/router';
 import {RouterTestingHarness} from '@angular/router/testing';
 import { of, Subject } from 'rxjs';
-import {gsap} from 'gsap';
 
 import { DashboardComponent } from './dashboard.component';
 import { DashboardQueryData, GraphqlService } from '../services/graphql.service';
@@ -106,50 +105,36 @@ describe('DashboardComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('app-kpi-card app-chart').length).toBe(3);
   });
 
-  for (const progress of [0.35, 1]) {
-    it(`keeps the page entrance at ${progress} when dashboard data arrives`, async () => {
-      fixture.destroy();
-      const request = new Subject<DashboardQueryData>();
-      graphqlService.fetchDashboardData.and.returnValue(request);
-      fixture = TestBed.createComponent(DashboardComponent);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-      await fixture.whenStable();
+  it('swaps the skeleton for content when dashboard data arrives', async () => {
+    fixture.destroy();
+    const request = new Subject<DashboardQueryData>();
+    graphqlService.fetchDashboardData.and.returnValue(request);
+    fixture = TestBed.createComponent(DashboardComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
 
-      const header: HTMLElement = fixture.nativeElement.querySelector('.dashboard-context');
-      const stage: HTMLElement = fixture.nativeElement.querySelector('.loading-stage');
-      const entrance = gsap.getTweensOf(header)[0];
-      expect(entrance).toBeDefined();
-      expect(gsap.getTweensOf(stage)).toEqual([entrance]);
-      entrance.pause().progress(progress);
-      const initialOpacity = header.style.opacity;
-      const initialTransform = header.style.transform;
-      const skeleton: HTMLElement = fixture.nativeElement.querySelector('.dashboard-skeleton');
-      expect(skeleton).not.toBeNull();
+    const stage: HTMLElement = fixture.nativeElement.querySelector('.loading-stage');
+    const skeleton: HTMLElement = fixture.nativeElement.querySelector('.dashboard-skeleton');
+    expect(skeleton).not.toBeNull();
 
-      request.next(dashboardData);
-      request.complete();
-      fixture.detectChanges();
-      await fixture.whenStable();
+    request.next(dashboardData);
+    request.complete();
+    fixture.detectChanges();
+    await fixture.whenStable();
 
-      const content: HTMLElement = fixture.nativeElement.querySelector('.loading-stage__content');
-      expect(fixture.nativeElement.querySelector('.loading-stage')).toBe(stage);
-      expect(entrance.progress()).toBe(progress);
-      expect(header.style.opacity).toBe(initialOpacity);
-      expect(header.style.transform).toBe(initialTransform);
-      expect(content.querySelector('app-kpi-card')).not.toBeNull();
-      expect(content.style.transform).toBe('');
-      expect(getComputedStyle(skeleton).position).toBe('absolute');
-      expect(skeleton.classList).toContain('loading-stage__leave');
-      expect(content.classList).toContain('loading-stage__enter');
+    const content: HTMLElement = fixture.nativeElement.querySelector('.loading-stage__content');
+    expect(fixture.nativeElement.querySelector('.loading-stage')).toBe(stage);
+    expect(content.querySelector('app-kpi-card')).not.toBeNull();
+    expect(content.style.transform).toBe('');
+    expect(getComputedStyle(skeleton).position).toBe('absolute');
+    expect(skeleton.classList).toContain('loading-stage__leave');
+    expect(content.classList).toContain('loading-stage__enter');
 
-      await Promise.all([...content.getAnimations(), ...skeleton.getAnimations()].map(animation => animation.finished));
-      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
-      expect(fixture.nativeElement.querySelector('.dashboard-skeleton')).toBeNull();
-      expect(header.style.opacity).toBe(initialOpacity);
-      expect(entrance.progress()).toBe(progress);
-    });
-  }
+    await Promise.all([...content.getAnimations(), ...skeleton.getAnimations()].map(animation => animation.finished));
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    expect(fixture.nativeElement.querySelector('.dashboard-skeleton')).toBeNull();
+  });
 
   it('keeps the settled content visible during a history refresh', async () => {
     await fixture.whenStable();
@@ -173,7 +158,7 @@ describe('DashboardComponent', () => {
     expect(fixture.nativeElement.querySelector('.dashboard-skeleton')).toBeNull();
   });
 
-  it('clears the loading page and its entrance when navigating away', async () => {
+  it('clears the loading page when navigating away', async () => {
     fixture.destroy();
     const request = new Subject<DashboardQueryData>();
     graphqlService.fetchDashboardData.and.returnValue(request);
@@ -187,7 +172,6 @@ describe('DashboardComponent', () => {
 
     expect(host.querySelector('.dashboard-context')).toBeNull();
     expect(host.querySelector('.dashboard-skeleton')).toBeNull();
-    expect(gsap.getTweensOf(header)).toEqual([]);
     expect(host.textContent).toContain('Other page');
     expect(request.observed).toBeFalse();
   });

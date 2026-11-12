@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, signal, untracked} from '@angular/core';
+import {Component, computed, DestroyRef, effect, inject, signal, untracked} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -13,20 +13,28 @@ import {AlertsService} from '../services/alerts.service';
 import {WorkspaceService} from '../services/workspace.service';
 import {NotificationService} from '../services/notification-service.service';
 import {SelectComponent} from '../shared/ui/select.component';
-import {VisibleRowsDirective} from '../shared/visible-rows.directive';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 import {NotificationFocusService, parseNotificationTargetId} from '../shared/notification-focus.service';
 import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
+import {DialogComponent} from '../shared/ui/dialog.component';
+import {TooltipComponent} from '../tooltip/tooltip.component';
 
 const emptyPage = (): AlertsPage => ({rules: [], destinations: [], incidents: [], deliveries: [], next_cursor: 0});
 const emptyRule = () => ({name: '', rotator_id: null as number | null, metric: 'usable_routes' as AlertMetric, threshold: null as number | null, enabled: true, destination_ids: [] as number[]});
+const nameLimitBytes = 120;
+const encoder = new TextEncoder();
+/** Trims a generated name to the backend's byte limit without splitting a character. */
+const clampBytes = (value: string, limit: number): string => {
+  const characters = Array.from(value);
+  while (encoder.encode(characters.join('')).length > limit) characters.pop();
+  return characters.join('').trimEnd();
+};
 const emptyDestination = () => ({name: '', kind: 'email' as AlertChannel, enabled: true, target: '', signing_secret: '', clear_signing_secret: false, mention_mode: 'none' as AlertMentionMode, mention_id: ''});
 
 @Component({
   selector: 'app-alerts', standalone: true,
   providers: [NotificationFocusService],
-  imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, VisibleRowsDirective, RevealGroupDirective, PageLoadErrorComponent],
-  templateUrl: './alerts.component.html', styleUrl: './alerts.component.scss',
+  imports: [CommonModule, FormsModule, BrnHoverCardImports, HlmInput, HlmSkeleton, HlmTabsImports, SelectComponent, PageLoadErrorComponent, DialogComponent, TooltipComponent],
+  templateUrl: './alerts.component.html', styleUrls: ['./alerts.component.scss', './alerts-incidents.component.scss', './alerts-dialogs.component.scss'],
 })
 export class AlertsComponent {
   private readonly notificationFocus = inject(NotificationFocusService);
@@ -49,13 +57,23 @@ export class AlertsComponent {
     {id: 'history', label: 'Incident history', icon: 'icon-history'},
   ];
   readonly confirmDelete = signal<{kind: 'rule' | 'destination'; id: number; name: string} | null>(null);
-  readonly metrics: {value: AlertMetric; label: string}[] = [
-    {value: 'usable_routes', label: 'Usable routes below minimum'},
-    {value: 'success_rate', label: 'Checker success rate below minimum'},
-    {value: 'latency_ms', label: 'Average successful-check latency above maximum'},
+  readonly ruleDialogOpen = signal(false);
+  readonly destinationDialogOpen = signal(false);
+  /** Save and delete failures, shown inside the dialog that caused them. */
+  readonly formError = signal('');
+  readonly metrics: {value: AlertMetric; label: string; description: string; icon: string}[] = [
+    {value: 'usable_routes', label: 'Usable routes', description: 'Too few routes can serve traffic', icon: 'icon-network'},
+    {value: 'success_rate', label: 'Success rate', description: 'Too many proxy checks fail', icon: 'icon-activity'},
+    {value: 'latency_ms', label: 'Latency', description: 'Successful checks get slow', icon: 'icon-clock'},
   ];
-  readonly channels: AlertChannel[] = ['email', 'slack', 'discord', 'webhook'];
-  readonly channelOptions = this.channels.map(value => ({value, label: value.charAt(0).toUpperCase() + value.slice(1)}));
+  readonly channels: {value: AlertChannel; label: string; description: string}[] = [
+    {value: 'email', label: 'Email', description: 'Send to an inbox'},
+    {value: 'slack', label: 'Slack', description: 'Post to a channel'},
+    {value: 'discord', label: 'Discord', description: 'Post to a channel'},
+    {value: 'webhook', label: 'Webhook', description: 'POST JSON to a URL'},
+  ];
+  targetTouched = false;
+  revealTarget = false;
   rule = emptyRule();
   destination = emptyDestination();
   editingRuleId: number | null = null;
@@ -68,10 +86,11 @@ export class AlertsComponent {
   private rotatorsRequest?: Subscription;
   private requestedIncidentId: number | null = null;
   private requestedIncidentWorkspaceId?: number;
+  /** The rule dialog was set aside to create a destination and reopens afterwards. */
+  private resumeRuleDialog = false;
 
   constructor(private readonly api: AlertsService, public readonly workspace: WorkspaceService,
               private readonly notification: NotificationService, private readonly destroyRef: DestroyRef,
-              private readonly host: ElementRef<HTMLElement>, private readonly injector: Injector,
               private readonly route: ActivatedRoute, private readonly router: Router) {
     effect(() => {
       const workspaceId = workspace.current()?.id;
@@ -83,7 +102,7 @@ export class AlertsComponent {
         this.loading.set(!!workspaceId);
         this.loaded.set(false); this.busy.set(false); this.error.set(''); this.cursor = 0;
         this.activeSection.set(this.requestedIncidentId ? 'history' : this.sectionFromRoute(this.route.snapshot.queryParamMap.get('section')));
-        this.cancelRule(); this.cancelDestination(); this.confirmDelete.set(null);
+        this.resumeRuleDialog = false; this.cancelRule(); this.cancelDestination(); this.confirmDelete.set(null); this.formError.set('');
         if (workspaceId) { this.load(); this.loadRotators(); }
       });
     });
@@ -244,32 +263,161 @@ export class AlertsComponent {
     return rule.status === 'healthy' ? 'healthy' : 'neutral';
   }
   unit(metric: AlertMetric): string { return metric === 'success_rate' ? '%' : metric === 'latency_ms' ? ' ms' : ''; }
+  newRule(): void {
+    if (!this.workspace.canOperate()) return;
+    this.cancelRule();
+    this.formError.set(''); this.ruleDialogOpen.set(true);
+  }
   editRule(rule: AlertRule): void {
     if (!this.workspace.canOperate()) return;
     this.activeSection.set('rules');
     this.editingRuleId = rule.id;
     this.rule = {...rule, destination_ids: rule.destination_ids.filter(id => this.page().destinations.some(d => d.id === id))};
-    this.focus('[name="ruleName"]');
+    this.formError.set(''); this.ruleDialogOpen.set(true);
   }
-  cancelRule(): void { this.editingRuleId = null; this.rule = emptyRule(); }
+  cancelRule(): void { this.editingRuleId = null; this.rule = emptyRule(); this.ruleDialogOpen.set(false); }
+  /** Escape and the close button discard the draft. Programmatic closes have already handled it. */
+  ruleDialogVisibilityChanged(visible: boolean): void {
+    if (!visible && this.ruleDialogOpen()) this.cancelRule();
+  }
+  changeMetric(metric: AlertMetric): void {
+    if (this.rule.metric === metric) return;
+    this.rule.metric = metric; this.rule.threshold = null;
+  }
+  metricOption(metric: AlertMetric) { return this.metrics.find(option => option.value === metric)!; }
+  thresholdLead(metric: AlertMetric): string {
+    return metric === 'usable_routes' ? 'Alert when usable routes drop below'
+      : metric === 'success_rate' ? 'Alert when the success rate drops below' : 'Alert when average latency rises above';
+  }
+  thresholdUnit(metric: AlertMetric): string { return metric === 'success_rate' ? '%' : metric === 'latency_ms' ? 'ms' : 'routes'; }
+  thresholdPlaceholder(metric: AlertMetric): string { return metric === 'success_rate' ? '80' : metric === 'latency_ms' ? '1500' : '50'; }
+  thresholdError(): string {
+    if (this.rule.threshold === null || this.validThreshold()) return '';
+    if (this.rule.metric === 'usable_routes') return 'Enter a whole number from 1 to 1,000,000,000.';
+    if (this.rule.metric === 'latency_ms') return 'Enter a value above 0 and up to 65,535 ms.';
+    return 'Enter a percentage from 0 to 100.';
+  }
+  draftScopeHint(): string {
+    if (this.rule.metric === 'usable_routes') {
+      return this.rule.rotator_id === null ? 'Counts routes that are currently eligible for routing.' : "Counts routes that pass this rotator's filters.";
+    }
+    return this.rule.rotator_id === null ? 'Measures all workspace checks over the last 15 minutes.'
+      : "Measures workspace checks for this rotator's upstream protocol over the last 15 minutes.";
+  }
+  /** Used as the rule name when the name field is left blank. */
+  suggestedRuleName(): string {
+    if (!this.validThreshold() || this.rule.threshold === null) return '';
+    const unit = this.rule.metric === 'usable_routes' ? '' : this.unit(this.rule.metric);
+    const comparison = this.rule.metric === 'latency_ms' ? 'above' : 'below';
+    const name = `${this.metricOption(this.rule.metric).label} ${comparison} ${this.rule.threshold}${unit} · ${this.scopeName(this.rule.rotator_id)}`;
+    return clampBytes(name, nameLimitBytes);
+  }
+  ruleName(): string { return this.rule.name.trim() || this.suggestedRuleName(); }
+  canSaveRule(): boolean { return this.workspace.canOperate() && !this.busy() && this.validThreshold() && !!this.ruleName(); }
   selectDestination(id: number, selected: boolean): void {
     this.rule.destination_ids = selected ? [...new Set([...this.rule.destination_ids, id])] : this.rule.destination_ids.filter(value => value !== id);
   }
   saveRule(): void {
-    if (!this.workspace.canOperate() || !this.validThreshold() || this.rule.threshold === null || !this.rule.name.trim()) return;
-    const payload: AlertRuleWrite = {...this.rule, name: this.rule.name.trim(), threshold: this.rule.threshold};
-    this.mutate(this.api.saveRule(this.editingRuleId, payload), 'Alert rule saved.', () => this.cancelRule());
+    const name = this.ruleName();
+    if (!this.workspace.canOperate() || !this.validThreshold() || this.rule.threshold === null || !name) return;
+    const payload: AlertRuleWrite = {...this.rule, name, threshold: this.rule.threshold};
+    const created = this.editingRuleId === null;
+    this.mutate(this.api.saveRule(this.editingRuleId, payload), created ? 'Alert rule created.' : 'Alert rule saved.', () => this.cancelRule());
   }
+  newDestination(): void {
+    if (!this.workspace.canAdminister()) return;
+    this.editingDestinationId = null; this.destination = emptyDestination(); this.targetTouched = false; this.revealTarget = false;
+    this.formError.set(''); this.destinationDialogOpen.set(true);
+  }
+  /** Sets the rule draft aside, creates a destination, then returns with it selected. */
+  newDestinationFromRule(): void {
+    if (!this.workspace.canAdminister() || !this.ruleDialogOpen()) return;
+    this.resumeRuleDialog = true;
+    this.ruleDialogOpen.set(false);
+    this.newDestination();
+  }
+  resumesRule(): boolean { return this.resumeRuleDialog; }
   editDestination(destination: AlertDestination): void {
     if (!this.workspace.canAdminister()) return;
     this.activeSection.set('destinations');
     this.editingDestinationId = destination.id; this.destination = {...emptyDestination(), name: destination.name, kind: destination.kind, enabled: destination.enabled, mention_mode: destination.mention_mode ?? 'none', mention_id: destination.mention_id ?? ''};
-    this.focus('[name="destinationName"]');
+    this.targetTouched = false; this.revealTarget = false;
+    this.formError.set(''); this.destinationDialogOpen.set(true);
   }
-  cancelDestination(): void { this.editingDestinationId = null; this.destination = emptyDestination(); }
+  cancelDestination(): void {
+    this.editingDestinationId = null; this.destination = emptyDestination(); this.targetTouched = false;
+    this.destinationDialogOpen.set(false);
+    if (this.resumeRuleDialog) {
+      this.resumeRuleDialog = false;
+      this.formError.set(''); this.ruleDialogOpen.set(true);
+    }
+  }
+  destinationDialogVisibilityChanged(visible: boolean): void {
+    if (!visible && this.destinationDialogOpen()) this.cancelDestination();
+  }
+  targetLabel(kind: AlertChannel): string {
+    switch (kind) {
+      case 'email': return 'Email address';
+      case 'slack': return 'Slack incoming webhook URL';
+      case 'discord': return 'Discord webhook URL';
+      case 'webhook': return 'Endpoint URL';
+    }
+  }
+  targetPlaceholder(kind: AlertChannel): string {
+    switch (kind) {
+      case 'email': return 'ops@example.com';
+      case 'slack': return 'https://hooks.slack.com/services/…';
+      case 'discord': return 'https://discord.com/api/webhooks/…';
+      case 'webhook': return 'https://alerts.example.com/magpie';
+    }
+  }
+  targetHint(kind: AlertChannel): string {
+    switch (kind) {
+      case 'email': return 'Email delivery requires SMTP to be configured on the server.';
+      case 'slack': return 'In Slack, add the Incoming Webhooks app to a channel and copy its webhook URL.';
+      case 'discord': return 'In Discord, open Channel settings → Integrations → Webhooks and copy the webhook URL.';
+      case 'webhook': return 'Magpie sends a JSON POST request when an incident opens and when it recovers.';
+    }
+  }
+  /** Mirrors the server's checks so mistakes show before saving. The server still validates. */
+  targetError(): string {
+    const target = this.destination.target.trim();
+    if (!target) return this.editingDestinationId === null ? 'Required.' : '';
+    if (target.length > 4096) return 'Must be at most 4,096 characters.';
+    if (this.destination.kind === 'email') {
+      return /^[^\s@<>(),;:"]+@[^\s@<>(),;:"]+\.[^\s@<>(),;:"]+$/.test(target) && target.length <= 254 ? '' : 'Enter one email address, like ops@example.com.';
+    }
+    let url: URL;
+    try { url = new URL(target); } catch { return 'Enter a full URL starting with https://.'; }
+    if (url.hash) return 'Remove the # fragment from the URL.';
+    const host = url.hostname.toLowerCase();
+    if (this.destination.kind === 'slack' && (url.protocol !== 'https:' || url.port || !['hooks.slack.com', 'hooks.slack-gov.com'].includes(host) || !url.pathname.startsWith('/services/'))) {
+      return 'Use a Slack incoming webhook URL that starts with https://hooks.slack.com/services/.';
+    }
+    if (this.destination.kind === 'discord' && (url.protocol !== 'https:' || url.port || host !== 'discord.com' || !url.pathname.startsWith('/api/webhooks/'))) {
+      return 'Use a Discord webhook URL that starts with https://discord.com/api/webhooks/.';
+    }
+    if (this.destination.kind === 'webhook' && url.protocol !== 'https:' && url.protocol !== 'http:') return 'Use an https:// URL.';
+    return '';
+  }
+  /** Used as the destination name when the name field is left blank. */
+  suggestedDestinationName(): string {
+    const target = this.destination.target.trim();
+    const valid = !!target && !this.targetError();
+    switch (this.destination.kind) {
+      case 'email': return valid ? clampBytes(target, nameLimitBytes) : 'Email';
+      case 'slack': return 'Slack channel';
+      case 'discord': return 'Discord channel';
+      case 'webhook': return valid ? clampBytes(`Webhook · ${new URL(target).hostname}`, nameLimitBytes) : 'Webhook';
+    }
+  }
+  destinationName(): string { return this.destination.name.trim() || this.suggestedDestinationName(); }
+  canSaveDestination(): boolean {
+    return this.workspace.canAdminister() && !this.busy() && !this.targetError() && this.validMention() && !!this.destinationName();
+  }
   saveDestination(): void {
-    if (!this.workspace.canAdminister() || !this.destination.name.trim() || !this.validMention()) return;
-    const payload: AlertDestinationWrite = {name: this.destination.name.trim(), kind: this.destination.kind, enabled: this.destination.enabled};
+    if (!this.workspace.canAdminister() || !this.destinationName() || !this.validMention() || this.targetError()) return;
+    const payload: AlertDestinationWrite = {name: this.destinationName(), kind: this.destination.kind, enabled: this.destination.enabled};
     if (this.destination.target.trim()) payload.target = this.destination.target.trim();
     if (this.destination.kind === 'webhook' && (this.destination.signing_secret || this.destination.clear_signing_secret)) {
       payload.signing_secret = this.destination.clear_signing_secret ? '' : this.destination.signing_secret;
@@ -278,10 +426,16 @@ export class AlertsComponent {
       payload.mention_mode = this.destination.mention_mode;
       payload.mention_id = this.needsMentionId() ? this.destination.mention_id.trim() : '';
     }
-    this.mutate(this.api.saveDestination(this.editingDestinationId, payload), 'Alert destination saved.', () => this.cancelDestination());
+    const created = this.editingDestinationId === null;
+    this.mutate(this.api.saveDestination(this.editingDestinationId, payload), created ? 'Alert destination created.' : 'Alert destination saved.', saved => {
+      if (created && this.resumeRuleDialog && saved?.id) this.rule.destination_ids = [...new Set([...this.rule.destination_ids, saved.id])];
+      this.cancelDestination();
+    });
   }
   changeChannel(kind: AlertChannel): void {
+    if (this.editingDestinationId !== null) return;
     this.destination.kind = kind; this.destination.mention_mode = 'none'; this.destination.mention_id = '';
+    this.destination.signing_secret = ''; this.targetTouched = false;
   }
   mentionOptions(): {value: AlertMentionMode; label: string}[] {
     const options: {value: AlertMentionMode; label: string}[] = [{value: 'none', label: 'No mention'}, {value: 'here', label: '@here'}, {value: 'everyone', label: '@everyone'}];
@@ -316,8 +470,11 @@ export class AlertsComponent {
     });
   }
   requestDelete(kind: 'rule' | 'destination', id: number, name: string): void {
-    this.confirmDelete.set({kind, id, name}); this.focus('.confirmation');
+    this.formError.set(''); this.confirmDelete.set({kind, id, name});
   }
+  /** Rules that would stop notifying anyone if this destination were deleted. */
+  rulesUsingDestination(id: number): AlertRule[] { return this.page().rules.filter(rule => rule.destination_ids.includes(id)); }
+  ruleNamesUsingDestination(id: number): string { return this.rulesUsingDestination(id).map(rule => rule.name).join(', '); }
   validThreshold(): boolean {
     const value = this.rule.threshold;
     if (value === null || !Number.isFinite(value)) return false;
@@ -331,28 +488,23 @@ export class AlertsComponent {
       && this.page().destinations.some(d => d.id === delivery.destination_id && d.enabled)
       && !this.page().deliveries.some(d => d.incident_id === delivery.incident_id && d.destination_id === delivery.destination_id && d.id > delivery.id);
   }
-  private focus(selector: string): void {
-    afterNextRender(() => {
-      const element = this.host.nativeElement.querySelector<HTMLElement>(selector);
-      element?.scrollIntoView({behavior: 'smooth', block: 'center'}); element?.focus({preventScroll: true});
-    }, {injector: this.injector});
-  }
   retryDelivery(id: number): void {
-    if (this.workspace.canAdminister()) this.mutate(this.api.retryDelivery(id), 'Notification queued for retry.');
+    if (this.workspace.canAdminister()) this.mutate(this.api.retryDelivery(id), 'Notification queued for retry.', () => {}, this.error);
   }
-  private mutate<T>(request: Observable<T>, message: string, done: () => void = () => {}): void {
+  /** Failures go to `errorTarget`: the open dialog's notice by default, or the page notice. */
+  private mutate<T>(request: Observable<T>, message: string, done: (result: T) => void = () => {}, errorTarget = this.formError): void {
     if (this.busy()) return;
     const workspaceId = this.workspace.current()?.id;
     const version = ++this.actionVersion;
-    this.busy.set(true); this.error.set('');
+    this.busy.set(true); errorTarget.set('');
     request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
+      next: result => {
         if (workspaceId !== this.workspace.current()?.id || version !== this.actionVersion) return;
-        this.busy.set(false); done(); this.notification.showSuccess(message); this.load(this.cursor);
+        this.busy.set(false); done(result); this.notification.showSuccess(message); this.load(this.cursor);
       },
       error: err => {
         if (workspaceId !== this.workspace.current()?.id || version !== this.actionVersion) return;
-        this.busy.set(false); this.error.set(this.errorMessage(err));
+        this.busy.set(false); errorTarget.set(this.errorMessage(err));
       },
     });
   }

@@ -16,7 +16,7 @@ import { HlmDialogImports } from '@spartan-ng/helm/dialog';
   template: `
     <hlm-dialog
       [state]="visible ? 'open' : 'closed'"
-      [closeOnOutsidePointerEvents]="dismissableMask && closable"
+      [closeOnOutsidePointerEvents]="false"
       [disableClose]="!closable"
       [autoFocus]="autoFocus"
       (stateChanged)="stateChanged($event)"
@@ -52,7 +52,6 @@ export class DialogComponent {
   @Input() header = '';
   @Input() autoFocus: AutoFocusTarget | string | boolean = 'first-tabbable';
   @Input() closable = true;
-  @Input() dismissableMask = false;
   @Input() styleClass = '';
   @Input() panelStyle: Record<string, any> = {};
   @ContentChild('dialogHeader') dialogHeader?: TemplateRef<unknown>;

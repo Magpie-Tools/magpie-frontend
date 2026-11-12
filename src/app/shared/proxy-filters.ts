@@ -64,7 +64,7 @@ export function normalizeProxyStateFilter(value: unknown): ManagedProxyState[] {
 }
 
 export const PROXY_STATUS_OPTIONS: ProxyFilterOption[] = [
-  { label: 'All Proxies', value: 'all' },
+  { label: 'All proxies', value: 'all' },
   { label: 'Only Alive Proxies', value: 'alive' },
   { label: 'Only Dead Proxies', value: 'dead' },
 ];

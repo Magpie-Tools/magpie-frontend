@@ -1,8 +1,10 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {DecimalPipe} from '@angular/common';
 
 @Component({
   selector: 'app-inventory-page-shell',
   standalone: true,
+  imports: [DecimalPipe],
   templateUrl: './inventory-page-shell.component.html',
   styleUrl: './inventory-page-shell.component.scss',
 })
@@ -24,6 +26,10 @@ export class InventoryPageShellComponent {
   @Input() showResultHeading = true;
   @Input() resultDescription = '';
   @Input() selectedCount = 0;
+  /** Plural noun for the summary line, such as "proxies". */
+  @Input() itemNoun = 'items';
+  /** Singular of `itemNoun`, such as "proxy". */
+  @Input() itemNounSingular = 'item';
   @Input() totalItems = 0;
   @Input() hasLoaded = false;
   @Input() loading = false;
@@ -37,6 +43,11 @@ export class InventoryPageShellComponent {
   @Output() searchTermChange = new EventEmitter<string>();
   @Output() clearSearch = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();
+  @Output() clearSelection = new EventEmitter<void>();
+
+  nounFor(count: number): string {
+    return count === 1 ? this.itemNounSingular : this.itemNoun;
+  }
 
   get isEmpty(): boolean {
     return this.hasLoaded && !this.loading && this.totalItems === 0;

@@ -1,8 +1,4 @@
-<main
-  class="workspace-page"
-  appRevealGroup=".workspace-context, .workspace-card, .page-error"
-  [revealReady]="!!workspaces.current() || !!workspaceError()"
->
+<main class="workspace-page">
   @if (workspaceError()) {
     <section class="page-error" role="alert">
       <span class="error-icon"
@@ -163,10 +159,17 @@
             <strong>{{ workspace.subscription.plan_code | titlecase }}</strong>
             <span>{{ workspace.subscription.status | titlecase }} subscription</span>
           </div>
+          <!-- Allowance rows only mean something when the workspace has a route limit. -->
           <dl class="plan-highlights">
-            <div><dt>Included routes</dt><dd>{{ workspace.capacity.included_routes | number }}</dd></div>
-            <div><dt>Additional routes</dt><dd>{{ workspace.capacity.additional_routes | number }}</dd></div>
-            <div><dt>Included operators</dt><dd>{{ workspace.subscription.included_operators | number }}</dd></div>
+            @if (workspace.capacity.activation_limit === null) {
+              <div><dt>Active route limit</dt><dd>No limit</dd></div>
+            } @else {
+              <div><dt>Included routes</dt><dd>{{ workspace.capacity.included_routes | number }}</dd></div>
+              <div><dt>Additional routes</dt><dd>{{ workspace.capacity.additional_routes | number }}</dd></div>
+            }
+            @if (workspace.subscription.included_operators > 0) {
+              <div><dt>Included operators</dt><dd>{{ workspace.subscription.included_operators | number }}</dd></div>
+            }
           </dl>
           <div class="plan-accordions">
             <details>
@@ -1094,7 +1097,6 @@
 <app-dialog
   [visible]="!!removalTarget()"
   (visibleChange)="!$event && removalTarget.set(null)"
-  [dismissableMask]="!removingMember()"
   [closable]="!removingMember()"
   [panelStyle]="{ width: '30rem' }"
 >
@@ -1137,7 +1139,6 @@
 <app-dialog
   [visible]="!!ownershipChange()"
   (visibleChange)="!$event && ownershipChange.set(null)"
-  [dismissableMask]="true"
   [panelStyle]="{ width: '32rem' }"
 >
   <ng-template #dialogHeader
@@ -1185,7 +1186,6 @@
 <app-dialog
   [visible]="!!revokeTarget()"
   (visibleChange)="!$event && revokeTarget.set(null)"
-  [dismissableMask]="!revokingInvitation()"
   [closable]="!revokingInvitation()"
   [panelStyle]="{ width: '30rem' }"
 >

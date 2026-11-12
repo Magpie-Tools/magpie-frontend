@@ -1,7 +1,4 @@
-<main
-  class="dashboard-page"
-  appRevealGroup=".dashboard-context, .loading-stage"
->
+<main class="dashboard-page">
   <section class="dashboard-stage">
     <header class="dashboard-context">
       <div class="dashboard-context__identity">
@@ -22,48 +19,153 @@
           aria-label="Loading dashboard"
         >
           @for (card of kpiSkeletons; track $index) {
-            <section
-              class="dashboard-skeleton-card dashboard-skeleton-card--metric"
-            >
-              <div class="skeleton-line">
-                <hlm-skeleton
-                  [style.width]="'2.4rem'"
-                  [style.height]="'2.4rem'"
-                  [style.border-radius]="'0.75rem'"
-                />
-                <hlm-skeleton [style.width]="'7rem'" [style.height]="'0.75rem'" />
+            <section class="skeleton-card skeleton-kpi dashboard-grid__kpi">
+              <div class="skeleton-kpi__top">
+                <hlm-skeleton class="bone bone--tile" />
+                <hlm-skeleton class="bone bone--label" />
+                <hlm-skeleton class="bone bone--pill" />
               </div>
-              <hlm-skeleton [style.width]="'8rem'" [style.height]="'2.2rem'" />
-              <hlm-skeleton [style.width]="'100%'" [style.height]="'3.6rem'" />
+              <hlm-skeleton class="bone bone--value" />
+              <div class="skeleton-kpi__spark"></div>
             </section>
           }
 
-          <section class="dashboard-skeleton-card dashboard-skeleton-card--wide">
-            <hlm-skeleton [style.width]="'12rem'" [style.height]="'1rem'" />
-            <hlm-skeleton [style.width]="'100%'" [style.height]="'22rem'" />
+          <section class="skeleton-card dashboard-grid__throughput">
+            <header class="skeleton-head">
+              <div class="skeleton-head__copy">
+                <hlm-skeleton class="bone bone--title" />
+                <hlm-skeleton class="bone bone--subtitle" />
+              </div>
+              <hlm-skeleton class="bone bone--meta" />
+            </header>
+            <div class="skeleton-body skeleton-body--throughput">
+              <div class="skeleton-chart">
+                @for (line of chartLines; track $index) {
+                  <div class="skeleton-chart__line">
+                    <hlm-skeleton class="bone bone--axis" />
+                  </div>
+                }
+              </div>
+            </div>
           </section>
-          <section
-            class="dashboard-skeleton-card dashboard-skeleton-card--narrow"
-          >
-            <hlm-skeleton [style.width]="'9rem'" [style.height]="'1rem'" />
-            <div class="dashboard-skeleton-list">
+
+          <section class="skeleton-card dashboard-grid__history">
+            <header class="skeleton-head">
+              <div class="skeleton-head__copy">
+                <hlm-skeleton class="bone bone--title bone--short" />
+              </div>
+              <hlm-skeleton class="bone bone--icon-button" />
+            </header>
+            <div class="skeleton-body">
               @for (row of historySkeletons; track $index) {
-                <hlm-skeleton [style.width]="'100%'" [style.height]="'2.6rem'" />
+                <div class="skeleton-row skeleton-row--history">
+                  <hlm-skeleton class="bone bone--tile" />
+                  <div class="skeleton-row__copy">
+                    <hlm-skeleton class="bone bone--host" />
+                    <hlm-skeleton class="bone bone--date" />
+                  </div>
+                  <hlm-skeleton class="bone bone--number" />
+                </div>
               }
             </div>
           </section>
-          <section
-            class="dashboard-skeleton-card dashboard-skeleton-card--country"
-          >
-            <hlm-skeleton [style.width]="'11rem'" [style.height]="'1rem'" />
-            <hlm-skeleton [style.width]="'100%'" [style.height]="'19rem'" />
+
+          <section class="skeleton-card dashboard-grid__countries">
+            <header class="skeleton-head">
+              <div class="skeleton-head__copy">
+                <hlm-skeleton class="bone bone--title" />
+              </div>
+              <div class="skeleton-head__tools">
+                <hlm-skeleton class="bone bone--control" />
+                <hlm-skeleton class="bone bone--control" />
+              </div>
+            </header>
+            <div class="skeleton-body">
+              <div class="skeleton-frame skeleton-frame--map"></div>
+            </div>
           </section>
-          <section class="dashboard-skeleton-card dashboard-skeleton-card--judge">
-            <hlm-skeleton [style.width]="'10rem'" [style.height]="'1rem'" />
-            <div class="dashboard-skeleton-list">
-              @for (row of countrySkeletons; track $index) {
-                <hlm-skeleton [style.width]="'100%'" [style.height]="'2rem'" />
+
+          <section class="skeleton-card dashboard-grid__judges">
+            <header class="skeleton-head">
+              <div class="skeleton-head__copy">
+                <hlm-skeleton class="bone bone--title bone--long" />
+              </div>
+            </header>
+            <div class="skeleton-body">
+              <div class="skeleton-judge__summary">
+                <hlm-skeleton class="bone bone--total" />
+                <hlm-skeleton class="bone bone--date" />
+              </div>
+              <hlm-skeleton class="bone bone--bar" />
+              @for (row of judgeSkeletons; track $index) {
+                <div class="skeleton-row skeleton-row--judge">
+                  <hlm-skeleton class="bone bone--dot" />
+                  <hlm-skeleton class="bone bone--name" />
+                  <hlm-skeleton class="bone bone--number" />
+                </div>
               }
+            </div>
+          </section>
+
+          <section class="skeleton-card dashboard-grid__latency">
+            <header class="skeleton-head">
+              <div class="skeleton-head__copy">
+                <hlm-skeleton class="bone bone--title" />
+                <hlm-skeleton class="bone bone--subtitle bone--long" />
+              </div>
+              <hlm-skeleton class="bone bone--control bone--wide" />
+            </header>
+            <div class="skeleton-body skeleton-split">
+              <div class="skeleton-frame skeleton-frame--latency">
+                <div class="skeleton-chart">
+                  @for (line of chartLines; track $index) {
+                    <div class="skeleton-chart__line">
+                      <hlm-skeleton class="bone bone--axis" />
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="skeleton-frame skeleton-legend">
+                @for (row of legendSkeletons; track $index) {
+                  <div class="skeleton-row skeleton-row--legend">
+                    <hlm-skeleton class="bone bone--dot" />
+                    <hlm-skeleton class="bone bone--name" />
+                    <hlm-skeleton class="bone bone--count" />
+                  </div>
+                }
+              </div>
+            </div>
+          </section>
+
+          <section class="skeleton-card dashboard-grid__reputation">
+            <header class="skeleton-head">
+              <div class="skeleton-head__copy">
+                <hlm-skeleton class="bone bone--title bone--short" />
+                <hlm-skeleton class="bone bone--subtitle" />
+              </div>
+            </header>
+            <div class="skeleton-body skeleton-split skeleton-split--reputation">
+              <div class="skeleton-frame skeleton-frame--reputation">
+                <div class="skeleton-chart">
+                  @for (line of chartLines; track $index) {
+                    <div class="skeleton-chart__line">
+                      <hlm-skeleton class="bone bone--axis" />
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="skeleton-frame skeleton-legend">
+                @for (row of reputationSkeletons; track $index) {
+                  <div class="skeleton-row skeleton-row--reputation">
+                    <hlm-skeleton class="bone bone--dot" />
+                    <div class="skeleton-row__copy">
+                      <hlm-skeleton class="bone bone--name" />
+                      <hlm-skeleton class="bone bone--date" />
+                    </div>
+                    <hlm-skeleton class="bone bone--number" />
+                  </div>
+                }
+              </div>
             </div>
           </section>
         </div>
@@ -124,6 +226,8 @@
                 [title]="proxiesPerHourTitle"
                 [chart]="inventoryChart()"
                 [legend]="inventoryLegend"
+                [range]="inventoryRange()"
+                [summary]="inventorySummary()"
               >
               </app-proxies-per-hour-card>
 

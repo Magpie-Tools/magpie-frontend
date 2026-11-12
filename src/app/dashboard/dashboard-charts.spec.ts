@@ -1,6 +1,6 @@
 import {createChartScene} from '@tanstack/charts';
 import type {ChartTooltipContentContext, SceneNode} from '@tanstack/charts';
-import {buildInventoryChart, buildLatencyChart, buildMetricChart, buildReputationChart, InventoryLabels, LatencyPoint} from './dashboard-charts';
+import {buildInventoryChart, buildLatencyChart, buildMetricChart, buildReputationChart, CHART_LIMIT_COLOR, CHART_SERIES_COLOR, InventoryLabels, REPUTATION_COLORS, inventoryTickIndexes, LatencyPoint} from './dashboard-charts';
 
 const tooltipContext: ChartTooltipContentContext = {
   pinned: false, xLabel: '', yLabel: '', formatX: String, formatY: String,
@@ -35,10 +35,10 @@ describe('Spartan dashboard chart definitions', () => {
     const limitPoint = scene.points.find(point => point.markId === 'limit' && point.datum.index === 1)!;
     const expected = {
       title: 'Oct 02', rows: [
-        {label: 'Proxies', value: '1.200', color: '#3b82f6'},
+        {label: 'Proxies', value: '1.200', color: CHART_SERIES_COLOR},
         {label: 'Gained', value: '0'},
         {label: 'Lost', value: '200'},
-        {label: 'Limit', value: '2.000', color: '#f59e0b'},
+        {label: 'Limit', value: '2.000', color: CHART_LIMIT_COLOR},
       ],
     };
     if ('content' in chart.tooltip) {
@@ -55,16 +55,16 @@ describe('Spartan dashboard chart definitions', () => {
     expect(scene.points.every(point => Number.isFinite(point.x) && Number.isFinite(point.y))).toBeTrue();
   });
 
-  it('preserves country colors, reputation shapes, and proxy tooltip details', () => {
+  it('colors latency points by reputation, keeps shapes, and keeps proxy tooltip details', () => {
     const data: LatencyPoint[] = ['good', 'neutral', 'bad', 'unknown'].map((reputation, index) => ({
       x: index < 2 ? 1 : 2, y: 50 + index * 20, rank: index + 1, proxy: `192.0.2.${index + 1}:8080`,
       country: index < 2 ? 'Germany' : 'France', reputation, reputationScore: 70,
     }));
-    const chart = buildLatencyChart(data, ['Germany', 'France'], ['#00ff00', '#0000ff'], format);
+    const chart = buildLatencyChart(data, ['Germany', 'France'], format);
     const scene = createChartScene(chart, {width: 600, height: 352});
     const nodes = flatten(scene.nodes).filter(node => 'interaction' in node && node.interaction?.point?.markId === 'latency');
     expect(nodes.map(node => node.kind)).toEqual(['dot', 'area', 'area', 'area']);
-    expect(scene.points.map(point => point.color)).toEqual(['#00ff00', '#00ff00', '#0000ff', '#0000ff']);
+    expect(scene.points.map(point => point.color)).toEqual(REPUTATION_COLORS);
     expect(scene.scales['x'].ticks.map(tick => tick.label)).toEqual(['Germany', 'France']);
     if ('content' in chart.tooltip) expect(chart.tooltip.content!([scene.points[2]], tooltipContext)).toEqual({
       title: '#3 192.0.2.3:8080', rows: [
@@ -81,6 +81,16 @@ describe('Spartan dashboard chart definitions', () => {
     const scene = createChartScene(chart, {width: 600, height: 288});
     const point = scene.points.find(point => point.markId === 'reputation' && point.datum.label === 'Good')!;
     expect(point.color).toBe('#22c55e');
-    if ('format' in chart.tooltip) expect(chart.tooltip.format!(point, tooltipContext)).toBe('Good: 1.200 (75.0%)');
+    if ('format' in chart.tooltip) expect(chart.tooltip.format!(point, tooltipContext)).toBe('Good: 1.200 (75,0%)');
+  });
+
+  it('labels long inventory histories with at most eight daily ticks', () => {
+    const points = Array.from({length: 30 * 24}, (_, index) => ({
+      index, label: `hour ${index}`, axisLabel: `day ${Math.floor(index / 24)}`, count: index, gained: 1, lost: 0,
+    }));
+    const ticks = inventoryTickIndexes(points);
+    expect(ticks.length).toBeLessThanOrEqual(8);
+    expect(ticks.every(index => index % 24 === 0)).toBeTrue();
+    expect(inventoryTickIndexes(points.slice(0, 5))).toEqual([0, 1, 2, 3, 4]);
   });
 });

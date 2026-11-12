@@ -132,6 +132,18 @@ describe('TopbarComponent', () => {
     expect(TestBed.inject(Router).url).toBe('/alerts?section=history&incident=2');
   });
 
+  it('marks every unread notification as read from the panel header', async () => {
+    unread.set(new Set(['invitation-1', 'alert-2']));
+    fixture.detectChanges();
+    const panel = await openNotifications();
+    expect(panel.querySelector('.notification-panel__count')?.textContent?.trim()).toBe('2 new');
+    panel.querySelector<HTMLButtonElement>('.notification-panel__mark-read')!.click();
+    fixture.detectChanges();
+    expect(reads.markRead.calls.allArgs()).toEqual([['invitation-1'], ['alert-2']]);
+    expect(panel.querySelector('.notification-panel__mark-read')).toBeNull();
+    expect(component.notificationsState()).toBe('open');
+  });
+
   it('hides the badge when all five recent notifications are read and keeps their links', async () => {
     unread.set(new Set());
     fixture.detectChanges();
@@ -221,23 +233,36 @@ describe('TopbarComponent', () => {
     expect(request.observed).toBeFalse();
   });
 
-  it('builds a singular proxy breadcrumb for detail routes', () => {
+  it('names detail pages after their parent section until the page supplies a label', () => {
     expect(buildTopbarBreadcrumbs('/proxies/37530?sourceId=2')).toEqual([
-      {label: 'Proxy', routerLink: '/proxies'},
-      {label: '37530'},
+      {label: 'Proxies', routerLink: '/proxies'},
+      {label: 'Proxy details'},
+    ]);
+    expect(buildTopbarBreadcrumbs('/proxies/37530', '203.0.113.7:8080')).toEqual([
+      {label: 'Proxies', routerLink: '/proxies'},
+      {label: '203.0.113.7:8080'},
+    ]);
+    expect(buildTopbarBreadcrumbs('/scraper/12')).toEqual([
+      {label: 'Scrape sources', routerLink: '/scraper'},
+      {label: 'Source details'},
     ]);
   });
 
-  it('preserves every route layer and product casing', () => {
+  it('uses sidebar names and never links to group labels', () => {
     expect(buildTopbarBreadcrumbs('/plugins/geolite')).toEqual([
+      {label: 'Admin'},
       {label: 'Plugins', routerLink: '/plugins'},
       {label: 'GeoLite'},
     ]);
-
-    expect(buildTopbarBreadcrumbs('/global/plugins/abuseipdb')).toEqual([
-      {label: 'Global', routerLink: '/global'},
-      {label: 'Plugins', routerLink: '/global/plugins'},
-      {label: 'AbuseIPDB'},
+    expect(buildTopbarBreadcrumbs('/global/blacklist')).toEqual([
+      {label: 'Admin'},
+      {label: 'Global blacklist'},
     ]);
+    expect(buildTopbarBreadcrumbs('/checker/judges')).toEqual([
+      {label: 'Checker'},
+      {label: 'Judges'},
+    ]);
+    expect(buildTopbarBreadcrumbs('/notifications')).toEqual([{label: 'Releases'}]);
+    expect(buildTopbarBreadcrumbs('/scraper')).toEqual([{label: 'Scrape sources'}]);
   });
 });

@@ -1,211 +1,145 @@
+// A small panel in the shape of the app dialogs: a title header, a short status body,
+// and the actions in a footer. Colours come from the --ui-* skin tokens. The host is a
+// popover, so it joins the top layer above an open import dialog.
 :host {
-  font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 1rem;
+  border: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: inherit;
+  font-family: var(--ui-font, "Geist Variable", "Segoe UI", sans-serif);
 }
 
-.popup-overlay {
-  position: fixed;
-  z-index: 3000;
-  inset: 0;
+:host(:popover-open) {
   display: grid;
   place-items: center;
-  padding: 1rem;
-  background: rgba(2, 2, 4, 0.72);
-  backdrop-filter: blur(10px);
 }
 
-.popup-overlay--hidden {
-  display: none;
-}
-
-.popup-content {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  width: min(100%, 30rem);
-  min-height: 20rem;
+.popup-panel {
+  width: min(100%, 28rem);
   overflow: hidden;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 2.4rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 1.35rem;
-  background: rgba(9, 9, 11, 0.98);
-  color: rgba(255, 255, 255, 0.82);
-  text-align: center;
-  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.66), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ui-line-strong, rgba(255, 255, 255, 0.14));
+  border-radius: var(--ui-radius, 0.75rem);
+  background: var(--ui-panel, #171717);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  color: var(--ui-text-2, rgba(255, 255, 255, 0.8));
+  outline: none;
+}
 
-  &::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    right: -5rem;
-    bottom: -5rem;
-    width: 13rem;
-    height: 13rem;
-    border: 1px solid rgba(var(--theme-primary-300-rgb), 0.09);
-    border-radius: 50%;
-    box-shadow: 0 0 0 2rem rgba(var(--theme-primary-500-rgb), 0.02);
-    pointer-events: none;
-  }
-
-  h2,
-  p {
-    margin: 0;
-  }
+.popup-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
 
   h2 {
-    max-width: 24rem;
-    margin-top: 0.3rem;
-    color: rgba(255, 255, 255, 0.95);
-    font-size: 1.25rem;
-    font-weight: 580;
-    letter-spacing: -0.04em;
+    margin: 0;
+    color: var(--ui-text, #fff);
+    font-family: var(--ui-font-heading, inherit);
+    font-size: 15px;
+    font-weight: 600;
+  }
+}
+
+.popup-body {
+  display: grid;
+  gap: 1rem;
+  padding: 18px;
+}
+
+.popup-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.popup-status__icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: var(--ui-radius-sm, 0.5rem);
+  background: var(--ui-inset, rgba(255, 255, 255, 0.04));
+  color: var(--theme-primary-300);
+  font-size: 0.8rem;
+}
+
+.popup-panel--error .popup-status__icon {
+  color: var(--status-bad-fg, #f4a7a7);
+}
+
+.popup-status__copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+  padding-top: 0.1rem;
+
+  strong {
+    color: var(--ui-text, #fff);
+    font-size: var(--ui-fs, 0.875rem);
+    font-weight: 600;
   }
 
   p {
-    max-width: 21rem;
-    margin-top: 0.58rem;
-    color: rgba(255, 255, 255, 0.44);
-    font-size: 0.69rem;
-    line-height: 1.55;
+    min-height: 1.45em;
+    margin: 0;
+    color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+    font-size: var(--ui-fs-sm, 0.8125rem);
+    line-height: 1.45;
   }
 }
 
-.popup-content--error {
-  border-color: rgba(248, 113, 113, 0.22);
+// Each message is a new element, so it fades in when the rotation moves on.
+.popup-message {
+  animation: popup-message-in 0.4s ease-out;
 }
 
-app-star-background {
-  position: absolute;
-  z-index: -2;
-  inset: 0;
-  opacity: 0.18;
-  pointer-events: none;
-}
-
-.popup-status-icon {
-  position: relative;
-  display: grid;
-  width: 5.2rem;
-  height: 5.2rem;
-  margin-bottom: 1rem;
-  place-items: center;
-  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.16);
-  border-radius: 50%;
-  background: rgba(var(--theme-primary-500-rgb), 0.035);
-
-  &::before {
-    content: "";
-    position: absolute;
-    width: 2.8rem;
-    height: 2.8rem;
-    border: 1px solid rgba(var(--theme-primary-300-rgb), 0.24);
-    border-radius: 0.82rem;
-    background: rgba(var(--theme-primary-500-rgb), 0.09);
-  }
-
-  i {
-    position: relative;
-    z-index: 1;
-    color: var(--theme-primary-200);
-    font-size: 0.92rem;
-  }
-}
-
-.popup-content--error .popup-status-icon {
-  border-color: rgba(248, 113, 113, 0.16);
-  background: rgba(127, 29, 29, 0.04);
-
-  &::before {
-    border-color: rgba(248, 113, 113, 0.26);
-    background: rgba(127, 29, 29, 0.14);
-  }
-
-  i {
-    color: #f4a7a7;
-  }
-}
-
-.popup-eyebrow {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.58rem;
-  font-weight: 620;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-}
-
-.popup-content--success .popup-eyebrow {
-  color: rgba(var(--theme-primary-200-rgb), 0.72);
-}
-
-.popup-content--error .popup-eyebrow {
-  color: rgba(239, 156, 156, 0.7);
-}
-
-.message {
-  max-width: 22rem;
-  min-height: 2.6rem;
-  margin-top: 0.62rem;
-  color: rgba(255, 255, 255, 0.46);
-  font-size: 0.69rem;
-  line-height: 1.55;
+@keyframes popup-message-in {
+  from { opacity: 0; transform: translateY(-4px); }
 }
 
 .progress-track {
-  width: min(100%, 19rem);
-  height: 0.22rem;
-  margin-top: 1rem;
+  height: 3px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--ui-inset, rgba(255, 255, 255, 0.07));
 
   span {
     display: block;
     width: 38%;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--theme-primary-600), var(--theme-primary-300));
-    box-shadow: 0 0 1rem rgba(var(--theme-primary-500-rgb), 0.35);
+    background: var(--theme-primary-400);
     animation: import-progress 1.5s ease-in-out infinite;
   }
 }
 
-.action-buttons {
+.popup-footer {
   display: flex;
-  gap: 0.48rem;
-  margin-top: 1.25rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 12px 18px;
+  border-top: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
 }
 
-.details-button,
-.close-button {
+.button {
   display: inline-flex;
-  min-height: 2.4rem;
   align-items: center;
   justify-content: center;
-  padding: 0.58rem 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 0.68rem;
-  background: rgba(255, 255, 255, 0.035);
-  color: rgba(255, 255, 255, 0.62);
-  font: inherit;
-  font-size: 0.65rem;
-  font-weight: 590;
+  gap: 0.4rem;
+  white-space: nowrap;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 
-  &:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.065);
-    color: rgba(255, 255, 255, 0.88);
-    transform: translateY(-1px);
+  &:focus-visible {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: 2px;
   }
-}
-
-.details-button {
-  border-color: rgba(var(--theme-primary-300-rgb), 0.28);
-  background: rgba(var(--theme-primary-500-rgb), 0.09);
-  color: var(--theme-primary-200);
 }
 
 @keyframes import-progress {
@@ -215,20 +149,8 @@ app-star-background {
 }
 
 @media (max-width: 480px) {
-  .popup-content {
-    min-height: 18rem;
-    padding: 1.7rem 1.2rem;
-  }
-
-  .action-buttons {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .details-button,
-  .close-button {
-    width: 100%;
-  }
+  .popup-footer { flex-direction: column-reverse; }
+  .popup-footer .button { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -237,8 +159,5 @@ app-star-background {
     animation: none;
   }
 
-  .details-button,
-  .close-button {
-    transition: none;
-  }
+  .popup-message { animation: none; }
 }

@@ -23,6 +23,7 @@ import {ProxyTagService} from '../../services/proxy-tag.service';
     SourceAutoTagsComponent,
 ],
   templateUrl: './add-scrape-source.component.html',
+  styleUrl: './add-scrape-source.component.scss',
 })
 export class AddScrapeSourceComponent {
   private static readonly maxUploadFileBytes = 10 * 1024 * 1024;

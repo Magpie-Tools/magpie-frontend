@@ -19,7 +19,7 @@
   isolation: isolate;
   width: min(100%, 1440px);
   margin: 0 auto;
-  padding: clamp(1rem, 2.5vw, 2.25rem);
+  padding: clamp(1rem, 2vw, 1.25rem);
 }
 
 h1,
@@ -57,7 +57,7 @@ p { margin: 0; }
   p {
     margin-top: 0.28rem;
     color: var(--card-muted);
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
   }
 }
 
@@ -89,28 +89,6 @@ p { margin: 0; }
   gap: 0.9rem;
 }
 
-// Let the browser play the entrance independently of requests and JS animation ticks.
-.inventory-context,
-.inventory-grid--combined,
-.inventory-grid:not(.inventory-grid--combined) .inventory-toolbar,
-.inventory-grid:not(.inventory-grid--combined) .inventory-card {
-  animation: inventory-enter 650ms cubic-bezier(0.165, 0.84, 0.44, 1) backwards;
-  animation-delay: var(--inventory-enter-delay, 0ms);
-}
-
-.inventory-context + .inventory-grid {
-  --inventory-enter-delay: 55ms;
-}
-
-.inventory-grid:not(.inventory-grid--combined) .inventory-card {
-  animation-delay: calc(var(--inventory-enter-delay, 0ms) + 55ms);
-}
-
-@keyframes inventory-enter {
-  from { transform: translateY(20px) scale(0.99); }
-  to { transform: none; }
-}
-
 .inventory-toolbar,
 .inventory-card,
 .inventory-grid--combined {
@@ -131,7 +109,7 @@ p { margin: 0; }
 }
 
 .inventory-toolbar,
-.inventory-card { padding: clamp(1.2rem, 2vw, 1.6rem); }
+.inventory-card { padding: clamp(1rem, 1.6vw, 1.25rem); }
 
 .inventory-grid--combined {
   gap: 0;
@@ -144,7 +122,10 @@ p { margin: 0; }
     box-shadow: none;
   }
 
+  .inventory-toolbar { padding-bottom: 0.5rem; }
+
   .inventory-card {
+    padding-top: 0.5rem;
     border-radius: 0 0 1.35rem 1.35rem;
   }
 }
@@ -187,7 +168,7 @@ p { margin: 0; }
     max-width: 38rem;
     margin-top: 0.32rem;
     color: var(--card-muted);
-    font-size: 0.75rem;
+    font-size: 0.84rem;
     line-height: 1.5;
   }
 }
@@ -221,7 +202,7 @@ p { margin: 0; }
     background: rgba(255, 255, 255, 0.035);
     color: rgba(255, 255, 255, 0.68);
     font: inherit;
-    font-size: 0.67rem;
+    font-size: 0.75rem;
     font-weight: 580;
     white-space: nowrap;
     cursor: pointer;
@@ -263,7 +244,7 @@ p { margin: 0; }
     background: rgba(255, 255, 255, 0.035);
     color: rgba(255, 255, 255, 0.68);
     box-shadow: none;
-    font-size: 0.67rem;
+    font-size: 0.75rem;
     font-weight: 580;
     transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 
@@ -303,7 +284,7 @@ p { margin: 0; }
   }
 
   .toolbar-action--delete [hlmBtn] {
-    border-color: rgba(248, 113, 113, 0.25);
+    border-color: color-mix(in srgb, var(--status-bad) 25%, transparent);
     background: rgba(127, 29, 29, 0.12);
     color: rgba(239, 174, 174, 0.78);
 
@@ -311,7 +292,7 @@ p { margin: 0; }
 
     &:hover:not(:disabled),
     &:focus-visible {
-      border-color: rgba(248, 113, 113, 0.4);
+      border-color: color-mix(in srgb, var(--status-bad) 40%, transparent);
       background: rgba(127, 29, 29, 0.22);
       color: #f5b5b5;
 
@@ -356,10 +337,10 @@ p { margin: 0; }
   background: transparent;
   color: rgba(255, 255, 255, 0.86);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
 
   &:focus { outline: none; }
-  &::placeholder { color: rgba(255, 255, 255, 0.3); }
+  &::placeholder { color: rgba(255, 255, 255, 0.62); }
   &::-webkit-search-cancel-button { display: none; }
 }
 
@@ -373,7 +354,7 @@ p { margin: 0; }
   border: 0;
   border-radius: 0.55rem;
   background: transparent;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.62);
   cursor: pointer;
 
   &:hover,
@@ -387,6 +368,51 @@ p { margin: 0; }
   overflow: hidden;
 }
 
+.inventory-summary {
+  display: flex;
+  min-height: 2.25rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  margin-top: 0.85rem;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.8125rem;
+
+  strong {
+    color: var(--theme-primary-200);
+    font-weight: 620;
+  }
+}
+
+.inventory-summary__count {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.inventory-summary--selected {
+  padding: 0.35rem 0.4rem 0.35rem 0.85rem;
+  border: 1px solid rgba(var(--theme-primary-300-rgb), 0.3);
+  border-radius: 0.75rem;
+  background: rgba(var(--theme-primary-500-rgb), 0.1);
+}
+
+.inventory-summary__clear {
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.6rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.86);
+  font: inherit;
+  font-weight: 560;
+  cursor: pointer;
+
+  &:hover { background: rgba(255, 255, 255, 0.06); }
+  &:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+}
+
 .inventory-state {
   display: inline-flex;
   flex: 0 0 auto;
@@ -395,8 +421,8 @@ p { margin: 0; }
   padding: 0.4rem 0.62rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  color: rgba(255, 255, 255, 0.52);
-  font-size: 0.63rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.75rem;
   white-space: nowrap;
 
   > span {
@@ -437,8 +463,8 @@ p { margin: 0; }
   p {
     max-width: 30rem;
     margin-top: 0.42rem;
-    color: rgba(255, 255, 255, 0.42);
-    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 }
@@ -488,21 +514,27 @@ p { margin: 0; }
 }
 
 @container inventory-page (max-width: 520px) {
-  .inventory-stage { border-radius: 1.2rem; }
+  /* Phones drop the outer frame and its padding so cards get the width (≈340px at 390px). */
+  .inventory-stage { padding: 0.25rem 0 0; border-radius: 0; }
+  .inventory-grid--combined { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .inventory-grid--combined .inventory-toolbar,
+  .inventory-grid--combined .inventory-card { padding-inline: 0; }
   .inventory-context__copy { align-items: flex-start; }
   .context-icon { width: 2.55rem; height: 2.55rem; }
 
+  /* Compact buttons wrap onto a second row so every action stays visible; pages order Add first. */
   .toolbar-actions {
-    display: grid;
+    display: flex;
     width: 100%;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.5rem;
   }
 
   ::ng-deep {
-    .toolbar-actions > *,
+    .toolbar-actions > * { flex: 0 0 auto; }
     .tool-button,
-    .toolbar-actions > div > .tool-button,
-    .toolbar-action [hlmBtn] { width: 100%; }
+    .toolbar-action [hlmBtn] { width: auto; white-space: nowrap; }
   }
 
   .empty-inventory__actions {
@@ -514,11 +546,6 @@ p { margin: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .inventory-context,
-  .inventory-grid--combined,
-  .inventory-grid:not(.inventory-grid--combined) .inventory-toolbar,
-  .inventory-grid:not(.inventory-grid--combined) .inventory-card { animation: none; }
-
   ::ng-deep .tool-button,
   .button { transition: none; }
 }

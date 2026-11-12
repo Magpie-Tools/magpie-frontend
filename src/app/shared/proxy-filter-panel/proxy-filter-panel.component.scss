@@ -25,7 +25,7 @@
 .filter-section {
   margin-top: 0.9rem;
   padding-top: 0.85rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  border-top: 1px solid color-mix(in srgb, var(--ink-muted) 20%, transparent);
 }
 
 .filter-section--top {
@@ -42,14 +42,14 @@
 }
 
 .filter-section__caption {
-  font-size: 0.74rem;
-  color: rgba(148, 163, 184, 0.86);
+  font-size: 0.84rem;
+  color: color-mix(in srgb, var(--ink-muted) 86%, transparent);
   margin-bottom: 0.75rem;
 }
 
 .filter-health {
   margin-top: 0.15rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  border-top: 1px solid color-mix(in srgb, var(--ink-muted) 20%, transparent);
 }
 
 .filter-health__content {
@@ -85,10 +85,8 @@
   border: 0;
   background: transparent;
   color: rgba(226, 232, 240, 0.9);
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   cursor: pointer;
   transition: color 160ms ease-out, opacity 160ms ease-out;
 }
@@ -109,7 +107,7 @@
 }
 
 .filter-health__toggle-count {
-  color: rgba(28, 187, 87, 0.92);
+  color: color-mix(in srgb, var(--status-good) 92%, transparent);
 }
 
 .filter-health__toggle-icon {
@@ -123,12 +121,10 @@
 
 .filter-label {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: rgba(226, 232, 240, 0.9);
   margin-bottom: 0.35rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .filter-section .grid {
@@ -150,7 +146,7 @@
   }
 
   .filter-panel__body-main > .filter-column--right {
-    border-left: 1px solid rgba(148, 163, 184, 0.2);
+    border-left: 1px solid color-mix(in srgb, var(--ink-muted) 20%, transparent);
     padding-left: 1rem;
   }
 
@@ -178,7 +174,7 @@
   [hlmInput],
   [data-slot="select-trigger"] {
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(148, 163, 184, 0.25);
+    border: 1px solid color-mix(in srgb, var(--ink-muted) 25%, transparent);
     color: #e2e8f0;
     border-radius: 0.5rem;
     min-height: 2.25rem;
@@ -187,8 +183,8 @@
   [hlmInput]:focus,
   [data-slot="select-trigger"]:focus-within,
   input[type="number"]:focus-within {
-    border-color: #1cbb57;
-    box-shadow: 0 0 0 2px rgba(28, 187, 87, 0.18);
+    border-color: var(--status-good);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-good) 18%, transparent);
   }
 
   [data-slot="select-trigger"] > span,

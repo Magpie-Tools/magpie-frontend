@@ -1,6 +1,7 @@
 import {loadProxyFilterOptions} from '../../../shared/proxy-filter-options';
 
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, inject, Input, LOCALE_ID, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {formatNumber} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CheckboxComponent} from '../../../checkbox/checkbox.component';
 import {SettingsService} from '../../../services/settings.service';
@@ -40,12 +41,15 @@ type DeleteFormDefaults = {
 })
 export class DeleteProxiesComponent implements OnChanges {
   @Input() selectedProxies: ProxyInfo[] = [];
+  /** Total records in the workspace, not just the loaded page. */
+  @Input() totalCount: number | null = null;
   @Input() allProxies: ProxyInfo[] = [];
   @Output() proxiesDeleted = new EventEmitter<void>();
 
   dialogVisible = false;
+  private readonly locale = inject(LOCALE_ID);
   isDeleting = false;
-  deleteOption: 'all' | 'selected' = 'all';
+  deleteOption: 'all' | 'selected' | null = null;
   deleteForm: FormGroup;
 
   readonly proxyStatusOptions = PROXY_STATUS_OPTIONS;
@@ -109,7 +113,7 @@ export class DeleteProxiesComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedProxies'] && this.deleteOption === 'selected' && !this.canDeleteSelected()) {
-      this.deleteOption = 'all';
+      this.deleteOption = null;
     }
   }
 
@@ -121,8 +125,35 @@ export class DeleteProxiesComponent implements OnChanges {
 
     this.syncDefaultsWithUserSettings();
     this.ensureFilterOptionsLoaded();
-    this.deleteOption = this.canDeleteSelected() ? 'selected' : 'all';
+    // Deleting everything must be an explicit choice, so nothing is preselected without a selection.
+    this.deleteOption = this.canDeleteSelected() ? 'selected' : null;
     this.dialogVisible = true;
+  }
+
+  get filtersEnabled(): boolean {
+    return Boolean(this.deleteForm.get('filter')?.value);
+  }
+
+  get allScopeTitle(): string {
+    const total = this.totalCount;
+    if (this.filtersEnabled) return 'All matching proxies';
+    return total !== null && total >= 0 ? `All proxies (${formatNumber(total, this.locale)})` : 'All proxies';
+  }
+
+  get confirmLabel(): string {
+    if (this.deleteOption !== 'all') return '';
+    return this.filtersEnabled
+      ? 'I understand that every proxy matching these filters will be permanently deleted.'
+      : 'I understand that every proxy in this workspace will be permanently deleted.';
+  }
+
+  get actionLabel(): string {
+    if (this.deleteOption === 'selected') {
+      const count = this.selectedProxies.length;
+      return `Delete ${formatNumber(count, this.locale)} selected ${count === 1 ? 'proxy' : 'proxies'}`;
+    }
+    if (this.deleteOption === 'all') return this.filtersEnabled ? 'Delete matching proxies' : 'Delete all proxies';
+    return 'Choose what to delete';
   }
 
   closeDialog(): void {
@@ -142,6 +173,9 @@ export class DeleteProxiesComponent implements OnChanges {
   }
 
   submitDelete(): void {
+    if (!this.deleteOption) {
+      return;
+    }
     if (this.deleteOption === 'selected' && !this.canDeleteSelected()) {
       this.notification.showError('No proxies selected for deletion.');
       return;
@@ -180,7 +214,7 @@ export class DeleteProxiesComponent implements OnChanges {
 
   private resetFormState(): void {
     this.deleteForm.reset(this.defaultFormValues);
-    this.deleteOption = 'all';
+    this.deleteOption = null;
     this.isDeleting = false;
   }
 

@@ -4,7 +4,7 @@ import {DialogComponent} from '../../shared/ui/dialog.component';
 import {ChartComponent} from '../../shared/ui/chart.component';
 import {buildProxyResponseChart} from './proxy-response-chart';
 import {CountryHoverCardComponent} from '../../shared/ui/country-hover-card.component';
-import {Component, OnDestroy, OnInit, computed, signal} from '@angular/core';
+import {Component, LOCALE_ID, OnDestroy, OnInit, computed, effect, inject, signal} from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
@@ -17,13 +17,13 @@ import {Subscription} from 'rxjs';
 import {ClipboardService} from '../../services/clipboard.service';
 import {NotificationService} from '../../services/notification-service.service';
 import {LoadingComponent} from '../../ui-elements/loading/loading.component';
-import {formatHostPort, isIPAddress} from '../../shared/proxy-address';
+import {addressBreakParts, formatHostPort, isIPAddress} from '../../shared/proxy-address';
 import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagSelectorComponent} from '../../shared/proxy-tag-selector/proxy-tag-selector.component';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
-import {RevealGroupDirective} from '../../shared/reveal-group.directive';
+import {BreadcrumbService} from '../../services/breadcrumb.service';
 
 type CopyField = 'ip' | 'port' | 'address' | 'username' | 'password' | 'combined' | 'credentialAddress';
 
@@ -51,22 +51,22 @@ interface ReputationSignalStructuredItem {
   imports: [HlmTooltip, HlmTableImports, DialogComponent, ChartComponent, CountryHoverCardComponent,
     CommonModule,
     RouterLink,
-
     LoadingComponent,
     DatePipe,
     NgClass,
     ProxyTagSelectorComponent,
     ProxyTagManagerComponent,
-    RevealGroupDirective,
   ],
   templateUrl: './proxy-detail.component.html',
-  styleUrl: './proxy-detail.component.scss'
+  styleUrls: ['./proxy-detail-reputation.component.scss', './proxy-detail.component.scss']
 })
 export class ProxyDetailComponent implements OnInit, OnDestroy {
   proxyId = signal<number | undefined>(undefined);
   detail = signal<ProxyDetail | null>(null);
   statistics = signal<ProxyStatistic[]>([]);
-  readonly responseTimeChart = computed(() => buildProxyResponseChart(this.statistics(), this.detail()?.latest_statistic));
+  private readonly locale = inject(LOCALE_ID);
+  readonly responseTimeChart = computed(() => buildProxyResponseChart(this.statistics(), this.detail()?.latest_statistic, this.locale));
+  private readonly breadcrumbs = inject(BreadcrumbService);
 
   isLoadingDetail = signal(true);
   isLoadingStatistics = signal(true);
@@ -104,7 +104,26 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     readonly tagService: ProxyTagService,
     readonly workspaces: WorkspaceService,
-  ) {}
+  ) {
+    effect(() => {
+      const proxy = this.detail();
+      this.breadcrumbs.setDetailLabel(proxy ? formatHostPort(proxy.ip, proxy.port) : null);
+    });
+  }
+
+  /** Host and port as shown in the header, with IPv6 hosts in brackets. */
+  proxyAddress(proxy: ProxyDetail): string {
+    return formatHostPort(proxy.ip, proxy.port);
+  }
+
+  proxyHostParts(proxy: ProxyDetail): string[] {
+    return addressBreakParts(this.proxyHost(proxy));
+  }
+
+  proxyHost(proxy: ProxyDetail): string {
+    const address = this.proxyAddress(proxy);
+    return address.slice(0, address.length - String(proxy.port).length - 1);
+  }
 
   ngOnInit(): void {
     this.tagService.load().subscribe({
@@ -280,7 +299,7 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
         } : detail);
         this.workspaces.refresh().subscribe();
         this.notification.showSuccess(
-          state === 'active' ? 'Proxy route activated' : state === 'paused' ? 'Proxy route paused' : 'Proxy route archived',
+          state === 'active' ? 'Proxy activated' : state === 'paused' ? 'Proxy paused' : 'Proxy archived',
         );
       },
       error: error => {

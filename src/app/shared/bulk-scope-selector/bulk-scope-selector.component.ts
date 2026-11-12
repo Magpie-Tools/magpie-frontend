@@ -11,7 +11,8 @@ export type BulkActionScope = 'all' | 'selected';
   styleUrl: './bulk-scope-selector.component.scss',
 })
 export class BulkScopeSelectorComponent {
-  @Input() scope: BulkActionScope = 'all';
+  /** `null` means the user has not chosen a scope yet. */
+  @Input() scope: BulkActionScope | null = 'all';
   @Input() radioName = 'bulkActionScope';
   @Input() allInputId = 'bulkActionAll';
   @Input() selectedInputId = 'bulkActionSelected';
@@ -20,7 +21,7 @@ export class BulkScopeSelectorComponent {
   @Input() selectedTitle = 'Selected';
   @Input() selectedDescription = '';
   @Input() selectedDisabled = false;
-  @Input() accentColor = '#1cbb57';
+  @Input() accentColor = 'var(--status-good)';
 
   @Output() scopeChange = new EventEmitter<BulkActionScope>();
 

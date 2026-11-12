@@ -77,46 +77,49 @@
   white-space: nowrap;
 }
 
+// Each key wears its reputation colour, matching the chart marks.
 .shape-dot {
   display: inline-block;
   width: 0.55rem;
   height: 0.55rem;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--shape-color);
 
-  &--good { border-radius: 50%; }
+  &--good {
+    --shape-color: var(--reputation-good);
+    border-radius: 50%;
+  }
 
   &--neutral {
+    --shape-color: var(--reputation-neutral);
     width: 0;
     height: 0;
     border-right: 0.31rem solid transparent;
-    border-bottom: 0.56rem solid rgba(255, 255, 255, 0.72);
+    border-bottom: 0.56rem solid var(--shape-color);
     border-left: 0.31rem solid transparent;
     background: transparent;
   }
 
-  &--bad { transform: rotate(45deg); }
+  &--bad {
+    --shape-color: var(--reputation-poor);
+    transform: rotate(45deg);
+  }
 
   &--unknown {
-    border: 1px solid rgba(255, 255, 255, 0.72);
+    --shape-color: var(--reputation-unknown);
+    border: 1px solid var(--shape-color);
     background: transparent;
   }
 }
 
 .country-key {
   display: grid;
-  grid-template-columns: 0.58rem minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.5rem;
   min-height: 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.61rem;
-}
-
-.country-key__swatch {
-  width: 0.52rem;
-  height: 0.52rem;
-  border-radius: 50%;
 }
 
 .country-key__name {

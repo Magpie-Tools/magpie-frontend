@@ -132,12 +132,6 @@ describe('ScrapeSourceListComponent', () => {
     const grid = element.querySelector<HTMLElement>('.inventory-grid')!;
     const toolbar = element.querySelector<HTMLElement>('.inventory-toolbar')!;
     const search = element.querySelector<HTMLInputElement>('input[aria-label="Search scrape sources"]')!;
-    const entrance = grid.getAnimations()[0];
-    expect(entrance).toBeInstanceOf(CSSAnimation);
-    expect(element.querySelector('.inventory-context')!.getAnimations()[0]).toBeInstanceOf(CSSAnimation);
-    entrance.pause();
-    entrance.currentTime = 350;
-
     expect(request.observed).toBeTrue();
     expect(component.loading()).toBeTrue();
     expect(component.hasLoaded()).toBeFalse();
@@ -145,7 +139,6 @@ describe('ScrapeSourceListComponent', () => {
     expect(getComputedStyle(toolbar).visibility).toBe('visible');
     expect(getComputedStyle(toolbar).opacity).toBe('1');
     expect(getComputedStyle(grid).opacity).toBe('1');
-    expect(getComputedStyle(grid).transform).not.toBe('none');
     expect(search.disabled).toBeFalse();
     expect(toolbar.textContent).toContain('Refresh');
     expect(toolbar.textContent).toContain('Filters');
@@ -171,8 +164,6 @@ describe('ScrapeSourceListComponent', () => {
     expect(element.querySelector('tbody')!.textContent).toContain('source.example');
     expect(element.querySelector('.data-table')!.getAttribute('aria-busy')).toBe('false');
     expect(getComputedStyle(grid).opacity).toBe('1');
-    expect(grid.getAnimations()).toEqual([entrance]);
-    expect(entrance.currentTime).toBe(350);
   });
 
   it('persists table row count changes', () => {

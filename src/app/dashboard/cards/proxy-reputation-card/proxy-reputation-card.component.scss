@@ -42,8 +42,8 @@
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.1rem 0.1rem 0.55rem;
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 0.52rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.6875rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -75,19 +75,19 @@
 
 .legend-label {
   color: rgba(255, 255, 255, 0.72);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 570;
 }
 
 .legend-value {
   margin-top: 0.14rem;
-  color: rgba(255, 255, 255, 0.32);
-  font-size: 0.54rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.6875rem;
 }
 
 .reputation-card__legend strong {
   color: rgba(255, 255, 255, 0.68);
-  font-size: 0.63rem;
+  font-size: 0.75rem;
   font-weight: 590;
   font-variant-numeric: tabular-nums;
 }

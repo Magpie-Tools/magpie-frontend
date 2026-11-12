@@ -2,15 +2,12 @@
   [visible]="dialogVisible()"
   (visibleChange)="dialogVisible.set($event)"
   dialogClass="proxy-add-dialog"
-  triggerLabel="Add Proxies"
+  width="38rem"
+  triggerLabel="Add proxies"
   triggerIcon="icon icon-plus"
   headingTitle="Add proxies"
-  headingIcon="icon icon-plus"
-  [headingTooltip]="'Hostname: gateway.provider.example:8080\nIPv4: 192.0.2.1:8080\nIPv6: [2001:db8::1]:8080\nAuth: user:pass@host:port\nAuth: host:port:user:pass'"
-  footerNote="Imports are queued for checking after validation."
-  actionLabel="Add proxies to queue"
-  actionIcon="icon icon-arrow-right"
-  actionIconPos="right"
+  actionLabel="Add proxies"
+  actionIcon="icon icon-check"
   [actionDisabled]="!file() && !proxyTextarea() && !clipboardProxies()"
   (openRequested)="openDialog()"
   (cancelRequested)="closeDialog()"
@@ -18,12 +15,13 @@
   (hidden)="onDialogHide()"
 >
   <app-import-dialog-content
-    inputTitle="Proxy input"
-    inputDescription="Paste routes, choose a text file, or enter one route per line."
+    inputTitle="Proxies"
+    inputHint="One proxy per line as host:port, user:pass@host:port, or host:port:user:pass. Put IPv6 addresses in brackets. Invalid lines are skipped and reported after the import."
+    optionsTitle="Tags"
+    [optionsOptional]="true"
     [textareaValue]="proxyTextarea()"
     [textareaPlaceholder]="'gateway.provider.example:8080\n192.0.2.1:8080\n[2001:db8::1]:8080\nuser:pass@host:port'"
-    textareaLabel="Proxy routes"
-    lineHint="One route per line"
+    textareaLabel="Proxies"
     [clipboardPresent]="!!clipboardProxies()"
     [filePresent]="file() !== undefined"
     (textareaValueChange)="onTextareaChange($event)"
@@ -32,23 +30,26 @@
     (fileSelected)="onFileSelected($event)"
     (fileClearRequested)="onFileClear()"
   >
-    <section
-      import-prefix
-      class="import-tags"
-      aria-labelledby="import-tags-title"
-    >
-      <div class="import-tags__copy">
-        <span class="section-icon"
-          ><i class="icon icon-tags" aria-hidden="true"></i
-        ></span>
-        <div>
-          <h3 id="import-tags-title">Tags</h3>
-          <p>
-            Selected tags are added without replacing tags on routes you already
-            own.
-          </p>
-        </div>
+    <dl import-summary>
+      <div>
+        <dt>Entries</dt>
+        <dd>{{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}</dd>
       </div>
+      <div>
+        <dt>Unique</dt>
+        <dd>{{ getUniqueProxiesCount() }}</dd>
+      </div>
+      <div>
+        <dt>With auth</dt>
+        <dd>{{ getProxiesWithAuthCount() }}</dd>
+      </div>
+      <div>
+        <dt>Without auth</dt>
+        <dd>{{ getProxiesWithoutAuthCount() }}</dd>
+      </div>
+    </dl>
+
+    <div import-options class="import-tags">
       <app-proxy-tag-selector
         [availableTags]="tagService.tags()"
         [selectedTags]="selectedTags()"
@@ -57,43 +58,15 @@
         (selectionChange)="onTagSelectionChange($event)"
         (manageTags)="importTagManager.open()"
       ></app-proxy-tag-selector>
+      <p class="field-hint">
+        Added to the imported proxies. Tags on proxies you already own are kept.
+      </p>
       <app-proxy-tag-manager
         #importTagManager
         [showTrigger]="false"
         (tagsChanged)="pruneSelectedTags()"
       ></app-proxy-tag-manager>
-    </section>
-
-    <ng-container import-summary>
-      <div class="import-summary__visual">
-        <span><i class="icon icon-server" aria-hidden="true"></i></span>
-      </div>
-      @if (getProxiesWithoutAuthCount() + getProxiesWithAuthCount() > 0) {
-        <div class="import-summary__count">
-          {{ getProxiesWithoutAuthCount() + getProxiesWithAuthCount() }}
-        </div>
-        <div class="import-summary__label">Routes ready</div>
-        <dl class="import-summary__stats">
-          <div>
-            <dt>Unique</dt>
-            <dd>{{ getUniqueProxiesCount() }}</dd>
-          </div>
-          <div>
-            <dt>With authentication</dt>
-            <dd>{{ getProxiesWithAuthCount() }}</dd>
-          </div>
-          <div>
-            <dt>Without authentication</dt>
-            <dd>{{ getProxiesWithoutAuthCount() }}</dd>
-          </div>
-        </dl>
-      } @else {
-        <strong>No routes yet</strong>
-        <p>
-          Your import summary will appear here as soon as you add proxy data.
-        </p>
-      }
-    </ng-container>
+    </div>
   </app-import-dialog-content>
 </app-bulk-action-dialog>
 
@@ -104,7 +77,6 @@
     [item]="'proxies'"
     [showDetailsButton]="hasUploadDetails()"
     [autoCloseOnSuccess]="!hasUploadDetails()"
-    [hideOverlay]="detailsVisible()"
     (closed)="onPopupClose()"
     (detailsRequested)="openDetails()"
   ></app-procesing-popup>
@@ -113,74 +85,55 @@
 <app-dialog
   [visible]="detailsVisible()"
   (visibleChange)="detailsVisible.set($event)"
-  [dismissableMask]="true"
   styleClass="proxy-upload-details-dialog"
-  (onShow)="animateDialog('proxy-upload-details-dialog')"
   [panelStyle]="{ width: '34rem' }"
 >
-  <ng-template #dialogHeader>
-    <div class="proxy-dialog-heading">
-      <span class="proxy-dialog-heading__icon"
-        ><i class="icon icon-chart-no-axes-column" aria-hidden="true"></i
-      ></span>
-      <div class="proxy-dialog-heading__copy">
-        <span>Import report</span>
-        <strong>Upload details</strong>
-      </div>
-    </div>
-  </ng-template>
+  <ng-template #dialogHeader>Upload details</ng-template>
 
-  <div class="proxy-dialog-body upload-details">
-    @if (uploadDetails()) {
-      <div class="upload-details__summary">
-        <span>{{ addedProxyCount() }}</span>
+  <div class="upload-details">
+    @if (uploadDetails(); as details) {
+      <section class="upload-details__summary">
+        <span class="upload-details__count">{{ addedProxyCount() }}</span>
         <div>
-          <strong>Routes added</strong
-          ><small
-            >Processed in
-            {{ formatDuration(uploadDetails()?.processingMs) }}</small
-          >
+          <strong>{{ addedProxyCount() === 1 ? 'Proxy' : 'Proxies' }} added</strong>
+          <small>Processed in {{ formatDuration(details.processingMs) }}</small>
         </div>
-      </div>
+      </section>
       <dl class="upload-details__grid">
         <div>
           <dt>Total entries</dt>
-          <dd>{{ uploadDetails()?.submittedCount }}</dd>
+          <dd>{{ details.submittedCount }}</dd>
         </div>
         <div>
           <dt>Parsed valid</dt>
-          <dd>{{ uploadDetails()?.parsedCount }}</dd>
+          <dd>{{ details.parsedCount }}</dd>
         </div>
         <div>
           <dt>Blacklisted</dt>
-          <dd>{{ uploadDetails()?.blacklistedCount }}</dd>
+          <dd>{{ details.blacklistedCount }}</dd>
         </div>
         <div>
           <dt>Invalid address</dt>
-          <dd>
-            {{
-              uploadDetails()?.invalidAddressCount ??
-                uploadDetails()?.invalidIpCount
-            }}
-          </dd>
+          <dd>{{ details.invalidAddressCount ?? details.invalidIpCount }}</dd>
         </div>
         <div>
           <dt>Invalid port</dt>
-          <dd>{{ uploadDetails()?.invalidPortCount }}</dd>
+          <dd>{{ details.invalidPortCount }}</dd>
         </div>
         <div>
           <dt>Invalid format</dt>
-          <dd>{{ uploadDetails()?.invalidFormatCount }}</dd>
+          <dd>{{ details.invalidFormatCount }}</dd>
         </div>
       </dl>
-      <p class="upload-details__note">
-        <i class="icon icon-info" aria-hidden="true"></i> Blank lines and
-        whitespace are excluded from these counts.
-      </p>
+      <p class="field-hint">Blank lines and whitespace are excluded from these counts.</p>
     } @else {
-      <div class="upload-details__empty">
-        No details are available for this upload.
-      </div>
+      <p class="field-hint upload-details__empty">No details are available for this upload.</p>
     }
   </div>
+
+  <ng-template #dialogFooter>
+    <div class="upload-details__actions">
+      <button type="button" class="button button--primary" (click)="detailsVisible.set(false)">Close</button>
+    </div>
+  </ng-template>
 </app-dialog>

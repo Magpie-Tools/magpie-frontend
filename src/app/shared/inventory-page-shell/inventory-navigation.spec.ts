@@ -1,9 +1,8 @@
 import {provideHttpClient, withFetch} from '@angular/common/http';
-import {ApplicationRef, provideZonelessChangeDetection, signal} from '@angular/core';
+import {provideZonelessChangeDetection, signal} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NavigationEnd, provideRouter, Router} from '@angular/router';
 import {filter, firstValueFrom, of, take} from 'rxjs';
-import {gsap} from 'gsap';
 import {AppComponent} from '../../app.component';
 import {DashboardComponent} from '../../dashboard/dashboard.component';
 import {ProxiesComponent} from '../../proxies/proxies.component';
@@ -83,13 +82,12 @@ describe('Inventory sidebar navigation', () => {
 
   afterEach(() => {
     fixture.destroy();
-    gsap.ticker.wake();
     UserService.setLoggedIn(false);
     UserService.setRole('user');
   });
 
   for (const route of ['proxies', 'scraper']) {
-    it(`animates ${route} immediately after a sidebar click while its table request remains pending`, async () => {
+    it(`shows ${route} in place immediately after a sidebar click while its table request remains pending`, async () => {
       const navigation = firstValueFrom(TestBed.inject(Router).events.pipe(
         filter(event => event instanceof NavigationEnd), take(1),
       ));
@@ -104,13 +102,12 @@ describe('Inventory sidebar navigation', () => {
       const heading = element.querySelector<HTMLElement>('.inventory-context')!;
       const toolbar = element.querySelector<HTMLElement>('.inventory-toolbar')!;
       const grid = element.querySelector<HTMLElement>('.inventory-grid')!;
-      const entrance = grid.getAnimations()[0];
-      const headingEntrance = heading.getAnimations()[0];
-      expect(entrance).toBeInstanceOf(CSSAnimation);
-      expect(headingEntrance).toBeInstanceOf(CSSAnimation);
-      expect(getComputedStyle(heading).transform).not.toBe('none');
-      expect(getComputedStyle(grid).transform).not.toBe('none');
-      expect(heading.querySelector('h1')!.textContent).toContain(route === 'proxies' ? 'Managed proxies' : 'Scrape sources');
+      // The page appears in place, without an entrance animation.
+      for (const target of [heading, grid]) {
+        expect(target.getAnimations()).toEqual([]);
+        expect(getComputedStyle(target).transform).toBe('none');
+      }
+      expect(heading.querySelector('h1')!.textContent).toContain(route === 'proxies' ? 'Proxies' : 'Scrape sources');
       for (const target of [heading, toolbar, grid]) {
         expect(getComputedStyle(target).opacity).toBe('1');
         expect(getComputedStyle(target).visibility).toBe('visible');
@@ -122,27 +119,6 @@ describe('Inventory sidebar navigation', () => {
       expect(element.querySelector(route === 'proxies' ? 'app-add-proxies' : 'app-add-scrape-source')).not.toBeNull();
 
       expect(pendingList!.path).toContain(route === 'proxies' ? '/getProxyPage/' : '/getScrapingSourcesPage/');
-      let applicationStable = true;
-      const stability = TestBed.inject(ApplicationRef).isStable.subscribe(stable => applicationStable = stable);
-      // Even a stopped JS animation ticker must not freeze this page's entrance.
-      gsap.ticker.sleep();
-      const initialY = new DOMMatrixReadOnly(getComputedStyle(grid).transform).m42;
-      await new Promise<void>(resolve => setTimeout(resolve, 200));
-      const intermediateY = new DOMMatrixReadOnly(getComputedStyle(grid).transform).m42;
-      expect(intermediateY).toBeGreaterThan(0);
-      expect(intermediateY).toBeLessThan(initialY);
-      expect(entrance.playState).toBe('running');
-      expect(pendingList!.responded).toBeFalse();
-      expect(applicationStable).toBeFalse();
-
-      // Observe natural completion without advancing animation time or responding to HTTP.
-      await Promise.all([entrance.finished, headingEntrance.finished]);
-      stability.unsubscribe();
-      expect(getComputedStyle(heading).transform).toBe('none');
-      expect(getComputedStyle(grid).transform).toBe('none');
-      expect(getComputedStyle(heading).opacity).toBe('1');
-      expect(getComputedStyle(grid).opacity).toBe('1');
-      expect(element.querySelector('.data-table')!.getAttribute('aria-busy')).toBe('true');
       expect(pendingList!.responded).toBeFalse();
       pendingList!.respond(route === 'proxies' ? {proxies: [], total: 0} : []);
       await fixture.whenStable();

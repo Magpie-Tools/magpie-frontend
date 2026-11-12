@@ -2,15 +2,12 @@
   [visible]="dialogVisible()"
   (visibleChange)="dialogVisible.set($event)"
   dialogClass="scrape-source-add-dialog"
-  triggerLabel="Add Sources"
+  width="38rem"
+  triggerLabel="Add sources"
   triggerIcon="icon icon-plus"
   headingTitle="Add scrape sources"
-  headingIcon="icon icon-plus"
-  headingTooltip="A scrape source is a webpage that publishes proxy data. Add one URL per line, paste from your clipboard, or import a text file."
-  footerNote="Sources join the scraper queue after validation."
-  actionLabel="Add sources to queue"
-  actionIcon="icon icon-arrow-right"
-  actionIconPos="right"
+  actionLabel="Add sources"
+  actionIcon="icon icon-check"
   [actionDisabled]="
     !file() && !scrapeSourceTextarea() && !clipboardScrapeSources()
   "
@@ -20,12 +17,12 @@
   (hidden)="onDialogHide()"
 >
   <app-import-dialog-content
-    inputTitle="Source input"
-    inputDescription="Paste URLs, choose a text file, or enter one source per line."
+    inputTitle="Source URLs"
+    inputHint="One URL per line, each pointing to a page or file that lists proxies. Text and CSV files work too."
+    optionsTitle="Scraping"
     [textareaValue]="scrapeSourceTextarea()"
     [textareaPlaceholder]="'https://provider.example/proxies\nhttp://example.net/list.txt'"
     textareaLabel="Scrape source URLs"
-    lineHint="One URL per line"
     [clipboardPresent]="!!clipboardScrapeSources()"
     [filePresent]="file() !== undefined"
     fileAccept=".txt,.csv"
@@ -35,50 +32,39 @@
     (fileSelected)="onFileSelected($event)"
     (fileClearRequested)="onFileClear()"
   >
-    <app-source-fetch-mode
-      import-prefix
-      inputId="import-source-javascript"
-      [enabled]="requiresJavaScript()"
-      (enabledChange)="requiresJavaScript.set($event)"
-    />
-    <app-source-auto-tags
-      import-prefix
-      [forImport]="true"
-      [tagIds]="selectedAutoTagIds()"
-      (tagIdsChange)="selectedAutoTagIds.set($event)"
-    />
-    <ng-container import-summary>
-      <div class="import-summary__visual">
-        <span><i class="icon icon-globe" aria-hidden="true"></i></span>
+    <dl import-summary>
+      <div>
+        <dt>Sources</dt>
+        <dd>{{ getSourcesCount() }}</dd>
       </div>
-      @if (getSourcesCount() > 0) {
-        <div class="import-summary__count">{{ getSourcesCount() }}</div>
-        <div class="import-summary__label">Sources ready</div>
-        <dl class="import-summary__stats">
-          <div>
-            <dt>Unique</dt>
-            <dd>{{ getUniqueSourcesCount() }}</dd>
-          </div>
-          <div>
-            <dt>Entered</dt>
-            <dd>{{ textAreaSourcesCount() }}</dd>
-          </div>
-          <div>
-            <dt>Clipboard</dt>
-            <dd>{{ clipboardSourcesCount() }}</dd>
-          </div>
-          <div>
-            <dt>File</dt>
-            <dd>{{ fileSourcesCount() }}</dd>
-          </div>
-        </dl>
-      } @else {
-        <strong>No sources yet</strong>
-        <p>
-          Your import summary will appear here as soon as you add source URLs.
-        </p>
-      }
-    </ng-container>
+      <div>
+        <dt>Unique</dt>
+        <dd>{{ getUniqueSourcesCount() }}</dd>
+      </div>
+      <div>
+        <dt>Clipboard</dt>
+        <dd>{{ clipboardSourcesCount() }}</dd>
+      </div>
+      <div>
+        <dt>File</dt>
+        <dd>{{ fileSourcesCount() }}</dd>
+      </div>
+    </dl>
+
+    <div import-options class="import-options">
+      <app-source-fetch-mode
+        inputId="import-source-javascript"
+        [compact]="true"
+        [enabled]="requiresJavaScript()"
+        (enabledChange)="requiresJavaScript.set($event)"
+      />
+      <app-source-auto-tags
+        [forImport]="true"
+        [compact]="true"
+        [tagIds]="selectedAutoTagIds()"
+        (tagIdsChange)="selectedAutoTagIds.set($event)"
+      />
+    </div>
   </app-import-dialog-content>
 </app-bulk-action-dialog>
 
@@ -87,6 +73,7 @@
     [status]="popupStatus()"
     [count]="addedSourceCount()"
     [item]="'scrape sources'"
+    successNote="Queued for scraping."
     (closed)="onPopupClose()"
   ></app-procesing-popup>
 }

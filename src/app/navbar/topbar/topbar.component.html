@@ -3,7 +3,8 @@
     <button
       type="button"
       class="topbar-icon-button topbar-menu-button"
-      aria-label="Toggle sidebar"
+      aria-label="Toggle navigation"
+      aria-controls="app-sidebar"
       [attr.aria-expanded]="layout.sidebarOpen()"
       (click)="layout.toggleSidebar()"
     >
@@ -16,12 +17,10 @@
           <a class="topbar-breadcrumb__link" [routerLink]="item.routerLink">{{
             item.label
           }}</a>
+        } @else if (!last) {
+          <span class="topbar-breadcrumb__group">{{ item.label }}</span>
         } @else {
-          <span
-            class="topbar-breadcrumb__current"
-            [attr.aria-current]="last ? 'page' : null"
-            >{{ item.label }}</span
-          >
+          <span class="topbar-breadcrumb__current" aria-current="page" [attr.title]="item.label">{{ item.label }}</span>
         }
         @if (!last) {
           <i
@@ -37,7 +36,7 @@
     <hlm-popover
       #notificationsPopover="brnPopover"
       align="end"
-      [sideOffset]="12"
+      [sideOffset]="8"
       [state]="notificationsState()"
       (stateChanged)="onNotificationsStateChange($event)"
     >
@@ -55,21 +54,30 @@
       </button>
 
       <hlm-popover-content *hlmPopoverPortal class="notification-panel">
-        <div class="notification-panel__header" hlmPopoverHeader>
-          <div>
-            <h2 hlmPopoverTitle>Notifications</h2>
+        <header class="notification-panel__header">
+          <h2 class="notification-panel__title">Notifications</h2>
+          @if (unreadCount() > 0) {
+            <span class="notification-panel__count">{{ unreadCount() }} new</span>
+          }
+          <div class="notification-panel__actions">
+            @if (unreadCount() > 0) {
+              <button type="button" class="notification-panel__mark-read" (click)="markAllNotificationsRead(); refreshButton.focus()">
+                Mark all read
+              </button>
+            }
+            <button
+              #refreshButton
+              type="button"
+              class="notification-panel__icon-button"
+              aria-label="Refresh notifications"
+              title="Refresh notifications"
+              [disabled]="notificationsLoading()"
+              (click)="refreshNotifications()"
+            >
+              <i class="icon icon-refresh-cw" [class.icon-spin]="notificationsLoading()" aria-hidden="true"></i>
+            </button>
           </div>
-          <button
-            type="button"
-            class="notification-panel__refresh"
-            aria-label="Refresh notifications"
-            title="Refresh notifications"
-            [disabled]="notificationsLoading()"
-            (click)="refreshNotifications()"
-          >
-            <i class="icon icon-refresh-cw" [class.icon-spin]="notificationsLoading()" aria-hidden="true"></i>
-          </button>
-        </div>
+        </header>
 
         @if (unavailableSources()) {
           <div class="notification-panel__error" role="status">
@@ -83,56 +91,61 @@
           @if (recentNotifications().length > 0) {
             <ul class="notification-list" aria-label="Recent notifications">
               @for (item of recentNotifications(); track item.id) {
+                @let unread = notificationReads.isUnread(item.id);
                 <li>
                   <a
-                    [class]="'notification-item notification-item--' + item.kind"
-                    [class.notification-item--unread]="notificationReads.isUnread(item.id)"
+                    [class]="'notification-item notification-item--' + item.kind + ' notification-item--' + item.tone"
+                    [class.notification-item--unread]="unread"
                     [routerLink]="item.routerLink"
                     [queryParams]="item.queryParams"
                     (click)="notificationReads.markRead(item.id); notificationsPopover.close()"
                   >
-                    <span class="notification-item__icon"><i [class]="'icon ' + item.icon" aria-hidden="true"></i></span>
+                    <span class="notification-item__icon" aria-hidden="true"><i [class]="'icon ' + item.icon"></i></span>
                     <span class="notification-item__content">
-                      <span class="notification-item__meta">
-                        <span>{{ item.label }}</span>
-                        @if (notificationReads.isUnread(item.id)) {
-                          <span class="notification-item__unread" aria-hidden="true"></span>
-                          <span class="sr-only">Unread</span>
-                        }
-                        <time [attr.datetime]="item.occurredAt" [title]="(item.occurredAt | date:'full') ?? ''">{{ item.occurredAt | date:'MMM d, HH:mm' }}</time>
-                      </span>
+                      <span class="sr-only">{{ item.label }}{{ unread ? ', unread' : '' }}:</span>
                       <strong>{{ item.title }}</strong>
                       <span class="notification-item__description">{{ item.description }}</span>
                     </span>
-                    <i class="icon icon-chevron-right notification-item__arrow" aria-hidden="true"></i>
+                    <span class="notification-item__aside">
+                      <time [attr.datetime]="item.occurredAt" [title]="(item.occurredAt | date:'medium') ?? ''">{{ ageOf(item.occurredAt) }}</time>
+                      @if (unread) {
+                        <span class="notification-item__unread" aria-hidden="true"></span>
+                      }
+                    </span>
                   </a>
                 </li>
               }
             </ul>
+          } @else if (notificationsLoading()) {
+            <ul class="notification-list notification-list--loading" aria-label="Loading notifications">
+              @for (row of [1, 2, 3]; track row) {
+                <li class="notification-skeleton" aria-hidden="true">
+                  <span class="notification-skeleton__icon"></span>
+                  <span class="notification-skeleton__lines"><span></span><span></span></span>
+                </li>
+              }
+            </ul>
+            <span class="sr-only" role="status">Loading notifications</span>
           } @else {
             <div class="notification-panel__empty" role="status">
-              <i [class]="notificationsLoading() ? 'icon icon-loader-circle icon-spin' : 'icon icon-bell'" aria-hidden="true"></i>
-              <strong>{{ notificationsLoading() ? 'Loading notifications' : (unavailableSources() ? 'Notifications are unavailable' : 'No notifications yet') }}</strong>
-              @if (!notificationsLoading()) {
-                <span>{{ unavailableSources() ? 'Try again to load your latest activity.' : 'New invitations, alerts, and releases will appear here.' }}</span>
-              }
+              <span class="notification-panel__empty-icon" aria-hidden="true">
+                <i [class]="unavailableSources() ? 'icon icon-circle-alert' : 'icon icon-bell'"></i>
+              </span>
+              <strong>{{ unavailableSources() ? 'Notifications are unavailable' : 'No notifications yet' }}</strong>
+              <span>{{ unavailableSources() ? 'Try again to load your latest activity.' : 'Invitations, alerts, and releases will show up here.' }}</span>
             </div>
           }
         </div>
 
         <footer class="notification-panel__footer">
           <a routerLink="/invitations" class="notification-panel__invitations" (click)="notificationsPopover.close()">
-            <i class="icon icon-inbox" aria-hidden="true"></i>
-            <span>Workspace invitations</span>
+            Invitations
             @if (invitations.pendingCount() > 0) {
               <span class="notification-panel__pending">{{ invitations.pendingCount() }} pending</span>
             }
-            <i class="icon icon-chevron-right" aria-hidden="true"></i>
           </a>
-          <div class="notification-panel__links">
-            <a routerLink="/alerts" [queryParams]="{section: 'history'}" (click)="notificationsPopover.close()">View alerts<i class="icon icon-arrow-up-right" aria-hidden="true"></i></a>
-            <a routerLink="/notifications" (click)="notificationsPopover.close()">All releases<i class="icon icon-arrow-up-right" aria-hidden="true"></i></a>
-          </div>
+          <a routerLink="/alerts" [queryParams]="{section: 'history'}" (click)="notificationsPopover.close()">Alerts</a>
+          <a routerLink="/notifications" (click)="notificationsPopover.close()">Releases</a>
         </footer>
       </hlm-popover-content>
     </hlm-popover>

@@ -129,20 +129,13 @@ describe('ProxyListComponent', () => {
     const grid = element.querySelector<HTMLElement>('.inventory-grid')!;
     const toolbar = element.querySelector<HTMLElement>('.inventory-toolbar')!;
     const search = element.querySelector<HTMLInputElement>('input[aria-label="Search proxies"]')!;
-    const entrance = grid.getAnimations()[0];
-    expect(entrance).toBeInstanceOf(CSSAnimation);
-    expect(element.querySelector('.inventory-context')!.getAnimations()[0]).toBeInstanceOf(CSSAnimation);
-    entrance.pause();
-    entrance.currentTime = 350;
-
     expect(request.observed).toBeTrue();
     expect(component.isLoading()).toBeTrue();
     expect(component.hasLoaded()).toBeFalse();
-    expect(element.querySelector('h1')!.textContent).toContain('Managed proxies');
+    expect(element.querySelector('h1')!.textContent).toContain('Proxies');
     expect(getComputedStyle(toolbar).visibility).toBe('visible');
     expect(getComputedStyle(toolbar).opacity).toBe('1');
     expect(getComputedStyle(grid).opacity).toBe('1');
-    expect(getComputedStyle(grid).transform).not.toBe('none');
     expect(search.disabled).toBeFalse();
     expect(toolbar.textContent).toContain('Refresh');
     expect(toolbar.textContent).toContain('Filters');
@@ -163,8 +156,6 @@ describe('ProxyListComponent', () => {
     expect(element.querySelector('tbody')!.textContent).toContain('192.0.2.42');
     expect(element.querySelector('.data-table')!.getAttribute('aria-busy')).toBe('false');
     expect(getComputedStyle(grid).opacity).toBe('1');
-    expect(grid.getAnimations()).toEqual([entrance]);
-    expect(entrance.currentTime).toBe(350);
   });
 
   async function openFilters(): Promise<HTMLButtonElement> {

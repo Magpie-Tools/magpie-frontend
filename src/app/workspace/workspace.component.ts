@@ -20,7 +20,6 @@ import {
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
-import {RevealGroupDirective} from '../shared/reveal-group.directive';
 import {UserService} from '../services/authorization/user.service';
 import {formatApproximateDuration} from '../shared/cadence-format';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
@@ -84,7 +83,6 @@ interface OwnershipChange {
   selector: 'app-workspace',
   standalone: true,
   imports: [HlmSkeleton, HlmTooltip, HlmTabs, HlmTabsList, HlmTabsTrigger, HlmTabsContent, DialogComponent,
-    RevealGroupDirective,
     VisibleRowsDirective,
     CommonModule,
     FormsModule,

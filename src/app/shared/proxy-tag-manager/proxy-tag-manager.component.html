@@ -10,128 +10,36 @@
   </button>
 }
 
+<!--
+  One dialog with three views, following the alert dialogs: the list, a form for one tag,
+  and a delete confirmation. The form replaces the list instead of opening a second popup,
+  and Back returns to the list.
+-->
 <app-dialog
   [visible]="visible()"
   (visibleChange)="setVisible($event)"
-  [dismissableMask]="true"
-  [autoFocus]="'.proxy-tag-manager-dialog'"
+  [closable]="!saving()"
   styleClass="proxy-tag-manager-dialog"
-  (onShow)="animateDialog()"
-  [panelStyle]="{ width: '58rem' }"
+  [panelStyle]="{ width: '34rem' }"
 >
   <ng-template #dialogHeader>
-    <div class="proxy-dialog-heading">
-      <span class="proxy-dialog-heading__icon">
-        <i class="icon icon-tags" aria-hidden="true"></i>
-      </span>
-      <strong>Manage tags</strong>
-    </div>
+    @switch (view()) {
+      @case ("form") { {{ editingTagId() ? 'Edit tag' : 'New tag' }} }
+      @case ("delete") { Delete tag }
+      @default { Manage tags }
+    }
   </ng-template>
 
   <div class="tag-manager">
-    <p class="tag-manager__policy">
-      <i class="icon icon-info" aria-hidden="true"></i>
-      Tags are shared across this workspace. Changes apply to every proxy using the tag.
-    </p>
-
-    <div class="tag-manager__layout">
-      <section class="tag-manager__panel tag-manager__catalog" aria-labelledby="tag-catalog-title" [attr.aria-busy]="tagService.loading()">
-        <header class="tag-manager__section-heading">
-          <div class="tag-manager__heading">
-            <span class="tag-manager__card-icon"><i class="icon icon-tags" aria-hidden="true"></i></span>
-            <h3 id="tag-catalog-title">Workspace tags</h3>
-          </div>
-          <span class="tag-manager__count">{{ tagService.tags().length }} {{ tagService.tags().length === 1 ? 'tag' : 'tags' }}</span>
-        </header>
-
-        @if (tagService.loading()) {
-          <div class="tag-manager__empty" role="status">
-            <span class="tag-manager__state-icon"><i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i></span>
-            <strong>Loading tags</strong>
-          </div>
-        } @else if (tagService.tags().length === 0) {
-          <div class="tag-manager__empty">
-            <span class="tag-manager__state-icon"><i class="icon icon-tag" aria-hidden="true"></i></span>
-            <strong>No tags yet</strong>
-            <p>Create a tag to group proxies by provider, purpose, or region.</p>
-          </div>
-        } @else {
-          <ul class="tag-manager__list" [appVisibleRows]="4.5">
-            @for (tag of tagService.tags(); track tag.id) {
-              <li
-                class="tag-manager__row"
-                [class.tag-manager__row--editing]="editingTagId() === tag.id"
-                [class.tag-manager__row--deleting]="deletingTagId() === tag.id"
-              >
-                <div class="tag-manager__identity">
-                  <span class="tag-manager__tag-icon" [style.--tag-color]="tag.color">
-                    <i class="icon icon-tag" aria-hidden="true"></i>
-                  </span>
-                  <div class="tag-manager__identity-copy">
-                    <div class="tag-manager__name" [title]="tag.name">{{ tag.name }}</div>
-                    <div class="tag-manager__hex">{{ tag.color }}</div>
-                  </div>
-                </div>
-
-                @if (deletingTagId() === tag.id) {
-                  <div class="tag-manager__delete-confirm" role="alert">
-                    <p>Delete this tag? It will be removed from every assigned proxy.</p>
-                    <div class="tag-manager__row-actions">
-                      <button type="button" class="tag-manager__button tag-manager__button--quiet tag-manager__button--compact" [disabled]="saving()" (click)="cancelDelete()">Cancel</button>
-                      <button type="button" class="tag-manager__button tag-manager__button--danger tag-manager__button--compact" [disabled]="saving()" (click)="confirmDelete(tag)">
-                        @if (deleting()) {
-                          <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
-                        }
-                        {{ deleting() ? 'Deleting…' : 'Delete tag' }}
-                      </button>
-                    </div>
-                  </div>
-                } @else {
-                  <div class="tag-manager__row-actions">
-                    <button
-                      type="button"
-                      class="tag-manager__icon-button"
-                      [attr.aria-label]="'Edit ' + tag.name"
-                      [title]="'Edit ' + tag.name"
-                      [disabled]="saving()"
-                      (click)="edit(tag); tagNameInput.focus()"
-                    >
-                      <i class="icon icon-pencil" aria-hidden="true"></i>
-                    </button>
-                    <button
-                      type="button"
-                      class="tag-manager__icon-button tag-manager__icon-button--danger"
-                      [attr.aria-label]="'Delete ' + tag.name"
-                      [title]="'Delete ' + tag.name"
-                      [disabled]="saving()"
-                      (click)="requestDelete(tag)"
-                    >
-                      <i class="icon icon-trash" aria-hidden="true"></i>
-                    </button>
-                  </div>
-                }
-              </li>
-            }
-          </ul>
-        }
-      </section>
-
-      <section class="tag-manager__panel tag-manager__editor" aria-labelledby="tag-editor-title" [attr.aria-busy]="saving() && !deleting()">
-        <header class="tag-manager__section-heading">
-          <div class="tag-manager__heading">
-            <span class="tag-manager__card-icon">
-              <i [class]="editingTagId() ? 'icon icon-pencil' : 'icon icon-plus'" aria-hidden="true"></i>
-            </span>
-            <h3 id="tag-editor-title">{{ editingTagId() ? 'Edit tag' : 'Create tag' }}</h3>
-          </div>
-        </header>
-
-        <div class="tag-manager__fields">
-          <div class="tag-manager__field">
-            <label for="proxyTagName">Name</label>
+    @switch (view()) {
+      @case ("form") {
+        <form id="tag-manager-form" class="tag-form" (ngSubmit)="save()" novalidate [attr.aria-busy]="saving()">
+          <section class="form-step">
+            <header class="form-step__heading"><h3><label for="proxyTagName">Name</label></h3></header>
             <input
-              #tagNameInput
+              hlmInput
               id="proxyTagName"
+              name="tagName"
               type="text"
               maxlength="40"
               placeholder="For example, Provider A"
@@ -139,51 +47,159 @@
               [disabled]="saving()"
               [ngModel]="tagName()"
               (ngModelChange)="tagName.set($event)"
-              (keydown.enter)="save()"
             />
-          </div>
-          <div class="tag-manager__field">
-            <label for="proxyTagColor">Color</label>
-            <div class="tag-manager__color-control" [class.is-disabled]="saving()">
-              <input
-                id="proxyTagColor"
-                type="color"
-                [disabled]="saving()"
-                [ngModel]="tagColor()"
-                (ngModelChange)="tagColor.set($event)"
-              />
-              <span>{{ tagColor() }}</span>
-              <i class="icon icon-palette" aria-hidden="true"></i>
-            </div>
-          </div>
-          <div class="tag-manager__preview">
-            <span>Preview</span>
-            <span class="tag-manager__chip" [style.--tag-color]="tagColor()">
-              <span class="tag-manager__swatch" aria-hidden="true"></span>
-              <span class="tag-manager__chip-name">{{ tagName().trim() || 'Tag name' }}</span>
-            </span>
-          </div>
-        </div>
+          </section>
 
-        <div class="tag-manager__editor-actions">
-          @if (editingTagId()) {
-            <button type="button" class="tag-manager__button tag-manager__button--quiet" [disabled]="saving()" (click)="cancelEdit()">Cancel</button>
-          }
-          <button
-            type="button"
-            class="tag-manager__button tag-manager__button--primary"
-            [disabled]="saving() || !tagName().trim()"
-            (click)="save()"
-          >
-            @if (saving() && !deleting()) {
-              <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
-            } @else {
-              <i [class]="editingTagId() ? 'icon icon-check' : 'icon icon-plus'" aria-hidden="true"></i>
+          <section class="form-step" aria-labelledby="tag-color-title">
+            <header class="form-step__heading"><h3 id="tag-color-title">Color</h3></header>
+            <div class="color-picker" role="radiogroup" aria-labelledby="tag-color-title">
+              @for (color of presetColors; track color) {
+                <button
+                  type="button"
+                  class="color-swatch"
+                  role="radio"
+                  [style.--tag-color]="color"
+                  [class.color-swatch--selected]="sameColor(color, tagColor())"
+                  [attr.aria-checked]="sameColor(color, tagColor())"
+                  [attr.aria-label]="color"
+                  [title]="color"
+                  [disabled]="saving()"
+                  (click)="tagColor.set(color)"
+                ></button>
+              }
+              <label
+                class="color-swatch color-swatch--custom"
+                [class.color-swatch--selected]="!isPreset(tagColor())"
+                [style.--tag-color]="isPreset(tagColor()) ? null : tagColor()"
+                title="Custom color"
+              >
+                <input
+                  type="color"
+                  name="tagColor"
+                  aria-label="Custom color"
+                  [disabled]="saving()"
+                  [ngModel]="tagColor()"
+                  (ngModelChange)="tagColor.set($event)"
+                />
+                <i class="icon icon-palette" aria-hidden="true"></i>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-step" aria-labelledby="tag-preview-title">
+            <header class="form-step__heading"><h3 id="tag-preview-title">Preview</h3></header>
+            <div class="tag-preview">
+              <span class="tag-chip" [style.--tag-color]="tagColor()">
+                <span class="tag-chip__swatch" aria-hidden="true"></span>
+                <span class="tag-chip__name">{{ tagName().trim() || 'Tag name' }}</span>
+              </span>
+              <span class="tag-preview__hex">{{ tagColor() | uppercase }}</span>
+            </div>
+            @if (editingTagId()) {
+              <p class="field-hint">Changes apply to every proxy that has this tag.</p>
             }
-            {{ saving() && !deleting() ? 'Saving…' : editingTagId() ? 'Save changes' : 'Create tag' }}
-          </button>
-        </div>
-      </section>
-    </div>
+          </section>
+        </form>
+      }
+
+      @case ("delete") {
+        @if (editingTag(); as tag) {
+          <div class="tag-delete" role="alertdialog" aria-label="Confirm deletion">
+            <p>
+              Delete
+              <span class="tag-chip" [style.--tag-color]="tag.color">
+                <span class="tag-chip__swatch" aria-hidden="true"></span>
+                <span class="tag-chip__name">{{ tag.name }}</span>
+              </span>?
+            </p>
+            <p class="field-hint">It's removed from every proxy that has it. This can't be undone.</p>
+          </div>
+        }
+      }
+
+      @default {
+        <section class="form-step" aria-labelledby="tag-catalog-title" [attr.aria-busy]="tagService.loading()">
+          <header class="form-step__heading">
+            <h3 id="tag-catalog-title">Workspace tags</h3>
+            @if (tagService.tags().length) {
+              <span class="tag-count">{{ tagService.tags().length }}</span>
+            }
+            <button
+              id="tag-manager-new"
+              type="button"
+              class="button button--quiet button--compact form-step__action"
+              (click)="startCreate()"
+            >
+              <i class="icon icon-plus" aria-hidden="true"></i>New tag
+            </button>
+          </header>
+
+          @if (tagService.loading() && tagService.tags().length === 0) {
+            <p class="field-hint" role="status">Loading tags…</p>
+          } @else if (tagService.tags().length === 0) {
+            <p class="field-hint field-hint--box">
+              No tags yet. Create one to group proxies by provider, purpose, or region.
+            </p>
+          } @else {
+            <ul class="tag-list" [appVisibleRows]="6.5">
+              @for (tag of tagService.tags(); track tag.id) {
+                <li>
+                  <button
+                    type="button"
+                    class="tag-row"
+                    [id]="'tag-row-' + tag.id"
+                    [attr.aria-label]="'Edit ' + tag.name"
+                    (click)="startEdit(tag)"
+                  >
+                    <span class="tag-row__swatch" [style.--tag-color]="tag.color" aria-hidden="true"></span>
+                    <span class="tag-row__name" [title]="tag.name">{{ tag.name }}</span>
+                    <span class="tag-row__hex">{{ tag.color | uppercase }}</span>
+                    <i class="icon icon-chevron-right tag-row__chevron" aria-hidden="true"></i>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+          <p class="field-hint">Tags are shared across this workspace.</p>
+        </section>
+      }
+    }
   </div>
+
+  <ng-template #dialogFooter>
+    <div class="tag-manager__actions">
+      @switch (view()) {
+        @case ("form") {
+          @if (editingTagId()) {
+            <button type="button" class="button button--quiet tag-manager__delete" [disabled]="saving()" (click)="requestDelete()">
+              <i class="icon icon-trash" aria-hidden="true"></i>Delete
+            </button>
+          }
+          <button type="button" class="button button--quiet" [disabled]="saving()" (click)="backToList()">
+            <i class="icon icon-arrow-left" aria-hidden="true"></i>Back
+          </button>
+          <button type="submit" form="tag-manager-form" class="button button--primary" [disabled]="saving() || !tagName().trim()">
+            @if (saving()) {
+              <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>Saving…
+            } @else {
+              <i class="icon icon-check" aria-hidden="true"></i>{{ editingTagId() ? 'Save changes' : 'Create tag' }}
+            }
+          </button>
+        }
+        @case ("delete") {
+          <button type="button" class="button button--quiet" [disabled]="saving()" (click)="cancelDelete()">Cancel</button>
+          <button type="button" class="button button--danger" [disabled]="saving()" (click)="confirmDelete()">
+            @if (saving()) {
+              <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>Deleting…
+            } @else {
+              <i class="icon icon-trash" aria-hidden="true"></i>Delete tag
+            }
+          </button>
+        }
+        @default {
+          <button type="button" class="button" (click)="close()">Done</button>
+        }
+      }
+    </div>
+  </ng-template>
 </app-dialog>

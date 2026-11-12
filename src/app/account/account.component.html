@@ -1,65 +1,15 @@
-<main class="account-page" appRevealGroup=".account-context, .account-card">
+<main class="account-page">
   <section class="account-stage">
     <header class="account-context">
       <div class="account-context__copy">
         <span class="context-icon"
           ><i class="icon icon-user" aria-hidden="true"></i
         ></span>
-        <h1>Your account</h1>
+        <h1>Account</h1>
       </div>
     </header>
 
     <div class="account-grid">
-      <section
-        class="account-card appearance-card"
-        aria-labelledby="appearance-title"
-      >
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-palette" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2 id="appearance-title">Accent color</h2>
-            <p>
-              The accent follows you across settings, controls, charts, and
-              status highlights.
-            </p>
-          </div>
-        </div>
-
-        <div class="theme-accordion" role="group" aria-label="Interface color">
-          @for (theme of themes; track theme) {
-            <button
-              type="button"
-              class="theme-choice"
-              [class.is-active]="currentTheme() === theme"
-              (click)="setTheme(theme)"
-              [attr.aria-pressed]="currentTheme() === theme"
-            >
-              <span
-                class="theme-choice__swatch"
-                [style.--swatch-color]="colorFor(theme)"
-              ></span>
-              <span class="theme-choice__copy">
-                <strong>{{ labelFor(theme) }}</strong>
-                <small>{{
-                  currentTheme() === theme ? "In use" : "Preview"
-                }}</small>
-              </span>
-              <i class="icon icon-check" aria-hidden="true"></i>
-            </button>
-          }
-        </div>
-
-        <div class="appearance-note">
-          <i class="icon icon-monitor" aria-hidden="true"></i>
-          <span
-            >Your choice is saved in this browser and takes effect
-            immediately.</span
-          >
-        </div>
-      </section>
-
       <section
         class="account-card password-card"
         aria-labelledby="password-title"
@@ -189,6 +139,56 @@
         </form>
       </section>
 
+      <section
+        class="account-card appearance-card"
+        aria-labelledby="appearance-title"
+      >
+        <div class="card-heading">
+          <span class="card-icon"
+            ><i class="icon icon-palette" aria-hidden="true"></i
+          ></span>
+          <div class="card-heading__copy">
+            <h2 id="appearance-title">Accent color</h2>
+            <p>
+              The accent follows you across settings, controls, charts, and
+              status highlights.
+            </p>
+          </div>
+        </div>
+
+        <div class="theme-accordion" role="group" aria-label="Interface color">
+          @for (theme of themes; track theme) {
+            <button
+              type="button"
+              class="theme-choice"
+              [class.is-active]="currentTheme() === theme"
+              (click)="setTheme(theme)"
+              [attr.aria-pressed]="currentTheme() === theme"
+            >
+              <span
+                class="theme-choice__swatch"
+                [style.--swatch-color]="colorFor(theme)"
+              ></span>
+              <span class="theme-choice__copy">
+                <strong>{{ labelFor(theme) }}</strong>
+                <small>{{
+                  currentTheme() === theme ? "In use" : "Preview"
+                }}</small>
+              </span>
+              <i class="icon icon-check" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+
+        <div class="appearance-note">
+          <i class="icon icon-monitor" aria-hidden="true"></i>
+          <span
+            >Your choice is saved in this browser and takes effect
+            immediately.</span
+          >
+        </div>
+      </section>
+
       <section class="account-card danger-card" aria-labelledby="danger-title">
         <div class="card-heading">
           <span class="card-icon card-icon--danger"
@@ -243,7 +243,6 @@
 <app-dialog
   [visible]="deleteDialogVisible"
   (visibleChange)="deleteDialogVisible = $event"
-  [dismissableMask]="true"
   styleClass="account-danger-dialog"
   (onHide)="onDeleteDialogHide()"
   [panelStyle]="{ width: '32rem' }"

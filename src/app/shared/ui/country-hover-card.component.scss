@@ -49,7 +49,7 @@
   padding: 0.8rem;
   border: 1px solid rgba(239, 229, 237, 0.18);
   border-radius: 0.9rem;
-  background: #141416;
+  background: var(--ui-panel, #141416);
   color: #f7f5f7;
   font-family: "Geist Variable", "Avenir Next", "Segoe UI", sans-serif;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.035);
@@ -61,7 +61,7 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.65rem;
-  font-size: 0.75rem;
+  font-size: 0.84rem;
 
   i { color: var(--theme-primary-200); }
   strong {
@@ -80,7 +80,7 @@
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 0.65rem;
-  background: #0d101b;
+  background: var(--ui-inset, #0d101b);
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -108,7 +108,7 @@
   background: rgba(255, 255, 255, 0.03);
   color: rgba(255, 255, 255, 0.7);
   font: inherit;
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   cursor: pointer;
 
   &:hover:not(:disabled),
@@ -136,8 +136,10 @@
   line-height: 1;
 }
 
+// Same colours as the dashboard country map: neutral land, the theme colour for the
+// selected country.
 .country-hover-card__countries {
-  fill: rgba(9, 12, 24, 0.55);
+  fill: var(--ui-map-empty, rgba(9, 12, 24, 0.55));
 }
 
 .country-hover-card__borders {
@@ -148,23 +150,23 @@
 }
 
 .country-hover-card__selected {
-  fill: rgba(180, 225, 255, 0.9);
+  fill: var(--ui-map-high, rgba(180, 225, 255, 0.9));
 }
 
 .country-hover-card__selected-border {
   fill: none;
-  stroke: #dbf2ff;
+  stroke: var(--theme-primary-100, #dbf2ff);
   stroke-width: 1.1;
   vector-effect: non-scaling-stroke;
 }
 
 .country-hover-card__marker {
   fill: #fff;
-  stroke: #141416;
+  stroke: var(--ui-panel, #141416);
   stroke-width: 1.5;
 }
 
 .country-hover-card__marker-ring {
-  fill: rgba(180, 225, 255, 0.15);
-  stroke: #b4e1ff;
+  fill: rgba(var(--theme-primary-200-rgb, 180, 225, 255), 0.15);
+  stroke: var(--theme-primary-200, #b4e1ff);
 }

@@ -1,12 +1,11 @@
 import {HlmCardImports} from '@spartan-ng/helm/card';
 import {ChartComponent} from '../../../shared/ui/chart.component';
 import type {AppChartDefinition} from '../../../shared/ui/chart.component';
-import {DecimalPipe, NgStyle} from '@angular/common';
+import {DecimalPipe} from '@angular/common';
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 export interface FastestAliveProxyCountryLegend {
   country: string;
-  color: string;
   count: number;
 }
 
@@ -15,7 +14,7 @@ export type FastestAliveSortDirection = 'fastest-right' | 'fastest-left';
 @Component({
   selector: 'app-fastest-alive-proxies-card',
   standalone: true,
-  imports: [HlmCardImports, ChartComponent, DecimalPipe, NgStyle],
+  imports: [HlmCardImports, ChartComponent, DecimalPipe],
   templateUrl: './fastest-alive-proxies-card.component.html',
   styleUrl: './fastest-alive-proxies-card.component.scss'
 })

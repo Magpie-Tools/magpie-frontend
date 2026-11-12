@@ -21,7 +21,7 @@
 .filter-panel__vertical-divider {
   width: 1px;
   min-height: 7.25rem;
-  background: rgba(148, 163, 184, 0.24);
+  background: color-mix(in srgb, var(--ink-muted) 24%, transparent);
 }
 
 .filter-protocol-stack {
@@ -43,7 +43,7 @@
   height: 0.95rem;
   line-height: 1;
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   color: rgba(226, 232, 240, 0.9);
   cursor: pointer;
   letter-spacing: 0.02em;
@@ -64,7 +64,7 @@
 .filter-count-label {
   justify-self: end;
   color: #cbd5e1;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 600;
   text-align: right;
 }
@@ -85,12 +85,15 @@
     height: 1px;
   }
 
+  /* Label above; comparison and value share one row. */
   .filter-count-row {
-    grid-template-columns: 1fr 4.25rem;
+    grid-template-columns: 5rem minmax(0, 1fr);
   }
 
-  .filter-count-input {
+  .filter-count-label {
     grid-column: 1 / -1;
+    justify-self: start;
+    text-align: left;
   }
 }
 
@@ -101,7 +104,7 @@
   [data-slot="select-trigger"],
   input[type="number"] {
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(148, 163, 184, 0.25);
+    border: 1px solid color-mix(in srgb, var(--ink-muted) 25%, transparent);
     color: #e2e8f0;
     border-radius: 0.5rem;
     min-height: 2.25rem;
@@ -110,8 +113,8 @@
   [hlmInput]:focus,
   [data-slot="select-trigger"]:focus-within,
   input[type="number"]:focus-within {
-    border-color: #1cbb57;
-    box-shadow: 0 0 0 2px rgba(28, 187, 87, 0.18);
+    border-color: var(--status-good);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-good) 18%, transparent);
   }
 
   [data-slot="select-trigger"] > span,

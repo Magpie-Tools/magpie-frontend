@@ -23,7 +23,7 @@
 
 // Keep the destructive cue local to the warning icon and final action.
 .bulk-dialog-heading--danger .bulk-dialog-heading__icon {
-  border-color: rgba(248, 113, 113, 0.28);
+  border-color: color-mix(in srgb, var(--status-bad) 28%, transparent);
   background: rgba(127, 29, 29, 0.13);
   color: #f4a7a7;
 }
@@ -42,8 +42,8 @@
   gap: 0.08rem;
 
   > span {
-    color: rgba(255, 255, 255, 0.42);
-    font-size: 0.58rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.72rem;
     font-weight: 620;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -90,14 +90,14 @@
 
     h3 {
       color: rgba(255, 255, 255, 0.9);
-      font-size: 0.76rem;
+      font-size: 0.84rem;
       font-weight: 590;
     }
 
     p {
       margin-top: 0.18rem;
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 0.62rem;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 0.75rem;
       line-height: 1.45;
     }
   }
@@ -114,8 +114,8 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 999px;
     background: rgba(5, 5, 7, 0.35);
-    color: rgba(255, 255, 255, 0.42);
-    font-size: 0.58rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.72rem;
     white-space: nowrap;
   }
 
@@ -136,15 +136,15 @@
 
     h3 {
       color: rgba(255, 255, 255, 0.88);
-      font-size: 0.75rem;
+      font-size: 0.84rem;
       font-weight: 590;
     }
 
     p {
       max-width: 38rem;
       margin-top: 0.2rem;
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 0.62rem;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 0.75rem;
       line-height: 1.45;
     }
   }
@@ -154,6 +154,101 @@
     gap: 1rem;
   }
 
+  .bulk-dialog-confirm {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.84rem;
+    line-height: 1.45;
+    cursor: pointer;
+
+    input {
+      width: 1.1rem;
+      height: 1.1rem;
+      flex: 0 0 auto;
+      margin-top: 0.1rem;
+      accent-color: var(--theme-primary-400);
+      cursor: pointer;
+    }
+
+    input:focus-visible {
+      outline: 2px solid var(--ring);
+      outline-offset: 2px;
+    }
+  }
+
+  .bulk-dialog-confirm--danger {
+    border-color: color-mix(in srgb, var(--status-bad) 38%, transparent);
+    background: color-mix(in srgb, var(--status-bad) 7%, transparent);
+
+    input { accent-color: var(--status-bad); }
+  }
+
+  // Flat sections, as in the alert dialogs: a small heading over the content, with a rule
+  // between sections instead of a box around each one. Used by the delete dialogs.
+  .bulk-dialog-body:has(> .form-step) {
+    gap: 1.1rem;
+  }
+
+  .bulk-dialog-body .form-step {
+    display: grid;
+    min-width: 0;
+    gap: 0.6rem;
+  }
+
+  .bulk-dialog-body > .form-step + .form-step {
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
+  }
+
+  .bulk-dialog-body .form-step__heading {
+    display: flex;
+    min-height: 1.75rem;
+    align-items: center;
+    gap: 0.55rem;
+
+    h3 {
+      margin: 0;
+      color: var(--ui-text, #fff);
+      font-size: var(--ui-fs, 0.8rem);
+      font-weight: 550;
+      letter-spacing: 0;
+    }
+
+    .optional-label {
+      color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+      font-size: var(--ui-fs-xs, 0.75rem);
+      font-weight: 400;
+    }
+  }
+
+  .bulk-dialog-body .form-step__action {
+    margin-left: auto;
+  }
+
+  .bulk-dialog-body .form-step .field-hint {
+    margin: 0;
+    color: var(--ui-text-3, rgba(255, 255, 255, 0.55));
+    font-size: var(--ui-fs-xs, 0.72rem);
+    line-height: 1.45;
+  }
+
+  // The acknowledgement becomes a plain checkbox row closing the form.
+  .bulk-dialog-body:has(> .form-step) > .bulk-dialog-confirm {
+    padding: 1.1rem 0 0;
+    border: 0;
+    border-top: 1px solid var(--ui-line-soft, rgba(255, 255, 255, 0.06));
+    border-radius: 0;
+    background: transparent;
+    color: var(--ui-text-2, rgba(255, 255, 255, 0.8));
+    font-size: var(--ui-fs-sm, 0.8125rem);
+  }
+
   .filter-disabled-copy {
     display: flex;
     align-items: center;
@@ -161,8 +256,8 @@
     padding: 0.65rem 0.72rem;
     border: 1px dashed rgba(255, 255, 255, 0.1);
     border-radius: 0.72rem;
-    color: rgba(255, 255, 255, 0.36);
-    font-size: 0.61rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.72rem;
   }
 
   .export-dialog__settings {
@@ -178,13 +273,15 @@
     gap: 1rem;
 
     > span {
-      color: rgba(255, 255, 255, 0.34);
-      font-size: 0.59rem;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 0.72rem;
     }
 
+    // Without a note the actions still sit on the right, as in the other dialogs.
     > div {
       display: flex;
       gap: 0.45rem;
+      margin-left: auto;
     }
   }
 
@@ -219,7 +316,7 @@
     width: 2.15rem;
     height: 2.15rem;
     border-radius: 0.68rem;
-    color: rgba(255, 255, 255, 0.42);
+    color: rgba(255, 255, 255, 0.62);
   }
 
   .bulk-action-dialog [data-slot="dialog-close"]:hover {
@@ -230,7 +327,7 @@
   .bulk-action-dialog .dialog-button[hlmBtn] {
     min-height: 2.35rem;
     border-radius: 0.68rem;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 590;
     box-shadow: none;
   }
@@ -253,13 +350,13 @@
   }
 
   .bulk-action-dialog .dialog-button--danger[hlmBtn] {
-    border-color: rgba(239, 68, 68, 0.42);
+    border-color: color-mix(in srgb, var(--status-bad) 42%, transparent);
     background: rgba(127, 29, 29, 0.52);
-    color: #fecaca;
+    color: var(--status-bad-fg);
   }
 
   .bulk-action-dialog .dialog-button--danger[hlmBtn]:hover:not(:disabled) {
-    border-color: rgba(248, 113, 113, 0.62);
+    border-color: color-mix(in srgb, var(--status-bad) 62%, transparent);
     background: rgba(153, 27, 27, 0.68);
     color: #fff1f2;
   }
@@ -282,12 +379,17 @@
       flex-direction: column;
     }
 
+    /* Stack the actions with the primary one first so both labels and focus rings stay visible. */
     .bulk-dialog-footer > div {
       width: 100%;
+      flex-direction: column-reverse;
+      gap: 0.5rem;
     }
 
     .bulk-action-dialog .dialog-button[hlmBtn] {
       width: 100%;
+      min-width: 0;
+      white-space: normal;
     }
   }
 }

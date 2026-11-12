@@ -110,4 +110,48 @@ describe('NavbarComponent', () => {
     expect(logout).toHaveBeenCalledTimes(1);
     expect(overlay.getContainerElement().querySelector('[role="menu"]')).toBeNull();
   });
+
+  describe('navigation groups', () => {
+    let router: Router;
+
+    function cluster(label: string): HTMLDetailsElement {
+      const clusters = Array.from(fixture.nativeElement.querySelectorAll('details.nav-cluster')) as HTMLDetailsElement[];
+      return clusters.find(element => element.querySelector('summary')!.textContent!.includes(label))!;
+    }
+
+    async function navigate(url: string): Promise<void> {
+      await router.navigateByUrl(url);
+      await fixture.whenStable();
+    }
+
+    beforeEach(async () => {
+      spyOn(UserService, 'isAdmin').and.returnValue(true);
+      router = TestBed.inject(Router);
+      router.resetConfig([{path: '**', children: []}]);
+      fixture = TestBed.createComponent(NavbarComponent);
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    it('keeps the admin group open after leaving an admin page', async () => {
+      expect(cluster('Admin').open).toBeFalse();
+
+      await navigate('/global/checker');
+      expect(cluster('Admin').open).toBeTrue();
+
+      await navigate('/proxies');
+      expect(cluster('Admin').open).toBeTrue();
+    });
+
+    it('keeps a group the user closed closed on unrelated navigation', async () => {
+      const checker = cluster('Checker');
+      expect(checker.open).toBeTrue();
+
+      checker.open = false;
+      checker.dispatchEvent(new Event('toggle'));
+      await navigate('/proxies');
+
+      expect(cluster('Checker').open).toBeFalse();
+    });
+  });
 });

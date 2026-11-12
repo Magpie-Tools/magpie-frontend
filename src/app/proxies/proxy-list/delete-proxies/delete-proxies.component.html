@@ -7,19 +7,14 @@
   triggerStyleClass="ui-button-danger"
   [triggerDisabled]="!hasAnyProxies()"
   headingTitle="Delete proxies"
-  headingIcon="icon icon-triangle-alert"
-  headingTooltip="Delete proxies in bulk with optional filters and status selections. This action cannot be undone."
+  width="40rem"
   tone="danger"
-  introIcon="icon icon-lock"
-  introTitle="Deleted routes cannot be restored"
-  introDescription="Review the scope before continuing. Filters apply only when they are enabled below."
-  [selectedCount]="selectedProxies.length"
-  footerNote="This action cannot be undone."
-  actionLabel="Delete proxies"
+  [actionLabel]="actionLabel"
+  [confirmLabel]="confirmLabel"
   actionIcon="icon icon-trash"
   [cancelDisabled]="isDeleting"
   [actionDisabled]="
-    isDeleting || (deleteOption === 'selected' && !canDeleteSelected())
+    isDeleting || !deleteOption || (deleteOption === 'selected' && !canDeleteSelected())
   "
   [actionLoading]="isDeleting"
   (openRequested)="openDialog()"
@@ -27,66 +22,53 @@
   (actionRequested)="submitDelete()"
   (hidden)="onDialogHide()"
 >
-  <section class="dialog-section" aria-labelledby="delete-scope-title">
-    <div class="section-heading">
-      <div>
-        <h3 id="delete-scope-title">Proxies to delete</h3>
-        <p>
-          Delete the highlighted routes or every route that matches the optional
-          filters.
-        </p>
-      </div>
-    </div>
+  <section class="form-step" aria-labelledby="delete-scope-title">
+    <header class="form-step__heading">
+      <h3 id="delete-scope-title">Proxies to delete</h3>
+    </header>
     <app-bulk-scope-selector
       [(scope)]="deleteOption"
       radioName="deleteOption"
       allInputId="deleteAll"
       selectedInputId="deleteSelected"
-      allTitle="All proxies"
-      allDescription="Delete every proxy you own that matches the filters below."
-      selectedTitle="Selected proxies"
-      selectedDescription="Delete only the routes highlighted in the table."
+      [allTitle]="allScopeTitle"
+      allDescription="Delete every proxy in this workspace, or only those matching the filters below."
+      [selectedTitle]="'Selected proxies (' + selectedProxies.length + ')'"
+      selectedDescription="Delete only the proxies selected in the table."
       [selectedDisabled]="!canDeleteSelected()"
       accentColor="var(--theme-primary-400)"
     ></app-bulk-scope-selector>
   </section>
 
-  <div [formGroup]="deleteForm">
-    <section class="dialog-section delete-card">
-      <div class="section-heading section-heading--split">
-        <div>
-          <h3>Filters</h3>
-          <p>
-            Enable filters to narrow the chosen scope before proxies are
-            removed.
-          </p>
-        </div>
-        <app-checkbox
-          label="Enable filters"
-          formControlName="filter"
-        ></app-checkbox>
-      </div>
+  <section class="form-step" [formGroup]="deleteForm" aria-labelledby="delete-scope-title-filters">
+    <header class="form-step__heading">
+      <h3 id="delete-scope-title-filters">Filters</h3>
+      <span class="optional-label">Optional</span>
+      <app-checkbox
+        class="form-step__action"
+        label="Enable filters"
+        formControlName="filter"
+      ></app-checkbox>
+    </header>
 
-      @if (deleteForm.get("filter")?.value) {
-        <app-proxy-filter-panel
-          class="delete-filter-panel"
-          [form]="deleteForm"
-          [countryOptions]="countryOptions"
-          [typeOptions]="typeOptions"
-          [anonymityOptions]="anonymityOptions"
-          [proxyStatusOptions]="proxyStatusOptions"
-          [proxyReputationOptions]="proxyReputationOptions"
-          [tagOptions]="tagOptions"
-          [floating]="false"
-          [showHeader]="false"
-          (clear)="clearDeleteFilters()"
-        ></app-proxy-filter-panel>
-      } @else {
-        <div class="filter-disabled-copy">
-          <i class="icon icon-filter-x" aria-hidden="true"></i> No additional
-          filters will be applied.
-        </div>
-      }
-    </section>
-  </div>
+    @if (deleteForm.get("filter")?.value) {
+      <app-proxy-filter-panel
+        class="delete-filter-panel"
+        [form]="deleteForm"
+        [countryOptions]="countryOptions"
+        [typeOptions]="typeOptions"
+        [anonymityOptions]="anonymityOptions"
+        [proxyStatusOptions]="proxyStatusOptions"
+        [proxyReputationOptions]="proxyReputationOptions"
+        [tagOptions]="tagOptions"
+        [floating]="false"
+        [showHeader]="false"
+        (clear)="clearDeleteFilters()"
+      ></app-proxy-filter-panel>
+    } @else {
+      <p class="field-hint">
+        No filters. Everything in the chosen scope is deleted.
+      </p>
+    }
+  </section>
 </app-bulk-action-dialog>

@@ -11,7 +11,11 @@ import {Component, Input} from '@angular/core';
   styleUrl: './proxies-per-hour-card.component.scss'
 })
 export class ProxiesPerHourCardComponent {
-  @Input() title = 'Proxies per Hour (Last 7 Days)';
+  @Input() title = 'Proxy inventory';
+  /** Date span the chart covers, such as "Oct 8 – Nov 4". */
+  @Input() range = '';
+  /** Plain-language description of the chart for screen readers. */
+  @Input() summary = '';
   @Input() chart: AppChartDefinition = {marks: [], scales: {x: null, y: null}};
   @Input() legend: Array<{label: string; color: string; dashed?: boolean}> = [];
   @Input() styleClass = 'dashboard-card throughput-card';

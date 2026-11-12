@@ -18,6 +18,10 @@ describe('proxy-table-columns', () => {
     ]);
   });
 
+  it('restores the Host:Port column so every row keeps an identifier', () => {
+    expect(normalizeProxyTableColumns(['alive', 'country', 'tags'])).toEqual(['alive', 'ip_port', 'country', 'tags']);
+  });
+
   it('keeps a saved tags column in its chosen position without duplicating it', () => {
     expect(normalizeProxyTableColumns(['tags', 'alive', 'ip_port', 'tags'])).toEqual([
       'tags',

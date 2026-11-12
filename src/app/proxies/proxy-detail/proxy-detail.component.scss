@@ -73,10 +73,31 @@ a {
 
 .endpoint-title {
   display: flex;
+  min-width: 0;
   align-items: center;
-  gap: 0.35rem;
   overflow: visible !important;
+  font-size: clamp(1.15rem, 2vw, 1.6rem) !important;
+  white-space: nowrap;
 }
+
+/* Host and port look like one address; the copy affordance appears on hover and focus. */
+.endpoint-title .endpoint-copy-target {
+  padding: 0.12rem 0.18rem;
+  border-color: transparent;
+  background: transparent;
+  border-radius: 0.45rem;
+}
+
+.endpoint-title .endpoint-copy-target:is(:hover, :focus-visible, .endpoint-copy--copied) {
+  border-color: rgba(var(--theme-primary-300-rgb), 0.5);
+  background: rgba(var(--theme-primary-500-rgb), 0.16);
+}
+
+.endpoint-copy-target--host { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.endpoint-copy-target--port { flex: 0 0 auto; }
+.endpoint-title .endpoint-copy-all { margin-left: 0.45rem; }
+.endpoint-copy-target--wrapped { display: none !important; }
+.endpoint-copy-target--wrapped .endpoint-copy-target__icon { font-size: 0.85rem; vertical-align: 0.1em; }
 
 .endpoint-separator {
   flex: 0 0 auto;
@@ -113,8 +134,8 @@ a {
 }
 
 .card-eyebrow {
-  color: rgba(255, 255, 255, 0.42);
-  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.6875rem;
   font-weight: 650;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -216,7 +237,7 @@ a {
   p {
     margin-top: 0.18rem;
     color: var(--detail-muted);
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     line-height: 1.4;
   }
 }
@@ -239,7 +260,7 @@ a {
   border-radius: 0.64rem;
   background: rgba(255, 255, 255, 0.03);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.61rem;
+  font-size: 0.72rem;
   font-weight: 590;
   white-space: nowrap;
   cursor: pointer;
@@ -300,8 +321,8 @@ a {
   border: 0;
   border-radius: 0.45rem;
   background: transparent;
-  color: rgba(255, 255, 255, 0.52);
-  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
   text-decoration: none;
 
   img {
@@ -356,8 +377,8 @@ a {
   flex-direction: column;
 
   > span {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 0.52rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.6875rem;
   }
 
   strong {
@@ -369,7 +390,7 @@ a {
     small {
       margin-left: 0.12rem;
       color: var(--detail-muted);
-      font-size: 0.52rem;
+      font-size: 0.6875rem;
       letter-spacing: 0;
     }
   }
@@ -392,7 +413,7 @@ a {
 
   > span {
     color: var(--detail-muted);
-    font-size: 0.55rem;
+    font-size: 0.6875rem;
   }
 }
 
@@ -425,7 +446,12 @@ a {
   gap: 0.16rem;
   color: rgba(255, 255, 255, 0.84);
   font-family: "Geist Mono", "SFMono-Regular", Consolas, monospace;
-  font-size: 0.64rem;
+  font-size: 0.6875rem;
+
+  > button {
+    height: 1.75rem;
+    gap: 0.3rem;
+  }
 
   .copy-value__text {
     filter: blur(4px);
@@ -442,7 +468,7 @@ a {
 .copy-value {
   --proxy-accent-rgb: 34, 197, 94;
   flex: 0 1 auto;
-  min-width: calc(4ch + 2rem);
+  min-width: calc(4ch + 1.75rem);
   width: auto;
   display: inline-flex;
   align-items: center;
@@ -460,19 +486,19 @@ a {
 
   .icon {
     font-size: 0.7rem;
-    color: rgba(148, 163, 184, 0.85);
+    color: var(--ink-muted);
     opacity: 0;
     transition: color 0.2s ease, opacity 0.15s ease;
   }
 
   &:not(.copy-value--copied):hover,
   &:not(.copy-value--copied):focus-visible {
-    border-color: rgba(148, 163, 184, 0.45);
-    background: rgba(148, 163, 184, 0.1);
+    border-color: color-mix(in srgb, var(--ink-muted) 45%, transparent);
+    background: color-mix(in srgb, var(--ink-muted) 10%, transparent);
     color: rgba(226, 232, 240, 0.9);
 
     .icon {
-      color: rgba(148, 163, 184, 0.85);
+      color: var(--ink-muted);
       opacity: 1;
     }
   }
@@ -486,7 +512,7 @@ a {
     border-style: solid;
     border-color: rgba(var(--proxy-accent-rgb), 0.65);
     background: rgba(var(--proxy-accent-rgb), 0.2);
-    color: #bbf7d0;
+    color: var(--status-good-fg);
 
     .icon {
       color: rgba(var(--proxy-accent-rgb), 1);
@@ -539,173 +565,6 @@ a {
   }
 }
 
-.managed-state-pill,
-.reputation-badge {
-  display: inline-flex;
-  width: fit-content;
-  align-items: center;
-  gap: 0.3rem;
-  border: 1px solid rgba(34, 197, 94, 0.28);
-  border-radius: 999px;
-  background: rgba(34, 197, 94, 0.075);
-  color: #bbf7d0;
-  font-size: 0.52rem;
-  font-weight: 650;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
-.managed-state-pill {
-  padding: 0.3rem 0.5rem;
-
-  i {
-    font-size: 0.28rem;
-  }
-
-  &--paused {
-    border-color: rgba(245, 158, 11, 0.3);
-    background: rgba(245, 158, 11, 0.075);
-    color: #fde68a;
-  }
-
-  &--archived {
-    border-color: rgba(148, 163, 184, 0.28);
-    background: rgba(148, 163, 184, 0.075);
-    color: #cbd5e1;
-  }
-}
-
-.reputation-summary {
-  min-width: 0;
-  padding: clamp(1.1rem, 2vw, 1.6rem);
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
-}
-
-.reputation-summary__heading {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-
-  .reputation-summary__score {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-  }
-
-  h2 {
-    margin-bottom: 0.4rem;
-    color: rgba(255, 255, 255, 0.92);
-    font-size: 0.95rem;
-    font-weight: 590;
-    letter-spacing: -0.025em;
-  }
-
-  strong {
-    color: #fff;
-    font-size: 1.45rem;
-    font-weight: 630;
-    letter-spacing: -0.05em;
-  }
-
-  em {
-    margin-left: 0.12rem;
-    color: var(--detail-muted);
-    font-size: 0.52rem;
-    font-style: normal;
-    letter-spacing: 0;
-  }
-
-  .icon-button {
-    margin-left: auto;
-  }
-}
-
-.reputation-badge {
-  padding: 0.28rem 0.52rem;
-
-  &--neutral {
-    border-color: rgba(250, 204, 21, 0.28);
-    background: rgba(250, 204, 21, 0.075);
-    color: #fef08a;
-  }
-
-  &--poor {
-    border-color: rgba(248, 113, 113, 0.3);
-    background: rgba(248, 113, 113, 0.075);
-    color: #fecaca;
-  }
-
-  &--unknown {
-    border-color: rgba(148, 163, 184, 0.28);
-    background: rgba(148, 163, 184, 0.075);
-    color: #d8dee7;
-  }
-}
-
-.protocol-list {
-  display: grid;
-  gap: 0.26rem;
-  margin-top: 0.45rem;
-}
-
-.protocol-row {
-  display: grid;
-  min-height: 1.65rem;
-  grid-template-columns: 3.5rem minmax(2.5rem, 1fr) 1.6rem;
-  align-items: center;
-  gap: 0.42rem;
-  padding: 0.18rem 0.3rem;
-  border: 0;
-  border-radius: 0.42rem;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 0.52rem;
-  text-align: left;
-  cursor: pointer;
-
-  strong {
-    color: rgba(255, 255, 255, 0.74);
-    font-size: 0.58rem;
-    text-align: right;
-  }
-
-  &:hover:not(:disabled),
-  &:focus-visible {
-    background: rgba(255, 255, 255, 0.035);
-    color: #fff;
-    outline: 0;
-  }
-
-  &:disabled {
-    cursor: default;
-  }
-}
-
-.reputation-meter {
-  position: relative;
-  height: 0.28rem;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.075);
-
-  > span {
-    position: absolute;
-    inset: 0 auto 0 0;
-    border-radius: inherit;
-  }
-}
-
-.progress-bar__fill--good { background: linear-gradient(90deg, #2bc378, #7fe1ac); }
-.progress-bar__fill--neutral { background: linear-gradient(90deg, #d7aa3d, #f1d27c); }
-.progress-bar__fill--poor { background: linear-gradient(90deg, #e1636b, #f5a0a6); }
-.progress-bar__fill--unknown { background: linear-gradient(90deg, #7d8797, #b4bdc9); }
-
-.reputation-summary > p {
-  margin-top: 0.65rem;
-  color: var(--detail-muted);
-  font-size: 0.58rem;
-}
-
 .card-loading {
   display: flex;
   min-height: 12rem;
@@ -743,8 +602,8 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 0.58rem;
   background: rgba(255, 255, 255, 0.022);
-  color: rgba(255, 255, 255, 0.46);
-  font-size: 0.56rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
   white-space: nowrap;
 }
 
@@ -768,6 +627,12 @@ a {
   white-space: nowrap;
 }
 
+/* The check time closes each row, flush with the table's right edge. */
+.checked-at-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
 .empty-table {
   height: 7rem;
   color: var(--detail-muted) !important;
@@ -780,11 +645,11 @@ a {
   height: 0.52rem;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: rgba(148, 163, 184, 0.65);
+  background: color-mix(in srgb, var(--ink-muted) 65%, transparent);
 
   &.alive {
-    background: #25cf7a;
-    box-shadow: 0 0 0.7rem rgba(37, 207, 122, 0.5);
+    background: var(--status-good);
+    box-shadow: 0 0 0.7rem color-mix(in srgb, var(--status-good) 50%, transparent);
   }
 
   &.dead {
@@ -811,8 +676,8 @@ a {
     border: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.085);
     background: rgba(255, 255, 255, 0.022);
-    color: rgba(255, 255, 255, 0.38);
-    font-size: 0.55rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.6875rem;
     font-weight: 640;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -828,7 +693,7 @@ a {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     background: transparent;
     color: rgba(255, 255, 255, 0.68);
-    font-size: 0.63rem;
+    font-size: 0.75rem;
   }
 
   tbody > tr.proxy-stat-row {
@@ -877,6 +742,16 @@ a {
     h1 {
       white-space: normal;
       overflow-wrap: anywhere;
+    }
+
+    // Narrow cards show the whole address in one wrapping button; the port stays with the host.
+    .endpoint-title > :is(.endpoint-copy-target--host, .endpoint-separator, .endpoint-copy-target--port, .endpoint-copy-all) { display: none; }
+    .endpoint-title > .endpoint-copy-target--wrapped {
+      display: inline-block !important;
+      overflow: visible;
+      white-space: normal;
+      overflow-wrap: break-word;
+      text-align: left;
     }
   }
 
@@ -963,6 +838,6 @@ a {
 .history-settings-note {
   display: block;
   color: var(--detail-muted);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   text-transform: none;
 }
