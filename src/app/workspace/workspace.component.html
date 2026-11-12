@@ -272,6 +272,199 @@
             View members<i class="icon icon-arrow-right" aria-hidden="true"></i>
           </button>
         </section>
+
+        <section class="workspace-card allowance-card" aria-labelledby="allowance-title">
+          <div class="card-heading">
+            <span class="card-icon"
+              ><i class="icon icon-clock" aria-hidden="true"></i
+            ></span>
+            <div>
+              <h2 id="allowance-title">Monthly allowances</h2>
+            </div>
+          </div>
+
+          <div class="allowance-grid">
+            @for (meter of allowanceMeters(); track meter.id) {
+              <div class="allowance-meter">
+                <div class="allowance-meter__head">
+                  <span>{{ meter.label }}</span>
+                  <span class="allowance-tags">
+                    @if (meter.unlimited) {
+                      <span class="allowance-tag allowance-tag--unlimited">No limit</span>
+                    }
+                    @if (meter.inherits) {
+                      <span class="allowance-tag">Instance default</span>
+                    }
+                  </span>
+                </div>
+                <div class="capacity-figure">
+                  <strong class="metric-value">{{ meter.used | number }}</strong>
+                  @if (meter.unlimited) {
+                    <span>{{ meter.unit }} this month</span>
+                  } @else {
+                    <span>of {{ meter.monthly | number }} {{ meter.unit }} this month</span>
+                  }
+                </div>
+                @if (!meter.unlimited) {
+                  <div
+                    class="capacity-progress"
+                    role="progressbar"
+                    [attr.aria-label]="meter.label + ' used this month'"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    [attr.aria-valuenow]="meter.percent"
+                  >
+                    <span [style.width.%]="meter.percent"></span>
+                  </div>
+                }
+                <p class="allowance-cadence" [class.allowance-cadence--stopped]="meter.exhausted">
+                  {{ meter.cadence }}
+                </p>
+                @if (meter.runOutWarning) {
+                  <p class="allowance-warning" role="status">
+                    <i class="icon icon-circle-alert" aria-hidden="true"></i>{{ meter.runOutWarning }}
+                  </p>
+                }
+
+                @if (workspaces.canOperate()) {
+                  <div class="cadence-editor">
+                    <label class="field-label" [attr.for]="'cadence-mode-' + meter.id">
+                      {{ meter.id === 'checks' ? 'Check interval' : 'Scrape interval' }}
+                    </label>
+                    <div class="cadence-editor__fields">
+                      <select
+                        class="select-input select-input--compact"
+                        [id]="'cadence-mode-' + meter.id"
+                        [(ngModel)]="cadenceDrafts[meter.id].mode"
+                        [disabled]="savingCadence()"
+                      >
+                        <option value="automatic" [disabled]="meter.unlimited">Automatic</option>
+                        <option value="fixed">Fixed</option>
+                      </select>
+                      @if (cadenceDrafts[meter.id].mode === 'fixed') {
+                        <span class="cadence-editor__every">every</span>
+                        <input
+                          class="text-input cadence-editor__value"
+                          type="number"
+                          min="1"
+                          [attr.aria-label]="meter.label + ' interval'"
+                          [(ngModel)]="cadenceDrafts[meter.id].value"
+                          [disabled]="savingCadence()"
+                        />
+                        <select
+                          class="select-input select-input--compact"
+                          [attr.aria-label]="meter.label + ' interval unit'"
+                          [(ngModel)]="cadenceDrafts[meter.id].unit"
+                          [disabled]="savingCadence()"
+                        >
+                          @for (unit of cadenceUnits; track unit) {
+                            <option [value]="unit">{{ unit }}</option>
+                          }
+                        </select>
+                      }
+                    </div>
+                    @if (cadenceError(meter.id); as error) {
+                      <p class="inline-error">{{ error }}</p>
+                    } @else if (cadenceWarning(meter.id); as warning) {
+                      <p class="allowance-warning" role="status">
+                        <i class="icon icon-circle-alert" aria-hidden="true"></i>{{ warning }}
+                      </p>
+                    } @else if (meter.unlimited) {
+                      <p class="card-note">
+                        No monthly limit, so {{ meter.label.toLowerCase() }} run at the interval you choose.
+                      </p>
+                    } @else if (cadenceDrafts[meter.id].mode === 'automatic') {
+                      <p class="card-note">The remaining allowance is spread evenly over the rest of the month.</p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          @if (workspaces.canOperate() && cadenceChanged()) {
+            <div class="cadence-actions">
+              <button
+                type="button"
+                class="button button--primary"
+                [disabled]="savingCadence() || !!cadenceError('checks') || !!cadenceError('scrapes')"
+                (click)="saveCadence()"
+              >
+                @if (savingCadence()) {
+                  <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
+                }
+                Save intervals
+              </button>
+            </div>
+          }
+
+          <p class="card-note">
+            <i class="icon icon-info" aria-hidden="true"></i>With an automatic interval, Magpie
+            spreads the remaining allowance over the rest of the month. A fixed interval runs until
+            the allowance is used up. Without a monthly limit, a fixed interval is required. Usage
+            resets on {{ workspace.allowances.period_end | date: "mediumDate" }}.
+          </p>
+
+          @if (isInstanceAdmin) {
+            <div class="allowance-admin">
+              <label class="field-label" for="allowance-checks">Checks per month</label>
+              <div class="allowance-admin__field">
+                <input
+                  id="allowance-checks"
+                  class="text-input"
+                  type="number"
+                  min="0"
+                  step="1000"
+                  [(ngModel)]="allowanceChecks"
+                  [disabled]="savingAllowances() || allowanceUnlimitedChecks"
+                  [placeholder]="allowanceUnlimitedChecks ? 'No limit' : 'Instance default'"
+                />
+                <label class="checkbox-field"
+                  ><input
+                    type="checkbox"
+                    [(ngModel)]="allowanceUnlimitedChecks"
+                    [disabled]="savingAllowances()"
+                  /><span>No limit</span></label
+                >
+              </div>
+              <label class="field-label" for="allowance-scrapes">Scrapes per month</label>
+              <div class="allowance-admin__field">
+                <input
+                  id="allowance-scrapes"
+                  class="text-input"
+                  type="number"
+                  min="0"
+                  step="100"
+                  [(ngModel)]="allowanceScrapes"
+                  [disabled]="savingAllowances() || allowanceUnlimitedScrapes"
+                  [placeholder]="allowanceUnlimitedScrapes ? 'No limit' : 'Instance default'"
+                />
+                <label class="checkbox-field"
+                  ><input
+                    type="checkbox"
+                    [(ngModel)]="allowanceUnlimitedScrapes"
+                    [disabled]="savingAllowances()"
+                  /><span>No limit</span></label
+                >
+              </div>
+              <button
+                type="button"
+                class="button button--primary"
+                [disabled]="savingAllowances()"
+                (click)="saveAllowances()"
+              >
+                @if (savingAllowances()) {
+                  <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
+                }
+                Save allowances
+              </button>
+              <p class="card-note">
+                Leave a field empty or at 0 to use the instance default. With No limit, the workspace
+                has to choose a fixed interval and runs hourly until it does.
+              </p>
+            </div>
+          }
+        </section>
       </section>
       <section hlmTabsContent="workspace-members" class="workspace-grid workspace-panel">
         <section

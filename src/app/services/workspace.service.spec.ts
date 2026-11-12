@@ -31,7 +31,37 @@ describe('WorkspaceService', () => {
       included_operators: 1,
       statistics_retention_days: 7,
       minimum_check_interval_seconds: 60,
+      monthly_checks: 0,
+      monthly_scrapes: 0,
+      unlimited_checks: false,
+      unlimited_scrapes: false,
       cancel_at_period_end: false,
+    },
+    allowances: {
+      unlimited_checks: false,
+      unlimited_scrapes: false,
+      needs_check_interval: false,
+      needs_scrape_interval: false,
+      monthly_checks: 50000,
+      used_checks: 0,
+      checks_per_cycle: 0,
+      check_interval_seconds: 60,
+      checks_exhausted: false,
+      monthly_scrapes: 3000,
+      used_scrapes: 0,
+      scrapes_per_cycle: 0,
+      scrape_interval_seconds: 900,
+      scrapes_exhausted: false,
+      requested_check_interval_seconds: 0,
+      requested_scrape_interval_seconds: 0,
+      minimum_check_interval_seconds: 60,
+      minimum_scrape_interval_seconds: 900,
+      projected_monthly_checks: 0,
+      projected_monthly_scrapes: 0,
+      inherits_checks: true,
+      inherits_scrapes: true,
+      period_start: '2026-11-01T00:00:00Z',
+      period_end: '2026-12-01T00:00:00Z',
     },
     created_at: '2026-08-25T00:00:00Z',
   });
@@ -59,6 +89,25 @@ describe('WorkspaceService', () => {
 
   afterEach(() => {
     window.localStorage.removeItem('magpie-workspace-id');
+  });
+
+  it('reloads cached workspaces once they are older than the requested max age', () => {
+    const first = workspace(1, 'First');
+    const updated = {...first, name: 'Updated'};
+    getWorkspaces.and.returnValues(of([first]), of([updated]));
+    const now = Date.now();
+    const clock = spyOn(Date, 'now').and.returnValue(now);
+
+    service.load().subscribe();
+    service.load(false, 60_000).subscribe();
+    expect(getWorkspaces).toHaveBeenCalledTimes(1);
+
+    clock.and.returnValue(now + 61_000);
+    service.load().subscribe();
+    expect(getWorkspaces).toHaveBeenCalledTimes(1);
+    service.load(false, 60_000).subscribe();
+    expect(getWorkspaces).toHaveBeenCalledTimes(2);
+    expect(service.current()?.name).toBe('Updated');
   });
 
   it('loads the new account workspaces after the session is reset', () => {

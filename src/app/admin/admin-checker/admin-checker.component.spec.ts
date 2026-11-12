@@ -18,7 +18,8 @@ class SettingsServiceStub {
       save_responses: true,
       retries: 2,
       timeout: 7500,
-      checker_timer: { days: 0, hours: 1, minutes: 0, seconds: 0 },
+      monthly_checks_per_workspace: 720000,
+      unlimited_monthly_checks: false,
       judge_timer: { days: 0, hours: 0, minutes: 30, seconds: 0 },
       ip_lookup: 'https://ident.me',
       judges_threads: 3,
@@ -75,5 +76,22 @@ describe('AdminCheckerComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('loads the monthly check allowance instead of a check interval', () => {
+    expect(component.settingsForm.get('checker_timer')).toBeNull();
+    expect(component.settingsForm.get('monthly_checks_per_workspace')?.value).toBe(720000);
+    expect(component.monthlyChecksLabel).toBe(`${(720000).toLocaleString()} checks`);
+    // 720,000 checks over a 30-day month for 1,000 proxies is one per hour.
+    expect(component.checkerCadenceExample).toContain('every 1 hour');
+  });
+
+  it('hides the monthly figure when the default has no limit', () => {
+    component.settingsForm.get('unlimited_monthly_checks')?.setValue(true);
+    fixture.detectChanges();
+    expect(component.monthlyChecksLabel).toBe('No limit');
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('#monthly-checks')).toBeNull();
+    expect(element.textContent).toContain('fixed interval they choose on their Workspace page');
   });
 });

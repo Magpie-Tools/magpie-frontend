@@ -29,54 +29,47 @@
                   ><i class="icon icon-clock" aria-hidden="true"></i
                 ></span>
                 <div class="card-heading__copy">
-                  <h2>Scrape interval</h2>
+                  <h2>Monthly scrape allowance</h2>
                 </div>
               </div>
 
               <div class="cadence-summary">
-                <span>Every</span><strong>{{ scraperCadenceLabel }}</strong>
+                <span>Per workspace</span><strong>{{ monthlyScrapesLabel }}</strong>
               </div>
 
-              <div class="timer-grid" formGroupName="scraper_timer">
-                <div class="timer-field">
-                  <label for="scraper-days">Days</label>
-                  <app-select
-                    inputId="scraper-days"
-                    [options]="daysList"
-                    formControlName="days"
-                    optionLabel="label"
-                    optionValue="value"
-                  ></app-select>
-                </div>
-                <div class="timer-field">
-                  <label for="scraper-hours">Hours</label>
-                  <app-select
-                    inputId="scraper-hours"
-                    [options]="hoursList"
-                    formControlName="hours"
-                    optionLabel="label"
-                    optionValue="value"
-                  ></app-select>
-                </div>
-                <div class="timer-field">
-                  <label for="scraper-minutes">Minutes</label>
-                  <app-select
-                    inputId="scraper-minutes"
-                    [options]="minutesList"
-                    formControlName="minutes"
-                    optionLabel="label"
-                    optionValue="value"
-                  ></app-select>
-                </div>
-                <div class="timer-field">
-                  <label for="scraper-seconds">Seconds</label>
-                  <app-select
-                    inputId="scraper-seconds"
-                    [options]="secondsList"
-                    formControlName="seconds"
-                    optionLabel="label"
-                    optionValue="value"
-                  ></app-select>
+              <div class="timer-grid timer-grid--single">
+                <div class="field-group">
+                  <app-checkbox
+                    label="No monthly limit"
+                    formControlName="unlimited_monthly_scrapes"
+                  ></app-checkbox>
+                  @if (unlimitedMonthlyScrapes) {
+                    <p class="field-hint">
+                      Workspaces without their own allowance can scrape as often as they like, at a
+                      fixed interval they choose on their Workspace page (at least every 15
+                      minutes). Until they choose one, their sources are scraped every hour.
+                    </p>
+                  } @else {
+                    <label class="field-label" for="monthly_scrapes"
+                      >Scrapes per workspace per month</label
+                    >
+                    <div class="number-with-unit">
+                      <input
+                        hlmInput
+                        type="number"
+                        formControlName="monthly_scrapes_per_workspace"
+                        [min]="1"
+                        [step]="100"
+                        id="monthly_scrapes"
+                      />
+                      <span>scrapes</span>
+                    </div>
+                    <p class="field-hint">
+                      One scrape fetches one source for one workspace. Magpie spreads each
+                      workspace's remaining scrapes over its sources and the rest of the month,
+                      but never more often than every 15 minutes. {{ scraperCadenceExample }}
+                    </p>
+                  }
                 </div>
               </div>
             </section>

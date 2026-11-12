@@ -122,6 +122,8 @@
   strong { color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; font-weight: 580; }
 }
 
+.timer-grid--single { grid-template-columns: minmax(0, 1fr) !important; }
+
 .timer-grid {
   position: relative;
   z-index: 2;

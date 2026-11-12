@@ -14,7 +14,7 @@ class SettingsServiceStub {
       timeout: 7500,
       respect_robots_txt: true,
       scrape_sites: ['https://example.com/proxies.txt'],
-      scraper_timer: { days: 0, hours: 9, minutes: 0, seconds: 0 }
+      monthly_scrapes_per_workspace: 4320
     },
     proxy_limits: {
       enabled: false,
@@ -58,5 +58,19 @@ describe('AdminScraperComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('loads the monthly scrape allowance instead of a scrape interval', () => {
+    expect(component.settingsForm.get('scraper_timer')).toBeNull();
+    expect(component.settingsForm.get('monthly_scrapes_per_workspace')?.value).toBe(4320);
+    // 4,320 scrapes over 30 days for ten sources is one fetch every 100 minutes.
+    expect(component.scraperCadenceExample).toContain('every 1.7 hours');
+  });
+
+  it('hides the monthly figure when the default has no limit', () => {
+    component.settingsForm.get('unlimited_monthly_scrapes')?.setValue(true);
+    fixture.detectChanges();
+    expect(component.monthlyScrapesLabel).toBe('No limit');
+    expect((fixture.nativeElement as HTMLElement).querySelector('#monthly_scrapes')).toBeNull();
   });
 });

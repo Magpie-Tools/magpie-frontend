@@ -3,7 +3,9 @@ import {HlmTabs, HlmTabsList, HlmTabsTrigger, HlmTabsContent} from '@spartan-ng/
 import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {DialogComponent} from '../shared/ui/dialog.component';
 import {CommonModule, DatePipe, DecimalPipe, TitleCasePipe} from '@angular/common';
-import {Component, OnInit, computed, signal} from '@angular/core';
+import {Component, DestroyRef, OnInit, computed, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {interval} from 'rxjs';
 import {FormsModule} from '@angular/forms';
 
 import {finalize, switchMap} from 'rxjs/operators';
@@ -18,11 +20,59 @@ import {
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
+import {UserService} from '../services/authorization/user.service';
+import {formatApproximateDuration} from '../shared/cadence-format';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
 
 type WorkspaceSection = 'overview' | 'members' | 'settings';
 
+/**
+ * How long workspace data, including metered allowance usage, may be shown
+ * before the page reloads it. The backend recomputes cadence every minute.
+ */
+export const WORKSPACE_USAGE_MAX_AGE_MS = 60_000;
+
 type InvitationRole = WorkspaceInvitation['role'];
+
+export type CadenceKind = 'checks' | 'scrapes';
+export type CadenceUnit = 'minutes' | 'hours' | 'days';
+
+export interface CadenceDraft {
+  mode: 'automatic' | 'fixed';
+  value: number;
+  unit: CadenceUnit;
+}
+
+const cadenceUnitSeconds: Record<CadenceUnit, number> = {minutes: 60, hours: 3600, days: 86400};
+
+/** Picks the largest unit that expresses a stored interval exactly. */
+export function cadenceDraftFromSeconds(seconds: number): CadenceDraft {
+  if (!seconds) {
+    return {mode: 'automatic', value: 1, unit: 'hours'};
+  }
+  for (const unit of ['days', 'hours', 'minutes'] as CadenceUnit[]) {
+    if (seconds % cadenceUnitSeconds[unit] === 0) {
+      return {mode: 'fixed', value: seconds / cadenceUnitSeconds[unit], unit};
+    }
+  }
+  return {mode: 'fixed', value: Math.max(1, Math.round(seconds / 60)), unit: 'minutes'};
+}
+
+export interface AllowanceMeter {
+  id: 'checks' | 'scrapes';
+  label: string;
+  unit: string;
+  used: number;
+  monthly: number;
+  percent: number;
+  inherits: boolean;
+  exhausted: boolean;
+  /** No monthly limit: no progress bar, and a fixed interval is required. */
+  unlimited: boolean;
+  cadence: string;
+  /** Set when a fixed interval uses up the allowance before the month ends. */
+  runOutWarning: string | null;
+}
 
 interface OwnershipChange {
   member: WorkspaceMember;
@@ -71,6 +121,66 @@ export class WorkspaceComponent implements OnInit {
   readonly ownershipChange = signal<OwnershipChange | null>(null);
   readonly removingMember = signal(false);
   readonly revokingInvitation = signal(false);
+  readonly savingAllowances = signal(false);
+  readonly isInstanceAdmin = UserService.isAdmin();
+  readonly savingCadence = signal(false);
+  readonly cadenceUnits: CadenceUnit[] = ['minutes', 'hours', 'days'];
+  cadenceDrafts: Record<CadenceKind, CadenceDraft> = {
+    checks: cadenceDraftFromSeconds(0),
+    scrapes: cadenceDraftFromSeconds(0),
+  };
+  allowanceChecks: number | null = null;
+  allowanceScrapes: number | null = null;
+  allowanceUnlimitedChecks = false;
+  allowanceUnlimitedScrapes = false;
+
+  readonly allowanceMeters = computed<AllowanceMeter[]>(() => {
+    const allowances = this.workspaces.current()?.allowances;
+    if (!allowances) {
+      return [];
+    }
+    const resumes = new Date(allowances.period_end).toLocaleDateString(undefined, {dateStyle: 'medium'});
+    const meter = (
+      id: AllowanceMeter['id'], label: string, unit: string, used: number, monthly: number,
+      inherits: boolean, exhausted: boolean, intervalSeconds: number, perCycle: number,
+      plural: string, singular: string, verb: string,
+    ): AllowanceMeter => {
+      let cadence: string;
+      const fixed = id === 'checks'
+        ? allowances.requested_check_interval_seconds > 0
+        : allowances.requested_scrape_interval_seconds > 0;
+      const unlimited = id === 'checks' ? allowances.unlimited_checks : allowances.unlimited_scrapes;
+      const needsInterval = id === 'checks' ? allowances.needs_check_interval : allowances.needs_scrape_interval;
+      if (needsInterval) {
+        cadence = `No monthly limit. Until you choose an interval, each ${singular} is ${verb} every hour.`;
+      } else if (exhausted) {
+        cadence = `Allowance used. ${label} resume on ${resumes}.`;
+      } else if (!allowances.computed_at) {
+        cadence = 'Cadence is calculated within a minute.';
+      } else if (perCycle === 0) {
+        cadence = `No active ${plural} yet.`;
+      } else {
+        cadence = `${fixed ? 'Fixed interval: each' : 'Each'} ${singular} is ${verb} ${formatApproximateDuration(intervalSeconds)}.`;
+      }
+      const runOut = id === 'checks' ? allowances.checks_run_out_at : allowances.scrapes_run_out_at;
+      const runOutWarning = !exhausted && runOut
+        ? `At this interval the allowance runs out around ${new Date(runOut).toLocaleDateString(undefined, {dateStyle: 'medium'})}, and ${label.toLowerCase()} stop until next month.`
+        : null;
+      return {
+        id, label, unit, used, monthly, inherits, exhausted, unlimited, cadence,
+        runOutWarning: unlimited ? null : runOutWarning,
+        percent: unlimited ? 0 : monthly > 0 ? Math.min(100, Math.round((used / monthly) * 100)) : 100,
+      };
+    };
+    return [
+      meter('checks', 'Checks', 'checks', allowances.used_checks, allowances.monthly_checks,
+        allowances.inherits_checks, allowances.checks_exhausted, allowances.check_interval_seconds,
+        allowances.checks_per_cycle, 'proxies', 'proxy', 'checked'),
+      meter('scrapes', 'Scrapes', 'scrapes', allowances.used_scrapes, allowances.monthly_scrapes,
+        allowances.inherits_scrapes, allowances.scrapes_exhausted, allowances.scrape_interval_seconds,
+        allowances.scrapes_per_cycle, 'sources', 'source', 'scraped'),
+    ];
+  });
 
   readonly showMemberSearch = computed(() => this.members().length > 8);
   readonly ownerCount = computed(() => this.members().filter(member => member.role === 'owner').length);
@@ -93,13 +203,23 @@ export class WorkspaceComponent implements OnInit {
     private readonly notification: NotificationService,
   ) {}
 
+  private readonly destroyRef = inject(DestroyRef);
+
   ngOnInit(): void {
     this.loadWorkspace();
+    // Usage and cadence change while the page is open. Reload them in the
+    // background without resetting drafts the user is editing.
+    interval(WORKSPACE_USAGE_MAX_AGE_MS).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        return;
+      }
+      this.workspaces.load(false, WORKSPACE_USAGE_MAX_AGE_MS).subscribe({error: () => undefined});
+    });
   }
 
   loadWorkspace(force = false): void {
     this.workspaceError.set(null);
-    this.workspaces.load(force).subscribe({
+    this.workspaces.load(force, WORKSPACE_USAGE_MAX_AGE_MS).subscribe({
       next: () => this.syncCurrentWorkspace(),
       error: error => this.workspaceError.set(this.errorMessage(error)),
     });
@@ -114,6 +234,21 @@ export class WorkspaceComponent implements OnInit {
       return;
     }
     this.workspaceName = current.name;
+    this.cadenceDrafts = {
+      checks: cadenceDraftFromSeconds(current.allowances?.requested_check_interval_seconds ?? 0),
+      scrapes: cadenceDraftFromSeconds(current.allowances?.requested_scrape_interval_seconds ?? 0),
+    };
+    // Without a monthly limit there is nothing to spread, so the editor starts
+    // on the hourly interval the workspace already runs at and offers to save it.
+    for (const kind of ['checks', 'scrapes'] as CadenceKind[]) {
+      if (this.isUnlimited(kind) && this.cadenceDrafts[kind].mode === 'automatic') {
+        this.cadenceDrafts[kind] = {mode: 'fixed', value: 1, unit: 'hours'};
+      }
+    }
+    this.allowanceChecks = current.subscription.monthly_checks || null;
+    this.allowanceScrapes = current.subscription.monthly_scrapes || null;
+    this.allowanceUnlimitedChecks = current.subscription.unlimited_checks ?? false;
+    this.allowanceUnlimitedScrapes = current.subscription.unlimited_scrapes ?? false;
     this.loadMembers();
     if (this.workspaces.canAdminister()) {
       this.loadInvitations();
@@ -482,6 +617,132 @@ export class WorkspaceComponent implements OnInit {
       case 'failed': return 'icon-circle-alert';
       default: return 'icon-circle-minus';
     }
+  }
+
+  /** The draft interval in seconds; 0 means automatic. */
+  cadenceDraftSeconds(kind: CadenceKind): number {
+    const draft = this.cadenceDrafts[kind];
+    if (draft.mode === 'automatic') {
+      return 0;
+    }
+    return Math.max(0, Math.round(Number(draft.value) || 0)) * cadenceUnitSeconds[draft.unit];
+  }
+
+  /** Whether the workspace has no monthly limit for checks or scrapes. */
+  isUnlimited(kind: CadenceKind): boolean {
+    const allowances = this.workspaces.current()?.allowances;
+    return !!allowances && (kind === 'checks' ? allowances.unlimited_checks : allowances.unlimited_scrapes);
+  }
+
+  cadenceError(kind: CadenceKind): string | null {
+    const allowances = this.workspaces.current()?.allowances;
+    const seconds = this.cadenceDraftSeconds(kind);
+    if (!allowances) {
+      return null;
+    }
+    if (this.cadenceDrafts[kind].mode === 'automatic') {
+      return this.isUnlimited(kind) ? 'This workspace has no monthly limit, so choose a fixed interval.' : null;
+    }
+    const minimum = kind === 'checks' ? allowances.minimum_check_interval_seconds : allowances.minimum_scrape_interval_seconds;
+    if (seconds <= 0) {
+      return 'Enter an interval.';
+    }
+    if (seconds < minimum) {
+      return `The fastest interval this workspace allows is ${formatApproximateDuration(minimum).replace(/^every /, '')}.`;
+    }
+    if (seconds > 31 * 86400) {
+      return 'The interval can be at most 31 days.';
+    }
+    return null;
+  }
+
+  /**
+   * Warns while editing when a fixed interval would use more than the monthly
+   * allowance. It is approximate: it uses the current number of active proxies
+   * times enabled protocols (or subscribed sources) per cycle.
+   */
+  cadenceWarning(kind: CadenceKind): string | null {
+    const allowances = this.workspaces.current()?.allowances;
+    const seconds = this.cadenceDraftSeconds(kind);
+    if (!allowances || seconds <= 0 || this.cadenceError(kind) || this.isUnlimited(kind)) {
+      return null;
+    }
+    const perCycle = kind === 'checks' ? allowances.checks_per_cycle : allowances.scrapes_per_cycle;
+    const monthly = kind === 'checks' ? allowances.monthly_checks : allowances.monthly_scrapes;
+    const used = kind === 'checks' ? allowances.used_checks : allowances.used_scrapes;
+    if (perCycle <= 0) {
+      return null;
+    }
+    const start = new Date(allowances.period_start).getTime();
+    const end = new Date(allowances.period_end).getTime();
+    const projected = Math.ceil(perCycle * ((end - start) / 1000) / seconds);
+    if (projected <= monthly) {
+      return null;
+    }
+    const noun = kind === 'checks' ? 'checks' : 'scrapes';
+    const cycles = Math.max(0, monthly - used) / perCycle;
+    const runOut = Date.now() + cycles * seconds * 1000;
+    const when = runOut < end
+      ? ` At the current usage it runs out around ${new Date(runOut).toLocaleDateString(undefined, {dateStyle: 'medium'})}.`
+      : '';
+    return `This interval needs about ${projected.toLocaleString()} ${noun} a month, more than the allowance of ${monthly.toLocaleString()}. `
+      + `${kind === 'checks' ? 'Checks' : 'Scraping'} stop when the allowance is used up.${when}`;
+  }
+
+  cadenceChanged(): boolean {
+    const allowances = this.workspaces.current()?.allowances;
+    if (!allowances) {
+      return false;
+    }
+    return this.cadenceDraftSeconds('checks') !== allowances.requested_check_interval_seconds
+      || this.cadenceDraftSeconds('scrapes') !== allowances.requested_scrape_interval_seconds;
+  }
+
+  saveCadence(): void {
+    if (this.savingCadence() || this.cadenceError('checks') || this.cadenceError('scrapes')) {
+      return;
+    }
+    this.savingCadence.set(true);
+    this.http.updateWorkspaceCadence({
+      check_interval_seconds: this.cadenceDraftSeconds('checks'),
+      scrape_interval_seconds: this.cadenceDraftSeconds('scrapes'),
+    }).pipe(
+      switchMap(response => this.workspaces.refresh().pipe(switchMap(() => [response]))),
+      finalize(() => this.savingCadence.set(false)),
+    ).subscribe({
+      next: response => {
+        this.syncCurrentWorkspace();
+        this.notification.showSuccess('Intervals saved. They apply within a minute.');
+        for (const warning of response.warnings ?? []) {
+          this.notification.showWarn(warning);
+        }
+      },
+      error: error => this.showError('Could not save intervals', error),
+    });
+  }
+
+  saveAllowances(): void {
+    const current = this.workspaces.current();
+    if (!current || this.savingAllowances()) {
+      return;
+    }
+    const normalize = (value: number | null) => Math.max(0, Math.round(Number(value) || 0));
+    this.savingAllowances.set(true);
+    this.http.updateWorkspaceAllowances(current.id, {
+      monthly_checks: normalize(this.allowanceChecks),
+      monthly_scrapes: normalize(this.allowanceScrapes),
+      unlimited_checks: this.allowanceUnlimitedChecks,
+      unlimited_scrapes: this.allowanceUnlimitedScrapes,
+    }).pipe(
+      switchMap(() => this.workspaces.refresh()),
+      finalize(() => this.savingAllowances.set(false)),
+    ).subscribe({
+      next: () => {
+        this.syncCurrentWorkspace();
+        this.notification.showSuccess('Allowances saved. Cadence updates within a minute.');
+      },
+      error: error => this.showError('Could not save allowances', error),
+    });
   }
 
   capacityPercent(): number {

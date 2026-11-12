@@ -4,39 +4,36 @@ import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmCheckbox} from '@spartan-ng/helm/checkbox';
 import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {HlmTabsImports} from '@spartan-ng/helm/tabs';
-import {SelectComponent} from '../../shared/ui/select.component';
 import {ConfirmDialogComponent} from '../../shared/ui/confirm-dialog.component';
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {formatApproximateDuration} from "../../shared/cadence-format";
 import {SettingsService} from '../../services/settings.service';
 import {Subject} from 'rxjs';
 import {filter, take, takeUntil} from 'rxjs/operators';
 
 import {NotificationService} from '../../services/notification-service.service';
 import {GlobalSettings} from '../../models/GlobalSettings';
-import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
 import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
 import {AdminSettingsHeaderComponent} from '../../shared/admin-settings-shell/admin-settings-header.component';
 import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/admin-settings-save-dock.component';
+import {CheckboxComponent} from '../../checkbox/checkbox.component';
 
 @Component({
   selector: 'app-admin-scraper',
   standalone: true,
-  imports: [HlmButton, HlmInput, HlmCheckbox, HlmTooltip, HlmTabsImports, SelectComponent, ConfirmDialogComponent,
+  imports: [HlmButton, HlmInput, HlmCheckbox, HlmTooltip, HlmTabsImports, ConfirmDialogComponent,
     ReactiveFormsModule,
     AdminSettingsShellComponent,
     AdminSettingsHeaderComponent,
     AdminSettingsSaveDockComponent,
+    CheckboxComponent,
   ],
   providers: [ConfirmationService],
   templateUrl: './admin-scraper.component.html',
   styleUrl: './admin-scraper.component.scss'
 })
 export class AdminScraperComponent implements OnInit, OnDestroy {
-  readonly daysList = dayOptions;
-  readonly hoursList = hourOptions;
-  readonly minutesList = minuteOptions;
-  readonly secondsList = secondOptions;
   settingsForm: FormGroup;
   isRequeueingSources = false;
   private destroy$ = new Subject<void>();
@@ -98,12 +95,8 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
       scraper_retries: [2],
       scraper_timeout: [7500],
       scraper_respect_robots_txt: [true],
-      scraper_timer: this.fb.group({
-        days: [0],
-        hours: [9],
-        minutes: [0],
-        seconds: [0]
-      }),
+      monthly_scrapes_per_workspace: [3000, [Validators.required, Validators.min(1)]],
+      unlimited_monthly_scrapes: [false],
       scrape_sites: this.fb.array([this.createScrapeSiteControl()]),
       proxy_limit_enabled: [false],
       proxy_limit_max_per_user: [0],
@@ -119,12 +112,8 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
       scraper_retries: settings.scraper.retries,
       scraper_timeout: settings.scraper.timeout,
       scraper_respect_robots_txt: settings.scraper.respect_robots_txt ?? true,
-      scraper_timer: {
-        days: settings.scraper.scraper_timer.days,
-        hours: settings.scraper.scraper_timer.hours,
-        minutes: settings.scraper.scraper_timer.minutes,
-        seconds: settings.scraper.scraper_timer.seconds
-      },
+      monthly_scrapes_per_workspace: settings.scraper.monthly_scrapes_per_workspace ?? 3000,
+      unlimited_monthly_scrapes: settings.scraper.unlimited_monthly_scrapes ?? false,
       proxy_limit_enabled: settings.proxy_limits.enabled,
       proxy_limit_max_per_user: settings.proxy_limits.max_per_user,
       proxy_limit_exclude_admins: settings.proxy_limits.exclude_admins
@@ -172,19 +161,26 @@ export class AdminScraperComponent implements OnInit, OnDestroy {
     return this.settingsForm.get('scrape_sites') as FormArray<FormControl<string>>;
   }
 
-  get scraperCadenceLabel(): string {
-    const timer = this.settingsForm.get('scraper_timer')?.value ?? {};
-    const timerParts: Array<[number, string]> = [
-      [Number(timer.days ?? 0), 'day'],
-      [Number(timer.hours ?? 0), 'hour'],
-      [Number(timer.minutes ?? 0), 'minute'],
-      [Number(timer.seconds ?? 0), 'second'],
-    ];
-    const parts = timerParts
-      .filter(([value]) => value > 0)
-      .map(([value, unit]) => `${value} ${unit}${value === 1 ? '' : 's'}`);
+  get unlimitedMonthlyScrapes(): boolean {
+    return this.settingsForm.get('unlimited_monthly_scrapes')?.value === true;
+  }
 
-    return parts.length ? parts.join(' ') : 'Continuous';
+  get monthlyScrapesLabel(): string {
+    if (this.unlimitedMonthlyScrapes) {
+      return 'No limit';
+    }
+    const value = Number(this.settingsForm.get('monthly_scrapes_per_workspace')?.value ?? 0);
+    return Number.isFinite(value) && value > 0 ? `${Math.round(value).toLocaleString()} scrapes` : 'Not set';
+  }
+
+  /** Example cadence for ten sources in a 30-day month, at the 15-minute floor. */
+  get scraperCadenceExample(): string {
+    const value = Number(this.settingsForm.get('monthly_scrapes_per_workspace')?.value ?? 0);
+    if (!Number.isFinite(value) || value <= 0) {
+      return '';
+    }
+    const seconds = Math.max(15 * 60, (30 * 24 * 3600 * 10) / value);
+    return `For example, ten sources are scraped about ${formatApproximateDuration(seconds)}.`;
   }
 
   get scraperThreadLimit(): number {
