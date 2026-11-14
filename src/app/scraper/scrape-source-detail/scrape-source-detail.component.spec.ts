@@ -127,7 +127,7 @@ describe('ScrapeSourceDetailComponent', () => {
   it('shows scraping errors independently of proxy health', () => {
     component.detail.update(detail => detail ? {...detail, last_scrape_status: 'error', last_scrape_error: 'source returned HTTP 503'} : null);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.source-scrape-status').textContent).toContain('Scrape failed');
+    expect(fixture.nativeElement.querySelector('app-detail-status-banner').textContent).toContain('Scrape failed');
     expect(fixture.nativeElement.querySelector('.scrape-error').textContent).toContain('HTTP 503');
   });
 
@@ -145,7 +145,7 @@ describe('ScrapeSourceDetailComponent', () => {
     expect(cycle).toContain('2026');
     expect(fixture.nativeElement.querySelector('.source-facts').textContent)
       .toContain('Provider requested a delay with Retry-After');
-    expect(fixture.nativeElement.querySelector('.source-scrape-status').textContent).toContain('Scrape failed');
+    expect(fixture.nativeElement.querySelector('app-detail-status-banner').textContent).toContain('Scrape failed');
   });
 
   it('draws one health cell per percent and keeps a single alive proxy visible', () => {
