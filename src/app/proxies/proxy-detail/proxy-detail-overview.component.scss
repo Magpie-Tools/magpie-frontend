@@ -10,8 +10,10 @@
 
 .overview-health,
 .overview-availability {
+  --panel-pad-block: clamp(1.1rem, 2vw, 1.5rem);
+  --panel-pad-inline: clamp(1.1rem, 2vw, 1.6rem);
   min-width: 0;
-  padding: clamp(1.1rem, 2vw, 1.5rem) clamp(1.1rem, 2vw, 1.6rem);
+  padding: var(--panel-pad-block) var(--panel-pad-inline);
 }
 
 .overview-availability {
@@ -28,22 +30,10 @@
   }
 }
 
-.overview-health__heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-
-  .check-summary {
-    min-width: 0;
-    padding: 0;
-    border-bottom: 0;
-  }
-
-  .check-summary__time {
-    margin-left: 0.15rem;
-    font-family: "Geist Mono", "SFMono-Regular", Consolas, monospace;
-  }
+// The latest-check band spans the panel edge to edge, so it bleeds out of the panel padding.
+.overview-health app-detail-status-banner {
+  --status-banner-inset-block: var(--panel-pad-block);
+  --status-banner-inset-inline: var(--panel-pad-inline);
 }
 
 .range-switch {
@@ -308,11 +298,6 @@
 }
 
 @container proxy-detail (max-width: 520px) {
-  .overview-health__heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
   .overview-columns,
   .overview-band__body {
     grid-template-columns: minmax(0, 1fr);

@@ -184,8 +184,10 @@ input {
   display: flex;
   min-width: 0;
   flex-direction: column;
+  --panel-pad-block: clamp(1.1rem, 2vw, 1.5rem);
+  --panel-pad-inline: clamp(1.1rem, 2vw, 1.6rem);
   gap: .85rem;
-  padding: clamp(1.1rem, 2vw, 1.5rem) clamp(1.1rem, 2vw, 1.6rem);
+  padding: var(--panel-pad-block) var(--panel-pad-inline);
 }
 
 .health-panel,
@@ -196,23 +198,11 @@ input {
 .scrape-panel {
   gap: 1.375rem;
 
-  .check-summary {
-    padding: 0;
-    border-bottom: 0;
+  // The latest-scrape band spans the panel edge to edge, so it bleeds out of the panel padding.
+  app-detail-status-banner {
+    --status-banner-inset-block: var(--panel-pad-block);
+    --status-banner-inset-inline: var(--panel-pad-inline);
   }
-
-  .check-summary__time {
-    margin-left: .15rem;
-    font-family: "Geist Mono", "SFMono-Regular", Consolas, monospace;
-  }
-}
-
-.source-scrape-status {
-  --scrape-status-text-color: #fff;
-  --scrape-status-font-size: 1.35rem;
-  --scrape-status-font-weight: 560;
-  --scrape-status-gap: .65rem;
-  --scrape-status-dot-size: .42rem;
 }
 
 .scrape-error {

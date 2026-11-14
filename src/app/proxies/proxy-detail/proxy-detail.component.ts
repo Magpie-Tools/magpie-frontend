@@ -27,6 +27,7 @@ import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag
 import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
 import {BreadcrumbService} from '../../services/breadcrumb.service';
+import {DetailStatusBannerComponent} from '../../shared/detail-status-banner/detail-status-banner.component';
 
 type CopyField = 'ip' | 'port' | 'address' | 'username' | 'password' | 'combined' | 'credentialAddress';
 
@@ -59,6 +60,7 @@ interface ReputationSignalStructuredItem {
     NgClass,
     ProxyTagSelectorComponent,
     ProxyTagManagerComponent,
+    DetailStatusBannerComponent,
   ],
   templateUrl: './proxy-detail.component.html',
   styleUrls: ['./proxy-detail-reputation.component.scss', './proxy-detail.component.scss', './proxy-detail-overview.component.scss']

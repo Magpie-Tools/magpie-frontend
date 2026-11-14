@@ -4,7 +4,8 @@ import {HlmPopoverImports} from '@spartan-ng/helm/popover';
 import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
 import {SourceFetchModeComponent} from '../source-fetch-mode/source-fetch-mode.component';
-import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
+import {DetailStatusBannerComponent} from '../../shared/detail-status-banner/detail-status-banner.component';
+import {scrapeStatusLabel, scrapeStatusTone} from '../../models/ScrapeSourceStatus';
 import {Component, OnDestroy, OnInit, computed, effect, inject, signal} from '@angular/core';
 import {BreadcrumbService} from '../../services/breadcrumb.service';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
@@ -62,7 +63,7 @@ type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
     HlmPopoverImports,
     HlmTooltip,
     CommonModule,
-    SourceScrapeStatusComponent,
+    DetailStatusBannerComponent,
     SourceFetchModeComponent,
     SourceAutoTagsComponent,
     RouterLink,
@@ -87,6 +88,8 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   sourceId = signal<number | undefined>(undefined);
   detail = signal<ScrapeSourceDetail | null>(null);
   /** Current time, refreshed on a timer so the scrape cycle keeps moving while the page is open. */
+  readonly scrapeStatusLabel = scrapeStatusLabel;
+  readonly scrapeStatusTone = scrapeStatusTone;
   private readonly now = signal(Date.now());
   private clockIntervalId?: ReturnType<typeof setInterval>;
   readonly scrapeCycle = computed(() =>

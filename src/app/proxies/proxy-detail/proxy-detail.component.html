@@ -168,22 +168,13 @@
           <div class="overview-hero">
             <section class="overview-health" aria-labelledby="route-overview-title">
               <h2 id="route-overview-title" class="sr-only">Overview</h2>
-              <div class="overview-health__heading">
-                <div class="check-summary">
-                  <div class="check-summary__result">
-                    <span
-                      class="status-dot"
-                      [ngClass]="latest ? (latest.alive ? 'alive' : 'dead') : 'unknown'"
-                      aria-hidden="true"
-                    ></span>
-                    <strong>{{ latest ? (latest.alive ? "Alive" : "Dead") : "Not checked" }}</strong>
-                  </div>
-                  <span class="check-summary__time">{{
-                    latest?.created_at
-                      ? (latest?.created_at | date)
-                      : "No check results yet"
-                  }}</span>
-                </div>
+              <app-detail-status-banner
+                [tone]="latest ? (latest.alive ? 'good' : 'bad') : 'neutral'"
+                [label]="latest ? (latest.alive ? 'Alive' : 'Dead') : 'Not checked'"
+                [timestamp]="latest?.created_at"
+                timestampPrefix="Last checked"
+                emptyText="No check results yet"
+              >
                 <div class="range-switch" role="group" aria-label="Time range">
                   @for (range of availabilityRanges; track range.hours) {
                     <button
@@ -195,7 +186,7 @@
                     >{{ range.label }}</button>
                   }
                 </div>
-              </div>
+              </app-detail-status-banner>
 
               <div class="mini-chart" aria-label="Average response time per hour">
                 @if (isLoadingStatisticHours()) {

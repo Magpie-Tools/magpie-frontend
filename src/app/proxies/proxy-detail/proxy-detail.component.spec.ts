@@ -77,7 +77,7 @@ describe('ProxyDetailComponent', () => {
   });
 
   it('shows an empty latest-check summary before any results exist', () => {
-    const summary = fixture.debugElement.query(By.css('.check-summary')).nativeElement as HTMLElement;
+    const summary = fixture.debugElement.query(By.css('app-detail-status-banner')).nativeElement as HTMLElement;
     expect(summary.textContent).toContain('Not checked');
     expect(summary.textContent).toContain('No check results yet');
   });
@@ -123,9 +123,9 @@ describe('ProxyDetailComponent', () => {
     ]);
     fixture.detectChanges();
 
-    const summary = fixture.debugElement.query(By.css('.check-summary')).nativeElement as HTMLElement;
+    const summary = fixture.debugElement.query(By.css('app-detail-status-banner')).nativeElement as HTMLElement;
     expect(summary.textContent).toContain('Dead');
-    expect(summary.querySelector('.status-dot.dead')).not.toBeNull();
+    expect(summary.dataset['tone']).toBe('bad');
     const protocol = fixture.debugElement.queryAll(By.css('.detail-item'))
       .find(item => item.nativeElement.textContent.includes('Check protocol'));
     expect(protocol?.nativeElement.textContent).toContain('HTTPS');
@@ -235,9 +235,9 @@ describe('ProxyDetailComponent', () => {
     fixture.detectChanges();
 
     expect(component.latestStatistic).toBeNull();
-    const summary = fixture.debugElement.query(By.css('.check-summary')).nativeElement as HTMLElement;
+    const summary = fixture.debugElement.query(By.css('app-detail-status-banner')).nativeElement as HTMLElement;
     expect(summary.textContent).toContain('Not checked');
-    expect(summary.querySelector('.status-dot.unknown')).not.toBeNull();
+    expect(summary.dataset['tone']).toBe('neutral');
   });
 
   it('loads three days of hourly results and reloads when the range changes', () => {

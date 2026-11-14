@@ -52,14 +52,13 @@
           <div class="overview-panels">
             <section class="scrape-panel" aria-labelledby="source-overview-title">
               <h2 id="source-overview-title" class="sr-only">Overview</h2>
-              <div class="check-summary">
-                <div class="check-summary__result">
-                  <app-source-scrape-status class="source-scrape-status" role="status"
-                    [status]="detail()?.last_scrape_status" />
-                </div>
-                <span class="check-summary__time">{{ detail()?.last_scraped_at
-                  ? (detail()?.last_scraped_at | date) : "Not scraped yet" }}</span>
-              </div>
+              <app-detail-status-banner
+                [tone]="scrapeStatusTone(detail()?.last_scrape_status)"
+                [label]="scrapeStatusLabel(detail()?.last_scrape_status)"
+                [timestamp]="detail()?.last_scraped_at"
+                timestampPrefix="Last scraped"
+                emptyText="Not scraped yet"
+              />
               @if (detail()?.last_scrape_error) {
                 <p class="scrape-error">
                   <i class="icon icon-info" aria-hidden="true"></i>
