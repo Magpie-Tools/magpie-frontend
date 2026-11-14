@@ -48,9 +48,10 @@
         @if (isLoading() && !detail()) {
           <div class="card-loading"><app-loading></app-loading></div>
         } @else {
-          <div class="overview-layout">
-            <section class="source-overview" aria-labelledby="source-overview-title">
-              <h2 id="source-overview-title" class="overview-title">Overview</h2>
+          @let cycle = scrapeCycle();
+          <div class="overview-panels">
+            <section class="scrape-panel" aria-labelledby="source-overview-title">
+              <h2 id="source-overview-title" class="sr-only">Overview</h2>
               <div class="check-summary">
                 <div class="check-summary__result">
                   <app-source-scrape-status class="source-scrape-status" role="status"
@@ -65,160 +66,192 @@
                   <span>{{ detail()?.last_scrape_error }}</span>
                 </p>
               }
-              <div class="fact-list">
-                <div class="detail-item">
-                  <span class="label">Next scrape</span>
-                  <span class="value">{{ detail()?.next_scrape_at
-                    ? (detail()?.next_scrape_at | date) : "Pending" }}</span>
-                </div>
-                @if (detail()?.scrape_schedule_reason) {
-                  <div class="detail-item">
-                    <span class="label">Schedule</span>
-                    <span class="value">{{ detail()?.scrape_schedule_reason }}</span>
-                  </div>
-                }
-                <div class="detail-item">
-                  <span class="label">Linked proxies</span>
-                  <span class="value">{{ totalProxies | number }}</span>
-                </div>
+              <div class="scrape-figures">
                 <div class="detail-item">
                   <span class="label">Found in latest scrape</span>
-                  <span class="value">{{ detail()?.last_scrape_proxy_count != null
-                    ? (detail()?.last_scrape_proxy_count | number) : "Not recorded" }}</span>
+                  <strong>{{ detail()?.last_scrape_proxy_count != null
+                    ? (detail()?.last_scrape_proxy_count | number) : "—" }}</strong>
                 </div>
                 <div class="detail-item">
-                  <span class="label">Source added</span>
-                  <span class="value">{{ detail()?.added_at ? (detail()?.added_at | date: "mediumDate") : "Unknown" }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Last proxy added</span>
-                  <span class="value">{{ detail()?.last_proxy_added_at
-                    ? (detail()?.last_proxy_added_at | date) : "Never" }}</span>
+                  <span class="label">Linked proxies</span>
+                  <strong>{{ totalProxies | number }}</strong>
                 </div>
               </div>
-              <section class="source-settings" aria-label="Source settings">
-                <div class="source-settings__fields">
-                  <app-source-fetch-mode inputId="source-javascript" [compact]="true"
-                    [enabled]="detail()?.fetch_mode === 'browser'"
-                    [disabled]="!workspaces.canOperate() || isLoading() || savingAutoTags()" [saving]="savingFetchMode()"
-                    (enabledChange)="setRequiresJavaScript($event)" />
-                  <app-source-auto-tags [compact]="true"
-                    [tagIds]="automaticTagIds()"
-                    [disabled]="!workspaces.canOperate() || isLoading() || savingFetchMode()"
-                    [saving]="savingAutoTags()"
-                    (tagIdsChange)="setAutomaticTagIds($event)"
-                    (catalogChanged)="onTagCatalogChanged()" />
+              <div class="scrape-cycle">
+                <div class="scrape-cycle__heading">
+                  <span class="label">Scrape cycle</span>
+                  <span class="value">
+                    @if (cycle.countdown) {
+                      Next scrape in <b>{{ cycle.countdown }}</b>
+                    } @else {
+                      {{ cycle.due ? "Next scrape due" : "Next scrape pending" }}
+                    }
+                  </span>
                 </div>
-              </section>
+                <div
+                  class="scrape-cycle__track"
+                  role="progressbar"
+                  aria-label="Time elapsed between the last and the next scrape"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  [attr.aria-valuenow]="cycle.progress | number: '1.0-0'"
+                  [style.--cycle-progress.%]="cycle.progress"
+                >
+                  <span class="scrape-cycle__fill"></span>
+                  @if (cycle.countdown || cycle.due) {
+                    <span class="scrape-cycle__now"></span>
+                  }
+                </div>
+                <div class="scrape-cycle__ends">
+                  <span>Last scrape <span>{{ detail()?.last_scraped_at
+                    ? (detail()?.last_scraped_at | date: cycleTimeFormat(detail()?.last_scraped_at)) : "—" }}</span></span>
+                  <span>Next scrape <span>{{ detail()?.next_scrape_at
+                    ? (detail()?.next_scrape_at | date: cycleTimeFormat(detail()?.next_scrape_at)) : "Pending" }}</span></span>
+                </div>
+              </div>
             </section>
 
-            <aside
-              class="source-insights"
-              aria-label="Source health and reputation"
-            >
-              <section class="health-summary" aria-labelledby="health-summary-title">
-                <div class="insight-heading">
-                  <h2 id="health-summary-title" class="overview-title">Proxy health</h2>
-                  <strong class="insight-score">{{ aliveRatioDisplay }}</strong>
-                </div>
-
-                <div class="health-bar" role="img" [attr.aria-label]="aliveCount + ' alive, ' + deadCount + ' dead, ' + unknownCount + ' unknown'">
-                  <span
-                    class="health-bar__segment health-bar__segment--alive"
-                    [style.width.%]="healthPercent(aliveCount)"
-                    [attr.title]="aliveCount + ' alive'"
-                  ></span>
-                  <span
-                    class="health-bar__segment health-bar__segment--dead"
-                    [style.width.%]="healthPercent(deadCount)"
-                    [attr.title]="deadCount + ' dead'"
-                  ></span>
-                  <span
-                    class="health-bar__segment health-bar__segment--unknown"
-                    [style.width.%]="healthPercent(unknownCount)"
-                    [attr.title]="unknownCount + ' unknown'"
-                  ></span>
-                </div>
-                <ul class="health-legend" aria-label="Proxy health counts">
-                  <li class="health-legend__item health-legend__item--alive">
-                    <span>Alive</span><strong>{{ aliveCount | number }}</strong>
-                  </li>
-                  <li class="health-legend__item health-legend__item--dead">
-                    <span>Dead</span><strong>{{ deadCount | number }}</strong>
-                  </li>
-                  <li class="health-legend__item health-legend__item--unknown">
-                    <span>Unknown</span><strong>{{ unknownCount | number }}</strong>
-                  </li>
-                </ul>
-              </section>
-
-              <section
-                class="reputation-summary"
-                aria-labelledby="reputation-summary-title"
+            <section class="health-panel" aria-labelledby="health-summary-title">
+              <h2 id="health-summary-title" class="overview-title">Proxy health</h2>
+              <div
+                class="share-grid"
+                role="img"
+                [attr.aria-label]="aliveCount + ' alive, ' + deadCount + ' dead, ' + unknownCount + ' unknown'"
               >
-                <div class="reputation-summary__heading">
-                  <h2 id="reputation-summary-title" class="overview-title">Average reputation</h2>
-                  <div class="reputation-summary__score">
+                @for (cell of healthCells(); track $index) {
+                  <span [ngClass]="'share-cell--' + cell"></span>
+                }
+              </div>
+              <div class="share-legend" aria-hidden="true">
+                <span>Alive</span><i class="share-cell--alive"></i>
+                <span>Dead</span><i class="share-cell--dead"></i>
+                <span>Unknown</span><i class="share-cell--unknown"></i>
+                <span class="share-legend__note">1 cell = 1% of linked proxies</span>
+              </div>
+              <div class="health-stats stat-tiles">
+                <div>
+                  <span class="label">Alive</span>
+                  <strong>{{ aliveCount | number }}<small>{{ healthShare(aliveCount) }}</small></strong>
+                </div>
+                <div>
+                  <span class="label">Dead</span>
+                  <strong>{{ deadCount | number }}<small>{{ healthShare(deadCount) }}</small></strong>
+                </div>
+                <div>
+                  <span class="label">Unknown</span>
+                  <strong>{{ unknownCount | number }}<small>{{ healthShare(unknownCount) }}</small></strong>
+                </div>
+              </div>
+            </section>
+
+            <section class="reputation-panel" aria-labelledby="reputation-summary-title">
+              <h2 id="reputation-summary-title" class="overview-title">Average reputation</h2>
+              <div class="reputation-overview">
+                <div class="reputation-ring">
+                  <svg viewBox="0 0 36 36" aria-hidden="true">
+                    <circle class="reputation-ring__track" cx="18" cy="18" r="15.5" pathLength="100" />
                     @if (averageReputationScore !== null) {
-                      <strong>{{ averageReputationDisplay }}<em>/100</em></strong>
-                    } @else {
-                      <strong>—</strong>
+                      <circle
+                        [ngClass]="'reputation-ring__value reputation-ring__value--' + averageReputationLabel"
+                        cx="18" cy="18" r="15.5" pathLength="100"
+                        [attr.stroke-dasharray]="reputationRingDash"
+                      />
                     }
-                    <span [ngClass]="reputationBadgeClass(averageReputationLabel)">
-                      {{ averageReputationLabel | titlecase }}
+                  </svg>
+                  @if (averageReputationScore !== null) {
+                    <strong [attr.aria-label]="averageReputationDisplay + ' out of 100'">{{ averageReputationDisplay }}</strong>
+                  } @else {
+                    <strong aria-label="No score">—</strong>
+                  }
+                </div>
+                <div class="reputation-overview__copy">
+                  <span [ngClass]="reputationBadgeClass(averageReputationLabel)">
+                    {{ averageReputationLabel | titlecase }}
+                  </span>
+                  @if (ratedProxies > 0) {
+                    <span>Out of 100, across {{ ratedProxies | number }} rated {{ ratedProxies === 1 ? "proxy" : "proxies" }}</span>
+                  } @else {
+                    <span>No rated proxies yet</span>
+                  }
+                </div>
+              </div>
+
+              @if (totalProxies === 0) {
+                <p>No proxies are linked to this source yet.</p>
+              } @else {
+                <div class="reputation-list" role="group" aria-label="Reputation breakdown">
+                  <div class="reputation-row">
+                    <span>Good</span>
+                    <span class="reputation-meter">
+                      <span
+                        class="progress-bar__fill--good"
+                        [style.width.%]="reputationPercent('good')"
+                      ></span>
                     </span>
+                    <strong>{{ reputationBreakdown.good | number }}</strong>
+                  </div>
+                  <div class="reputation-row">
+                    <span>Neutral</span>
+                    <span class="reputation-meter">
+                      <span
+                        class="progress-bar__fill--neutral"
+                        [style.width.%]="reputationPercent('neutral')"
+                      ></span>
+                    </span>
+                    <strong>{{ reputationBreakdown.neutral | number }}</strong>
+                  </div>
+                  <div class="reputation-row">
+                    <span>Poor</span>
+                    <span class="reputation-meter">
+                      <span
+                        class="progress-bar__fill--poor"
+                        [style.width.%]="reputationPercent('poor')"
+                      ></span>
+                    </span>
+                    <strong>{{ reputationBreakdown.poor | number }}</strong>
+                  </div>
+                  <div class="reputation-row">
+                    <span>Unknown</span>
+                    <span class="reputation-meter">
+                      <span
+                        class="progress-bar__fill--unknown"
+                        [style.width.%]="reputationPercent('unknown')"
+                      ></span>
+                    </span>
+                    <strong>{{ reputationBreakdown.unknown | number }}</strong>
                   </div>
                 </div>
-
-                @if (totalProxies === 0) {
-                  <p>No proxies are linked to this source yet.</p>
-                } @else {
-                  <div class="reputation-list" role="group" aria-label="Reputation breakdown">
-                    <div class="reputation-row">
-                      <span>Good</span>
-                      <span class="reputation-meter">
-                        <span
-                          class="progress-bar__fill--good"
-                          [style.width.%]="reputationPercent('good')"
-                        ></span>
-                      </span>
-                      <strong>{{ reputationBreakdown.good | number }}</strong>
-                    </div>
-                    <div class="reputation-row">
-                      <span>Neutral</span>
-                      <span class="reputation-meter">
-                        <span
-                          class="progress-bar__fill--neutral"
-                          [style.width.%]="reputationPercent('neutral')"
-                        ></span>
-                      </span>
-                      <strong>{{ reputationBreakdown.neutral | number }}</strong>
-                    </div>
-                    <div class="reputation-row">
-                      <span>Poor</span>
-                      <span class="reputation-meter">
-                        <span
-                          class="progress-bar__fill--poor"
-                          [style.width.%]="reputationPercent('poor')"
-                        ></span>
-                      </span>
-                      <strong>{{ reputationBreakdown.poor | number }}</strong>
-                    </div>
-                    <div class="reputation-row">
-                      <span>Unknown</span>
-                      <span class="reputation-meter">
-                        <span
-                          class="progress-bar__fill--unknown"
-                          [style.width.%]="reputationPercent('unknown')"
-                        ></span>
-                      </span>
-                      <strong>{{ reputationBreakdown.unknown | number }}</strong>
-                    </div>
-                  </div>
-                }
-              </section>
-            </aside>
+              }
+            </section>
           </div>
+
+          <section class="source-facts" aria-label="Source details and settings">
+            @if (detail()?.scrape_schedule_reason) {
+              <div class="detail-item">
+                <span class="label">Schedule</span>
+                <span class="value">{{ detail()?.scrape_schedule_reason }}</span>
+              </div>
+            }
+            <div class="detail-item">
+              <span class="label">Source added</span>
+              <span class="value">{{ detail()?.added_at ? (detail()?.added_at | date: "mediumDate") : "Unknown" }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Last proxy added</span>
+              <span class="value">{{ detail()?.last_proxy_added_at
+                ? (detail()?.last_proxy_added_at | date) : "Never" }}</span>
+            </div>
+            <app-source-fetch-mode inputId="source-javascript" [stacked]="true"
+              [enabled]="detail()?.fetch_mode === 'browser'"
+              [disabled]="!workspaces.canOperate() || isLoading() || savingAutoTags()" [saving]="savingFetchMode()"
+              (enabledChange)="setRequiresJavaScript($event)" />
+            <app-source-auto-tags [stacked]="true"
+              [tagIds]="automaticTagIds()"
+              [disabled]="!workspaces.canOperate() || isLoading() || savingFetchMode()"
+              [saving]="savingAutoTags()"
+              (tagIdsChange)="setAutomaticTagIds($event)"
+              (catalogChanged)="onTagCatalogChanged()" />
+          </section>
         }
       </section>
 

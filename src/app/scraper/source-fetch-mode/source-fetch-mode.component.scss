@@ -68,3 +68,25 @@
 
   .fetch-mode__icon { display: none; }
 }
+
+.fetch-mode.fetch-mode--stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .45rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+
+  .fetch-mode__icon { display: none; }
+  .fetch-mode__control { flex-direction: row-reverse; }
+
+  .fetch-mode__heading label {
+    color: rgba(255, 255, 255, .62);
+    font-size: 0.6875rem;
+    font-weight: 620;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+  }
+}

@@ -5,7 +5,7 @@ import {TablePageEvent} from '../../shared/ui/pagination.component';
 import {loadProxyFilterOptions} from '../../shared/proxy-filter-options';
 import {SourceFetchModeComponent} from '../source-fetch-mode/source-fetch-mode.component';
 import {SourceScrapeStatusComponent} from '../source-scrape-status/source-scrape-status.component';
-import {Component, OnDestroy, OnInit, effect, inject, signal} from '@angular/core';
+import {Component, OnDestroy, OnInit, computed, effect, inject, signal} from '@angular/core';
 import {BreadcrumbService} from '../../services/breadcrumb.service';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {FormBuilder, FormGroup} from '@angular/forms';
@@ -50,6 +50,7 @@ import {ProxyTagService} from '../../services/proxy-tag.service';
 import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag-manager.component';
 import {WorkspaceService} from '../../services/workspace.service';
 import {SourceAutoTagsComponent} from '../source-auto-tags/source-auto-tags.component';
+import {healthShareCells, scrapeCycle, sharePercent} from './source-overview';
 
 type ReputationLabel = 'good' | 'neutral' | 'poor' | 'unknown';
 
@@ -85,6 +86,15 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   savingAutoTags = signal(false);
   sourceId = signal<number | undefined>(undefined);
   detail = signal<ScrapeSourceDetail | null>(null);
+  /** Current time, refreshed on a timer so the scrape cycle keeps moving while the page is open. */
+  private readonly now = signal(Date.now());
+  private clockIntervalId?: ReturnType<typeof setInterval>;
+  readonly scrapeCycle = computed(() =>
+    scrapeCycle(this.detail()?.last_scraped_at, this.detail()?.next_scrape_at, this.now()));
+  readonly healthCells = computed(() => {
+    const detail = this.detail();
+    return healthShareCells(detail?.alive_count ?? 0, detail?.dead_count ?? 0, detail?.unknown_count ?? 0);
+  });
   isLoading = signal(true);
   proxies = signal<ProxyInfo[]>([]);
   proxyPage = signal(1);
@@ -137,6 +147,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.clockIntervalId = setInterval(() => this.now.set(Date.now()), 30_000);
     this.tagService.load().subscribe({
       error: err => this.notification.showError(
         'Could not load proxy tags: ' + (err?.error?.error ?? err?.message ?? 'Unknown error'),
@@ -176,6 +187,7 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    clearInterval(this.clockIntervalId);
     clearTimeout(this.copyFeedbackTimeout);
     if (this.proxySearchDebounce) {
       clearTimeout(this.proxySearchDebounce);
@@ -200,13 +212,13 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     return this.detail()?.unknown_count ?? 0;
   }
 
-  get aliveRatioDisplay(): string {
-    const total = this.totalProxies;
-    if (total === 0) {
-      return 'No data';
-    }
-    const ratio = Math.round((this.aliveCount / total) * 100);
-    return `${ratio}% alive`;
+  healthShare(count: number): string {
+    return sharePercent(count, this.totalProxies);
+  }
+
+  /** A time on the current day is shown without its date in the scrape cycle. */
+  cycleTimeFormat(value: string | null | undefined): string | undefined {
+    return value && new Date(value).toDateString() === new Date(this.now()).toDateString() ? 'HH:mm' : undefined;
   }
 
   get averageReputationScore(): number | null {
@@ -257,12 +269,15 @@ export class ScrapeSourceDetailComponent implements OnInit, OnDestroy {
     return (breakdown[label] / total) * 100;
   }
 
-  healthPercent(count: number): number {
-    const total = this.totalProxies;
-    if (total === 0) {
-      return 0;
-    }
-    return (count / total) * 100;
+  /** Proxies with a good, neutral, or poor rating; the average is taken across these. */
+  get ratedProxies(): number {
+    const breakdown = this.reputationBreakdown;
+    return breakdown.good + breakdown.neutral + breakdown.poor;
+  }
+
+  get reputationRingDash(): string {
+    const score = Math.min(100, Math.max(0, this.averageReputationScore ?? 0));
+    return `${score} ${100 - score}`;
   }
 
   reputationBadgeClass(label: ReputationLabel): string {

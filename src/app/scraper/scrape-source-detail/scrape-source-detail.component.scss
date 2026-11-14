@@ -18,9 +18,6 @@
 .detail-stage {
   --detail-border: rgba(239, 229, 237, 0.15);
   --detail-muted: rgba(222, 215, 222, 0.59);
-  --health-alive: #51ce8a;
-  --health-dead: #e77179;
-  --health-unknown: #9ba5b4;
   position: relative;
   isolation: isolate;
   width: min(100%, 1440px);
@@ -173,21 +170,41 @@ input {
   box-shadow: 0 16px 34px rgba(4, 4, 6, .2), inset 0 1px 0 rgba(255, 255, 255, .03);
 }
 
-.overview-layout {
+// Overview card: three equal panels (scrape, health, reputation) above a row of source facts and
+// settings. Equal thirds keep every panel filled at any card width.
+.overview-panels {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
 
-.source-overview,
-.health-summary,
-.reputation-summary {
+.scrape-panel,
+.health-panel,
+.reputation-panel {
+  display: flex;
   min-width: 0;
-  padding: clamp(1.1rem, 2vw, 1.6rem);
+  flex-direction: column;
+  gap: .85rem;
+  padding: clamp(1.1rem, 2vw, 1.5rem) clamp(1.1rem, 2vw, 1.6rem);
 }
 
-.source-overview {
-  .fact-list { padding-bottom: 0; }
-  .value { overflow-wrap: anywhere; }
+.health-panel,
+.reputation-panel {
+  border-left: 1px solid rgba(255, 255, 255, .08);
+}
+
+.scrape-panel {
+  gap: 1.375rem;
+
+  .check-summary {
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .check-summary__time {
+    margin-left: .15rem;
+    font-family: "Geist Mono", "SFMono-Regular", Consolas, monospace;
+  }
 }
 
 .source-scrape-status {
@@ -202,7 +219,7 @@ input {
   display: flex;
   align-items: flex-start;
   gap: .45rem;
-  margin-top: .75rem;
+  margin-top: -.75rem;
   color: #e8a0a6;
   font-size: 0.75rem;
   line-height: 1.6;
@@ -212,100 +229,121 @@ input {
   span { min-width: 0; }
 }
 
-.source-insights {
-  min-width: 0;
-  border-left: 1px solid rgba(255, 255, 255, .09);
-  background: rgba(255, 255, 255, .012);
+.scrape-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .875rem clamp(1.75rem, 5cqi, 4rem);
+
+  strong {
+    color: #fff;
+    font-size: 2.125rem;
+    font-weight: 620;
+    letter-spacing: -.05em;
+    line-height: 1.05;
+  }
 }
 
-.insight-heading,
-.reputation-summary__heading,
-.reputation-summary__score {
+// Where the source sits between its last scrape and the next one.
+.scrape-cycle {
+  display: grid;
+  gap: .625rem;
+  margin-top: auto;
+}
+
+.scrape-cycle__heading,
+.scrape-cycle__ends {
   display: flex;
-  min-width: 0;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
-  gap: .75rem;
+  gap: .25rem 1rem;
 }
 
-.insight-score,
-.reputation-summary__score strong {
+.scrape-cycle__heading b {
   color: #fff;
-  font-size: 1.25rem;
-  font-weight: 620;
-  letter-spacing: -.045em;
-  white-space: nowrap;
+  font-weight: 600;
 }
 
-.health-bar {
-  display: flex;
-  height: .38rem;
-  gap: 2px;
-  margin-top: 1rem;
-  overflow: hidden;
+.scrape-cycle__track {
+  position: relative;
+  height: .375rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, .075);
 }
 
-.health-bar__segment {
-  min-width: 0;
-  height: 100%;
-
-  &--alive { background: var(--health-alive); }
-  &--dead { background: var(--health-dead); }
-  &--unknown { background: var(--health-unknown); }
+.scrape-cycle__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--cycle-progress);
+  border-radius: inherit;
+  background: rgba(var(--theme-primary-300-rgb), .85);
 }
 
-.health-legend {
+// Kept inside the track at both ends.
+.scrape-cycle__now {
+  position: absolute;
+  top: 50%;
+  left: clamp(.3rem, var(--cycle-progress), calc(100% - .3rem));
+  width: .6rem;
+  height: .6rem;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.scrape-cycle__ends {
+  color: var(--detail-muted);
+  font-size: 0.72rem;
+
+  span span { font-family: "Geist Mono", "SFMono-Regular", Consolas, monospace; }
+}
+
+// One cell per percent of the linked proxies, coloured like the proxy availability grid.
+.share-grid {
+  display: grid;
+  grid-template-columns: repeat(25, minmax(0, 1fr));
+  gap: .19rem;
+
+  span {
+    height: 1.3rem;
+    border-radius: .2rem;
+  }
+}
+
+.share-cell--alive { background: color-mix(in srgb, var(--status-good) 85%, transparent); }
+.share-cell--dead { background: color-mix(in srgb, var(--status-bad) 80%, transparent); }
+.share-cell--unknown { background: rgba(255, 255, 255, .075); }
+
+.share-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: .5rem 1.25rem;
-  margin: .75rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.health-legend__item {
-  display: inline-flex;
   align-items: center;
-  gap: .35rem;
+  gap: .3rem;
   color: var(--detail-muted);
-  font-size: 0.75rem;
+  font-size: 0.65rem;
 
-  &::before {
-    content: '';
-    width: .35rem;
-    height: .35rem;
-    flex: 0 0 auto;
-    border-radius: 50%;
-    background: var(--legend-color);
+  i {
+    width: .65rem;
+    height: .65rem;
+    border-radius: .16rem;
   }
 
-  strong { color: rgba(255, 255, 255, .82); font-weight: 540; }
-  &--alive { --legend-color: var(--health-alive); }
-  &--dead { --legend-color: var(--health-dead); }
-  &--unknown { --legend-color: var(--health-unknown); }
+  i + span { margin-left: .4rem; }
+  .share-legend__note { margin-left: auto; }
 }
 
-.reputation-summary {
-  border-top: 1px solid rgba(255, 255, 255, .08);
+.health-stats {
+  margin-top: auto;
+
+  small:empty { display: none; }
+}
+
+.reputation-panel {
+  .reputation-overview { margin-bottom: 0; }
 
   > p {
-    margin-top: .65rem;
     color: var(--detail-muted);
     font-size: 0.75rem;
-  }
-}
-
-.reputation-summary__score {
-  flex-shrink: 0;
-
-  em {
-    margin-left: .12rem;
-    color: var(--detail-muted);
-    font-size: 0.72rem;
-    font-style: normal;
-    letter-spacing: 0;
   }
 }
 
@@ -341,7 +379,7 @@ input {
   }
 }
 
-.reputation-list { display: grid; gap: .3rem; margin-top: .85rem; }
+.reputation-list { display: grid; gap: .3rem; margin-top: auto; }
 
 .reputation-row {
   display: grid;
@@ -364,25 +402,21 @@ input {
   > span { display: block; height: 100%; border-radius: inherit; }
 }
 
-.progress-bar__fill--good { background: var(--health-alive); }
+.progress-bar__fill--good { background: var(--reputation-good); }
 .progress-bar__fill--neutral { background: var(--reputation-neutral); }
-.progress-bar__fill--poor { background: var(--health-dead); }
-.progress-bar__fill--unknown { background: var(--health-unknown); }
+.progress-bar__fill--poor { background: var(--reputation-poor); }
+.progress-bar__fill--unknown { background: color-mix(in srgb, var(--reputation-unknown) 60%, transparent); }
 
-.source-settings {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, .08);
-}
-
-.source-settings__fields {
+.source-facts {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  gap: 1.25rem;
-  padding-top: 1rem;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: .875rem clamp(1.1rem, 2vw, 1.6rem);
+  padding: 1rem clamp(1.1rem, 2vw, 1.6rem) 1.125rem;
+  background: rgba(255, 255, 255, .012);
 
   > * { min-width: 0; }
+  .value { overflow-wrap: anywhere; }
 }
 
 .proxy-registry { min-width: 0; }
@@ -394,39 +428,36 @@ input {
   justify-content: center;
 }
 
-@container source-detail (max-width: 880px) {
-  .overview-layout { grid-template-columns: 1fr; }
+@container source-detail (max-width: 1000px) {
+  .overview-panels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-  .source-insights {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    border-top: 1px solid rgba(255, 255, 255, .08);
-    border-left: 0;
+  .scrape-panel {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
   }
 
-  .reputation-summary {
-    border-top: 0;
-    border-left: 1px solid rgba(255, 255, 255, .08);
-  }
+  .health-panel { border-left: 0; }
 
-  .reputation-summary__heading { flex-wrap: wrap; }
+  .source-facts {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @container source-detail (max-width: 600px) {
-  .source-insights { display: block; }
+  .overview-panels { grid-template-columns: minmax(0, 1fr); }
+  .scrape-panel { border-bottom: 0; }
 
-  .reputation-summary {
+  .health-panel,
+  .reputation-panel {
     border-top: 1px solid rgba(255, 255, 255, .08);
     border-left: 0;
   }
 
-  .reputation-summary__heading { flex-wrap: nowrap; }
-
+  .source-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @container source-detail (max-width: 500px) {
   .detail-stage { padding: .7rem; }
   .source-title { font-size: 1rem; }
-  .health-legend { gap: .5rem .85rem; }
-  .reputation-summary__heading { flex-wrap: wrap; }
 }

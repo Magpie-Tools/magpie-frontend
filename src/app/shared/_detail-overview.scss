@@ -74,3 +74,89 @@
   }
 }
 
+// Row of bordered figures, each a label above a number with an optional small unit.
+.stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.08);
+
+  > div {
+    display: grid;
+    min-width: 0;
+    gap: 0.15rem;
+    padding: 0.6rem 0.85rem;
+    background: #131315;
+  }
+
+  strong {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 620;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+  }
+
+  small {
+    margin-left: 0.12rem;
+    color: var(--detail-muted);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+}
+
+// Score ring with its badge and caption beside it.
+.reputation-overview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.reputation-overview__copy {
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+  color: var(--detail-muted);
+  font-size: 0.72rem;
+}
+
+.reputation-ring {
+  position: relative;
+  width: 4.4rem;
+  height: 4.4rem;
+  flex: none;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  circle {
+    fill: none;
+    stroke-width: 3.2;
+  }
+
+  strong {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 640;
+    letter-spacing: -0.05em;
+  }
+}
+
+.reputation-ring__track { stroke: rgba(255, 255, 255, 0.08); }
+.reputation-ring__value { stroke-linecap: round; }
+.reputation-ring__value--good { stroke: var(--reputation-good); }
+.reputation-ring__value--neutral { stroke: var(--reputation-neutral); }
+.reputation-ring__value--poor { stroke: var(--reputation-poor); }
+.reputation-ring__value--unknown { stroke: var(--reputation-unknown); }

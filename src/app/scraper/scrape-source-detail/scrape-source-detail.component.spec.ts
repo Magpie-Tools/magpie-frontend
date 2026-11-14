@@ -140,11 +140,30 @@ describe('ScrapeSourceDetailComponent', () => {
       scrape_schedule_reason: 'Provider requested a delay with Retry-After',
     } : null);
     fixture.detectChanges();
-    const facts = fixture.nativeElement.querySelector('.fact-list').textContent;
-    expect(facts).toContain('Next scrape');
-    expect(facts).toContain('2026');
-    expect(facts).toContain('Provider requested a delay with Retry-After');
+    const cycle = fixture.nativeElement.querySelector('.scrape-cycle').textContent;
+    expect(cycle).toContain('Next scrape');
+    expect(cycle).toContain('2026');
+    expect(fixture.nativeElement.querySelector('.source-facts').textContent)
+      .toContain('Provider requested a delay with Retry-After');
     expect(fixture.nativeElement.querySelector('.source-scrape-status').textContent).toContain('Scrape failed');
+  });
+
+  it('draws one health cell per percent and keeps a single alive proxy visible', () => {
+    component.detail.update(detail => detail ? {...detail, proxy_count: 195, alive_count: 1, dead_count: 84, unknown_count: 110} : null);
+    fixture.detectChanges();
+    const grid: HTMLElement = fixture.nativeElement.querySelector('.share-grid');
+    expect(grid.children.length).toBe(100);
+    expect(grid.querySelectorAll('.share-cell--alive').length).toBe(1);
+    expect(grid.querySelectorAll('.share-cell--dead').length).toBe(43);
+    const shares = Array.from(fixture.nativeElement.querySelectorAll('.health-stats small'), (share: Element) => share.textContent);
+    expect(shares).toEqual(['1%', '43%', '56%']);
+  });
+
+  it('shows the average reputation with the number of rated proxies', () => {
+    const panel: HTMLElement = fixture.nativeElement.querySelector('.reputation-panel');
+    expect(panel.querySelector('.reputation-ring strong')?.textContent).toBe('68');
+    expect(panel.querySelector('.reputation-ring__value--neutral')?.getAttribute('stroke-dasharray')).toBe('68 32');
+    expect(panel.textContent).toContain('across 20 rated proxies');
   });
 
   it('uses the same typography and height for all proxy toolbar buttons', () => {

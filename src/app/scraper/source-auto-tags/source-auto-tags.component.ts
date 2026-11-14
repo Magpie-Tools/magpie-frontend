@@ -17,6 +17,8 @@ export class SourceAutoTagsComponent {
   @Input() saving = false;
   @Input() forImport = false;
   @Input() compact = false;
+  /** Small label above the selector, for a row of labelled fields. */
+  @Input() stacked = false;
   @Output() tagIdsChange = new EventEmitter<number[]>();
   @Output() catalogChanged = new EventEmitter<void>();
 

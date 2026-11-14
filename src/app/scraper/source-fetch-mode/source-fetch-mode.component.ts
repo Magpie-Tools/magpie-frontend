@@ -7,7 +7,7 @@ import {TooltipComponent} from '../../tooltip/tooltip.component';
   selector: 'app-source-fetch-mode',
   imports: [HlmSwitch, FormsModule, TooltipComponent],
   template: `
-    <div class="fetch-mode" [class.fetch-mode--compact]="compact()" [attr.aria-busy]="saving()">
+    <div class="fetch-mode" [class.fetch-mode--compact]="compact()" [class.fetch-mode--stacked]="stacked()" [attr.aria-busy]="saving()">
       <div class="fetch-mode__copy">
         <span class="fetch-mode__icon"><i class="icon icon-code" aria-hidden="true"></i></span>
         <div class="fetch-mode__heading">
@@ -33,6 +33,8 @@ export class SourceFetchModeComponent {
   readonly saving = input(false);
   readonly hint = input('');
   readonly compact = input(false);
+  /** Small label above the switch, for a row of labelled fields. */
+  readonly stacked = input(false);
   readonly enabledChange = output<boolean>();
 
   private readonly toggle = viewChild(HlmSwitch);
