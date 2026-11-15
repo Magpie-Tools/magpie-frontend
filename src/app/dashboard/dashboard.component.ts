@@ -1,8 +1,7 @@
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
 import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
 import {Component, Inject, LOCALE_ID, OnDestroy, OnInit, signal} from '@angular/core';
-import {DecimalPipe} from '@angular/common';
-import {Subject} from 'rxjs';
+import {Subject, Subscription, interval, timer} from 'rxjs';
 import {finalize, takeUntil} from 'rxjs/operators';
 import {ProxyCheck} from '../models/ProxyCheck';
 import {KpiCardComponent} from './cards/kpi-card/kpi-card.component';
@@ -13,7 +12,8 @@ import {JudgeByPercentageCardComponent} from './cards/judge-by-percentage-card/j
 import {
   CountryBreakdownEntry,
   DASHBOARD_BACKEND_UNAVAILABLE_ERROR,
-  DashboardInfo,
+  DashboardSnapshotStatus,
+  DashboardView,
   DashboardViewer,
   FastestAliveProxy,
   GraphqlService,
@@ -35,7 +35,7 @@ import {buildInventoryChart, buildLatencyChart, buildReputationChart, CHART_LIMI
 import type {AppChartDefinition} from '../shared/ui/chart.component';
 
 interface SparklineMetric {
-  value: number;
+  value: number | null;
   history: number[];
   displayValue?: string | null;
   change?: number | null;
@@ -61,6 +61,29 @@ interface ProxyLineI18n {
 
 type FastestAliveSortDirection = 'fastest-right' | 'fastest-left';
 
+/** What the page knows about the snapshot behind the current data. */
+export interface DashboardSnapshotState {
+  status: DashboardSnapshotStatus;
+  rebuilding: boolean;
+  healthMasked: boolean;
+  collectedAt: Date | null;
+}
+
+/** Live check figures from the usage meter. */
+export interface DashboardCheckFigures {
+  checksThisMonth: number;
+  totalChecks: number;
+}
+
+/**
+ * While a snapshot is PENDING or rebuilding the page asks again after a
+ * jittered delay, for at most the claim cooldown plus the build deadline.
+ */
+export const DASHBOARD_REREQUEST_WINDOW_MS = 60_000;
+const DASHBOARD_REREQUEST_MIN_DELAY_MS = 2_000;
+const DASHBOARD_REREQUEST_JITTER_MS = 2_000;
+const DASHBOARD_AGE_TICK_MS = 30_000;
+
 const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirection';
 
 @Component({
@@ -68,7 +91,6 @@ const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirecti
   templateUrl: './dashboard.component.html',
   imports: [HlmSkeleton,
     PageLoadErrorComponent,
-    DecimalPipe,
     KpiCardComponent,
     ProxiesPerHourCardComponent,
     ProxyHistoryCardComponent,
@@ -81,6 +103,12 @@ const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirecti
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   dashboardInfo = signal<DashboardStatus>({ loading: false, loaded: false });
+  snapshot = signal<DashboardSnapshotState | null>(null);
+  checkFigures = signal<DashboardCheckFigures | null>(null);
+  /** Advances every 30 s so the snapshot age stays current. */
+  private readonly clock = signal(Date.now());
+  private rerequestSince: number | null = null;
+  private rerequest?: Subscription;
 
   readonly inventoryRange = signal('');
   readonly inventorySummary = signal('');
@@ -111,7 +139,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   fastestAliveCountryLegend = signal<FastestAliveProxyCountryLegend[]>([]);
   fastestAliveSortDirection = signal<FastestAliveSortDirection>(this.loadFastestAliveSortDirection());
 
-  reputationBreakdown = signal<ReputationBreakdown>({ good: 0, neutral: 0, poor: 0, unknown: 0 });
+  reputationBreakdown = signal<ReputationBreakdown | null>(null);
   reputationChart = signal<AppChartDefinition>({marks: [], scales: {x: null, y: null}});
 
   readonly proxiesPerHourTitle: string;
@@ -142,11 +170,55 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadDashboard();
+    interval(DASHBOARD_AGE_TICK_MS)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.clock.set(Date.now()));
   }
 
   ngOnDestroy(): void {
+    this.rerequest?.unsubscribe();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /** "Updated 3 min ago" for the data's build time, or null before any build. */
+  snapshotAgeLabel(): string | null {
+    const collectedAt = this.snapshot()?.collectedAt;
+    if (!collectedAt) {
+      return null;
+    }
+    const seconds = Math.max(0, Math.round((this.clock() - collectedAt.getTime()) / 1000));
+    if (seconds < 60) {
+      return 'Updated just now';
+    }
+    const minutes = Math.round(seconds / 60);
+    if (minutes < 60) {
+      return `Updated ${minutes} min ago`;
+    }
+    const hours = Math.round(minutes / 60);
+    return hours < 24 ? `Updated ${hours} h ago` : `Updated ${Math.round(hours / 24)} d ago`;
+  }
+
+  /** Short state of the snapshot, or null when it is simply current. */
+  snapshotStateLabel(): string | null {
+    const snapshot = this.snapshot();
+    if (!snapshot) {
+      return null;
+    }
+    if (snapshot.status === 'PENDING' || snapshot.rebuilding) {
+      return 'Updating';
+    }
+    if (snapshot.status === 'FAILED') {
+      return 'Update failed';
+    }
+    if (snapshot.status === 'STALE') {
+      return 'Not current';
+    }
+    return null;
+  }
+
+  formatCount(value: number | null | undefined): string {
+    return value === null || value === undefined ? '—' : this.numberFormatter.format(value);
   }
 
   onProxyHistoryRefresh(): void {
@@ -166,6 +238,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: ({viewer}) => {
+          this.rerequestSince = null;
           this.applyDashboardData(viewer);
           this.dashboardInfo.update((info) => ({ ...info, error: undefined, backendUnavailable: false }));
         },
@@ -185,6 +258,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadDashboard(): void {
+    this.rerequestSince = null;
     this.dashboardInfo.set({ loading: true, loaded: false, backendUnavailable: false });
     this.graphqlService
       .fetchDashboardData()
@@ -223,45 +297,96 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.updateKpis(viewer.dashboard, viewer.proxyCount, viewer.proxySnapshots, viewer.proxyHistory);
-    this.updateCountryBreakdown(viewer.dashboard?.countryBreakdown ?? []);
-    this.updateReputationOverview(viewer.dashboard);
-    this.updateProxyHistory(viewer.recentProxyChecks ?? []);
-    this.updateFastestAliveScatter(viewer.fastestAliveProxies ?? []);
-    this.updateAnonymitySummary(viewer.dashboard?.judgeValidProxies ?? []);
-    this.updateJudgeBreakdown(viewer.dashboard?.judgeValidProxies ?? []);
+    const view = viewer.dashboardView;
+    this.snapshot.set({
+      status: view.status,
+      rebuilding: view.rebuilding,
+      healthMasked: view.healthMasked,
+      collectedAt: this.parseDate(view.collectedAt ?? undefined)
+    });
+    this.clock.set(Date.now());
+    this.checkFigures.set({checksThisMonth: view.info.checksThisMonth, totalChecks: view.info.totalChecks});
+    this.updateKpis(view, viewer.proxySnapshots, viewer.proxyHistory);
+    this.updateCountryBreakdown(view.info.countryBreakdown ?? []);
+    this.updateReputationOverview(view);
+    this.updateProxyHistory(view.recentProxyChecks ?? []);
+    this.updateFastestAliveScatter(view.fastestAliveProxies ?? []);
+    this.updateAnonymitySummary(view.info.judgeValidProxies ?? []);
+    this.updateJudgeBreakdown(view.info.judgeValidProxies ?? []);
     this.buildProxiesLineChart(viewer.proxyHistory ?? [], viewer.proxyLimit);
+    this.scheduleRerequest(view);
+  }
+
+  /**
+   * Asks again after a jittered delay while the snapshot is being built, so
+   * the page fills in once a build publishes. Each re-request is an ordinary
+   * read; the backend claims a build only when the row is eligible.
+   */
+  private scheduleRerequest(view: DashboardView): void {
+    this.rerequest?.unsubscribe();
+    this.rerequest = undefined;
+    if (view.status !== 'PENDING' && !view.rebuilding) {
+      this.rerequestSince = null;
+      return;
+    }
+    const now = Date.now();
+    this.rerequestSince ??= now;
+    const since = this.rerequestSince;
+    const delay = DASHBOARD_REREQUEST_MIN_DELAY_MS + Math.random() * DASHBOARD_REREQUEST_JITTER_MS;
+    // Never send a re-request after the window, wherever the delay lands.
+    if (now + delay - since > DASHBOARD_REREQUEST_WINDOW_MS) {
+      return;
+    }
+    this.rerequest = timer(delay)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (Date.now() - since > DASHBOARD_REREQUEST_WINDOW_MS) {
+          return;
+        }
+        this.graphqlService
+          .fetchDashboardData()
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: ({viewer}) => this.applyDashboardData(viewer),
+            // Keep the data already shown; the next manual refresh retries.
+            error: () => undefined
+          });
+      });
   }
 
   private updateKpis(
-    dashboard: DashboardInfo | undefined,
-    proxyCount: number,
+    view: DashboardView,
     snapshots: ProxySnapshots | undefined,
     proxyHistory: ProxyHistoryEntry[] | undefined
   ): void {
+    // The current alive count is the snapshot's validated count only. While
+    // health is masked or not yet rebuilt it is null, and the last history
+    // sample (counted under earlier settings) must not stand in for it. The
+    // backend appends the validated count as the series' last point, so the
+    // trend excludes that point when it exists.
     const aliveSeries = this.extractSnapshotCounts(snapshots?.alive);
-    const aliveValue = aliveSeries.length ? aliveSeries[aliveSeries.length - 1] : this.resolveAliveFallback(dashboard);
+    const aliveValue = view.aliveCount;
 
     this.conversionRate.set({
       value: aliveValue,
-      history: aliveSeries.slice(0, -1),
-      displayValue: aliveValue.toLocaleString()
+      history: aliveValue === null ? aliveSeries : aliveSeries.slice(0, -1),
+      displayValue: this.formatCount(aliveValue)
     });
 
     const totalSeries = (proxyHistory ?? []).map((entry) => entry.count);
     this.avgOrderValue.set({
-      value: proxyCount,
+      value: view.proxyCount,
       history: totalSeries,
-      displayValue: proxyCount.toLocaleString()
+      displayValue: this.formatCount(view.proxyCount)
     });
 
     const scrapedSeries = this.extractSnapshotCounts(snapshots?.scraped);
-    const scrapedValue = scrapedSeries.length ? scrapedSeries[scrapedSeries.length - 1] : dashboard?.totalScraped ?? 0;
+    const scrapedValue = scrapedSeries.length ? scrapedSeries[scrapedSeries.length - 1] : view.info.totalScraped;
 
     this.orderQuantity.set({
       value: scrapedValue,
       history: scrapedSeries.slice(0, -1),
-      displayValue: scrapedValue.toLocaleString()
+      displayValue: this.formatCount(scrapedValue)
     });
   }
 
@@ -273,18 +398,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return entries
       .map((entry) => Number(entry?.count ?? 0))
       .filter((value) => Number.isFinite(value) && value >= 0);
-  }
-
-  private resolveAliveFallback(dashboard: DashboardInfo | undefined): number {
-    const judgeEntries = dashboard?.judgeValidProxies ?? [];
-    if (!judgeEntries.length) {
-      return 0;
-    }
-
-    const totals = judgeEntries.map(
-      (entry) => entry.eliteProxies + entry.anonymousProxies + entry.transparentProxies
-    );
-    return totals.reduce((sum, value) => sum + value, 0);
   }
 
   private updateCountryBreakdown(breakdown: CountryBreakdownEntry[] = []): void {
@@ -566,16 +679,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.judgeTrafficData.set(data);
   }
 
-  private updateReputationOverview(dashboard: DashboardInfo | undefined): void {
-    const source = dashboard?.reputationBreakdown;
-    const breakdown: ReputationBreakdown = {
-      good: source?.good ?? 0,
-      neutral: source?.neutral ?? 0,
-      poor: source?.poor ?? 0,
-      unknown: source?.unknown ?? 0
-    };
-
+  private updateReputationOverview(view: DashboardView): void {
+    const breakdown = view.info.reputationBreakdown;
     this.reputationBreakdown.set(breakdown);
+    if (!breakdown) {
+      return;
+    }
 
     const values = [breakdown.good, breakdown.neutral, breakdown.poor, breakdown.unknown];
     const labels = ['Good', 'Neutral', 'Poor', 'Unknown'];

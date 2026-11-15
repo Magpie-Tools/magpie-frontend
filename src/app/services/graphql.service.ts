@@ -9,48 +9,55 @@ export const DASHBOARD_BACKEND_UNAVAILABLE_ERROR = 'dashboard_backend_unavailabl
 const DASHBOARD_QUERY = `#graphql
   query DashboardData {
     viewer {
-      dashboard {
-        totalChecks
-        totalScraped
-        totalChecksWeek
-        totalScrapedWeek
-        reputationBreakdown {
-          good
-          neutral
-          poor
-          unknown
+      dashboardView {
+        status
+        rebuilding
+        healthMasked
+        collectedAt
+        computedAt
+        info {
+          totalChecks
+          checksThisMonth
+          totalScraped
+          reputationBreakdown {
+            good
+            neutral
+            poor
+            unknown
+          }
+          countryBreakdown {
+            country
+            count
+          }
+          judgeValidProxies {
+            judgeUrl
+            eliteProxies
+            anonymousProxies
+            transparentProxies
+          }
         }
-        countryBreakdown {
+        recentProxyChecks(limit: 8) {
+          id
+          ip
+          port
+          responseTime
+          alive
+          latestCheck
+        }
+        fastestAliveProxies(limit: 100) {
+          id
+          ip
+          port
+          responseTime
           country
-          count
+          reputationLabel
+          reputationScore
+          latestCheck
         }
-        judgeValidProxies {
-          judgeUrl
-          eliteProxies
-          anonymousProxies
-          transparentProxies
-        }
+        aliveCount
+        proxyCount
       }
-      proxyCount
       proxyLimit
-      recentProxyChecks(limit: 8) {
-        id
-        ip
-        port
-        responseTime
-        alive
-        latestCheck
-      }
-      fastestAliveProxies(limit: 100) {
-        id
-        ip
-        port
-        responseTime
-        country
-        reputationLabel
-        reputationScore
-        latestCheck
-      }
       proxyHistory(limit: 168) {
         count
         recordedAt
@@ -79,24 +86,45 @@ export interface DashboardQueryData {
 }
 
 export interface DashboardViewer {
-  dashboard: DashboardInfo;
-  proxyCount: number;
+  dashboardView: DashboardView;
   proxyLimit: number | null;
-  recentProxyChecks: RecentProxyCheck[];
-  fastestAliveProxies: FastestAliveProxy[];
   proxyHistory: ProxyHistoryEntry[];
   proxySnapshots: ProxySnapshots;
   scrapeSourceCount: number;
 }
 
-export interface DashboardInfo {
+/**
+ * How current the dashboard snapshot is. FRESH: published in the last 30 s.
+ * STALE: older (up to ten minutes), or the last build failed while some part
+ * is still valid. PENDING: no valid snapshot yet. FAILED: the last build failed
+ * and nothing is valid.
+ */
+export type DashboardSnapshotStatus = 'FRESH' | 'STALE' | 'PENDING' | 'FAILED';
+
+/**
+ * The dashboard served from a shared snapshot. Parts the snapshot has no valid
+ * value for are null, never zero. The two check figures are read live.
+ */
+export interface DashboardView {
+  status: DashboardSnapshotStatus;
+  rebuilding: boolean;
+  healthMasked: boolean;
+  collectedAt: string | null;
+  computedAt: string | null;
+  info: DashboardViewInfo;
+  recentProxyChecks: RecentProxyCheck[] | null;
+  fastestAliveProxies: FastestAliveProxy[] | null;
+  aliveCount: number | null;
+  proxyCount: number | null;
+}
+
+export interface DashboardViewInfo {
   totalChecks: number;
-  totalScraped: number;
-  totalChecksWeek: number;
-  totalScrapedWeek: number;
-  reputationBreakdown: ReputationBreakdown;
-  countryBreakdown: CountryBreakdownEntry[];
-  judgeValidProxies: JudgeValidProxy[];
+  checksThisMonth: number;
+  totalScraped: number | null;
+  reputationBreakdown: ReputationBreakdown | null;
+  countryBreakdown: CountryBreakdownEntry[] | null;
+  judgeValidProxies: JudgeValidProxy[] | null;
 }
 
 export interface ReputationBreakdown {

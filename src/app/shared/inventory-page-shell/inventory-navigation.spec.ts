@@ -59,10 +59,11 @@ describe('Inventory sidebar navigation', () => {
         {provide: UserService, useValue: {email: signal('test@example.invalid'), role$: of('user')}},
         {provide: SettingsService, useValue: {getUserSettings: () => undefined, userSettings$: of(undefined)}},
         {provide: GraphqlService, useValue: {fetchDashboardData: () => of({viewer: {
-          dashboard: {totalChecks: 0, totalScraped: 0, totalChecksWeek: 0, totalScrapedWeek: 0,
-            reputationBreakdown: {good: 0, neutral: 0, poor: 0, unknown: 0}, countryBreakdown: [], judgeValidProxies: []},
-          proxyCount: 0, proxyLimit: null, recentProxyChecks: [], fastestAliveProxies: [],
-          proxyHistory: [], proxySnapshots: {alive: [], scraped: []}, scrapeSourceCount: 0,
+          dashboardView: {status: 'FRESH', rebuilding: false, healthMasked: false, collectedAt: null, computedAt: null,
+            info: {totalChecks: 0, checksThisMonth: 0, totalScraped: 0,
+              reputationBreakdown: {good: 0, neutral: 0, poor: 0, unknown: 0}, countryBreakdown: [], judgeValidProxies: []},
+            recentProxyChecks: [], fastestAliveProxies: [], aliveCount: 0, proxyCount: 0},
+          proxyLimit: null, proxyHistory: [], proxySnapshots: {alive: [], scraped: []}, scrapeSourceCount: 0,
         }})}},
         {provide: WorkspaceService, useValue: {
           current: signal({id: 1, name: 'Test workspace', role: 'owner'}),
