@@ -7,8 +7,7 @@ import { of, Subject } from 'rxjs';
 import {
   DASHBOARD_OUTDATED_REREQUEST_WINDOW_MS,
   DASHBOARD_REREQUEST_WINDOW_MS,
-  DashboardComponent,
-  WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY
+  DashboardComponent
 } from './dashboard.component';
 import { DashboardQueryData, GraphqlService } from '../services/graphql.service';
 
@@ -22,7 +21,6 @@ describe('DashboardComponent', () => {
   let dashboardData: DashboardQueryData;
 
   beforeEach(async () => {
-    localStorage.removeItem(WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY);
     graphqlService = jasmine.createSpyObj<GraphqlService>('GraphqlService', ['fetchDashboardData']);
     dashboardData = {
       viewer: {
@@ -269,7 +267,6 @@ describe('DashboardComponent', () => {
   describe('while checker settings apply', () => {
     const status = () => (fixture.nativeElement.querySelector('.dashboard-context__status') as HTMLElement).textContent ?? '';
     const aliveValue = () => (fixture.nativeElement.querySelector('app-kpi-card .metric-card__value') as HTMLElement).textContent?.trim();
-    const toggle = () => fixture.nativeElement.querySelector('.dashboard-context__health-toggle') as HTMLButtonElement | null;
 
     beforeEach(() => {
       const view = dashboardData.viewer.dashboardView;
@@ -288,27 +285,10 @@ describe('DashboardComponent', () => {
       expect(status()).toContain('Previous results');
       expect(status()).toContain('from 12 min ago');
       expect(status()).toContain('Applying checker settings');
-      expect(toggle()?.textContent).toContain('Wait for new results');
-    });
-
-    it('hides them while the viewer waits for the new results, and remembers that', () => {
-      toggle()!.click();
-      fixture.detectChanges();
-      expect(aliveValue()).toBe('—');
-      expect(component.proxyHistory().length).toBe(0);
-      expect(status()).toContain('Updating');
-      expect(status()).not.toContain('Previous results');
-      expect(toggle()?.textContent).toContain('Show previous results');
-      expect(localStorage.getItem(WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY)).toBe('true');
-
-      toggle()!.click();
-      fixture.detectChanges();
-      expect(aliveValue()).toBe('640');
-      expect(localStorage.getItem(WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY)).toBe('false');
+      expect(fixture.nativeElement.querySelector('.dashboard-context button')).toBeNull();
     });
 
     it('shows the new results once they are current', () => {
-      toggle()!.click();
       const view = dashboardData.viewer.dashboardView;
       view.checkerSettingsPending = false;
       view.healthOutdated = false;
@@ -318,7 +298,6 @@ describe('DashboardComponent', () => {
       fixture.detectChanges();
       expect(aliveValue()).toBe('512');
       expect(status()).not.toContain('Applying checker settings');
-      expect(toggle()).toBeNull();
     });
   });
 

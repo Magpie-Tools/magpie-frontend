@@ -1,5 +1,4 @@
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
-import {HlmButton} from '@spartan-ng/helm/button';
 import {PageLoadErrorComponent} from '../shared/page-load-error/page-load-error.component';
 import {Component, Inject, LOCALE_ID, OnDestroy, OnInit, signal} from '@angular/core';
 import {Subject, Subscription, interval, timer} from 'rxjs';
@@ -97,13 +96,11 @@ const DASHBOARD_SLOW_REREQUEST_JITTER_MS = 5_000;
 const DASHBOARD_AGE_TICK_MS = 30_000;
 
 const FASTEST_ALIVE_SORT_STORAGE_KEY = 'magpie.dashboard.fastestAliveSortDirection';
-export const WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY = 'magpie.dashboard.waitForCurrentHealth';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   imports: [HlmSkeleton,
-    HlmButton,
     PageLoadErrorComponent,
     KpiCardComponent,
     ProxiesPerHourCardComponent,
@@ -119,13 +116,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   dashboardInfo = signal<DashboardStatus>({ loading: false, loaded: false });
   snapshot = signal<DashboardSnapshotState | null>(null);
   checkFigures = signal<DashboardCheckFigures | null>(null);
-  /**
-   * While checker settings apply, hide the previous health results and wait
-   * for the new ones instead of showing them. Remembered per browser.
-   */
-  waitForCurrentHealth = signal(this.loadWaitForCurrentHealth());
-  /** The last response, re-rendered when the viewer changes that choice. */
-  private lastViewer: DashboardViewer | null = null;
   /** Advances every 30 s so the snapshot age stays current. */
   private readonly clock = signal(Date.now());
   private rerequestSince: number | null = null;
@@ -230,7 +220,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /** The health cards show results from earlier checker settings. */
   showingPreviousHealth(): boolean {
-    return !!this.snapshot()?.healthOutdated && !this.waitForCurrentHealth();
+    return !!this.snapshot()?.healthOutdated;
   }
 
   /** Why the health results are not current, or null when they are. */
@@ -303,21 +293,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadDashboard();
   }
 
-  /**
-   * Switches between showing the previous health results while checker
-   * settings apply and hiding them until the new ones arrive.
-   */
-  setWaitForCurrentHealth(wait: boolean): void {
-    if (wait === this.waitForCurrentHealth()) {
-      return;
-    }
-    this.waitForCurrentHealth.set(wait);
-    this.saveWaitForCurrentHealth(wait);
-    if (this.lastViewer) {
-      this.renderDashboardData(this.lastViewer);
-    }
-  }
-
   private loadDashboard(): void {
     this.rerequestSince = null;
     this.dashboardInfo.set({ loading: true, loaded: false, backendUnavailable: false });
@@ -357,31 +332,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!viewer) {
       return;
     }
-    this.lastViewer = viewer;
-    this.renderDashboardData(viewer);
-    this.scheduleRerequest(viewer.dashboardView);
-  }
-
-  private renderDashboardData(viewer: DashboardViewer): void {
-    const served = viewer.dashboardView;
+    const view = viewer.dashboardView;
     this.snapshot.set({
-      status: served.status,
-      rebuilding: served.rebuilding,
-      checkerSettingsPending: served.checkerSettingsPending,
-      healthOutdated: served.healthOutdated,
-      collectedAt: this.parseDate(served.collectedAt ?? undefined),
-      healthCollectedAt: this.parseDate(served.healthCollectedAt ?? undefined)
+      status: view.status,
+      rebuilding: view.rebuilding,
+      checkerSettingsPending: view.checkerSettingsPending,
+      healthOutdated: view.healthOutdated,
+      collectedAt: this.parseDate(view.collectedAt ?? undefined),
+      healthCollectedAt: this.parseDate(view.healthCollectedAt ?? undefined)
     });
-    // Waiting for current results hides the previous ones as unavailable.
-    const view: DashboardView = served.healthOutdated && this.waitForCurrentHealth()
-      ? {
-        ...served,
-        aliveCount: null,
-        recentProxyChecks: null,
-        fastestAliveProxies: null,
-        info: {...served.info, judgeValidProxies: null}
-      }
-      : served;
     this.clock.set(Date.now());
     this.checkFigures.set({checksThisMonth: view.info.checksThisMonth, totalChecks: view.info.totalChecks});
     this.updateKpis(view, viewer.proxySnapshots, viewer.proxyHistory);
@@ -392,6 +351,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.updateAnonymitySummary(view.info.judgeValidProxies ?? []);
     this.updateJudgeBreakdown(view.info.judgeValidProxies ?? []);
     this.buildProxiesLineChart(viewer.proxyHistory ?? [], viewer.proxyLimit);
+    this.scheduleRerequest(view);
   }
 
   /**
@@ -691,22 +651,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       storage.setItem(FASTEST_ALIVE_SORT_STORAGE_KEY, direction);
     } catch {
       // Ignore storage access failures and keep the in-memory selection.
-    }
-  }
-
-  private loadWaitForCurrentHealth(): boolean {
-    try {
-      return this.getStorage()?.getItem(WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY) === 'true';
-    } catch {
-      return false;
-    }
-  }
-
-  private saveWaitForCurrentHealth(wait: boolean): void {
-    try {
-      this.getStorage()?.setItem(WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY, String(wait));
-    } catch {
-      // Ignore storage access failures and keep the in-memory choice.
     }
   }
 

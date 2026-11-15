@@ -20,17 +20,6 @@
                   <span>{{ reason }}</span>
                 }
               </p>
-              @if (snapshot()?.healthOutdated) {
-                @if (waitForCurrentHealth()) {
-                  <button type="button" hlmBtn variant="outline" size="sm" class="dashboard-context__health-toggle" (click)="setWaitForCurrentHealth(false)">
-                    Show previous results
-                  </button>
-                } @else {
-                  <button type="button" hlmBtn variant="outline" size="sm" class="dashboard-context__health-toggle" (click)="setWaitForCurrentHealth(true)">
-                    Wait for new results
-                  </button>
-                }
-              }
             </div>
           }
         </div>
