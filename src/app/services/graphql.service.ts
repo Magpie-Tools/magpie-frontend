@@ -12,9 +12,11 @@ const DASHBOARD_QUERY = `#graphql
       dashboardView {
         status
         rebuilding
-        healthMasked
+        checkerSettingsPending
+        healthOutdated
         collectedAt
         computedAt
+        healthCollectedAt
         info {
           totalChecks
           checksThisMonth
@@ -102,15 +104,24 @@ export interface DashboardViewer {
 export type DashboardSnapshotStatus = 'FRESH' | 'STALE' | 'PENDING' | 'FAILED';
 
 /**
- * The dashboard served from a shared snapshot. Parts the snapshot has no valid
- * value for are null, never zero. The two check figures are read live.
+ * The dashboard served from a shared snapshot. Parts the snapshot has no value
+ * for are null, never zero. The two check figures are read live.
+ *
+ * The health parts (aliveCount, judgeValidProxies, recentProxyChecks and
+ * fastestAliveProxies) are the previous result while healthOutdated: checker
+ * settings changed and results under them are not built yet.
  */
 export interface DashboardView {
   status: DashboardSnapshotStatus;
   rebuilding: boolean;
-  healthMasked: boolean;
+  /** The workspace's checker settings changed and are still being applied. */
+  checkerSettingsPending: boolean;
+  /** The health parts were computed under earlier checker settings. */
+  healthOutdated: boolean;
   collectedAt: string | null;
   computedAt: string | null;
+  /** When the build that computed the health parts started. */
+  healthCollectedAt: string | null;
   info: DashboardViewInfo;
   recentProxyChecks: RecentProxyCheck[] | null;
   fastestAliveProxies: FastestAliveProxy[] | null;

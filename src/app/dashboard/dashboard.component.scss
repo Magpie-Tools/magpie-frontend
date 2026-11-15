@@ -100,7 +100,16 @@ p {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.28rem;
+}
+
+.dashboard-context__copy .dashboard-context__status-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.35rem 0.75rem;
+  margin-top: 0;
 }
 
 .dashboard-context__state {
