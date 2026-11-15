@@ -119,6 +119,12 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
     }
   }
 
+  // Panels whose rows or cells run edge to edge and pad themselves.
+  .workspace-card.workspace-strip,
+  .workspace-card.people-card {
+    padding: 0;
+  }
+
   #{$inner} {
     border-color: var(--ui-line-soft);
     border-radius: var(--ui-radius-sm);
