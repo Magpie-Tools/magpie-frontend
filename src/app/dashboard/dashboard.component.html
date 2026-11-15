@@ -7,8 +7,33 @@
         ></span>
         <div class="dashboard-context__copy">
           <h1>Dashboard</h1>
+          @if (snapshotAgeLabel() || snapshotStateLabel()) {
+            <p class="dashboard-context__status" role="status" aria-live="polite">
+              @if (snapshotStateLabel(); as state) {
+                <span class="dashboard-context__state" [class.dashboard-context__state--updating]="state === 'Updating'">{{ state }}</span>
+              }
+              @if (snapshotAgeLabel(); as age) {
+                <span>{{ age }}</span>
+              }
+              @if (snapshot()?.healthMasked) {
+                <span>Applying checker settings</span>
+              }
+            </p>
+          }
         </div>
       </div>
+      @if (checkFigures(); as checks) {
+        <dl class="dashboard-context__checks">
+          <div>
+            <dt>Checks this month</dt>
+            <dd>{{ formatCount(checks.checksThisMonth) }}</dd>
+          </div>
+          <div>
+            <dt>Total checks</dt>
+            <dd>{{ formatCount(checks.totalChecks) }}</dd>
+          </div>
+        </dl>
+      }
     </header>
 
     <div class="loading-stage" [attr.aria-busy]="dashboardInfo().loading">
@@ -195,8 +220,8 @@
                 class="dashboard-grid__kpi"
                 title="Alive proxies"
                 icon="icon icon-bolt"
-                [value]="conversionRate().value"
-                [displayValue]="conversionRate().value | number"
+                [value]="conversionRate().value ?? '—'"
+                [displayValue]="conversionRate().displayValue"
                 [chartValues]="conversionRate().history"
               >
               </app-kpi-card>
@@ -205,8 +230,8 @@
                 class="dashboard-grid__kpi"
                 title="Total proxies"
                 icon="icon icon-server"
-                [value]="avgOrderValue().value"
-                [displayValue]="avgOrderValue().value | number"
+                [value]="avgOrderValue().value ?? '—'"
+                [displayValue]="avgOrderValue().displayValue"
                 [chartValues]="avgOrderValue().history"
               >
               </app-kpi-card>
@@ -215,8 +240,8 @@
                 class="dashboard-grid__kpi"
                 title="Scraped proxies"
                 icon="icon icon-download"
-                [value]="orderQuantity().value"
-                [displayValue]="orderQuantity().value | number"
+                [value]="orderQuantity().value ?? '—'"
+                [displayValue]="orderQuantity().displayValue"
                 [chartValues]="orderQuantity().history"
               >
               </app-kpi-card>

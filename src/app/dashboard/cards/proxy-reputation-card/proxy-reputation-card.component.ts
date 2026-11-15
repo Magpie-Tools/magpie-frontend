@@ -21,7 +21,8 @@ interface ReputationBreakdown {
   styleUrl: './proxy-reputation-card.component.scss'
 })
 export class ProxyReputationCardComponent {
-  @Input({ required: true }) breakdown!: ReputationBreakdown;
+  /** Null while the dashboard snapshot has no inventory yet: unknown, not empty. */
+  @Input({ required: true }) breakdown!: ReputationBreakdown | null;
   @Input({ required: true }) chart!: AppChartDefinition;
 
   readonly cardStyleClass = 'dashboard-card reputation-card';
