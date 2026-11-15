@@ -8,17 +8,30 @@
         <div class="dashboard-context__copy">
           <h1>Dashboard</h1>
           @if (snapshotAgeLabel() || snapshotStateLabel()) {
-            <p class="dashboard-context__status" role="status" aria-live="polite">
-              @if (snapshotStateLabel(); as state) {
-                <span class="dashboard-context__state" [class.dashboard-context__state--updating]="state === 'Updating'">{{ state }}</span>
+            <div class="dashboard-context__status">
+              <p class="dashboard-context__status-text" role="status" aria-live="polite">
+                @if (snapshotStateLabel(); as state) {
+                  <span class="dashboard-context__state" [class.dashboard-context__state--updating]="state === 'Updating' || state === 'Previous results'">{{ state }}</span>
+                }
+                @if (snapshotAgeLabel(); as age) {
+                  <span>{{ age }}</span>
+                }
+                @if (healthUpdateLabel(); as reason) {
+                  <span>{{ reason }}</span>
+                }
+              </p>
+              @if (snapshot()?.healthOutdated) {
+                @if (waitForCurrentHealth()) {
+                  <button type="button" hlmBtn variant="outline" size="sm" class="dashboard-context__health-toggle" (click)="setWaitForCurrentHealth(false)">
+                    Show previous results
+                  </button>
+                } @else {
+                  <button type="button" hlmBtn variant="outline" size="sm" class="dashboard-context__health-toggle" (click)="setWaitForCurrentHealth(true)">
+                    Wait for new results
+                  </button>
+                }
               }
-              @if (snapshotAgeLabel(); as age) {
-                <span>{{ age }}</span>
-              }
-              @if (snapshot()?.healthMasked) {
-                <span>Applying checker settings</span>
-              }
-            </p>
+            </div>
           }
         </div>
       </div>

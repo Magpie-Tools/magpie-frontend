@@ -59,7 +59,7 @@ describe('Inventory sidebar navigation', () => {
         {provide: UserService, useValue: {email: signal('test@example.invalid'), role$: of('user')}},
         {provide: SettingsService, useValue: {getUserSettings: () => undefined, userSettings$: of(undefined)}},
         {provide: GraphqlService, useValue: {fetchDashboardData: () => of({viewer: {
-          dashboardView: {status: 'FRESH', rebuilding: false, healthMasked: false, collectedAt: null, computedAt: null,
+          dashboardView: {status: 'FRESH', rebuilding: false, checkerSettingsPending: false, healthOutdated: false, collectedAt: null, computedAt: null, healthCollectedAt: null,
             info: {totalChecks: 0, checksThisMonth: 0, totalScraped: 0,
               reputationBreakdown: {good: 0, neutral: 0, poor: 0, unknown: 0}, countryBreakdown: [], judgeValidProxies: []},
             recentProxyChecks: [], fastestAliveProxies: [], aliveCount: 0, proxyCount: 0},

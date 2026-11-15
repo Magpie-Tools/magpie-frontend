@@ -4,7 +4,12 @@ import {provideRouter} from '@angular/router';
 import {RouterTestingHarness} from '@angular/router/testing';
 import { of, Subject } from 'rxjs';
 
-import { DASHBOARD_REREQUEST_WINDOW_MS, DashboardComponent } from './dashboard.component';
+import {
+  DASHBOARD_OUTDATED_REREQUEST_WINDOW_MS,
+  DASHBOARD_REREQUEST_WINDOW_MS,
+  DashboardComponent,
+  WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY
+} from './dashboard.component';
 import { DashboardQueryData, GraphqlService } from '../services/graphql.service';
 
 @Component({template: '<h1>Other page</h1>'})
@@ -17,15 +22,18 @@ describe('DashboardComponent', () => {
   let dashboardData: DashboardQueryData;
 
   beforeEach(async () => {
+    localStorage.removeItem(WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY);
     graphqlService = jasmine.createSpyObj<GraphqlService>('GraphqlService', ['fetchDashboardData']);
     dashboardData = {
       viewer: {
         dashboardView: {
           status: 'FRESH',
           rebuilding: false,
-          healthMasked: false,
+          checkerSettingsPending: false,
+          healthOutdated: false,
           collectedAt: new Date().toISOString(),
           computedAt: new Date().toISOString(),
+          healthCollectedAt: new Date().toISOString(),
           info: {
             totalChecks: 0,
             checksThisMonth: 0,
@@ -87,6 +95,9 @@ describe('DashboardComponent', () => {
     const previousTime = '2026-10-16T10:00:00Z';
     const currentTime = '2026-10-16T11:00:00Z';
     dashboardData.viewer.dashboardView.proxyCount = 40;
+    // The backend appends the snapshot's alive count at its collection time.
+    dashboardData.viewer.dashboardView.aliveCount = 12;
+    dashboardData.viewer.dashboardView.healthCollectedAt = currentTime;
     dashboardData.viewer.proxySnapshots = {
       alive: [{count: 12, recordedAt: currentTime}],
       scraped: [{count: 24, recordedAt: currentTime}]
@@ -238,10 +249,11 @@ describe('DashboardComponent', () => {
     expect(checks.textContent).toContain('1,200');
   });
 
-  it('never shows an earlier alive sample while health is masked', () => {
+  it('never shows an earlier alive sample before health is built', () => {
     const view = dashboardData.viewer.dashboardView;
-    view.healthMasked = true;
+    view.checkerSettingsPending = true;
     view.aliveCount = null;
+    view.healthCollectedAt = null;
     dashboardData.viewer.proxySnapshots = {
       alive: [{count: 700, recordedAt: '2026-10-16T10:00:00Z'}, {count: 800, recordedAt: '2026-10-16T11:00:00Z'}],
       scraped: []
@@ -252,6 +264,80 @@ describe('DashboardComponent', () => {
 
     const alive: HTMLElement = fixture.nativeElement.querySelector('app-kpi-card .metric-card__value');
     expect(alive.textContent?.trim()).toBe('—');
+  });
+
+  describe('while checker settings apply', () => {
+    const status = () => (fixture.nativeElement.querySelector('.dashboard-context__status') as HTMLElement).textContent ?? '';
+    const aliveValue = () => (fixture.nativeElement.querySelector('app-kpi-card .metric-card__value') as HTMLElement).textContent?.trim();
+    const toggle = () => fixture.nativeElement.querySelector('.dashboard-context__health-toggle') as HTMLButtonElement | null;
+
+    beforeEach(() => {
+      const view = dashboardData.viewer.dashboardView;
+      view.checkerSettingsPending = true;
+      view.healthOutdated = true;
+      view.aliveCount = 640;
+      view.healthCollectedAt = new Date(Date.now() - 12 * 60_000).toISOString();
+      view.recentProxyChecks = [{id: 1, ip: '192.0.2.1', port: 8080, responseTime: 120, alive: true, latestCheck: new Date().toISOString()}];
+      component.onProxyHistoryRefresh();
+      fixture.detectChanges();
+    });
+
+    it('shows the previous results at once, labeled with their age', () => {
+      expect(aliveValue()).toBe('640');
+      expect(component.proxyHistory().length).toBe(1);
+      expect(status()).toContain('Previous results');
+      expect(status()).toContain('from 12 min ago');
+      expect(status()).toContain('Applying checker settings');
+      expect(toggle()?.textContent).toContain('Wait for new results');
+    });
+
+    it('hides them while the viewer waits for the new results, and remembers that', () => {
+      toggle()!.click();
+      fixture.detectChanges();
+      expect(aliveValue()).toBe('—');
+      expect(component.proxyHistory().length).toBe(0);
+      expect(status()).toContain('Updating');
+      expect(status()).not.toContain('Previous results');
+      expect(toggle()?.textContent).toContain('Show previous results');
+      expect(localStorage.getItem(WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY)).toBe('true');
+
+      toggle()!.click();
+      fixture.detectChanges();
+      expect(aliveValue()).toBe('640');
+      expect(localStorage.getItem(WAIT_FOR_CURRENT_HEALTH_STORAGE_KEY)).toBe('false');
+    });
+
+    it('shows the new results once they are current', () => {
+      toggle()!.click();
+      const view = dashboardData.viewer.dashboardView;
+      view.checkerSettingsPending = false;
+      view.healthOutdated = false;
+      view.aliveCount = 512;
+      view.healthCollectedAt = new Date().toISOString();
+      component.onProxyHistoryRefresh();
+      fixture.detectChanges();
+      expect(aliveValue()).toBe('512');
+      expect(status()).not.toContain('Applying checker settings');
+      expect(toggle()).toBeNull();
+    });
+  });
+
+  it('keeps the trend point the backend appended out of the alive history', () => {
+    const view = dashboardData.viewer.dashboardView;
+    view.aliveCount = 900;
+    view.healthCollectedAt = '2026-10-16T12:00:00Z';
+    dashboardData.viewer.proxySnapshots = {
+      alive: [{count: 700, recordedAt: '2026-10-16T10:00:00Z'}, {count: 900, recordedAt: '2026-10-16T12:00:00Z'}],
+      scraped: []
+    };
+    component.onProxyHistoryRefresh();
+    expect(component.conversionRate().history).toEqual([700]);
+
+    // An older count is not appended after a newer sample; the whole series
+    // is history.
+    view.healthCollectedAt = '2026-10-16T09:00:00Z';
+    component.onProxyHistoryRefresh();
+    expect(component.conversionRate().history).toEqual([700, 900]);
   });
 
   it('shows the reputation breakdown as unavailable, not as zeros', () => {
@@ -281,8 +367,9 @@ describe('DashboardComponent', () => {
     expect(status()).toContain('Update failed');
 
     view.status = 'FRESH';
-    view.healthMasked = true;
+    view.checkerSettingsPending = true;
     view.collectedAt = new Date().toISOString();
+    view.healthCollectedAt = null;
     component.onProxyHistoryRefresh();
     fixture.detectChanges();
     expect(status()).toContain('Updated just now');
@@ -323,6 +410,49 @@ describe('DashboardComponent', () => {
       expect(settled).toBeGreaterThan(afterRefresh);
       expect(settled - afterRefresh).toBeLessThanOrEqual(DASHBOARD_REREQUEST_WINDOW_MS / 2_000);
       jasmine.clock().tick(60_000);
+      expect(graphqlService.fetchDashboardData.calls.count()).toBe(settled);
+    });
+
+    it('keeps asking, more slowly, while the health results are outdated', () => {
+      const view = dashboardData.viewer.dashboardView;
+      view.checkerSettingsPending = true;
+      view.healthOutdated = true;
+      component.onProxyHistoryRefresh();
+      const afterRefresh = graphqlService.fetchDashboardData.calls.count();
+
+      for (let elapsed = 0; elapsed < DASHBOARD_REREQUEST_WINDOW_MS; elapsed += 1_000) {
+        jasmine.clock().tick(1_000);
+      }
+      const firstWindow = graphqlService.fetchDashboardData.calls.count() - afterRefresh;
+      expect(firstWindow).toBeGreaterThanOrEqual(DASHBOARD_REREQUEST_WINDOW_MS / 4_000);
+
+      // After the first window: at most one request per 10 s, but not none.
+      const beforeSlow = graphqlService.fetchDashboardData.calls.count();
+      for (let elapsed = 0; elapsed < 5 * 60_000; elapsed += 1_000) {
+        jasmine.clock().tick(1_000);
+      }
+      const slow = graphqlService.fetchDashboardData.calls.count() - beforeSlow;
+      expect(slow).toBeGreaterThanOrEqual(5 * 60_000 / 15_000 - 1);
+      expect(slow).toBeLessThanOrEqual(5 * 60_000 / 10_000 + 1);
+
+      // Results under the new settings stop the re-requests.
+      view.checkerSettingsPending = false;
+      view.healthOutdated = false;
+      jasmine.clock().tick(15_001);
+      const settled = graphqlService.fetchDashboardData.calls.count();
+      jasmine.clock().tick(60_000);
+      expect(graphqlService.fetchDashboardData.calls.count()).toBe(settled);
+    });
+
+    it('stops after the outdated window', () => {
+      const view = dashboardData.viewer.dashboardView;
+      view.healthOutdated = true;
+      component.onProxyHistoryRefresh();
+      for (let elapsed = 0; elapsed < DASHBOARD_OUTDATED_REREQUEST_WINDOW_MS + 20_000; elapsed += 5_000) {
+        jasmine.clock().tick(5_000);
+      }
+      const settled = graphqlService.fetchDashboardData.calls.count();
+      jasmine.clock().tick(10 * 60_000);
       expect(graphqlService.fetchDashboardData.calls.count()).toBe(settled);
     });
   });
