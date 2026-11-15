@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {signal} from '@angular/core';
+import {ApplicationRef, signal} from '@angular/core';
 import {of, throwError} from 'rxjs';
 import {
   Workspace,
@@ -9,6 +9,7 @@ import {
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
 import {WorkspaceService} from '../services/workspace.service';
+import {UserService} from '../services/authorization/user.service';
 import {WORKSPACE_USAGE_MAX_AGE_MS, WorkspaceComponent} from './workspace.component';
 
 describe('WorkspaceComponent', () => {
@@ -94,6 +95,8 @@ describe('WorkspaceComponent', () => {
   };
 
   beforeEach(async () => {
+    // Render with the console skin that index.html enables, so layout checks see the real styles.
+    document.documentElement.setAttribute('data-ui', 'console');
     canAdminister = signal(true);
     isOwner = signal(true);
     http = jasmine.createSpyObj<HttpService>('HttpService', [
@@ -147,44 +150,89 @@ describe('WorkspaceComponent', () => {
     fixture.detectChanges();
   });
 
-  it('shows member Save only after access changes', () => {
+  afterEach(() => {
+    document.documentElement.removeAttribute('data-ui');
+    // The schedule panel renders in the CDK overlay outside the fixture.
+    document.querySelectorAll('.cdk-overlay-container').forEach(container => container.replaceChildren());
+  });
+
+  it('edits member access in the side panel and saves it', async () => {
     showMembers();
-    expect(memberSaveButtons().length).toBe(0);
-
-    component.setMemberRole(operator, 'viewer');
-    fixture.changeDetectorRef.markForCheck();
-    fixture.detectChanges();
-
-    expect(memberSaveButtons().length).toBe(1);
-    component.saveMember(operator);
+    const row = fixture.nativeElement.querySelector('button[aria-label="Change access for operator@example.test"]') as HTMLButtonElement;
+    row.click();
+    await settle();
+    expect(component.panelMember()).toEqual(operator);
+    const viewer = document.querySelector('.workspace-access-sheet input[name="member-role"][value="viewer"]') as HTMLInputElement;
+    viewer.click();
+    await settle();
+    expect(component.isMemberDirty(operator)).toBeTrue();
+    (document.querySelector('.workspace-access-sheet .access-save') as HTMLButtonElement).click();
     expect(http.updateWorkspaceMember).toHaveBeenCalledWith(workspace.id, operator.user_id, {
       role: 'viewer',
       billing_admin: false,
     });
+    expect(component.accessPanel()).toBeNull();
+  });
+  it('docks the access panel to the right edge at full height', async () => {
+    component.openMemberPanel(operator);
+    await settle();
+    await new Promise(resolve => setTimeout(resolve, 250));
+    const sheet = document.querySelector('.workspace-access-sheet') as HTMLElement;
+    const bounds = sheet.getBoundingClientRect();
+    expect(bounds.width).toBeLessThan(document.documentElement.clientWidth);
+    expect(Math.round(bounds.right)).toBe(document.documentElement.clientWidth);
+    expect(Math.round(bounds.top)).toBe(0);
+    expect(Math.round(bounds.height)).toBe(window.innerHeight);
+    const avatar = sheet.querySelector('.access-head .avatar') as HTMLElement;
+    expect(getComputedStyle(avatar).borderRadius).toBe('50%');
+    expect(avatar.getBoundingClientRect().width).toBeGreaterThan(30);
   });
 
-  it('keeps the sole owner removal disabled with the transfer tooltip', () => {
+  it('drops unsaved access changes when the panel closes', () => {
+    showMembers();
+    component.openMemberPanel(operator);
+    component.setMemberRole(operator, 'viewer');
+    expect(component.isMemberDirty(operator)).toBeTrue();
+    component.closeAccessPanel();
+    expect(component.accessPanel()).toBeNull();
+    expect(component.memberEdits[operator.user_id].role).toBe('operator');
+  });
+
+  it('asks before an ownership change and restores the picker when cancelled', () => {
+    component.openMemberPanel(operator);
+    component.setMemberRole(operator, 'owner');
+    expect(component.ownershipChange()).toEqual({member: operator, role: 'owner'});
+    const revision = component.rolePickerRevision();
+    component.cancelOwnershipChange();
+    expect(component.ownershipChange()).toBeNull();
+    expect(component.rolePickerRevision()).toBe(revision + 1);
+    expect(component.memberEdits[operator.user_id].role).toBe('operator');
+  });
+  it('keeps the sole owner removal disabled and says why', async () => {
     showMembers();
     expect(component.canRemoveMember(owner)).toBeFalse();
     expect(component.memberRemovalReason(owner)).toBe('Transfer ownership first');
 
-    const button = fixture.nativeElement.querySelector('button[aria-label="Remove owner@example.test"]') as HTMLButtonElement;
+    component.openMemberPanel(owner);
+    await settle();
+    const button = document.querySelector('.workspace-access-sheet button[aria-label="Remove owner@example.test"]') as HTMLButtonElement;
     expect(button).not.toBeNull();
     expect(button.disabled).toBeTrue();
+    expect(document.querySelector('.workspace-access-sheet .access-danger')?.textContent).toContain('Transfer ownership first');
   });
-
-  it('renders plain member values for a read-only workspace role', () => {
+  it('renders members as plain rows for a read-only workspace role', () => {
     showMembers();
     isOwner.set(false);
     canAdminister.set(false);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.invite-form')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.member-list select')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.workspace-members .people-row--action')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.workspace-members .group-hint')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Operator');
+    component.openMemberPanel(operator);
+    expect(component.accessPanel()).toBeNull();
   });
-
-  it('creates a pending invitation and surfaces an unknown-account error inline', () => {
+  it('creates a pending invitation and surfaces an unknown-account error inline', async () => {
     showMembers();
     const response: WorkspaceInvitationResponse = {
       invitation: {
@@ -204,6 +252,7 @@ describe('WorkspaceComponent', () => {
       },
     };
     http.createWorkspaceInvitation.and.returnValue(of(response));
+    component.startInvite();
     component.inviteEmail = 'member@example.test';
     component.sendInvitation();
 
@@ -213,35 +262,104 @@ describe('WorkspaceComponent', () => {
       billing_admin: false,
     });
     expect(component.invitations()).toEqual([response.invitation]);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.invite-form')).not.toBeNull();
+    expect(component.accessPanel()).toBeNull();
     expect(component.inviteEmail).toBe('');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('button[aria-label="Change invitation for member@example.test"]')).not.toBeNull();
 
     http.createWorkspaceInvitation.and.returnValue(throwError(() => ({error: {error: 'No Magpie account exists for that email address'}})));
+    component.startInvite();
     component.inviteEmail = 'missing@example.test';
     component.sendInvitation();
-    fixture.detectChanges();
+    await settle();
 
     expect(component.inviteError()).toBe('No Magpie account exists for that email address');
-    expect(fixture.nativeElement.querySelector('.form-error').textContent).toContain('No Magpie account');
+    expect(component.accessPanel()).toEqual({kind: 'invite'});
+    expect(document.querySelector('.workspace-access-sheet .form-error')?.textContent).toContain('No Magpie account');
   });
 
-  it('only shows member search for larger workspaces', () => {
-    expect(component.showMemberSearch()).toBeFalse();
-    component.members.set(Array.from({length: 9}, (_, index) => ({
-      ...operator,
-      user_id: index + 10,
-      email: `member-${index}@example.test`,
-    })));
-    expect(component.showMemberSearch()).toBeTrue();
+  it('always shows search and filters members and invitations by email', () => {
+    showMembers();
+    expect(fixture.nativeElement.querySelector('.workspace-members .search-field input')).not.toBeNull();
+    component.memberSearch.set('OPERATOR@');
+    expect(component.filteredMembers()).toEqual([operator]);
+    expect(component.filteredInvitations()).toEqual([]);
   });
 
+  it('runs member row dividers from card edge to card edge', () => {
+    showMembers();
+    expect(getComputedStyle(fixture.nativeElement.querySelector('.workspace-members .people-card')).paddingLeft).toBe('0px');
+    const card = fixture.nativeElement.querySelector('.workspace-members .people-card') as HTMLElement;
+    const row = card.querySelector('.people-row') as HTMLElement;
+    const cardBounds = card.getBoundingClientRect();
+    const rowBounds = row.getBoundingClientRect();
+    expect(Math.round(rowBounds.left)).toBe(Math.round(cardBounds.left + 1));
+    expect(Math.round(rowBounds.right)).toBe(Math.round(cardBounds.right - 1));
+  });
+
+  it('marks the signed-in member as you', () => {
+    TestBed.inject(UserService).email.set('owner@example.test');
+    expect(component.isCurrentUser(owner)).toBeTrue();
+    expect(component.isCurrentUser(operator)).toBeFalse();
+  });
   it('starts with capacity and keeps administration in separate sections', () => {
     expect(panel('overview').hidden).toBeFalse();
     expect(panel('members').hidden).toBeTrue();
     expect(panel('settings').hidden).toBeTrue();
-    expect(panel('members').querySelector('.invite-form')).not.toBeNull();
-    expect(fixture.nativeElement.querySelectorAll('.plan-accordions details[open]').length).toBe(0);
+    expect(panel('members').querySelector('.people-card')).not.toBeNull();
+    const overview = panel('overview');
+    expect(overview.querySelector('.workspace-strip')).not.toBeNull();
+    expect(overview.querySelector('.forecast-card app-allowance-forecast-chart')).not.toBeNull();
+    expect(overview.querySelector('.plan-card')).not.toBeNull();
+    expect(overview.querySelector('.routes-card .route-bar')).not.toBeNull();
+    // Interval editing lives in the schedule panel, not on the overview.
+    expect(overview.querySelector('.cadence-editor')).toBeNull();
+  });
+
+  it('describes the plan, workspace type and role in the header without pills', () => {
+    const meta = fixture.nativeElement.querySelector('.workspace-meta') as HTMLElement;
+    expect(meta.textContent).toContain('Self-hosted plan');
+    expect(meta.textContent).toContain('Shared');
+    expect(meta.textContent).toContain('Owner');
+    expect(meta.querySelector('.icon-users')).not.toBeNull();
+  });
+
+  it('opens the invitation panel on Members from the header', async () => {
+    const invite = Array.from(fixture.nativeElement.querySelectorAll('.workspace-context__actions button') as NodeListOf<HTMLButtonElement>)
+      .find(button => button.textContent?.includes('Invite member'))!;
+    invite.click();
+    await settle();
+    expect(panel('members').hidden).toBeFalse();
+    expect(component.accessPanel()).toEqual({kind: 'invite'});
+    expect(document.querySelector('.workspace-access-sheet #workspace-invite-email')).not.toBeNull();
+  });
+  it('shows active, available and paused routes against the activation limit', () => {
+    const bar = component.routeBar()!;
+    expect(bar.active).toBe(750);
+    expect(bar.available).toBe(250);
+    expect(bar.paused).toBe(150);
+    expect(bar.limitAt).toBeCloseTo((1000 / 1150) * 100, 5);
+    expect(panel('overview').querySelector('.routes-card .status-chip')?.textContent).toContain('75% of limit');
+  });
+
+  it('projects allowance use from the stored cadence without recomputing it', () => {
+    jasmine.clock().install();
+    try {
+      jasmine.clock().mockDate(new Date('2026-11-16T00:00:00Z'));
+      const service = TestBed.inject(WorkspaceService);
+      (service.current as ReturnType<typeof signal<Workspace | null>>).set({...workspace});
+      const forecast = component.forecast()!;
+      const [checks, scrapes] = forecast.series;
+      expect(checks.used[1].percent).toBe(25);
+      // 750 checks every 1.5 hours for the remaining 15 days is 180,000 more checks: 12% of 1.5M.
+      expect(checks.projected[1].percent).toBeCloseTo(37, 5);
+      expect(checks.runOutAt).toBeNull();
+      // Used up: the line stays at 100% until the period ends.
+      expect(scrapes.projected.every(point => point.percent === 100)).toBeTrue();
+      expect(component.periodDaysLeft()).toBe(15);
+    } finally {
+      jasmine.clock().uninstall();
+    }
   });
 
   it('shows allowance usage and the derived cadence on the overview', () => {
@@ -250,14 +368,42 @@ describe('WorkspaceComponent', () => {
     expect(checks.cadence).toBe('Each proxy is checked every 1.5 hours.');
     expect(scrapes.exhausted).toBeTrue();
     expect(scrapes.cadence).toContain('Allowance used. Scrapes resume on');
-    const card = panel('overview').querySelector('.allowance-card') as HTMLElement;
-    expect(card).not.toBeNull();
-    expect(card.querySelectorAll('.allowance-meter').length).toBe(2);
-    // Only instance administrators may change a workspace's allowances.
-    expect(card.querySelector('.allowance-admin')).toBeNull();
+    expect(checks.schedule).toBe('Automatic · every 1.5 hours');
+    expect(checks.outlook).toBe('Lasts the month');
+    expect(scrapes.outlook).toContain('Used up · resumes');
+    const strip = panel('overview').querySelector('.workspace-strip') as HTMLElement;
+    expect(strip.querySelectorAll('.strip-bar[role="progressbar"]').length).toBe(3);
+    expect(strip.textContent).toContain('375K');
+    expect(component.forecast()?.series.length).toBe(2);
   });
 
-  it('warns while editing a fixed interval that needs more than the allowance', () => {
+  it('edits intervals in the schedule panel and keeps allowances for instance admins', async () => {
+    component.openSchedule();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const sheet = document.querySelector('.workspace-schedule-sheet') as HTMLElement;
+    expect(sheet).not.toBeNull();
+    expect(sheet.querySelectorAll('.schedule-block').length).toBe(2);
+    // Only instance administrators may change a workspace's allowances.
+    expect(sheet.querySelector('.allowance-admin')).toBeNull();
+
+    component.cadenceDrafts.checks = {mode: 'fixed', value: 10, unit: 'minutes'};
+    component.closeSchedule();
+    expect(component.scheduleOpen()).toBeFalse();
+    expect(component.cadenceDrafts.checks.mode).toBe('automatic');
+  });
+
+  it('only allows saving allowances after they change', () => {
+    expect(component.allowancesChanged()).toBeFalse();
+    component.allowanceChecks = 2_000_000;
+    expect(component.allowancesChanged()).toBeTrue();
+    component.allowanceChecks = null;
+    expect(component.allowancesChanged()).toBeFalse();
+    component.allowanceUnlimitedScrapes = true;
+    expect(component.allowancesChanged()).toBeTrue();
+  });
+
+  it('warns while editing a fixed interval that needs more than the allowance', async () => {
     expect(component.cadenceDrafts.checks.mode).toBe('automatic');
     expect(component.cadenceWarning('checks')).toBeNull();
 
@@ -271,11 +417,24 @@ describe('WorkspaceComponent', () => {
     component.cadenceDrafts.checks = {mode: 'fixed', value: 2, unit: 'hours'};
     expect(component.cadenceWarning('checks')).toBeNull();
 
-    component.cadenceDrafts.checks = {mode: 'fixed', value: 30, unit: 'minutes'};
-    component.cadenceDrafts.scrapes = {mode: 'fixed', value: 5, unit: 'minutes'};
-    expect(component.cadenceError('scrapes')).toContain('15 minutes');
+    component.openSchedule();
     fixture.detectChanges();
-    expect(panel('overview').querySelector('.cadence-actions button')?.hasAttribute('disabled')).toBeTrue();
+    await fixture.whenStable();
+    // Drive the panel like a user: choose Fixed, then every 5 minutes for scrapes.
+    const scrapes = document.querySelectorAll('.workspace-schedule-sheet .schedule-block')[1] as HTMLElement;
+    (Array.from(scrapes.querySelectorAll('.segmented button')) as HTMLButtonElement[])
+      .find(button => button.textContent?.includes('Fixed'))!.click();
+    await settle();
+    const value = scrapes.querySelector('input[type="number"]') as HTMLInputElement;
+    value.value = '5';
+    value.dispatchEvent(new Event('input'));
+    const unit = scrapes.querySelector('select') as HTMLSelectElement;
+    unit.value = 'minutes';
+    unit.dispatchEvent(new Event('change'));
+    await settle();
+    expect(component.cadenceError('scrapes')).toContain('15 minutes');
+    expect(scrapes.querySelector('.inline-error')?.textContent).toContain('15 minutes');
+    expect(document.querySelector('.workspace-schedule-sheet .cadence-save')?.hasAttribute('disabled')).toBeTrue();
   });
 
   it('saves fixed intervals and surfaces server warnings', () => {
@@ -284,13 +443,15 @@ describe('WorkspaceComponent', () => {
       scrape_interval_seconds: 0,
       warnings: ['This interval needs about 3240000 checks a month'],
     }));
+    component.openSchedule();
     component.cadenceDrafts.checks = {mode: 'fixed', value: 10, unit: 'minutes'};
     component.saveCadence();
     expect(http.updateWorkspaceCadence).toHaveBeenCalledWith({check_interval_seconds: 600, scrape_interval_seconds: 0});
     expect(notification.showWarn).toHaveBeenCalledWith('This interval needs about 3240000 checks a month');
+    expect(component.scheduleOpen()).toBeFalse();
   });
 
-  it('requires a fixed interval for a workspace without a monthly limit', () => {
+  it('requires a fixed interval for a workspace without a monthly limit', async () => {
     const service = TestBed.inject(WorkspaceService);
     (service.current as ReturnType<typeof signal<Workspace | null>>).set({
       ...workspace,
@@ -314,10 +475,19 @@ describe('WorkspaceComponent', () => {
     // The editor starts on the hourly interval and offers to save it.
     expect(component.cadenceDrafts.checks).toEqual({mode: 'fixed', value: 1, unit: 'hours'});
     expect(component.cadenceChanged()).toBeTrue();
-    const meter = panel('overview').querySelector('.allowance-meter') as HTMLElement;
-    expect(meter.querySelector('.capacity-progress')).toBeNull();
-    expect(meter.querySelector('.allowance-tag--unlimited')?.textContent).toContain('No limit');
-    expect((meter.querySelector('option[value="automatic"]') as HTMLOptionElement).disabled).toBeTrue();
+    const cell = panel('overview').querySelector('.strip-cell') as HTMLElement;
+    expect(cell.querySelector('.strip-bar')).toBeNull();
+    // Only metrics with a monthly limit are forecast.
+    expect(component.forecast()?.series.map(series => series.id)).toEqual(['scrapes']);
+    expect(panel('overview').querySelector('.forecast-card .allowance-warning')?.textContent).toContain('Until you choose an interval');
+    component.openSchedule();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const block = document.querySelector('.workspace-schedule-sheet .schedule-block') as HTMLElement;
+    expect(block.querySelector('.allowance-tag--unlimited')?.textContent).toContain('No limit');
+    const automatic = Array.from(block.querySelectorAll('.segmented button') as NodeListOf<HTMLButtonElement>)
+      .find(button => button.textContent?.includes('Automatic'))!;
+    expect(automatic.disabled).toBeTrue();
     // No allowance, so no over-allowance warning even at the fastest interval.
     component.cadenceDrafts.checks = {mode: 'fixed', value: 1, unit: 'minutes'};
     expect(component.cadenceWarning('checks')).toBeNull();
@@ -352,7 +522,10 @@ describe('WorkspaceComponent', () => {
     const list = fixture.nativeElement.querySelector('[role="tablist"]') as HTMLElement;
     const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
     expect(list.getBoundingClientRect().height).toBeGreaterThan(0);
-    expect(list.getBoundingClientRect().height).toBeLessThanOrEqual(2.25 * rootFontSize + 0.5);
+    // Phone and touch layouts raise every trigger to a 44px target; the list adds 3px padding and a border.
+    const touch = matchMedia('(pointer: coarse), (max-width: 48rem)').matches;
+    const limit = touch ? 2.75 * rootFontSize + 8 : 2.25 * rootFontSize;
+    expect(list.getBoundingClientRect().height).toBeLessThanOrEqual(limit + 0.5);
   });
 
   it('supports keyboard selection and links each tab to its panel', async () => {
@@ -368,33 +541,32 @@ describe('WorkspaceComponent', () => {
     expect(panel('overview').hidden).toBeTrue();
   });
 
-  it('preserves unsaved member access when navigating between sections', () => {
+  it('lists pending invitations and opens them in the panel', async () => {
+    const invitation = {
+      id: 5, workspace_id: workspace.id, workspace_name: workspace.name, invitee_user_id: 9,
+      invitee_email: 'pending@example.test', inviter_user_id: owner.user_id, inviter_email: owner.email,
+      role: 'viewer' as const, billing_admin: false, notification_status: 'failed' as const,
+      expires_at: '2026-11-20T00:00:00Z', created_at: '2026-11-13T00:00:00Z', updated_at: '2026-11-13T00:00:00Z',
+    };
+    component.invitations.set([invitation]);
+    component.invitationEdits[invitation.id] = {role: 'viewer', billing_admin: false};
     showMembers();
-    component.setMemberRole(operator, 'viewer');
-    fixture.nativeElement.querySelector('#brn-tabs-label-workspace-overview').click();
-    fixture.detectChanges();
-    expect(panel('members').hidden).toBeTrue();
-    showMembers();
-    expect(component.memberEdits[operator.user_id].role).toBe('viewer');
-    expect(memberSaveButtons().length).toBe(1);
+    const row = fixture.nativeElement.querySelector('button[aria-label="Change invitation for pending@example.test"]') as HTMLButtonElement;
+    expect(row.textContent).toContain('Email not sent');
+    row.click();
+    await settle();
+    expect(component.panelInvitation()).toEqual(invitation);
+    expect(document.querySelector('.workspace-access-sheet button[aria-label="Revoke invitation for pending@example.test"]')).not.toBeNull();
   });
-
-  it('keeps invitations open in Members and preserves a draft between sections', () => {
-    showMembers();
-    expect(panel('members').hidden).toBeFalse();
-    expect(fixture.nativeElement.querySelector('.invite-form')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.workspace-context button')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.invite-cancel')).toBeNull();
+  it('keeps an invitation draft when the panel is closed and reopened', () => {
+    component.startInvite();
     component.inviteEmail = 'draft@example.test';
-    fixture.nativeElement.querySelector('#brn-tabs-label-workspace-overview').click();
-    fixture.detectChanges();
-    expect(panel('members').hidden).toBeTrue();
-    showMembers();
-    expect(fixture.nativeElement.querySelector('.invite-form')).not.toBeNull();
+    component.closeAccessPanel();
+    expect(component.accessPanel()).toBeNull();
+    component.startInvite();
     expect(http.createWorkspaceInvitation).not.toHaveBeenCalled();
     expect(component.inviteEmail).toBe('draft@example.test');
   });
-
   it('keeps rename and creation available in Settings for administrators', () => {
     fixture.nativeElement.querySelector('#brn-tabs-label-workspace-settings').click();
     fixture.detectChanges();
@@ -405,6 +577,12 @@ describe('WorkspaceComponent', () => {
     expect(fixture.nativeElement.querySelector('#new-workspace-name')).not.toBeNull();
   });
 
+  /** Runs change detection for the fixture and the overlay views attached to the application. */
+  async function settle(): Promise<void> {
+    TestBed.inject(ApplicationRef).tick();
+    await fixture.whenStable();
+  }
+
   function panel(section: string): HTMLElement {
     return fixture.nativeElement.querySelector('#brn-tabs-content-workspace-' + section);
   }
@@ -414,8 +592,4 @@ describe('WorkspaceComponent', () => {
     fixture.detectChanges();
   }
 
-  function memberSaveButtons(): HTMLButtonElement[] {
-    const buttons = fixture.nativeElement.querySelectorAll('.member-list .button--compact') as NodeListOf<HTMLButtonElement>;
-    return Array.from(buttons).filter(button => button.textContent?.trim().includes('Save'));
-  }
 });

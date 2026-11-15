@@ -1,9 +1,8 @@
 import {HlmSkeleton} from '@spartan-ng/helm/skeleton';
 import {HlmTabs, HlmTabsList, HlmTabsTrigger, HlmTabsContent} from '@spartan-ng/helm/tabs';
-import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {DialogComponent} from '../shared/ui/dialog.component';
 import {CommonModule, DatePipe, DecimalPipe, TitleCasePipe} from '@angular/common';
-import {Component, DestroyRef, OnInit, computed, inject, signal} from '@angular/core';
+import {Component, DestroyRef, LOCALE_ID, OnInit, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {interval} from 'rxjs';
 import {FormsModule} from '@angular/forms';
@@ -23,6 +22,7 @@ import {WorkspaceService} from '../services/workspace.service';
 import {UserService} from '../services/authorization/user.service';
 import {formatApproximateDuration} from '../shared/cadence-format';
 import {VisibleRowsDirective} from '../shared/visible-rows.directive';
+import {AllowanceForecastChartComponent, ForecastSeries} from './allowance-forecast-chart.component';
 
 type WorkspaceSection = 'overview' | 'members' | 'settings';
 
@@ -72,7 +72,46 @@ export interface AllowanceMeter {
   cadence: string;
   /** Set when a fixed interval uses up the allowance before the month ends. */
   runOutWarning: string | null;
+  /** Short schedule summary, such as "Automatic · every 14 minutes". */
+  schedule: string;
+  /** What happens by the end of the period, such as "Lasts the month". */
+  outlook: string;
+  outlookTone: 'ok' | 'warn' | 'stopped' | 'neutral';
+  /** Line colour on the allowance chart. */
+  color: string;
+  /** No monthly limit and no fixed interval yet. */
+  needsInterval: boolean;
 }
+
+/** Categorical colours for the allowance chart, validated for colour-vision deficiencies on the dark card. */
+export const ALLOWANCE_SERIES_COLORS: Record<CadenceKind, string> = {checks: '#22a37a', scrapes: '#8f7ae0'};
+
+const DAY_MS = 86_400_000;
+
+export interface RouteBar {
+  active: number;
+  available: number;
+  paused: number;
+  activeWidth: number;
+  availableWidth: number;
+  pausedWidth: number;
+  /** Position of the activation limit along the bar, in percent. */
+  limitAt: number;
+}
+
+/** What the access panel shows: a member, a pending invitation, or a new invitation. */
+export type AccessPanel =
+  | {kind: 'member'; userId: number}
+  | {kind: 'invitation'; id: number}
+  | {kind: 'invite'};
+
+/** One-line summaries of what each workspace role may do, shown in the role picker. */
+export const ROLE_DESCRIPTIONS: Record<WorkspaceRole, string> = {
+  owner: 'Everything, including billing access and ownership.',
+  admin: 'Workspace settings, and operators and viewers.',
+  operator: 'Routes, checks, scrapes and their intervals.',
+  viewer: 'Read-only access.',
+};
 
 interface OwnershipChange {
   member: WorkspaceMember;
@@ -82,8 +121,9 @@ interface OwnershipChange {
 @Component({
   selector: 'app-workspace',
   standalone: true,
-  imports: [HlmSkeleton, HlmTooltip, HlmTabs, HlmTabsList, HlmTabsTrigger, HlmTabsContent, DialogComponent,
+  imports: [HlmSkeleton, HlmTabs, HlmTabsList, HlmTabsTrigger, HlmTabsContent, DialogComponent,
     VisibleRowsDirective,
+    AllowanceForecastChartComponent,
     CommonModule,
     FormsModule,
     DatePipe,
@@ -124,6 +164,11 @@ export class WorkspaceComponent implements OnInit {
   readonly savingAllowances = signal(false);
   readonly isInstanceAdmin = UserService.isAdmin();
   readonly savingCadence = signal(false);
+  readonly scheduleOpen = signal(false);
+  readonly accessPanel = signal<AccessPanel | null>(null);
+  /** Re-creates the role picker so it shows the saved role after an ownership change is cancelled. */
+  readonly rolePickerRevision = signal(0);
+  readonly roleDescriptions = ROLE_DESCRIPTIONS;
   readonly cadenceUnits: CadenceUnit[] = ['minutes', 'hours', 'days'];
   cadenceDrafts: Record<CadenceKind, CadenceDraft> = {
     checks: cadenceDraftFromSeconds(0),
@@ -166,8 +211,27 @@ export class WorkspaceComponent implements OnInit {
       const runOutWarning = !exhausted && runOut
         ? `At this interval the allowance runs out around ${new Date(runOut).toLocaleDateString(undefined, {dateStyle: 'medium'})}, and ${label.toLowerCase()} stop until next month.`
         : null;
+      const mode = fixed ? 'Fixed' : 'Automatic';
+      const schedule = needsInterval
+        ? 'No interval chosen · hourly for now'
+        : perCycle === 0 ? `${mode} · no active ${plural}`
+          : intervalSeconds > 0 ? `${mode} · ${formatApproximateDuration(intervalSeconds)}` : mode;
+      const shortDate = (value: string) => new Date(value).toLocaleDateString(this.locale, {month: 'short', day: 'numeric'});
+      let outlook = 'Lasts the month';
+      let outlookTone: AllowanceMeter['outlookTone'] = 'ok';
+      if (unlimited) {
+        outlook = 'No monthly limit';
+        outlookTone = 'neutral';
+      } else if (exhausted) {
+        outlook = `Used up · resumes ${shortDate(allowances.period_end)}`;
+        outlookTone = 'stopped';
+      } else if (runOut) {
+        outlook = `Runs out ${shortDate(runOut)}`;
+        outlookTone = 'warn';
+      }
       return {
         id, label, unit, used, monthly, inherits, exhausted, unlimited, cadence,
+        schedule, outlook, outlookTone, color: ALLOWANCE_SERIES_COLORS[id], needsInterval,
         runOutWarning: unlimited ? null : runOutWarning,
         percent: unlimited ? 0 : monthly > 0 ? Math.min(100, Math.round((used / monthly) * 100)) : 100,
       };
@@ -182,7 +246,65 @@ export class WorkspaceComponent implements OnInit {
     ];
   });
 
-  readonly showMemberSearch = computed(() => this.members().length > 8);
+  /** Allowance use and its projection for every metric that has a monthly limit. */
+  readonly forecast = computed(() => {
+    const allowances = this.workspaces.current()?.allowances;
+    if (!allowances) {
+      return null;
+    }
+    const start = Date.parse(allowances.period_start);
+    const end = Date.parse(allowances.period_end);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+      return null;
+    }
+    const now = Math.min(Math.max(Date.now(), start), end);
+    const series = this.allowanceMeters()
+      .filter(meter => !meter.unlimited && meter.monthly > 0)
+      .map(meter => this.forecastSeries(meter, start, end, now));
+    return {start, end, now, series};
+  });
+
+  readonly periodDaysLeft = computed(() => {
+    const forecast = this.forecast();
+    return forecast ? Math.max(0, Math.ceil((forecast.end - forecast.now) / DAY_MS)) : 0;
+  });
+
+  readonly periodElapsedPercent = computed(() => {
+    const forecast = this.forecast();
+    return forecast ? Math.round(((forecast.now - forecast.start) / (forecast.end - forecast.start)) * 100) : 0;
+  });
+
+  /** Active, still available and paused routes on one bar, with the activation limit marked. */
+  readonly routeBar = computed<RouteBar | null>(() => {
+    const capacity = this.workspaces.current()?.capacity;
+    if (!capacity || capacity.activation_limit === null) {
+      return null;
+    }
+    const active = capacity.active_routes;
+    const available = Math.max(0, capacity.activation_limit - active);
+    const paused = Math.max(0, capacity.stored_routes - active);
+    const total = Math.max(1, active + available + paused);
+    return {
+      active,
+      available,
+      paused,
+      activeWidth: (active / total) * 100,
+      availableWidth: (available / total) * 100,
+      pausedWidth: (paused / total) * 100,
+      limitAt: ((Math.max(active, capacity.activation_limit)) / total) * 100,
+    };
+  });
+
+  readonly panelMember = computed(() => {
+    const panel = this.accessPanel();
+    return panel?.kind === 'member' ? this.members().find(member => member.user_id === panel.userId) ?? null : null;
+  });
+
+  readonly panelInvitation = computed(() => {
+    const panel = this.accessPanel();
+    return panel?.kind === 'invitation' ? this.invitations().find(invitation => invitation.id === panel.id) ?? null : null;
+  });
+
   readonly ownerCount = computed(() => this.members().filter(member => member.role === 'owner').length);
 
   workspaceName = '';
@@ -204,6 +326,9 @@ export class WorkspaceComponent implements OnInit {
   ) {}
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly user = inject(UserService);
+  /** The app locale, so dates built in code match the date pipe. */
+  readonly locale = inject(LOCALE_ID);
 
   ngOnInit(): void {
     this.loadWorkspace();
@@ -234,17 +359,7 @@ export class WorkspaceComponent implements OnInit {
       return;
     }
     this.workspaceName = current.name;
-    this.cadenceDrafts = {
-      checks: cadenceDraftFromSeconds(current.allowances?.requested_check_interval_seconds ?? 0),
-      scrapes: cadenceDraftFromSeconds(current.allowances?.requested_scrape_interval_seconds ?? 0),
-    };
-    // Without a monthly limit there is nothing to spread, so the editor starts
-    // on the hourly interval the workspace already runs at and offers to save it.
-    for (const kind of ['checks', 'scrapes'] as CadenceKind[]) {
-      if (this.isUnlimited(kind) && this.cadenceDrafts[kind].mode === 'automatic') {
-        this.cadenceDrafts[kind] = {mode: 'fixed', value: 1, unit: 'hours'};
-      }
-    }
+    this.resetCadenceDrafts();
     this.allowanceChecks = current.subscription.monthly_checks || null;
     this.allowanceScrapes = current.subscription.monthly_scrapes || null;
     this.allowanceUnlimitedChecks = current.subscription.unlimited_checks ?? false;
@@ -256,6 +371,120 @@ export class WorkspaceComponent implements OnInit {
       this.invitations.set([]);
       this.invitationsError.set(null);
     }
+  }
+
+  /** Sets the interval editor back to the saved intervals. */
+  resetCadenceDrafts(): void {
+    const allowances = this.workspaces.current()?.allowances;
+    this.cadenceDrafts = {
+      checks: cadenceDraftFromSeconds(allowances?.requested_check_interval_seconds ?? 0),
+      scrapes: cadenceDraftFromSeconds(allowances?.requested_scrape_interval_seconds ?? 0),
+    };
+    // Without a monthly limit there is nothing to spread, so the editor starts
+    // on the hourly interval the workspace already runs at and offers to save it.
+    for (const kind of ['checks', 'scrapes'] as CadenceKind[]) {
+      if (this.isUnlimited(kind) && this.cadenceDrafts[kind].mode === 'automatic') {
+        this.cadenceDrafts[kind] = {mode: 'fixed', value: 1, unit: 'hours'};
+      }
+    }
+  }
+
+  openSchedule(): void {
+    this.resetCadenceDrafts();
+    this.scheduleOpen.set(true);
+  }
+
+  closeSchedule(): void {
+    if (this.savingCadence() || this.savingAllowances()) {
+      return;
+    }
+    this.scheduleOpen.set(false);
+    this.resetCadenceDrafts();
+  }
+
+  /** Large counts in short form, such as 1.82M. */
+  compactNumber(value: number): string {
+    return value >= 100_000
+      ? new Intl.NumberFormat(undefined, {notation: 'compact', maximumFractionDigits: 2}).format(value)
+      : value.toLocaleString();
+  }
+
+  /** Opens the invitation panel on Members. */
+  startInvite(): void {
+    if (!this.workspaces.canAdminister()) {
+      return;
+    }
+    this.activeSection.set('members');
+    this.inviteError.set(null);
+    this.accessPanel.set({kind: 'invite'});
+  }
+
+  /** Whether the current user may change anything about this member. */
+  canManageMember(member: WorkspaceMember): boolean {
+    return this.canEditMemberRole(member) || this.canEditMemberBilling(member)
+      || this.canRemoveMember(member) || !!this.memberRemovalReason(member);
+  }
+
+  openMemberPanel(member: WorkspaceMember): void {
+    if (!this.canManageMember(member)) {
+      return;
+    }
+    this.memberEdits[member.user_id] = {role: member.role, billing_admin: member.billing_admin};
+    this.accessPanel.set({kind: 'member', userId: member.user_id});
+  }
+
+  openInvitationPanel(invitation: WorkspaceInvitation): void {
+    if (!this.canManageInvitation(invitation)) {
+      return;
+    }
+    this.invitationEdits[invitation.id] = this.invitationDraft(invitation);
+    this.accessPanel.set({kind: 'invitation', id: invitation.id});
+  }
+
+  /** Closes the access panel and drops its unsaved edits. */
+  closeAccessPanel(): void {
+    const panel = this.accessPanel();
+    if (this.accessPanelBusy()) {
+      return;
+    }
+    const member = this.panelMember();
+    const invitation = this.panelInvitation();
+    if (member) {
+      this.memberEdits[member.user_id] = {role: member.role, billing_admin: member.billing_admin};
+    }
+    if (invitation) {
+      this.invitationEdits[invitation.id] = this.invitationDraft(invitation);
+    }
+    if (panel?.kind === 'invite') {
+      this.inviteError.set(null);
+    }
+    this.accessPanel.set(null);
+  }
+
+  accessPanelBusy(): boolean {
+    const member = this.panelMember();
+    const invitation = this.panelInvitation();
+    return (!!member && !!this.savingMemberIds()[member.user_id])
+      || (!!invitation && !!this.savingInvitationIds()[invitation.id])
+      || (this.accessPanel()?.kind === 'invite' && this.sendingInvitation());
+  }
+
+  /** Saves the access panel: member access, invitation access, or a new invitation. */
+  saveAccessPanel(): void {
+    const member = this.panelMember();
+    const invitation = this.panelInvitation();
+    if (member) {
+      this.saveMember(member);
+    } else if (invitation) {
+      this.saveInvitation(invitation);
+    } else if (this.accessPanel()?.kind === 'invite') {
+      this.sendInvitation();
+    }
+  }
+
+  cancelOwnershipChange(): void {
+    this.ownershipChange.set(null);
+    this.rolePickerRevision.update(revision => revision + 1);
   }
 
   createWorkspace(): void {
@@ -309,9 +538,6 @@ export class WorkspaceComponent implements OnInit {
           role: member.role,
           billing_admin: member.billing_admin,
         }]));
-        if (members.length <= 8) {
-          this.memberSearch.set('');
-        }
       },
       error: error => this.membersError.set(this.errorMessage(error)),
     });
@@ -319,10 +545,19 @@ export class WorkspaceComponent implements OnInit {
 
   filteredMembers(): WorkspaceMember[] {
     const query = this.memberSearch().trim().toLowerCase();
-    if (!query || !this.showMemberSearch()) {
-      return this.members();
-    }
-    return this.members().filter(member => member.email.toLowerCase().includes(query));
+    return query ? this.members().filter(member => member.email.toLowerCase().includes(query)) : this.members();
+  }
+
+  filteredInvitations(): WorkspaceInvitation[] {
+    const query = this.memberSearch().trim().toLowerCase();
+    return query
+      ? this.invitations().filter(invitation => invitation.invitee_email.toLowerCase().includes(query))
+      : this.invitations();
+  }
+
+  isCurrentUser(member: WorkspaceMember): boolean {
+    const email = this.user.email();
+    return !!email && member.email.toLowerCase() === email.toLowerCase();
   }
 
   setMemberRole(member: WorkspaceMember, role: WorkspaceRole): void {
@@ -379,6 +614,7 @@ export class WorkspaceComponent implements OnInit {
           ? {...candidate, role: payload.role, billing_admin: payload.billing_admin}
           : candidate));
         this.memberEdits[member.user_id] = {...payload};
+        this.closePanelFor({kind: 'member', userId: member.user_id});
         this.notification.showSuccess('Member access updated');
         this.workspaces.refresh().subscribe({error: () => undefined});
       },
@@ -407,6 +643,7 @@ export class WorkspaceComponent implements OnInit {
         this.members.update(members => members.filter(candidate => candidate.user_id !== member.user_id));
         delete this.memberEdits[member.user_id];
         this.removalTarget.set(null);
+        this.closePanelFor({kind: 'member', userId: member.user_id});
         this.notification.showSuccess('Workspace member removed');
         this.workspaces.refresh().subscribe({
           next: () => {
@@ -509,6 +746,7 @@ export class WorkspaceComponent implements OnInit {
         this.inviteEmail = '';
         this.inviteRole = 'operator';
         this.inviteBillingAdmin = false;
+        this.closePanelFor({kind: 'invite'});
         this.showInvitationResult('Invitation created', response);
       },
       error: error => {
@@ -570,6 +808,7 @@ export class WorkspaceComponent implements OnInit {
       next: response => {
         this.invitations.update(invitations => invitations.map(candidate => candidate.id === invitation.id ? response.invitation : candidate));
         this.invitationEdits[invitation.id] = this.invitationDraft(response.invitation);
+        this.closePanelFor({kind: 'invitation', id: invitation.id});
         this.showInvitationResult('Invitation updated', response);
       },
       error: error => this.showError('Could not update invitation', error),
@@ -597,6 +836,7 @@ export class WorkspaceComponent implements OnInit {
         this.invitations.update(invitations => invitations.filter(candidate => candidate.id !== invitation.id));
         delete this.invitationEdits[invitation.id];
         this.revokeTarget.set(null);
+        this.closePanelFor({kind: 'invitation', id: invitation.id});
         this.notification.showSuccess('Invitation revoked');
       },
       error: error => this.showError('Could not revoke invitation', error),
@@ -712,6 +952,7 @@ export class WorkspaceComponent implements OnInit {
     ).subscribe({
       next: response => {
         this.syncCurrentWorkspace();
+        this.scheduleOpen.set(false);
         this.notification.showSuccess('Intervals saved. They apply within a minute.');
         for (const warning of response.warnings ?? []) {
           this.notification.showWarn(warning);
@@ -721,12 +962,24 @@ export class WorkspaceComponent implements OnInit {
     });
   }
 
+  /** Whether the instance admin changed a workspace allowance from its saved value. */
+  allowancesChanged(): boolean {
+    const subscription = this.workspaces.current()?.subscription;
+    if (!subscription) {
+      return false;
+    }
+    return this.normalizeAllowance(this.allowanceChecks) !== subscription.monthly_checks
+      || this.normalizeAllowance(this.allowanceScrapes) !== subscription.monthly_scrapes
+      || this.allowanceUnlimitedChecks !== (subscription.unlimited_checks ?? false)
+      || this.allowanceUnlimitedScrapes !== (subscription.unlimited_scrapes ?? false);
+  }
+
   saveAllowances(): void {
     const current = this.workspaces.current();
-    if (!current || this.savingAllowances()) {
+    if (!current || this.savingAllowances() || !this.allowancesChanged()) {
       return;
     }
-    const normalize = (value: number | null) => Math.max(0, Math.round(Number(value) || 0));
+    const normalize = (value: number | null) => this.normalizeAllowance(value);
     this.savingAllowances.set(true);
     this.http.updateWorkspaceAllowances(current.id, {
       monthly_checks: normalize(this.allowanceChecks),
@@ -767,6 +1020,51 @@ export class WorkspaceComponent implements OnInit {
       return 'Capacity is above 80%. Review paused routes before the limit is reached.';
     }
     return null;
+  }
+
+  private forecastSeries(meter: AllowanceMeter, start: number, end: number, now: number): ForecastSeries {
+    const allowances = this.workspaces.current()!.allowances;
+    const perCycle = meter.id === 'checks' ? allowances.checks_per_cycle : allowances.scrapes_per_cycle;
+    const interval = meter.id === 'checks' ? allowances.check_interval_seconds : allowances.scrape_interval_seconds;
+    const runOutIso = meter.id === 'checks' ? allowances.checks_run_out_at : allowances.scrapes_run_out_at;
+    const usedPercent = meter.exhausted ? 100 : Math.min(100, (meter.used / meter.monthly) * 100);
+    const used = [{time: start, percent: 0}, {time: now, percent: usedPercent}];
+    if (meter.exhausted) {
+      return {id: meter.id, label: meter.label, color: meter.color, used, projected: [{time: now, percent: 100}, {time: end, percent: 100}], runOutAt: null};
+    }
+    const parsedRunOut = runOutIso ? Date.parse(runOutIso) : NaN;
+    const runOutAt = Number.isFinite(parsedRunOut) && parsedRunOut < end ? Math.max(now, parsedRunOut) : null;
+    if (runOutAt !== null) {
+      return {
+        id: meter.id, label: meter.label, color: meter.color, used, runOutAt,
+        projected: [{time: now, percent: usedPercent}, {time: runOutAt, percent: 100}, {time: end, percent: 100}],
+      };
+    }
+    // Cycles still to run this period at the current cadence, in allowance percent.
+    const perSecond = perCycle > 0 && interval > 0 ? perCycle / interval : 0;
+    const projectedEnd = Math.min(100, usedPercent + ((perSecond * (end - now)) / 1000 / meter.monthly) * 100);
+    return {
+      id: meter.id, label: meter.label, color: meter.color, used, runOutAt: null,
+      projected: [{time: now, percent: usedPercent}, {time: end, percent: projectedEnd}],
+    };
+  }
+
+  /** Closes the access panel when it still shows the entity that was just saved or removed. */
+  private closePanelFor(target: AccessPanel): void {
+    const panel = this.accessPanel();
+    if (!panel || panel.kind !== target.kind) {
+      return;
+    }
+    if ((panel.kind === 'member' && target.kind === 'member' && panel.userId !== target.userId)
+      || (panel.kind === 'invitation' && target.kind === 'invitation' && panel.id !== target.id)) {
+      return;
+    }
+    this.accessPanel.set(null);
+  }
+
+  /** Empty, negative or fractional entries are stored as whole numbers; 0 means the instance default. */
+  private normalizeAllowance(value: number | null): number {
+    return Math.max(0, Math.round(Number(value) || 0));
   }
 
   private updateMemberDraft(userId: number, update: Partial<WorkspaceMemberWriteRequest>): void {

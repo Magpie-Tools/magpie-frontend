@@ -37,13 +37,34 @@
     <div class="workspace-stage">
       <header class="workspace-context">
         <div class="workspace-context__identity">
-          <span class="workspace-mark">{{
+          <span class="workspace-mark" aria-hidden="true">{{
             workspace.name.slice(0, 1).toUpperCase()
           }}</span>
           <div>
             <h1>{{ workspace.name }}</h1>
+            <ul class="workspace-meta" aria-label="Workspace details">
+              <li><i class="icon icon-sparkles" aria-hidden="true"></i>{{ workspace.subscription.plan_code | titlecase }} plan</li>
+              <li>
+                <i class="icon" [class.icon-user]="workspace.personal" [class.icon-users]="!workspace.personal" aria-hidden="true"></i>{{ workspace.personal ? "Personal" : "Shared" }}
+              </li>
+              <li><i class="icon icon-shield" aria-hidden="true"></i>{{ workspace.role | titlecase }}</li>
+            </ul>
           </div>
         </div>
+        @if (workspaces.canOperate() || isInstanceAdmin || workspaces.canAdminister()) {
+          <div class="workspace-context__actions">
+            @if (workspaces.canOperate() || isInstanceAdmin) {
+              <button type="button" class="button button--quiet" (click)="openSchedule()">
+                <i class="icon icon-clock" aria-hidden="true"></i>Schedule
+              </button>
+            }
+            @if (workspaces.canAdminister()) {
+              <button type="button" class="button button--primary" (click)="startInvite()">
+                <i class="icon icon-plus" aria-hidden="true"></i>Invite member
+              </button>
+            }
+          </div>
+        }
       </header>
 
       <hlm-tabs class="settings-section-tabs workspace-tabs" [tab]="'workspace-' + activeSection()"
@@ -59,904 +80,404 @@
           }
         </hlm-tabs-list>
         <div class="workspace-tab-panels">
-      <section hlmTabsContent="workspace-overview" class="workspace-grid workspace-panel">
-        <section
-          class="workspace-card capacity-card"
-          aria-labelledby="capacity-title"
-        >
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i class="icon icon-network" aria-hidden="true"></i
-            ></span>
-            <div>
-              <h2 id="capacity-title">Route capacity</h2>
-            </div>
-          </div>
-
-          <div class="capacity-hero">
-            <div class="capacity-figure">
-              <strong class="metric-value">{{
-                workspace.capacity.active_routes | number
-              }}</strong>
-              @if (workspace.capacity.activation_limit === null) {
-                <span>active routes with no limit</span>
-              } @else {
-                <span
-                  >of {{ workspace.capacity.activation_limit | number }} active
-                  routes</span
+      <section hlmTabsContent="workspace-overview" class="workspace-panel workspace-overview">
+        <div class="workspace-card workspace-strip">
+          @for (meter of allowanceMeters(); track meter.id) {
+            <div class="strip-cell">
+              <span class="strip-label"><span class="series-dot" [style.background]="meter.color" aria-hidden="true"></span>{{ meter.label }}</span>
+              <span class="strip-value">
+                <strong class="metric-value">{{ compactNumber(meter.used) }}</strong>
+                @if (meter.unlimited) {
+                  <span>this month</span>
+                } @else {
+                  <span>/ {{ compactNumber(meter.monthly) }}</span>
+                }
+              </span>
+              @if (!meter.unlimited) {
+                <div
+                  class="strip-bar"
+                  role="progressbar"
+                  [attr.aria-label]="meter.label + ' used this month'"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  [attr.aria-valuenow]="meter.percent"
                 >
+                  <span [style.width.%]="meter.percent" [style.background]="meter.color"></span>
+                </div>
               }
+              <span class="strip-note" [class.strip-note--warn]="meter.outlookTone === 'warn' || meter.outlookTone === 'stopped' || meter.needsInterval">
+                @switch (meter.outlookTone) {
+                  @case ('stopped') { {{ meter.outlook }} }
+                  @case ('warn') { {{ meter.schedule }} · {{ meter.outlook }} }
+                  @default { {{ meter.schedule }} }
+                }
+              </span>
             </div>
-
-            @if (workspace.capacity.activation_limit !== null) {
-              <div
-                class="capacity-progress"
-                role="progressbar"
-                aria-label="Active route capacity"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                [attr.aria-valuenow]="capacityPercent()"
-              >
-                <span [style.width.%]="capacityPercent()"></span>
-              </div>
-              <div class="capacity-scale">
-                <span>{{ capacityPercent() }}% used</span
-                ><span
-                  >{{
-                    workspace.capacity.activation_limit -
-                      workspace.capacity.active_routes >
-                    0
-                      ? (workspace.capacity.activation_limit -
-                          workspace.capacity.active_routes | number)
-                      : 0
-                  }}
-                  available</span
-                >
-              </div>
-            }
-          </div>
-
-          @if (capacityMessage(); as message) {
-            <p
-              class="capacity-warning"
-              [class.capacity-warning--critical]="capacityPercent() >= 100"
-            >
-              <i class="icon icon-circle-alert" aria-hidden="true"></i
-              >{{ message }}
-            </p>
           }
-
-          <dl class="capacity-metrics">
-            <div>
-              <dt>Stored</dt>
-              <dd class="metric-value">
-                {{ workspace.capacity.stored_routes | number }}
-              </dd>
+          <div class="strip-cell">
+            <span class="strip-label">Billing period</span>
+            <span class="strip-value"><strong class="metric-value">{{ periodDaysLeft() }}</strong><span>{{ periodDaysLeft() === 1 ? "day" : "days" }} left</span></span>
+            <div class="strip-bar" role="progressbar" aria-label="Billing period elapsed" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="periodElapsedPercent()">
+              <span class="strip-bar__period" [style.width.%]="periodElapsedPercent()"></span>
             </div>
-            <div>
-              <dt>Paused or archived</dt>
-              <dd class="metric-value">
-                {{ overflowStoredRoutes() | number }}
-              </dd>
-            </div>
-          </dl>
-
-          <p class="card-note">
-            <i class="icon icon-info" aria-hidden="true"></i>Paused and archived
-            routes stay stored without using active capacity.
-          </p>
-        </section>
-
-        <section class="workspace-card plan-card" aria-labelledby="plan-title">
-          <div class="card-heading card-heading--split">
-            <span class="card-icon"
-              ><i class="icon icon-sparkles" aria-hidden="true"></i
-            ></span>
-            <h2 id="plan-title">Plan</h2>
+            <span class="strip-note">Usage resets {{ workspace.allowances.period_end | date: "mediumDate" }}</span>
           </div>
-
-          <div class="plan-summary">
-            <strong>{{ workspace.subscription.plan_code | titlecase }}</strong>
-            <span>{{ workspace.subscription.status | titlecase }} subscription</span>
-          </div>
-          <!-- Allowance rows only mean something when the workspace has a route limit. -->
-          <dl class="plan-highlights">
-            @if (workspace.capacity.activation_limit === null) {
-              <div><dt>Active route limit</dt><dd>No limit</dd></div>
-            } @else {
-              <div><dt>Included routes</dt><dd>{{ workspace.capacity.included_routes | number }}</dd></div>
-              <div><dt>Additional routes</dt><dd>{{ workspace.capacity.additional_routes | number }}</dd></div>
-            }
-            @if (workspace.subscription.included_operators > 0) {
-              <div><dt>Included operators</dt><dd>{{ workspace.subscription.included_operators | number }}</dd></div>
-            }
-          </dl>
-          <div class="plan-accordions">
-            <details>
-              <summary>
-                <span
-                  ><i class="icon icon-database" aria-hidden="true"></i>Capacity
-                  policy</span
-                ><i class="icon icon-chevron-down" aria-hidden="true"></i>
-              </summary>
-              <dl>
-                <div>
-                  <dt>Overage policy</dt>
-                  <dd>{{ workspace.capacity.overage_mode | titlecase }}</dd>
-                </div>
-                <div>
-                  <dt>Overage routes</dt>
-                  <dd>{{ workspace.capacity.overage_routes | number }}</dd>
-                </div>
-              </dl>
-            </details>
-            <details>
-              <summary>
-                <span
-                  ><i class="icon icon-clock" aria-hidden="true"></i>Data and
-                  billing</span
-                ><i class="icon icon-chevron-down" aria-hidden="true"></i>
-              </summary>
-              <dl>
-                <div>
-                  <dt>Statistics retention</dt>
-                  <dd>
-                    {{
-                      workspace.subscription.statistics_retention_days
-                        ? workspace.subscription.statistics_retention_days +
-                          " days"
-                        : "Instance default"
-                    }}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Minimum check interval</dt>
-                  <dd>
-                    {{
-                      workspace.subscription.minimum_check_interval_seconds
-                        ? workspace.subscription
-                            .minimum_check_interval_seconds + " seconds"
-                        : "Instance default"
-                    }}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Billing period</dt>
-                  <dd>
-                    @if (
-                      workspace.subscription.current_period_start &&
-                      workspace.subscription.current_period_end
-                    ) {
-                      {{
-                        workspace.subscription.current_period_start
-                          | date: "mediumDate"
-                      }}
-                      to
-                      {{
-                        workspace.subscription.current_period_end
-                          | date: "mediumDate"
-                      }}
-                    } @else {
-                      Not set
-                    }
-                  </dd>
-                </div>
-                <div>
-                  <dt>Cancellation</dt>
-                  <dd>
-                    {{
-                      workspace.subscription.cancel_at_period_end
-                        ? "At period end"
-                        : "Not scheduled"
-                    }}
-                  </dd>
-                </div>
-              </dl>
-            </details>
-          </div>
-        </section>
-
-        <section class="workspace-card team-summary" aria-labelledby="team-summary-title">
-          <div>
-            <h2 id="team-summary-title">Workspace members</h2>
-            <p>
-              @if (loadingMembers()) { Loading members… }
-              @else if (membersError()) { Members could not be loaded. }
-              @else { {{ members().length }} {{ members().length === 1 ? 'member' : 'members' }} }
-              @if (workspaces.canAdminister() && invitations().length > 0) {
-                <span aria-hidden="true"> · </span>{{ invitations().length }} pending
+          <div class="strip-cell">
+            <span class="strip-label">Members</span>
+            <span class="strip-value">
+              @if (loadingMembers()) {
+                <strong class="metric-value">…</strong>
+              } @else {
+                <strong class="metric-value">{{ members().length }}</strong>
+                @if (workspaces.canAdminister() && invitations().length > 0) {
+                  <span>+ {{ invitations().length }} pending</span>
+                }
               }
-            </p>
+            </span>
+            <button type="button" class="strip-link" (click)="activeSection.set('members')">
+              Manage members<i class="icon icon-arrow-right" aria-hidden="true"></i>
+            </button>
           </div>
-          <button type="button" class="button button--quiet" (click)="activeSection.set('members')">
-            View members<i class="icon icon-arrow-right" aria-hidden="true"></i>
-          </button>
-        </section>
+        </div>
 
-        <section class="workspace-card allowance-card" aria-labelledby="allowance-title">
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i class="icon icon-clock" aria-hidden="true"></i
-            ></span>
-            <div>
-              <h2 id="allowance-title">Monthly allowances</h2>
+        <div class="overview-split">
+          <section class="workspace-card forecast-card" aria-labelledby="forecast-title">
+            <div class="card-row">
+              <div>
+                <h2 id="forecast-title">Allowance used</h2>
+                <p>Share of each monthly allowance, so both fit on one scale.</p>
+              </div>
+              @if (workspaces.canOperate() || isInstanceAdmin) {
+                <button type="button" class="button button--quiet" (click)="openSchedule()">Adjust schedule</button>
+              }
             </div>
-          </div>
-
-          <div class="allowance-grid">
-            @for (meter of allowanceMeters(); track meter.id) {
-              <div class="allowance-meter">
-                <div class="allowance-meter__head">
-                  <span>{{ meter.label }}</span>
-                  <span class="allowance-tags">
-                    @if (meter.unlimited) {
-                      <span class="allowance-tag allowance-tag--unlimited">No limit</span>
-                    }
-                    @if (meter.inherits) {
-                      <span class="allowance-tag">Instance default</span>
-                    }
-                  </span>
+            @if (forecast(); as forecast) {
+              @if (forecast.series.length > 0) {
+                <app-allowance-forecast-chart
+                  [series]="forecast.series"
+                  [periodStart]="forecast.start"
+                  [periodEnd]="forecast.end"
+                  [now]="forecast.now"
+                />
+                <div class="forecast-legend">
+                  <span><svg width="18" height="4" aria-hidden="true"><line x1="0" y1="2" x2="18" y2="2" stroke="currentColor" stroke-width="2" /></svg>Used so far</span>
+                  <span><svg width="18" height="4" aria-hidden="true"><line x1="0" y1="2" x2="18" y2="2" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3" /></svg>Projected at the current schedule</span>
+                  <span><svg width="18" height="4" aria-hidden="true"><line x1="0" y1="2" x2="18" y2="2" stroke="currentColor" stroke-width="1.5" opacity=".6" /></svg>100% of allowance</span>
                 </div>
-                <div class="capacity-figure">
-                  <strong class="metric-value">{{ meter.used | number }}</strong>
-                  @if (meter.unlimited) {
-                    <span>{{ meter.unit }} this month</span>
-                  } @else {
-                    <span>of {{ meter.monthly | number }} {{ meter.unit }} this month</span>
-                  }
-                </div>
-                @if (!meter.unlimited) {
-                  <div
-                    class="capacity-progress"
-                    role="progressbar"
-                    [attr.aria-label]="meter.label + ' used this month'"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    [attr.aria-valuenow]="meter.percent"
-                  >
-                    <span [style.width.%]="meter.percent"></span>
-                  </div>
-                }
-                <p class="allowance-cadence" [class.allowance-cadence--stopped]="meter.exhausted">
-                  {{ meter.cadence }}
+              } @else {
+                <p class="forecast-empty">
+                  <i class="icon icon-info" aria-hidden="true"></i>This workspace has no monthly limits, so there is nothing to forecast.
+                  Checks and scrapes run at the intervals you choose.
                 </p>
-                @if (meter.runOutWarning) {
-                  <p class="allowance-warning" role="status">
-                    <i class="icon icon-circle-alert" aria-hidden="true"></i>{{ meter.runOutWarning }}
-                  </p>
-                }
+              }
+            }
+            @for (meter of allowanceMeters(); track meter.id) {
+              @if (meter.needsInterval) {
+                <p class="allowance-warning" role="status">
+                  <i class="icon icon-circle-alert" aria-hidden="true"></i>{{ meter.cadence }}
+                </p>
+              }
+            }
+            <details class="forecast-table">
+              <summary>Show as table</summary>
+              <div class="forecast-table__scroll">
+                <table>
+                  <thead>
+                    <tr><th scope="col">Metric</th><th scope="col" class="numeric">Used</th><th scope="col" class="numeric">Allowance</th><th scope="col" class="numeric">Used so far</th><th scope="col">Schedule</th><th scope="col">End of month</th></tr>
+                  </thead>
+                  <tbody>
+                    @for (meter of allowanceMeters(); track meter.id) {
+                      <tr>
+                        <th scope="row"><span class="series-dot" [style.background]="meter.color" aria-hidden="true"></span>{{ meter.label }}</th>
+                        <td class="numeric metric-value">{{ meter.used | number }}</td>
+                        <td class="numeric metric-value">{{ meter.unlimited ? "No limit" : (meter.monthly | number) }}{{ meter.inherits ? " (instance default)" : "" }}</td>
+                        <td class="numeric metric-value">{{ meter.unlimited ? "–" : meter.percent + "%" }}</td>
+                        <td>{{ meter.schedule }}</td>
+                        <td>{{ meter.outlook }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </section>
 
-                @if (workspaces.canOperate()) {
-                  <div class="cadence-editor">
-                    <label class="field-label" [attr.for]="'cadence-mode-' + meter.id">
-                      {{ meter.id === 'checks' ? 'Check interval' : 'Scrape interval' }}
-                    </label>
-                    <div class="cadence-editor__fields">
-                      <select
-                        class="select-input select-input--compact"
-                        [id]="'cadence-mode-' + meter.id"
-                        [(ngModel)]="cadenceDrafts[meter.id].mode"
-                        [disabled]="savingCadence()"
-                      >
-                        <option value="automatic" [disabled]="meter.unlimited">Automatic</option>
-                        <option value="fixed">Fixed</option>
-                      </select>
-                      @if (cadenceDrafts[meter.id].mode === 'fixed') {
-                        <span class="cadence-editor__every">every</span>
-                        <input
-                          class="text-input cadence-editor__value"
-                          type="number"
-                          min="1"
-                          [attr.aria-label]="meter.label + ' interval'"
-                          [(ngModel)]="cadenceDrafts[meter.id].value"
-                          [disabled]="savingCadence()"
-                        />
-                        <select
-                          class="select-input select-input--compact"
-                          [attr.aria-label]="meter.label + ' interval unit'"
-                          [(ngModel)]="cadenceDrafts[meter.id].unit"
-                          [disabled]="savingCadence()"
-                        >
-                          @for (unit of cadenceUnits; track unit) {
-                            <option [value]="unit">{{ unit }}</option>
-                          }
-                        </select>
+          <section class="workspace-card plan-card" aria-labelledby="plan-title">
+            <div class="card-row">
+              <h2 id="plan-title">Plan</h2>
+              <span class="status-chip">{{ workspace.subscription.status | titlecase }}</span>
+            </div>
+            <div class="plan-summary">
+              <strong>{{ workspace.subscription.plan_code | titlecase }}</strong>
+              @if (workspace.subscription.current_period_end) {
+                <span>{{ workspace.subscription.cancel_at_period_end ? "Ends" : "Renews" }} {{ workspace.subscription.current_period_end | date: "mediumDate" }}</span>
+              }
+            </div>
+            <dl class="plan-facts">
+              @if (workspace.capacity.activation_limit === null) {
+                <div><dt>Active route limit</dt><dd>No limit</dd></div>
+              } @else {
+                <div class="plan-limit">
+                  <div class="plan-limit__head"><dt>Route limit</dt><dd class="metric-value">{{ workspace.capacity.activation_limit | number }}</dd></div>
+                  @if (workspace.capacity.included_routes + workspace.capacity.additional_routes > 0) {
+                    <div class="plan-limit__bar" aria-hidden="true">
+                      <span class="plan-limit__included" [style.flex-grow]="workspace.capacity.included_routes"></span>
+                      @if (workspace.capacity.additional_routes > 0) {
+                        <span class="plan-limit__additional" [style.flex-grow]="workspace.capacity.additional_routes"></span>
                       }
                     </div>
-                    @if (cadenceError(meter.id); as error) {
-                      <p class="inline-error">{{ error }}</p>
-                    } @else if (cadenceWarning(meter.id); as warning) {
-                      <p class="allowance-warning" role="status">
-                        <i class="icon icon-circle-alert" aria-hidden="true"></i>{{ warning }}
-                      </p>
-                    } @else if (meter.unlimited) {
-                      <p class="card-note">
-                        No monthly limit, so {{ meter.label.toLowerCase() }} run at the interval you choose.
-                      </p>
-                    } @else if (cadenceDrafts[meter.id].mode === 'automatic') {
-                      <p class="card-note">The remaining allowance is spread evenly over the rest of the month.</p>
-                    }
-                  </div>
-                }
+                    <div class="plan-limit__labels">
+                      <span>{{ workspace.capacity.included_routes | number }} included</span>
+                      @if (workspace.capacity.additional_routes > 0) {
+                        <span>+ {{ workspace.capacity.additional_routes | number }} additional</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+              @if (workspace.subscription.included_operators > 0) {
+                <div><dt>Included operators</dt><dd class="metric-value">{{ workspace.subscription.included_operators | number }}</dd></div>
+              }
+              <div class="plan-facts__divider" aria-hidden="true"></div>
+              <div><dt>Overage policy</dt><dd>{{ workspace.capacity.overage_mode | titlecase }}</dd></div>
+              @if (workspace.capacity.overage_routes > 0) {
+                <div><dt>Overage routes</dt><dd class="metric-value">{{ workspace.capacity.overage_routes | number }}</dd></div>
+              }
+              <div>
+                <dt>Statistics retention</dt>
+                <dd>{{ workspace.subscription.statistics_retention_days ? workspace.subscription.statistics_retention_days + " days" : "Instance default" }}</dd>
               </div>
-            }
+              <div>
+                <dt>Min. check interval</dt>
+                <dd>{{ workspace.subscription.minimum_check_interval_seconds ? workspace.subscription.minimum_check_interval_seconds + " seconds" : "Instance default" }}</dd>
+              </div>
+              <div>
+                <dt>Billing period</dt>
+                <dd>
+                  @if (workspace.subscription.current_period_start && workspace.subscription.current_period_end) {
+                    {{ workspace.subscription.current_period_start | date: "MMM d" }} – {{ workspace.subscription.current_period_end | date: "MMM d" }}
+                  } @else {
+                    Not set
+                  }
+                </dd>
+              </div>
+              <div><dt>Cancellation</dt><dd>{{ workspace.subscription.cancel_at_period_end ? "At period end" : "Not scheduled" }}</dd></div>
+            </dl>
+          </section>
+        </div>
+
+        <section class="workspace-card routes-card" aria-labelledby="routes-title">
+          <div class="card-row">
+            <div class="routes-card__title">
+              <h2 id="routes-title">Routes</h2>
+              @if (workspace.capacity.activation_limit !== null) {
+                <span class="status-chip" [class.status-chip--warn]="capacityPercent() >= 80 && capacityPercent() < 100" [class.status-chip--bad]="capacityPercent() >= 100">
+                  {{ capacityPercent() }}% of limit
+                </span>
+              }
+            </div>
+            <span class="routes-card__total">{{ workspace.capacity.stored_routes | number }} stored · paused routes don't use capacity</span>
           </div>
-
-          @if (workspaces.canOperate() && cadenceChanged()) {
-            <div class="cadence-actions">
-              <button
-                type="button"
-                class="button button--primary"
-                [disabled]="savingCadence() || !!cadenceError('checks') || !!cadenceError('scrapes')"
-                (click)="saveCadence()"
+          @if (routeBar(); as bar) {
+            <div class="route-bar">
+              <div
+                class="route-bar__track"
+                role="img"
+                [attr.aria-label]="(bar.active | number) + ' active, ' + (bar.available | number) + ' available up to the limit of ' + (workspace.capacity.activation_limit | number) + ', ' + (bar.paused | number) + ' paused or archived'"
               >
-                @if (savingCadence()) {
-                  <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
+                @if (bar.active > 0) {
+                  <span class="route-bar__active" [class.route-bar__active--warn]="capacityPercent() >= 80" [style.width.%]="bar.activeWidth"></span>
                 }
-                Save intervals
-              </button>
+                @if (bar.available > 0) {
+                  <span class="route-bar__available" [style.width.%]="bar.availableWidth"></span>
+                }
+                @if (bar.paused > 0) {
+                  <span class="route-bar__paused" [style.width.%]="bar.pausedWidth"></span>
+                }
+              </div>
+              <span class="route-bar__limit" [style.left.%]="bar.limitAt" aria-hidden="true"></span>
+              <span class="route-bar__limit-label" [style.left.%]="bar.limitAt" aria-hidden="true">Limit {{ workspace.capacity.activation_limit | number }}</span>
             </div>
+            <dl class="route-legend">
+              <div><dt><span class="route-swatch route-swatch--active" [class.route-swatch--warn]="capacityPercent() >= 80"></span>Active</dt><dd class="metric-value">{{ bar.active | number }}</dd></div>
+              <div><dt><span class="route-swatch route-swatch--available"></span>Available</dt><dd class="metric-value">{{ bar.available | number }}</dd></div>
+              <div><dt><span class="route-swatch route-swatch--paused"></span>Paused or archived</dt><dd class="metric-value">{{ bar.paused | number }}</dd></div>
+            </dl>
+          } @else {
+            <dl class="route-legend">
+              <div><dt><span class="route-swatch route-swatch--active"></span>Active</dt><dd class="metric-value">{{ workspace.capacity.active_routes | number }}</dd></div>
+              <div><dt><span class="route-swatch route-swatch--paused"></span>Paused or archived</dt><dd class="metric-value">{{ overflowStoredRoutes() | number }}</dd></div>
+              <div><dt>Active route limit</dt><dd>No limit</dd></div>
+            </dl>
           }
-
-          <p class="card-note">
-            <i class="icon icon-info" aria-hidden="true"></i>With an automatic interval, Magpie
-            spreads the remaining allowance over the rest of the month. A fixed interval runs until
-            the allowance is used up. Without a monthly limit, a fixed interval is required. Usage
-            resets on {{ workspace.allowances.period_end | date: "mediumDate" }}.
-          </p>
-
-          @if (isInstanceAdmin) {
-            <div class="allowance-admin">
-              <label class="field-label" for="allowance-checks">Checks per month</label>
-              <div class="allowance-admin__field">
-                <input
-                  id="allowance-checks"
-                  class="text-input"
-                  type="number"
-                  min="0"
-                  step="1000"
-                  [(ngModel)]="allowanceChecks"
-                  [disabled]="savingAllowances() || allowanceUnlimitedChecks"
-                  [placeholder]="allowanceUnlimitedChecks ? 'No limit' : 'Instance default'"
-                />
-                <label class="checkbox-field"
-                  ><input
-                    type="checkbox"
-                    [(ngModel)]="allowanceUnlimitedChecks"
-                    [disabled]="savingAllowances()"
-                  /><span>No limit</span></label
-                >
-              </div>
-              <label class="field-label" for="allowance-scrapes">Scrapes per month</label>
-              <div class="allowance-admin__field">
-                <input
-                  id="allowance-scrapes"
-                  class="text-input"
-                  type="number"
-                  min="0"
-                  step="100"
-                  [(ngModel)]="allowanceScrapes"
-                  [disabled]="savingAllowances() || allowanceUnlimitedScrapes"
-                  [placeholder]="allowanceUnlimitedScrapes ? 'No limit' : 'Instance default'"
-                />
-                <label class="checkbox-field"
-                  ><input
-                    type="checkbox"
-                    [(ngModel)]="allowanceUnlimitedScrapes"
-                    [disabled]="savingAllowances()"
-                  /><span>No limit</span></label
-                >
-              </div>
-              <button
-                type="button"
-                class="button button--primary"
-                [disabled]="savingAllowances()"
-                (click)="saveAllowances()"
-              >
-                @if (savingAllowances()) {
-                  <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
-                }
-                Save allowances
-              </button>
-              <p class="card-note">
-                Leave a field empty or at 0 to use the instance default. With No limit, the workspace
-                has to choose a fixed interval and runs hourly until it does.
-              </p>
-            </div>
+          @if (capacityMessage(); as message) {
+            <p class="capacity-warning" [class.capacity-warning--critical]="capacityPercent() >= 100">
+              <i class="icon icon-circle-alert" aria-hidden="true"></i>{{ message }}
+            </p>
           }
         </section>
       </section>
-      <section hlmTabsContent="workspace-members" class="workspace-grid workspace-panel">
-        <section
-          class="workspace-card access-card"
-          aria-labelledby="access-title"
-        >
-          <div class="card-heading card-heading--split">
-            <span class="card-icon"
-              ><i class="icon icon-users" aria-hidden="true"></i
-            ></span>
-            <div>
-              <h2 id="access-title">Members</h2>
-            </div>
-            <span class="section-count"
-              >{{ members().length }}
-              {{ members().length === 1 ? "member" : "members" }}</span
-            >
+      <section hlmTabsContent="workspace-members" class="workspace-panel workspace-members">
+        <div class="members-toolbar">
+          <label class="search-field"
+            ><i class="icon icon-search" aria-hidden="true"></i><span class="sr-only">Search members and invitations</span
+            ><input type="search" placeholder="Search by email" [ngModel]="memberSearch()" (ngModelChange)="memberSearch.set($event)"
+          /></label>
+          <span class="members-count">
+            {{ members().length }} {{ members().length === 1 ? "member" : "members" }}
+            @if (workspaces.canAdminister() && invitations().length > 0) {
+              · {{ invitations().length }} pending
+            }
+          </span>
+        </div>
+
+        <div class="workspace-card people-card">
+          <div class="group-head">
+            <h2>Members</h2>
+            @if (workspaces.canAdminister()) {
+              <span class="group-hint">Select someone to change their access.</span>
+            }
           </div>
-
-          @if (workspaces.canAdminister()) {
-            <form id="workspace-invite-form" class="invite-form" aria-label="Invite a member" (ngSubmit)="sendInvitation()">
-              <div class="invite-fields">
-                <label class="invite-email"
-                  ><span>Invite by email</span
-                  ><input
-                    class="text-input"
-                    type="email"
-                    name="inviteEmail"
-                    autocomplete="off"
-                    aria-describedby="workspace-invite-hint"
-                    placeholder="member@example.com"
-                    [(ngModel)]="inviteEmail"
-                    required
-                    [disabled]="sendingInvitation()"
-                /></label>
-                <label class="invite-role"
-                  ><span>Role</span
-                  ><select
-                    class="select-input"
-                    name="inviteRole"
-                    [(ngModel)]="inviteRole"
-                    [disabled]="sendingInvitation()"
-                  >
-                    @for (role of invitationRoleOptions(); track role) {
-                      <option [ngValue]="role">{{ role | titlecase }}</option>
-                    }
-                  </select></label
-                >
-                @if (workspaces.isOwner()) {
-                  <label class="checkbox-field"
-                    ><input
-                      type="checkbox"
-                      name="inviteBillingAdmin"
-                      [(ngModel)]="inviteBillingAdmin"
-                      [disabled]="sendingInvitation()"
-                    /><span>Billing access</span></label
-                  >
-                }
-                <button
-                  type="submit"
-                  class="button button--primary invite-submit"
-                  [disabled]="sendingInvitation() || !inviteEmail.trim()"
-                >
-                  @if (sendingInvitation()) {
-                    <i
-                      class="icon icon-spin icon-loader-circle"
-                      aria-hidden="true"
-                    ></i>
-                  }
-                  Send invitation
-                </button>
-              </div>
-              <p id="workspace-invite-hint" class="invite-hint">Use an existing Magpie account.</p>
-              @if (inviteError()) {
-                <p class="form-error" role="alert">
-                  <span class="error-icon"
-                    ><i class="icon icon-triangle-alert" aria-hidden="true"></i
-                  ></span>
-                  <span>{{ inviteError() }}</span>
-                </p>
-              }
-            </form>
-          }
-
-          @if (showMemberSearch()) {
-            <div class="subsection-heading">
-              <label class="search-field"
-                ><i class="icon icon-search" aria-hidden="true"></i
-                ><span class="sr-only">Search members</span
-                ><input
-                  type="search"
-                  placeholder="Search members"
-                  [ngModel]="memberSearch()"
-                  (ngModelChange)="memberSearch.set($event)"
-              /></label>
-            </div>
-          }
-
           @if (membersError()) {
             <div class="inline-error" role="alert">
-              <span class="error-icon"
-                ><i class="icon icon-triangle-alert" aria-hidden="true"></i
-              ></span>
-              <div>
-                <strong>Members could not be loaded</strong
-                ><span>{{ membersError() }}</span>
-              </div>
-              <button
-                type="button"
-                class="button button--quiet"
-                (click)="loadMembers()"
-              >
-                Try again
-              </button>
+              <span class="error-icon"><i class="icon icon-triangle-alert" aria-hidden="true"></i></span>
+              <div><strong>Members could not be loaded</strong><span>{{ membersError() }}</span></div>
+              <button type="button" class="button button--quiet" (click)="loadMembers()">Try again</button>
             </div>
           } @else if (loadingMembers()) {
-            <div class="data-list" aria-label="Loading members">
+            <div class="people-list" aria-label="Loading members">
               @for (_ of [1, 2, 3]; track $index) {
-                <div class="data-row member-grid member-row--skeleton">
-                  <div>
-                    <hlm-skeleton
-                      [style.width]="'13rem'"
-                      [style.height]="'.9rem'"
-                    /><hlm-skeleton
-                      [style.width]="'7rem'"
-                      [style.height]="'.7rem'"
-                    />
-                  </div>
-                  <hlm-skeleton
-                    [style.width]="'6rem'"
-                    [style.height]="'2.2rem'"
-                  /><hlm-skeleton
-                    [style.width]="'4rem'"
-                    [style.height]="'.8rem'"
-                  /><hlm-skeleton
-                    [style.width]="'6rem'"
-                    [style.height]="'.8rem'"
-                  /><hlm-skeleton
-                    [style.width]="'5rem'"
-                    [style.height]="'2.2rem'"
-                  />
+                <div class="people-row">
+                  <span class="people-row__identity">
+                    <hlm-skeleton [style.width]="'2.25rem'" [style.height]="'2.25rem'" [style.border-radius]="'50%'" />
+                    <span class="people-row__text"><hlm-skeleton [style.width]="'12rem'" [style.height]="'.85rem'" /></span>
+                  </span>
+                  <hlm-skeleton [style.width]="'4.5rem'" [style.height]="'.8rem'" />
                 </div>
               }
             </div>
           } @else {
-            <div class="data-list member-list">
-              <div class="data-header member-grid" aria-hidden="true">
-                <span>Member</span><span>Role</span><span>Billing</span
-                ><span>Joined</span><span></span>
-              </div>
-              <div class="member-list__rows" [appVisibleRows]="9.5">
-                @for (member of filteredMembers(); track member.user_id) {
-                  @if (memberEdits[member.user_id]; as edit) {
-                    <article class="data-row member-grid">
-                      <div class="identity-cell">
-                        <span class="workspace-avatar" aria-hidden="true">{{
-                          member.email.slice(0, 1).toUpperCase()
-                        }}</span>
-                        <div>
-                          <strong>{{ member.email }}</strong
-                          >
-                        </div>
-                      </div>
-                      <div class="control-cell" data-label="Role">
-                        @if (canEditMemberRole(member)) {
-                          <select
-                            class="select-input select-input--compact"
-                            [ngModel]="edit.role"
-                            (ngModelChange)="setMemberRole(member, $event)"
-                            [disabled]="savingMemberIds()[member.user_id]"
-                            [attr.aria-label]="'Role for ' + member.email"
-                          >
-                            @for (role of memberRoleOptions(); track role) {
-                              <option [ngValue]="role">
-                                {{ role | titlecase }}
-                              </option>
-                            }
-                          </select>
-                        } @else {
-                          <span class="plain-value">{{
-                            member.role | titlecase
-                          }}</span>
-                        }
-                      </div>
-                      <div class="control-cell" data-label="Billing">
-                        @if (canEditMemberBilling(member)) {
-                          <label class="compact-checkbox"
-                            ><input
-                              type="checkbox"
-                              [ngModel]="edit.billing_admin"
-                              (ngModelChange)="setMemberBilling(member, $event)"
-                              [disabled]="savingMemberIds()[member.user_id]"
-                              [attr.aria-label]="
-                                'Billing access for ' + member.email
-                              "
-                            /><span>{{
-                              edit.billing_admin ? "Yes" : "No"
-                            }}</span></label
-                          >
-                        } @else {
-                          <span class="plain-value">{{
-                            member.billing_admin ? "Yes" : "No"
-                          }}</span>
-                        }
-                      </div>
-                      <span
-                        class="plain-value joined-value"
-                        data-label="Joined"
-                        >{{ member.joined_at | date: "mediumDate" }}</span
-                      >
-                      <div class="row-actions">
-                        @if (isMemberDirty(member)) {
-                          <button
-                            type="button"
-                            class="button button--quiet button--compact"
-                            [disabled]="savingMemberIds()[member.user_id]"
-                            (click)="saveMember(member)"
-                          >
-                            @if (savingMemberIds()[member.user_id]) {
-                              <i
-                                class="icon icon-spin icon-loader-circle"
-                                aria-hidden="true"
-                              ></i>
-                            }
-                            Save
-                          </button>
-                        }
-                        @if (
-                          canRemoveMember(member) || memberRemovalReason(member)
-                        ) {
-                          <span
-                            class="tooltip-target"
-                            [hlmTooltip]="memberRemovalReason(member) ?? ''"
-                            [attr.tabindex]="
-                              memberRemovalReason(member) ? 0 : null
-                            "
-                            [attr.aria-label]="
-                              memberRemovalReason(member) ?? null
-                            "
-                          >
-                            <button
-                              type="button"
-                              class="icon-button icon-button--danger"
-                              [disabled]="
-                                !canRemoveMember(member) ||
-                                savingMemberIds()[member.user_id]
-                              "
-                              [attr.aria-label]="'Remove ' + member.email"
-                              (click)="requestMemberRemoval(member)"
-                            >
-                              <i class="icon icon-trash" aria-hidden="true"></i>
-                            </button>
-                          </span>
-                        }
-                      </div>
-                    </article>
-                  }
-                } @empty {
-                  <div class="list-empty">No members match your search.</div>
+            <div class="people-list member-list" [appVisibleRows]="9.5">
+              @for (member of filteredMembers(); track member.user_id) {
+                @if (canManageMember(member)) {
+                  <button type="button" class="people-row people-row--action" [attr.aria-label]="'Change access for ' + member.email" (click)="openMemberPanel(member)">
+                    <ng-container [ngTemplateOutlet]="memberRow" [ngTemplateOutletContext]="{$implicit: member}" />
+                    <i class="icon icon-chevron-right people-row__chevron" aria-hidden="true"></i>
+                  </button>
+                } @else {
+                  <div class="people-row">
+                    <ng-container [ngTemplateOutlet]="memberRow" [ngTemplateOutletContext]="{$implicit: member}" />
+                  </div>
                 }
-              </div>
+              } @empty {
+                <div class="list-empty">No members match your search.</div>
+              }
             </div>
           }
+        </div>
 
-          @if (workspaces.canAdminister()) {
-            <div class="subsection-heading pending-heading">
-              <div>
-                <h3>Pending invitations</h3>
-              </div>
-              <span class="section-count"
-                >{{ invitations().length }} pending</span
-              >
+        @if (workspaces.canAdminister()) {
+          <div class="workspace-card people-card">
+            <div class="group-head">
+              <h2>Waiting to join</h2>
+              <span class="group-hint">Select an invitation to change or revoke it.</span>
             </div>
-
             @if (invitationsError()) {
               <div class="inline-error" role="alert">
-                <span class="error-icon"
-                  ><i class="icon icon-triangle-alert" aria-hidden="true"></i
-                ></span>
-                <div>
-                  <strong>Invitations could not be loaded</strong
-                  ><span>{{ invitationsError() }}</span>
-                </div>
-                <button
-                  type="button"
-                  class="button button--quiet"
-                  (click)="loadInvitations()"
-                >
-                  Try again
-                </button>
+                <span class="error-icon"><i class="icon icon-triangle-alert" aria-hidden="true"></i></span>
+                <div><strong>Invitations could not be loaded</strong><span>{{ invitationsError() }}</span></div>
+                <button type="button" class="button button--quiet" (click)="loadInvitations()">Try again</button>
               </div>
             } @else if (loadingInvitations()) {
-              <div class="data-list" aria-label="Loading pending invitations">
+              <div class="people-list" aria-label="Loading pending invitations">
                 @for (_ of [1, 2]; track $index) {
-                  <div
-                    class="data-row invitation-grid invitation-row--skeleton"
-                  >
-                    <div>
-                      <hlm-skeleton
-                        [style.width]="'12rem'"
-                        [style.height]="'.9rem'"
-                      /><hlm-skeleton
-                        [style.width]="'8rem'"
-                        [style.height]="'.7rem'"
-                      />
-                    </div>
-                    <hlm-skeleton
-                      [style.width]="'6rem'"
-                      [style.height]="'2.2rem'"
-                    /><hlm-skeleton
-                      [style.width]="'4rem'"
-                      [style.height]="'.8rem'"
-                    /><hlm-skeleton
-                      [style.width]="'8rem'"
-                      [style.height]="'.8rem'"
-                    /><hlm-skeleton
-                      [style.width]="'7rem'"
-                      [style.height]="'.8rem'"
-                    /><hlm-skeleton
-                      [style.width]="'5rem'"
-                      [style.height]="'2.2rem'"
-                    />
+                  <div class="people-row">
+                    <span class="people-row__identity">
+                      <hlm-skeleton [style.width]="'2.25rem'" [style.height]="'2.25rem'" [style.border-radius]="'50%'" />
+                      <span class="people-row__text"><hlm-skeleton [style.width]="'12rem'" [style.height]="'.85rem'" /></span>
+                    </span>
+                    <hlm-skeleton [style.width]="'4.5rem'" [style.height]="'.8rem'" />
                   </div>
                 }
               </div>
             } @else if (invitations().length === 0) {
-              <div class="list-empty list-empty--bordered">
-                No pending invitations.
-              </div>
+              <div class="list-empty">No pending invitations. Use Invite member to add someone.</div>
             } @else {
-              <div class="data-list invitation-list">
-                <div class="data-header invitation-grid" aria-hidden="true">
-                  <span>Recipient</span><span>Role</span><span>Billing</span
-                  ><span>Expires</span><span>Notification</span><span></span>
-                </div>
-                <div class="invitation-list__rows" [appVisibleRows]="4.5">
-                  @for (invitation of invitations(); track invitation.id) {
-                    @if (invitationEdits[invitation.id]; as edit) {
-                      <article class="data-row invitation-grid">
-                        <div class="identity-cell identity-cell--invitation">
-                          <span class="avatar avatar--pending" aria-hidden="true"
-                            ><i class="icon icon-mail"></i
-                          ></span>
-                          <div>
-                            <strong>{{ invitation.invitee_email }}</strong
-                            ><span
-                              [hlmTooltip]="inviterTooltip"
-                              tabindex="0"
-                              >Invited by {{ invitation.inviter_email }}</span
-                            >
-                            <ng-template #inviterTooltip>
-                              <span class="block max-w-[80vw] break-all sm:max-w-sm">{{
-                                invitation.inviter_email
-                              }}</span>
-                            </ng-template>
-                          </div>
-                        </div>
-                        <div class="control-cell" data-label="Role">
-                          @if (canManageInvitation(invitation)) {
-                            <select
-                              class="select-input select-input--compact"
-                              [ngModel]="edit.role"
-                              (ngModelChange)="
-                                setInvitationRole(invitation, $event)
-                              "
-                              [disabled]="savingInvitationIds()[invitation.id]"
-                              [attr.aria-label]="
-                                'Invitation role for ' + invitation.invitee_email
-                              "
-                            >
-                              @for (role of invitationRoleOptions(); track role) {
-                                <option [ngValue]="role">
-                                  {{ role | titlecase }}
-                                </option>
-                              }
-                            </select>
-                          } @else {
-                            <span class="plain-value">{{
-                              invitation.role | titlecase
-                            }}</span>
-                          }
-                        </div>
-                        <div class="control-cell" data-label="Billing">
-                          @if (
-                            workspaces.isOwner() &&
-                            canManageInvitation(invitation)
-                          ) {
-                            <label class="compact-checkbox"
-                              ><input
-                                type="checkbox"
-                                [ngModel]="edit.billing_admin"
-                                (ngModelChange)="
-                                  setInvitationBilling(invitation, $event)
-                                "
-                                [disabled]="savingInvitationIds()[invitation.id]"
-                                [attr.aria-label]="
-                                  'Invitation billing access for ' +
-                                  invitation.invitee_email
-                                "
-                              /><span>{{
-                                edit.billing_admin ? "Yes" : "No"
-                              }}</span></label
-                            >
-                          } @else {
-                            <span class="plain-value">{{
-                              invitation.billing_admin ? "Yes" : "No"
-                            }}</span>
-                          }
-                        </div>
-                        <span class="plain-value joined-value" data-label="Expires">{{
-                          invitation.expires_at | date: "mediumDate"
-                        }}</span>
-                        <span
-                          class="notification-state"
-                          [class.notification-state--failed]="
-                            invitation.notification_status === 'failed'
-                          "
-                          data-label="Notification"
-                          ><i
-                            class="icon"
-                            [class]="
-                              'icon ' +
-                              notificationIcon(invitation.notification_status)
-                            "
-                            aria-hidden="true"
-                          ></i
-                          >{{
-                            notificationLabel(invitation.notification_status)
-                          }}</span
-                        >
-                        <div class="row-actions">
-                          @if (invitationDirty(invitation)) {
-                            <button
-                              type="button"
-                              class="button button--quiet button--compact"
-                              [disabled]="savingInvitationIds()[invitation.id]"
-                              (click)="saveInvitation(invitation)"
-                            >
-                              @if (savingInvitationIds()[invitation.id]) {
-                                <i
-                                  class="icon icon-spin icon-loader-circle"
-                                  aria-hidden="true"
-                                ></i>
-                              }
-                              Save
-                            </button>
-                          }
-                          @if (canManageInvitation(invitation)) {
-                            <button
-                              type="button"
-                              class="icon-button icon-button--danger"
-                              [disabled]="savingInvitationIds()[invitation.id]"
-                              [attr.aria-label]="
-                                'Revoke invitation for ' +
-                                invitation.invitee_email
-                              "
-                              (click)="requestInvitationRevoke(invitation)"
-                            >
-                              <i class="icon icon-x" aria-hidden="true"></i>
-                            </button>
-                          }
-                        </div>
-                      </article>
-                    }
+              <div class="people-list invitation-list" [appVisibleRows]="4.5">
+                @for (invitation of filteredInvitations(); track invitation.id) {
+                  @if (canManageInvitation(invitation)) {
+                    <button
+                      type="button"
+                      class="people-row people-row--action"
+                      [attr.aria-label]="'Change invitation for ' + invitation.invitee_email"
+                      (click)="openInvitationPanel(invitation)"
+                    >
+                      <ng-container [ngTemplateOutlet]="invitationRow" [ngTemplateOutletContext]="{$implicit: invitation}" />
+                      <i class="icon icon-chevron-right people-row__chevron" aria-hidden="true"></i>
+                    </button>
+                  } @else {
+                    <div class="people-row">
+                      <ng-container [ngTemplateOutlet]="invitationRow" [ngTemplateOutletContext]="{$implicit: invitation}" />
+                    </div>
                   }
-                </div>
+                } @empty {
+                  <div class="list-empty">No invitations match your search.</div>
+                }
               </div>
             }
-          }
-        </section>
+          </div>
+        }
+
+        <ng-template #memberRow let-member>
+          <span class="people-row__identity">
+            <span class="avatar" aria-hidden="true">{{ member.email.slice(0, 1).toUpperCase() }}</span>
+            <span class="people-row__text">
+              <strong>{{ member.email }}@if (isCurrentUser(member)) {<span class="people-row__you"> · you</span>}</strong>
+              <span>Joined {{ member.joined_at | date: "mediumDate" }}</span>
+            </span>
+          </span>
+          <span class="people-row__meta">
+            @if (savingMemberIds()[member.user_id]) {
+              <i class="icon icon-spin icon-loader-circle" aria-label="Saving"></i>
+            } @else if (member.billing_admin) {
+              <span class="people-row__billing"><i class="icon icon-badge-check" aria-hidden="true"></i>Billing</span>
+            }
+          </span>
+          <span class="people-row__role">{{ member.role | titlecase }}</span>
+        </ng-template>
+
+        <ng-template #invitationRow let-invitation>
+          <span class="people-row__identity">
+            <span class="avatar avatar--pending" aria-hidden="true"><i class="icon icon-mail"></i></span>
+            <span class="people-row__text">
+              <strong>{{ invitation.invitee_email }}</strong>
+              <span>Invited by {{ invitation.inviter_email }} · expires {{ invitation.expires_at | date: "mediumDate" }}</span>
+            </span>
+          </span>
+          <span class="people-row__meta">
+            @if (savingInvitationIds()[invitation.id]) {
+              <i class="icon icon-spin icon-loader-circle" aria-label="Saving"></i>
+            } @else {
+              <span class="notification-state" [class.notification-state--failed]="invitation.notification_status === 'failed'"
+                ><i [class]="'icon ' + notificationIcon(invitation.notification_status)" aria-hidden="true"></i>{{
+                  notificationLabel(invitation.notification_status)
+                }}</span
+              >
+            }
+          </span>
+          <span class="people-row__role">{{ invitation.role | titlecase }}</span>
+        </ng-template>
       </section>
-      <section hlmTabsContent="workspace-settings" class="workspace-grid workspace-panel">
-        <section
-          class="workspace-card identity-card"
-          aria-labelledby="details-title"
-        >
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i class="icon icon-pencil" aria-hidden="true"></i
-            ></span>
+      <section hlmTabsContent="workspace-settings" class="workspace-panel workspace-settings">
+        <section class="workspace-card identity-card" aria-labelledby="details-title">
+          <div class="card-row">
             <div>
               <h2 id="details-title">Workspace details</h2>
-              <p>
-                Shown in navigation and invitations.
-              </p>
+              <p>Shown in navigation and invitations.</p>
             </div>
           </div>
-
           <div class="identity-form">
-            <label class="field-label" for="workspace-name"
-              >Workspace name</label
-            >
+            <label class="field-label" for="workspace-name">Workspace name</label>
             @if (workspaces.canAdminister()) {
               <div class="inline-form">
                 <input
@@ -967,79 +488,47 @@
                   [(ngModel)]="workspaceName"
                   [disabled]="savingWorkspace()"
                 />
-                @if (
-                  workspaceName.trim() &&
-                  workspaceName.trim() !== workspace.name
-                ) {
-                  <button
-                    type="button"
-                    class="button button--primary"
-                    [disabled]="savingWorkspace()"
-                    (click)="renameWorkspace()"
-                  >
-                    @if (savingWorkspace()) {
-                      <i
-                        class="icon icon-spin icon-loader-circle"
-                        aria-hidden="true"
-                      ></i>
-                    }
-                    Save name
-                  </button>
-                }
+                <button
+                  type="button"
+                  class="button button--primary"
+                  [disabled]="savingWorkspace() || !workspaceName.trim() || workspaceName.trim() === workspace.name"
+                  (click)="renameWorkspace()"
+                >
+                  @if (savingWorkspace()) {
+                    <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
+                  }
+                  Save
+                </button>
               </div>
             } @else {
               <div class="read-only-value">{{ workspace.name }}</div>
             }
           </div>
-
           <dl class="workspace-facts">
-            <div>
-              <dt>Type</dt>
-              <dd>{{ workspace.personal ? "Personal" : "Shared" }}</dd>
-            </div>
-            <div>
-              <dt>Your role</dt>
-              <dd>{{ workspace.role | titlecase }}</dd>
-            </div>
-            <div>
-              <dt>Created</dt>
-              <dd>{{ workspace.created_at | date: "mediumDate" }}</dd>
-            </div>
+            <div><dt>Type</dt><dd>{{ workspace.personal ? "Personal" : "Shared" }}</dd></div>
+            <div><dt>Your role</dt><dd>{{ workspace.role | titlecase }}</dd></div>
+            <div><dt>Created</dt><dd>{{ workspace.created_at | date: "mediumDate" }}</dd></div>
           </dl>
         </section>
-
-        <section
-          class="workspace-card create-card"
-          aria-labelledby="create-title"
-        >
-          <button
-            type="button"
-            class="disclosure"
-            [attr.aria-expanded]="createExpanded()"
-            aria-controls="create-workspace-form"
-            (click)="createExpanded.set(!createExpanded())"
-          >
-            <span class="card-icon"
-              ><i class="icon icon-plus" aria-hidden="true"></i
-            ></span>
-            <span class="disclosure__copy"
-              ><strong id="create-title">Create another workspace</strong
-              ><small
-                >Keep another team or project separate.</small
-              ></span
+        <section class="workspace-card create-card" aria-labelledby="create-title">
+          <div class="card-row">
+            <div>
+              <h2 id="create-title">Create another workspace</h2>
+              <p>Keep another team or project separate.</p>
+            </div>
+            <button
+              type="button"
+              class="button button--quiet disclosure"
+              [attr.aria-expanded]="createExpanded()"
+              aria-controls="create-workspace-form"
+              (click)="createExpanded.set(!createExpanded())"
             >
-            <i
-              class="icon disclosure__chevron"
-              [class.icon-chevron-down]="!createExpanded()"
-              [class.icon-chevron-up]="createExpanded()"
-              aria-hidden="true"
-            ></i>
-          </button>
+              {{ createExpanded() ? "Cancel" : "New workspace" }}
+            </button>
+          </div>
           @if (createExpanded()) {
             <div id="create-workspace-form" class="create-form">
-              <label class="field-label" for="new-workspace-name"
-                >New workspace name</label
-              >
+              <label class="field-label" for="new-workspace-name">New workspace name</label>
               <div class="inline-form">
                 <input
                   id="new-workspace-name"
@@ -1056,10 +545,7 @@
                   (click)="createWorkspace()"
                 >
                   @if (creatingWorkspace()) {
-                    <i
-                      class="icon icon-spin icon-loader-circle"
-                      aria-hidden="true"
-                    ></i>
+                    <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
                   }
                   Create workspace
                 </button>
@@ -1067,7 +553,6 @@
             </div>
           }
         </section>
-
       </section>
         </div>
       </hlm-tabs>
@@ -1138,7 +623,7 @@
 
 <app-dialog
   [visible]="!!ownershipChange()"
-  (visibleChange)="!$event && ownershipChange.set(null)"
+  (visibleChange)="!$event && cancelOwnershipChange()"
   [panelStyle]="{ width: '32rem' }"
 >
   <ng-template #dialogHeader
@@ -1169,7 +654,7 @@
       <button
         type="button"
         class="button button--quiet"
-        (click)="ownershipChange.set(null)"
+        (click)="cancelOwnershipChange()"
       >
         Cancel</button
       ><button
@@ -1223,4 +708,383 @@
       </button>
     </div>
   }
+</app-dialog>
+
+<app-dialog
+  [visible]="scheduleOpen()"
+  (visibleChange)="!$event && closeSchedule()"
+  [closable]="!savingCadence() && !savingAllowances()"
+  styleClass="workspace-side-sheet workspace-schedule-sheet"
+>
+  <ng-template #dialogHeader
+    ><span class="dialog-title">Adjust schedule</span></ng-template
+  >
+  @if (workspaces.current(); as workspace) {
+    <div class="schedule-body">
+      @for (meter of allowanceMeters(); track meter.id) {
+        <section class="schedule-block" [attr.aria-labelledby]="'schedule-' + meter.id">
+          <div class="schedule-block__head">
+            <h3 [id]="'schedule-' + meter.id">{{ meter.id === "checks" ? "Proxy checks" : "Source scrapes" }}</h3>
+            @if (meter.unlimited) {
+              <span class="allowance-tag allowance-tag--unlimited">No limit</span>
+            }
+            @if (meter.inherits) {
+              <span class="allowance-tag">Instance default</span>
+            }
+          </div>
+          <p class="allowance-cadence" [class.allowance-cadence--stopped]="meter.exhausted">{{ meter.cadence }}</p>
+          @if (workspaces.canOperate()) {
+            <div class="cadence-editor">
+              <div class="segmented" role="group" [attr.aria-label]="meter.label + ' interval mode'">
+                <button
+                  type="button"
+                  [class.is-active]="cadenceDrafts[meter.id].mode === 'automatic'"
+                  [attr.aria-pressed]="cadenceDrafts[meter.id].mode === 'automatic'"
+                  [disabled]="meter.unlimited || savingCadence()"
+                  (click)="cadenceDrafts[meter.id].mode = 'automatic'"
+                >
+                  Automatic
+                </button>
+                <button
+                  type="button"
+                  [class.is-active]="cadenceDrafts[meter.id].mode === 'fixed'"
+                  [attr.aria-pressed]="cadenceDrafts[meter.id].mode === 'fixed'"
+                  [disabled]="savingCadence()"
+                  (click)="cadenceDrafts[meter.id].mode = 'fixed'"
+                >
+                  Fixed
+                </button>
+              </div>
+              @if (cadenceDrafts[meter.id].mode === "fixed") {
+                <div class="cadence-editor__fields">
+                  <span class="cadence-editor__every">Every</span>
+                  <input
+                    class="text-input cadence-editor__value"
+                    type="number"
+                    min="1"
+                    [attr.aria-label]="meter.label + ' interval'"
+                    [(ngModel)]="cadenceDrafts[meter.id].value"
+                    [disabled]="savingCadence()"
+                  />
+                  <select
+                    class="select-input select-input--compact"
+                    [attr.aria-label]="meter.label + ' interval unit'"
+                    [(ngModel)]="cadenceDrafts[meter.id].unit"
+                    [disabled]="savingCadence()"
+                  >
+                    @for (unit of cadenceUnits; track unit) {
+                      <option [value]="unit">{{ unit }}</option>
+                    }
+                  </select>
+                </div>
+              }
+              @if (cadenceError(meter.id); as error) {
+                <p class="inline-error">{{ error }}</p>
+              } @else if (cadenceWarning(meter.id); as warning) {
+                <p class="schedule-preview schedule-preview--warn" role="status">{{ warning }}</p>
+              } @else if (meter.runOutWarning && !cadenceChanged()) {
+                <p class="schedule-preview schedule-preview--warn" role="status">{{ meter.runOutWarning }}</p>
+              } @else if (meter.unlimited) {
+                <p class="schedule-preview">No monthly limit, so {{ meter.label.toLowerCase() }} run at the interval you choose.</p>
+              } @else if (cadenceDrafts[meter.id].mode === "automatic") {
+                <p class="schedule-preview">The remaining allowance is spread evenly over the rest of the month.</p>
+              }
+            </div>
+          }
+        </section>
+      }
+      <p class="card-note">
+        <i class="icon icon-info" aria-hidden="true"></i>With an automatic interval, Magpie spreads the remaining allowance over the
+        rest of the month. A fixed interval runs until the allowance is used up. Without a monthly limit, a fixed interval is
+        required. Usage resets on {{ workspace.allowances.period_end | date: "mediumDate" }}.
+      </p>
+      @if (isInstanceAdmin) {
+        <details class="schedule-admin">
+          <summary>Instance admin: monthly allowances</summary>
+          <div class="allowance-admin">
+            <label class="field-label" for="allowance-checks">Checks per month</label>
+            <div class="allowance-admin__field">
+              <input
+                id="allowance-checks"
+                class="text-input"
+                type="number"
+                min="0"
+                step="1000"
+                [(ngModel)]="allowanceChecks"
+                [disabled]="savingAllowances() || allowanceUnlimitedChecks"
+                [placeholder]="allowanceUnlimitedChecks ? 'No limit' : 'Instance default'"
+              />
+              <label class="checkbox-field"
+                ><input type="checkbox" [(ngModel)]="allowanceUnlimitedChecks" [disabled]="savingAllowances()" /><span>No limit</span></label
+              >
+            </div>
+            <label class="field-label" for="allowance-scrapes">Scrapes per month</label>
+            <div class="allowance-admin__field">
+              <input
+                id="allowance-scrapes"
+                class="text-input"
+                type="number"
+                min="0"
+                step="100"
+                [(ngModel)]="allowanceScrapes"
+                [disabled]="savingAllowances() || allowanceUnlimitedScrapes"
+                [placeholder]="allowanceUnlimitedScrapes ? 'No limit' : 'Instance default'"
+              />
+              <label class="checkbox-field"
+                ><input type="checkbox" [(ngModel)]="allowanceUnlimitedScrapes" [disabled]="savingAllowances()" /><span>No limit</span></label
+              >
+            </div>
+            <p class="card-note">
+              Leave a field empty or at 0 to use the instance default. With No limit, the workspace has to choose a fixed interval and
+              runs hourly until it does.
+            </p>
+            <button type="button" class="button button--primary allowance-save" [disabled]="savingAllowances() || !allowancesChanged()" (click)="saveAllowances()">
+              @if (savingAllowances()) {
+                <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
+              }
+              Save allowances
+            </button>
+          </div>
+        </details>
+      }
+    </div>
+  }
+  <ng-template #dialogFooter>
+    <div class="dialog-actions">
+      <button type="button" class="button button--quiet" [disabled]="savingCadence()" (click)="closeSchedule()">Cancel</button>
+      @if (workspaces.canOperate()) {
+        <button
+          type="button"
+          class="button button--primary cadence-save"
+          [disabled]="savingCadence() || !cadenceChanged() || !!cadenceError('checks') || !!cadenceError('scrapes')"
+          (click)="saveCadence()"
+        >
+          @if (savingCadence()) {
+            <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
+          }
+          Save schedule
+        </button>
+      }
+    </div>
+  </ng-template>
+</app-dialog>
+
+<app-dialog
+  [visible]="!!accessPanel()"
+  (visibleChange)="!$event && closeAccessPanel()"
+  [closable]="!accessPanelBusy()"
+  styleClass="workspace-side-sheet workspace-access-sheet"
+>
+  <ng-template #dialogHeader>
+    <span class="access-head">
+      @if (panelMember(); as member) {
+        <span class="avatar" aria-hidden="true">{{ member.email.slice(0, 1).toUpperCase() }}</span>
+        <span class="access-head__text"><span class="dialog-title">{{ member.email }}</span><small>Joined {{ member.joined_at | date: "mediumDate" }}</small></span>
+      } @else if (panelInvitation(); as invitation) {
+        <span class="avatar avatar--pending" aria-hidden="true"><i class="icon icon-mail"></i></span>
+        <span class="access-head__text"
+          ><span class="dialog-title">{{ invitation.invitee_email }}</span><small>Invitation expires {{ invitation.expires_at | date: "mediumDate" }}</small></span
+        >
+      } @else {
+        <span class="avatar avatar--pending" aria-hidden="true"><i class="icon icon-plus"></i></span>
+        <span class="access-head__text"><span class="dialog-title">Invite a member</span><small>They need an existing Magpie account.</small></span>
+      }
+    </span>
+  </ng-template>
+
+  <div class="access-body">
+    @if (panelMember(); as member) {
+      @if (memberEdits[member.user_id]; as edit) {
+        <fieldset class="access-section">
+          <legend>Role</legend>
+          @for (revision of [rolePickerRevision()]; track revision) {
+            <div class="role-picker">
+              @for (role of canEditMemberRole(member) ? memberRoleOptions() : [member.role]; track role) {
+                <label class="role-option">
+                  <input
+                    type="radio"
+                    name="member-role"
+                    [value]="role"
+                    [checked]="edit.role === role"
+                    [disabled]="!canEditMemberRole(member) || savingMemberIds()[member.user_id]"
+                    (change)="setMemberRole(member, role)"
+                  />
+                  <span><strong>{{ role | titlecase }}</strong><small>{{ roleDescriptions[role] }}</small></span>
+                </label>
+              }
+            </div>
+          }
+          @if (!canEditMemberRole(member)) {
+            <p class="access-note">You can't change this member's role.</p>
+          }
+        </fieldset>
+        <div class="access-toggle">
+          <span><strong>Billing access</strong><small>Can see and manage the subscription.</small></span>
+          @if (canEditMemberBilling(member)) {
+            <button
+              type="button"
+              class="access-switch"
+              role="switch"
+              [attr.aria-checked]="edit.billing_admin"
+              [attr.aria-label]="'Billing access for ' + member.email"
+              [disabled]="savingMemberIds()[member.user_id]"
+              (click)="setMemberBilling(member, !edit.billing_admin)"
+            ></button>
+          } @else {
+            <span class="plain-value">{{ member.billing_admin ? "Yes" : "No" }}</span>
+          }
+        </div>
+        @if (canRemoveMember(member) || memberRemovalReason(member)) {
+          <div class="access-danger">
+            <strong>Remove from workspace</strong>
+            <p>{{ memberRemovalReason(member) ?? "Their access ends immediately. Routes and capacity don't change." }}</p>
+            <button
+              type="button"
+              class="button button--danger"
+              [disabled]="!canRemoveMember(member) || savingMemberIds()[member.user_id]"
+              [attr.aria-label]="'Remove ' + member.email"
+              (click)="requestMemberRemoval(member)"
+            >
+              Remove member
+            </button>
+          </div>
+        }
+      }
+    } @else if (panelInvitation(); as invitation) {
+      @if (invitationEdits[invitation.id]; as edit) {
+        <p class="access-note">
+          Invited by {{ invitation.inviter_email }}.
+          <span class="notification-state" [class.notification-state--failed]="invitation.notification_status === 'failed'"
+            ><i [class]="'icon ' + notificationIcon(invitation.notification_status)" aria-hidden="true"></i>{{
+              notificationLabel(invitation.notification_status)
+            }}</span
+          >
+        </p>
+        <fieldset class="access-section">
+          <legend>Role</legend>
+          <div class="role-picker">
+            @for (role of invitationRoleOptions(); track role) {
+              <label class="role-option">
+                <input
+                  type="radio"
+                  name="invitation-role"
+                  [value]="role"
+                  [checked]="edit.role === role"
+                  [disabled]="savingInvitationIds()[invitation.id]"
+                  (change)="setInvitationRole(invitation, role)"
+                />
+                <span><strong>{{ role | titlecase }}</strong><small>{{ roleDescriptions[role] }}</small></span>
+              </label>
+            }
+          </div>
+        </fieldset>
+        <div class="access-toggle">
+          <span><strong>Billing access</strong><small>Can see and manage the subscription.</small></span>
+          @if (workspaces.isOwner()) {
+            <button
+              type="button"
+              class="access-switch"
+              role="switch"
+              [attr.aria-checked]="edit.billing_admin"
+              [attr.aria-label]="'Invitation billing access for ' + invitation.invitee_email"
+              [disabled]="savingInvitationIds()[invitation.id]"
+              (click)="setInvitationBilling(invitation, !edit.billing_admin)"
+            ></button>
+          } @else {
+            <span class="plain-value">{{ invitation.billing_admin ? "Yes" : "No" }}</span>
+          }
+        </div>
+        <div class="access-danger">
+          <strong>Revoke invitation</strong>
+          <p>The invitation disappears and cannot be accepted.</p>
+          <button
+            type="button"
+            class="button button--danger"
+            [disabled]="savingInvitationIds()[invitation.id]"
+            [attr.aria-label]="'Revoke invitation for ' + invitation.invitee_email"
+            (click)="requestInvitationRevoke(invitation)"
+          >
+            Revoke invitation
+          </button>
+        </div>
+      }
+    } @else if (accessPanel()?.kind === "invite") {
+      <form id="workspace-invite-form" class="invite-form" aria-label="Invite a member" (ngSubmit)="sendInvitation()">
+        <label class="field-label" for="workspace-invite-email">Email of an existing Magpie account</label>
+        <input
+          class="text-input"
+          type="email"
+          id="workspace-invite-email"
+          name="inviteEmail"
+          autocomplete="off"
+          placeholder="member@example.com"
+          [(ngModel)]="inviteEmail"
+          required
+          [disabled]="sendingInvitation()"
+        />
+        <fieldset class="access-section">
+          <legend>Role</legend>
+          <div class="role-picker">
+            @for (role of invitationRoleOptions(); track role) {
+              <label class="role-option">
+                <input type="radio" name="inviteRole" [value]="role" [(ngModel)]="inviteRole" [disabled]="sendingInvitation()" />
+                <span><strong>{{ role | titlecase }}</strong><small>{{ roleDescriptions[role] }}</small></span>
+              </label>
+            }
+          </div>
+        </fieldset>
+        @if (workspaces.isOwner()) {
+          <div class="access-toggle">
+            <span><strong>Billing access</strong><small>Can see and manage the subscription.</small></span>
+            <button
+              type="button"
+              class="access-switch"
+              role="switch"
+              [attr.aria-checked]="inviteBillingAdmin"
+              aria-label="Billing access for the invited member"
+              [disabled]="sendingInvitation()"
+              (click)="inviteBillingAdmin = !inviteBillingAdmin"
+            ></button>
+          </div>
+        }
+        @if (inviteError()) {
+          <p class="form-error" role="alert">
+            <span class="error-icon"><i class="icon icon-triangle-alert" aria-hidden="true"></i></span>
+            <span>{{ inviteError() }}</span>
+          </p>
+        }
+      </form>
+    }
+  </div>
+
+  <ng-template #dialogFooter>
+    <div class="dialog-actions">
+      <button type="button" class="button button--quiet" [disabled]="accessPanelBusy()" (click)="closeAccessPanel()">Cancel</button>
+      @if (accessPanel()?.kind === "invite") {
+        <button
+          type="submit"
+          form="workspace-invite-form"
+          class="button button--primary access-save"
+          [disabled]="sendingInvitation() || !inviteEmail.trim()"
+        >
+          @if (sendingInvitation()) {
+            <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
+          }
+          Send invitation
+        </button>
+      } @else {
+        <button
+          type="button"
+          class="button button--primary access-save"
+          [disabled]="accessPanelBusy() || (panelMember() ? !isMemberDirty(panelMember()!) : !panelInvitation() || !invitationDirty(panelInvitation()!))"
+          (click)="saveAccessPanel()"
+        >
+          @if (accessPanelBusy()) {
+            <i class="icon icon-spin icon-loader-circle" aria-hidden="true"></i>
+          }
+          Save changes
+        </button>
+      }
+    </div>
+  </ng-template>
 </app-dialog>
