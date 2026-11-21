@@ -5,147 +5,171 @@
         ><i class="icon icon-contact-round" aria-hidden="true"></i
       ></span>
       <h1>Judges</h1>
+      @if (workspaces.canOperate() && loaded) {
+        <button type="button" hlmBtn variant="outline" class="add-button" (click)="addJudge()">
+          Add judge
+        </button>
+      }
     </header>
 
-    <div class="settings-grid">
-      <section class="settings-card settings-card--flow">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-badge-check" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2>Proxy verification</h2>
-            <p>
-              Magpie sends a request through the proxy, then checks the judge
-              response for the expected evidence.
-            </p>
-          </div>
+    <dl class="coverage" aria-label="Judges per proxy protocol">
+      @for (cell of coverage; track cell.protocol) {
+        <div class="coverage__cell" [attr.data-state]="cell.state">
+          <dt>{{ cell.label }}</dt>
+          <dd>{{ cell.text }}</dd>
         </div>
+      }
+    </dl>
 
-        <div class="flow-summary">
-          <div>
-            <strong>{{ configuredJudgeCount }}</strong
-            ><span>configured</span>
-          </div>
-          <div>
-            <strong>{{ defaultRegexCount }}</strong
-            ><span>default matching</span>
-          </div>
+    <div class="judge-table">
+      @if (judgeControls.length) {
+        <div class="judge-table__head" aria-hidden="true">
+          <span>Judge</span><span>Check</span><span>Alive proxies</span><span></span>
         </div>
+      }
 
-        <div class="validation-note">
-          <i class="icon icon-info" aria-hidden="true"></i>
-          <p>
-            <strong>Default matching</strong> inspects returned headers for
-            anonymity. Use a custom regex only when a judge returns a specific
-            payload.
-          </p>
-        </div>
-      </section>
+      @if (!loaded) {
+        <p class="judge-table__empty">Loading judges…</p>
+      } @else {
+        @for (judge of judgeControls; track judge; let i = $index) {
+          @let open = openIndex() === i;
+          @let check = checkSummary(judge);
+          @let counts = result(judge);
+          <div class="judge-item" [class.is-open]="open" [formGroup]="judge">
+            <button
+              type="button"
+              class="judge-line"
+              [attr.aria-expanded]="open"
+              [attr.aria-controls]="'judge-form-' + i"
+              (click)="toggle(i)"
+            >
+              <span class="judge-name">
+                <strong>{{ hostname(judge) }}</strong>
+                @if (path(judge); as rest) {
+                  <small>{{ rest }}</small>
+                }
+              </span>
+              <span class="judge-check" [class.is-bad]="check.bad">{{ check.text }}</span>
+              <span class="judge-result">
+                @if (counts.unknown) {
+                  <span class="judge-result__none">–</span>
+                } @else if (counts.total === 0) {
+                  <span class="judge-result__count" [class.is-bad]="counts.suspect">
+                    {{ counts.suspect ? "0, check the URL" : "0" }}
+                  </span>
+                } @else {
+                  <span class="judge-result__count">{{ counts.total | number }}</span>
+                  <span class="judge-result__bar" aria-hidden="true">
+                    @for (segment of counts.segments; track segment.key) {
+                      <i [attr.data-level]="segment.key" [style.width.%]="segment.percent"></i>
+                    }
+                  </span>
+                }
+              </span>
+              <span class="judge-edit">{{ open ? "Close" : workspaces.canOperate() ? "Edit" : "View" }}</span>
+            </button>
 
-      <section class="settings-card settings-card--editor">
-        <div class="editor-heading">
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i class="icon icon-link" aria-hidden="true"></i
-            ></span>
-            <div class="card-heading__copy">
-              <h2>Judge endpoints</h2>
-              <p>
-                Add every endpoint the checker may call during a proxy test.
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            class="add-button"
-            [disabled]="!workspaces.canOperate()"
-            (click)="addJudge()"
-          >
-            <i class="icon icon-plus" aria-hidden="true"></i>
-            Add judge
-          </button>
-        </div>
-
-        <div class="judge-list" [appVisibleRows]="3.5">
-          @for (judge of judgeControls; track judge; let i = $index) {
-            <article [formGroup]="judge" class="judge-row">
-              <span class="judge-index">{{ i + 1 }}</span>
-
-              <div class="judge-fields">
-                <div class="field-group field-group--url">
-                  <label class="field-label" for="judge-url-{{ i }}"
-                    >Judge URL</label
-                  >
-                  <input
-                    id="judge-url-{{ i }}"
-                    formControlName="url"
-                    type="url"
-                    hlmInput
-                    placeholder="https://example.com/judge"
-                    [readOnly]="!workspaces.canOperate()"
-                  />
-                  <p class="field-hint">
-                    The endpoint should return headers or connection data.
-                  </p>
+            @if (open) {
+              <div class="judge-form" [id]="'judge-form-' + i">
+                <div class="judge-form__row">
+                  <div class="field">
+                    <label class="field-label" [for]="'judge-url-' + i">URL</label>
+                    <input
+                      [id]="'judge-url-' + i"
+                      formControlName="url"
+                      type="url"
+                      hlmInput
+                      placeholder="https://example.com/judge"
+                      [style.border-color]="urlError(judge) ? 'color-mix(in srgb, var(--status-bad) 65%, transparent)' : null"
+                      [readOnly]="!workspaces.canOperate()"
+                    />
+                  </div>
+                  <div class="field">
+                    <label class="field-label" [for]="'judge-mode-' + i">Check</label>
+                    <app-select
+                      [inputId]="'judge-mode-' + i"
+                      formControlName="mode"
+                      [options]="checkModes"
+                      optionLabel="label"
+                      optionValue="value"
+                    ></app-select>
+                  </div>
                 </div>
+                @if (urlError(judge); as error) {
+                  <p class="field-error">{{ error }}</p>
+                }
 
-                <div class="field-group field-group--regex">
-                  <label class="field-label" for="judge-regex-{{ i }}">
-                    Response regex
-                    <app-tooltip
-                      [text]="'Use default for header-based anonymity checks, or provide a regular expression that matches the judge response.'"
-                    ></app-tooltip>
-                  </label>
-                  <input
-                    id="judge-regex-{{ i }}"
-                    formControlName="regex"
-                    type="text"
-                    hlmInput
-                    placeholder="default"
-                    [readOnly]="!workspaces.canOperate()"
-                  />
+                @if (usesRegex(judge)) {
+                  <div class="field">
+                    <label class="field-label" [for]="'judge-regex-' + i">Pattern</label>
+                    <input
+                      [id]="'judge-regex-' + i"
+                      formControlName="regex"
+                      type="text"
+                      hlmInput
+                      style="font-family: var(--ui-font-mono); font-size: var(--ui-fs-sm)"
+                      spellcheck="false"
+                      placeholder='"origin":\s*"[\d.]+"'
+                      [style.border-color]="regexError(judge) ? 'color-mix(in srgb, var(--status-bad) 65%, transparent)' : null"
+                      [readOnly]="!workspaces.canOperate()"
+                    />
+                    @if (regexError(judge); as error) {
+                      <p class="field-error">{{ error }}</p>
+                    } @else {
+                      <p class="field-hint">The proxy passes when the response body matches this pattern.</p>
+                    }
+                  </div>
+                } @else {
                   <p class="field-hint">
-                    Use <code>default</code> unless this judge needs a content
-                    match.
+                    Passes when the response lists the request headers the checker sent (User-Agent, Host, Accept and
+                    Accept-Encoding by default).
                   </p>
+                }
+
+                <div class="judge-form__actions">
+                  @if (workspaces.canOperate()) {
+                    <button type="button" class="remove-button" (click)="removeJudge(i)">Remove judge</button>
+                  }
+                  <button type="button" hlmBtn variant="outline" size="sm" (click)="openIndex.set(-1)">Done</button>
                 </div>
               </div>
-
-              <div class="judge-state">
-                <span [class.is-default]="usesDefaultRegex(judge)">
-                  {{
-                    usesDefaultRegex(judge) ? "Header match" : "Custom match"
-                  }}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                class="icon-button icon-button--remove"
-                [disabled]="!workspaces.canOperate()"
-                (click)="removeJudge(i)"
-                [attr.aria-label]="'Remove judge ' + (i + 1)"
-              >
-                <i class="icon icon-trash" aria-hidden="true"></i>
-              </button>
-            </article>
-          }
-        </div>
-      </section>
+            }
+          </div>
+        } @empty {
+          <div class="judge-table__empty">
+            <p>No judges. The checker skips every proxy until you add one.</p>
+            @if (workspaces.canOperate()) {
+              <button type="button" hlmBtn (click)="addJudge()">Add judge</button>
+            }
+          </div>
+        }
+      }
     </div>
+
+    @if (hasResultBars) {
+      <div class="judge-legend" aria-hidden="true">
+        <span><i data-level="elite"></i>Elite</span>
+        <span><i data-level="anonymous"></i>Anonymous</span>
+        <span><i data-level="transparent"></i>Transparent</span>
+      </div>
+    }
 
     <app-admin-settings-save-dock
       [dirty]="judgesForm.dirty"
       [invalid]="judgesForm.invalid"
       dirtyTitle="Unsaved judge changes"
-      dirtyDescription="Save when the endpoint list looks right."
+      dirtyDescription="Save when the judge list looks right."
       pristineTitle="Judges are up to date"
       pristineDescription="Changes will appear here before you save."
       saveLabel="Save judges"
       [readOnly]="!workspaces.canOperate()"
       readOnlyDescription="You can inspect these judges, but you cannot change them."
-    ></app-admin-settings-save-dock>
+    >
+      @if (workspaces.canOperate()) {
+        <button settings-save-action type="button" hlmBtn variant="outline" [disabled]="!judgesForm.dirty" (click)="discard()">
+          Discard
+        </button>
+      }
+    </app-admin-settings-save-dock>
   </form>
 </div>
