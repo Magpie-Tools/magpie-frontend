@@ -1,4 +1,5 @@
 import {HlmTooltip} from '@spartan-ng/helm/tooltip';
+import {HlmDropdownMenuImports} from '@spartan-ng/helm/dropdown-menu';
 import {HlmTableImports} from '@spartan-ng/helm/table';
 import {DialogComponent} from '../../shared/ui/dialog.component';
 import {ChartComponent} from '../../shared/ui/chart.component';
@@ -49,10 +50,22 @@ interface ReputationSignalStructuredItem {
   layout?: 'protocol';
 }
 
+const LIFECYCLE_LABELS: Record<ManagedProxyState, string> = {
+  active: 'Active',
+  paused: 'Paused',
+  archived: 'Archived',
+};
+
+const PAUSE_REASON_LABELS: Record<string, string> = {
+  manual: 'manually',
+  failure: 'after repeated failed checks',
+  capacity: 'workspace limit reached',
+};
+
 @Component({
   selector: 'app-proxy-detail',
   standalone: true,
-  imports: [HlmTooltip, HlmTableImports, CdkConnectedOverlay, DialogComponent, ChartComponent, CountryHoverCardComponent,
+  imports: [HlmTooltip, HlmDropdownMenuImports, HlmTableImports, CdkConnectedOverlay, DialogComponent, ChartComponent, CountryHoverCardComponent,
     CommonModule,
     RouterLink,
     LoadingComponent,
@@ -306,6 +319,18 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
       return;
     }
     void this.copyValueWithFeedback(value, 'credentialAddress');
+  }
+
+  lifecycleLabel(state: ManagedProxyState): string {
+    return LIFECYCLE_LABELS[state] ?? 'Active';
+  }
+
+  /** Why a paused proxy is paused, shown after the state; empty for other states. */
+  pauseReasonLabel(detail: ProxyDetail): string {
+    if (detail.state !== 'paused') {
+      return '';
+    }
+    return PAUSE_REASON_LABELS[detail.pause_reason ?? ''] ?? '';
   }
 
   changeLifecycle(state: ManagedProxyState): void {

@@ -10,6 +10,8 @@ import {ProxyDetail} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
 import {ProxyStatisticHours} from '../../models/ProxyStatisticHour';
 import {CountryHoverCardComponent} from '../../shared/ui/country-hover-card.component';
+import {WorkspaceService} from '../../services/workspace.service';
+import {Workspace} from '../../models/Workspace';
 
 describe('ProxyDetailComponent', () => {
   let component: ProxyDetailComponent;
@@ -324,5 +326,34 @@ describe('ProxyDetailComponent', () => {
     expect(text).toContain('80 / 100');
     const network = fixture.nativeElement.querySelector('[aria-labelledby="network-title"]') as HTMLElement;
     expect(network.textContent).not.toContain('Network operator');
+  });
+  it('shows the lifecycle state and pause reason read-only to members who cannot operate', () => {
+    component.detail.update(detail => detail ? {...detail, state: 'paused', pause_reason: 'failure'} : detail);
+    fixture.detectChanges();
+
+    const state = fixture.nativeElement.querySelector('.lifecycle-trigger') as HTMLElement;
+    expect(state.tagName).toBe('SPAN');
+    expect(state.querySelector('.lifecycle-trigger__label')!.textContent).toBe('Paused');
+    expect(state.querySelector('.lifecycle-trigger__reason')!.textContent!.trim()).toBe('· after repeated failed checks');
+    expect(fixture.nativeElement.querySelector('button.lifecycle-trigger')).toBeNull();
+  });
+
+  it('opens the lifecycle actions from the state button', () => {
+    TestBed.inject(WorkspaceService).current.set({role: 'operator'} as Workspace);
+    const changeLifecycle = spyOn(component, 'changeLifecycle');
+    fixture.detectChanges();
+
+    const trigger = fixture.nativeElement.querySelector('button.lifecycle-trigger') as HTMLButtonElement;
+    expect(trigger.textContent!.trim()).toBe('Active');
+    expect(trigger.getAttribute('aria-label')).toBe('Lifecycle: Active. Change state');
+
+    trigger.click();
+    fixture.detectChanges();
+    const items = Array.from(document.querySelectorAll<HTMLButtonElement>('.lifecycle-menu [hlmDropdownMenuItem]'));
+    expect(items.map(item => item.querySelector('span span')!.textContent)).toEqual(['Pause checking', 'Archive']);
+    expect(items[1].disabled).toBeTrue();
+
+    items[0].click();
+    expect(changeLifecycle).toHaveBeenCalledWith('paused');
   });
 });
