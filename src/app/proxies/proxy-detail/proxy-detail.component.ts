@@ -1,6 +1,5 @@
 import {HlmTooltip} from '@spartan-ng/helm/tooltip';
 import {HlmDropdownMenuImports} from '@spartan-ng/helm/dropdown-menu';
-import {HlmTableImports} from '@spartan-ng/helm/table';
 import {DialogComponent} from '../../shared/ui/dialog.component';
 import {ChartComponent} from '../../shared/ui/chart.component';
 import {buildProxyHourlyChart} from './proxy-response-chart';
@@ -29,6 +28,7 @@ import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
 import {BreadcrumbService} from '../../services/breadcrumb.service';
 import {DetailStatusBannerComponent} from '../../shared/detail-status-banner/detail-status-banner.component';
+import {ProxyCheckHistoryComponent} from './check-history/proxy-check-history.component';
 
 type CopyField = 'ip' | 'port' | 'address' | 'username' | 'password' | 'combined' | 'credentialAddress';
 
@@ -65,7 +65,7 @@ const PAUSE_REASON_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-proxy-detail',
   standalone: true,
-  imports: [HlmTooltip, HlmDropdownMenuImports, HlmTableImports, CdkConnectedOverlay, DialogComponent, ChartComponent, CountryHoverCardComponent,
+  imports: [HlmTooltip, HlmDropdownMenuImports, CdkConnectedOverlay, ProxyCheckHistoryComponent, DialogComponent, ChartComponent, CountryHoverCardComponent,
     CommonModule,
     RouterLink,
     LoadingComponent,
@@ -81,6 +81,7 @@ const PAUSE_REASON_LABELS: Record<string, string> = {
 export class ProxyDetailComponent implements OnInit, OnDestroy {
   proxyId = signal<number | undefined>(undefined);
   detail = signal<ProxyDetail | null>(null);
+  /** The check history's unfiltered first page, newest first: the latest-check fallback. */
   statistics = signal<ProxyStatistic[]>([]);
   private readonly locale = inject(LOCALE_ID);
   readonly availabilityRanges = AVAILABILITY_RANGES;
@@ -104,7 +105,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   private readonly breadcrumbs = inject(BreadcrumbService);
 
   isLoadingDetail = signal(true);
-  isLoadingStatistics = signal(true);
   isResponseBodyModalVisible = signal(false);
   isLoadingResponseBody = signal(false);
   selectedStatistic = signal<ProxyStatistic | null>(null);
@@ -178,7 +178,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
 
       this.proxyId.set(id);
       this.loadProxyDetail(id);
-      this.loadProxyStatistics(id);
       this.loadStatisticHours(id);
     });
 
@@ -1148,23 +1147,6 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
         this.notification.showError(message);
       }
     });
-  }
-
-  private loadProxyStatistics(id: number): void {
-    this.isLoadingStatistics.set(true);
-    const sub = this.http.getProxyStatistics(id, { limit: 150 }).subscribe({
-      next: stats => {
-        this.statistics.set(stats);
-        this.isLoadingStatistics.set(false);
-      },
-      error: err => {
-        this.isLoadingStatistics.set(false);
-        const message = err?.error?.error ?? err?.message ?? 'Failed to load proxy statistics';
-        this.notification.showError(message);
-      }
-    });
-
-    this.subscriptions.add(sub);
   }
 
   openStatisticResponse(row: ProxyStatistic): void {

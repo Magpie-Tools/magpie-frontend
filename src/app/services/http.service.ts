@@ -13,7 +13,7 @@ import {ScrapeSourceDetail} from '../models/ScrapeSourceDetail';
 import {ChangePassword} from '../models/ChangePassword';
 import {DeleteAccount} from '../models/DeleteAccount';
 import {ProxyDetail} from '../models/ProxyDetail';
-import {ProxyStatistic} from '../models/ProxyStatistic';
+import {ProxyStatistic, ProxyStatisticsPage, ProxyStatisticsQuery} from '../models/ProxyStatistic';
 import {ProxyStatisticResponseDetail} from '../models/ProxyStatisticResponseDetail';
 import {ProxyStatisticHours} from '../models/ProxyStatisticHour';
 import {RotatingProxy, CreateRotatingProxy, RotatingProxyNext, RotatingProxyInstance} from '../models/RotatingProxy';
@@ -215,14 +215,29 @@ export class HttpService {
     return this.http.get<ProxyDetail>(`${this.apiUrl}/proxies/${proxyId}`);
   }
 
-  getProxyStatistics(proxyId: number, options?: { limit?: number }) {
-    let params = new HttpParams();
-    if (options?.limit && options.limit > 0) {
-      params = params.set('limit', options.limit.toString());
-    }
-
-    return this.http.get<{statistics: ProxyStatistic[]}>(`${this.apiUrl}/proxies/${proxyId}/statistics`, { params })
-      .pipe(map(res => res?.statistics ?? []));
+  /** One filtered, sorted page of a proxy's check history, with totals and filter options. */
+  getProxyStatisticsPage(proxyId: number, query: ProxyStatisticsQuery) {
+    let params = new HttpParams()
+      .set('page', query.page.toString())
+      .set('page_size', query.pageSize.toString())
+      .set('sort', query.sort)
+      .set('order', query.order);
+    if (query.status) params = params.set('status', query.status);
+    if (query.protocol) params = params.set('protocol', query.protocol);
+    if (query.transport) params = params.set('transport', query.transport);
+    if (query.judgeId) params = params.set('judge_id', query.judgeId.toString());
+    if (query.settings) params = params.set('settings', query.settings);
+    if (query.hours) params = params.set('hours', query.hours.toString());
+    return this.http.get<ProxyStatisticsPage>(`${this.apiUrl}/proxies/${proxyId}/statistics`, { params }).pipe(
+      map(res => ({
+        statistics: res?.statistics ?? [],
+        total: res?.total ?? 0,
+        page: res?.page ?? query.page,
+        page_size: res?.page_size ?? query.pageSize,
+        counts: res?.counts ?? {alive: 0, dead: 0},
+        options: {protocols: res?.options?.protocols ?? [], judges: res?.options?.judges ?? []},
+      } satisfies ProxyStatisticsPage))
+    );
   }
 
   /** Checks grouped into UTC hours for the window of `hours` (1–168) ending now. */

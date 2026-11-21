@@ -1,0 +1,220 @@
+/* Check history card. Values follow the approved mockup and the proxy list's table
+   (_proxy-inventory-table.scss); the shared pagination brings its own styles. */
+:host {
+  --ink-2: rgba(255, 255, 255, 0.58); /* secondary text, at least 6.5:1 on the card */
+  --proxy-dead: #f06d76;
+  display: block;
+  grid-column: 1 / -1;
+  container: card / inline-size;
+}
+
+h2 { margin: 0; }
+button, select, input { font: inherit; }
+.card-heading__copy { min-width: 0; }
+.card-icon i { font-size: 0.68rem; }
+.tool-button i { font-size: 0.67rem; opacity: 0.6; }
+/* Inline selects lay out as direct items of the filter bar; their labels are visually hidden. */
+.inline-field { display: contents; }
+
+.route-card { min-width: 0; position: relative; border: 1px solid var(--detail-border); border-radius: 1.2rem; background: rgba(8,8,10,.91); box-shadow: 0 16px 34px rgba(4,4,6,.2), inset 0 1px 0 rgba(255,255,255,.03); }
+.history-card { padding: 1.35rem; }
+.history-card__heading { display: flex; min-height: 2.25rem; align-items: center; justify-content: space-between; gap: 1rem; }
+.history-title:focus { outline: none; }
+.history-title:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: .25rem; }
+.card-heading { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: .65rem; min-width: 0; }
+.card-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.1rem; height: 2.1rem; border: 1px solid rgba(255,255,255,.12); border-radius: .68rem; background: rgba(255,255,255,.035); color: var(--theme-primary-200); }
+.card-heading h2 { margin: 0; font-size: .94rem; font-weight: 590; letter-spacing: -.025em; color: rgba(255,255,255,.94); }
+.history-empty { margin-top: .9rem; padding: 2rem 1rem; border: 1px solid rgba(255,255,255,.085); border-radius: .82rem; text-align: center; font-size: .8125rem; color: var(--detail-muted); }
+.history-empty b { display: block; margin-bottom: .3rem; color: rgba(255,255,255,.86); font-weight: 580; }
+
+/* ---------- filter bar ---------- */
+.filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: 1rem; }
+.status-filter { display: inline-flex; height: 2.25rem; padding: .18rem; border: 1px solid rgba(255,255,255,.12); border-radius: .72rem; background: rgba(255,255,255,.02); }
+.status-filter button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: 0 .75rem; border: 0; border-radius: .52rem; background: transparent; color: rgba(255,255,255,.66); font-size: .75rem; font-weight: 560; cursor: pointer; }
+.status-filter button .n { color: var(--ink-2); font-variant-numeric: tabular-nums; font-weight: 500; }
+.status-filter button { border: 1px solid transparent; }
+/* Pressed: fill plus a 1px border (~4.5:1), distinct from the 2px focus ring; Highlight in forced colors. */
+.status-filter button[aria-pressed="true"] { background: rgba(255,255,255,.085); border-color: rgba(255,255,255,.45); color: #fff; }
+.status-filter button[aria-pressed="true"] .n { color: rgba(255,255,255,.72); }
+.status-filter button:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.status-filter button:disabled { opacity: .45; cursor: not-allowed; }
+/* Forced colors last, so nothing above overrides it. */
+@media (forced-colors: active) {
+  .status-filter button[aria-pressed="true"] { forced-color-adjust: none; background: Highlight; color: HighlightText; border-color: Highlight; }
+  .status-filter button[aria-pressed="true"] .n { color: HighlightText; }
+  .status-filter button[aria-pressed="true"]:focus-visible { outline-color: CanvasText; }
+}
+.filter-bar .sep { width: 1px; height: 1.4rem; background: rgba(255,255,255,.1); margin: 0 .15rem; }
+.select { appearance: none; height: 2.25rem; max-width: 14rem; padding: 0 2rem 0 .7rem; border: 1px solid rgba(255,255,255,.12); border-radius: .62rem; background: rgba(255,255,255,.035) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right .7rem center; color: rgba(255,255,255,.78); font-size: .75rem; text-overflow: ellipsis; cursor: pointer; }
+.select:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+/* A set filter uses the proxy list's .tool-button.is-active values. */
+.filter-bar .sel-judge { width: 12rem; } .filter-bar .sel-settings { width: 12rem; }
+.select.is-set { border-color: rgba(var(--theme-primary-300-rgb), .34); background-color: rgba(var(--theme-primary-500-rgb), .08); color: #fff; }
+.select:disabled { opacity: .45; cursor: not-allowed; }
+.link-btn { min-height: 2.25rem; border: 0; background: none; padding: 0 .25rem; color: var(--theme-primary-300); cursor: pointer; font-size: .75rem; font-weight: 560; }
+.link-btn:hover { color: var(--theme-primary-200); }
+.link-btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: .3rem; }
+.tool-button { display: none; min-height: 2.75rem; align-items: center; justify-content: center; gap: .4rem; padding: 0 .85rem; border: 1px solid rgba(255,255,255,.12); border-radius: .72rem; background: rgba(255,255,255,.035); color: rgba(255,255,255,.72); font-size: .75rem; font-weight: 580; cursor: pointer; }
+.tool-button:disabled { opacity: .45; cursor: not-allowed; }
+.tool-button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.tool-button.is-active { border-color: rgba(var(--theme-primary-300-rgb), .34); background: rgba(var(--theme-primary-500-rgb), .08); color: #fff; }
+
+/* ---------- table (sizes from _proxy-inventory-table.scss) ---------- */
+.history-table { position: relative; margin-top: .9rem; border: 1px solid rgba(255,255,255,.085); border-radius: .82rem; overflow: hidden; }
+.table-scroll { overflow-x: auto; }
+/* Every focus target clears the sticky top bar when it is scrolled into view. */
+.table-scroll, .history-title, .history-message, .history-message button, .tool-button, .status-filter button { scroll-margin-top: 5rem; }
+.table-scroll:focus { outline: none; }
+.table-scroll:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+table.proxy-stat-table { width: 100%; min-width: 0; border-collapse: collapse; table-layout: fixed; }
+.proxy-stat-table col.c-status { width: 6rem; } .proxy-stat-table col.c-resp { width: 7.5rem; } .proxy-stat-table col.c-att { width: 6.5rem; }
+.proxy-stat-table col.c-proto { width: 8rem; } .proxy-stat-table col.c-anon { width: 8rem; } .proxy-stat-table col.c-at { width: 8.5rem; }
+.proxy-stat-table th { padding: .68rem .75rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,.085); background: rgba(255,255,255,.022); color: rgba(255,255,255,.66); font-size: .75rem; font-weight: 640; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.proxy-stat-table th[aria-sort] { padding: 0; }
+.proxy-stat-table th[aria-sort]:hover, .proxy-stat-table th:is([aria-sort="ascending"], [aria-sort="descending"]) { color: var(--theme-primary-200); }
+.table-sort { display: flex; width: 100%; align-items: center; gap: .4rem; padding: .68rem .75rem; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
+.table-sort:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+.table-sort[aria-disabled="true"], .link-btn[aria-disabled="true"] { cursor: progress; opacity: .6; }
+.table-sort__icon { width: .75rem; height: .75rem; opacity: .72; flex: 0 0 auto; }
+.num, .num .table-sort { justify-content: flex-end; text-align: right !important; }
+.at-col .table-sort { justify-content: flex-end; }
+.proxy-stat-table td { padding: .68rem .75rem; border-bottom: 1px solid rgba(255,255,255,.05); color: rgba(255,255,255,.82); font-size: .8125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.proxy-stat-table td.num { font-variant-numeric: tabular-nums; }
+/* Judge: whole URL without the scheme (kept when it tells two judges apart), wrapping after . / - ? = and,
+   for long unbroken segments, anywhere. Nothing is truncated. */
+.ms-dead { color: var(--ink-2); }
+.proxy-stat-table td.judge { white-space: normal; overflow: visible; text-overflow: clip; }
+.judge .full { overflow-wrap: anywhere; }
+.proxy-stat-table tbody tr.row { cursor: pointer; }
+.proxy-stat-table tbody tr.row:hover { background: rgba(var(--theme-primary-500-rgb), .05); }
+.proxy-stat-table tbody tr:last-child td { border-bottom: 0; }
+.table-status { display: inline-flex; align-items: center; gap: .45rem; }
+.table-status.dead { color: var(--status-bad-text); }
+/* Shape and colour, as in the proxy list: filled = alive, ring = dead. No glow. */
+.status-dot { width: .62rem; height: .62rem; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
+.status-dot.alive { background: var(--status-good); }
+.status-dot.dead { border: 2px solid var(--proxy-dead); background: transparent; }
+.note { display: block; color: var(--detail-muted); font-size: .72rem; margin-top: .1rem; }
+.capitalize { text-transform: capitalize; }
+.at-col { text-align: right !important; }
+.at-btn { padding: .15rem .3rem; margin: -.15rem -.3rem; border: 0; border-radius: .35rem; background: none; color: rgba(255,255,255,.86); font-variant-numeric: tabular-nums; cursor: pointer; white-space: nowrap; }
+.at-btn .t { color: var(--ink-2); }
+.at-btn .t--line { display: block; }
+.at-btn:has(.t--line) { display: inline-block; text-decoration: none; }
+/* Two-line timestamps underline each line so the touch cue survives. */
+.at-btn:has(.t--line) :is(.d, .t--line) { text-decoration: underline dotted; text-decoration-color: rgba(255,255,255,.28); text-underline-offset: 4px; }
+.at-btn:has(.t--line) .t--line { width: fit-content; margin-left: auto; }
+.at-btn { text-decoration: underline dotted; text-decoration-color: rgba(255,255,255,.28); text-underline-offset: 4px; }
+.at-btn:hover { color: #fff; text-decoration-style: solid; text-decoration-color: rgba(255,255,255,.5); }
+.at-btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.history-message { padding: 2.25rem 1rem; text-align: center; font-size: .8125rem; color: var(--detail-muted); border-top: 1px solid rgba(255,255,255,.05); }
+.filter-summary { margin: .35rem auto .5rem; max-width: 40rem; color: var(--ink-2); font-size: .75rem; overflow-wrap: anywhere; }
+.history-message:focus { outline: none; }
+.history-message:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+.history-message b { display: block; color: rgba(255,255,255,.86); font-weight: 580; margin-bottom: .2rem; }
+.skeleton td span { display: block; height: .75rem; border-radius: .3rem; background: rgba(255,255,255,.07); }
+.skeleton td.num span, .skeleton td.at-col span { margin-left: auto; }
+.table-progress { position: absolute; inset: 0 0 auto; z-index: 2; height: 3px; overflow: hidden; background: rgba(var(--theme-primary-500-rgb), .15); }
+.table-progress::after { content: ''; display: block; width: 35%; height: 100%; border-radius: 999px; background: var(--theme-primary-400); animation: tp 1.4s ease-in-out infinite; }
+@keyframes tp { from { transform: translateX(-100%); } to { transform: translateX(286%); } }
+@media (prefers-reduced-motion: reduce) { .table-progress::after { width: 100%; animation: none; } }
+.refreshing tbody { opacity: .55; }
+
+/* ---------- phones: proxy-list card pattern ---------- */
+/* Below 61rem the table no longer fits: rows become cards and headers become sort chips (proxy-list pattern). */
+@container card (width <= 61rem) {
+  table.proxy-stat-table { min-width: 0; table-layout: auto; }
+  .proxy-stat-table colgroup { display: none; }
+  .proxy-stat-table, .proxy-stat-table thead, .proxy-stat-table tbody { display: block; width: 100%; }
+  .proxy-stat-table thead > tr { display: flex; flex-wrap: wrap; gap: .4rem; padding: .65rem .75rem; border-bottom: 1px solid var(--ui-line, rgba(255,255,255,.085)); background: rgba(255,255,255,.022); }
+  .proxy-stat-table thead > tr > th { border-bottom: 0 !important; }
+  .proxy-stat-table thead { position: relative; }
+  .proxy-stat-table thead > tr > th:not([aria-sort]) { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  /* !important: the app skin styles .history-table cells for table mode (as the proxy list's phone cards do). */
+  .proxy-stat-table thead > tr > th[aria-sort] { display: block; flex: 0 0 auto; padding: 0 !important; border: 1px solid rgba(255,255,255,.12) !important; border-radius: 999px !important; background: transparent !important; font-size: .6875rem; }
+  .proxy-stat-table thead > tr > th:is([aria-sort="ascending"], [aria-sort="descending"]) { border-color: rgba(var(--theme-primary-300-rgb), .34) !important; background: rgba(var(--theme-primary-500-rgb), .08) !important; }
+  .proxy-stat-table .table-sort { min-height: 2.75rem; justify-content: center !important; padding: 0 .75rem; }
+  .proxy-stat-table tbody > tr.row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem .75rem; padding: .8rem .75rem; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .proxy-stat-table tbody > tr.row:last-child { border-bottom: 0; }
+  .proxy-stat-table tbody > tr.row > td { display: flex; flex-direction: column; gap: .15rem; min-width: 0; padding: 0 !important; border: 0 !important; background: transparent !important; white-space: normal; overflow: visible; text-align: left !important; }
+  .proxy-stat-table tbody > tr.row:hover { background: rgba(var(--theme-primary-500-rgb), .05); }
+  .proxy-stat-table tbody > tr.row > td[data-label]::before { content: attr(data-label); color: var(--ink-2); font-family: var(--ui-font, inherit); font-size: .75rem; text-transform: none; }
+  .proxy-stat-table tbody > tr.row > td.status-cell { order: 1; grid-column: 1 / 2; flex-direction: row; align-items: center; min-height: 1.6rem; font-weight: 600; }
+  .proxy-stat-table tbody > tr.row > td.at-col { order: 2; grid-column: 2 / -1; align-items: flex-end; justify-content: center; text-align: right !important; }
+  .proxy-stat-table tbody > tr.row > td.resp { order: 3; }
+  .proxy-stat-table tbody > tr.row > td.proto { order: 4; }
+  .proxy-stat-table tbody > tr.row > td.anon { order: 5; }
+  .proxy-stat-table tbody > tr.row > td.att { order: 6; }
+  .proxy-stat-table tbody > tr.row > td.judge { order: 7; grid-column: 2 / -1; }
+  .proxy-stat-table tbody > tr.row > td.at-col .at-btn { min-height: 2.75rem; margin: -.6rem -.3rem; padding: 0 .3rem; }
+  .proxy-stat-table tbody > tr.row > td.num { justify-content: flex-start; }
+  .proxy-stat-table tbody > tr:not(.row) { display: block; }
+  .proxy-stat-table tbody > tr:not(.row) > td { display: block; }
+  .skeleton { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; padding: .8rem .75rem; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .skeleton td { display: block; padding: 0 !important; border: 0 !important; background: transparent !important; }
+  .skeleton td.status-cell { order: 1; } .skeleton td.at-col { order: 2; grid-column: 2 / -1; }
+  .skeleton td.resp { order: 3; } .skeleton td.proto { order: 4; } .skeleton td.anon { order: 5; } .skeleton td.att { order: 6; } .skeleton td.judge { order: 7; grid-column: 2 / -1; }
+  .skeleton td:not(.status-cell, .at-col) span { height: 1.9rem; width: 100% !important; }
+
+}
+
+/* Desktop: the status group has a fixed width with equal buttons, so counts arriving or changing never shift the selects. */
+@container card (width > 61rem) {
+  /* Fixed tracks: All is narrow, Alive and Dead are equal and fit five-digit counts, so hit areas never move. */
+  .filter-bar .status-filter { display: inline-grid; width: 15.25rem; grid-template-columns: 2.75rem 1fr 1fr; }
+  .filter-bar .status-filter button { min-width: 0; padding: 0 .45rem; white-space: nowrap; }
+}
+
+/* Mid widths (tablet, laptop with the sidebar): four-column cards so Checked at and the judge path stay visible. */
+@container card (640px < width <= 61rem) {
+  /* Filter bar: fixed two-row grid (status, protocol, judge / settings, period); counts can't reflow it. */
+  .filter-bar { display: grid; grid-template-columns: minmax(15.5rem, 1fr) repeat(2, minmax(0, 1fr)); }
+  .filter-bar .sep { display: none; }
+  .filter-bar .status-filter { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1fr) minmax(0, 1fr); }
+  .filter-bar .status-filter button { min-width: 0; padding: 0 .45rem; white-space: nowrap; }
+  .filter-bar .select { width: 100% !important; max-width: none; }
+  .proxy-stat-table tbody > tr.row { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: .85rem 1rem; }
+  .proxy-stat-table tbody > tr.row > td.status-cell { grid-column: 1 / 3; }
+  .proxy-stat-table tbody > tr.row > td.at-col { grid-column: 3 / -1; }
+  .proxy-stat-table tbody > tr.row > td.judge { grid-column: 1 / -1; }
+  .proxy-stat-table thead > tr { padding: .65rem 1rem; }
+  .skeleton { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .skeleton td.status-cell { grid-column: 1 / 3; } .skeleton td.at-col { grid-column: 3 / -1; } .skeleton td.judge { grid-column: 1 / -1; }
+}
+
+@container card (width <= 640px) {
+  .history-card { padding: .75rem; border-radius: .92rem; }
+  .filter-bar { display: flex; flex-wrap: wrap; }
+  .status-filter { flex: 1 1 15rem; height: auto; padding: 0; }
+  /* Fixed tracks (content-independent), so counts never move the button boundaries. */
+  .status-filter { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1fr) minmax(0, 1fr); }
+  .status-filter button { min-width: 0; min-height: 2.75rem; padding: 0 .45rem; white-space: nowrap; }
+  /* Same flex basis whatever the label ("Filters" or "Filters (3)"), so applying a filter never rewraps the row. */
+  .tool-button { flex: 1 0 7.5rem; }
+  .filter-bar > :is(.inline-field, .sep) { display: none; }
+  .tool-button { display: inline-flex; }
+}
+
+/* Touch devices and narrow viewports: the app makes every control 44px tall. */
+@media (pointer: coarse), (max-width: 48rem) {
+  /* The heading always reserves the 44px "Clear filters" link, so it never grows when a filter is set. */
+  .history-card__heading { min-height: 2.75rem; }
+  /* The status group grows with its 44px buttons at every width. */
+  .history-card .status-filter { height: auto; padding: 0; }
+}
+
+/* Phone filter sheet (phone-sheet-popover places it). */
+.history-sheet { display: flex; flex-direction: column; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 1rem; background: #111113; color: #f7f5f7; overflow: hidden; }
+.history-sheet__header { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.875rem; font-weight: 600; }
+.history-sheet__close { display: inline-flex; width: 2.75rem; height: 2.75rem; align-items: center; justify-content: center; margin: -0.6rem -0.6rem -0.6rem 0; border: 0; border-radius: 0.6rem; background: none; color: rgba(255, 255, 255, 0.6); cursor: pointer; }
+.history-sheet__close:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+.history-sheet__body { display: grid; gap: 0.9rem; padding: 1rem; overflow-y: auto; overscroll-behavior: contain; }
+.sheet-field { display: grid; gap: 0.4rem; font-size: 0.75rem; font-weight: 560; color: rgba(255, 255, 255, 0.72); }
+.sheet-field .select { width: 100%; max-width: none; height: 2.75rem; font-size: 0.8125rem; }
+.field-hint { color: var(--ink-2); font-size: 0.72rem; font-weight: 450; overflow-wrap: anywhere; }
+.history-sheet__footer { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.75rem 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.history-sheet__meta { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+.history-sheet__meta .link-btn { min-height: 2.75rem; padding: 0; }
+.history-sheet__count { color: var(--ink-2); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+.history-sheet__done { min-height: 2.75rem; padding: 0 1rem; border: 1px solid rgba(var(--theme-primary-300-rgb), 0.5); border-radius: 0.65rem; background: rgba(var(--theme-primary-500-rgb), 0.32); color: #fff; font-size: 0.8125rem; font-weight: 600; cursor: pointer; }
+.history-sheet__done:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }

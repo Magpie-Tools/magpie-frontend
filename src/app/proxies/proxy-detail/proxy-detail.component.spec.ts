@@ -37,7 +37,9 @@ describe('ProxyDetailComponent', () => {
     const httpServiceStub = {
       getProxyStatisticHours: hourlyStatistics,
       getProxyDetail: jasmine.createSpy('getProxyDetail').and.returnValue(of(detail)),
-      getProxyStatistics: jasmine.createSpy('getProxyStatistics').and.returnValue(of([] as ProxyStatistic[])),
+      getProxyStatisticsPage: jasmine.createSpy('getProxyStatisticsPage').and.returnValue(of({
+        statistics: [] as ProxyStatistic[], total: 0, page: 1, page_size: 20, counts: {alive: 0, dead: 0}, options: {protocols: [], judges: []},
+      })),
       getProxyTags: jasmine.createSpy('getProxyTags').and.returnValue(of([])),
       replaceProxyTags: jasmine.createSpy('replaceProxyTags').and.returnValue(of([])),
     } satisfies Partial<HttpService>;

@@ -529,93 +529,13 @@
         }
       </section>
 
-      <section class="route-card history-card" aria-labelledby="history-title">
-        <div class="history-card__heading">
-          <div class="card-heading card-heading--compact">
-            <span class="card-icon"
-              ><i class="icon icon-history" aria-hidden="true"></i
-            ></span>
-            <div class="card-heading__copy">
-              <h2 id="history-title">Check history</h2>
-            </div>
-          </div>
-          <span class="entry-count">{{ statistics().length }} entries</span>
-        </div>
-
-        <div class="history-table">
-          @if (isLoadingStatistics()) {
-            <div class="card-loading"><app-loading></app-loading></div>
-          } @else {
-            <div class="data-table" [attr.aria-busy]="false">
-              <div hlmTableContainer class="table-scroll">
-                <table hlmTable class="proxy-stat-table">
-                  <thead hlmTHead>
-                    <tr hlmTr>
-                      <th hlmTh>Status</th>
-                      <th hlmTh>Response</th>
-                      <th hlmTh>Attempt</th>
-                      <th hlmTh>Protocol</th>
-                      <th hlmTh>Anonymity</th>
-                      <th hlmTh>Judge</th>
-                      <th hlmTh class="checked-at-cell">Checked at</th>
-                    </tr>
-                  </thead>
-                  <tbody hlmTBody>
-                    @for (row of statistics(); track row.id ?? $index) {
-                      <tr
-                        hlmTr
-                        class="proxy-stat-row"
-                        role="button"
-                        tabindex="0"
-                        title="View judge response body"
-                        (click)="openStatisticResponse(row)"
-                        (keydown.enter)="openStatisticResponse(row)"
-                        (keydown.space)="
-                          openStatisticResponse(row); $event.preventDefault()
-                        "
-                      >
-                        <td hlmTd>
-                          <span class="table-status">
-                            <span
-                              class="status-dot status-dot--small"
-                              [ngClass]="row.alive ? 'alive' : 'dead'"
-                            ></span>
-                            {{ row.alive ? "Alive" : "Dead" }}
-                          </span>
-                        </td>
-                        <td hlmTd>{{ row.response_time | number }} ms</td>
-                        <td hlmTd>{{ row.attempt + 1 }}</td>
-                        <td hlmTd [title]="row.timeout ? row.timeout + ' ms timeout, ' + (row.retries ?? 0) + ' retries' : 'Legacy check without settings attribution'">
-                          {{ row.protocol ? (row.protocol | uppercase) : "Unknown" }}@if (row.transport) { / {{ row.transport | uppercase }} }
-                          @if (row.current === false) {<small class="history-settings-note">{{ row.config_key ? 'Previous settings' : 'Legacy settings' }}</small>}
-                        </td>
-                        <td hlmTd class="capitalize">
-                          {{ row.anonymity_level || "Unknown" }}
-                        </td>
-                        <td
-                          hlmTd
-                          class="judge-cell"
-                          [title]="row.judge || 'Unknown'"
-                        >
-                          {{ row.judge || "Unknown" }}
-                        </td>
-                        <td hlmTd class="checked-at-cell">{{ row.created_at | date }}</td>
-                      </tr>
-                    }
-                    @if (statistics().length === 0) {
-                      <tr hlmTr>
-                        <td hlmTd colspan="7" class="empty-table">
-                          No check history recorded yet.
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          }
-        </div>
-      </section>
+      @if (proxyId(); as id) {
+        <app-proxy-check-history
+          [proxyId]="id"
+          (openResponse)="openStatisticResponse($event)"
+          (firstPage)="statistics.set($event)"
+        />
+      }
     </div>
   </section>
 
