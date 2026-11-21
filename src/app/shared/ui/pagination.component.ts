@@ -17,8 +17,8 @@ export interface TablePageEvent {
   imports: [HlmButton, HlmNativeSelectImports, HlmTooltip, FormsModule, DecimalPipe],
   styleUrl: './pagination.component.scss',
   template: `
-    <nav class="table-pagination" aria-label="Table pagination">
-      <span role="status"
+    <nav class="table-pagination" [attr.aria-label]="ariaLabel">
+      <span [attr.role]="announceRange ? 'status' : null"
         >{{ (totalRecords === 0 ? 0 : first + 1) | number }}–{{ last | number }} of
         {{ totalRecords | number }}</span
       >
@@ -30,6 +30,7 @@ export interface TablePageEvent {
           size="sm"
           class="pagination-edge"
           aria-label="First page"
+          [attr.aria-disabled]="busy || null"
           [disabled]="disabled || first <= 0"
           (click)="go(0)"
         >
@@ -41,6 +42,7 @@ export interface TablePageEvent {
           variant="outline"
           size="sm"
           aria-label="Previous page"
+          [attr.aria-disabled]="busy || null"
           [disabled]="disabled || first <= 0"
           (click)="go(first - rows)"
         >
@@ -52,6 +54,7 @@ export interface TablePageEvent {
           variant="outline"
           size="sm"
           aria-label="Next page"
+          [attr.aria-disabled]="busy || null"
           [disabled]="disabled || last >= totalRecords"
           (click)="go(first + rows)"
         >
@@ -64,6 +67,7 @@ export interface TablePageEvent {
           size="sm"
           class="pagination-edge"
           aria-label="Last page"
+          [attr.aria-disabled]="busy || null"
           [disabled]="disabled || last >= totalRecords"
           (click)="go((pages - 1) * rows)"
         >
@@ -75,6 +79,9 @@ export interface TablePageEvent {
             [ngModel]="rows"
             (ngModelChange)="resize($event)"
             [disabled]="disabled"
+            [attr.aria-disabled]="busy || null"
+            (keydown)="blockWhileBusy($event)"
+            (mousedown)="blockWhileBusy($event)"
           >
             @for (size of rowsPerPageOptions; track size) {
               <option hlmNativeSelectOption [value]="size">
@@ -95,11 +102,13 @@ export interface TablePageEvent {
           [min]="1"
           [max]="pages"
           [disabled]="disabled || pages <= 1"
+          [readonly]="busy"
+          [attr.aria-disabled]="busy || null"
           [(ngModel)]="pageJumpValue"
           [attr.aria-describedby]="pageJumpTotalId"
         />
         <span class="page-jump__total" [id]="pageJumpTotalId">of {{ pages | number }}</span>
-        <button type="submit" class="page-jump__submit" [disabled]="disabled || pages <= 1">Go</button>
+        <button type="submit" class="page-jump__submit" [disabled]="disabled || pages <= 1" [attr.aria-disabled]="busy || null">Go</button>
         <button
           type="button"
           class="page-jump__scroll-toggle"
@@ -126,6 +135,11 @@ export class PaginationComponent implements OnChanges {
   @Input() sortField: string | null = null;
   @Input() sortOrder: number | null = null;
   @Input() pageScrollTargetStorageKey: string | null = null;
+  /** While a page loads, controls stay focusable (aria-disabled) but ignore input, so keyboard focus is not lost. */
+  @Input() busy = false;
+  /** Tables that announce results through their own live region turn the range announcement off. */
+  @Input() announceRange = true;
+  @Input() ariaLabel = 'Table pagination';
   @Output() pageChange = new EventEmitter<TablePageEvent>();
   @Output() pageScrollTargetChange = new EventEmitter<PageScrollTarget>();
 
@@ -159,9 +173,16 @@ export class PaginationComponent implements OnChanges {
     return this.pageScrollTarget === 'top' ? 'Page changes scroll to top' : 'Page changes stay at bottom';
   }
 
+  blockWhileBusy(event: Event): void {
+    if (this.busy && !(event instanceof KeyboardEvent && (event.key === 'Tab' || event.key === 'Escape'))) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+
   jump(event: Event): void {
     event.preventDefault();
-    if (this.disabled || this.pages <= 1) return;
+    if (this.disabled || this.busy || this.pages <= 1) return;
     const rawPage = Number(this.pageJumpValue);
     const nextPage = Number.isFinite(rawPage) ? Math.min(this.pages, Math.max(1, Math.floor(rawPage))) : this.page;
     this.pageJumpValue = nextPage;
@@ -174,7 +195,7 @@ export class PaginationComponent implements OnChanges {
     this.pageScrollTargetChange.emit(this.pageScrollTarget);
   }
   go(first: number): void {
-    if (this.disabled) return;
+    if (this.disabled || this.busy) return;
     this.pageChange.emit({
       first: Math.max(0, Math.min(first, (this.pages - 1) * this.rows)),
       rows: this.rows,
@@ -184,7 +205,7 @@ export class PaginationComponent implements OnChanges {
   }
   resize(raw: string | number): void {
     const rows = Number(raw);
-    if (this.disabled || !this.rowsPerPageOptions.includes(rows)) return;
+    if (this.disabled || this.busy || !this.rowsPerPageOptions.includes(rows)) return;
     this.pageChange.emit({
       first: 0,
       rows,

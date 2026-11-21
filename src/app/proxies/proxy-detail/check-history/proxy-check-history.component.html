@@ -1,0 +1,234 @@
+<section class="route-card history-card" aria-labelledby="history-title">
+  <div class="history-card__heading">
+    <div class="card-heading card-heading--compact">
+      <span class="card-icon"><i class="icon icon-history" aria-hidden="true"></i></span>
+      <div class="card-heading__copy">
+        <h2 id="history-title" class="history-title" tabindex="-1">Check history</h2>
+      </div>
+    </div>
+    @if (!noChecks() && hasFilters()) {
+      <button type="button" class="link-btn" data-action="clear-head" (click)="clearFilters()">Clear filters</button>
+    }
+  </div>
+
+  @if (noChecks()) {
+    <div class="history-empty"><b>No checks yet</b>Results appear here after this proxy's first check.</div>
+  } @else {
+    <div class="filter-bar" role="group" aria-label="Filter checks">
+      <div class="status-filter" role="group" aria-label="Status">
+        @for (option of [{value: 'all', label: 'All'}, {value: 'alive', label: 'Alive'}, {value: 'dead', label: 'Dead'}]; track option.value) {
+          <button
+            type="button"
+            [attr.data-status]="option.value"
+            [attr.aria-pressed]="status() === option.value"
+            [disabled]="firstLoad()"
+            (click)="setStatus($any(option.value))"
+          >
+            {{ option.label }}
+            @if (option.value !== 'all' && counts(); as c) {
+              <span class="n">{{ (option.value === 'alive' ? c.alive : c.dead).toLocaleString() }}</span>
+            }
+          </button>
+        }
+      </div>
+      <span class="sep" aria-hidden="true"></span>
+      <ng-container *ngTemplateOutlet="filterFields; context: {sheet: false}"></ng-container>
+
+      <hlm-popover align="end" sideOffset="8" [state]="sheetOpen() ? 'open' : 'closed'" (stateChanged)="onSheetState($event)">
+        <button type="button" class="tool-button" [class.is-active]="sheetFilterCount() > 0" [disabled]="firstLoad()" hlmPopoverTrigger>
+          <i class="icon icon-filter" aria-hidden="true"></i>
+          {{ sheetFilterCount() ? 'Filters (' + sheetFilterCount() + ')' : 'Filters' }}
+        </button>
+        <hlm-popover-content *hlmPopoverPortal class="phone-sheet-popover history-sheet p-0 gap-0" aria-label="Filters">
+          <header class="history-sheet__header">
+            Filters
+            <button type="button" class="history-sheet__close" aria-label="Close filters" (click)="closeSheet()">
+              <i class="icon icon-x" aria-hidden="true"></i>
+            </button>
+          </header>
+          <div class="history-sheet__body">
+            <ng-container *ngTemplateOutlet="filterFields; context: {sheet: true}"></ng-container>
+          </div>
+          <footer class="history-sheet__footer">
+            <div class="history-sheet__meta">
+              <span class="history-sheet__count" role="status">{{ sheetStatus() }}</span>
+              <button type="button" class="link-btn" title="Resets the fields above; status stays as set" (click)="clearSheetFilters()">Clear these filters</button>
+            </div>
+            <button type="button" class="history-sheet__done" (click)="closeSheet()">Done</button>
+          </footer>
+        </hlm-popover-content>
+      </hlm-popover>
+    </div>
+
+    <div class="history-table" [class.refreshing]="loading() && !withheld() && !retrying()" [attr.aria-busy]="loading()">
+      @if (loading()) {
+        <div class="table-progress" aria-hidden="true"></div>
+      }
+      <div class="table-scroll" tabindex="-1" role="region" aria-label="Check history results">
+        <table class="proxy-stat-table" role="table" aria-labelledby="history-title">
+          <colgroup>
+            @for (column of columns; track column.id) {
+              <col [class]="'c-' + column.id">
+            }
+          </colgroup>
+          <thead role="rowgroup">
+            <tr role="row">
+              @for (column of columns; track column.id) {
+                @if (column.sort) {
+                  <th role="columnheader" scope="col" [class.num]="column.numeric" [class.at-col]="column.id === 'checked'" [attr.aria-sort]="ariaSort(column)">
+                    <button type="button" class="table-sort" [attr.aria-disabled]="loading() || null" (click)="sortBy(column)">
+                      {{ column.label }}
+                      <svg class="table-sort__icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        @switch (ariaSort(column)) {
+                          @case ('ascending') { <path d="M12 19V5m-5 5 5-5 5 5" /> }
+                          @case ('descending') { <path d="M12 5v14m-5-5 5 5 5-5" /> }
+                          @default { <path d="M8 20V4m-4 4 4-4 4 4m4-4v16m-4-4 4 4 4-4" /> }
+                        }
+                      </svg>
+                    </button>
+                  </th>
+                } @else {
+                  <th role="columnheader" scope="col">{{ column.label }}</th>
+                }
+              }
+            </tr>
+          </thead>
+          <tbody role="rowgroup" [attr.inert]="loading() ? '' : null">
+            @if (firstLoad()) {
+              @for (index of skeletonRows; track index) {
+                <tr class="skeleton" aria-hidden="true">
+                  @for (column of columns; track column.id) {
+                    <td [class]="column.cell" [class.num]="column.numeric"><span></span></td>
+                  }
+                </tr>
+              }
+            } @else {
+              @for (row of rows(); track row.id) {
+                <tr class="row" role="row" (click)="open(row)">
+                  <td role="cell" class="status-cell">
+                    <span class="table-status" [class.dead]="!row.alive">
+                      <span class="status-dot" [class.alive]="row.alive" [class.dead]="!row.alive" aria-hidden="true"></span>
+                      {{ row.alive ? 'Alive' : 'Dead' }}
+                    </span>
+                  </td>
+                  <td role="cell" class="num resp" data-label="Response">
+                    @if (row.alive) {
+                      <span>{{ row.response_time.toLocaleString() }} ms</span>
+                    } @else {
+                      <span class="ms-dead" [title]="'Failed after ' + row.response_time.toLocaleString() + ' ms'">No response</span>
+                    }
+                  </td>
+                  <td role="cell" class="num att" data-label="Attempt"><span>{{ attemptLabel(row) }}</span></td>
+                  <td role="cell" class="proto" data-label="Protocol"
+                      [title]="row.timeout ? row.timeout + ' ms timeout, ' + (row.retries ?? 0) + ' retries' : 'Legacy check without settings attribution'">
+                    <span>{{ protocolLabel(row) }}@if (settingsNote(row); as note) {<small class="note">{{ note }}</small>}</span>
+                  </td>
+                  <td role="cell" class="anon capitalize" data-label="Anonymity"><span>{{ anonymity(row) }}</span></td>
+                  <td role="cell" class="judge" data-label="Judge" [title]="row.judge">
+                    <span class="full">@for (part of breakParts(judgeLabel(row.judge)); track $index) {{{ part }}<wbr>}</span>
+                  </td>
+                  <td role="cell" class="at-col">
+                    <button type="button" class="at-btn" [attr.aria-label]="'View judge response, ' + checkedDate(row) + ' ' + checkedTime(row)"
+                            (click)="open(row); $event.stopPropagation()">
+                      @if (hasYear(row)) {
+                        <span class="d">{{ checkedDate(row) }}</span><span class="t t--line">{{ checkedTime(row) }}</span>
+                      } @else {
+                        {{ checkedDate(row) }}&nbsp; <span class="t">{{ checkedTime(row) }}</span>
+                      }
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (showError()) {
+        <div class="history-message" tabindex="-1">
+          <b>Couldn't load check history</b>
+          <button type="button" class="link-btn" data-action="retry" [attr.aria-disabled]="retrying() || null" (click)="retry()">Try again</button>
+        </div>
+      } @else if (withheld()) {
+        <div class="history-message">
+          <b>Loading checks…</b>
+          <button type="button" class="link-btn" aria-hidden="true" tabindex="-1" disabled style="visibility: hidden">Try again</button>
+        </div>
+      } @else if (outcome() === 'empty') {
+        <div class="history-message" tabindex="-1">
+          @if (loading()) {
+            <b>Loading checks…</b>
+            <p class="filter-summary" aria-hidden="true" style="visibility: hidden">{{ emptySummary() }}</p>
+          } @else {
+            <b>No checks match these filters</b>
+            <p class="filter-summary">@for (part of breakParts(emptySummary()); track $index) {{{ part }}<wbr>}</p>
+          }
+          @if (hasFilters()) {
+            <button type="button" class="link-btn" data-action="clear-empty" (click)="clearFilters()">Clear filters</button>
+          } @else {
+            <button type="button" class="link-btn" aria-hidden="true" tabindex="-1" disabled style="visibility: hidden">Clear filters</button>
+          }
+        </div>
+      }
+
+      @if (showFooter()) {
+        <app-pagination
+          [first]="first"
+          [rows]="pageSize()"
+          [totalRecords]="total()"
+          [rowsPerPageOptions]="pageSizeOptions"
+          [busy]="loading()"
+          [announceRange]="false"
+          ariaLabel="Check history pagination"
+          [pageScrollTargetStorageKey]="pageScrollKey"
+          (pageChange)="onPageChange($event)"
+          (pageScrollTargetChange)="onPageScrollTargetChange($event)"
+        />
+      }
+    </div>
+  }
+</section>
+<span class="sr-only" role="status">{{ liveMessage() }}</span>
+
+<ng-template #filterFields let-sheet="sheet">
+  @let disabled = firstLoad();
+  <label [class.sheet-field]="sheet" [class.inline-field]="!sheet">
+    <span [class.sr-only]="!sheet">Protocol</span>
+    <select class="select" [class.is-set]="protocol()" [disabled]="disabled" [title]="selectedLabel(protocolOptions(), protocol(), 'All protocols')"
+            (change)="setProtocol($any($event.target).value)">
+      <option value="" [selected]="!protocol()">All protocols</option>
+      @for (option of protocolOptions(); track option.value) {
+        <option [value]="option.value" [selected]="option.value === protocol()">{{ option.label }}</option>
+      }
+    </select>
+  </label>
+  <label [class.sheet-field]="sheet" [class.inline-field]="!sheet">
+    <span [class.sr-only]="!sheet">Judge</span>
+    <select class="select sel-judge" [class.is-set]="judgeId()" [disabled]="disabled" [title]="selectedLabel(judgeOptions(), judgeId(), 'All judges')"
+            (change)="setJudge($any($event.target).value)">
+      <option value="0" [selected]="!judgeId()">All judges</option>
+      @for (option of judgeOptions(); track option.value) {
+        <option [value]="option.value" [selected]="option.value === judgeId()">{{ option.label }}</option>
+      }
+    </select>
+    @if (sheet && judgeId()) {
+      <small class="field-hint">@for (part of breakParts(selectedLabel(judgeOptions(), judgeId(), '')); track $index) {{{ part }}<wbr>}</small>
+    }
+  </label>
+  <label [class.sheet-field]="sheet" [class.inline-field]="!sheet">
+    <span [class.sr-only]="!sheet">Settings</span>
+    <select class="select sel-settings" [class.is-set]="settings()" [disabled]="disabled" (change)="setSettings($any($event.target).value)">
+      @for (option of settingsOptions; track option.value) {
+        <option [value]="option.value" [selected]="option.value === settings()">{{ option.label }}</option>
+      }
+    </select>
+  </label>
+  <label [class.sheet-field]="sheet" [class.inline-field]="!sheet">
+    <span [class.sr-only]="!sheet">Period</span>
+    <select class="select" [class.is-set]="hours() !== 0" [disabled]="disabled" (change)="setHours($any($event.target).value)">
+      @for (option of periodOptions; track option.value) {
+        <option [value]="option.value" [selected]="option.value === hours()">{{ option.label }}</option>
+      }
+    </select>
+  </label>
+</ng-template>
