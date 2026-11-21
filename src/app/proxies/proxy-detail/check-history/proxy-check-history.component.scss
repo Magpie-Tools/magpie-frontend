@@ -67,17 +67,17 @@ button, select, input { font: inherit; }
 .table-scroll:focus { outline: none; }
 .table-scroll:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
 table.proxy-stat-table { width: 100%; min-width: 0; border-collapse: collapse; table-layout: fixed; }
-.proxy-stat-table col.c-status { width: 6rem; } .proxy-stat-table col.c-resp { width: 7.5rem; } .proxy-stat-table col.c-att { width: 6.5rem; }
-.proxy-stat-table col.c-proto { width: 8rem; } .proxy-stat-table col.c-anon { width: 8rem; } .proxy-stat-table col.c-at { width: 8.5rem; }
+/* Fixed columns take what their content needs (data cells use the skin's monospace font); the judge gets the rest. */
+.proxy-stat-table col.c-status { width: 6.5rem; } .proxy-stat-table col.c-response { width: 8rem; } .proxy-stat-table col.c-attempt { width: 6.5rem; }
+.proxy-stat-table col.c-protocol { width: 9rem; } .proxy-stat-table col.c-anonymity { width: 8.5rem; } .proxy-stat-table col.c-checked { width: 11rem; }
 .proxy-stat-table th { padding: .68rem .75rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,.085); background: rgba(255,255,255,.022); color: rgba(255,255,255,.66); font-size: .75rem; font-weight: 640; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
-.proxy-stat-table th[aria-sort] { padding: 0; }
 .proxy-stat-table th[aria-sort]:hover, .proxy-stat-table th:is([aria-sort="ascending"], [aria-sort="descending"]) { color: var(--theme-primary-200); }
-.table-sort { display: flex; width: 100%; align-items: center; gap: .4rem; padding: .68rem .75rem; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
-.table-sort:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+/* As in the proxy list: the header cell carries the padding, the sort button sits inline in it. */
+.table-sort { display: inline-flex; align-items: center; gap: .4rem; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
+.table-sort:focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
 .table-sort[aria-disabled="true"], .link-btn[aria-disabled="true"] { cursor: progress; opacity: .6; }
 .table-sort__icon { width: .75rem; height: .75rem; opacity: .72; flex: 0 0 auto; }
-.num, .num .table-sort { justify-content: flex-end; text-align: right !important; }
-.at-col .table-sort { justify-content: flex-end; }
+.num { text-align: right !important; }
 .proxy-stat-table td { padding: .68rem .75rem; border-bottom: 1px solid rgba(255,255,255,.05); color: rgba(255,255,255,.82); font-size: .8125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .proxy-stat-table td.num { font-variant-numeric: tabular-nums; }
 /* Judge: whole URL without the scheme (kept when it tells two judges apart), wrapping after . / - ? = and,
@@ -133,7 +133,7 @@ table.proxy-stat-table { width: 100%; min-width: 0; border-collapse: collapse; t
   /* !important: the app skin styles .history-table cells for table mode (as the proxy list's phone cards do). */
   .proxy-stat-table thead > tr > th[aria-sort] { display: block; flex: 0 0 auto; padding: 0 !important; border: 1px solid rgba(255,255,255,.12) !important; border-radius: 999px !important; background: transparent !important; font-size: .6875rem; }
   .proxy-stat-table thead > tr > th:is([aria-sort="ascending"], [aria-sort="descending"]) { border-color: rgba(var(--theme-primary-300-rgb), .34) !important; background: rgba(var(--theme-primary-500-rgb), .08) !important; }
-  .proxy-stat-table .table-sort { min-height: 2.75rem; justify-content: center !important; padding: 0 .75rem; }
+  .proxy-stat-table .table-sort { display: flex; width: 100%; min-height: 2.75rem; justify-content: center; padding: 0 .75rem; }
   .proxy-stat-table tbody > tr.row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem .75rem; padding: .8rem .75rem; border-bottom: 1px solid rgba(255,255,255,.07); }
   .proxy-stat-table tbody > tr.row:last-child { border-bottom: 0; }
   .proxy-stat-table tbody > tr.row > td { display: flex; flex-direction: column; gap: .15rem; min-width: 0; padding: 0 !important; border: 0 !important; background: transparent !important; white-space: normal; overflow: visible; text-align: left !important; }
