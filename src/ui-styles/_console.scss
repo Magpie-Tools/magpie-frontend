@@ -390,8 +390,7 @@ html:root:root:root:root[data-ui="console"] {
   .inventory-table tbody > tr > td { font-variant-numeric: tabular-nums; }
 
   .inventory-table .reputation-badge,
-  .route-card .reputation-badge,
-  .managed-state-pill {
+  .route-card .reputation-badge {
     border: 0;
     font-weight: 600;
   }

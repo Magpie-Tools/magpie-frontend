@@ -270,21 +270,6 @@ a {
     opacity: 0.42;
     cursor: not-allowed;
   }
-
-  &--primary {
-    border-color: rgba(var(--theme-primary-300-rgb), 0.32);
-    background: rgba(var(--theme-primary-500-rgb), 0.22);
-    color: #fff;
-
-    i {
-      color: var(--theme-primary-100);
-    }
-  }
-
-  &--warning {
-    border-color: rgba(245, 158, 11, 0.28);
-    color: #fcdba0;
-  }
 }
 
 .lookup-rail {
