@@ -79,6 +79,28 @@ const DASHBOARD_QUERY = `#graphql
   }
 `;
 
+// Only the per-judge alive counts, for the Judges settings page.
+const JUDGE_RESULTS_QUERY = `#graphql
+  query JudgeResults {
+    viewer {
+      dashboardView {
+        info {
+          judgeValidProxies {
+            judgeUrl
+            eliteProxies
+            anonymousProxies
+            transparentProxies
+          }
+        }
+      }
+    }
+  }
+`;
+
+interface JudgeResultsQueryData {
+  viewer: {dashboardView: {info: {judgeValidProxies: JudgeValidProxy[] | null}}};
+}
+
 interface GraphQLError {
   message: string;
 }
@@ -204,10 +226,18 @@ export class GraphqlService {
   constructor(private http: HttpClient) {}
 
   fetchDashboardData(): Observable<DashboardQueryData> {
+    return this.query<DashboardQueryData>(DASHBOARD_QUERY, 'Failed to fetch dashboard data');
+  }
+
+  /** Alive proxies per judge URL from the dashboard snapshot; null when the snapshot has none yet. */
+  fetchJudgeValidProxies(): Observable<JudgeValidProxy[] | null> {
+    return this.query<JudgeResultsQueryData>(JUDGE_RESULTS_QUERY, 'Failed to fetch judge results')
+      .pipe(map(data => data.viewer?.dashboardView?.info?.judgeValidProxies ?? null));
+  }
+
+  private query<T>(query: string, fallbackMessage: string): Observable<T> {
     return this.http
-      .post<GraphQLResponse<DashboardQueryData>>(this.graphqlUrl, {
-        query: DASHBOARD_QUERY
-      })
+      .post<GraphQLResponse<T>>(this.graphqlUrl, {query})
       .pipe(
         map((response) => {
           if (response.errors?.length) {
@@ -227,7 +257,7 @@ export class GraphqlService {
           return throwError(() =>
             error instanceof Error
               ? error
-              : new Error(typeof error?.message === 'string' ? error.message : 'Failed to fetch dashboard data')
+              : new Error(typeof error?.message === 'string' ? error.message : fallbackMessage)
           );
         })
       );

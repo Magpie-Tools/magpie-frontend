@@ -81,6 +81,8 @@ app-admin-settings-save-dock {
   app-admin-settings-save-dock {
     .save-dock { align-items: stretch; flex-direction: column; }
     .save-actions, .save-actions > *, .save-button[hlmBtn] { width: 100%; justify-content: center; }
+    // Full-width actions stack instead of overflowing when a page adds one beside Save.
+    .save-actions { flex-wrap: wrap; }
   }
 }
 
