@@ -11,411 +11,300 @@
       <h1>Checker settings</h1>
     </header>
 
-    <section class="profile-picker" aria-label="Checker profile">
-      <div class="profile-toolbar">
-        <div class="profile-field">
-          <label class="field-label" for="checker-profile">Settings for</label>
-          <app-select inputId="checker-profile" [options]="profileOptions" [formControl]="selectedProfile" optionLabel="label" optionValue="value"></app-select>
-          @if (editingDefault) { <p class="field-hint" id="checker-profile-hint">Default applies to every proxy. Tags can adjust these settings.</p> }
-        </div>
-        <div class="profile-actions">
-          <hlm-popover align="end" sideOffset="8" [state]="priorityOpen() ? 'open' : 'closed'" (stateChanged)="onPriorityStateChanged($event)">
-            <button type="button" hlmBtn variant="outline" hlmPopoverTrigger [disabled]="rules.length === 0" [class.is-active]="priorityOpen()">
-              <i class="icon icon-list" aria-hidden="true"></i>Tag priority
-            </button>
-            <hlm-popover-content *hlmPopoverPortal class="w-[min(440px,calc(100vw-4rem))] max-h-[calc(100dvh-2rem)] overflow-hidden rounded-xl p-0 gap-0" aria-label="Tag priority">
-              <div class="tag-priority">
-                <div class="tag-priority__header" hlmPopoverHeader>
-                  <h3 hlmPopoverTitle>Tag priority</h3>
-                  <p hlmPopoverDescription>The top tag has highest priority and applies last.</p>
-                </div>
-                <div class="tag-priority__list" cdkDropList [cdkDropListData]="priorityDraft()" (cdkDropListDropped)="dropPriority($event)">
-                  @for (id of priorityDraft(); track id; let index = $index) {
-                    <div class="tag-priority__row" cdkDrag [cdkDragDisabled]="!workspaces.canOperate()" (cdkDragStarted)="priorityDragging = true" (cdkDragEnded)="priorityDragging = false">
-                      <span class="tag-priority__handle" cdkDragHandle title="Drag to reorder"><i class="icon icon-menu" aria-hidden="true"></i></span>
-                      <span class="tag-priority__color" [style.background-color]="tagColor(id)" aria-hidden="true"></span>
-                      <span class="tag-priority__name">{{ tagName(id) }}<small>{{ ruleMode(id) }}</small></span>
-                      <button type="button" hlmBtn variant="ghost" size="icon-sm" [attr.aria-label]="'Move ' + tagName(id) + ' up'" [disabled]="!workspaces.canOperate() || index === 0" (click)="movePriority(index, -1)"><i class="icon icon-arrow-up" aria-hidden="true"></i></button>
-                      <button type="button" hlmBtn variant="ghost" size="icon-sm" [attr.aria-label]="'Move ' + tagName(id) + ' down'" [disabled]="!workspaces.canOperate() || index === priorityDraft().length - 1" (click)="movePriority(index, 1)"><i class="icon icon-arrow-down" aria-hidden="true"></i></button>
-                    </div>
-                  }
-                </div>
-                <div class="tag-priority__footer">
-                  <button type="button" hlmBtn variant="ghost" size="sm" (click)="priorityOpen.set(false)">Cancel</button>
-                  <button type="button" hlmBtn size="sm" [disabled]="!workspaces.canOperate()" (click)="applyPriority()">Apply order</button>
-                </div>
-              </div>
-            </hlm-popover-content>
-          </hlm-popover>
-          @if (workspaces.canOperate()) { <app-proxy-tag-manager (tagsChanged)="onTagsChanged()"></app-proxy-tag-manager> }
-        </div>
-      </div>
-      @if (!editingDefault) {
-        <div class="rule-editor">
-          <div>
-            @if (selectedRule; as rule) {
-              <div class="rule-mode" [formGroup]="rule">
-                <label class="field-label" for="checker-rule-mode">How this tag changes protocols</label>
-                <app-select inputId="checker-rule-mode" [options]="ruleModes" formControlName="Mode" optionLabel="label" optionValue="value"></app-select>
-              </div>
-              <p class="field-hint">Replace uses the selected protocols. Add includes them. Remove excludes them. Shared settings apply to all enabled protocols; inherited fields follow earlier rules.</p>
-            } @else {
-              <p class="field-hint">This tag uses Default and any other matching tag rules.</p>
-            }
-          </div>
-          @if (selectedRule) {
-            <button type="button" hlmBtn variant="outline" [disabled]="!workspaces.canOperate()" (click)="removeRule()">Remove checker rule</button>
-          } @else {
-            <button type="button" hlmBtn [disabled]="!workspaces.canOperate()" (click)="addRule()">Add checker rule</button>
-          }
-        </div>
-      }
-    </section>
-    <div class="settings-grid">
-      @if (editingDefault || selectedRule) {
-      <section class="settings-card settings-card--protocols" [formGroup]="profileForm">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-compass" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2>Proxy protocols</h2>
-            <p>Select the protocols Magpie uses to check proxies.</p>
-          </div>
-        </div>
-
+    <nav class="profile-tabs" aria-label="Checker profiles">
+      <div class="profile-tablist" data-slot="tabs-list" role="tablist" aria-label="Checker profile">
+        <button
+          type="button"
+          role="tab"
+          class="profile-tab"
+          data-slot="tabs-trigger"
+          [attr.data-state]="editingDefault ? 'active' : 'inactive'"
+          [class.is-active]="editingDefault"
+          [attr.aria-selected]="editingDefault"
+          (click)="selectProfile(0)"
+        >Default</button>
         <div
-          class="protocol-accordion"
-          role="group"
-          aria-label="Proxy protocols"
+          class="profile-tablist__rules"
+          cdkDropList
+          cdkDropListOrientation="horizontal"
+          cdkDropListLockAxis="x"
+          (cdkDropListDropped)="dropRule($event)"
         >
-          @for (protocol of protocolOptions; track protocol.control) {
+          @for (rule of rules.controls; track rule.get('TagID')?.value; let index = $index) {
+            @let id = rule.get('TagID')?.value;
             <button
               type="button"
-              class="protocol-choice"
-              [class.is-active]="profileForm.get(protocol.control)?.value"
-              [attr.aria-pressed]="!!profileForm.get(protocol.control)?.value"
-              [disabled]="!workspaces.canOperate()"
-              (click)="toggleProtocol(protocol.control)"
+              role="tab"
+              class="profile-tab"
+              data-slot="tabs-trigger"
+              [attr.data-state]="selectedProfile.value === id ? 'active' : 'inactive'"
+              cdkDrag
+              [cdkDragDisabled]="!workspaces.canOperate() || rules.length < 2"
+              [class.is-active]="selectedProfile.value === id"
+              [attr.aria-selected]="selectedProfile.value === id"
+              [title]="tagName(id) + (rules.length > 1 ? ' · drag or press Alt+Left/Right to change priority' : '')"
+              (click)="selectProfile(id)"
+              (keydown.alt.arrowleft)="moveRule(index, index - 1); $event.preventDefault()"
+              (keydown.alt.arrowright)="moveRule(index, index + 1); $event.preventDefault()"
             >
-              <span class="protocol-choice__icon"
-                ><i [class]="protocol.icon" aria-hidden="true"></i
-              ></span>
-              <span class="protocol-choice__copy">
-                <strong>{{ protocol.label }}</strong>
-                <small>{{ protocol.description }}</small>
-              </span>
-              <span class="protocol-choice__state">
-                {{ profileForm.get(protocol.control)?.value ? "On" : "Off" }}
-              </span>
+              <span class="tag-dot" [style.background-color]="tagColor(id)" aria-hidden="true"></span>
+              <span class="profile-tab__name">{{ tagName(id) }}</span>
             </button>
-          }
-        </div>
-      </section>
-
-      <section class="settings-card settings-card--transport" [formGroup]="profileForm">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-signpost" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2>Transport protocol</h2>
-            <p>One transport for every enabled proxy protocol.</p>
-          </div>
-        </div>
-
-        <div class="field-group transport-field">
-          <label class="field-label" for="transport-protocol">
-            Transport protocol
-            <app-tooltip [text]="transportProtocolTooltip"></app-tooltip>
-          </label>
-          <app-select
-            inputId="transport-protocol"
-            [options]="transportOptions"
-            formControlName="TransportProtocol"
-            optionLabel="label"
-            optionValue="value"
-            class="w-full"
-            placeholder="Select transport"
-          >
-            <ng-template #optionTemplate let-option>
-              <div class="transport-option">
-                <span>{{ option.label ?? option }}</span>
-                @if ((option.value ?? option) === "tcp") {
-                  <span hlmBadge class="transport-chip">Default</span>
-                }
-              </div>
-            </ng-template>
-          </app-select>
-        </div>
-
-        <div class="transport-explainer">
-          <i class="icon icon-info" aria-hidden="true"></i>
-          @switch (profileForm.get("TransportProtocol")?.value) {
-            @case ("quic") {
-              <p>
-                <strong>QUIC</strong> uses HTTP/3 with datagram support. Your
-                proxy and judge both need HTTP/3 support.
-              </p>
-            }
-            @case ("http3") {
-              <p>
-                <strong>HTTP/3</strong> uses reliable QUIC streams. Your proxy
-                and judge both need HTTP/3 support.
-              </p>
-            }
-            @case (null) { <p>Use the transport from Default or preceding tag rules.</p> }
-            @default {
-              <p>
-                <strong>TCP</strong> has the broadest compatibility and works
-                with standard HTTP judges.
-              </p>
-            }
-          }
-        </div>
-      </section>
-
-      <section class="settings-card settings-card--performance" [formGroup]="profileForm">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-gauge" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2>Retries and timeout</h2>
-            <p>Shared by all enabled protocols in this profile.</p>
-          </div>
-        </div>
-
-        <div class="performance-fields">
-          <div class="field-group">
-            <label class="field-label" for="retries">Retries</label>
-            @if (!editingDefault && !removeMode) {
-              <label class="inherit-toggle"><input type="checkbox" [checked]="profileForm.get('Retries')?.value === null" [disabled]="!workspaces.canOperate()" (change)="setInherited('Retries', $any($event.target).checked)">Inherit retries</label>
-            }
-            <div class="input-with-unit">
-              <input
-                id="retries"
-                formControlName="Retries"
-                type="number"
-                hlmInput
-                inputmode="numeric"
-                placeholder="2"
-                min="0"
-                max="255"
-              />
-              <span>after failure</span>
-            </div>
-            <p class="field-hint">
-              Extra attempts after the first request fails.
-            </p>
-          </div>
-
-          <div class="field-group">
-            <label class="field-label" for="timeout">Timeout</label>
-            @if (!editingDefault && !removeMode) {
-              <label class="inherit-toggle"><input type="checkbox" [checked]="profileForm.get('Timeout')?.value === null" [disabled]="!workspaces.canOperate()" (change)="setInherited('Timeout', $any($event.target).checked)">Inherit timeout</label>
-            }
-            <div class="input-with-unit">
-              <input
-                id="timeout"
-                formControlName="Timeout"
-                type="number"
-                hlmInput
-                inputmode="numeric"
-                placeholder="7500"
-                min="1"
-                max="65535"
-              />
-              <span>milliseconds</span>
-            </div>
-            <p class="field-hint">Maximum wait for each attempt.</p>
-          </div>
-        </div>
-
-        <div class="performance-summary">
-          <span class="performance-summary__value">{{ totalAttempts }}</span>
-          <p>
-            <strong>attempts at most</strong>
-            <span
-              >Up to {{ configuredAttemptWindow }} of configured wait time per
-              protocol check.</span
-            >
-          </p>
-        </div>
-      </section>
-
-      }
-      @if (editingDefault) {
-      <section class="settings-card settings-card--validation">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-shield" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2>SOCKS validation</h2>
-            <p>Workspace-wide. Controls which judges receive SOCKS4 and SOCKS5 requests.</p>
-          </div>
-        </div>
-
-        <div
-          class="decision-row"
-          [class.is-active]="settingsForm.get('UseHttpsForSocks')?.value"
-        >
-          <div class="decision-row__icon">
-            <i class="icon icon-lock" aria-hidden="true"></i>
-          </div>
-          <div class="decision-row__copy">
-            <strong>Use HTTPS judges for SOCKS</strong>
-            <p>SOCKS4 and SOCKS5 checks will use your HTTPS judge list.</p>
-            <span>
-              {{
-                settingsForm.get("UseHttpsForSocks")?.value
-                  ? "HTTPS judges active"
-                  : "Standard judge routing"
-              }}
-            </span>
-          </div>
-          <app-checkbox
-            label="Enabled"
-            formControlName="UseHttpsForSocks"
-          ></app-checkbox>
-        </div>
-      </section>
-
-      <section class="settings-card settings-card--cleanup">
-        <div class="cleanup-main">
-          <div class="card-heading">
-            <span class="card-icon"
-              ><i class="icon icon-filter" aria-hidden="true"></i
-            ></span>
-            <div class="card-heading__copy">
-              <h2>Handle persistently failing proxies</h2>
-              <p>Workspace-wide settings for all managed proxies.</p>
-            </div>
-          </div>
-
-          <div
-            class="decision-row cleanup-toggle"
-            [class.is-active]="
-              settingsForm.get('AutoRemoveFailingProxies')?.value
-            "
-          >
-            <div class="decision-row__icon">
-              <i [class]="deleteOnFailure ? 'icon icon-trash' : 'icon icon-pause'" aria-hidden="true"></i>
-            </div>
-            <div class="decision-row__copy">
-              <strong>Automatic failure action</strong>
-              <p>
-                A successful check resets the failure streak.
-              </p>
-              <div class="field-group failure-action-field">
-                <div class="failure-action-control">
-                  <label class="field-label" for="failure-action">At threshold</label>
-                  <app-select
-                    inputId="failure-action"
-                    [options]="failureActionOptions"
-                    formControlName="FailureAction"
-                    optionLabel="label"
-                    optionValue="value"
-                  ></app-select>
-                </div>
-              </div>
-            </div>
-            <app-checkbox
-              label="Enabled"
-              formControlName="AutoRemoveFailingProxies"
-            ></app-checkbox>
-          </div>
-
-        </div>
-
-        <div
-          class="cleanup-threshold"
-          [class.is-disabled]="
-            !settingsForm.get('AutoRemoveFailingProxies')?.value
-          "
-        >
-          <div class="cleanup-threshold__topline">
-            <span>Failure threshold</span>
-            <i class="icon icon-arrow-right" aria-hidden="true"></i>
-            <strong>{{ cleanupThreshold }}</strong>
-          </div>
-
-          <label class="field-label" for="failure-threshold"
-            >Consecutive failed checks</label
-          >
-          <div class="input-with-unit">
-            <input
-              id="failure-threshold"
-              formControlName="AutoRemoveFailureThreshold"
-              type="number"
-              hlmInput
-              inputmode="numeric"
-              placeholder="3"
-              min="1"
-              max="255"
-            />
-            <span>failures</span>
-          </div>
-
-          <div class="failure-path" aria-hidden="true">
-            <span class="failure-path__start"
-              ><i class="icon icon-server"></i
-            ></span>
-            <span class="failure-path__line"></span>
-            <span class="failure-path__failure"
-              ><i class="icon icon-x"></i
-            ></span>
-            <span class="failure-path__line"></span>
-            <span class="failure-path__action"
-              ><i [class]="deleteOnFailure ? 'icon icon-trash' : 'icon icon-pause'"></i
-            ></span>
-          </div>
-          <p class="field-hint">
-            {{ deleteOnFailure ? 'The proxy is deleted' : 'The proxy pauses' }}
-            after {{ cleanupThreshold }} consecutive failed checks.
-          </p>
-        </div>
-      </section>
-      }
-    </div>
-
-<!--    <p class="field-hint">Changes apply on the next scheduled check. An empty protocol selection skips checks and does not count as failure.</p>-->
-    <footer class="save-dock">
-      <div class="save-state" aria-live="polite">
-        <span
-          class="save-state__dot"
-          [class.is-dirty]="settingsForm.dirty"
-          aria-hidden="true"
-        ></span>
-        <div>
-          @if (!workspaces.canOperate()) {
-            <strong>Viewer access</strong>
-            <p>You can inspect these settings, but you cannot change them.</p>
-          } @else if (settingsForm.dirty) {
-            <strong>Unsaved changes</strong>
-            <p>Save all profile edits and tag priority together.</p>
-          } @else {
-            <strong>Everything is up to date</strong>
-            <p>Changes will appear here before you save.</p>
           }
         </div>
       </div>
 
-      <button
-        type="button"
-        [disabled]="
-          !workspaces.canOperate() ||
-          !settingsForm.dirty ||
-          settingsForm.invalid || saving() || !settingsLoaded
-        "
-        class="save-settings-button"
-        (click)="onSubmit()"
-        hlmBtn
-        variant="default"
-      >
-        <i class="icon icon-check" aria-hidden="true"></i>Save checker settings
-      </button>
+      @if (workspaces.canOperate()) {
+        <button type="button" hlmBtn variant="outline" class="add-rule-button" [hlmDropdownMenuTrigger]="addRuleMenu" align="start">
+          <i class="icon icon-plus" aria-hidden="true"></i>Tag rule
+        </button>
+        <ng-template #addRuleMenu>
+          <hlm-dropdown-menu class="add-rule-menu" aria-label="Add a tag rule">
+            @if (tagsWithoutRule.length) {
+              <div hlmDropdownMenuLabel class="add-rule-menu__label">Tags without a checker rule</div>
+              @for (tag of tagsWithoutRule; track tag.id) {
+                <button type="button" hlmDropdownMenuItem class="add-rule-menu__item" (triggered)="addRuleFor(tag.id)">
+                  <span class="tag-dot" [style.background-color]="tag.color" aria-hidden="true"></span>
+                  <span class="add-rule-menu__name">{{ tag.name }}</span>
+                </button>
+              }
+            } @else {
+              <div hlmDropdownMenuLabel class="add-rule-menu__label">
+                {{ tags.tags().length ? 'Every tag already has a rule.' : 'No tags yet. Create one to give its proxies their own settings.' }}
+              </div>
+            }
+            <hlm-dropdown-menu-separator />
+            <button type="button" hlmDropdownMenuItem class="add-rule-menu__item add-rule-menu__item--muted" (triggered)="tagManager.open()">Manage tags…</button>
+          </hlm-dropdown-menu>
+        </ng-template>
+      }
+      @if (rules.length > 1) {
+        <span class="profile-tabs__order">Tabs are in priority order · drag to reorder</span>
+      }
+    </nav>
+    <app-proxy-tag-manager #tagManager [showTrigger]="false" (tagsChanged)="onTagsChanged()"></app-proxy-tag-manager>
+
+    <section class="settings-card settings-list" [formGroup]="profileForm" aria-label="Check settings">
+      @if (selectedRule; as rule) {
+        <header class="rule-head" [formGroup]="rule">
+          <div class="rule-head__copy">
+            <h2>Rule for {{ tagName(rule.get('TagID')?.value) }}</h2>
+            <p class="row-desc">{{ modeHelp[rule.get('Mode')?.value] }}</p>
+          </div>
+          <div class="rule-head__actions">
+            <div class="mode-switch" role="group" aria-label="How this tag changes protocols">
+              @for (mode of ruleModes; track mode.value) {
+                <button
+                  type="button"
+                  [class.is-active]="rule.get('Mode')?.value === mode.value"
+                  [attr.aria-pressed]="rule.get('Mode')?.value === mode.value"
+                  [disabled]="!workspaces.canOperate()"
+                  (click)="setMode(mode.value)"
+                >{{ mode.label }}</button>
+              }
+            </div>
+            <button type="button" hlmBtn variant="ghost" class="delete-rule-button" [disabled]="!workspaces.canOperate()" (click)="removeRule()">Delete rule</button>
+          </div>
+        </header>
+      }
+
+      <div class="setting-row">
+        <div class="setting-row__label">
+          <h3 id="protocols-label">{{ protocolHeading }}</h3>
+          <p class="row-desc">
+            @if (editingDefault) {
+              Magpie checks every proxy once per enabled protocol. With none enabled, proxies are not checked.
+            } @else {
+              Default checks {{ defaultProtocolList }}.
+            }
+          </p>
+        </div>
+        <div class="setting-row__control">
+          <div class="protocol-toggles" role="group" aria-labelledby="protocols-label">
+            @for (protocol of protocolOptions; track protocol.control) {
+              @let active = !!profileForm.get(protocol.control)?.value;
+              <button
+                type="button"
+                class="protocol-choice"
+                [class.is-active]="active"
+                [class.is-remove]="removeMode"
+                [attr.aria-pressed]="active"
+                [disabled]="!workspaces.canOperate()"
+                (click)="toggleProtocol(protocol.control)"
+              >
+                <span class="protocol-choice__box" aria-hidden="true">{{ active ? protocolMark : '' }}</span>
+                <strong>{{ protocol.label }}</strong>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (!removeMode) {
+        <div class="setting-row">
+          <div class="setting-row__label">
+            <h3><label [attr.for]="inherits('TransportProtocol') ? null : 'transport-protocol'">Transport</label></h3>
+            <p class="row-desc">Used by every enabled protocol.</p>
+          </div>
+          <div class="setting-row__control">
+            @if (inherits('TransportProtocol')) {
+              <div class="inherit-field">
+                <div class="inherited-value"><span>{{ transportLabel(settingsForm.get('TransportProtocol')?.value) }} from Default</span></div>
+                <button type="button" class="link-button" [disabled]="!workspaces.canOperate()" (click)="setInherited('TransportProtocol', false)">Override</button>
+              </div>
+            } @else {
+              <div class="inherit-field">
+                <app-select
+                  inputId="transport-protocol"
+                  [options]="transportProtocolOptions"
+                  formControlName="TransportProtocol"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select transport"
+                >
+                  <ng-template #optionTemplate let-option>
+                    <div class="transport-option">
+                      <span>{{ option.label ?? option }}</span>
+                      @if ((option.value ?? option) === "tcp") {
+                        <span hlmBadge class="transport-chip">Default</span>
+                      }
+                    </div>
+                  </ng-template>
+                </app-select>
+                @if (!editingDefault) {
+                  <button type="button" class="link-button" [disabled]="!workspaces.canOperate()" (click)="setInherited('TransportProtocol', true)">Use Default</button>
+                }
+              </div>
+              <p class="field-hint">{{ transportHint(profileForm.get('TransportProtocol')?.value) }}</p>
+            }
+          </div>
+        </div>
+
+        @for (field of numericFields; track field.control) {
+          <div class="setting-row">
+            <div class="setting-row__label">
+              <h3><label [attr.for]="inherits(field.control) ? null : field.id">{{ field.label }}</label></h3>
+              <p class="row-desc">{{ field.description }}</p>
+            </div>
+            <div class="setting-row__control">
+              <div class="inherit-field">
+                @if (inherits(field.control)) {
+                  <div class="inherited-value">
+                    <span>{{ settingsForm.get(field.control)?.value }} from Default</span>
+                    <span class="inherited-value__unit">{{ field.unit }}</span>
+                  </div>
+                  <button type="button" class="link-button" [disabled]="!workspaces.canOperate()" (click)="setInherited(field.control, false)">Override</button>
+                } @else {
+                  <div class="input-with-unit">
+                    <input
+                      [id]="field.id"
+                      [formControlName]="field.control"
+                      type="number"
+                      hlmInput
+                      inputmode="numeric"
+                      [placeholder]="field.placeholder"
+                      [min]="field.min"
+                      [max]="field.max"
+                    />
+                    <span>{{ field.unit }}</span>
+                  </div>
+                  @if (!editingDefault) {
+                    <button type="button" class="link-button" [disabled]="!workspaces.canOperate()" (click)="setInherited(field.control, true)">Use Default</button>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <p class="attempt-summary">
+          Each protocol check makes up to <strong>{{ totalAttempts }} {{ totalAttempts === 1 ? 'attempt' : 'attempts' }}</strong>
+          and waits at most <strong>{{ configuredAttemptWindow }}</strong>.
+        </p>
+      }
+    </section>
+
+    @if (editingDefault) {
+      <section class="settings-card settings-list" aria-labelledby="workspace-heading">
+        <div class="group-heading">
+          <h2 id="workspace-heading">Workspace</h2>
+          <p class="row-desc">Applies to every proxy, whatever its tags.</p>
+        </div>
+
+        <div class="setting-row setting-row--switch">
+          <div class="setting-row__label">
+            <h3 id="https-socks-label">Use HTTPS judges for SOCKS</h3>
+            <p class="row-desc">SOCKS4 and SOCKS5 checks go to your HTTPS judges instead of the HTTP ones.</p>
+          </div>
+          <hlm-switch inputId="use-https-for-socks" formControlName="UseHttpsForSocks" aria-labelledby="https-socks-label" />
+        </div>
+
+        <div class="setting-row setting-row--switch">
+          <div class="setting-row__label">
+            <h3 id="failing-proxies-label">Act on failing proxies</h3>
+            <p class="row-desc">
+              {{ settingsForm.get('AutoRemoveFailingProxies')?.value ? 'A successful check resets the count.' : 'Off. Failing proxies stay as they are.' }}
+            </p>
+          </div>
+          <hlm-switch inputId="auto-remove-failing" formControlName="AutoRemoveFailingProxies" aria-labelledby="failing-proxies-label" />
+          @if (settingsForm.get('AutoRemoveFailingProxies')?.value) {
+            <div class="failure-sentence">
+              <label for="failure-threshold">After</label>
+              <input
+                id="failure-threshold"
+                class="failure-sentence__count"
+                formControlName="AutoRemoveFailureThreshold"
+                type="number"
+                hlmInput
+                inputmode="numeric"
+                placeholder="3"
+                min="1"
+                max="255"
+                aria-label="Consecutive failed checks"
+              />
+              <span>failed checks in a row,</span>
+              <app-select
+                inputId="failure-action"
+                class="failure-sentence__action"
+                [options]="failureActionOptions"
+                formControlName="FailureAction"
+                optionLabel="label"
+                optionValue="value"
+              ></app-select>
+              <span>the proxy.</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span class="save-state__dot" [class.is-dirty]="settingsForm.dirty" aria-hidden="true"></span>
+        <p>
+          @if (!workspaces.canOperate()) {
+            Viewer access. You can look at these settings but not change them.
+          } @else if (settingsForm.dirty) {
+            {{ unsavedSummary }}
+          } @else {
+            All changes saved
+          }
+        </p>
+      </div>
+
+      <div class="save-dock__actions">
+        @if (workspaces.canOperate() && settingsForm.dirty) {
+          <button type="button" hlmBtn variant="ghost" class="discard-button" (click)="discardChanges()">Discard</button>
+        }
+        <button
+          type="button"
+          [disabled]="!workspaces.canOperate() || !settingsForm.dirty || settingsForm.invalid || saving() || !settingsLoaded"
+          class="save-settings-button"
+          (click)="onSubmit()"
+          hlmBtn
+          variant="default"
+        >Save checker settings</button>
+      </div>
     </footer>
   </section>
 </fieldset>
