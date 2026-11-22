@@ -132,7 +132,17 @@
                 [disabled]="!workspaces.canOperate()"
                 (click)="toggleProtocol(protocol.control)"
               >
-                <span class="protocol-choice__box" aria-hidden="true">{{ active ? protocolMark : '' }}</span>
+                <span class="protocol-choice__box" aria-hidden="true">
+                  @if (active) {
+                    <svg viewBox="0 0 12 12">
+                      @switch (protocolMark) {
+                        @case ('plus') { <path d="M6 2.5v7M2.5 6h7" /> }
+                        @case ('minus') { <path d="M2.5 6h7" /> }
+                        @default { <path d="M2.75 6.25 5 8.5l4.25-5" /> }
+                      }
+                    </svg>
+                  }
+                </span>
                 <strong>{{ protocol.label }}</strong>
               </button>
             }

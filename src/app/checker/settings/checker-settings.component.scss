@@ -337,9 +337,19 @@ h3 {
   width: 14px;
   height: 14px;
   border: 1px solid var(--ui-line-strong, rgba(255, 255, 255, 0.3));
+  flex-shrink: 0;
   border-radius: var(--ui-check-radius, 3px);
-  font-size: 10px;
-  line-height: 1;
+
+  svg {
+    display: block;
+    width: 10px;
+    height: 10px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+  }
 }
 
 .input-with-unit {

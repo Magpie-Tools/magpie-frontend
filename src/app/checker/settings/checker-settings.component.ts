@@ -102,9 +102,9 @@ export class CheckerSettingsComponent implements OnInit, OnDestroy {
     const mode = this.selectedRule?.get('Mode')?.value;
     return mode === 'replace' ? 'Use only these protocols' : mode === 'add' ? 'Also check these protocols' : mode === 'remove' ? 'Stop checking these protocols' : 'Protocols';
   }
-  get protocolMark(): string {
+  get protocolMark(): 'check' | 'plus' | 'minus' {
     const mode = this.selectedRule?.get('Mode')?.value;
-    return mode === 'remove' ? '−' : mode === 'add' ? '+' : '✓';
+    return mode === 'remove' ? 'minus' : mode === 'add' ? 'plus' : 'check';
   }
   get defaultProtocolList(): string {
     const labels = this.protocolOptions.filter(p => this.settingsForm.get(p.control)?.value).map(p => p.label);
