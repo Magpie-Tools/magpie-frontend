@@ -30,10 +30,38 @@
   }
 }
 
-// The latest-check band spans the panel edge to edge, so it bleeds out of the panel padding.
-.overview-health app-detail-status-banner {
-  --status-banner-inset-block: var(--panel-pad-block);
-  --status-banner-inset-inline: var(--panel-pad-inline);
+// The protocol band spans the panel edge to edge, so it bleeds out of the panel padding.
+.overview-health app-proxy-protocol-health {
+  --protocol-health-inset-block: var(--panel-pad-block);
+  --protocol-health-inset-inline: var(--panel-pad-inline);
+}
+
+.availability-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.chart-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  margin-top: 1rem;
+
+  h3 {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.95rem;
+    font-weight: 590;
+    letter-spacing: -0.025em;
+  }
+
+  span {
+    color: var(--detail-muted);
+    font-size: 0.7rem;
+  }
 }
 
 .range-switch {
@@ -83,7 +111,7 @@
   flex: 1 1 auto;
   align-items: center;
   justify-content: center;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   overflow: hidden;
 
   app-chart {

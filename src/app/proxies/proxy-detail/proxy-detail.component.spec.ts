@@ -80,8 +80,8 @@ describe('ProxyDetailComponent', () => {
     expect(country.country()).toBe('Singapore');
   });
 
-  it('shows an empty latest-check summary before any results exist', () => {
-    const summary = fixture.debugElement.query(By.css('app-detail-status-banner')).nativeElement as HTMLElement;
+  it('shows an empty protocol summary before any results exist', () => {
+    const summary = fixture.debugElement.query(By.css('app-proxy-protocol-health')).nativeElement as HTMLElement;
     expect(summary.textContent).toContain('Not checked');
     expect(summary.textContent).toContain('No check results yet');
   });
@@ -127,12 +127,40 @@ describe('ProxyDetailComponent', () => {
     ]);
     fixture.detectChanges();
 
-    const summary = fixture.debugElement.query(By.css('app-detail-status-banner')).nativeElement as HTMLElement;
+    const summary = fixture.debugElement.query(By.css('app-proxy-protocol-health')).nativeElement as HTMLElement;
+    expect(summary.textContent).toContain('HTTPS');
     expect(summary.textContent).toContain('Dead');
-    expect(summary.dataset['tone']).toBe('bad');
+    expect(summary.querySelectorAll('.protocol-health__cell').length).toBe(1);
     const protocol = fixture.debugElement.queryAll(By.css('.detail-item'))
       .find(item => item.nativeElement.textContent.includes('Check protocol'));
     expect(protocol?.nativeElement.textContent).toContain('HTTPS');
+  });
+
+  it('shows one cell per protocol with its latest result and recent checks', () => {
+    const checkedAt = new Date(Date.now() - 2 * 60_000).toISOString();
+    component.detail.update(detail => detail ? {...detail, protocols: [
+      {protocol: 'http', transport: 'tcp', alive: true, response_time: 1412, attempt: 0, anonymity_level: 'elite', checked_at: checkedAt, recent: [true, false, true]},
+      {protocol: 'socks5', transport: 'quic', alive: false, response_time: 0, attempt: 2, anonymity_level: 'Unknown', checked_at: checkedAt, recent: [true, false]},
+    ]} : detail);
+    fixture.detectChanges();
+
+    const cells = Array.from(fixture.nativeElement.querySelectorAll('.protocol-health__cell')) as HTMLElement[];
+    expect(cells.length).toBe(2);
+    expect(cells[0].textContent).toContain('HTTP');
+    expect(cells[0].textContent).toContain('Alive');
+    expect(cells[0].textContent).toContain('1,412 ms');
+    expect(cells[0].textContent).toMatch(/· \d+ min ago/);
+    expect(cells[1].textContent).toContain('SOCKS5 · QUIC');
+    expect(cells[1].textContent).toContain('Dead');
+    expect(cells[1].querySelector('.protocol-health__state--down')).not.toBeNull();
+
+    // 20 slots, padded with empty ticks before the oldest check.
+    const ticks = Array.from(cells[0].querySelectorAll('.protocol-health__tick')) as HTMLElement[];
+    expect(ticks.length).toBe(20);
+    expect(ticks.slice(0, 17).every(tick => tick.classList.contains('protocol-health__tick--none'))).toBeTrue();
+    expect(ticks.slice(17).map(tick => tick.className.replace('protocol-health__tick protocol-health__tick--', '')))
+      .toEqual(['up', 'down', 'up']);
+    expect(cells[0].querySelector('.protocol-health__ticks')?.getAttribute('aria-label')).toBe('Last 3 checks: 1 failed');
   });
 
   it('should truncate the latest judge and expose the full value in the title', () => {
@@ -239,9 +267,8 @@ describe('ProxyDetailComponent', () => {
     fixture.detectChanges();
 
     expect(component.latestStatistic).toBeNull();
-    const summary = fixture.debugElement.query(By.css('app-detail-status-banner')).nativeElement as HTMLElement;
+    const summary = fixture.debugElement.query(By.css('app-proxy-protocol-health')).nativeElement as HTMLElement;
     expect(summary.textContent).toContain('Not checked');
-    expect(summary.dataset['tone']).toBe('neutral');
   });
 
   it('loads three days of hourly results and reloads when the range changes', () => {

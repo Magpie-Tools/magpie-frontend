@@ -16,6 +16,8 @@ export interface ProxyDetail {
   created_at: string;
   latest_check?: string | null;
   latest_statistic?: ProxyStatistic | null;
+  /** Current result per checked protocol, ordered by protocol. */
+  protocols?: ProxyProtocolHealth[];
   reputation?: ProxyReputationBreakdown | null;
   tags?: ProxyTag[];
   state?: ManagedProxyState;
@@ -31,4 +33,17 @@ export interface ProxyDetail {
         proxy_confidence_score?: number | null; proxy_last_seen: string; proxy_provider_names: string[]};
     };
   };
+}
+
+/** Latest check of one protocol under the workspace's current checker settings. */
+export interface ProxyProtocolHealth {
+  protocol: string;
+  transport?: string;
+  alive: boolean;
+  response_time: number;
+  attempt: number;
+  anonymity_level: string;
+  checked_at: string;
+  /** Verdicts of the latest checks with the same settings, oldest first. */
+  recent: boolean[];
 }
