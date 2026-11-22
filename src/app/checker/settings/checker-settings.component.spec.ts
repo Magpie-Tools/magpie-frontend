@@ -98,16 +98,18 @@ describe('CheckerSettingsComponent', () => {
     expect((fixture.nativeElement.querySelector('fieldset') as HTMLFieldSetElement).disabled).toBeFalse();
   });
 
-  it('keeps the original grouped cards instead of individual protocol forms', () => {
+  it('shows Default as one settings list with the workspace card below it', () => {
     const element = fixture.nativeElement as HTMLElement;
 
-    expect(element.querySelector('.settings-hero')).toBeNull();
-    expect(element.querySelector('.settings-stage > .settings-grid')).not.toBeNull();
-    expect(element.querySelector('.settings-card--protocols')).not.toBeNull();
-    expect(element.querySelectorAll('input[formControlName=Timeout]').length).toBe(1);
-    expect(element.querySelectorAll('input[formControlName=Retries]').length).toBe(1);
+    expect(element.querySelectorAll('.settings-stage > .settings-card').length).toBe(2);
+    expect(element.querySelectorAll('.profile-tab').length).toBe(1);
+    expect(element.querySelector('.profile-tab.is-active')?.textContent?.trim()).toBe('Default');
+    expect(element.querySelectorAll('.protocol-choice').length).toBe(4);
+    expect(element.querySelectorAll('input#timeout').length).toBe(1);
+    expect(element.querySelectorAll('input#retries').length).toBe(1);
     expect(element.querySelectorAll('app-select[formControlName=TransportProtocol]').length).toBe(1);
-    expect(element.querySelector('.rule-priority')).toBeNull();
+    expect(element.querySelectorAll('hlm-switch').length).toBe(2);
+    expect(element.querySelector('.failure-sentence')).toBeNull();
   });
 
   it('normalizes auto-remove threshold before saving', () => {
@@ -186,9 +188,7 @@ describe('CheckerSettingsComponent', () => {
     component.addRule();
     component.selectedRule?.get('Mode')?.setValue('remove');
     component.profileForm.get('SOCKS5Protocol')?.setValue(true);
-    component.onPriorityStateChanged('open');
-    component.movePriority(1, -1);
-    component.applyPriority();
+    component.moveRule(1, 0);
     component.selectedProfile.setValue(1);
     expect(component.profileForm.get('Timeout')?.value).toBe(2000);
     component.selectedProfile.setValue(0);
@@ -269,25 +269,55 @@ describe('CheckerSettingsComponent', () => {
     expect(component.settingsForm.get('Timeout')?.value).toBe(1234);
   });
 
-  it('keeps canceled priority changes out of the saved order', () => {
-    component.selectedProfile.setValue(1); component.addRule();
-    component.selectedProfile.setValue(2); component.addRule();
-    const before = component.serializeProfiles();
-    component.onPriorityStateChanged('open');
-    component.movePriority(0, 1);
-    component.onPriorityStateChanged('closed');
-    expect(component.serializeProfiles()).toEqual(before);
-    component.onPriorityStateChanged('open');
-    expect(component.priorityDraft()).toEqual([1, 2]);
+  it('shows tag rules as tabs in priority order and adds rules only for tags without one', () => {
+    expect(component.tagsWithoutRule.map(tag => tag.id)).toEqual([1, 2]);
+    component.addRuleFor(2);
+    component.addRuleFor(1);
+    fixture.detectChanges();
+    const names = Array.from(fixture.nativeElement.querySelectorAll('.profile-tab') as NodeListOf<HTMLElement>).map(tab => tab.textContent?.trim());
+    expect(names).toEqual(['Default', 'Two', 'One']);
+    expect(component.selectedProfile.value).toBe(1);
+    expect(component.tagsWithoutRule).toEqual([]);
+    expect(fixture.nativeElement.querySelector('.rule-head h2').textContent).toContain('Rule for One');
+    expect(fixture.nativeElement.querySelectorAll('.settings-stage > .settings-card').length).toBe(1);
+  });
+  it('switches rule modes, hides shared settings for Remove and returns to Default after deleting a rule', () => {
+    component.addRuleFor(1);
+    component.setMode('remove');
+    fixture.detectChanges();
+    expect(component.selectedRule?.get('Mode')?.value).toBe('remove');
+    expect(fixture.nativeElement.querySelector('input#timeout')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.setting-row h3').textContent).toContain('Stop checking these protocols');
+    component.removeRule();
+    expect(component.rules.length).toBe(0);
+    expect(component.selectedProfile.value).toBe(0);
+  });
+  it('overrides and resets an inherited transport', () => {
+    component.addRuleFor(1);
+    expect(component.inherits('TransportProtocol')).toBeTrue();
+    component.setInherited('TransportProtocol', false);
+    expect(component.profileForm.get('TransportProtocol')?.value).toBe('tcp');
+    expect(component.serializeProfiles().rules[0].transport).toBe('tcp');
+    component.setInherited('TransportProtocol', true);
+    expect(component.serializeProfiles().rules[0].transport).toBeUndefined();
+  });
+  it('discards unsaved edits and drafted rules', () => {
+    component.settingsForm.patchValue({Timeout: 999});
+    component.settingsForm.get('Timeout')?.markAsDirty();
+    component.addRuleFor(1);
+    expect(component.unsavedSummary).toBe('Unsaved changes to Default and One');
+    component.discardChanges();
+    expect(component.settingsForm.dirty).toBeFalse();
+    expect(component.settingsForm.get('Timeout')?.value).toBe(7500);
+    expect(component.rules.length).toBe(0);
+    expect(component.selectedProfile.value).toBe(0);
   });
   it('applies drag order while preserving profile drafts', () => {
     component.selectedProfile.setValue(1); component.addRule();
     component.profileForm.patchValue({Timeout: 1400, Retries: 0});
     component.selectedProfile.setValue(2); component.addRule();
-    component.onPriorityStateChanged('open');
-    component.dropPriority({previousIndex: 0, currentIndex: 1, isPointerOverContainer: true} as any);
     expect(component.serializeProfiles().rules.map(rule => rule.tag_id)).toEqual([1, 2]);
-    component.applyPriority();
+    component.dropRule({previousIndex: 0, currentIndex: 1, isPointerOverContainer: true} as any);
     expect(component.serializeProfiles().rules.map(rule => rule.tag_id)).toEqual([2, 1]);
     component.selectedProfile.setValue(1);
     expect(component.profileForm.get('Timeout')?.value).toBe(1400);

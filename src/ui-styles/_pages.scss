@@ -121,7 +121,8 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
 
   // Panels whose rows or cells run edge to edge and pad themselves.
   .workspace-card.workspace-strip,
-  .workspace-card.people-card {
+  .workspace-card.people-card,
+  .settings-card.settings-list {
     padding: 0;
   }
 

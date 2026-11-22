@@ -277,6 +277,12 @@ html:root:root:root:root[data-ui="console"] {
     background: rgba(var(--theme-primary-500-rgb), 0.08);
   }
 
+  // A checker tag rule in Remove mode marks the protocols it takes away in red.
+  .protocol-choice.is-active.is-remove {
+    border-color: var(--status-bad-line);
+    background: var(--status-bad-soft);
+  }
+
   .protocol-choice.is-active .protocol-choice__copy strong,
   .decision-row.is-active .decision-row__copy strong {
     color: var(--ui-text);
