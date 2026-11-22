@@ -186,25 +186,12 @@
           <div class="overview-hero">
             <section class="overview-health" aria-labelledby="route-overview-title">
               <h2 id="route-overview-title" class="sr-only">Overview</h2>
-              <app-detail-status-banner
-                [tone]="latest ? (latest.alive ? 'good' : 'bad') : 'neutral'"
-                [label]="latest ? (latest.alive ? 'Alive' : 'Dead') : 'Not checked'"
-                [timestamp]="latest?.created_at"
-                timestampPrefix="Last checked"
-                emptyText="No check results yet"
-              >
-                <div class="range-switch" role="group" aria-label="Time range">
-                  @for (range of availabilityRanges; track range.hours) {
-                    <button
-                      type="button"
-                      class="range-switch__option"
-                      [class.range-switch__option--active]="availabilityRange() === range.hours"
-                      [attr.aria-pressed]="availabilityRange() === range.hours"
-                      (click)="setAvailabilityRange(range.hours)"
-                    >{{ range.label }}</button>
-                  }
-                </div>
-              </app-detail-status-banner>
+              <app-proxy-protocol-health [protocols]="protocolHealth()" />
+
+              <div class="chart-heading">
+                <h3>Response time</h3>
+                <span>Hourly average, all protocols</span>
+              </div>
 
               <div class="mini-chart" aria-label="Average response time per hour">
                 @if (isLoadingStatisticHours()) {
@@ -218,7 +205,20 @@
             </section>
 
             <aside class="overview-availability" aria-labelledby="availability-title">
-              <h2 id="availability-title">Availability</h2>
+              <div class="availability-heading">
+                <h2 id="availability-title">Availability</h2>
+                <div class="range-switch" role="group" aria-label="Time range">
+                  @for (range of availabilityRanges; track range.hours) {
+                    <button
+                      type="button"
+                      class="range-switch__option"
+                      [class.range-switch__option--active]="availabilityRange() === range.hours"
+                      [attr.aria-pressed]="availabilityRange() === range.hours"
+                      (click)="setAvailabilityRange(range.hours)"
+                    >{{ range.label }}</button>
+                  }
+                </div>
+              </div>
               @if (isLoadingStatisticHours() && !availabilityGrid().length) {
                 <div class="availability-loading"><app-loading></app-loading></div>
               } @else {

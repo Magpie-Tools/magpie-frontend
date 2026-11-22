@@ -11,7 +11,7 @@ import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {ProxyDetail} from '../../models/ProxyDetail';
+import {ProxyDetail, ProxyProtocolHealth} from '../../models/ProxyDetail';
 import {ProxyStatistic} from '../../models/ProxyStatistic';
 import {ProxyStatisticHours} from '../../models/ProxyStatisticHour';
 import {ProxyReputation} from '../../models/ProxyReputation';
@@ -27,7 +27,7 @@ import {ProxyTagManagerComponent} from '../../shared/proxy-tag-manager/proxy-tag
 import {WorkspaceService} from '../../services/workspace.service';
 import {ManagedProxyState} from '../../models/Workspace';
 import {BreadcrumbService} from '../../services/breadcrumb.service';
-import {DetailStatusBannerComponent} from '../../shared/detail-status-banner/detail-status-banner.component';
+import {ProxyProtocolHealthComponent} from './protocol-health/proxy-protocol-health.component';
 import {ProxyCheckHistoryComponent} from './check-history/proxy-check-history.component';
 
 type CopyField = 'ip' | 'port' | 'address' | 'username' | 'password' | 'combined' | 'credentialAddress';
@@ -73,7 +73,7 @@ const PAUSE_REASON_LABELS: Record<string, string> = {
     NgClass,
     ProxyTagSelectorComponent,
     ProxyTagManagerComponent,
-    DetailStatusBannerComponent,
+    ProxyProtocolHealthComponent,
   ],
   templateUrl: './proxy-detail.component.html',
   styleUrls: ['./proxy-detail-reputation.component.scss', './proxy-detail.component.scss', './proxy-detail-overview.component.scss']
@@ -88,6 +88,18 @@ export class ProxyDetailComponent implements OnInit, OnDestroy {
   availabilityRange = signal<AvailabilityRange>(72);
   statisticHours = signal<ProxyStatisticHours | null>(null);
   isLoadingStatisticHours = signal(true);
+  /** One entry per checked protocol; an older API without the list falls back to the latest check. */
+  readonly protocolHealth = computed<ProxyProtocolHealth[]>(() => {
+    const protocols = this.detail()?.protocols;
+    if (protocols) {
+      return protocols;
+    }
+    const latest = this.latestStatistic;
+    return latest ? [{
+      protocol: latest.protocol, transport: latest.transport, alive: latest.alive, response_time: latest.response_time,
+      attempt: latest.attempt, anonymity_level: latest.anonymity_level, checked_at: latest.created_at, recent: [],
+    }] : [];
+  });
   readonly responseTimeChart = computed(() => buildProxyHourlyChart(this.statisticHours(), this.availabilityRange(), this.locale));
   readonly availabilityGrid = computed(() => {
     const data = this.statisticHours();
