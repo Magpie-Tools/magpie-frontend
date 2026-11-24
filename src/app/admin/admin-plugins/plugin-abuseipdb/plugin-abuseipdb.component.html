@@ -1,152 +1,139 @@
-<div class="plugin-abuseipdb-page">
+<div class="plugin-page">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="settings-stage">
-    <header class="admin-context">
-      <div class="admin-context__copy">
-        <a routerLink="/plugins" class="back-link" aria-label="Back to plugins"
-          ><i class="icon icon-arrow-left" aria-hidden="true"></i
-        ></a>
-        <span class="plugin-mark"
-          ><img
-            src="https://www.google.com/s2/favicons?domain=abuseipdb.com&amp;sz=64"
-            alt="AbuseIPDB logo"
+    <a routerLink="/plugins" class="plugin-back"
+      ><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2.5 4 6l3.5 3.5" /></svg>Plugins</a
+    >
+    <header class="admin-context plugin-context">
+      <div class="plugin-identity">
+        <span class="plugin-logo"
+          ><img src="https://www.google.com/s2/favicons?domain=abuseipdb.com&amp;sz=64" alt=""
         /></span>
-        <div>
+        <div class="plugin-title">
           <h1>AbuseIPDB</h1>
-          <p>
-            Use community abuse reports to strengthen every proxy reputation
-            score.
-          </p>
+          @if (saved()) {
+            <span class="state-pill" [class.is-bad]="state().tone === 'bad'">
+              <span class="state-dot" [class.is-good]="state().tone === 'good'" [class.is-bad]="state().tone === 'bad'" aria-hidden="true"></span>
+              {{ state().label }}
+            </span>
+          }
         </div>
       </div>
-
-      <label class="master-toggle" for="abuseipdb-enabled">
-        <span
-          ><strong>{{ pluginEnabled() ? "Enabled" : "Disabled" }}</strong
-          ><small>Abuse intelligence</small></span
-        >
-        <hlm-switch
-          inputId="abuseipdb-enabled"
-          formControlName="enabled"
-          aria-label="Toggle AbuseIPDB plugin"
-        />
+      <label class="enabled-toggle" for="abuseipdb-enabled">
+        {{ enabled ? "Enabled" : "Disabled" }}
+        <hlm-switch inputId="abuseipdb-enabled" formControlName="enabled" aria-label="Enable AbuseIPDB" />
       </label>
     </header>
 
-    <div class="settings-grid" [class.plugin-disabled]="!pluginEnabled()">
-      <section class="settings-card settings-card--access">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-key" aria-hidden="true"></i
-          ></span>
-          <div>
-            <h2>API settings</h2>
-            <p>
-              Connect the v2 API and define how far back reports should
-              influence a proxy.
+    <section class="settings-card settings-list" aria-label="AbuseIPDB status">
+      <dl class="status-strip">
+        <div class="status-cell status-cell--lead">
+          <dt>Requests left today</dt>
+          <dd>
+            @if (quotaLimit(); as limit) {
+              {{ quotaRemaining() | number }} <small>/ {{ limit | number }}</small>
+            } @else {
+              <span title="The quota appears after the first check">—</span>
+            }
+          </dd>
+          @if (quotaLimit()) {
+            <div
+              class="plugin-meter"
+              [class.is-full]="quotaUsedPercent() >= 100"
+              role="progressbar"
+              aria-label="Daily requests used"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-valuenow]="quotaUsedPercent()"
+            ><span [style.width.%]="quotaUsedPercent()"></span></div>
+          }
+        </div>
+        <div class="status-cell">
+          <dt>Quota resets</dt>
+          <dd>{{ quotaResetLabel() }}</dd>
+        </div>
+        <div class="status-cell">
+          <dt>Last API check</dt>
+          <dd>{{ lastCheckedLabel() }}</dd>
+        </div>
+      </dl>
+      @if (saved() && !saved()!.enabled) {
+        <p class="strip-note">Reputation scores are calculated without abuse reports.</p>
+      } @else if (lastError()) {
+        <p class="strip-note is-bad" role="alert"><strong>Latest check failed.</strong> {{ lastError() }}</p>
+      }
+    </section>
+
+    <section class="settings-card settings-list" aria-label="AbuseIPDB settings">
+      <div class="form-section">
+        <header>
+          <h2>Access</h2>
+          <p class="section-desc">Your AbuseIPDB account.</p>
+        </header>
+        <div class="form-fields">
+          <div class="form-field is-wide" [class.is-invalid]="missingKey">
+            <label for="abuseipdb-api-key">API key</label>
+            <app-password
+              inputId="abuseipdb-api-key"
+              formControlName="api_key"
+              autocomplete="off"
+              placeholder="Enter your API key"
+              showLabel="Show AbuseIPDB API key"
+              hideLabel="Hide AbuseIPDB API key"
+            />
+            @if (missingKey) {
+              <p class="field-hint is-bad">Required while AbuseIPDB is on.</p>
+            } @else {
+              <p class="field-hint">Used only for IP check requests.</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <header>
+          <h2>Limits</h2>
+          <p class="section-desc">How far back abuse reports count.</p>
+        </header>
+        <div class="form-fields">
+          <div class="form-field" [class.is-invalid]="form.get('max_age_in_days')?.invalid">
+            <label for="abuseipdb-max-age">Report max age</label>
+            <div class="input-with-unit">
+              <input
+                hlmInput
+                id="abuseipdb-max-age"
+                type="number"
+                inputmode="numeric"
+                formControlName="max_age_in_days"
+                min="1"
+                max="365"
+              />
+              <span>days</span>
+            </div>
+            <p class="field-hint" [class.is-bad]="form.get('max_age_in_days')?.invalid">
+              {{ form.get('max_age_in_days')?.invalid ? "Enter 1 to 365 days." : "Reports older than this are ignored." }}
             </p>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="field-group">
-          <label for="abuseipdb-api-key">AbuseIPDB API key</label>
-          <app-password
-            inputId="abuseipdb-api-key"
-            formControlName="api_key"
-            autocomplete="off"
-            placeholder="Enter your API key"
-            showLabel="Show AbuseIPDB API key"
-            hideLabel="Hide AbuseIPDB API key"
-          />
-          <small>The key is used only for IP check requests.</small>
-        </div>
-
-        <div class="age-policy">
-          <span class="age-policy__icon"
-            ><i class="icon icon-history" aria-hidden="true"></i
-          ></span>
-          <div class="age-policy__copy">
-            <strong>Report max age</strong
-            ><small>Ignore reports older than this window.</small>
-          </div>
-          <input
-            hlmInput
-            type="number"
-            formControlName="max_age_in_days"
-            [min]="1"
-            [max]="365"
-            id="abuseipdb-max-age"
-          />
-        </div>
-      </section>
-
-      <section class="settings-card settings-card--quota">
-        <div class="card-heading card-heading--with-badge">
-          <span class="card-icon"
-            ><i class="icon icon-chart-no-axes-column" aria-hidden="true"></i
-          ></span>
-          <div>
-            <h2>Daily API quota</h2>
-            <p>
-              Magpie reads rate-limit headers and spreads checks across the
-              reset window.
-            </p>
-          </div>
-          <span class="quota-badge">{{ quotaDisplay() }}</span>
-        </div>
-
-        <div
-          class="quota-visual"
-          [attr.aria-label]="quotaUsagePercent() + '% of daily quota used'"
-        >
-          <div class="quota-scale">
-            <span [style.width.%]="quotaUsagePercent()"></span>
-          </div>
-          <div class="quota-legend">
-            <span>{{ quotaUsagePercent() }}% used</span
-            ><strong>{{ quotaRemaining() ?? "Unknown" }} remaining</strong>
-          </div>
-        </div>
-
-        <div class="meta-grid">
-          <div class="meta-card">
-            <span class="meta-icon"
-              ><i class="icon icon-clock" aria-hidden="true"></i
-            ></span>
-            <div>
-              <small>Quota resets</small
-              ><strong>{{ quotaResetLabel() }}</strong>
-            </div>
-          </div>
-          <div class="meta-card">
-            <span class="meta-icon"
-              ><i class="icon icon-badge-check" aria-hidden="true"></i
-            ></span>
-            <div>
-              <small>Last API check</small
-              ><strong>{{ lastCheckedLabel() }}</strong>
-            </div>
-          </div>
-        </div>
-
-        @if (lastError()) {
-          <div class="error-note" role="alert">
-            <i class="icon icon-triangle-alert" aria-hidden="true"></i>
-            <div>
-              <strong>Latest check failed</strong><span>{{ lastError() }}</span>
-            </div>
-          </div>
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span class="save-state__dot" [class.is-dirty]="form.dirty" aria-hidden="true"></span>
+        <p>{{ form.dirty ? unsavedSummary : "All changes saved" }}</p>
+      </div>
+      <div class="save-dock__actions">
+        @if (form.dirty) {
+          <button type="button" hlmBtn variant="ghost" (click)="discardChanges()">Discard</button>
         }
-      </section>
-    </div>
-
-    <app-admin-settings-save-dock
-      [dirty]="form.dirty"
-      [invalid]="form.invalid"
-      dirtyTitle="Unsaved AbuseIPDB changes"
-      dirtyDescription="New credentials and report policy apply after saving."
-      pristineTitle="AbuseIPDB is up to date"
-      pristineDescription="Quota health refreshes automatically every hour."
-      saveLabel="Save AbuseIPDB settings"
-    ></app-admin-settings-save-dock>
+        <button
+          type="submit"
+          hlmBtn
+          variant="default"
+          class="save-settings-button"
+          [disabled]="!form.dirty || form.invalid || saving()"
+        >Save AbuseIPDB settings</button>
+      </div>
+    </footer>
   </form>
 </div>

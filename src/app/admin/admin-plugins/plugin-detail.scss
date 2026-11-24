@@ -1,0 +1,465 @@
+// Plugin detail pages (GeoLite, AbuseIPDB, IPGeolocation.io): a header with a state pill and
+// the on/off switch, a strip of status figures, and one form card grouped into sections with
+// labels above the fields. Colours, radii and control heights come from the console skin
+// tokens (src/ui-styles), so these pages match Checker settings.
+
+:host {
+  display: block;
+  color: var(--ui-text, #f7f5f7);
+  font-family: var(--ui-font, "Geist Variable", "Segoe UI", sans-serif);
+}
+
+.plugin-page {
+  width: 100%;
+  min-width: 0;
+  container: plugin-detail / inline-size;
+}
+
+.settings-stage {
+  --row-line: var(--ui-line-soft, rgba(255, 255, 255, 0.08));
+  --row-pad-x: var(--ui-pad-x, 20px);
+  --muted: var(--ui-text-3, rgba(222, 215, 222, 0.59));
+  --control-h: var(--ui-control-h, 34px);
+  position: relative;
+  width: min(100%, 1180px);
+  margin: 0 auto;
+}
+
+/* ---------- header ---------- */
+
+.plugin-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: var(--ui-fs-sm, 13px);
+  text-decoration: none;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+  }
+
+  &:hover { color: var(--ui-text, #fff); }
+
+  &:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: 2px;
+  }
+}
+
+.plugin-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+.plugin-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.plugin-title {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+
+  h1 { margin: 0; overflow-wrap: anywhere; }
+}
+
+.plugin-logo {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ui-radius-sm, 6px);
+  background: #fafafa;
+
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+}
+
+.state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 9px 3px 8px;
+  border: 1px solid var(--ui-line-strong, rgba(255, 255, 255, 0.16));
+  border-radius: 999px;
+  color: var(--ui-text-2, rgba(255, 255, 255, 0.7));
+  font-size: var(--ui-fs-xs, 12px);
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.is-bad {
+    border-color: var(--status-bad-line);
+    color: var(--status-bad-fg);
+  }
+}
+
+.state-dot {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ui-line-strong, rgba(255, 255, 255, 0.25));
+
+  &.is-good { background: var(--status-good); }
+  &.is-bad { background: var(--status-bad); }
+}
+
+.enabled-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  color: var(--ui-text-2, rgba(255, 255, 255, 0.7));
+  font-size: var(--ui-fs-sm, 13px);
+  cursor: pointer;
+}
+
+/* ---------- status strip ---------- */
+
+.settings-card + .settings-card { margin-top: var(--ui-gap, 16px); }
+
+.status-strip {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  margin: 0;
+}
+
+.status-cell {
+  min-width: 0;
+  margin: 0;
+  padding: 14px 18px;
+
+  & + & { border-left: 1px solid var(--row-line); }
+
+  dt {
+    color: var(--muted);
+    font-size: var(--ui-fs-xs, 12px);
+  }
+
+  dd {
+    margin: 4px 0 0;
+    overflow: hidden;
+    color: var(--ui-text-2, rgba(255, 255, 255, 0.75));
+    font-size: var(--ui-fs, 14px);
+    font-variant-numeric: tabular-nums;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.status-cell--lead dd {
+  color: var(--ui-text, #fff);
+  font-size: 15px;
+  font-weight: 500;
+
+  small {
+    color: var(--muted);
+    font-size: var(--ui-fs-sm, 13px);
+    font-weight: 400;
+  }
+}
+
+.plugin-meter {
+  height: 6px;
+  margin-top: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ui-hover, rgba(255, 255, 255, 0.08));
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--theme-primary-400);
+    transition: width 0.3s ease;
+  }
+
+  &.is-full span { background: var(--status-bad); }
+}
+
+.strip-note {
+  margin: 0;
+  padding: 10px 18px;
+  border-top: 1px solid var(--row-line);
+  color: var(--muted);
+  font-size: var(--ui-fs-sm, 13px);
+  line-height: 1.45;
+
+  strong {
+    color: var(--ui-text, #fff);
+    font-weight: 500;
+  }
+
+  &.is-bad {
+    border-top-color: var(--status-bad-line);
+    background: var(--status-bad-soft);
+    color: var(--status-bad-fg);
+  }
+}
+
+.strip-help {
+  padding: 10px 18px 12px;
+  border-top: 1px solid var(--row-line);
+  color: var(--muted);
+  font-size: var(--ui-fs-sm, 13px);
+  line-height: 1.55;
+
+  summary {
+    width: fit-content;
+    color: var(--ui-text-2, rgba(255, 255, 255, 0.75));
+    cursor: pointer;
+  }
+
+  summary:focus-visible {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: 2px;
+  }
+
+  p { margin: 8px 0 0; }
+}
+
+/* ---------- form sections ---------- */
+
+.form-section {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 24px;
+  padding: 18px var(--row-pad-x);
+
+  & + & { border-top: 1px solid var(--row-line); }
+
+  > header h2 {
+    margin: 0;
+    color: var(--ui-text, #fff);
+    font-size: var(--ui-fs, 14px);
+    font-weight: 600;
+  }
+}
+
+.section-desc {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: var(--ui-fs-sm, 13px);
+  line-height: 1.45;
+}
+
+.form-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 40rem;
+}
+
+.form-field {
+  min-width: 0;
+
+  &.is-wide { grid-column: 1 / -1; }
+  &.is-muted { opacity: 0.45; }
+
+  > label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--ui-text, #fff);
+    font-size: var(--ui-fs-sm, 13px);
+    font-weight: 500;
+  }
+}
+
+.field-hint {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: var(--ui-fs-xs, 12px);
+  line-height: 1.45;
+
+  // The skin colours .field-hint with a far more specific selector.
+  &.is-bad { color: var(--status-bad-text) !important; }
+}
+
+.provider-link {
+  color: var(--ui-accent, var(--theme-primary-300));
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}
+
+// A switch with its explanation, framed like an inset row.
+.check-row {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: var(--ui-radius-sm, 6px);
+  background: var(--ui-inset, rgba(255, 255, 255, 0.02));
+  cursor: pointer;
+
+  strong {
+    display: block;
+    color: var(--ui-text, #fff);
+    font-size: var(--ui-fs-sm, 13px);
+    font-weight: 500;
+  }
+
+  hlm-switch { flex-shrink: 0; margin-top: 1px; }
+}
+
+.check-row__desc {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: var(--ui-fs-xs, 12px);
+  line-height: 1.45;
+}
+
+.interval-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.input-with-unit {
+  display: flex;
+  min-width: 0;
+  align-items: stretch;
+  overflow: hidden;
+
+  input {
+    width: 100%;
+    min-width: 0;
+    padding: 0 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  > span {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    padding: 0 11px;
+    border-left: 1px solid var(--ui-line-strong, rgba(255, 255, 255, 0.1));
+    color: var(--muted);
+    font-size: var(--ui-fs-xs, 12px);
+    white-space: nowrap;
+  }
+}
+
+// The skin's field rule is far more specific than a component selector, so the red border
+// needs !important. ::ng-deep reaches the input inside app-password.
+.is-invalid ::ng-deep app-password [hlmInput],
+.is-invalid .input-with-unit,
+.input-with-unit.is-invalid {
+  border-color: var(--status-bad-line) !important;
+}
+
+/* ---------- save dock (the skin draws the frame) ---------- */
+
+.save-dock {
+  position: sticky;
+  z-index: 6;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: var(--ui-gap, 16px);
+}
+
+.save-state {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+
+  p {
+    margin: 0;
+    color: var(--ui-text-2, rgba(255, 255, 255, 0.7));
+    font-size: var(--ui-fs-sm, 13px);
+  }
+
+  // The skin colours .save-state p with a far more specific selector.
+  &.is-blocked p { color: var(--status-bad-text) !important; }
+}
+
+.save-state__dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ui-line-strong, rgba(255, 255, 255, 0.25));
+
+  &.is-dirty { background: var(--theme-primary-300); }
+}
+
+.save-dock__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- narrow layouts ---------- */
+
+@container plugin-detail (max-width: 640px) {
+  .settings-stage { --row-pad-x: 16px; }
+
+  .plugin-context { flex-wrap: wrap; }
+
+  // The lead figure gets its own line; the rest sit two to a row.
+  .status-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+  }
+
+  .status-cell { border-top: 1px solid var(--row-line); }
+  .status-cell + .status-cell { border-left: 0; }
+  .status-cell:nth-child(odd):not(:first-child) { border-left: 1px solid var(--row-line); }
+
+  .status-cell--lead {
+    grid-column: 1 / -1;
+    border-top: 0;
+  }
+
+  .form-section {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px var(--row-pad-x);
+  }
+
+  .section-desc { display: none; }
+  .form-fields { grid-template-columns: minmax(0, 1fr); }
+  .interval-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .save-dock { flex-wrap: wrap; }
+
+  .save-dock__actions {
+    width: 100%;
+
+    .save-settings-button { flex: 1; justify-content: center; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plugin-meter span { transition-duration: 0.01ms !important; }
+}
