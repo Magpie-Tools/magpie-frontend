@@ -1,171 +1,335 @@
+// Global blacklist: two settings-list cards, one per list, with entries as flat editable
+// lines that run edge to edge. Colours, radii and control heights come from the console
+// skin tokens (src/ui-styles), matching the checker settings page.
+
 .admin-blacklist-page {
   container: admin-blacklist / inline-size;
 }
 
-.settings-card--cadence { grid-column: 1 / -1; }
-.settings-card--sources,
-.settings-card--websites { grid-column: span 6; }
-
-.cadence-summary {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  margin-top: 1.55rem;
-  padding: 0.85rem 0.95rem;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.025);
-
-  span { color: rgba(255, 255, 255, 0.62); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.08em; }
-  strong { color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; font-weight: 580; }
+.settings-stage {
+  --row-line: var(--ui-line-soft, rgba(255, 255, 255, 0.08));
+  --row-pad-x: var(--ui-pad-x, 20px);
+  --muted: var(--ui-text-3, rgba(222, 215, 222, 0.59));
 }
 
-.timer-grid {
-  position: relative;
-  z-index: 2;
+.blacklist-cards {
+  > .settings-card { container: blacklist-card / inline-size; }
+
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--ui-gap, 16px);
 }
 
-.timer-field,
-.field-group {
+h2 {
+  margin: 0;
+  color: var(--ui-text, #fff);
+  font-family: var(--ui-title-font, inherit);
+  font-size: var(--ui-title-fs, 16px);
+  font-weight: var(--ui-title-weight, 600);
+  letter-spacing: var(--ui-title-tracking, -0.01em);
+}
+
+h3 {
+  margin: 0;
+  color: var(--ui-text, #fff);
+  font-size: var(--ui-fs, 14px);
+  font-weight: 500;
+}
+
+.row-desc {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: var(--ui-fs-sm, 13px);
+  line-height: 1.45;
+}
+
+code {
+  color: var(--ui-text-2, rgba(255, 255, 255, 0.75));
+  font-family: var(--ui-font-mono, monospace);
+  font-size: var(--ui-fs-xs, 12px);
+}
+
+.list-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px var(--row-pad-x);
+  border-bottom: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+}
+
+.entry-total {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: var(--ui-fs-xs, 12px);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 16px var(--row-pad-x);
+  border-bottom: 1px solid var(--row-line);
+}
+
+.duration-fields {
+  display: grid;
+  grid-template-columns: repeat(4, 4.4rem);
+  gap: 6px;
+}
+
+.input-with-unit {
   display: flex;
   min-width: 0;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+  align-items: stretch;
+  overflow: hidden;
 
-.timer-field label,
-.field-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.42rem;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 0.8125rem;
-  font-weight: 560;
-}
+  input {
+    width: 100%;
+    min-width: 0;
+    padding: 0 10px;
+    font-variant-numeric: tabular-nums;
+    -moz-appearance: textfield;
 
-.entry-editor {
-  position: relative;
-  z-index: 1;
-  margin-top: 1.55rem;
-}
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      margin: 0;
+      -webkit-appearance: none;
+    }
+  }
 
-.entry-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  // Leave room inside the scroll area for the first row's hover/focus lift.
-  padding-top: 2px;
-}
-
-.entry-row {
-  display: grid;
-  flex-shrink: 0;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 0.8rem;
-  padding: 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 0.95rem;
-  background: rgba(255, 255, 255, 0.025);
-  transition: border-color 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
-
-  &:hover,
-  &:focus-within {
-    border-color: rgba(var(--theme-primary-300-rgb), 0.28);
-    background: rgba(var(--theme-primary-500-rgb), 0.045);
-    transform: translateY(-2px);
+  > span {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    padding: 0 9px;
+    border-left: 1px solid var(--ui-line-strong, rgba(255, 255, 255, 0.1));
+    color: var(--muted);
+    font-size: var(--ui-fs-xs, 12px);
   }
 }
 
-.entry-index {
-  display: inline-flex;
-  align-self: center;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 0.65rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.8125rem;
-}
+.duration-error { grid-column: 1 / -1; }
 
-.icon-button,
-.add-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.65);
-  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
-}
-
-.icon-button {
-  width: 2.55rem;
-  height: 2.55rem;
-  border-radius: 0.78rem;
-  background: rgba(255, 255, 255, 0.035);
-}
-
-.icon-button--remove {
-  color: #f2a3a3;
-  &:hover { border-color: color-mix(in srgb, var(--status-bad) 45%, transparent); background: rgba(127, 29, 29, 0.18); transform: translateY(-2px); }
-}
-
-.add-button {
-  gap: 0.45rem;
-  margin-top: 0.8rem;
-  padding: 0.62rem 0.9rem;
-  border-color: rgba(var(--theme-primary-300-rgb), 0.25);
-  border-radius: 0.78rem;
-  background: rgba(var(--theme-primary-500-rgb), 0.07);
-  color: var(--theme-primary-200);
-  font-size: 0.8125rem;
-  font-weight: 570;
-
-  &:hover { border-color: rgba(var(--theme-primary-300-rgb), 0.5); background: rgba(var(--theme-primary-500-rgb), 0.13); transform: translateY(-2px); }
-}
-
-.entry-note,
-.entry-notes {
-  margin: 0.75rem 0 0;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-
-.entry-notes {
+.list-label {
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding-left: 1rem;
-  list-style: disc;
-
-  li::marker { color: var(--ui-text-3, rgba(255, 255, 255, 0.4)); }
-  code { color: var(--ui-text-2, rgba(255, 255, 255, 0.75)); font-family: var(--ui-font-mono, monospace); font-size: 0.72rem; }
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px var(--row-pad-x) 6px;
 }
 
-@container admin-blacklist (max-width: 760px) {
-  .settings-card--sources,
-  .settings-card--websites { grid-column: 1 / -1; }
-  .timer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+// The website card has no interval row, so its label row only holds the problem count.
+.list-label--plain {
+  justify-content: flex-end;
+  min-height: 8px;
+  padding-top: 8px;
+  padding-bottom: 0;
+
+  &:not(:empty) { padding-bottom: 6px; }
+}
+
+.entry-list {
+  margin: 0;
+  padding: 0 0 4px;
+  list-style: none;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 8px;
+  padding: 2px calc(var(--row-pad-x) - 8px) 2px calc(var(--row-pad-x) - 9px);
+
+  &:hover { background: var(--ui-row-hover, rgba(255, 255, 255, 0.03)); }
+}
+
+// An entry reads as text until it is hovered or focused, then it shows its field frame.
+.entry-input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-sm, 6px);
+  outline: 0;
+  background: transparent;
+  color: var(--ui-text, #fff);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: var(--ui-fs-sm, 13px);
+  text-overflow: ellipsis;
+
+  &:hover { border-color: var(--ui-line-strong, rgba(255, 255, 255, 0.16)); }
+
+  &:focus {
+    border-color: var(--theme-primary-400);
+    background: var(--ui-inset, rgba(255, 255, 255, 0.03));
+  }
+
+  &:disabled { opacity: 0.6; }
+}
+
+.entry.has-error .entry-input {
+  border-color: var(--status-bad-line);
+  color: var(--status-bad-fg);
+}
+
+.entry > .entry-error {
+  grid-column: 1;
+  padding: 0 9px 6px;
+}
+
+.remove-entry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-sm, 6px);
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--status-bad-soft);
+    color: var(--status-bad-fg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-primary-300);
+    outline-offset: -2px;
+  }
+}
+
+.entry-error {
+  color: var(--status-bad-text);
+  font-size: var(--ui-fs-xs, 12px);
+}
+
+.entry-empty {
+  margin: 4px var(--row-pad-x);
+  padding: 14px;
+  border: 1px dashed var(--ui-line-strong, rgba(255, 255, 255, 0.16));
+  border-radius: var(--ui-radius-sm, 6px);
+  color: var(--muted);
+  font-size: var(--ui-fs-sm, 13px);
+}
+
+.add-entry {
+  display: flex;
+  gap: 8px;
+  padding: 10px var(--row-pad-x) 16px;
+
+  // A plain input styled as a field, so the skin's field font does not replace the mono face.
+  .add-entry__input {
+    flex: 1;
+    min-width: 0;
+    min-height: var(--ui-control-h, 34px);
+    padding: 0 12px;
+    border: 1px solid var(--ui-line-strong, rgba(255, 255, 255, 0.16));
+    border-radius: var(--ui-radius-sm, 6px);
+    outline: 0;
+    background: var(--ui-field-bg, rgba(255, 255, 255, 0.03));
+    color: var(--ui-text, #fff);
+    font-family: var(--ui-font-mono, monospace);
+    font-size: var(--ui-fs-sm, 13px);
+
+    &::placeholder { color: var(--muted); }
+
+    &:focus {
+      border-color: var(--theme-primary-400);
+      box-shadow: 0 0 0 1px var(--theme-primary-400);
+    }
+  }
+
+  [hlmBtn] { flex-shrink: 0; }
+}
+
+.list-notes {
+  padding: 12px var(--row-pad-x) 14px;
+  border-top: 1px solid var(--row-line);
+  color: var(--muted);
+  font-size: var(--ui-fs-sm, 13px);
+  line-height: 1.45;
+
+  p { margin: 0; }
+  p + p { margin-top: 4px; }
+}
+
+/* ---------- save dock (the skin draws the frame) ---------- */
+
+.save-dock {
+  position: sticky;
+  z-index: 6;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: var(--ui-gap, 16px);
+}
+
+.save-state {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+
+  p {
+    margin: 0;
+    color: var(--ui-text-2, rgba(255, 255, 255, 0.7));
+    font-size: var(--ui-fs-sm, 13px);
+  }
+}
+
+.save-state__dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ui-line-strong, rgba(255, 255, 255, 0.25));
+
+  &.is-dirty { background: var(--theme-primary-300); }
+  &.has-problems { background: var(--status-bad); }
+}
+
+.save-dock__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- narrow layouts ---------- */
+
+// Two cards side by side on a mid-width page leave too little room beside the interval fields.
+@container blacklist-card (max-width: 560px) {
+  .setting-row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+}
+
+@container admin-blacklist (max-width: 900px) {
+  .blacklist-cards { grid-template-columns: minmax(0, 1fr); }
 }
 
 @container admin-blacklist (max-width: 520px) {
-  .timer-grid { grid-template-columns: minmax(0, 1fr); }
-  .entry-row { grid-template-columns: minmax(0, 1fr) auto; }
-  .entry-index { display: none; }
-  .icon-button { grid-column: 2; }
-}
+  .settings-stage { --row-pad-x: 16px; }
 
-@media (prefers-reduced-motion: reduce) {
-  .entry-row,
-  .add-button,
-  .icon-button { transition-duration: 0.01ms !important; }
+  .duration-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  .save-dock { flex-wrap: wrap; }
+
+  .save-dock__actions {
+    width: 100%;
+
+    .save-settings-button { flex: 1; justify-content: center; }
+  }
 }
