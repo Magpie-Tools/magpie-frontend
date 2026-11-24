@@ -8,9 +8,13 @@ import {Component, Input} from '@angular/core';
       <div class="admin-context__copy">
         <span class="context-icon"><i [class]="icon" aria-hidden="true"></i></span>
         <div>
-          <span class="context-eyebrow">{{ eyebrow }}</span>
+          @if (eyebrow) {
+            <span class="context-eyebrow">{{ eyebrow }}</span>
+          }
           <h1>{{ title }}</h1>
-          <p>{{ description }}</p>
+          @if (description) {
+            <p>{{ description }}</p>
+          }
         </div>
       </div>
     </header>

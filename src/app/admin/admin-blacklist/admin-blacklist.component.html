@@ -6,193 +6,191 @@
       description=""
     ></app-admin-settings-header>
 
-    <div class="settings-grid">
-      <section class="settings-card settings-card--cadence">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-clock" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2>Blacklist refresh interval</h2>
+    <div class="blacklist-cards">
+      <section class="settings-card settings-list" aria-labelledby="sources-heading">
+        <header class="list-card-head">
+          <div>
+            <h2 id="sources-heading">IP blacklist sources</h2>
+            <p class="row-desc">Plain-text lists of IPv4, IPv6, or CIDR entries. Proxies on these lists are removed from every workspace.</p>
           </div>
+          <span class="entry-total">{{ sources.length }} {{ sources.length === 1 ? 'source' : 'sources' }}</span>
+        </header>
+
+        <div class="setting-row" formGroupName="blacklist_timer">
+          <div class="setting-row__label">
+            <h3 id="refresh-interval-label">Refresh interval</h3>
+            <p class="row-desc">{{ refreshIntervalSummary }}</p>
+          </div>
+          <div class="duration-fields" role="group" aria-labelledby="refresh-interval-label">
+            @for (unit of timerUnits; track unit.control) {
+              <label class="input-with-unit">
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  [max]="unit.max"
+                  [formControlName]="unit.control"
+                  [attr.aria-label]="unit.label"
+                />
+                <span aria-hidden="true">{{ unit.short }}</span>
+              </label>
+            }
+          </div>
+          @if (form.get('blacklist_timer')?.invalid) {
+            <p class="entry-error duration-error">Use up to 30 days, 23 hours, 59 minutes, and 59 seconds.</p>
+          }
         </div>
 
-        <div class="cadence-summary">
-          <span>Every</span><strong>{{ blacklistCadenceLabel }}</strong>
+        <div class="list-label">
+          <h3>Sources</h3>
+          @if (issues.sourceCount) {
+            <span class="entry-error">{{ issues.sourceCount }} {{ issues.sourceCount === 1 ? 'problem' : 'problems' }}</span>
+          }
         </div>
 
-        <div class="timer-grid" formGroupName="blacklist_timer">
-          <div class="timer-field">
-            <label for="blacklist-days">Days</label>
-            <app-select
-              inputId="blacklist-days"
-              [options]="daysList"
-              formControlName="days"
-              optionLabel="label"
-              optionValue="value"
-            ></app-select>
-          </div>
-          <div class="timer-field">
-            <label for="blacklist-hours">Hours</label>
-            <app-select
-              inputId="blacklist-hours"
-              [options]="hoursList"
-              formControlName="hours"
-              optionLabel="label"
-              optionValue="value"
-            ></app-select>
-          </div>
-          <div class="timer-field">
-            <label for="blacklist-minutes">Minutes</label>
-            <app-select
-              inputId="blacklist-minutes"
-              [options]="minutesList"
-              formControlName="minutes"
-              optionLabel="label"
-              optionValue="value"
-            ></app-select>
-          </div>
-          <div class="timer-field">
-            <label for="blacklist-seconds">Seconds</label>
-            <app-select
-              inputId="blacklist-seconds"
-              [options]="secondsList"
-              formControlName="seconds"
-              optionLabel="label"
-              optionValue="value"
-            ></app-select>
-          </div>
-        </div>
-      </section>
-
-      <section class="settings-card settings-card--sources">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-cloud-download" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2>IP blacklist sources</h2>
-            <p>Add plain-text feeds containing IPv4, IPv6, or CIDR entries.</p>
-          </div>
-        </div>
-
-        <div formArrayName="blacklist_sources" class="entry-editor">
-          <div class="entry-list" [appVisibleRows]="4.5">
+        @if (sources.length) {
+          <ul class="entry-list" formArrayName="blacklist_sources" [appVisibleRows]="9.5">
             @for (source of sources.controls; track source; let i = $index) {
-              <div class="entry-row" [attr.data-index]="i">
-                <span class="entry-index">{{ i + 1 }}</span>
-                <div class="field-group">
-                  <label class="field-label" for="blacklist-source-{{ i }}"
-                    >Source URL</label
-                  >
-                  <input
-                    id="blacklist-source-{{ i }}"
-                    type="url"
-                    [formControlName]="i"
-                    hlmInput
-                    placeholder="https://example.com/drop.txt"
-                  />
-                </div>
-                @if (sources.length > 1) {
-                  <button
-                    type="button"
-                    class="icon-button icon-button--remove"
-                    (click)="removeSource(i)"
-                    [attr.aria-label]="'Remove blacklist source ' + (i + 1)"
-                  >
-                    <i class="icon icon-trash" aria-hidden="true"></i>
-                  </button>
+              <li class="entry" [class.has-error]="issues.sources[i]">
+                <input
+                  id="blacklist-source-{{ i }}"
+                  type="url"
+                  class="entry-input"
+                  [formControlName]="i"
+                  spellcheck="false"
+                  autocomplete="off"
+                  [attr.aria-label]="'IP blacklist source ' + (i + 1)"
+                  [attr.aria-invalid]="!!issues.sources[i]"
+                  [attr.aria-describedby]="issues.sources[i] ? 'blacklist-source-error-' + i : null"
+                />
+                <button
+                  type="button"
+                  class="remove-entry"
+                  (click)="removeSource(i)"
+                  [attr.aria-label]="'Remove IP blacklist source ' + (i + 1)"
+                ><i class="icon icon-x" aria-hidden="true"></i></button>
+                @if (issues.sources[i]; as problem) {
+                  <span class="entry-error" id="blacklist-source-error-{{ i }}">{{ problem }}</span>
                 }
-              </div>
+              </li>
             }
-          </div>
+          </ul>
+        } @else {
+          <p class="entry-empty">No IP sources. Add a plain-text list of IPv4, IPv6, or CIDR entries.</p>
+        }
 
-          <button type="button" class="add-button" (click)="addSource()">
-            <i class="icon icon-plus" aria-hidden="true"></i>Add source
-          </button>
-          <p class="entry-note">
-            Provider hostnames are not resolved for IP matching. New feeds are
-            scraped as soon as you save.
-          </p>
+        <div class="add-entry">
+          <input
+            type="url"
+            class="add-entry__input"
+            [formControl]="newSource"
+            placeholder="https://example.com/drop.txt"
+            spellcheck="false"
+            autocomplete="off"
+            aria-label="New IP blacklist source URL"
+            (keydown.enter)="$event.preventDefault(); addSource()"
+          />
+          <button type="button" hlmBtn variant="outline" (click)="addSource()">Add source</button>
+        </div>
+
+        <div class="list-notes">
+          <p>Hostnames inside a list are not resolved. New sources are downloaded as soon as you save.</p>
         </div>
       </section>
 
-      <section class="settings-card settings-card--websites">
-        <div class="card-heading">
-          <span class="card-icon"
-            ><i class="icon icon-globe" aria-hidden="true"></i
-          ></span>
-          <div class="card-heading__copy">
-            <h2>Website blacklist</h2>
-            <p>
-              Prevent specific hosts and their subdomains from receiving any
-              request.
-            </p>
+      <section class="settings-card settings-list" aria-labelledby="websites-heading">
+        <header class="list-card-head">
+          <div>
+            <h2 id="websites-heading">Website blacklist</h2>
+            <p class="row-desc">Magpie never sends a request to these hosts or their subdomains.</p>
           </div>
+          <span class="entry-total">{{ blockedSites.length }} {{ blockedSites.length === 1 ? 'website' : 'websites' }}</span>
+        </header>
+
+        <div class="list-label list-label--plain">
+          @if (issues.siteCount) {
+            <span class="entry-error">{{ issues.siteCount }} {{ issues.siteCount === 1 ? 'problem' : 'problems' }}</span>
+          }
         </div>
 
-        <div formArrayName="website_blacklist" class="entry-editor">
-          <div class="entry-list" [appVisibleRows]="4.5">
+        @if (blockedSites.length) {
+          <ul class="entry-list" formArrayName="website_blacklist" [appVisibleRows]="9.5">
             @for (site of blockedSites.controls; track site; let i = $index) {
-              <div class="entry-row" [attr.data-index]="i">
-                <span class="entry-index">{{ i + 1 }}</span>
-                <div class="field-group">
-                  <label class="field-label" for="blocked-site-{{ i }}"
-                    >Website</label
-                  >
-                  <input
-                    id="blocked-site-{{ i }}"
-                    type="text"
-                    [formControlName]="i"
-                    hlmInput
-                    placeholder="example.com or https://example.com"
-                  />
-                </div>
-                @if (blockedSites.length > 1) {
-                  <button
-                    type="button"
-                    class="icon-button icon-button--remove"
-                    (click)="removeBlockedSite(i)"
-                    [attr.aria-label]="'Remove blocked website ' + (i + 1)"
-                  >
-                    <i class="icon icon-trash" aria-hidden="true"></i>
-                  </button>
+              <li class="entry" [class.has-error]="issues.sites[i]">
+                <input
+                  id="blocked-site-{{ i }}"
+                  type="text"
+                  class="entry-input"
+                  [formControlName]="i"
+                  spellcheck="false"
+                  autocomplete="off"
+                  [attr.aria-label]="'Blocked website ' + (i + 1)"
+                  [attr.aria-invalid]="!!issues.sites[i]"
+                  [attr.aria-describedby]="issues.sites[i] ? 'blocked-site-error-' + i : null"
+                />
+                <button
+                  type="button"
+                  class="remove-entry"
+                  (click)="removeBlockedSite(i)"
+                  [attr.aria-label]="'Remove blocked website ' + (i + 1)"
+                ><i class="icon icon-x" aria-hidden="true"></i></button>
+                @if (issues.sites[i]; as problem) {
+                  <span class="entry-error" id="blocked-site-error-{{ i }}">{{ problem }}</span>
                 }
-              </div>
+              </li>
             }
-          </div>
-
-          <button type="button" class="add-button" (click)="addBlockedSite()">
-            <i class="icon icon-plus" aria-hidden="true"></i>Add website
-          </button>
-          <ul class="entry-notes">
-            <li>
-              Blocking <code>example.com</code> also blocks every subdomain,
-              such as <code>api.example.com</code>.
-            </li>
-            <li>
-              Magpie never contacts a blocked host, including through scraper
-              redirects.
-            </li>
-            <li>
-              Saving removes judges and scrape sources on blocked hosts from
-              every workspace.
-            </li>
-            <li>
-              Global judges, scrape sources, blacklist feeds, and the IP lookup
-              URL cannot use a blocked host.
-            </li>
           </ul>
+        } @else {
+          <p class="entry-empty">No blocked websites. Magpie may contact any host.</p>
+        }
+
+        <div class="add-entry">
+          <input
+            type="text"
+            class="add-entry__input"
+            [formControl]="newSite"
+            placeholder="example.com"
+            spellcheck="false"
+            autocomplete="off"
+            aria-label="New blocked website"
+            (keydown.enter)="$event.preventDefault(); addBlockedSite()"
+          />
+          <button type="button" hlmBtn variant="outline" (click)="addBlockedSite()">Add website</button>
+        </div>
+
+        <div class="list-notes">
+          <p>Blocking <code>example.com</code> also blocks <code>api.example.com</code>, including through scraper redirects.</p>
+          <p>Saving removes judges and scrape sources on blocked hosts from every workspace. Global judges, scrape sources, IP sources, and the IP lookup URL cannot use a blocked host.</p>
         </div>
       </section>
     </div>
 
-    <app-admin-settings-save-dock
-      [dirty]="form.dirty"
-      [invalid]="form.invalid"
-      dirtyDescription="Saving new IP feeds starts an immediate scrape and purge."
-      pristineTitle="Global blacklist is up to date"
-      saveLabel="Save global blacklist"
-    ></app-admin-settings-save-dock>
+    <footer class="save-dock blacklist-save-dock">
+      <div class="save-state" aria-live="polite">
+        <span class="save-state__dot" [class.is-dirty]="form.dirty" [class.has-problems]="issues.total" aria-hidden="true"></span>
+        <p>
+          @if (issues.total) {
+            {{ issues.total }} {{ issues.total === 1 ? 'entry needs' : 'entries need' }} fixing before you can save
+          } @else if (form.dirty) {
+            Unsaved changes. New IP sources are downloaded as soon as you save.
+          } @else {
+            All changes saved
+          }
+        </p>
+      </div>
+
+      <div class="save-dock__actions">
+        @if (form.dirty) {
+          <button type="button" hlmBtn variant="ghost" class="discard-button" [disabled]="saving()" (click)="discardChanges()">Discard</button>
+        }
+        <button
+          type="submit"
+          hlmBtn
+          variant="default"
+          class="save-settings-button"
+          [disabled]="!canSave"
+        >Save global blacklist</button>
+      </div>
+    </footer>
   </form>
 </app-admin-settings-shell>
