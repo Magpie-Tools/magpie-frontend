@@ -37,7 +37,7 @@ describe('PluginIPGeolocationComponent', () => {
     expect(component.form.controls.enabled.value).toBeFalse();
     expect(status).toHaveBeenCalledTimes(1);
     expect(save).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.textContent).toContain('Network classification requires a paid plan');
+    expect(fixture.nativeElement.textContent).toContain('Network classification needs a paid plan');
   });
 
   it('requires a key and sufficient whole-number credit limits', () => {

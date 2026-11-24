@@ -1,39 +1,71 @@
-import {formatDate} from '@angular/common';
+import {DecimalPipe, formatDate} from '@angular/common';
 import {TIMESTAMP_FORMAT} from '../../../shared/date-formats';
+import {HlmButton} from '@spartan-ng/helm/button';
 import {HlmInput} from '@spartan-ng/helm/input';
 import {HlmSwitch} from '@spartan-ng/helm/switch';
-import {AdminSettingsSaveDockComponent} from '../../../shared/admin-settings-shell/admin-settings-save-dock.component';
 import {PasswordComponent} from '../../../shared/ui/password.component';
-import {ChangeDetectorRef, Component, OnDestroy, OnInit, signal, inject, LOCALE_ID} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, computed, signal, inject, LOCALE_ID} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Subject, interval} from 'rxjs';
 import {filter, startWith, takeUntil} from 'rxjs/operators';
 
 import {GlobalSettings} from '../../../models/GlobalSettings';
 import {SettingsService} from '../../../services/settings.service';
 import {NotificationService} from '../../../services/notification-service.service';
+import {PluginState, hasText, unsavedSummary, usedPercent} from '../plugin-detail';
+
+type AbuseIPDBSettings = GlobalSettings['plugins']['abuseipdb'];
 
 @Component({
   selector: 'app-plugin-abuseipdb',
   standalone: true,
-  imports: [HlmInput, HlmSwitch, PasswordComponent,
-    AdminSettingsSaveDockComponent,
+  imports: [DecimalPipe, HlmButton, HlmInput, HlmSwitch, PasswordComponent,
     RouterLink,
     ReactiveFormsModule,
   ],
   templateUrl: './plugin-abuseipdb.component.html',
-  styleUrl: './plugin-abuseipdb.component.scss'
+  styleUrl: '../plugin-detail.scss'
 })
 export class PluginAbuseIPDBComponent implements OnInit, OnDestroy {
   private readonly locale = inject(LOCALE_ID);
   form: FormGroup;
-  pluginEnabled = signal(false);
-  quotaLimit = signal<number | null>(null);
-  quotaRemaining = signal<number | null>(null);
-  quotaResetLabel = signal('Unknown');
-  lastCheckedLabel = signal('Never');
-  lastError = signal('');
+  saved = signal<AbuseIPDBSettings | null>(null);
+  saving = signal(false);
+
+  quotaLimit = computed(() => this.saved()?.daily_limit || null);
+  quotaRemaining = computed(() => {
+    const saved = this.saved();
+    return saved?.daily_limit ? Math.max(0, saved.daily_remaining) : null;
+  });
+  quotaUsedPercent = computed(() => {
+    const limit = this.quotaLimit();
+    const remaining = this.quotaRemaining();
+    return limit && remaining !== null ? usedPercent(limit - remaining, limit) : 0;
+  });
+  quotaResetLabel = computed(() => this.formatTimestamp(this.saved()?.daily_reset_at, 'Unknown'));
+  lastCheckedLabel = computed(() => this.formatTimestamp(this.saved()?.last_checked_at, 'Never'));
+  lastError = computed(() => this.saved()?.last_error?.trim() ?? '');
+
+  state = computed<PluginState>(() => {
+    const saved = this.saved();
+    if (!saved?.enabled) {
+      return {tone: 'off', label: 'Off'};
+    }
+    if (!saved.api_key?.trim()) {
+      return {tone: 'bad', label: 'Needs an API key'};
+    }
+    if (this.lastError()) {
+      return {tone: 'bad', label: 'Last check failed'};
+    }
+    return {tone: 'good', label: 'Running'};
+  });
+
+  private readonly changeLabels = {
+    enabled: 'enabled',
+    api_key: 'API key',
+    max_age_in_days: 'report max age'
+  };
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -45,7 +77,7 @@ export class PluginAbuseIPDBComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       enabled: [false],
       api_key: [''],
-      max_age_in_days: [30]
+      max_age_in_days: [30, [Validators.required, Validators.min(1), Validators.max(365)]]
     });
   }
 
@@ -55,19 +87,13 @@ export class PluginAbuseIPDBComponent implements OnInit, OnDestroy {
         filter((settings): settings is GlobalSettings => !!settings),
         takeUntil(this.destroy$)
       )
-      .subscribe(settings => this.updateFormWithSettings(settings));
-
-    this.form.get('enabled')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.syncControlStates());
+      .subscribe(settings => this.applySettings(settings.plugins.abuseipdb));
 
     interval(60 * 60 * 1000)
       .pipe(startWith(0), takeUntil(this.destroy$))
       .subscribe(() => {
         this.settingsService.refreshGlobalSettings().subscribe({ error: () => {} });
       });
-
-    this.syncControlStates();
   }
 
   ngOnDestroy(): void {
@@ -75,8 +101,20 @@ export class PluginAbuseIPDBComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  get enabled(): boolean {
+    return !!this.form.get('enabled')?.value;
+  }
+
+  get missingKey(): boolean {
+    return this.enabled && !hasText(this.form.get('api_key'));
+  }
+
+  get unsavedSummary(): string {
+    return unsavedSummary(this.form, this.changeLabels);
+  }
+
   onSubmit(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.saving()) {
       return;
     }
 
@@ -91,74 +129,51 @@ export class PluginAbuseIPDBComponent implements OnInit, OnDestroy {
       }
     };
 
+    this.saving.set(true);
     this.settingsService.saveGlobalSettings(payload).subscribe({
       next: (resp) => {
+        this.saving.set(false);
         this.notification.showSuccess(resp.message ?? 'Settings saved');
         this.form.markAsPristine();
         this.cdr.markForCheck();
       },
       error: (err) => {
+        this.saving.set(false);
         console.error('Error saving AbuseIPDB settings:', err);
         this.notification.showError('Failed to save AbuseIPDB settings: ' + (err?.error?.message ?? 'Unknown error'));
       }
     });
   }
 
-  quotaUsagePercent(): number {
-    const limit = this.quotaLimit();
-    const remaining = this.quotaRemaining();
-    if (!limit || remaining === null || remaining === undefined) {
-      return 0;
+  discardChanges(): void {
+    const saved = this.saved();
+    if (saved) {
+      this.patchForm(saved);
     }
-    return Math.max(0, Math.min(100, Math.round(((limit - remaining) / limit) * 100)));
   }
 
-  quotaDisplay(): string {
-    const limit = this.quotaLimit();
-    const remaining = this.quotaRemaining();
-    if (!limit) {
-      return 'Unknown';
+  private applySettings(abuseipdb: AbuseIPDBSettings | undefined): void {
+    if (!abuseipdb) {
+      return;
     }
-    return `${remaining ?? 0} / ${limit}`;
+    this.saved.set(abuseipdb);
+    if (!this.form.dirty) {
+      this.patchForm(abuseipdb);
+    }
   }
 
-  private updateFormWithSettings(settings: GlobalSettings): void {
-    const abuseipdb = settings.plugins.abuseipdb;
-    this.form.patchValue({
-      enabled: abuseipdb?.enabled ?? false,
-      api_key: abuseipdb?.api_key ?? '',
-      max_age_in_days: abuseipdb?.max_age_in_days ?? 30
+  private patchForm(abuseipdb: AbuseIPDBSettings): void {
+    this.form.reset({
+      enabled: abuseipdb.enabled ?? false,
+      api_key: abuseipdb.api_key ?? '',
+      max_age_in_days: abuseipdb.max_age_in_days ?? 30
     }, { emitEvent: false });
-
-    this.quotaLimit.set(abuseipdb?.daily_limit || null);
-    this.quotaRemaining.set(abuseipdb?.daily_limit ? abuseipdb.daily_remaining : null);
-    this.quotaResetLabel.set(this.formatTimestamp(abuseipdb?.daily_reset_at));
-    this.lastCheckedLabel.set(this.formatTimestamp(abuseipdb?.last_checked_at));
-    this.lastError.set(abuseipdb?.last_error ?? '');
-    this.form.markAsPristine();
-    this.syncControlStates();
-  }
-
-  private syncControlStates(): void {
-    const enabled = !!this.form.get('enabled')?.value;
-    const apiKey = this.form.get('api_key');
-    const maxAge = this.form.get('max_age_in_days');
-    this.pluginEnabled.set(enabled);
-
-    if (enabled) {
-      apiKey?.enable({ emitEvent: false });
-      maxAge?.enable({ emitEvent: false });
-    } else {
-      apiKey?.disable({ emitEvent: false });
-      maxAge?.disable({ emitEvent: false });
-    }
-
     this.cdr.markForCheck();
   }
 
-  private formatTimestamp(timestamp?: string | null): string {
+  private formatTimestamp(timestamp: string | null | undefined, fallback: string): string {
     if (!timestamp) {
-      return 'Unknown';
+      return fallback;
     }
 
     const parsed = new Date(timestamp);
