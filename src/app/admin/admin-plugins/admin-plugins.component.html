@@ -1,111 +1,118 @@
 <main class="admin-plugins-page" aria-label="Plugins">
   <div class="settings-stage">
     <header class="admin-context">
-      <div class="admin-context__copy">
-        <span class="context-icon"
-          ><i class="icon icon-layout-grid" aria-hidden="true"></i
-        ></span>
+      <div>
         <h1>Plugins</h1>
+        <p>Switches apply immediately. Open a plugin to manage its credentials and limits.</p>
       </div>
     </header>
 
-    <p class="policy-note">
-      <i class="icon icon-bolt" aria-hidden="true"></i>
-      Plugin switches apply immediately. Open a plugin to manage its credentials and operating policy.
-    </p>
+    <section class="settings-card settings-list plugin-list" aria-label="Plugins">
+      <table class="plugin-table">
+        <thead>
+          <tr>
+            <th scope="col">Plugin</th>
+            <th scope="col">Status</th>
+            <th scope="col">Today</th>
+            <th scope="col">API key</th>
+            <th scope="col" class="plugin-table__end">Enabled</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.id) {
+            <tr [class.is-off]="!row.enabled" (click)="openPlugin(row)">
+              <td>
+                <ng-container *ngTemplateOutlet="identity; context: { $implicit: row }" />
+              </td>
+              <td><ng-container *ngTemplateOutlet="status; context: { $implicit: row }" /></td>
+              <td><ng-container *ngTemplateOutlet="usage; context: { $implicit: row }" /></td>
+              <td><ng-container *ngTemplateOutlet="key; context: { $implicit: row }" /></td>
+              <td class="plugin-table__end">
+                <div class="plugin-end">
+                  <ng-container *ngTemplateOutlet="toggle; context: { $implicit: row, idSuffix: '' }" />
+                  <i class="icon icon-chevron-right plugin-chevron" aria-hidden="true"></i>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
 
-    <section class="plugin-panel" aria-labelledby="plugins-title">
-      <header class="section-heading">
-        <div class="card-heading">
-          <span class="card-icon"><i class="icon icon-layout-grid" aria-hidden="true"></i></span>
-          <h2 id="plugins-title">Available plugins</h2>
-        </div>
-      </header>
-
-      <div class="plugin-list">
-        @for (plugin of plugins; track plugin.id) {
-          <article
-            class="plugin-card"
-            [attr.aria-labelledby]="plugin.id + '-title'"
-            [class.is-disabled]="!isPluginEnabled(plugin.id)"
-            [class.needs-attention]="isPluginIncomplete(plugin.id)"
-            [hlmTooltip]="getPluginIncompleteReason(plugin.id) ?? ''"
-          >
-            <div class="plugin-card__topline">
-              <div class="plugin-card__identity">
-                <span class="plugin-logo-shell">
-                  <img
-                    [src]="plugin.logo"
-                    [alt]="plugin.name + ' logo'"
-                    class="plugin-logo"
-                  />
-                </span>
-                <h3 class="plugin-card__title" [id]="plugin.id + '-title'">{{ plugin.name }}</h3>
-              </div>
+      <div class="plugin-cards">
+        @for (row of rows(); track row.id) {
+          <article class="plugin-row-card" [class.is-off]="!row.enabled" (click)="openPlugin(row)">
+            <div class="plugin-row-card__top">
+              <ng-container *ngTemplateOutlet="identity; context: { $implicit: row }" />
+              <ng-container *ngTemplateOutlet="toggle; context: { $implicit: row, idSuffix: '-compact' }" />
             </div>
-
-            <div class="plugin-card__copy">
-              <p>{{ plugin.description }}</p>
-            </div>
-
-            <div class="capability-list" aria-label="Plugin capabilities">
-              @for (capability of plugin.capabilities; track capability) {
-                <span
-                  ><i class="icon icon-check" aria-hidden="true"></i
-                  >{{ capability }}</span
-                >
-              }
-            </div>
-
-            @if (getPluginIncompleteReason(plugin.id); as incompleteReason) {
-              <div class="attention-note">
-                <i class="icon icon-circle-alert" aria-hidden="true"></i>
-                <span>{{ incompleteReason }}</span>
-              </div>
-            } @else {
-              <div class="configuration-state">
-                <i
-                  [class]="
-                    isPluginConfigured(plugin.id)
-                      ? 'icon icon-lock'
-                      : 'icon icon-key'
-                  "
-                  aria-hidden="true"
-                ></i>
-                {{
-                  isPluginConfigured(plugin.id)
-                    ? "Credentials configured"
-                    : "Credentials not configured"
-                }}
-              </div>
-            }
-
-            <footer class="plugin-card__footer">
-              <a
-                class="configure-link"
-                [routerLink]="plugin.route"
-                [attr.aria-label]="'Configure ' + plugin.name"
-              >
-                Configure plugin
-                <i class="icon icon-arrow-up-right" aria-hidden="true"></i>
-              </a>
-
-              <label class="plugin-toggle-label" [for]="plugin.id + '-enabled'">
-                <span>Enable plugin</span>
-                <hlm-switch
-                  [inputId]="plugin.id + '-enabled'"
-                  [ngModel]="isPluginEnabled(plugin.id)"
-                  [ngModelOptions]="{ standalone: true }"
-                  [disabled]="!settings() || isPluginTogglePending(plugin.id)"
-                  [aria-label]="'Toggle ' + plugin.name"
-                  class="plugin-switch-control"
-                  (checkedChange)="togglePlugin(plugin.id, $event)"
-                />
-              </label>
-            </footer>
+            <dl>
+              <dt>Status</dt>
+              <dd><ng-container *ngTemplateOutlet="status; context: { $implicit: row }" /></dd>
+              <dt>Today</dt>
+              <dd><ng-container *ngTemplateOutlet="usage; context: { $implicit: row }" /></dd>
+              <dt>API key</dt>
+              <dd><ng-container *ngTemplateOutlet="key; context: { $implicit: row }" /></dd>
+            </dl>
           </article>
         }
       </div>
     </section>
   </div>
 </main>
+
+<ng-template #identity let-row>
+  <div class="plugin-identity">
+    <span class="plugin-logo"><img [src]="row.logo" alt="" /></span>
+    <div class="plugin-identity__copy">
+      <a class="plugin-name" [routerLink]="row.route" (click)="$event.stopPropagation()">{{ row.name }}</a>
+      <span class="plugin-provides">{{ row.provides }}</span>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #status let-row>
+  <span [class]="'plugin-status tone-' + row.status.tone" [attr.title]="row.status.detail ?? null">
+    <span class="plugin-status__dot" aria-hidden="true"></span>
+    <span>{{ row.status.text }}</span>
+  </span>
+</ng-template>
+
+<ng-template #usage let-row>
+  @if (row.usage; as usage) {
+    <div class="plugin-usage">
+      <span class="plugin-usage__value">{{ usage.left }} <small>of {{ usage.limit }} left</small></span>
+      <div
+        class="plugin-meter"
+        [class.is-exhausted]="usage.exhausted"
+        role="meter"
+        aria-label="Used today"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="usage.usedPercent"
+      ><i [style.width.%]="usage.usedPercent"></i></div>
+    </div>
+  } @else {
+    <span class="plugin-muted">{{ row.usageText }}</span>
+  }
+</ng-template>
+
+<ng-template #key let-row>
+  @switch (row.keyState) {
+    @case ('configured') { <span class="plugin-key">Configured</span> }
+    @case ('missing') { <span class="plugin-key is-missing">Missing</span> }
+    @default { <span class="plugin-key plugin-muted">Not configured</span> }
+  }
+</ng-template>
+
+<ng-template #toggle let-row let-idSuffix="idSuffix">
+  <span class="plugin-switch" (click)="$event.stopPropagation()">
+    <hlm-switch
+      [inputId]="row.id + '-enabled' + idSuffix"
+      [ngModel]="row.enabled"
+      [ngModelOptions]="{ standalone: true }"
+      [disabled]="!settings() || isPluginTogglePending(row.id)"
+      [aria-label]="'Enable ' + row.name"
+      (checkedChange)="togglePlugin(row.id, $event)"
+    />
+  </span>
+</ng-template>
