@@ -1,410 +1,21 @@
-<app-admin-settings-shell class="admin-scraper-page">
-  <form
-    [formGroup]="settingsForm"
+<form
+  class="admin-scraper-page"
+  [formGroup]="settingsForm"
+  (ngSubmit)="onSubmit()"
+>
+  <fieldset
     class="settings-stage"
-    (ngSubmit)="onSubmit()"
+    [disabled]="saving() || !settingsLoaded"
   >
-    <app-admin-settings-header
-      icon="icon icon-cloud-download"
-      title="Global scraper"
-      description=""
-    ></app-admin-settings-header>
-
-    <hlm-tabs tab="0" class="settings-tabs settings-section-tabs">
-      <hlm-tabs-list aria-label="Global scraper sections">
-        <button hlmTabsTrigger="0" type="button">
-          <i class="icon icon-sliders-horizontal" aria-hidden="true"></i>Common
-        </button>
-        <button hlmTabsTrigger="1" type="button">
-          <i class="icon icon-link" aria-hidden="true"></i>Sources
-        </button>
-      </hlm-tabs-list>
-
-      <div>
-        <section hlmTabsContent="0">
-          <div class="settings-grid settings-grid--common">
-            <section class="settings-card settings-card--cadence">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-clock" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Monthly scrape allowance</h2>
-                </div>
-              </div>
-
-              <div class="cadence-summary">
-                <span>Per workspace</span><strong>{{ monthlyScrapesLabel }}</strong>
-              </div>
-
-              <div class="timer-grid timer-grid--single">
-                <div class="field-group">
-                  <app-checkbox
-                    label="No monthly limit"
-                    formControlName="unlimited_monthly_scrapes"
-                  ></app-checkbox>
-                  @if (unlimitedMonthlyScrapes) {
-                    <p class="field-hint">
-                      Workspaces without their own allowance can scrape as often as they like, at a
-                      fixed interval they choose on their Workspace page (at least every 15
-                      minutes). Until they choose one, their sources are scraped every hour.
-                    </p>
-                  } @else {
-                    <label class="field-label" for="monthly_scrapes"
-                      >Scrapes per workspace per month</label
-                    >
-                    <div class="number-with-unit">
-                      <input
-                        hlmInput
-                        type="number"
-                        formControlName="monthly_scrapes_per_workspace"
-                        [min]="1"
-                        [step]="100"
-                        id="monthly_scrapes"
-                      />
-                      <span>scrapes</span>
-                    </div>
-                    <p class="field-hint">
-                      One scrape fetches one source for one workspace. Magpie spreads each
-                      workspace's remaining scrapes over its sources and the rest of the month,
-                      but never more often than every 15 minutes. {{ scraperCadenceExample }}
-                    </p>
-                  }
-                </div>
-              </div>
-            </section>
-
-            <section class="settings-card settings-card--performance">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-bolt" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Scraper performance</h2>
-                </div>
-              </div>
-
-              <div class="performance-fields">
-                <div class="field-group field-group--wide">
-                  <label
-                    class="field-label"
-                    [for]="
-                      settingsForm.get('scraper_dynamic_threads')?.value
-                        ? 'scraper_max_threads'
-                        : 'scraper_threads'
-                    "
-                  >
-                    {{
-                      settingsForm.get("scraper_dynamic_threads")?.value
-                        ? "Maximum threads"
-                        : "Threads"
-                    }}
-                    <i
-                      class="icon icon-info"
-                      hlmTooltip="The number of source requests Magpie can run at once."
-                      aria-hidden="true"
-                    ></i>
-                  </label>
-                  <div class="number-with-unit">
-                    @if (settingsForm.get("scraper_dynamic_threads")?.value) {
-                      <input
-                        hlmInput
-                        type="number"
-                        formControlName="scraper_max_threads"
-                        [min]="1"
-                        [max]="10000"
-                        id="scraper_max_threads"
-                      />
-                    } @else {
-                      <input
-                        hlmInput
-                        type="number"
-                        formControlName="scraper_threads"
-                        [min]="1"
-                        [max]="10000"
-                        id="scraper_threads"
-                      />
-                    }
-                    <span>concurrent</span>
-                  </div>
-                </div>
-
-                <div class="field-group">
-                  <label class="field-label" for="scraper_retries"
-                    >Retries</label
-                  >
-                  <div class="number-with-unit">
-                    <input
-                      hlmInput
-                      type="number"
-                      formControlName="scraper_retries"
-                      [min]="0"
-                      [max]="100"
-                      id="scraper_retries"
-                    />
-                    <span>after failure</span>
-                  </div>
-                </div>
-
-                <div class="field-group">
-                  <label class="field-label" for="scraper_timeout"
-                    >Timeout</label
-                  >
-                  <div class="number-with-unit">
-                    <input
-                      hlmInput
-                      type="number"
-                      formControlName="scraper_timeout"
-                      [min]="1000"
-                      [max]="60000"
-                      [step]="500"
-                      id="scraper_timeout"
-                    />
-                    <span>milliseconds</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="performance-summary">
-                <strong>{{ scraperThreadLimit }}</strong>
-                <p>
-                  <span>thread ceiling</span
-                  ><small
-                    >Up to {{ scraperAttemptWindow }} of configured wait per
-                    source.</small
-                  >
-                </p>
-              </div>
-            </section>
-
-            <section class="settings-card settings-card--behavior">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-sparkles" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Scraper options</h2>
-                </div>
-              </div>
-
-              <div class="decision-list">
-                <div
-                  class="decision-row"
-                  [class.is-active]="
-                    settingsForm.get('scraper_dynamic_threads')?.value
-                  "
-                >
-                  <span class="decision-row__icon"
-                    ><i
-                      class="icon icon-chart-no-axes-combined"
-                      aria-hidden="true"
-                    ></i
-                  ></span>
-                  <div class="decision-row__copy">
-                    <strong>Dynamic threads</strong>
-                    <p>
-                      Scale concurrency against the available work and current
-                      demand.
-                    </p>
-                    <span>{{
-                      settingsForm.get("scraper_dynamic_threads")?.value
-                        ? "Adapts up to " + scraperThreadLimit + " threads"
-                        : "Uses a fixed thread count"
-                    }}</span>
-                  </div>
-                  <hlm-checkbox
-                    formControlName="scraper_dynamic_threads"
-                    inputId="dynamic-threads"
-                    aria-label="Enable dynamic threads"
-                  />
-                </div>
-
-                <div
-                  class="decision-row"
-                  [class.is-active]="
-                    settingsForm.get('scraper_respect_robots_txt')?.value
-                  "
-                >
-                  <span class="decision-row__icon"
-                    ><i class="icon icon-shield" aria-hidden="true"></i
-                  ></span>
-                  <div class="decision-row__copy">
-                    <strong>Respect robots.txt</strong>
-                    <p>
-                      Read each source policy and skip paths that disallow
-                      scraping.
-                    </p>
-                    <span>{{
-                      settingsForm.get("scraper_respect_robots_txt")?.value
-                        ? "Source policies enforced"
-                        : "Source policies ignored"
-                    }}</span>
-                  </div>
-                  <hlm-checkbox
-                    formControlName="scraper_respect_robots_txt"
-                    inputId="respect-robots"
-                    aria-label="Respect robots.txt"
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section class="settings-card settings-card--limits">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-users" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Account proxy limits</h2>
-                  <p>
-                    Set active proxy limits for new workspaces. Extra scraped or
-                    imported proxies are stored as paused. Existing workspace
-                    limits stay unchanged.
-                  </p>
-                </div>
-              </div>
-
-              <div
-                class="limit-summary"
-                [class.is-active]="
-                  settingsForm.get('proxy_limit_enabled')?.value
-                "
-              >
-                <div>
-                  <span>New workspace allowance</span>
-                  <strong>{{ proxyLimitLabel }}</strong>
-                </div>
-                <hlm-checkbox
-                  formControlName="proxy_limit_enabled"
-                  inputId="proxy-limit-enabled"
-                  aria-label="Limit active proxies in new workspaces"
-                />
-              </div>
-
-              <div
-                class="limit-fields"
-                [class.is-disabled]="
-                  !settingsForm.get('proxy_limit_enabled')?.value
-                "
-              >
-                <div class="field-group">
-                  <label class="field-label" for="proxy_limit_max_per_user"
-                    >Maximum active proxies per new workspace</label
-                  >
-                  <input
-                    hlmInput
-                    type="number"
-                    formControlName="proxy_limit_max_per_user"
-                    [min]="0"
-                    [max]="1000000"
-                    [step]="50"
-                    id="proxy_limit_max_per_user"
-                  />
-                </div>
-
-                <label class="inline-check" for="proxy-limit-exclude-admins">
-                  <hlm-checkbox
-                    formControlName="proxy_limit_exclude_admins"
-                    inputId="proxy-limit-exclude-admins"
-                  />
-                  <span
-                    ><strong>Exclude administrators</strong
-                    ><small
-                      >New workspaces created by instance administrators have
-                      unlimited active capacity.</small
-                    ></span
-                  >
-                </label>
-              </div>
-            </section>
-          </div>
-        </section>
-
-        <section hlmTabsContent="1">
-          <div class="settings-grid settings-grid--sources">
-            <section class="settings-card settings-card--sources">
-              <div class="sources-intro">
-                <div class="card-heading">
-                  <span class="card-icon"
-                    ><i class="icon icon-link" aria-hidden="true"></i
-                  ></span>
-                  <div class="card-heading__copy">
-                    <h2>Default scrape sources</h2>
-                    <p>
-                      Every new account starts with these proxy source URLs.
-                    </p>
-                  </div>
-                </div>
-
-                <p class="source-note">
-                  URLs stay exactly as entered. Query parameters such as
-                  <code>?protocols=http,https</code> are preserved.
-                </p>
-              </div>
-
-              <div class="sources-editor" formArrayName="scrape_sites">
-                <div class="scrape-site-list">
-                  @for (
-                    site of scrapeSites.controls;
-                    track site;
-                    let i = $index
-                  ) {
-                    <div class="scrape-site-row" [attr.data-index]="i">
-                      <span class="source-index">{{ i + 1 }}</span>
-                      <div class="field-group">
-                        <label class="field-label" for="scrape-site-{{ i }}"
-                          >Source URL</label
-                        >
-                        <input
-                          id="scrape-site-{{ i }}"
-                          type="url"
-                          [formControlName]="i"
-                          hlmInput
-                          placeholder="https://example.com/proxies.txt"
-                        />
-                      </div>
-                      @if (scrapeSites.length > 1) {
-                        <button
-                          type="button"
-                          class="icon-button icon-button--remove"
-                          (click)="removeScrapeSite(i)"
-                          [attr.aria-label]="'Remove source ' + (i + 1)"
-                        >
-                          <i class="icon icon-trash" aria-hidden="true"></i>
-                        </button>
-                      }
-                    </div>
-                  }
-                </div>
-
-                <button
-                  type="button"
-                  class="add-button"
-                  (click)="addScrapeSite()"
-                >
-                  <i class="icon icon-plus" aria-hidden="true"></i>Add source
-                </button>
-              </div>
-            </section>
-          </div>
-        </section>
-      </div>
-    </hlm-tabs>
-
-    <app-admin-settings-save-dock
-      [dirty]="settingsForm.dirty"
-      [invalid]="settingsForm.invalid"
-      dirtyDescription="Save when the scraper baseline looks right."
-      pristineTitle="Global settings are up to date"
-    >
+    <header class="admin-context">
+      <h1>Global scraper</h1>
       <button
-        settings-save-action
         type="button"
-        class="requeue-button"
-        (click)="confirmRequeueAllScrapeSources()"
         hlmBtn
-        [disabled]="isRequeueingSources"
-        variant="default"
+        variant="outline"
+        class="requeue-action"
+        [disabled]="isRequeueingSources || !settingsLoaded"
+        (click)="confirmRequeueAllScrapeSources()"
       >
         @if (isRequeueingSources) {
           <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
@@ -413,8 +24,400 @@
         }
         Requeue all sources
       </button>
-    </app-admin-settings-save-dock>
-  </form>
+    </header>
 
-  <app-confirm-dialog />
-</app-admin-settings-shell>
+    <nav class="section-tabs" aria-label="Global scraper sections">
+      <div class="section-tablist" data-slot="tabs-list" role="tablist" aria-label="Global scraper sections">
+        <button
+          type="button"
+          role="tab"
+          class="section-tab"
+          data-slot="tabs-trigger"
+          [attr.data-state]="activeTab === 'settings' ? 'active' : 'inactive'"
+          [attr.aria-selected]="activeTab === 'settings'"
+          (click)="selectTab('settings')"
+        >
+          Settings
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="section-tab"
+          data-slot="tabs-trigger"
+          [attr.data-state]="activeTab === 'sources' ? 'active' : 'inactive'"
+          [attr.aria-selected]="activeTab === 'sources'"
+          (click)="selectTab('sources')"
+        >
+          Default sources
+          <span class="tab-count">{{ scrapeSites.length }}</span>
+        </button>
+      </div>
+    </nav>
+
+    @if (activeTab === 'settings') {
+      <section class="settings-card settings-list" aria-labelledby="engine-heading">
+        <div class="group-heading">
+          <h2 id="engine-heading">Scraper engine</h2>
+          <p class="row-desc">Concurrency, request pacing and source policy rules.</p>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__label">
+            <h3>
+              <label [for]="dynamicThreads ? 'scraper_max_threads' : 'scraper_threads'">Concurrency</label>
+            </h3>
+            <p class="row-desc">
+              @if (dynamicThreads) {
+                Scales concurrent source requests up to this ceiling based on demand.
+              } @else {
+                Runs a fixed number of concurrent source requests.
+              }
+            </p>
+          </div>
+          <div class="setting-row__control">
+            <div class="control-inline">
+              <div class="mode-switch" role="group" aria-label="Concurrency mode">
+                <button
+                  type="button"
+                  [class.is-active]="dynamicThreads"
+                  [attr.aria-pressed]="dynamicThreads"
+                  (click)="setDynamicThreads(true)"
+                >
+                  Dynamic
+                </button>
+                <button
+                  type="button"
+                  [class.is-active]="!dynamicThreads"
+                  [attr.aria-pressed]="!dynamicThreads"
+                  (click)="setDynamicThreads(false)"
+                >
+                  Fixed
+                </button>
+              </div>
+              <div class="input-with-unit" [class.is-invalid]="threadsInvalid">
+                @if (dynamicThreads) {
+                  <input
+                    id="scraper_max_threads"
+                    type="number"
+                    hlmInput
+                    inputmode="numeric"
+                    formControlName="scraper_max_threads"
+                    min="1"
+                    max="10000"
+                  />
+                  <span>max</span>
+                } @else {
+                  <input
+                    id="scraper_threads"
+                    type="number"
+                    hlmInput
+                    inputmode="numeric"
+                    formControlName="scraper_threads"
+                    min="1"
+                    max="10000"
+                  />
+                  <span>threads</span>
+                }
+              </div>
+            </div>
+            @if (threadsInvalid) {
+              <p class="field-error">Enter between 1 and 10,000 threads.</p>
+            }
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__label">
+            <h3><label for="scraper_timeout">Timeout</label></h3>
+            <p class="row-desc">How long one source fetch attempt may take.</p>
+          </div>
+          <div class="setting-row__control">
+            <div class="input-with-unit" [class.is-invalid]="timeoutInvalid">
+              <input
+                id="scraper_timeout"
+                type="number"
+                hlmInput
+                inputmode="numeric"
+                formControlName="scraper_timeout"
+                min="1000"
+                max="60000"
+                step="500"
+              />
+              <span>ms</span>
+            </div>
+            @if (timeoutInvalid) {
+              <p class="field-error">Enter between 1,000 and 60,000 ms.</p>
+            }
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__label">
+            <h3><label for="scraper_retries">Retries</label></h3>
+            <p class="row-desc">Extra attempts after a source fetch fails.</p>
+          </div>
+          <div class="setting-row__control">
+            <div class="input-with-unit" [class.is-invalid]="retriesInvalid">
+              <input
+                id="scraper_retries"
+                type="number"
+                hlmInput
+                inputmode="numeric"
+                formControlName="scraper_retries"
+                min="0"
+                max="100"
+              />
+              <span>retries</span>
+            </div>
+            @if (retriesInvalid) {
+              <p class="field-error">Enter between 0 and 100 retries.</p>
+            }
+          </div>
+        </div>
+
+        <div class="setting-row setting-row--switch">
+          <div class="setting-row__label">
+            <h3 id="respect-robots-label">Respect robots.txt</h3>
+            <p class="row-desc">Read each source policy and skip paths that disallow scraping.</p>
+          </div>
+          <hlm-switch
+            inputId="respect-robots"
+            formControlName="scraper_respect_robots_txt"
+            aria-labelledby="respect-robots-label"
+          />
+        </div>
+
+        <p class="attempt-summary">
+          {{ dynamicThreads ? 'Adapts up to' : 'Fixed at' }}
+          <strong>{{ scraperThreadLimit.toLocaleString() }} concurrent {{ scraperThreadLimit === 1 ? 'request' : 'requests' }}</strong>.
+          Each source makes up to <strong>{{ scraperTotalAttempts }} {{ scraperTotalAttempts === 1 ? 'attempt' : 'attempts' }}</strong>
+          and waits at most <strong>{{ scraperAttemptWindow }}</strong>.
+        </p>
+      </section>
+
+      <section class="settings-card settings-list" aria-labelledby="defaults-heading">
+        <div class="group-heading">
+          <h2 id="defaults-heading">Workspace defaults</h2>
+          <p class="row-desc">Applied to workspaces without their own allowance, and to newly created workspaces.</p>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__label">
+            <h3>
+              <label [attr.for]="unlimitedMonthlyScrapes ? null : 'monthly_scrapes'">Monthly scrape allowance</label>
+            </h3>
+            <p class="row-desc">
+              One scrape fetches one source for one workspace. Spread across the month with a 15-minute floor.
+            </p>
+          </div>
+          <div class="setting-row__control">
+            <div class="control-inline">
+              <div class="mode-switch" role="group" aria-label="Monthly scrape allowance mode">
+                <button
+                  type="button"
+                  [class.is-active]="!unlimitedMonthlyScrapes"
+                  [attr.aria-pressed]="!unlimitedMonthlyScrapes"
+                  (click)="setUnlimitedMonthlyScrapes(false)"
+                >
+                  Limited
+                </button>
+                <button
+                  type="button"
+                  [class.is-active]="unlimitedMonthlyScrapes"
+                  [attr.aria-pressed]="unlimitedMonthlyScrapes"
+                  (click)="setUnlimitedMonthlyScrapes(true)"
+                >
+                  No limit
+                </button>
+              </div>
+              @if (!unlimitedMonthlyScrapes) {
+                <div class="input-with-unit" [class.is-invalid]="monthlyScrapesInvalid">
+                  <input
+                    id="monthly_scrapes"
+                    type="number"
+                    hlmInput
+                    inputmode="numeric"
+                    formControlName="monthly_scrapes_per_workspace"
+                    min="1"
+                    step="100"
+                  />
+                  <span>scrapes</span>
+                </div>
+              }
+            </div>
+            @if (unlimitedMonthlyScrapes) {
+              <p class="field-hint">
+                Workspaces choose a fixed interval on their Workspace page (default every hour, minimum 15 minutes).
+              </p>
+            } @else if (monthlyScrapesInvalid) {
+              <p class="field-error">Enter at least 1 scrape per workspace per month.</p>
+            } @else if (scraperCadenceExample) {
+              <p class="field-hint">{{ scraperCadenceExample }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="setting-row setting-row--switch">
+          <div class="setting-row__label">
+            <h3 id="proxy-limit-label">Limit active proxies in new workspaces</h3>
+            <p class="row-desc">
+              @if (proxyLimitEnabled) {
+                Extra scraped or imported proxies are stored as paused. Existing workspace limits stay unchanged.
+              } @else {
+                Off. New workspaces start with unlimited active proxies.
+              }
+            </p>
+          </div>
+          <hlm-switch
+            inputId="proxy-limit-enabled"
+            formControlName="proxy_limit_enabled"
+            aria-labelledby="proxy-limit-label"
+          />
+
+          @if (proxyLimitEnabled) {
+            <div class="limit-sentence">
+              <label for="proxy_limit_max_per_user">Cap new workspaces at</label>
+              <input
+                id="proxy_limit_max_per_user"
+                class="limit-sentence__count"
+                [class.is-invalid]="proxyLimitMaxInvalid"
+                type="number"
+                hlmInput
+                inputmode="numeric"
+                formControlName="proxy_limit_max_per_user"
+                min="0"
+                max="1000000"
+                step="50"
+              />
+              <span>active proxies</span>
+              <span class="limit-sentence__sep" aria-hidden="true"></span>
+              <label class="limit-sentence__check" for="proxy-limit-exclude-admins">
+                <hlm-checkbox
+                  formControlName="proxy_limit_exclude_admins"
+                  inputId="proxy-limit-exclude-admins"
+                />
+                <span>Exclude administrators</span>
+              </label>
+            </div>
+            @if (proxyLimitMaxInvalid) {
+              <p class="field-error limit-sentence__error">Enter between 0 and 1,000,000 active proxies.</p>
+            }
+          }
+        </div>
+      </section>
+    } @else {
+      <section class="settings-card settings-list" aria-labelledby="sources-heading">
+        <header class="list-card-head">
+          <div>
+            <h2 id="sources-heading">Default scrape sources</h2>
+            <p class="row-desc">Every new account starts with these proxy source URLs.</p>
+          </div>
+          <span class="entry-total">{{ scrapeSites.length }} {{ scrapeSites.length === 1 ? 'source' : 'sources' }}</span>
+        </header>
+
+        <div class="list-label">
+          @if (sourceIssues.count) {
+            <span class="entry-error">{{ sourceIssues.count }} {{ sourceIssues.count === 1 ? 'problem' : 'problems' }}</span>
+          }
+        </div>
+
+        @if (scrapeSites.length) {
+          <ul class="entry-list" formArrayName="scrape_sites" [appVisibleRows]="9.5">
+            @for (site of scrapeSites.controls; track site; let i = $index) {
+              <li class="entry" [class.has-error]="sourceIssues.entries[i]">
+                <input
+                  id="scrape-site-{{ i }}"
+                  type="url"
+                  class="entry-input"
+                  [formControlName]="i"
+                  spellcheck="false"
+                  autocomplete="off"
+                  [attr.aria-label]="'Default scrape source ' + (i + 1)"
+                  [attr.aria-invalid]="!!sourceIssues.entries[i]"
+                  [attr.aria-describedby]="sourceIssues.entries[i] ? 'scrape-site-error-' + i : null"
+                />
+                <button
+                  type="button"
+                  class="remove-entry"
+                  (click)="removeScrapeSite(i)"
+                  [attr.aria-label]="'Remove source ' + (i + 1)"
+                ><i class="icon icon-x" aria-hidden="true"></i></button>
+                @if (sourceIssues.entries[i]; as problem) {
+                  <span class="entry-error" id="scrape-site-error-{{ i }}">{{ problem }}</span>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="entry-empty">No default scrape sources. New accounts start with an empty source list.</p>
+        }
+
+        <div class="add-entry">
+          <input
+            type="url"
+            class="add-entry__input"
+            [formControl]="newSource"
+            placeholder="https://example.com/proxies.txt"
+            spellcheck="false"
+            autocomplete="off"
+            aria-label="New default scrape source URL"
+            (keydown.enter)="$event.preventDefault(); addScrapeSite()"
+          />
+          <button type="button" hlmBtn variant="outline" (click)="addScrapeSite()">Add source</button>
+        </div>
+
+        <div class="list-notes">
+          <p>URLs stay exactly as entered. Query parameters such as <code>?protocols=http,https</code> are preserved.</p>
+        </div>
+      </section>
+    }
+
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span
+          class="save-state__dot"
+          [class.is-dirty]="settingsForm.dirty"
+          [class.has-problems]="hasProblems && (settingsForm.dirty || sourceIssues.count > 0)"
+          aria-hidden="true"
+        ></span>
+        <p>
+          @if (!settingsLoaded) {
+            Loading global scraper settings...
+          } @else if (hasProblems && (settingsForm.dirty || sourceIssues.count > 0)) {
+            {{ validationSummary }}
+          } @else if (settingsForm.dirty) {
+            {{ unsavedSummary }}
+          } @else {
+            All changes saved
+          }
+        </p>
+      </div>
+
+      <div class="save-dock__actions">
+        @if (settingsForm.dirty) {
+          <button
+            type="button"
+            hlmBtn
+            variant="ghost"
+            class="discard-button"
+            [disabled]="saving()"
+            (click)="discardChanges()"
+          >
+            Discard
+          </button>
+        }
+        <button
+          type="submit"
+          hlmBtn
+          variant="default"
+          class="save-settings-button"
+          [disabled]="!canSave"
+        >
+          Save global settings
+        </button>
+      </div>
+    </footer>
+  </fieldset>
+</form>
+
+<app-confirm-dialog />
