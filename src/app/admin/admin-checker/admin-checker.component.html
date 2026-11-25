@@ -12,95 +12,85 @@
 
     <hlm-tabs tab="0" class="settings-tabs settings-section-tabs">
       <hlm-tabs-list aria-label="Global checker sections">
-        <button hlmTabsTrigger="0" type="button">
-          <i class="icon icon-gauge" aria-hidden="true"></i>Common
-        </button>
+        <button hlmTabsTrigger="0" type="button">Checker</button>
         <button hlmTabsTrigger="1" type="button">
-          <i class="icon icon-circle-check" aria-hidden="true"></i>Judges
-        </button>
-        <button hlmTabsTrigger="2" type="button">
-          <i class="icon icon-map-pin" aria-hidden="true"></i>IP lookup
+          Judges
+          <span class="tab-count" [class.is-bad]="judgeProblemCount > 0">{{ judges.length }}</span>
         </button>
       </hlm-tabs-list>
 
-      <div>
+      <div class="tab-panels">
         <section hlmTabsContent="0">
-          <div class="settings-grid settings-grid--common">
-            <section class="settings-card settings-card--protocols">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-compass" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Proxy protocols</h2>
-                  <p>
-                    Select the protocols Magpie uses to check proxies.
-                  </p>
-                </div>
-              </div>
+          <section class="settings-card settings-list" aria-labelledby="defaults-heading">
+            <div class="group-heading">
+              <h2 id="defaults-heading">Defaults for new workspaces</h2>
+              <p class="row-desc">
+                Starting checker settings for new workspaces, plus the default monthly check allowance.
+              </p>
+            </div>
 
-              <div
-                class="protocol-accordion"
-                formGroupName="protocols"
-                role="group"
-                aria-label="Proxy protocols"
-              >
-                @for (protocol of protocolOptions; track protocol.control) {
-                  <button
-                    type="button"
-                    class="protocol-choice"
-                    [class.is-active]="
-                      settingsForm.get('protocols.' + protocol.control)?.value
-                    "
-                    [attr.aria-pressed]="
-                      !!settingsForm.get('protocols.' + protocol.control)?.value
-                    "
-                    (click)="toggleProtocol(protocol.control)"
-                  >
-                    <span class="protocol-choice__icon"
-                      ><i [class]="protocol.icon" aria-hidden="true"></i
-                    ></span>
-                    <span class="protocol-choice__copy">
+            <div class="setting-row">
+              <div class="setting-row__label">
+                <h3 id="protocols-label">Protocols</h3>
+                <p class="row-desc">Protocols enabled by default when checking proxies.</p>
+              </div>
+              <div class="setting-row__control">
+                <div
+                  class="protocol-toggles"
+                  formGroupName="protocols"
+                  role="group"
+                  aria-labelledby="protocols-label"
+                >
+                  @for (protocol of protocolOptions; track protocol.control) {
+                    @let active = !!settingsForm.get('protocols.' + protocol.control)?.value;
+                    <button
+                      type="button"
+                      class="protocol-choice"
+                      [class.is-active]="active"
+                      [attr.aria-pressed]="active"
+                      (click)="toggleProtocol(protocol.control)"
+                    >
+                      <span class="protocol-choice__box" aria-hidden="true">
+                        @if (active) {
+                          <svg viewBox="0 0 12 12">
+                            <path d="M2.75 6.25 5 8.5l4.25-5" />
+                          </svg>
+                        }
+                      </span>
                       <strong>{{ protocol.label }}</strong>
-                      <small>{{ protocol.description }}</small>
-                    </span>
-                    <span class="protocol-choice__state">{{
-                      settingsForm.get("protocols." + protocol.control)?.value
-                        ? "On"
-                        : "Off"
-                    }}</span>
-                  </button>
-                }
-              </div>
-            </section>
-
-            <section class="settings-card settings-card--cadence">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-clock" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Monthly check allowance</h2>
+                    </button>
+                  }
                 </div>
               </div>
-              <div class="cadence-summary">
-                <span>Per workspace</span><strong>{{ monthlyChecksLabel }}</strong>
-              </div>
-              <div class="timer-grid timer-grid--single">
-                <div class="field-group">
-                  <app-checkbox
-                    label="No monthly limit"
-                    formControlName="unlimited_monthly_checks"
-                  ></app-checkbox>
+            </div>
+
+            <div class="setting-row setting-row--switch">
+              <div class="setting-row__label">
+                <h3 id="monthly-allowance-label">Monthly check allowance</h3>
+                <p class="row-desc">
                   @if (unlimitedMonthlyChecks) {
-                    <p class="field-hint">
-                      Workspaces without their own allowance can check as often as they like, at a
-                      fixed interval they choose on their Workspace page. Until they choose one,
-                      their proxies are checked every hour. Workspaces with their own allowance
-                      keep it.
-                    </p>
+                    Workspaces without their own allowance can check as often as they like, at a
+                    fixed interval they choose on their Workspace page. Until they choose one,
+                    their proxies are checked every hour. Workspaces with their own allowance keep it.
                   } @else {
-                    <label class="field-label" for="monthly-checks">Checks per workspace per month</label>
+                    Default limit per workspace each month. Workspaces with their own allowance keep it.
+                  }
+                </p>
+              </div>
+              <div class="switch-with-state">
+                <span class="switch-state">{{ unlimitedMonthlyChecks ? 'Unlimited' : 'Limited' }}</span>
+                <hlm-switch
+                  inputId="monthly-allowance-switch"
+                  [checked]="!unlimitedMonthlyChecks"
+                  (checkedChange)="setLimitedMonthlyChecks($event)"
+                  aria-labelledby="monthly-allowance-label"
+                />
+              </div>
+
+              @if (!unlimitedMonthlyChecks) {
+                <div class="allowance-sub">
+                  <div class="allowance-sub__field">
+                    <label class="sr-only" for="monthly-checks">Checks per workspace per month</label>
                     <div class="input-with-unit">
                       <input
                         id="monthly-checks"
@@ -110,49 +100,119 @@
                         inputmode="numeric"
                         min="1"
                         step="1000"
-                      /><span>checks</span>
+                      />
+                      <span>checks / month</span>
                     </div>
-                    <p class="field-hint">
-                      Magpie spreads each workspace's remaining checks over the rest of the month.
-                      One check is one request to a judge, and each retry is another check.
-                      {{ checkerCadenceExample }}
-                      Workspaces with their own allowance keep it.
-                    </p>
-                  }
+                  </div>
+                  <p class="field-hint">
+                    Magpie spreads each workspace's remaining checks over the rest of the month.
+                    One check is one request to a judge, and each retry is another check.
+                    {{ checkerCadenceExample }}
+                  </p>
                 </div>
-              </div>
-            </section>
+              }
+            </div>
 
-            <section class="settings-card settings-card--performance">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-bolt" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Checker performance</h2>
+            <div class="setting-row">
+              <div class="setting-row__label">
+                <h3><label for="retries">Retries</label></h3>
+                <p class="row-desc">Extra attempts after the first one fails.</p>
+              </div>
+              <div class="setting-row__control">
+                <div class="input-with-unit">
+                  <input
+                    id="retries"
+                    formControlName="retries"
+                    type="number"
+                    hlmInput
+                    inputmode="numeric"
+                    min="0"
+                  />
+                  <span>retries</span>
                 </div>
               </div>
-              <div class="performance-fields">
-                <div class="field-group field-group--wide">
-                  <label
-                    class="field-label"
-                    [for]="
-                      settingsForm.get('dynamic_threads')?.value
-                        ? 'max_threads'
-                        : 'threads'
-                    "
-                  >
-                    {{
-                      settingsForm.get("dynamic_threads")?.value
-                        ? "Maximum threads"
-                        : "Threads"
-                    }}
-                    <app-tooltip
-                      [text]="'The number of proxy checks Magpie can run at once.'"
-                    ></app-tooltip>
-                  </label>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-row__label">
+                <h3><label for="timeout">Timeout</label></h3>
+                <p class="row-desc">How long one attempt may take.</p>
+              </div>
+              <div class="setting-row__control">
+                <div class="input-with-unit">
+                  <input
+                    id="timeout"
+                    formControlName="timeout"
+                    type="number"
+                    hlmInput
+                    inputmode="numeric"
+                    min="1"
+                  />
+                  <span>ms</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-row setting-row--switch">
+              <div class="setting-row__label">
+                <h3 id="https-socks-label">Use HTTPS judges for SOCKS</h3>
+                <p class="row-desc">
+                  Route SOCKS4 and SOCKS5 checks through HTTPS judges instead of HTTP ones.
+                </p>
+              </div>
+              <hlm-switch
+                inputId="use-https-for-socks"
+                formControlName="use_https_for_socks"
+                aria-labelledby="https-socks-label"
+              />
+            </div>
+
+            <p class="attempt-summary">
+              Each protocol check makes up to
+              <strong>{{ totalAttempts }} {{ totalAttempts === 1 ? 'attempt' : 'attempts' }}</strong>
+              and waits at most <strong>{{ checkerAttemptWindow }}</strong>.
+            </p>
+          </section>
+
+          <section class="settings-card settings-list" aria-labelledby="worker-heading">
+            <div class="group-heading">
+              <h2 id="worker-heading">Worker &amp; host</h2>
+              <p class="row-desc">
+                Instance-wide concurrency, response storage, and host IP discovery.
+              </p>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-row__label">
+                <h3>
+                  <label [for]="dynamicThreads ? 'max_threads' : 'threads'">Concurrency</label>
+                </h3>
+                <p class="row-desc">
+                  @if (dynamicThreads) {
+                    Dynamic. Adapts up to {{ threadLimit }} concurrent checks to stay close to the checker cadence.
+                  } @else {
+                    Fixed. Always runs up to {{ threadLimit }} proxy checks at once.
+                  }
+                </p>
+              </div>
+              <div class="setting-row__control">
+                <div class="concurrency-control">
+                  <div class="mode-switch" role="group" aria-label="Thread concurrency mode">
+                    <button
+                      type="button"
+                      [class.is-active]="!dynamicThreads"
+                      [attr.aria-pressed]="!dynamicThreads"
+                      (click)="setDynamicThreads(false)"
+                    >Fixed</button>
+                    <button
+                      type="button"
+                      [class.is-active]="dynamicThreads"
+                      [attr.aria-pressed]="dynamicThreads"
+                      (click)="setDynamicThreads(true)"
+                    >Dynamic</button>
+                  </div>
                   <div class="input-with-unit">
-                    @if (settingsForm.get("dynamic_threads")?.value) {
+                    @if (dynamicThreads) {
                       <input
                         id="max_threads"
                         formControlName="max_threads"
@@ -161,6 +221,7 @@
                         inputmode="numeric"
                         min="1"
                       />
+                      <span>max</span>
                     } @else {
                       <input
                         id="threads"
@@ -170,374 +231,346 @@
                         inputmode="numeric"
                         min="1"
                       />
+                      <span>threads</span>
                     }
-                    <span>concurrent</span>
-                  </div>
-                </div>
-                <div class="field-group">
-                  <label class="field-label" for="retries">Retries</label>
-                  <div class="input-with-unit">
-                    <input
-                      id="retries"
-                      formControlName="retries"
-                      type="number"
-                      hlmInput
-                      inputmode="numeric"
-                      min="0"
-                    /><span>after failure</span>
-                  </div>
-                </div>
-                <div class="field-group">
-                  <label class="field-label" for="timeout">Timeout</label>
-                  <div class="input-with-unit">
-                    <input
-                      id="timeout"
-                      formControlName="timeout"
-                      type="number"
-                      hlmInput
-                      inputmode="numeric"
-                      min="1"
-                    /><span>milliseconds</span>
                   </div>
                 </div>
               </div>
-              <div class="performance-summary">
-                <strong>{{ threadLimit }}</strong>
-                <p>
-                  <span>thread ceiling</span
-                  ><small
-                    >Up to {{ checkerAttemptWindow }} of configured wait per
-                    proxy.</small
-                  >
+            </div>
+
+            <div class="setting-row setting-row--switch">
+              <div class="setting-row__label">
+                <h3 id="save-responses-label">Save request responses</h3>
+                <p class="row-desc">
+                  Keep judge response bodies available for inspection and debugging.
                 </p>
               </div>
-            </section>
+              <hlm-switch
+                inputId="save-responses"
+                formControlName="save_responses"
+                aria-labelledby="save-responses-label"
+              />
+            </div>
 
-            <section class="settings-card settings-card--automation">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-sparkles" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Checker options</h2>
-                </div>
+            <div class="setting-row">
+              <div class="setting-row__label">
+                <h3><label for="iplookup">Public IP lookup</label></h3>
+                <p class="row-desc">
+                  Called at startup and every 15 minutes to learn the host's public IP.
+                </p>
               </div>
-              <div class="decision-list">
-                <div
-                  class="decision-row"
-                  [class.is-active]="settingsForm.get('dynamic_threads')?.value"
-                >
-                  <span class="decision-row__icon"
-                    ><i
-                      class="icon icon-chart-no-axes-combined"
-                      aria-hidden="true"
-                    ></i
-                  ></span>
-                  <div class="decision-row__copy">
-                    <strong>Dynamic threads</strong>
-                    <p>
-                      Adjust concurrency to stay close to the checker cadence.
-                    </p>
-                    <span>{{
-                      settingsForm.get("dynamic_threads")?.value
-                        ? "Adapts up to " + threadLimit + " threads"
-                        : "Uses a fixed thread count"
-                    }}</span>
-                  </div>
-                  <app-checkbox
-                    label="Enabled"
-                    formControlName="dynamic_threads"
-                  ></app-checkbox>
-                </div>
-                <div
-                  class="decision-row"
-                  [class.is-active]="
-                    settingsForm.get('use_https_for_socks')?.value
-                  "
-                >
-                  <span class="decision-row__icon"
-                    ><i class="icon icon-lock" aria-hidden="true"></i
-                  ></span>
-                  <div class="decision-row__copy">
-                    <strong>HTTPS judges for SOCKS</strong>
-                    <p>Route SOCKS4 and SOCKS5 checks through secure judges.</p>
-                    <span>{{
-                      settingsForm.get("use_https_for_socks")?.value
-                        ? "Secure judge routing"
-                        : "Standard judge routing"
-                    }}</span>
-                  </div>
-                  <app-checkbox
-                    label="Enabled"
-                    formControlName="use_https_for_socks"
-                  ></app-checkbox>
-                </div>
-                <div
-                  class="decision-row"
-                  [class.is-active]="settingsForm.get('save_responses')?.value"
-                >
-                  <span class="decision-row__icon"
-                    ><i class="icon icon-save" aria-hidden="true"></i
-                  ></span>
-                  <div class="decision-row__copy">
-                    <strong>Save request responses</strong>
-                    <p>
-                      Keep response bodies available for inspection and
-                      debugging.
-                    </p>
-                    <span>{{
-                      settingsForm.get("save_responses")?.value
-                        ? "Responses retained"
-                        : "Responses discarded"
-                    }}</span>
-                  </div>
-                  <app-checkbox
-                    label="Enabled"
-                    formControlName="save_responses"
-                  ></app-checkbox>
-                </div>
+              <div class="setting-row__control">
+                <input
+                  id="iplookup"
+                  class="mono-input"
+                  formControlName="iplookup"
+                  type="url"
+                  hlmInput
+                  spellcheck="false"
+                  placeholder="https://ident.me"
+                />
+                <p class="field-hint">
+                  Use a stable endpoint that returns one plain-text IP address.
+                </p>
               </div>
-            </section>
-          </div>
+            </div>
+
+            <div class="setting-row setting-row--action">
+              <div class="setting-row__label">
+                <h3>Queued proxies</h3>
+                <p class="row-desc">
+                  Requeue every currently queued proxy using the latest checker cadence.
+                </p>
+              </div>
+              <button
+                type="button"
+                class="requeue-button"
+                (click)="confirmRequeueAllProxies()"
+                hlmBtn
+                [disabled]="isRequeueing"
+                variant="default"
+              >
+                @if (isRequeueing) {
+                  <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
+                } @else {
+                  <i class="icon icon-refresh-cw" aria-hidden="true"></i>
+                }
+                Requeue all proxies
+              </button>
+            </div>
+          </section>
         </section>
 
         <section hlmTabsContent="1">
-          <div class="settings-grid settings-grid--judges">
-            <section class="settings-card settings-card--judge-performance">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-gauge" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Judge validation</h2>
-                  <p>
-                    Set the concurrency and patience used to validate judge
-                    endpoints.
-                  </p>
-                </div>
-              </div>
-              <div class="stacked-fields">
-                <div class="field-group">
-                  <label class="field-label" for="judges_threads"
-                    >Judge threads</label
-                  >
-                  <div class="input-with-unit">
-                    <input
-                      id="judges_threads"
-                      formControlName="judges_threads"
-                      type="number"
-                      hlmInput
-                      inputmode="numeric"
-                      min="1"
-                    /><span>concurrent</span>
-                  </div>
-                </div>
-                <div class="field-group">
-                  <label class="field-label" for="judges_timeout"
-                    >Judge timeout</label
-                  >
-                  <div class="input-with-unit">
-                    <input
-                      id="judges_timeout"
-                      formControlName="judges_timeout"
-                      type="number"
-                      hlmInput
-                      inputmode="numeric"
-                      min="1"
-                    /><span>milliseconds</span>
-                  </div>
-                </div>
-              </div>
-            </section>
+          <section class="settings-card settings-list" aria-labelledby="judge-validation-heading">
+            <div class="group-heading">
+              <h2 id="judge-validation-heading">Judge validation</h2>
+              <p class="row-desc">
+                Concurrency, timeout, and refresh cadence for validating judge endpoints.
+              </p>
+            </div>
 
-            <section class="settings-card settings-card--judge-cadence">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-refresh-cw" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Judge refresh interval</h2>
-                  <p>
-                    Control how often Magpie revalidates the shared judge pool.
-                  </p>
+            <div class="setting-row">
+              <div class="setting-row__label">
+                <h3><label for="judges_threads">Judge threads</label></h3>
+                <p class="row-desc">Validation requests run in parallel.</p>
+              </div>
+              <div class="setting-row__control">
+                <div class="input-with-unit">
+                  <input
+                    id="judges_threads"
+                    formControlName="judges_threads"
+                    type="number"
+                    hlmInput
+                    inputmode="numeric"
+                    min="1"
+                  />
+                  <span>concurrent</span>
                 </div>
               </div>
-              <div class="cadence-summary cadence-summary--inline">
-                <span>Refresh every</span
-                ><strong>{{ judgeCadenceLabel }}</strong>
-              </div>
-              <div class="timer-grid" formGroupName="judge_timer">
-                <div class="timer-field">
-                  <label for="judge-days">Days</label
-                  ><app-select
-                    inputId="judge-days"
-                    [options]="daysList"
-                    formControlName="days"
-                    optionLabel="label"
-                    optionValue="value"
-                  ></app-select>
-                </div>
-                <div class="timer-field">
-                  <label for="judge-hours">Hours</label
-                  ><app-select
-                    inputId="judge-hours"
-                    [options]="hoursList"
-                    formControlName="hours"
-                    optionLabel="label"
-                    optionValue="value"
-                  ></app-select>
-                </div>
-                <div class="timer-field">
-                  <label for="judge-minutes">Minutes</label
-                  ><app-select
-                    inputId="judge-minutes"
-                    [options]="minutesList"
-                    formControlName="minutes"
-                    optionLabel="label"
-                    optionValue="value"
-                  ></app-select>
-                </div>
-                <div class="timer-field">
-                  <label for="judge-seconds">Seconds</label
-                  ><app-select
-                    inputId="judge-seconds"
-                    [options]="secondsList"
-                    formControlName="seconds"
-                    optionLabel="label"
-                    optionValue="value"
-                  ></app-select>
-                </div>
-              </div>
-            </section>
+            </div>
 
-            <section class="settings-card settings-card--judge-list">
-              <div class="card-heading">
-                <span class="card-icon"
-                  ><i class="icon icon-badge-check" aria-hidden="true"></i
-                ></span>
-                <div class="card-heading__copy">
-                  <h2>Default judges</h2>
-                  <p>
-                    These endpoints become the starting judge list for every new
-                    account.
-                  </p>
+            <div class="setting-row">
+              <div class="setting-row__label">
+                <h3><label for="judges_timeout">Judge timeout</label></h3>
+                <p class="row-desc">How long to wait for a judge endpoint to respond.</p>
+              </div>
+              <div class="setting-row__control">
+                <div class="input-with-unit">
+                  <input
+                    id="judges_timeout"
+                    formControlName="judges_timeout"
+                    type="number"
+                    hlmInput
+                    inputmode="numeric"
+                    min="1"
+                  />
+                  <span>ms</span>
                 </div>
               </div>
-              <div formArrayName="judges" class="judge-list" [appVisibleRows]="4.5">
-                @for (judge of judges.controls; track judge; let i = $index) {
-                  <div [formGroupName]="i" class="judge-row">
-                    <span class="judge-index">{{ i + 1 }}</span>
-                    <div class="field-group">
-                      <label class="field-label" for="judge-url-{{ i }}"
-                        >Judge URL</label
-                      ><input
-                        id="judge-url-{{ i }}"
-                        formControlName="url"
-                        type="url"
-                        hlmInput
-                        placeholder="https://judge.example.com"
-                      />
-                    </div>
-                    <div class="field-group">
-                      <label class="field-label" for="judge-regex-{{ i }}"
-                        >Response regex
-                        <app-tooltip
-                          [text]="'Use default for Magpie\'s built-in response matching, or provide a custom regular expression.'"
-                        ></app-tooltip
-                      ></label>
+            </div>
+
+            <div class="setting-row" formGroupName="judge_timer">
+              <div class="setting-row__label">
+                <h3 id="judge-refresh-label">Refresh interval</h3>
+                <p class="row-desc">
+                  @if (judgeCadenceLabel === 'Continuous') {
+                    Revalidates the shared judge pool continuously.
+                  } @else {
+                    Revalidates the shared judge pool every {{ judgeCadenceLabel }}.
+                  }
+                </p>
+              </div>
+              <div class="setting-row__control">
+                <div class="duration-fields" role="group" aria-labelledby="judge-refresh-label">
+                  @for (unit of timerUnits; track unit.control) {
+                    <label class="input-with-unit duration-field">
                       <input
-                        id="judge-regex-{{ i }}"
-                        formControlName="regex"
-                        type="text"
-                        hlmInput
-                        placeholder="default"
+                        [id]="'judge-' + unit.control"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        [max]="unit.max"
+                        [formControlName]="unit.control"
+                        [attr.aria-label]="unit.label"
                       />
-                    </div>
-                    @if (judges.length > 1) {
-                      <button
-                        type="button"
-                        class="icon-button icon-button--remove"
-                        (click)="removeJudge(i)"
-                        [attr.aria-label]="'Remove judge ' + (i + 1)"
-                      >
-                        <i class="icon icon-trash" aria-hidden="true"></i>
-                      </button>
+                      <span aria-hidden="true">{{ unit.short }}</span>
+                    </label>
+                  }
+                </div>
+                @if (settingsForm.get('judge_timer')?.invalid) {
+                  <p class="field-error">
+                    Use up to 30 days, 23 hours, 59 minutes, and 59 seconds.
+                  </p>
+                }
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-card settings-list" aria-labelledby="default-judges-heading">
+            <header class="list-card-head">
+              <div>
+                <h2 id="default-judges-heading">Default judges</h2>
+                <p class="row-desc">
+                  Starting judge list for every new account.
+                </p>
+              </div>
+              <button
+                type="button"
+                hlmBtn
+                variant="outline"
+                class="add-judge-button"
+                (click)="addJudge()"
+              >
+                Add judge
+              </button>
+            </header>
+
+            @if (judgeControls.length) {
+              <div class="judge-table__head" aria-hidden="true">
+                <span>Judge</span>
+                <span>Check</span>
+                <span></span>
+              </div>
+
+              <div formArrayName="judges" class="judge-rows">
+                @for (judge of judgeControls; track judge; let i = $index) {
+                  @let open = openJudgeIndex() === i;
+                  @let check = judgeCheckSummary(judge);
+                  <div class="judge-item" [class.is-open]="open" [formGroupName]="i">
+                    <button
+                      type="button"
+                      class="judge-line"
+                      [attr.aria-expanded]="open"
+                      [attr.aria-controls]="'judge-form-' + i"
+                      (click)="toggleJudge(i)"
+                    >
+                      <span class="judge-name">
+                        <strong>{{ judgeHostname(judge) }}</strong>
+                        @if (judgePath(judge); as rest) {
+                          <small>{{ rest }}</small>
+                        }
+                      </span>
+                      <span
+                        class="judge-check"
+                        [class.is-bad]="check.bad"
+                        [class.is-mono]="check.mono"
+                      >{{ check.text }}</span>
+                      <span class="judge-edit">{{ open ? 'Close' : 'Edit' }}</span>
+                    </button>
+
+                    @if (open) {
+                      <div class="judge-form" [id]="'judge-form-' + i">
+                        <div class="judge-form__row">
+                          <div class="field">
+                            <label class="field-label" [for]="'judge-url-' + i">URL</label>
+                            <input
+                              [id]="'judge-url-' + i"
+                              class="mono-input"
+                              formControlName="url"
+                              type="url"
+                              hlmInput
+                              spellcheck="false"
+                              placeholder="https://example.com/judge"
+                              [class.is-invalid]="!!judgeUrlError(judge)"
+                            />
+                          </div>
+                          <div class="field">
+                            <label class="field-label" [for]="'judge-mode-' + i">Check</label>
+                            <app-select
+                              [inputId]="'judge-mode-' + i"
+                              formControlName="mode"
+                              [options]="judgeCheckModes"
+                              optionLabel="label"
+                              optionValue="value"
+                            ></app-select>
+                          </div>
+                        </div>
+                        @if (judgeUrlError(judge); as error) {
+                          <p class="field-error">{{ error }}</p>
+                        }
+
+                        @if (usesRegex(judge)) {
+                          <div class="field">
+                            <label class="field-label" [for]="'judge-regex-' + i">Pattern</label>
+                            <input
+                              [id]="'judge-regex-' + i"
+                              class="mono-input"
+                              formControlName="regex"
+                              type="text"
+                              hlmInput
+                              spellcheck="false"
+                              placeholder='"origin":\s*"[\d.]+"'
+                              [class.is-invalid]="!!judgeRegexError(judge)"
+                            />
+                            @if (judgeRegexError(judge); as error) {
+                              <p class="field-error">{{ error }}</p>
+                            } @else {
+                              <p class="field-hint">
+                                The proxy passes when the response body matches this pattern.
+                              </p>
+                            }
+                          </div>
+                        } @else {
+                          <p class="field-hint">
+                            Passes when the response lists the request headers the checker sent
+                            (User-Agent, Host, Accept and Accept-Encoding by default).
+                          </p>
+                        }
+
+                        <div class="judge-form__actions">
+                          @if (judges.length > 1) {
+                            <button
+                              type="button"
+                              class="remove-button"
+                              (click)="removeJudge(i)"
+                            >Remove judge</button>
+                          }
+                          <button
+                            type="button"
+                            hlmBtn
+                            variant="outline"
+                            size="sm"
+                            (click)="openJudgeIndex.set(-1)"
+                          >Done</button>
+                        </div>
+                      </div>
                     }
                   </div>
                 }
               </div>
-              <button type="button" class="add-button" (click)="addJudge()">
-                <i class="icon icon-plus" aria-hidden="true"></i>Add judge
-              </button>
-            </section>
-          </div>
-        </section>
-
-        <section hlmTabsContent="2">
-          <div class="settings-grid settings-grid--ip">
-            <section class="settings-card settings-card--ip">
-              <div class="ip-content">
-                <div class="card-heading">
-                  <span class="card-icon"
-                    ><i class="icon icon-map" aria-hidden="true"></i
-                  ></span>
-                  <div class="card-heading__copy">
-                    <h2>Public IP lookup</h2>
-                    <p>
-                      Magpie calls this endpoint at startup and every 15 minutes
-                      to learn the host’s public IP.
-                    </p>
-                  </div>
-                </div>
-                <div class="field-group ip-field">
-                  <label class="field-label" for="iplookup"
-                    >IP lookup URL
-                    <app-tooltip
-                      [text]="'The response should contain the checker host\'s public IP address.'"
-                    ></app-tooltip
-                  ></label>
-                  <input
-                    id="iplookup"
-                    formControlName="iplookup"
-                    type="url"
-                    hlmInput
-                    placeholder="https://ident.me"
-                  />
-                  <p class="field-hint">
-                    Use a stable endpoint that returns one plain-text IP
-                    address.
-                  </p>
-                </div>
+            } @else {
+              <div class="judge-table__empty">
+                <p>No default judges configured. New accounts will start with an empty judge list.</p>
+                <button type="button" hlmBtn variant="outline" (click)="addJudge()">
+                  Add judge
+                </button>
               </div>
-            </section>
-          </div>
+            }
+          </section>
         </section>
       </div>
     </hlm-tabs>
 
-    <app-admin-settings-save-dock
-      [dirty]="settingsForm.dirty"
-      [invalid]="settingsForm.invalid"
-      dirtyDescription="Save when the checker baseline looks right."
-      pristineTitle="Global settings are up to date"
-    >
-      <button
-        settings-save-action
-        type="button"
-        class="requeue-button"
-        (click)="confirmRequeueAllProxies()"
-        hlmBtn
-        [disabled]="isRequeueing"
-        variant="default"
-      >
-        @if (isRequeueing) {
-          <i class="icon icon-loader-circle icon-spin" aria-hidden="true"></i>
-        } @else {
-          <i class="icon icon-refresh-cw" aria-hidden="true"></i>
+    <footer class="save-dock">
+      <div class="save-state" aria-live="polite">
+        <span
+          class="save-state__dot"
+          [class.is-dirty]="settingsForm.dirty"
+          [class.has-problems]="settingsForm.invalid"
+          aria-hidden="true"
+        ></span>
+        <p>
+          @if (settingsForm.invalid) {
+            Fix highlighted fields before saving
+          } @else if (settingsForm.dirty) {
+            Unsaved global checker changes
+          } @else {
+            All changes saved
+          }
+        </p>
+      </div>
+
+      <div class="save-dock__actions">
+        @if (settingsForm.dirty) {
+          <button
+            type="button"
+            hlmBtn
+            variant="ghost"
+            class="discard-button"
+            [disabled]="saving()"
+            (click)="discardChanges()"
+          >Discard</button>
         }
-        Requeue all proxies
-      </button>
-    </app-admin-settings-save-dock>
+        <button
+          type="submit"
+          hlmBtn
+          variant="default"
+          class="save-settings-button"
+          [disabled]="!settingsForm.dirty || settingsForm.invalid || saving()"
+        >Save global settings</button>
+      </div>
+    </footer>
   </form>
 
   <app-confirm-dialog />
