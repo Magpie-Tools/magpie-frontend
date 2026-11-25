@@ -1,57 +1,70 @@
-import {ConfirmationService} from '../../shared/ui/confirmation.service';
+import {ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, signal} from '@angular/core';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {HlmButton} from '@spartan-ng/helm/button';
 import {HlmInput} from '@spartan-ng/helm/input';
+import {HlmSwitch} from '@spartan-ng/helm/switch';
 import {HlmTabsImports} from '@spartan-ng/helm/tabs';
-import {SelectComponent} from '../../shared/ui/select.component';
-import {ConfirmDialogComponent} from '../../shared/ui/confirm-dialog.component';
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {CheckboxComponent} from "../../checkbox/checkbox.component";
-import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {formatApproximateDuration} from "../../shared/cadence-format";
-
-import {TooltipComponent} from "../../tooltip/tooltip.component";
-import {SettingsService} from '../../services/settings.service';
-import {take, takeUntil} from 'rxjs/operators';
-
-import {NotificationService} from '../../services/notification-service.service';
 import {Subject} from 'rxjs';
+import {finalize, take, takeUntil} from 'rxjs/operators';
 
-import {dayOptions, hourOptions, minuteOptions, secondOptions} from '../../shared/duration-options';
-import {VisibleRowsDirective} from '../../shared/visible-rows.directive';
-import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
+import {
+  JudgeCheckMode,
+  judgeRegexValidator,
+  judgeUrlValidator,
+} from '../../checker/judges/judge-validation';
+import {NotificationService} from '../../services/notification-service.service';
+import {SettingsService} from '../../services/settings.service';
 import {AdminSettingsHeaderComponent} from '../../shared/admin-settings-shell/admin-settings-header.component';
-import {AdminSettingsSaveDockComponent} from '../../shared/admin-settings-shell/admin-settings-save-dock.component';
+import {AdminSettingsShellComponent} from '../../shared/admin-settings-shell/admin-settings-shell.component';
+import {formatApproximateDuration} from '../../shared/cadence-format';
+import {ConfirmDialogComponent} from '../../shared/ui/confirm-dialog.component';
+import {ConfirmationService} from '../../shared/ui/confirmation.service';
+import {SelectComponent} from '../../shared/ui/select.component';
 
 @Component({
   selector: 'app-admin-checker',
   standalone: true,
-  imports: [HlmButton, HlmInput, HlmTabsImports, SelectComponent, ConfirmDialogComponent,
-    CheckboxComponent,
-    FormsModule,
+  imports: [
+    HlmButton,
+    HlmInput,
+    HlmSwitch,
+    HlmTabsImports,
+    SelectComponent,
+    ConfirmDialogComponent,
     ReactiveFormsModule,
-    TooltipComponent,
-    VisibleRowsDirective,
     AdminSettingsShellComponent,
     AdminSettingsHeaderComponent,
-    AdminSettingsSaveDockComponent,
   ],
-    providers: [ConfirmationService],
-    templateUrl: './admin-checker.component.html',
-    styleUrl: './admin-checker.component.scss'
+  providers: [ConfirmationService],
+  templateUrl: './admin-checker.component.html',
+  styleUrl: './admin-checker.component.scss',
 })
 export class AdminCheckerComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
   readonly protocolOptions = [
-    {label: 'HTTP', control: 'http', icon: 'icon icon-globe', description: 'Standard web traffic'},
-    {label: 'HTTPS', control: 'https', icon: 'icon icon-lock', description: 'Encrypted web traffic'},
-    {label: 'SOCKS4', control: 'socks4', icon: 'icon icon-network', description: 'IPv4 socket routing'},
-    {label: 'SOCKS5', control: 'socks5', icon: 'icon icon-shield', description: 'Modern socket routing'},
+    {label: 'HTTP', control: 'http'},
+    {label: 'HTTPS', control: 'https'},
+    {label: 'SOCKS4', control: 'socks4'},
+    {label: 'SOCKS5', control: 'socks5'},
   ];
-  readonly daysList = dayOptions;
-  readonly hoursList = hourOptions;
-  readonly minutesList = minuteOptions;
-  readonly secondsList = secondOptions;
+  readonly timerUnits = [
+    {control: 'days', label: 'Days', short: 'd', max: 30},
+    {control: 'hours', label: 'Hours', short: 'h', max: 23},
+    {control: 'minutes', label: 'Minutes', short: 'm', max: 59},
+    {control: 'seconds', label: 'Seconds', short: 's', max: 59},
+  ];
+  readonly judgeCheckModes: {label: string; value: JudgeCheckMode}[] = [
+    {label: 'Header check', value: 'default'},
+    {label: 'Regex', value: 'regex'},
+  ];
+
+  readonly openJudgeIndex = signal(-1);
+  readonly saving = signal(false);
   isRequeueing = false;
+
+  private lastCheckerSettings: any = null;
+  private lastProtocols: any = null;
+  private lastBlacklist: string[] = [];
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -59,7 +72,8 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     private changeDetector: ChangeDetectorRef,
     private settingsService: SettingsService,
     private notification: NotificationService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private host: ElementRef<HTMLElement>,
   ) {
     this.settingsForm = this.createDefaultForm();
   }
@@ -68,14 +82,19 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     this.settingsService.getCheckerSettings().pipe(take(1)).subscribe({
       next: checkerSettings => {
         if (checkerSettings) {
+          this.lastCheckerSettings = checkerSettings;
           this.updateFormWithCheckerSettings(checkerSettings);
         }
       },
-      error: err => {this.notification.showError("Could not get checker settings: " + err.error.message)}
+      error: err => {
+        this.notification.showError('Could not get checker settings: ' + (err?.error?.message ?? 'Unknown error'));
+      },
     });
 
     const settings = this.settingsService.getGlobalSettings();
     if (settings) {
+      this.lastProtocols = settings.protocols;
+      this.lastBlacklist = settings.blacklist_sources ?? [];
       this.updateProtocolsAndBlacklist(settings.protocols, settings.blacklist_sources);
     }
 
@@ -85,18 +104,30 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
         if (!settingsState) {
           return;
         }
-        this.updateProtocolsAndBlacklist(settingsState.protocols, settingsState.blacklist_sources);
+        this.lastProtocols = settingsState.protocols;
+        this.lastBlacklist = settingsState.blacklist_sources ?? [];
+        if (settingsState.checker) {
+          this.lastCheckerSettings = settingsState.checker;
+        }
+        if (!this.settingsForm.dirty) {
+          this.updateProtocolsAndBlacklist(settingsState.protocols, settingsState.blacklist_sources);
+        }
       });
 
     const dynamicControl = this.settingsForm.get('dynamic_threads');
     this.updateThreadControlState(!!dynamicControl?.value);
-
     dynamicControl?.valueChanges
       ?.pipe(takeUntil(this.destroy$))
       .subscribe({
         next: dynamic => this.updateThreadControlState(!!dynamic),
-        error: err => this.notification.showError("Could not get dynamic thread info " + err.error.message)
+        error: err => this.notification.showError('Could not get dynamic thread info ' + (err?.error?.message ?? '')),
       });
+
+    const unlimitedControl = this.settingsForm.get('unlimited_monthly_checks');
+    this.updateMonthlyAllowanceControlState(!!unlimitedControl?.value);
+    unlimitedControl?.valueChanges
+      ?.pipe(takeUntil(this.destroy$))
+      .subscribe(unlimited => this.updateMonthlyAllowanceControlState(!!unlimited));
   }
 
   ngOnDestroy(): void {
@@ -106,12 +137,12 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
 
   private createDefaultForm(): FormGroup {
     return this.fb.group({
-      dynamic_threads: false,
-      threads: [250],
-      max_threads: [250],
+      dynamic_threads: [false],
+      threads: [250, [Validators.required, Validators.min(1)]],
+      max_threads: [250, [Validators.required, Validators.min(1)]],
       save_responses: [true],
-      retries: [2],
-      timeout: [7500],
+      retries: [2, [Validators.required, Validators.min(0)]],
+      timeout: [7500, [Validators.required, Validators.min(1)]],
       protocols: this.fb.group({
         http: [false],
         https: [true],
@@ -120,109 +151,110 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
       }),
       monthly_checks_per_workspace: [1500000, [Validators.required, Validators.min(1)]],
       unlimited_monthly_checks: [false],
-      judges_threads: [3],
-      judges_timeout: [5000],
+      judges_threads: [3, [Validators.required, Validators.min(1)]],
+      judges_timeout: [5000, [Validators.required, Validators.min(1)]],
       judge_timer: this.fb.group({
-        days: [0],
-        hours: [0],
-        minutes: [30],
-        seconds: [0]
+        days: [0, [Validators.min(0), Validators.max(30)]],
+        hours: [0, [Validators.min(0), Validators.max(23)]],
+        minutes: [30, [Validators.min(0), Validators.max(59)]],
+        seconds: [0, [Validators.min(0), Validators.max(59)]],
       }),
       judges: this.fb.array([
-        this.fb.group({ url: ['https://pool.proxyspace.pro/judge.php'], regex: ['default'] }),
-        this.fb.group({ url: ['http://azenv.net'], regex: ['default'] })
+        this.createJudgeGroup('https://pool.proxyspace.pro/judge.php', 'default'),
+        this.createJudgeGroup('http://azenv.net', 'default'),
       ]),
-      use_https_for_socks: true,
-      iplookup: ['https://ident.me'],
+      use_https_for_socks: [true],
+      iplookup: ['https://ident.me', [Validators.required]],
       standard_header: this.fb.array([
-        "USER-AGENT", "HOST", "ACCEPT", "ACCEPT-ENCODING"
+        'USER-AGENT', 'HOST', 'ACCEPT', 'ACCEPT-ENCODING',
       ]),
       proxy_header: this.fb.array([
-        "HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"
+        'HTTP_X_FORWARDED_FOR', 'HTTP_FORWARDED', 'HTTP_VIA', 'HTTP_X_PROXY_ID',
       ]),
-      blacklisted: this.fb.array([])
+      blacklisted: this.fb.array([]),
     });
   }
 
-  private updateFormWithCheckerSettings(checkerSettings: any): void {
-    // Update checker-specific fields
-    this.settingsForm.patchValue({
-      dynamic_threads: checkerSettings.dynamic_threads,
-      threads: checkerSettings.threads,
-      max_threads: checkerSettings.max_threads ?? checkerSettings.threads ?? 250,
-      save_responses: checkerSettings.save_responses ?? true,
-      retries: checkerSettings.retries,
-      timeout: checkerSettings.timeout,
-      monthly_checks_per_workspace: checkerSettings.monthly_checks_per_workspace ?? 1500000,
-      unlimited_monthly_checks: checkerSettings.unlimited_monthly_checks ?? false,
-      iplookup: checkerSettings.ip_lookup,
-      judges_threads: checkerSettings.judges_threads,
-      judges_timeout: checkerSettings.judges_timeout,
-      use_https_for_socks: checkerSettings.use_https_for_socks
-    });
-
-    this.changeDetector.markForCheck();
-
-    // Update judge timer if exists
-    if (checkerSettings.judge_timer) {
-      this.settingsForm.patchValue({
-        judge_timer: {
-          days: checkerSettings.judge_timer.days,
-          hours: checkerSettings.judge_timer.hours,
-          minutes: checkerSettings.judge_timer.minutes,
-          seconds: checkerSettings.judge_timer.seconds
-        }
-      });
-    }
-
-    // Update judges array
-    this.updateJudgesArray(checkerSettings.judges);
-
-    // Update headers arrays
-    this.updateHeadersArrays(
-      checkerSettings.standard_header || ["USER-AGENT", "HOST", "ACCEPT", "ACCEPT-ENCODING"],
-      checkerSettings.proxy_header || ["HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"]
+  private createJudgeGroup(url: string = '', regex: string = 'default'): FormGroup {
+    const usesHeaders = !regex || regex.trim().toLowerCase() === 'default';
+    return this.fb.group(
+      {
+        url: [url, judgeUrlValidator],
+        mode: [usesHeaders ? 'default' : 'regex'],
+        regex: [usesHeaders ? '' : regex],
+      },
+      {validators: judgeRegexValidator},
     );
   }
 
-  private updateProtocolsAndBlacklist(protocols: any, blacklist: string[]): void {
-    if (protocols) {
-      // Check if protocols is an object with boolean values
-      if (protocols && typeof protocols === 'object') {
-        const protocolsGroup = this.settingsForm.get('protocols') as FormGroup;
+  private updateFormWithCheckerSettings(checkerSettings: any): void {
+    this.settingsForm.patchValue({
+      dynamic_threads: !!checkerSettings.dynamic_threads,
+      threads: checkerSettings.threads ?? 250,
+      max_threads: checkerSettings.max_threads ?? checkerSettings.threads ?? 250,
+      save_responses: checkerSettings.save_responses ?? true,
+      retries: checkerSettings.retries ?? 2,
+      timeout: checkerSettings.timeout ?? 7500,
+      monthly_checks_per_workspace: checkerSettings.monthly_checks_per_workspace ?? 1500000,
+      unlimited_monthly_checks: !!checkerSettings.unlimited_monthly_checks,
+      iplookup: checkerSettings.ip_lookup ?? '',
+      judges_threads: checkerSettings.judges_threads ?? 3,
+      judges_timeout: checkerSettings.judges_timeout ?? 5000,
+      use_https_for_socks: checkerSettings.use_https_for_socks ?? true,
+    });
 
-        // Set checkboxes based on protocol values
-        Object.keys(protocols).forEach(protocol => {
-          if (protocolsGroup.contains(protocol)) {
-            protocolsGroup.get(protocol)?.setValue(!!protocols[protocol]);
-          }
-        });
-      }
+    if (checkerSettings.judge_timer) {
+      this.settingsForm.patchValue({
+        judge_timer: {
+          days: checkerSettings.judge_timer.days ?? 0,
+          hours: checkerSettings.judge_timer.hours ?? 0,
+          minutes: checkerSettings.judge_timer.minutes ?? 0,
+          seconds: checkerSettings.judge_timer.seconds ?? 0,
+        },
+      });
     }
 
-    // Update blacklist
+    this.updateJudgesArray(checkerSettings.judges);
+    this.updateHeadersArrays(
+      checkerSettings.standard_header || ['USER-AGENT', 'HOST', 'ACCEPT', 'ACCEPT-ENCODING'],
+      checkerSettings.proxy_header || ['HTTP_X_FORWARDED_FOR', 'HTTP_FORWARDED', 'HTTP_VIA', 'HTTP_X_PROXY_ID'],
+    );
+    this.updateThreadControlState(!!checkerSettings.dynamic_threads);
+    this.updateMonthlyAllowanceControlState(!!checkerSettings.unlimited_monthly_checks);
+    this.openJudgeIndex.set(-1);
+    this.settingsForm.markAsPristine();
+    this.changeDetector.markForCheck();
+  }
+
+  private updateProtocolsAndBlacklist(protocols: any, blacklist: string[]): void {
+    if (protocols && typeof protocols === 'object') {
+      const protocolsGroup = this.settingsForm.get('protocols') as FormGroup;
+      Object.keys(protocols).forEach(protocol => {
+        if (protocolsGroup.contains(protocol)) {
+          protocolsGroup.get(protocol)?.setValue(!!protocols[protocol], {emitEvent: false});
+        }
+      });
+      protocolsGroup.markAsPristine();
+    }
+
     const blacklistArray = this.settingsForm.get('blacklisted') as FormArray;
     blacklistArray.clear();
-
     (blacklist ?? []).forEach(url => {
       blacklistArray.push(this.fb.control(url));
     });
-
     blacklistArray.markAsPristine();
     this.changeDetector.markForCheck();
   }
 
   private updateJudgesArray(judges: any[]): void {
-    if (!judges || judges.length === 0) return;
+    if (!Array.isArray(judges)) {
+      return;
+    }
 
     const judgesArray = this.settingsForm.get('judges') as FormArray;
     judgesArray.clear();
-
     judges.forEach(judge => {
-      judgesArray.push(this.fb.group({
-        url: [judge.url],
-        regex: [judge.regex]
-      }));
+      judgesArray.push(this.createJudgeGroup(judge.url ?? '', judge.regex ?? 'default'));
     });
   }
 
@@ -254,8 +286,25 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     maxThreadsControl?.disable({emitEvent: false});
   }
 
-  get judges() {
-    return this.settingsForm.get('judges') as FormArray;
+  private updateMonthlyAllowanceControlState(unlimited: boolean): void {
+    const control = this.settingsForm.get('monthly_checks_per_workspace');
+    if (unlimited) {
+      control?.disable({emitEvent: false});
+      return;
+    }
+    control?.enable({emitEvent: false});
+  }
+
+  get judges(): FormArray<FormGroup> {
+    return this.settingsForm.get('judges') as FormArray<FormGroup>;
+  }
+
+  get judgeControls(): FormGroup[] {
+    return this.judges.controls as FormGroup[];
+  }
+
+  get dynamicThreads(): boolean {
+    return this.settingsForm.get('dynamic_threads')?.value === true;
   }
 
   get unlimitedMonthlyChecks(): boolean {
@@ -284,11 +333,14 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     return this.formatTimer('judge_timer');
   }
 
+  get totalAttempts(): number {
+    const retries = Number(this.settingsForm.get('retries')?.value ?? 0);
+    return Math.max(1, Math.round(Number.isFinite(retries) ? retries : 0) + 1);
+  }
+
   get checkerAttemptWindow(): string {
     const timeout = Number(this.settingsForm.get('timeout')?.value ?? 0);
-    const retries = Number(this.settingsForm.get('retries')?.value ?? 0);
-    const attempts = Math.max(1, Math.round(Number.isFinite(retries) ? retries : 0) + 1);
-    const totalMilliseconds = Math.max(0, Number.isFinite(timeout) ? timeout : 0) * attempts;
+    const totalMilliseconds = Math.max(0, Number.isFinite(timeout) ? timeout : 0) * this.totalAttempts;
 
     if (totalMilliseconds < 1000) {
       return `${Math.round(totalMilliseconds)} ms`;
@@ -301,9 +353,32 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
   }
 
   get threadLimit(): number {
-    const controlName = this.settingsForm.get('dynamic_threads')?.value ? 'max_threads' : 'threads';
+    const controlName = this.dynamicThreads ? 'max_threads' : 'threads';
     const value = Number(this.settingsForm.get(controlName)?.value ?? 0);
     return Math.max(0, Math.round(Number.isFinite(value) ? value : 0));
+  }
+
+  get judgeProblemCount(): number {
+    return this.judgeControls.filter(judge => judge.invalid).length;
+  }
+
+  setDynamicThreads(dynamic: boolean): void {
+    const control = this.settingsForm.get('dynamic_threads');
+    if (!control || control.value === dynamic) {
+      return;
+    }
+    control.setValue(dynamic);
+    control.markAsDirty();
+  }
+
+  setLimitedMonthlyChecks(limited: boolean): void {
+    const control = this.settingsForm.get('unlimited_monthly_checks');
+    const unlimited = !limited;
+    if (!control || control.value === unlimited) {
+      return;
+    }
+    control.setValue(unlimited);
+    control.markAsDirty();
   }
 
   toggleProtocol(controlName: string): void {
@@ -316,18 +391,146 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     control.markAsDirty();
   }
 
-  onSubmit() {
-    this.settingsService.saveGlobalSettings(this.settingsForm.value).subscribe({
-      next: (resp) => {
-        this.notification.showSuccess(resp.message)
-        this.settingsForm.markAsPristine()
-      },
-      error: (err) => {
-        console.error("Error saving settings:", err);
-        const reason = err?.error?.message ?? err?.error?.error ?? "Failed to save settings!";
-        this.notification.showError(reason);
+  judgeUrl(judge: FormGroup): string {
+    return String(judge.get('url')?.value ?? '').trim();
+  }
+
+  judgeHostname(judge: FormGroup): string {
+    const url = this.judgeUrl(judge);
+    try {
+      return new URL(url).host || url;
+    } catch {
+      return url || 'New judge';
+    }
+  }
+
+  judgePath(judge: FormGroup): string {
+    try {
+      const parsed = new URL(this.judgeUrl(judge));
+      return (parsed.pathname === '/' ? '' : parsed.pathname) + parsed.search;
+    } catch {
+      return '';
+    }
+  }
+
+  usesRegex(judge: FormGroup): boolean {
+    return judge.get('mode')?.value === 'regex';
+  }
+
+  judgeUrlError(judge: FormGroup): string | null {
+    const control = judge.get('url');
+    if (!control?.value && !control?.dirty && !control?.touched) {
+      return null;
+    }
+    return control?.errors?.['judgeUrl'] ?? null;
+  }
+
+  judgeRegexError(judge: FormGroup): string | null {
+    const control = judge.get('regex');
+    if (!control?.value && !control?.dirty && !control?.touched) {
+      return null;
+    }
+    return judge.errors?.['judgeRegex'] ?? null;
+  }
+
+  judgeCheckSummary(judge: FormGroup): {text: string; bad: boolean; mono: boolean} {
+    if (!this.judgeUrl(judge) && !this.judgeUrlError(judge)) {
+      return {text: 'Add a URL', bad: false, mono: false};
+    }
+    if (this.judgeUrlError(judge)) {
+      return {text: 'URL error', bad: true, mono: false};
+    }
+    if (this.judgeRegexError(judge)) {
+      return {text: 'Pattern error', bad: true, mono: false};
+    }
+    if (this.usesRegex(judge)) {
+      return {text: String(judge.get('regex')?.value ?? '').trim() || 'Regex', bad: false, mono: true};
+    }
+    return {text: 'Header check', bad: false, mono: false};
+  }
+
+  toggleJudge(index: number): void {
+    this.openJudgeIndex.update(open => (open === index ? -1 : index));
+  }
+
+  addJudge(): void {
+    this.judges.push(this.createJudgeGroup('', 'default'));
+    this.settingsForm.markAsDirty();
+    const index = this.judges.length - 1;
+    this.openJudgeIndex.set(index);
+    setTimeout(() => this.host.nativeElement.querySelector<HTMLInputElement>(`#judge-url-${index}`)?.focus());
+  }
+
+  removeJudge(index: number): void {
+    if (index < 0 || index >= this.judges.length) {
+      return;
+    }
+    this.judges.removeAt(index);
+    this.settingsForm.markAsDirty();
+    this.openJudgeIndex.update(open => {
+      if (open === index) {
+        return -1;
       }
+      return open > index ? open - 1 : open;
     });
+  }
+
+  discardChanges(): void {
+    if (this.saving()) {
+      return;
+    }
+    if (this.lastCheckerSettings) {
+      this.updateFormWithCheckerSettings(this.lastCheckerSettings);
+    } else {
+      this.settingsForm = this.createDefaultForm();
+      this.updateThreadControlState(this.dynamicThreads);
+      this.updateMonthlyAllowanceControlState(this.unlimitedMonthlyChecks);
+    }
+    if (this.lastProtocols) {
+      this.updateProtocolsAndBlacklist(this.lastProtocols, this.lastBlacklist);
+    }
+    this.settingsForm.markAsPristine();
+    this.changeDetector.markForCheck();
+  }
+
+  onSubmit(): void {
+    if (this.saving() || this.settingsForm.invalid) {
+      return;
+    }
+
+    const raw = this.settingsForm.getRawValue();
+    const serializedJudges = this.judgeControls.map(judge => ({
+      url: this.judgeUrl(judge),
+      regex: this.usesRegex(judge) ? String(judge.get('regex')?.value ?? '').trim() : 'default',
+    }));
+
+    const payload = {
+      ...raw,
+      judges: serializedJudges,
+    };
+
+    this.saving.set(true);
+    this.settingsService
+      .saveGlobalSettings(payload)
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: resp => {
+          this.notification.showSuccess(resp.message);
+          this.lastCheckerSettings = {
+            ...payload,
+            ip_lookup: payload.iplookup,
+          };
+          this.lastProtocols = payload.protocols;
+          this.lastBlacklist = payload.blacklisted ?? this.lastBlacklist;
+          this.settingsForm.markAsPristine();
+          this.changeDetector.markForCheck();
+        },
+        error: err => {
+          console.error('Error saving settings:', err);
+          const reason = err?.error?.message ?? err?.error?.error ?? 'Failed to save settings!';
+          this.notification.showError(reason);
+        },
+      });
   }
 
   confirmRequeueAllProxies(): void {
@@ -339,7 +542,7 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
       message: 'Requeue every currently queued proxy using the latest checker cadence?',
       header: 'Confirm Requeue',
       acceptLabel: 'Requeue',
-      accept: () => this.requeueAllProxies()
+      accept: () => this.requeueAllProxies(),
     });
   }
 
@@ -352,26 +555,15 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
         const suffix = Number.isFinite(count) ? ` (${count} proxies)` : '';
         this.notification.showSuccess(`${resp?.message ?? 'Queued proxies were requeued successfully'}${suffix}`);
         this.isRequeueing = false;
+        this.changeDetector.markForCheck();
       },
       error: err => {
         const reason = err?.error?.message ?? err?.error?.error ?? 'Failed to requeue all proxies.';
         this.notification.showError(reason);
         this.isRequeueing = false;
-      }
+        this.changeDetector.markForCheck();
+      },
     });
-  }
-
-  addJudge(): void {
-    this.judges.push(this.fb.group({
-      url: [''],
-      regex: ['default']
-    }));
-    this.settingsForm.markAsDirty();
-  }
-
-  removeJudge(index: number): void {
-    this.judges.removeAt(index);
-    this.settingsForm.markAsDirty();
   }
 
   private formatTimer(groupName: string): string {
@@ -389,4 +581,3 @@ export class AdminCheckerComponent implements OnInit, OnDestroy {
     return parts.length ? parts.join(' ') : 'Continuous';
   }
 }
-
