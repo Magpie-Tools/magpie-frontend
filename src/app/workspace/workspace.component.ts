@@ -15,6 +15,7 @@ import {
   WorkspaceMember,
   WorkspaceMemberWriteRequest,
   WorkspaceRole,
+  ROLE_DESCRIPTIONS,
 } from '../models/Workspace';
 import {HttpService} from '../services/http.service';
 import {NotificationService} from '../services/notification-service.service';
@@ -104,14 +105,6 @@ export type AccessPanel =
   | {kind: 'member'; userId: number}
   | {kind: 'invitation'; id: number}
   | {kind: 'invite'};
-
-/** One-line summaries of what each workspace role may do, shown in the role picker. */
-export const ROLE_DESCRIPTIONS: Record<WorkspaceRole, string> = {
-  owner: 'Everything, including billing access and ownership.',
-  admin: 'Workspace settings, and operators and viewers.',
-  operator: 'Routes, checks, scrapes and their intervals.',
-  viewer: 'Read-only access.',
-};
 
 interface OwnershipChange {
   member: WorkspaceMember;

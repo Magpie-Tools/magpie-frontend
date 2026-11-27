@@ -535,6 +535,24 @@ $fields: '[hlmInput], input[type="number"], textarea, [data-slot="select-trigger
 
   .button--compact { min-height: 28px; padding: 0 10px; font-size: var(--ui-fs-sm); }
 
+  // Row actions in the invitations table sit a step below page buttons. When the rows
+  // stack on phones they go back to full height, and Decline gets a frame.
+  .invitation-table .button {
+    min-height: 30px;
+    padding: 0 11px;
+    font-size: var(--ui-fs-sm);
+  }
+
+  @container invitation-page (max-width: 820px) {
+    .invitation-table .button { min-height: var(--ui-control-h); }
+
+    .invitation-table .button--quiet {
+      border-color: var(--ui-line-strong);
+      background: var(--ui-btn-bg);
+      color: var(--ui-text);
+    }
+  }
+
   .button--quiet,
   // The import and delete dialogs follow the alert dialogs, whose Cancel has no frame.
   :is(.proxy-add-dialog, .scrape-source-add-dialog, .delete-proxies-dialog, .delete-sources-dialog) .dialog-button--quiet[hlmBtn] {
