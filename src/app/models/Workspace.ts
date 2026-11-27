@@ -1,4 +1,12 @@
 export type WorkspaceRole = 'owner' | 'admin' | 'operator' | 'viewer';
+/** One-line summaries of what each workspace role may do, shown in the role picker and on invitations. */
+export const ROLE_DESCRIPTIONS: Record<WorkspaceRole, string> = {
+  owner: 'Everything, including billing access and ownership.',
+  admin: 'Workspace settings, and operators and viewers.',
+  operator: 'Routes, checks, scrapes and their intervals.',
+  viewer: 'Read-only access.',
+};
+
 export type ManagedProxyState = 'active' | 'paused' | 'archived';
 
 export interface WorkspaceCapacity {

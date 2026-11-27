@@ -63,6 +63,7 @@ describe('WorkspaceInvitationsComponent', () => {
         {
           provide: WorkspaceService,
           useValue: {
+            current: signal(null),
             refresh,
             switchTo,
           },
@@ -79,19 +80,38 @@ describe('WorkspaceInvitationsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('accepts without switching the current workspace and offers an explicit Open action', () => {
+  it('accepts without switching the current workspace and offers Open workspace in the same row', () => {
+    const other = {...invitation, id: 5, workspace_id: 13, workspace_name: 'Operations'};
+    pending.set([invitation, other]);
+    fixture.detectChanges();
+    accept.and.callFake(() => {
+      pending.set([other]);
+      return of({workspace_id: 12, workspace_name: 'Research'});
+    });
+
     component.accept(invitation);
     fixture.detectChanges();
 
     expect(accept).toHaveBeenCalledWith(invitation.id);
     expect(refresh).toHaveBeenCalled();
     expect(switchTo).not.toHaveBeenCalled();
-    expect(component.acceptedWorkspace()).toEqual({workspace_id: 12, workspace_name: 'Research'});
-    expect(fixture.nativeElement.querySelector('.accepted-notice').textContent).toContain('current workspace was not changed');
-    expect(fixture.nativeElement.querySelector('.accepted-notice button').textContent).toContain('Open workspace');
+    const rows = fixture.nativeElement.querySelectorAll('tbody tr') as NodeListOf<HTMLElement>;
+    expect(rows.length).toBe(2);
+    expect(rows[0].classList).toContain('invitation-row--joined');
+    expect(rows[0].textContent).toContain('You joined Research');
+    expect(rows[0].textContent).toContain('current workspace was not changed');
+    expect(rows[1].textContent).toContain('Operations');
 
-    component.openAcceptedWorkspace();
-    expect(switchTo).toHaveBeenCalledWith(invitation.workspace_id, false);
+    (rows[0].querySelector('button') as HTMLButtonElement).click();
+    expect(switchTo).toHaveBeenCalledWith(12, false);
+  });
+
+  it('shows the role description and calls out invitations that expire within three days', () => {
+    const now = new Date('2026-11-25T10:00:00Z').getTime();
+    expect(component.expiry({...invitation, expires_at: '2026-11-27T10:00:00Z'}, now)).toEqual({relative: 'in 2 days', soon: true});
+    expect(component.expiry({...invitation, expires_at: '2026-11-26T09:00:00Z'}, now)).toEqual({relative: 'tomorrow', soon: true});
+    expect(component.expiry({...invitation, expires_at: '2026-12-02T10:00:00Z'}, now)).toEqual({relative: 'in 7 days', soon: false});
+    expect(fixture.nativeElement.querySelector('td[data-label="Access"]').textContent).toContain('Read-only access.');
   });
 
   it('declines through the account-bound invitation service', () => {
